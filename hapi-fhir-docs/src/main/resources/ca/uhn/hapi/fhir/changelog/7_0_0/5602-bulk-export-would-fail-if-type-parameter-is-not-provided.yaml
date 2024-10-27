@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5602
+title: "Previously, instance-level Patient Bulk Export batch job would fail if the `_type` parameter was empty. This is 
+now fixed and `_type` will default to all resource types in the Patient Compartment plus Device."

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cli;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
@@ -31,11 +32,13 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.FileUtil;
 import ca.uhn.fhir.util.ParametersUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.StringUtils;
@@ -264,11 +267,11 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				"Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
-	private void addFileToRequestBundle(IBaseParameters theInputParameters, String theFileName, byte[] theBytes) {
+	protected void addFileToRequestBundle(IBaseParameters theInputParameters, String theFileName, byte[] theBytes) {
 
 		byte[] bytes = theBytes;
 		String fileName = theFileName;
-		String suffix = fileName.substring(fileName.lastIndexOf("."));
+		String suffix = FilenameUtils.getExtension(fileName);
 
 		if (bytes.length > ourTransferSizeLimit) {
 			ourLog.info(
@@ -276,7 +279,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 					FileUtil.formatFileSize(ourTransferSizeLimit));
 
 			try {
-				File tempFile = File.createTempFile("hapi-fhir-cli", suffix);
+				File tempFile = File.createTempFile("hapi-fhir-cli", "." + suffix);
 				tempFile.deleteOnExit();
 				try (OutputStream fileOutputStream = new FileOutputStream(tempFile, false)) {
 					fileOutputStream.write(bytes);
@@ -361,5 +364,10 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			retVal = retVal.substring(retVal.lastIndexOf("/"));
 		}
 		return retVal;
+	}
+
+	@VisibleForTesting
+	void setFhirContext(FhirContext theFhirContext) {
+		myFhirCtx = theFhirContext;
 	}
 }

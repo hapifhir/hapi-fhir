@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5636
+jira: SMILE-7648
+title: "Previously, the number of threads allocated to the $expunge operation in certain cases could be more
+than configured, this would cause hundreds of threads to be created and all available database connections
+to be consumed. This has been fixed."

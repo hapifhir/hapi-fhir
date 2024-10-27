@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +54,10 @@ import ca.uhn.fhir.util.StopWatch;
 import co.elastic.apm.api.ElasticApm;
 import co.elastic.apm.api.Span;
 import co.elastic.apm.api.Transaction;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
@@ -68,7 +68,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
@@ -122,9 +121,11 @@ public class SearchTask implements Callable<Void> {
 	private boolean myAdditionalPrefetchThresholdsRemaining;
 	private List<JpaPid> myPreviouslyAddedResourcePids;
 	private Integer myMaxResultsToFetch;
+
 	/**
 	 * Constructor
 	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public SearchTask(
 			SearchTaskParameters theCreationParams,
 			HapiTransactionService theManagedTxManager,
@@ -198,6 +199,7 @@ public class SearchTask implements Callable<Void> {
 		myCountSavedTotal = myPreviouslyAddedResourcePids.size();
 	}
 
+	@SuppressWarnings("rawtypes")
 	private ISearchBuilder newSearchBuilder() {
 		Class<? extends IBaseResource> resourceTypeClass =
 				myContext.getResourceDefinition(myResourceType).getImplementingClass();
@@ -281,6 +283,7 @@ public class SearchTask implements Callable<Void> {
 				.execute(() -> doSaveSearch());
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void saveUnsynced(final IResultIterator theResultIter) {
 		myTxService
 				.withRequest(myRequest)
@@ -296,9 +299,9 @@ public class SearchTask implements Callable<Void> {
 					// Interceptor call: STORAGE_PREACCESS_RESOURCES
 					// This can be used to remove results from the search result details before
 					// the user has a chance to know that they were in the results
-					if (mySearchRuntimeDetails.getRequestDetails() != null && unsyncedPids.isEmpty() == false) {
+					if (mySearchRuntimeDetails.getRequestDetails() != null && !unsyncedPids.isEmpty()) {
 						JpaPreResourceAccessDetails accessDetails =
-								new JpaPreResourceAccessDetails(unsyncedPids, () -> newSearchBuilder());
+								new JpaPreResourceAccessDetails(unsyncedPids, this::newSearchBuilder);
 						HookParams params = new HookParams()
 								.add(IPreResourceAccessDetails.class, accessDetails)
 								.add(RequestDetails.class, mySearchRuntimeDetails.getRequestDetails())
@@ -332,10 +335,8 @@ public class SearchTask implements Callable<Void> {
 						mySyncedPids.addAll(unsyncedPids);
 						unsyncedPids.clear();
 
-						if (theResultIter.hasNext() == false) {
+						if (!theResultIter.hasNext()) {
 							int skippedCount = theResultIter.getSkippedCount();
-							int nonSkippedCount = theResultIter.getNonSkippedCount();
-							int totalFetched = skippedCount + myCountSavedThisPass + myCountBlockedThisPass;
 							ourLog.trace(
 									"MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]",
 									myMaxResultsToFetch,
@@ -344,16 +345,18 @@ public class SearchTask implements Callable<Void> {
 									myCountSavedTotal,
 									myAdditionalPrefetchThresholdsRemaining);
 
-							if (nonSkippedCount == 0
-									|| (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch)) {
+							if (isFinished(theResultIter)) {
+								// finished
 								ourLog.trace("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSavedTotal - countBlocked);
 							} else if (myAdditionalPrefetchThresholdsRemaining) {
+								// pass complete
 								ourLog.trace("Setting search status to PASSCMPLET");
 								mySearch.setStatus(SearchStatusEnum.PASSCMPLET);
 								mySearch.setSearchParameterMap(myParams);
 							} else {
+								// also finished
 								ourLog.trace("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSavedTotal - countBlocked);
@@ -382,8 +385,34 @@ public class SearchTask implements Callable<Void> {
 		ourLog.trace("saveUnsynced() - post-commit");
 	}
 
+	@SuppressWarnings("rawtypes")
+	private boolean isFinished(final IResultIterator theResultIter) {
+		int skippedCount = theResultIter.getSkippedCount();
+		int nonSkippedCount = theResultIter.getNonSkippedCount();
+		int totalFetched = skippedCount + myCountSavedThisPass + myCountBlockedThisPass;
+
+		if (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch) {
+			// total fetched < max results to fetch -> we've exhausted the search
+			return true;
+		} else {
+			if (nonSkippedCount == 0) {
+				// no skipped resources in this query
+				if (myParams.getCount() != null) {
+					// count supplied
+					// if the count is > what we've fetched -> we've exhausted the query
+					return myParams.getCount() > totalFetched;
+				} else {
+					// legacy - we have no skipped resources - we are done
+					return true;
+				}
+			}
+			// skipped resources means we have more to fetch
+			return false;
+		}
+	}
+
 	public boolean isNotAborted() {
-		return myAbortRequested == false;
+		return !myAbortRequested;
 	}
 
 	public void markComplete() {
@@ -417,8 +446,7 @@ public class SearchTask implements Callable<Void> {
 			myTxService
 					.withRequest(myRequest)
 					.withRequestPartitionId(myRequestPartitionId)
-					.withIsolation(Isolation.READ_COMMITTED)
-					.execute(() -> doSearch());
+					.execute(this::doSearch);
 
 			mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 			if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {
@@ -517,6 +545,7 @@ public class SearchTask implements Callable<Void> {
 	 * This method actually creates the database query to perform the
 	 * search, and starts it.
 	 */
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void doSearch() {
 		/*
 		 * If the user has explicitly requested a _count, perform a
@@ -531,32 +560,7 @@ public class SearchTask implements Callable<Void> {
 				: SearchParameterMapCalculator.isWantCount(myStorageSettings.getDefaultTotalMode());
 
 		if (myParamWantOnlyCount || myParamOrDefaultWantCount) {
-			ourLog.trace("Performing count");
-			ISearchBuilder sb = newSearchBuilder();
-
-			/*
-			 * createCountQuery
-			 * NB: (see createQuery below)
-			 * Because FulltextSearchSvcImpl will (internally)
-			 * mutate the myParams (searchmap),
-			 * (specifically removing the _content and _text filters)
-			 * we will have to clone those parameters here so that
-			 * the "correct" params are used in createQuery below
-			 */
-			Long count = sb.createCountQuery(myParams.clone(), mySearch.getUuid(), myRequest, myRequestPartitionId);
-
-			ourLog.trace("Got count {}", count);
-
-			myTxService
-					.withRequest(myRequest)
-					.withRequestPartitionId(myRequestPartitionId)
-					.execute(() -> {
-						mySearch.setTotalCount(count.intValue());
-						if (myParamWantOnlyCount) {
-							mySearch.setStatus(SearchStatusEnum.FINISHED);
-						}
-						doSaveSearch();
-					});
+			doCountOnlyQuery(myParamWantOnlyCount);
 			if (myParamWantOnlyCount) {
 				return;
 			}
@@ -573,12 +577,16 @@ public class SearchTask implements Callable<Void> {
 		 */
 		int currentlyLoaded = defaultIfNull(mySearch.getNumFound(), 0);
 		int minWanted = 0;
+
+		// if no count is provided,
+		// we only use the values in SearchPreFetchThresholds
+		// but if there is a count...
 		if (myParams.getCount() != null) {
-			minWanted = myParams.getCount() + 1; // Always fetch one past this page, so we know if there is a next page.
-			minWanted = Math.min(minWanted, myPagingProvider.getMaximumPageSize());
+			minWanted = Math.min(myParams.getCount(), myPagingProvider.getMaximumPageSize());
 			minWanted += currentlyLoaded;
 		}
 
+		// iterate through the search thresholds
 		for (Iterator<Integer> iter =
 						myStorageSettings.getSearchPreFetchThresholds().iterator();
 				iter.hasNext(); ) {
@@ -590,8 +598,11 @@ public class SearchTask implements Callable<Void> {
 			if (next == -1) {
 				sb.setMaxResultsToFetch(null);
 			} else {
+				// we want at least 1 more than our requested amount
+				// so we know that there are other results
+				// (in case we get the exact amount back)
 				myMaxResultsToFetch = Math.max(next, minWanted);
-				sb.setMaxResultsToFetch(myMaxResultsToFetch);
+				sb.setMaxResultsToFetch(myMaxResultsToFetch + 1);
 			}
 
 			if (iter.hasNext()) {
@@ -633,6 +644,7 @@ public class SearchTask implements Callable<Void> {
 		 */
 		try (IResultIterator<JpaPid> resultIterator =
 				sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
+			// resultIterator is SearchBuilder.QueryIterator
 			assert (resultIterator != null);
 
 			/*
@@ -677,5 +689,39 @@ public class SearchTask implements Callable<Void> {
 			ourLog.error("IO failure during database access", e);
 			throw new InternalErrorException(Msg.code(1166) + e);
 		}
+	}
+
+	/**
+	 * Does the query but only for the count.
+	 * @param theParamWantOnlyCount - if count query is wanted only
+	 */
+	private void doCountOnlyQuery(boolean theParamWantOnlyCount) {
+		ourLog.trace("Performing count");
+		@SuppressWarnings("rawtypes")
+		ISearchBuilder sb = newSearchBuilder();
+
+		/*
+		 * createCountQuery
+		 * NB: (see createQuery below)
+		 * Because FulltextSearchSvcImpl will (internally)
+		 * mutate the myParams (searchmap),
+		 * (specifically removing the _content and _text filters)
+		 * we will have to clone those parameters here so that
+		 * the "correct" params are used in createQuery below
+		 */
+		Long count = sb.createCountQuery(myParams.clone(), mySearch.getUuid(), myRequest, myRequestPartitionId);
+
+		ourLog.trace("Got count {}", count);
+
+		myTxService
+				.withRequest(myRequest)
+				.withRequestPartitionId(myRequestPartitionId)
+				.execute(() -> {
+					mySearch.setTotalCount(count.intValue());
+					if (theParamWantOnlyCount) {
+						mySearch.setStatus(SearchStatusEnum.FINISHED);
+					}
+					doSaveSearch();
+				});
 	}
 }

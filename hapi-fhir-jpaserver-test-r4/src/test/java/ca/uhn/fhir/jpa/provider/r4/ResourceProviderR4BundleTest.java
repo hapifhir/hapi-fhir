@@ -3,9 +3,11 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -24,18 +26,31 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4BundleTest.class);
+
+	private static final int DESIRED_MAX_THREADS = 5;
+
+	static {
+		if (TestR4Config.ourMaxThreads == null || TestR4Config.ourMaxThreads < DESIRED_MAX_THREADS) {
+			TestR4Config.ourMaxThreads = DESIRED_MAX_THREADS;
+		}
+	}
 
 	@BeforeEach
 	@Override
@@ -44,7 +59,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		myStorageSettings.setBundleBatchPoolSize(20);
 		myStorageSettings.setBundleBatchMaxPoolSize(100);
 	}
-	
+
 	@AfterEach
 	@Override
 	public void after() throws Exception {
@@ -52,6 +67,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		myStorageSettings.setBundleBatchPoolSize(JpaStorageSettings.DEFAULT_BUNDLE_BATCH_POOL_SIZE);
 		myStorageSettings.setBundleBatchMaxPoolSize(JpaStorageSettings.DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE);
 	}
+
 	/**
 	 * See #401
 	 */
@@ -69,14 +85,13 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		Bundle retBundle = myClient.read().resource(Bundle.class).withId(id).execute();
 
-    ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
 
 		assertEquals("http://foo/", bundle.getEntry().get(0).getFullUrl());
 	}
 
 	@Test
 	public void testProcessMessage() {
-
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.MESSAGE);
 
@@ -88,7 +103,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 			myClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
 			fail();
 		} catch (NotImplementedOperationException e) {
-			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));
+			assertThat(e.getMessage()).contains("This operation is not yet implemented on this server");
 		}
 
 	}
@@ -101,38 +116,52 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		input.setType(BundleType.BATCH);
 
 		for (String id : ids)
-		    input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(id);
+			input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(id);
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
 
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		
-		assertEquals(50, output.getEntry().size());
+
+		assertThat(output.getEntry()).hasSize(50);
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
 
-		int i=0;
+		int i = 0;
 		for (BundleEntryComponent bundleEntry : bundleEntries) {
-			assertEquals(ids.get(i++),  bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+			assertEquals(ids.get(i++), bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 		}
 
 	}
-
 
 	@Test
 	public void testHighConcurrencyWorks() throws IOException, InterruptedException {
 		List<Bundle> bundles = new ArrayList<>();
-		for (int i =0 ; i < 10; i ++) {
+		for (int i = 0; i < 10; i++) {
 			bundles.add(myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/identical-tags-batch.json"), Charsets.UTF_8)));
 		}
 
-		ExecutorService tpe = Executors.newFixedThreadPool(4);
-		for (Bundle bundle :bundles) {
-			tpe.execute(() -> myClient.transaction().withBundle(bundle).execute());
-		}
-		tpe.shutdown();
-		tpe.awaitTermination(100, TimeUnit.SECONDS);
-	}
+		int desiredMaxThreads = DESIRED_MAX_THREADS - 1;
+		int maxThreads = TestR4Config.getMaxThreads();
+		// we want strictly > because we want at least 1 extra thread hanging around for
+		// any spun off processes needed internally during the transaction
+		assertTrue(maxThreads > desiredMaxThreads, String.format("Wanted > %d threads, but we only have %d available", desiredMaxThreads, maxThreads));
+		ExecutorService tpe = Executors.newFixedThreadPool(desiredMaxThreads);
+		CompletionService<Bundle> completionService = new ExecutorCompletionService<>(tpe);
 
+		for (Bundle bundle : bundles) {
+			completionService.submit(() -> myClient.transaction().withBundle(bundle).execute());
+		}
+
+		int count = 0;
+		int expected = bundles.size();
+		while (count < expected) {
+			completionService.take();
+			count++;
+		}
+
+		tpe.shutdown();
+		await().atMost(100, TimeUnit.SECONDS)
+			.until(tpe::isShutdown);
+	}
 
 	@Test
 	public void testBundleBatchWithSingleThread() {
@@ -140,27 +169,27 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		myStorageSettings.setBundleBatchPoolSize(1);
 		myStorageSettings.setBundleBatchMaxPoolSize(1);
-		
+
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
 
-		for (String id : ids)
-		    input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(id);
+		for (String id : ids) {
+			input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(id);
+		}
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
 
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		
-		assertEquals(50, output.getEntry().size());
+
+		assertThat(output.getEntry()).hasSize(50);
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
 
-		int i=0;
+		int i = 0;
 		for (BundleEntryComponent bundleEntry : bundleEntries) {
-			assertEquals(ids.get(i++),  bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+			assertEquals(ids.get(i++), bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 		}
-
-
 	}
+
 	@Test
 	public void testBundleBatchWithError() {
 		List<String> ids = createPatients(5);
@@ -170,29 +199,29 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(0));
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/1000"); // not exist
-		
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(1)); 
+
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(1));
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(2));
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/2000"); // not exist
-		
+
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(3));
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/3000"); // not exist
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(4));
-		
+
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
-		
+
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		
-		assertEquals(8, output.getEntry().size());
-		
+
+		assertThat(output.getEntry()).hasSize(8);
+
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
-		
+
 		// patient 1
 		assertEquals(ids.get(0), bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
-		
+
 		// patient 10 - error outcomes
-	    assertThat(((OperationOutcome)bundleEntries.get(1).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics(), containsString("Patient/1000"));
+		assertThat(((OperationOutcome) bundleEntries.get(1).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics()).contains("Patient/1000");
 
 		// patient 2
 		assertEquals(ids.get(1), bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
@@ -201,22 +230,22 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		assertEquals(ids.get(2), bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// patient 20 - error outcomes
-	    assertThat(((OperationOutcome)bundleEntries.get(4).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics(), containsString("Patient/2000"));
+		assertThat(((OperationOutcome) bundleEntries.get(4).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics()).contains("Patient/2000");
 
 		// patient 4
 		assertEquals(ids.get(3), bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// patient 30 - error outcomes
-	    assertThat(((OperationOutcome)bundleEntries.get(6).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics(), containsString("Patient/3000"));
+		assertThat(((OperationOutcome) bundleEntries.get(6).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics()).contains("Patient/3000");
 
 		// patient 5
 		assertEquals(ids.get(4), bundleEntries.get(7).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 	}
-	
+
 	@Test
 	public void testBundleBatchWithCreate() {
-		
+
 		List<String> ids = createPatients(5);
 
 		Bundle input = new Bundle();
@@ -247,22 +276,22 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(3));
 		//7
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(4));
-		
+
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
-		
+
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		
-		assertEquals(7, output.getEntry().size());
-		
+
+		assertThat(output.getEntry()).hasSize(7);
+
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
-		
+
 		// patient 1
 		assertEquals(ids.get(0), bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
-		
+
 		// patient create
-	    assertThat(bundleEntries.get(1).getResponse().getStatus(), containsString("201"));
+		assertThat(bundleEntries.get(1).getResponse().getStatus()).contains("201");
 
 		// patient 2
 		assertEquals(ids.get(1), bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
@@ -271,7 +300,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		assertEquals(ids.get(2), bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// condition create
-	    assertThat(bundleEntries.get(4).getResponse().getStatus(), containsString("201"));
+		assertThat(bundleEntries.get(4).getResponse().getStatus()).contains("201");
 
 		// patient 4
 		assertEquals(ids.get(3), bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
@@ -319,14 +348,14 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 			});
 	}
 
-	
+
 	private List<String> createPatients(int count) {
 		List<String> ids = new ArrayList<String>();
 		for (int i = 0; i < count; i++) {
 			Patient patient = new Patient();
 			patient.setGender(AdministrativeGender.MALE);
 			patient.addIdentifier().setSystem("urn:foo").setValue("A");
-			patient.addName().setFamily("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".substring(i, i+1));
+			patient.addName().setFamily("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".substring(i, i + 1));
 			String id = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
 			ids.add(id);
 		}
@@ -351,7 +380,8 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		bundle.getEntry().forEach(entry -> carePlans.add((CarePlan) entry.getResource()));
 
 		// Post CarePlans should not get: HAPI-2006: Unable to perform PUT, URL provided is invalid...
-		myClient.transaction().withResources(carePlans).execute();
+		List<IBaseResource> result = myClient.transaction().withResources(carePlans).execute();
+		assertFalse(result.isEmpty());
 	}
 
 }

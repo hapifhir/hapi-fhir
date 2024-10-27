@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6263
+title: "The method `FhirTerser.cloneInto()` has been enhanced to copy the `resource` field of a `Reference`, 
+in addition to the fields that are accessible via the structure definition."

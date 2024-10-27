@@ -15,8 +15,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -25,9 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class EmptyIndexesR4Test extends BaseJpaR4Test {
 	private static RestfulServer myRestServer;
@@ -109,8 +107,8 @@ public class EmptyIndexesR4Test extends BaseJpaR4Test {
 		myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(()->{
-			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
-			assertThat(myResourceIndexedSearchParamTokenDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamQuantityDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll()).isEmpty();
 		});
 	}
 
@@ -121,10 +119,10 @@ public class EmptyIndexesR4Test extends BaseJpaR4Test {
 		myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(()->{
-			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
-			assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamQuantityDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamStringDao.findAll()).isEmpty();
 			// code and combo-code
-			assertThat(myResourceIndexedSearchParamTokenDao.findAll().toString(), myResourceIndexedSearchParamTokenDao.findAll(), hasSize(2));
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll()).as(myResourceIndexedSearchParamTokenDao.findAll().toString()).hasSize(2);
 		});
 	}
 

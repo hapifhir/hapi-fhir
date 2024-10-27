@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,19 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Implementations of this interface represent a response back to the client from the server. It is
- * conceptually similar to {@link javax.servlet.http.HttpServletResponse} but intended to be agnostic
+ * conceptually similar to {@link jakarta.servlet.http.HttpServletResponse} but intended to be agnostic
  * of the server framework being used.
  * <p>
  * This class is a bit of an awkward abstraction given the two styles of servers it supports.

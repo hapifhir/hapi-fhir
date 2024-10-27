@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	@Override
 	public void disableConstraints() {
+		purgeRecycleBin();
 		List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> queryResults =
 				query("SELECT CONSTRAINT_NAME, TABLE_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_TYPE != 'P'");
@@ -68,6 +69,7 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	@Override
 	public void enableConstraints() {
+		purgeRecycleBin();
 		List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> queryResults =
 				query("SELECT CONSTRAINT_NAME, TABLE_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_TYPE != 'P'");

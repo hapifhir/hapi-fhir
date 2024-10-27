@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,17 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.ResourceUtil;
 import ca.uhn.fhir.util.StringUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.commons.collections4.comparators.ReverseComparator;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -83,17 +94,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toPredicateArray;
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
@@ -243,7 +243,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	 */
 	private byte[] fetchBlobFromBinary(IBaseBinary theBinary) throws IOException {
 		if (myBinaryStorageSvc != null && !(myBinaryStorageSvc instanceof NullBinaryStorageSvcImpl)) {
-			return myBinaryStorageSvc.fetchDataBlobFromBinary(theBinary);
+			return myBinaryStorageSvc.fetchDataByteArrayFromBinary(theBinary);
 		} else {
 			byte[] value = BinaryUtil.getOrCreateData(myCtx, theBinary).getValue();
 			if (value == null) {
@@ -301,15 +301,10 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			boolean currentVersion =
 					updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(packageId, packageVersionId);
-			String packageDesc = null;
-			if (npmPackage.description() != null) {
-				if (npmPackage.description().length() > NpmPackageVersionEntity.PACKAGE_DESC_LENGTH) {
-					packageDesc = npmPackage.description().substring(0, NpmPackageVersionEntity.PACKAGE_DESC_LENGTH - 4)
-							+ "...";
-				} else {
-					packageDesc = npmPackage.description();
-				}
-			}
+
+			String packageDesc = truncateStorageString(npmPackage.description());
+			String packageAuthor = truncateStorageString(npmPackage.getNpm().asString("author"));
+
 			if (currentVersion) {
 				getProcessingMessages(npmPackage)
 						.add("Marking package " + packageId + "#" + initialPackageVersionId + " as current version");
@@ -327,6 +322,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			packageVersion.setPackage(pkg);
 			packageVersion.setPackageBinary(persistedPackage);
 			packageVersion.setSavedTime(new Date());
+			packageVersion.setAuthor(packageAuthor);
 			packageVersion.setDescription(packageDesc);
 			packageVersion.setFhirVersionId(npmPackage.fhirVersion());
 			packageVersion.setFhirVersion(fhirVersion);
@@ -336,8 +332,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			String dirName = "package";
 			NpmPackage.NpmPackageFolder packageFolder = npmPackage.getFolders().get(dirName);
-			for (Map.Entry<String, List<String>> nextTypeToFiles :
-					packageFolder.getTypes().entrySet()) {
+			Map<String, List<String>> packageFolderTypes = null;
+			try {
+				packageFolderTypes = packageFolder.getTypes();
+			} catch (IOException e) {
+				throw new InternalErrorException(Msg.code(2371) + e);
+			}
+			for (Map.Entry<String, List<String>> nextTypeToFiles : packageFolderTypes.entrySet()) {
 				String nextType = nextTypeToFiles.getKey();
 				for (String nextFile : nextTypeToFiles.getValue()) {
 
@@ -620,6 +621,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			NpmPackageMetadataJson.Version version = new NpmPackageMetadataJson.Version();
 			version.setFhirVersion(next.getFhirVersionId());
+			version.setAuthor(next.getAuthor());
 			version.setDescription(next.getDescription());
 			version.setName(next.getPackageId());
 			version.setVersion(next.getVersionId());
@@ -677,7 +679,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					retVal.addObject()
 							.getPackage()
 							.setName(next.getPackageId())
-							.setDescription(next.getPackage().getDescription())
+							.setAuthor(next.getAuthor())
+							.setDescription(next.getDescription())
 							.setVersion(next.getVersionId())
 							.addFhirVersion(next.getFhirVersionId())
 							.setBytes(next.getPackageSizeBytes());
@@ -783,25 +786,34 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			Join<NpmPackageVersionEntity, NpmPackageVersionResourceEntity> resources =
 					theRoot.join("myResources", JoinType.LEFT);
 
-			predicates.add(theCb.equal(
-					resources.get("myCanonicalUrl").as(String.class), thePackageSearchSpec.getResourceUrl()));
+			predicates.add(theCb.equal(resources.get("myCanonicalUrl"), thePackageSearchSpec.getResourceUrl()));
+		}
+
+		if (isNotBlank(thePackageSearchSpec.getVersion())) {
+			String searchTerm = thePackageSearchSpec.getVersion() + "%";
+			predicates.add(theCb.like(theRoot.get("myVersionId"), searchTerm));
 		}
 
 		if (isNotBlank(thePackageSearchSpec.getDescription())) {
 			String searchTerm = "%" + thePackageSearchSpec.getDescription() + "%";
 			searchTerm = StringUtil.normalizeStringForSearchIndexing(searchTerm);
-			predicates.add(theCb.like(theRoot.get("myDescriptionUpper").as(String.class), searchTerm));
+			predicates.add(theCb.like(theCb.upper(theRoot.get("myDescriptionUpper")), searchTerm));
+		}
+
+		if (isNotBlank(thePackageSearchSpec.getAuthor())) {
+			String searchTerm = "%" + thePackageSearchSpec.getAuthor() + "%";
+			searchTerm = StringUtil.normalizeStringForSearchIndexing(searchTerm);
+			predicates.add(theCb.like(theRoot.get("myAuthorUpper"), searchTerm));
 		}
 
 		if (isNotBlank(thePackageSearchSpec.getFhirVersion())) {
 			if (!thePackageSearchSpec.getFhirVersion().matches("([0-9]+\\.)+[0-9]+")) {
 				FhirVersionEnum versionEnum = FhirVersionEnum.forVersionString(thePackageSearchSpec.getFhirVersion());
 				if (versionEnum != null) {
-					predicates.add(theCb.equal(theRoot.get("myFhirVersion").as(FhirVersionEnum.class), versionEnum));
+					predicates.add(theCb.equal(theRoot.get("myFhirVersion").as(String.class), versionEnum.name()));
 				}
 			} else {
-				predicates.add(theCb.like(
-						theRoot.get("myFhirVersionId").as(String.class), thePackageSearchSpec.getFhirVersion() + "%"));
+				predicates.add(theCb.like(theRoot.get("myFhirVersionId"), thePackageSearchSpec.getFhirVersion() + "%"));
 			}
 		}
 
@@ -812,5 +824,22 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	public static List<String> getProcessingMessages(NpmPackage thePackage) {
 		return (List<String>)
 				thePackage.getUserData().computeIfAbsent("JpPackageCache_ProcessingMessages", t -> new ArrayList<>());
+	}
+
+	/**
+	 * Truncates a string to {@link NpmPackageVersionEntity#PACKAGE_DESC_LENGTH} which is
+	 * the maximum length used on several columns in {@link NpmPackageVersionEntity}. If the
+	 * string is longer than the maximum allowed, the last 3 characters are replaced with "..."
+	 */
+	private static String truncateStorageString(String theInput) {
+		String retVal = null;
+		if (theInput != null) {
+			if (theInput.length() > NpmPackageVersionEntity.PACKAGE_DESC_LENGTH) {
+				retVal = theInput.substring(0, NpmPackageVersionEntity.PACKAGE_DESC_LENGTH - 4) + "...";
+			} else {
+				retVal = theInput;
+			}
+		}
+		return retVal;
 	}
 }

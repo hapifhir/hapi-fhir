@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -82,5 +84,21 @@ public class PartitionEntity {
 
 	public RequestPartitionId toRequestPartitionId() {
 		return RequestPartitionId.fromPartitionIdAndName(getId(), getName());
+	}
+
+	/**
+	 * Build a RequestPartitionId from the ids and names in the entities.
+	 * @param thePartitions the entities to use for ids and names
+	 * @return a single RequestPartitionId covering all the entities
+	 */
+	public static RequestPartitionId buildRequestPartitionId(List<PartitionEntity> thePartitions) {
+		List<Integer> ids = new ArrayList<>(thePartitions.size());
+		List<String> names = new ArrayList<>(thePartitions.size());
+		for (PartitionEntity nextPartition : thePartitions) {
+			ids.add(nextPartition.getId());
+			names.add(nextPartition.getName());
+		}
+
+		return RequestPartitionId.forPartitionIdsAndNames(names, ids, null);
 	}
 }

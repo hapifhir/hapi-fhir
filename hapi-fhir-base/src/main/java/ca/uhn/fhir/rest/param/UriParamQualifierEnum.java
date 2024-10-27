@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,16 @@ public enum UriParamQualifierEnum {
 	 * Value <code>:below</code>
 	 * </p>
 	 */
-	BELOW(":below");
+	BELOW(":below"),
+
+	/**
+	 * The contains modifier allows clients to indicate that a supplied URI input should be matched
+	 * as a case-insensitive and combining-character insensitive match anywhere in the target URI.
+	 * <p>
+	 * Value <code>:contains</code>
+	 * </p>
+	 */
+	CONTAINS(":contains");
 
 	private static final Map<String, UriParamQualifierEnum> KEY_TO_VALUE;
 

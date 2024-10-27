@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5298
+title: "Under some circumstances, a large `$everything` operation could enter an infinite loop and eventually timeout with a failure. This has been corrected."

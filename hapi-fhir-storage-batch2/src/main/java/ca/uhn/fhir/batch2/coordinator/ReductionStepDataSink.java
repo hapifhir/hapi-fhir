@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,9 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 					"Finalizing job instance {} with report length {} chars",
 					instance.getInstanceId(),
 					dataString.length());
-			ourLog.atTrace().addArgument(() -> JsonUtil.serialize(instance)).log("New instance state: {}");
+			if (ourLog.isTraceEnabled()) {
+				ourLog.trace("New instance state: {}", JsonUtil.serialize(instance));
+			}
 
 			return true;
 		});

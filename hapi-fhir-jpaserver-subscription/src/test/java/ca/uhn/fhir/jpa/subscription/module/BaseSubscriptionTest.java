@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFact
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -75,6 +76,11 @@ public abstract class BaseSubscriptionTest {
 		@Bean
 		public JpaStorageSettings jpaStorageSettings() {
 			return new JpaStorageSettings();
+		}
+
+		@Bean
+		public SubscriptionSettings subscriptionSettings() {
+			return new SubscriptionSettings();
 		}
 
 		@Bean

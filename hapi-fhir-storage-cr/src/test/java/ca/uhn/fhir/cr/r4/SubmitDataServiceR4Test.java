@@ -1,68 +1,71 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4Test;
-import ca.uhn.fhir.cr.common.Searches;
-import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+
+import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import com.google.common.collect.Lists;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.opencds.cqf.fhir.utility.search.Searches;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Iterator;
-import java.util.function.Function;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@ExtendWith(SpringExtension.class)
-public class SubmitDataServiceR4Test extends BaseCrR4Test {
+public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
 
-	Function<RequestDetails, SubmitDataService> mySubmitDataServiceFunction;
-
-	@BeforeEach
-	public void beforeEach() {
-		mySubmitDataServiceFunction = rs -> {
-			return new SubmitDataService(getDaoRegistry(), new SystemRequestDetails());
-		};
-	}
+	@Autowired
+	ISubmitDataProcessorFactory myR4SubmitDataProcessorFactory;
 
 	@Test
 	public void submitDataTest(){
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
+
+		//create resources
 		MeasureReport mr = newResource(MeasureReport.class).setMeasure("Measure/A123");
 		Observation obs = newResource(Observation.class).setValue(new StringType("ABC"));
-		mySubmitDataServiceFunction.apply(requestDetails)
+
+		//submit-data operation
+		var res = myR4SubmitDataProcessorFactory
+			.create(requestDetails)
 			.submitData(new IdType("Measure", "A123"), mr,
 				Lists.newArrayList(obs));
 
-		Iterable<IBaseResource> resourcesResult = search(Observation.class, Searches.all());
-		Observation savedObs = null;
-		Iterator<IBaseResource> iterator = resourcesResult.iterator();
-		while(iterator.hasNext()){
-			savedObs = (Observation) iterator.next();
-			break;
-		}
-		assertNotNull(savedObs);
-		assertEquals("ABC", savedObs.getValue().primitiveValue());
+		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, ourRestfulServer);
 
-		resourcesResult = search(MeasureReport.class, Searches.all());
-		MeasureReport savedMr = null;
-		iterator = resourcesResult.iterator();
-		while(iterator.hasNext()){
-			savedMr = (MeasureReport) iterator.next();
-			break;
+		var resultMr = repository.search(Bundle.class, MeasureReport.class, Searches.ALL);
+		var mrSize = resultMr.getEntry().size();
+		MeasureReport report = null;
+		for (int i = 0; i < mrSize; i++){
+			var getEntry = resultMr.getEntry();
+			var mrResource = (MeasureReport) getEntry.get(i).getResource();
+			var measure = mrResource.getMeasure();
+			if (measure.equals("Measure/A123")){
+				report = mrResource;
+				break;
+			}
 		}
-		assertNotNull(savedMr);
-		assertEquals("Measure/A123", savedMr.getMeasure());
+		//found submitted MeasureReport!
+		assertNotNull(report);
+
+		var resultOb = repository.search(Bundle.class, Observation.class, Searches.ALL);
+		var obSize = resultOb.getEntry().size();
+		Observation observation = null;
+		for (int i = 0; i < obSize; i++){
+			var getEntry = resultOb.getEntry();
+			var obResource = (Observation) getEntry.get(i).getResource();
+			var val = obResource.getValue().primitiveValue();
+			if (val.equals("ABC")){
+				observation = obResource;
+				break;
+			}
+		}
+		//found submitted Observation!
+		assertNotNull(observation);
+
 	}
-
 }

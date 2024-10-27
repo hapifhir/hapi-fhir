@@ -2,9 +2,16 @@ package ca.uhn.fhir.rest.openapi;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.Patch;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -19,35 +26,50 @@ import ca.uhn.fhir.test.utilities.HtmlUtil;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ExtensionConstants;
-import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.HtmlDivision;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.ActorDefinition;
-import org.junit.jupiter.api.*;
+import org.htmlunit.html.DomElement;
+import org.htmlunit.html.HtmlDivision;
+import org.htmlunit.html.HtmlPage;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.function.Consumer;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class OpenApiInterceptorTest {
 
@@ -69,7 +91,7 @@ public class OpenApiInterceptorTest {
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
 			List<String> buttonTexts = parsePageButtonTexts(resp, url);
-			assertThat(buttonTexts.toString(), buttonTexts, Matchers.contains("All", "System Level Operations", "Patient 2", "OperationDefinition 1", "Observation 0"));
+			assertThat(buttonTexts).as(buttonTexts.toString()).containsExactly("All", "System Level Operations", "Patient 2", "OperationDefinition 1", "Observation 0");
 		}
 
 		@Test
@@ -80,8 +102,30 @@ public class OpenApiInterceptorTest {
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
 			List<String> buttonTexts = parsePageButtonTexts(resp, url);
-			assertThat(buttonTexts.toString(), buttonTexts, Matchers.contains("All", "System Level Operations", "OperationDefinition 1", "Observation", "Patient"));
+			assertThat(buttonTexts).as(buttonTexts.toString()).containsExactly("All", "System Level Operations", "OperationDefinition 1", "Observation", "Patient");
 		}
+
+
+		@Test
+		public void testResourceDocsCopied() throws IOException {
+			myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor("OperationDefinition"));
+			myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
+			myServer.registerInterceptor(new CapabilityStatementEnhancingInterceptor(cs->{
+				org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent patientResource = findPatientResource(cs);
+				patientResource.setProfile("http://baseProfile");
+				patientResource.addSupportedProfile("http://foo");
+				patientResource.addSupportedProfile("http://bar");
+				patientResource.setDocumentation("This is **bolded** documentation");
+			}));
+
+			org.hl7.fhir.r4.model.CapabilityStatement cs = myServer.getFhirClient().capabilities().ofType(org.hl7.fhir.r4.model.CapabilityStatement.class).execute();
+			org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent patientResource = findPatientResource(cs);
+			assertEquals("This is **bolded** documentation", patientResource.getDocumentation());
+
+			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+			String resp = fetchSwaggerUi(url);
+		}
+
 
 	}
 
@@ -109,6 +153,35 @@ public class OpenApiInterceptorTest {
 		FhirContext getContext() {
 			return FhirContext.forR5Cached();
 		}
+	}
+
+	@Interceptor
+	private static class CapabilityStatementEnhancingInterceptor {
+
+		private final Consumer<org.hl7.fhir.r4.model.CapabilityStatement> myConsumer;
+
+		public CapabilityStatementEnhancingInterceptor(Consumer<org.hl7.fhir.r4.model.CapabilityStatement> theConsumer) {
+			myConsumer = theConsumer;
+		}
+
+		@Hook(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED)
+		public void massageCapabilityStatement(IBaseConformance theCs) {
+			myConsumer.accept((org.hl7.fhir.r4.model.CapabilityStatement) theCs);
+		}
+
+	}
+
+	@Nonnull
+	private static org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent findPatientResource(org.hl7.fhir.r4.model.CapabilityStatement theCs) {
+		org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent patientResource = theCs
+			.getRest()
+			.get(0)
+			.getResource()
+			.stream()
+			.filter(t -> "Patient".equals(t.getType()))
+			.findFirst()
+			.orElseThrow();
+		return patientResource;
 	}
 
 
@@ -168,7 +241,7 @@ public class OpenApiInterceptorTest {
 			assertNotNull(lastNPath.getGet());
 			assertEquals("LastN Description", lastNPath.getGet().getDescription());
 			assertEquals("LastN Short", lastNPath.getGet().getSummary());
-			assertEquals(4, lastNPath.getGet().getParameters().size());
+			assertThat(lastNPath.getGet().getParameters()).hasSize(4);
 			assertEquals("Subject description", lastNPath.getGet().getParameters().get(0).getDescription());
 		}
 
@@ -190,7 +263,7 @@ public class OpenApiInterceptorTest {
 				ourLog.info("Response: {}", response);
 				ourLog.info("Response: {}", responseString);
 				assertEquals(200, response.getStatusLine().getStatusCode());
-				assertThat(responseString, containsString("<title>Swagger UI</title>"));
+				assertThat(responseString).contains("<title>Swagger UI</title>");
 			}
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/?foo=foo");
@@ -214,8 +287,8 @@ public class OpenApiInterceptorTest {
 
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
-			assertThat(resp, resp, containsString("<p>This server is copyright <strong>Example Org</strong> 2021</p>"));
-			assertThat(resp, resp, not(containsString("swagger-ui-custom.css")));
+			assertThat(resp).as(resp).contains("<p>This server is copyright <strong>Example Org</strong> 2021</p>");
+			assertThat(resp).as(resp).doesNotContain("swagger-ui-custom.css");
 		}
 
 		@Test
@@ -225,7 +298,7 @@ public class OpenApiInterceptorTest {
 
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
-			assertThat(resp, resp, not(containsString("img id=\"banner_img\"")));
+			assertThat(resp).as(resp).doesNotContain("img id=\"banner_img\"");
 		}
 
 		@Test
@@ -239,7 +312,7 @@ public class OpenApiInterceptorTest {
 			// Fetch Swagger UI HTML
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
-			assertThat(resp, resp, containsString("<link rel=\"stylesheet\" type=\"text/css\" href=\"./swagger-ui-custom.css\"/>"));
+			assertThat(resp).as(resp).contains("<link rel=\"stylesheet\" type=\"text/css\" href=\"./swagger-ui-custom.css\"/>");
 
 			// Fetch Custom CSS
 			url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/swagger-ui-custom.css";
@@ -272,7 +345,7 @@ public class OpenApiInterceptorTest {
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
 			List<String> buttonTexts = parsePageButtonTexts(resp, url);
-			assertThat(buttonTexts.toString(), buttonTexts, empty());
+			assertThat(buttonTexts).as(buttonTexts.toString()).isEmpty();
 		}
 
 		@Test
@@ -291,7 +364,7 @@ public class OpenApiInterceptorTest {
 		public void testRemoveTrailingSlashWithNullUrl() {
 			OpenApiInterceptor interceptor = new OpenApiInterceptor();
 			String url = interceptor.removeTrailingSlash(null);
-			assertEquals(null, url);
+			assertNull(url);
 		}
 
 		@Test

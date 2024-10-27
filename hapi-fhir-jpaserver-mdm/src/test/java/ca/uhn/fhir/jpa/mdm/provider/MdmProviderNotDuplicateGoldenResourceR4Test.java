@@ -18,11 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4Test {
 	@Autowired
@@ -68,7 +67,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 			myMdmProvider.notDuplicate(myGoldenPatientId, myTargetPatientId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0745: No link exists between"));
+			assertThat(e.getMessage()).startsWith("HAPI-0745: No link exists between");
 		}
 	}
 
@@ -80,7 +79,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 			myMdmProvider.notDuplicate(myGoldenPatientId, myTargetPatientId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), endsWith("are not linked as POSSIBLE_DUPLICATE."));
+			assertThat(e.getMessage()).endsWith("are not linked as POSSIBLE_DUPLICATE.");
 		}
 	}
 
@@ -120,7 +119,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 			myMdmProvider.notDuplicate(goldenPatientId, targetPatientId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0745: No link exists between"));
+			assertThat(e.getMessage()).startsWith("HAPI-0745: No link exists between");
 		}
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - HFQL Driver
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,20 +30,15 @@ import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.fhir.util.VersionUtil;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.csv.CSVPrinter;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.jpa.fql.jdbc.HfqlRestClient.CSV_FORMAT;
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8_CTSUFFIX;
@@ -124,6 +119,7 @@ public class HfqlRestProvider {
 				String continuation = toStringValue(theContinuation);
 				ValidateUtil.isTrueOrThrowInvalidRequest(
 						theOffset != null && theOffset.hasValue(), "No offset supplied");
+				@SuppressWarnings("java:S2259") // Sonar doesn't understand the above
 				int startingOffset = theOffset.getValue();
 
 				String statement = DatatypeUtil.toStringValue(theStatement);
@@ -147,6 +143,9 @@ public class HfqlRestProvider {
 				streamResponseCsv(theServletResponse, fetchSize, outcome, true, outcome.getStatement());
 				break;
 			}
+			default:
+				//noinspection DataFlowIssue
+				ValidateUtil.isTrueOrThrowInvalidRequest(false, "Unrecognized action: %s", action);
 		}
 	}
 
@@ -186,41 +185,29 @@ public class HfqlRestProvider {
 		theServletResponse.setContentType(CT_TEXT_CSV + CHARSET_UTF8_CTSUFFIX);
 		try (ServletOutputStream outputStream = theServletResponse.getOutputStream()) {
 			Appendable out = new OutputStreamWriter(outputStream);
-			CSVPrinter csvWriter = new CSVPrinter(out, CSV_FORMAT);
-			csvWriter.printRecords();
+			try (CSVPrinter csvWriter = new CSVPrinter(out, CSV_FORMAT)) {
+				csvWriter.printRecords();
 
-			// Protocol version
-			csvWriter.printRecord(HfqlConstants.PROTOCOL_VERSION, "HAPI FHIR " + VersionUtil.getVersion());
+				// Protocol version
+				csvWriter.printRecord(HfqlConstants.PROTOCOL_VERSION, "HAPI FHIR " + VersionUtil.getVersion());
 
-			// Search ID, Limit, Parsed FQL Statement
-			String searchId = theResult.getSearchId();
-			String parsedFqlStatement = "";
-			if (theInitialPage && theStatement != null) {
-				parsedFqlStatement = JsonUtil.serialize(theStatement, false);
+				// Search ID, Limit, Parsed FQL Statement
+				String searchId = theResult.getSearchId();
+				String parsedFqlStatement = "";
+				if (theInitialPage && theStatement != null) {
+					parsedFqlStatement = JsonUtil.serialize(theStatement, false);
+				}
+				csvWriter.printRecord(searchId, theResult.getLimit(), parsedFqlStatement);
+
+				// Print the rows
+				int recordCount = 0;
+				while (recordCount++ < theFetchSize && theResult.hasNext()) {
+					IHfqlExecutionResult.Row nextRow = theResult.getNextRow();
+					csvWriter.print(nextRow.getRowOffset());
+					csvWriter.printRecord(nextRow.getRowValues());
+				}
+				csvWriter.flush();
 			}
-			csvWriter.printRecord(searchId, theResult.getLimit(), parsedFqlStatement);
-
-			// Print the rows
-			int recordCount = 0;
-			while (recordCount++ < theFetchSize && theResult.hasNext()) {
-				IHfqlExecutionResult.Row nextRow = theResult.getNextRow();
-				csvWriter.print(nextRow.getRowOffset());
-				csvWriter.printRecord(nextRow.getRowValues());
-			}
-
-			csvWriter.close(true);
 		}
-	}
-
-	@Nonnull
-	public static Parameters newQueryRequestParameters(String sql, Integer limit, int fetchSize) {
-		Parameters input = new Parameters();
-		input.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_SEARCH));
-		input.addParameter(HfqlConstants.PARAM_QUERY, new StringType(sql));
-		if (limit != null) {
-			input.addParameter(HfqlConstants.PARAM_LIMIT, new IntegerType(limit));
-		}
-		input.addParameter(HfqlConstants.PARAM_FETCH_SIZE, new IntegerType(fetchSize));
-		return input;
 	}
 }

@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -31,15 +32,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.Base64Utils;
 
-import javax.annotation.Nonnull;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -126,19 +125,19 @@ public class HfqlRestClientTest {
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertEquals(0, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains("Simpson", "Homer"));
+		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Homer");
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertEquals(3, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains("Simpson", "Marge"));
+		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Marge");
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertEquals(5, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains("Simpson", "Maggie"));
+		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Maggie");
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertEquals(7, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains("Simpson", "Lisa"));
+		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Lisa");
 		assertFalse(result.hasNext());
 
 		verify(myFqlExecutor, times(1)).executeInitialSearch(myStatementCaptor.capture(), myLimitCaptor.capture(), myRequestDetailsCaptor.capture());

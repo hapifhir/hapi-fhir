@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5452
+title: "Swapped from using `javax.*` to `jakarta.*` packages. This is a breaking change for a large majority of people who write custom code against HAPI-FHIR. Please see [the migration guide](/hapi-fhir/docs/interceptors/jakarta_upgrade.html) for more information."

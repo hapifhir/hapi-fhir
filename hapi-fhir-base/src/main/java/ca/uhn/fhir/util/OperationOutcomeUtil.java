@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,12 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -35,7 +37,6 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -250,34 +251,77 @@ public class OperationOutcomeUtil {
 	public static IBase addIssueWithMessageId(
 			FhirContext myCtx,
 			IBaseOperationOutcome theOperationOutcome,
-			String severity,
-			String message,
-			String messageId,
-			String location,
+			String theSeverity,
+			String theMessage,
+			String theMessageId,
+			String theLocation,
 			String theCode) {
-		IBase issue = addIssue(myCtx, theOperationOutcome, severity, message, location, theCode);
+		IBase issue = addIssue(myCtx, theOperationOutcome, theSeverity, theMessage, theLocation, theCode);
+		if (isNotBlank(theMessageId)) {
+			addDetailsToIssue(myCtx, issue, Constants.JAVA_VALIDATOR_DETAILS_SYSTEM, theMessageId);
+		}
+
+		return issue;
+	}
+
+	public static void addDetailsToIssue(FhirContext theFhirContext, IBase theIssue, String theSystem, String theCode) {
 		BaseRuntimeElementCompositeDefinition<?> issueElement =
-				(BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition(issue.getClass());
+				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition(theIssue.getClass());
 		BaseRuntimeChildDefinition detailsChildDef = issueElement.getChildByName("details");
 
-		IPrimitiveType<?> system =
-				(IPrimitiveType<?>) myCtx.getElementDefinition("uri").newInstance();
-		system.setValueAsString(Constants.JAVA_VALIDATOR_DETAILS_SYSTEM);
-		IPrimitiveType<?> code =
-				(IPrimitiveType<?>) myCtx.getElementDefinition("code").newInstance();
-		code.setValueAsString(messageId);
-
 		BaseRuntimeElementCompositeDefinition<?> codingDef =
-				(BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition("Coding");
+				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition("Coding");
 		ICompositeType coding = (ICompositeType) codingDef.newInstance();
+
+		// System
+		IPrimitiveType<?> system =
+				(IPrimitiveType<?>) theFhirContext.getElementDefinition("uri").newInstance();
+		system.setValueAsString(theSystem);
 		codingDef.getChildByName("system").getMutator().addValue(coding, system);
+
+		// Code
+		IPrimitiveType<?> code =
+				(IPrimitiveType<?>) theFhirContext.getElementDefinition("code").newInstance();
+		code.setValueAsString(theCode);
 		codingDef.getChildByName("code").getMutator().addValue(coding, code);
 		BaseRuntimeElementCompositeDefinition<?> ccDef =
-				(BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition("CodeableConcept");
+				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition("CodeableConcept");
+
 		ICompositeType codeableConcept = (ICompositeType) ccDef.newInstance();
 		ccDef.getChildByName("coding").getMutator().addValue(codeableConcept, coding);
+		detailsChildDef.getMutator().addValue(theIssue, codeableConcept);
+	}
 
-		detailsChildDef.getMutator().addValue(issue, codeableConcept);
-		return issue;
+	public static void addIssueLineExtensionToIssue(FhirContext theCtx, IBase theIssue, String theLine) {
+		if (theCtx.getVersion().getVersion() != FhirVersionEnum.DSTU2) {
+			ExtensionUtil.setExtension(
+					theCtx,
+					theIssue,
+					"http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line",
+					"integer",
+					theLine);
+		}
+	}
+
+	public static void addIssueColExtensionToIssue(FhirContext theCtx, IBase theIssue, String theColumn) {
+		if (theCtx.getVersion().getVersion() != FhirVersionEnum.DSTU2) {
+			ExtensionUtil.setExtension(
+					theCtx,
+					theIssue,
+					"http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
+					"integer",
+					theColumn);
+		}
+	}
+
+	public static void addMessageIdExtensionToIssue(FhirContext theCtx, IBase theIssue, String theMessageId) {
+		if (theCtx.getVersion().getVersion() != FhirVersionEnum.DSTU2) {
+			ExtensionUtil.setExtension(
+					theCtx,
+					theIssue,
+					"http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+					"string",
+					theMessageId);
+		}
 	}
 }

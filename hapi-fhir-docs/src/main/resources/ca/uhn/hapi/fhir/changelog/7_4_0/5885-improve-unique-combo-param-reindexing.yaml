@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 5885
+title: "Indexing for unique combo Search Parameters has been modified so that a hash
+   value is now stored. This hash value is not yet used in searching or enforcing uniqueness,
+   but will be in the future in order to reduce the space required to store the indexes and the
+   current size limitation on unique indexes."

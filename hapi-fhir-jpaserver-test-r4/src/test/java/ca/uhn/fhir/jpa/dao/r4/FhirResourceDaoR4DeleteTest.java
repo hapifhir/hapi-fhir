@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -21,14 +22,11 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4DeleteTest.class);
@@ -227,14 +225,14 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue(identifierCode);
 		IIdType firstObservationId = myObservationDao.create(obs, matchUrl, new SystemRequestDetails()).getId();
-		assertThat(myResourceSearchUrlDao.findAll(), hasSize(1));
+		assertThat(myResourceSearchUrlDao.findAll()).hasSize(1);
 
 		// when
 		myObservationDao.delete(obs.getIdElement(), mySrd);
 		DaoMethodOutcome daoMethodOutcome = myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
 
 		// then
-		assertThat(daoMethodOutcome.getCreated(), equalTo(Boolean.TRUE));
-		assertThat(firstObservationId.getIdPart(), not(equalTo(daoMethodOutcome.getId())));
+		assertTrue(daoMethodOutcome.getCreated().booleanValue());
+		assertThat(firstObservationId.getIdPart()).isNotEqualTo(daoMethodOutcome.getId());
 	}
 }

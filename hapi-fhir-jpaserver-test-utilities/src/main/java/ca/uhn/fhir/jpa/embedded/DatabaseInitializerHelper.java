@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.embedded;
 
+import ca.uhn.fhir.util.VersionEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +38,9 @@ public class DatabaseInitializerHelper {
 		theDatabase.executeSqlAsBatch(sql);
 	}
 
-	public void insertPersistenceTestData(JpaEmbeddedDatabase theDatabase) {
-		String fileName = String.format(
-				"migration/releases/%s/data/%s.sql",
-				HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION, theDatabase.getDriverType());
+	public void insertPersistenceTestData(JpaEmbeddedDatabase theDatabase, VersionEnum theVersionEnum) {
+		String fileName =
+				String.format("migration/releases/%s/data/%s.sql", theVersionEnum, theDatabase.getDriverType());
 		String sql = getSqlFromResourceFile(fileName);
 		theDatabase.insertTestData(sql);
 	}

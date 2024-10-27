@@ -34,8 +34,8 @@ public class NumericParamRangeUtilTest {
 			theExpectedRange.getLeft(), theExpectedRange.getRight(),
 			range.getLeft(), range.getRight() );
 
-		assertEquals(theExpectedRange.getLeft(), range.getLeft().doubleValue() );
-		assertEquals(theExpectedRange.getRight(), range.getRight().doubleValue() );
+		assertEquals(theExpectedRange.getLeft(), range.getLeft().doubleValue());
+		assertEquals(theExpectedRange.getRight(), range.getRight().doubleValue());
 	}
 
 

@@ -12,12 +12,14 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
 
+import jakarta.annotation.Nullable;
+
 public class FhirR4Util {
 
     public static final String LPI_CODESYSTEM = "http://cognitivemedicine.com/lpi";
     public static final String LPI_CODE = "LPI-FHIR";
 
-    public static Subscription createSubscription(String criteria, String payload, String endpoint, IGenericClient client) {
+    public static Subscription createSubscription(String criteria, String payload, String endpoint, @Nullable IGenericClient client) {
         Subscription subscription = new Subscription();
         subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
         subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -29,8 +31,10 @@ public class FhirR4Util {
         channel.setEndpoint(endpoint);
         subscription.setChannel(channel);
 
-        MethodOutcome methodOutcome = client.create().resource(subscription).execute();
-        subscription.setId(methodOutcome.getId().getIdPart());
+		if (client != null) {
+			MethodOutcome methodOutcome = client.create().resource(subscription).execute();
+			subscription.setId(methodOutcome.getId().getIdPart());
+		}
 
         return subscription;
     }

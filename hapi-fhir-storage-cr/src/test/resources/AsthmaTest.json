@@ -1,0 +1,15 @@
+{
+	"resourceType": "Library",
+	"id": "AsthmaTest",
+	"url": "http://example.com/AsthmaTest",
+	"version": "1.0.0",
+	"name": "AsthmaTest",
+	"status": "draft",
+	"type": "logic-library",
+	"content": [
+		{
+			"contentType": "text/cql",
+			"data": "bGlicmFyeSBBc3RobWFUZXN0IHZlcnNpb24gJzEuMC4wJwoKdXNpbmcgRkhJUiB2ZXJzaW9uICc0LjAuMScKCmluY2x1ZGUgRkhJUkhlbHBlcnMgdmVyc2lvbiAnNC4wLjEnCgpjb2Rlc3lzdGVtICJTTk9NRUQiOiAnaHR0cDovL3Nub21lZC5pbmZvL3NjdCcKCmNvZGUgIkFzdGhtYSI6ICcxOTU5NjcwMDEnIGZyb20gIlNOT01FRCIKCmNvbnRleHQgUGF0aWVudAoKZGVmaW5lICJBc3RobWEgRGlhZ25vc2lzIjoKICAgIFtDb25kaXRpb246ICJBc3RobWEiXQoKZGVmaW5lICJIYXMgQXN0aG1hIERpYWdub3NpcyI6CiAgICBleGlzdHMoIkFzdGhtYSBEaWFnbm9zaXMiKQo="
+		}
+	]
+}

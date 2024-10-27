@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@
 package ca.uhn.fhir.jpa.search.builder;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Iterator;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public class SearchQueryExecutors {
 
@@ -55,41 +56,6 @@ public class SearchQueryExecutors {
 	@Nonnull
 	public static ISearchQueryExecutor from(List<Long> rawPids) {
 		return new ResolvedSearchQueryExecutor(rawPids);
-	}
-
-	/**
-	 * Adapt bare Iterator to our internal query interface.
-	 */
-	static class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
-		private final Iterator<Long> myIterator;
-
-		ResolvedSearchQueryExecutor(Iterable<Long> theIterable) {
-			this(theIterable.iterator());
-		}
-
-		ResolvedSearchQueryExecutor(Iterator<Long> theIterator) {
-			myIterator = theIterator;
-		}
-
-		@Nonnull
-		public static ResolvedSearchQueryExecutor from(List<Long> rawPids) {
-			return new ResolvedSearchQueryExecutor(rawPids);
-		}
-
-		@Override
-		public boolean hasNext() {
-			return myIterator.hasNext();
-		}
-
-		@Override
-		public Long next() {
-			return myIterator.next();
-		}
-
-		@Override
-		public void close() {
-			// empty
-		}
 	}
 
 	public static ISearchQueryExecutor from(Iterator<JpaPid> theIterator) {

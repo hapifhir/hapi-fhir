@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - HFQL Driver
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,19 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
 import ca.uhn.fhir.rest.client.impl.HttpBasicAuthInterceptor;
 import ca.uhn.fhir.util.IoUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
@@ -65,6 +70,18 @@ public class HfqlRestClient {
 			httpClientBuilder.addInterceptorLast(new HttpBasicAuthInterceptor(theUsername, thePassword));
 		}
 		myClient = httpClientBuilder.build();
+	}
+
+	@Nonnull
+	public static Parameters newQueryRequestParameters(String sql, Integer limit, int fetchSize) {
+		Parameters input = new Parameters();
+		input.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_SEARCH));
+		input.addParameter(HfqlConstants.PARAM_QUERY, new StringType(sql));
+		if (limit != null) {
+			input.addParameter(HfqlConstants.PARAM_LIMIT, new IntegerType(limit));
+		}
+		input.addParameter(HfqlConstants.PARAM_FETCH_SIZE, new IntegerType(fetchSize));
+		return input;
 	}
 
 	public IHfqlExecutionResult execute(

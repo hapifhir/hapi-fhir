@@ -20,8 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Set;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REINDEX_DRYRUN;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -78,7 +77,7 @@ public class InstanceReindexProviderTest {
 
 		verify(myDryRunService, times(1)).reindexDryRun(any(), any(), myCodeCaptor.capture());
 
-		assertThat(myCodeCaptor.getValue(), contains("blah"));
+		assertThat(myCodeCaptor.getValue()).containsExactly("blah");
 	}
 
 }

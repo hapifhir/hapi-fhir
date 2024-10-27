@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div class="card" style="margin-top: 10px;" th:fragment="banner">
+   <h3 class="card-header">HFQL / SQL Execution</h3>
+   <div class="card-body">
+      This page can be used to execute queries using the HAPI FHIR Query Language (HFQL),
+      which is a SQL-like syntax for querying FHIR repositories. Learn more about
+      HFQL architecture at <a href="https://smilecdr.com/docs/hfql/">https://smilecdr.com/docs/hfql/</a>, and
+      learn more about the HFQL syntax at <a href="https://smilecdr.com/docs/hfql/sql_syntax.html">https://smilecdr.com/docs/hfql/sql_syntax.html</a>.
+      This UI will display a maximum of [[${rowLimit}]] rows.
+   </div>
+</div>

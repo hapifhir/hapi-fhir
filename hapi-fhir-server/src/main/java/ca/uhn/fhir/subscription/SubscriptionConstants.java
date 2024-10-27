@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public class SubscriptionConstants {
 	/**
 	 * The maximum number of subscriptions that can be active at once
 	 */
-	public static final int MAX_SUBSCRIPTION_RESULTS = 50000;
+	public static final int MAX_SUBSCRIPTION_RESULTS = 10000;
 
 	/**
 	 * The size of the queue used for sending resources to the subscription matching processor and by each subscription delivery queue

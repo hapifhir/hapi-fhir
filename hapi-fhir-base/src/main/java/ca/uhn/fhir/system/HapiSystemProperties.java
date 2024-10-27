@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ public final class HapiSystemProperties {
 	static final String TEST_MODE = "test";
 	static final String UNIT_TEST_MODE = "unit_test_mode";
 	static final long DEFAULT_TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = 10 * DateUtils.MILLIS_PER_SECOND;
+	static final String PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA =
+			"hapi.storage.prevent_invalidating_conditional_match_criteria";
 
 	private HapiSystemProperties() {}
 
@@ -103,7 +105,7 @@ public final class HapiSystemProperties {
 	}
 
 	/**
-	 * This property is used to ensure unit test behaviour is deterministic.  It is also used to add extra logging for unit tests.
+	 * This property is used to ensure unit test behaviour is deterministic.
 	 */
 	public static void enableUnitTestMode() {
 		System.setProperty(UNIT_TEST_MODE, Boolean.TRUE.toString());
@@ -157,5 +159,10 @@ public final class HapiSystemProperties {
 
 	public static boolean isSuppressHapiFhirVersionLogEnabled() {
 		return Boolean.parseBoolean(System.getProperty(SUPPRESS_HAPI_FHIR_VERSION_LOG));
+	}
+
+	public static boolean isPreventInvalidatingConditionalMatchCriteria() {
+		return Boolean.parseBoolean(System.getProperty(
+				HapiSystemProperties.PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA, Boolean.FALSE.toString()));
 	}
 }

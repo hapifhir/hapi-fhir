@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,9 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -67,9 +70,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
+import static ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams.isMatchSearchParam;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -356,12 +358,39 @@ public class InMemoryResourceMatcher {
 		SourceParam resourceSource = new SourceParam(MetaUtil.getSource(myFhirContext, theResource.getMeta()));
 		boolean matches = true;
 		if (paramSource.getSourceUri() != null) {
-			matches = paramSource.getSourceUri().equals(resourceSource.getSourceUri());
+			matches = matchSourceWithModifiers(theSourceParam, paramSource, resourceSource.getSourceUri());
 		}
 		if (paramSource.getRequestId() != null) {
 			matches &= paramSource.getRequestId().equals(resourceSource.getRequestId());
 		}
 		return matches;
+	}
+
+	private boolean matchSourceWithModifiers(
+			IQueryParameterType parameterType, SourceParam paramSource, String theSourceUri) {
+		// process :missing modifier
+		if (parameterType.getMissing() != null) {
+			return parameterType.getMissing() == StringUtils.isBlank(theSourceUri);
+		}
+		// process :above, :below, :contains modifiers
+		if (parameterType instanceof UriParam && ((UriParam) parameterType).getQualifier() != null) {
+			UriParam uriParam = ((UriParam) parameterType);
+			switch (uriParam.getQualifier()) {
+				case ABOVE:
+					return UrlUtil.getAboveUriCandidates(paramSource.getSourceUri()).stream()
+							.anyMatch(candidate -> candidate.equals(theSourceUri));
+				case BELOW:
+					return theSourceUri.startsWith(paramSource.getSourceUri());
+				case CONTAINS:
+					return StringUtils.containsIgnoreCase(theSourceUri, paramSource.getSourceUri());
+				default:
+					// Unsupported modifier specified - no match
+					return false;
+			}
+		} else {
+			// no modifiers specified - use equals operator
+			return paramSource.getSourceUri().equals(theSourceUri);
+		}
 	}
 
 	private boolean matchTagsOrSecurityAndOr(
@@ -551,11 +580,11 @@ public class InMemoryResourceMatcher {
 			switch (theQueryParam.getModifier()) {
 				case IN:
 					return theSearchParams.myTokenParams.stream()
-							.filter(t -> t.getParamName().equals(theParamName))
+							.filter(t -> isMatchSearchParam(theStorageSettings, theResourceName, theParamName, t))
 							.anyMatch(t -> systemContainsCode(theQueryParam, t));
 				case NOT_IN:
 					return theSearchParams.myTokenParams.stream()
-							.filter(t -> t.getParamName().equals(theParamName))
+							.filter(t -> isMatchSearchParam(theStorageSettings, theResourceName, theParamName, t))
 							.noneMatch(t -> systemContainsCode(theQueryParam, t));
 				case NOT:
 					return !theSearchParams.matchParam(

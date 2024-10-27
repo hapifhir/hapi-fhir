@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class MatchUrlService {
 			}
 
 			if (Constants.PARAM_LASTUPDATED.equals(nextParamName)) {
-				if (paramList != null && paramList.size() > 0) {
+				if (!paramList.isEmpty()) {
 					if (paramList.size() > 2) {
 						throw new InvalidRequestException(Msg.code(484) + "Failed to parse match URL[" + theMatchUrl
 								+ "] - Can not have more than 2 " + Constants.PARAM_LASTUPDATED
@@ -111,9 +111,7 @@ public class MatchUrlService {
 						myFhirContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (Constants.PARAM_COUNT.equals(nextParamName)) {
-				if (paramList != null
-						&& paramList.size() > 0
-						&& paramList.get(0).size() > 0) {
+				if (!paramList.isEmpty() && !paramList.get(0).isEmpty()) {
 					String intString = paramList.get(0).get(0);
 					try {
 						paramMap.setCount(Integer.parseInt(intString));
@@ -123,21 +121,23 @@ public class MatchUrlService {
 					}
 				}
 			} else if (Constants.PARAM_SEARCH_TOTAL_MODE.equals(nextParamName)) {
-				if (paramList != null
-						&& !paramList.isEmpty()
-						&& !paramList.get(0).isEmpty()) {
+				if (!paramList.isEmpty() && !paramList.get(0).isEmpty()) {
 					String totalModeEnumStr = paramList.get(0).get(0);
-					try {
-						paramMap.setSearchTotalMode(SearchTotalModeEnum.valueOf(totalModeEnumStr));
-					} catch (IllegalArgumentException e) {
-						throw new InvalidRequestException(Msg.code(2078) + "Invalid "
-								+ Constants.PARAM_SEARCH_TOTAL_MODE + " value: " + totalModeEnumStr);
+					SearchTotalModeEnum searchTotalMode = SearchTotalModeEnum.fromCode(totalModeEnumStr);
+					if (searchTotalMode == null) {
+						// We had an oops here supporting the UPPER CASE enum instead of the FHIR code for _total.
+						// Keep supporting it in case someone is using it.
+						try {
+							searchTotalMode = SearchTotalModeEnum.valueOf(totalModeEnumStr);
+						} catch (IllegalArgumentException e) {
+							throw new InvalidRequestException(Msg.code(2078) + "Invalid "
+									+ Constants.PARAM_SEARCH_TOTAL_MODE + " value: " + totalModeEnumStr);
+						}
 					}
+					paramMap.setSearchTotalMode(searchTotalMode);
 				}
 			} else if (Constants.PARAM_OFFSET.equals(nextParamName)) {
-				if (paramList != null
-						&& paramList.size() > 0
-						&& paramList.get(0).size() > 0) {
+				if (!paramList.isEmpty() && !paramList.get(0).isEmpty()) {
 					String intString = paramList.get(0).get(0);
 					try {
 						paramMap.setOffset(Integer.parseInt(intString));
@@ -165,7 +165,7 @@ public class MatchUrlService {
 				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(
 						myFhirContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
-			} else if (nextParamName.startsWith("_")) {
+			} else if (nextParamName.startsWith("_") && !Constants.PARAM_LANGUAGE.equals(nextParamName)) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
 				RuntimeSearchParam paramDef =
@@ -232,40 +232,27 @@ public class MatchUrlService {
 		return getResourceSearch(theUrl, null);
 	}
 
-	public abstract static class Flag {
-
-		/**
-		 * Constructor
-		 */
-		Flag() {
-			// nothing
-		}
-
-		abstract void process(
-				String theParamName, List<QualifiedParamList> theValues, SearchParameterMap theMapToPopulate);
+	public interface Flag {
+		void process(String theParamName, List<QualifiedParamList> theValues, SearchParameterMap theMapToPopulate);
 	}
 
 	/**
 	 * Indicates that the parser should process _include and _revinclude (by default these are not handled)
 	 */
 	public static Flag processIncludes() {
-		return new Flag() {
-
-			@Override
-			void process(String theParamName, List<QualifiedParamList> theValues, SearchParameterMap theMapToPopulate) {
-				if (Constants.PARAM_INCLUDE.equals(theParamName)) {
-					for (QualifiedParamList nextQualifiedList : theValues) {
-						for (String nextValue : nextQualifiedList) {
-							theMapToPopulate.addInclude(new Include(
-									nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
-						}
+		return (theParamName, theValues, theMapToPopulate) -> {
+			if (Constants.PARAM_INCLUDE.equals(theParamName)) {
+				for (QualifiedParamList nextQualifiedList : theValues) {
+					for (String nextValue : nextQualifiedList) {
+						theMapToPopulate.addInclude(new Include(
+								nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
 					}
-				} else if (Constants.PARAM_REVINCLUDE.equals(theParamName)) {
-					for (QualifiedParamList nextQualifiedList : theValues) {
-						for (String nextValue : nextQualifiedList) {
-							theMapToPopulate.addRevInclude(new Include(
-									nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
-						}
+				}
+			} else if (Constants.PARAM_REVINCLUDE.equals(theParamName)) {
+				for (QualifiedParamList nextQualifiedList : theValues) {
+					for (String nextValue : nextQualifiedList) {
+						theMapToPopulate.addRevInclude(new Include(
+								nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
 					}
 				}
 			}

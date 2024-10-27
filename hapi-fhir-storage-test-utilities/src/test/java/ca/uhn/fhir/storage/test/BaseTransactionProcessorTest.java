@@ -4,7 +4,7 @@ package ca.uhn.fhir.storage.test;
  * #%L
  * hapi-fhir-storage-test-utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BaseTransactionProcessorTest {
 
@@ -107,7 +107,24 @@ public class BaseTransactionProcessorTest {
 	void testUnqualifiedMatchUrlStart_RegexPatternMatches() {
 		String matchUrl = "patient-first-identifier=MRN%7C123456789";
 		boolean matchResult = BaseTransactionProcessor.UNQUALIFIED_MATCH_URL_START.matcher(matchUrl).find();
-		assertTrue(matchResult, "Failed to find a Regex match using Url '" + matchUrl + "'");
+		assertThat(matchResult).as("Failed to find a Regex match using Url '" + matchUrl + "'").isTrue();
 	}
 
+	@Test
+	void identifierSubstitutionNoQuestionMark() {
+		final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
+		idSubstitutions.put(new IdType("Task/urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"), new IdType("Task/1/history/1"));
+		idSubstitutions.put(new IdType("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"), new IdType("Task/1/_history/1"));
+		final String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "identifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea");
+		assertEquals("identifier=http://tempuri.org|2&based-on=Task/1", outcome);
+	}
+
+	@Test
+	void identifierSubstitutionYesQuestionMar() {
+		final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
+		idSubstitutions.put(new IdType("Task/urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"), new IdType("Task/1/history/1"));
+		idSubstitutions.put(new IdType("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"), new IdType("Task/1/_history/1"));
+		final String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "?identifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea");
+		assertEquals("?identifier=http://tempuri.org|2&based-on=Task/1", outcome);
+	}
 }

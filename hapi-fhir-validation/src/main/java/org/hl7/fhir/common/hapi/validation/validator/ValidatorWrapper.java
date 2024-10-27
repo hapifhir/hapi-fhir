@@ -14,8 +14,8 @@ import org.apache.commons.io.input.ReaderInputStream;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
+import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r5.model.StructureDefinition;
-import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.XVerExtensionManager;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
@@ -47,6 +47,7 @@ class ValidatorWrapper {
 	private boolean myAssumeValidRestReferences;
 	private boolean myNoExtensibleWarnings;
 	private boolean myNoBindingMsgSuppressed;
+
 	private Collection<? extends String> myExtensionDomains;
 	private IValidatorResourceFetcher myValidatorResourceFetcher;
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
@@ -120,7 +121,7 @@ class ValidatorWrapper {
 		try {
 			v = new InstanceValidator(theWorkerContext, evaluationCtx, xverManager);
 		} catch (Exception e) {
-			throw new ConfigurationException(Msg.code(648) + e);
+			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
 		}
 
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
@@ -129,6 +130,8 @@ class ValidatorWrapper {
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(myNoTerminologyChecks);
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
+		/* setUnknownCodeSystemsCauseErrors interacts with UnknownCodeSystemWarningValidationSupport. Until this interaction is resolved, the value here should remain fixed. */
+		v.setUnknownCodeSystemsCauseErrors(true);
 		v.getExtensionDomains().addAll(myExtensionDomains);
 		v.setFetcher(myValidatorResourceFetcher);
 		v.setPolicyAdvisor(myValidationPolicyAdvisor);

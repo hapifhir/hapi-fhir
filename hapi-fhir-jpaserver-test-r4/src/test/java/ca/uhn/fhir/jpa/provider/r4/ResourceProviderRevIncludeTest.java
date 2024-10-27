@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -12,11 +15,15 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.DetectedIssue;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
@@ -140,7 +145,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
 		//Ensure that the revincludes are included in the query list of the sql trace.
 		//TODO GGG/KHS reduce this to something less than 6 by smarter iterating and getting the resource types earlier when needed.
-		assertEquals(6, sqlCapturingInterceptor.getQueryList().size());
+		assertThat(sqlCapturingInterceptor.getQueryList()).hasSize(5);
 		myInterceptorRegistry.unregisterInterceptor(sqlCapturingInterceptor);
 	}
 
@@ -168,10 +173,48 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.execute();
 
 		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
-		assertEquals(3, foundResources.size());
+		assertThat(foundResources).hasSize(3);
 		assertEquals(detectedIssueId.getIdPart(), foundResources.get(0).getIdElement().getIdPart());
 		assertEquals(practitionerId.getIdPart(), foundResources.get(1).getIdElement().getIdPart());
 		assertEquals(practitionerRoleId.getIdPart(), foundResources.get(2).getIdElement().getIdPart());
+	}
+
+	@Test
+	public void includeRevIncludeIterate() {
+		Patient p = new Patient();
+		String methodName = "includeRevIncludeIterate";
+		p.addName().setFamily(methodName);
+		IIdType pid = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+
+		EpisodeOfCare episodeOfCare = new EpisodeOfCare();
+		episodeOfCare.addIdentifier(new Identifier().setSystem("system1").setValue("value1"));
+		IIdType episodeOfCareId = myClient.create().resource(episodeOfCare).execute().getId().toUnqualifiedVersionless();
+
+		Encounter encounter = new Encounter();
+		encounter.setSubject(new Reference(pid));
+		encounter.addEpisodeOfCare(new Reference(episodeOfCareId));
+		IIdType encounterId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless();
+
+		Task task = new Task();
+		task.setEncounter(new Reference(encounterId));
+		IIdType taskId = myClient.create().resource(task).execute().getId().toUnqualifiedVersionless();
+
+		// EpisodeOfCare?identifier=system1|value1&_revinclude=Encounter:episode-of-care&_include:iterate=Encounter:patient&_revinclude:iterate=Task:encounter
+		Bundle bundle = myClient.search()
+			.forResource(EpisodeOfCare.class)
+			.where(EpisodeOfCare.IDENTIFIER.exactly().systemAndIdentifier("system1", "value1"))
+			.revInclude(new Include("Encounter:episode-of-care"))
+			.include(new Include("Encounter:patient").setRecurse(true))
+			.revInclude(new Include("Task:encounter").setRecurse(true))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
+		assertThat(foundResources).hasSize(4);
+		assertEquals(episodeOfCareId.getIdPart(), foundResources.get(0).getIdElement().getIdPart());
+		assertEquals(encounterId.getIdPart(), foundResources.get(1).getIdElement().getIdPart());
+		assertEquals(taskId.getIdPart(), foundResources.get(2).getIdElement().getIdPart());
+		assertEquals(pid.getIdPart(), foundResources.get(3).getIdElement().getIdPart());
 	}
 
 }

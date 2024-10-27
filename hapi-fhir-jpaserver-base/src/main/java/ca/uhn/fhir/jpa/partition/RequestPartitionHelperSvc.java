@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,10 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	@Autowired
 	IPartitionLookupSvc myPartitionConfigSvc;
 
+	public RequestPartitionHelperSvc() {}
+
 	@Override
-	protected RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
+	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
 		List<String> names = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionIds().size(); i++) {
 
@@ -59,7 +61,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				}
 			}
 
-			if (theRequestPartitionId.getPartitionNames() != null) {
+			if (theRequestPartitionId.hasPartitionNames()) {
 				if (partition == null) {
 					Validate.isTrue(
 							theRequestPartitionId.getPartitionIds().get(i) == null,
@@ -68,8 +70,8 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				} else {
 					Validate.isTrue(
 							Objects.equals(
-									theRequestPartitionId.getPartitionIds().get(i), partition.getId()),
-							"Partition name %s does not match ID %n",
+									theRequestPartitionId.getPartitionNames().get(i), partition.getName()),
+							"Partition name %s does not match ID %s",
 							theRequestPartitionId.getPartitionNames().get(i),
 							theRequestPartitionId.getPartitionIds().get(i));
 				}
@@ -94,7 +96,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	}
 
 	@Override
-	protected RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
+	public RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
 		List<Integer> ids = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionNames().size(); i++) {
 
@@ -122,9 +124,9 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 					Validate.isTrue(
 							Objects.equals(
 									theRequestPartitionId.getPartitionIds().get(i), partition.getId()),
-							"Partition name %s does not match ID %n",
-							theRequestPartitionId.getPartitionNames().get(i),
-							theRequestPartitionId.getPartitionIds().get(i));
+							"Partition ID %s does not match name %s",
+							theRequestPartitionId.getPartitionIds().get(i),
+							theRequestPartitionId.getPartitionNames().get(i));
 				}
 			} else {
 				if (ids == null) {

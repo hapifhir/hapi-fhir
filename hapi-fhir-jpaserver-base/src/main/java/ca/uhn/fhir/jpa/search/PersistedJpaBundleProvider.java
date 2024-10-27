@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
-import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -55,9 +54,13 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,9 +72,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
@@ -125,9 +125,10 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	 * of this class, since it's a prototype
 	 */
 	private Search mySearchEntity;
-	private String myUuid;
+	private final String myUuid;
 	private SearchCacheStatusEnum myCacheStatus;
 	private RequestPartitionId myRequestPartitionId;
+
 	/**
 	 * Constructor
 	 */
@@ -148,6 +149,11 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@VisibleForTesting
 	public void setRequestPartitionHelperSvcForUnitTest(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+	}
+
+	@VisibleForTesting
+	public Search getSearchEntityForTesting() {
+		return getSearchEntity();
 	}
 
 	protected Search getSearchEntity() {
@@ -180,7 +186,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			BaseHasResource resource;
 			resource = next;
 
-			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(next.getResourceType());
 			retVal.add(myJpaStorageResourceParser.toResource(resource, true));
 		}
 
@@ -238,7 +243,10 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	protected List<IBaseResource> doSearchOrEverything(final int theFromIndex, final int theToIndex) {
+	protected List<IBaseResource> doSearchOrEverything(
+			final int theFromIndex,
+			final int theToIndex,
+			@Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 		if (mySearchEntity.getTotalCount() != null && mySearchEntity.getNumFound() <= 0) {
 			// No resources to fetch (e.g. we did a _summary=count search)
 			return Collections.emptyList();
@@ -251,14 +259,24 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, resourceName, resourceType);
 
 		RequestPartitionId requestPartitionId = getRequestPartitionId();
-		final List<JpaPid> pidsSubList =
-				mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest, requestPartitionId);
-		return myTxService
+		// we request 1 more resource than we need
+		// this is so we can be sure of when we hit the last page
+		// (when doing offset searches)
+		final List<JpaPid> pidsSubList = mySearchCoordinatorSvc.getResources(
+				myUuid, theFromIndex, theToIndex + 1, myRequest, requestPartitionId);
+		// max list size should be either the entire list, or from - to length
+		int maxSize = Math.min(theToIndex - theFromIndex, pidsSubList.size());
+		theResponsePageBuilder.setTotalRequestedResourcesFetched(pidsSubList.size());
+
+		List<JpaPid> firstBatchOfPids = pidsSubList.subList(0, maxSize);
+		List<IBaseResource> resources = myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(requestPartitionId)
 				.execute(() -> {
-					return toResourceList(sb, pidsSubList);
+					return toResourceList(sb, firstBatchOfPids, theResponsePageBuilder);
 				});
+
+		return resources;
 	}
 
 	/**
@@ -351,7 +369,13 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	@Nonnull
 	@Override
-	public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
+	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+		return getResources(theFromIndex, theToIndex, new ResponsePage.ResponsePageBuilder());
+	}
+
+	@Override
+	public List<IBaseResource> getResources(
+			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 		boolean entityLoaded = ensureSearchEntityLoaded();
 		assert entityLoaded;
 		assert mySearchEntity != null;
@@ -366,7 +390,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			case SEARCH:
 			case EVERYTHING:
 			default:
-				List<IBaseResource> retVal = doSearchOrEverything(theFromIndex, theToIndex);
+				List<IBaseResource> retVal = doSearchOrEverything(theFromIndex, theToIndex, theResponsePageBuilder);
 				/*
 				 * If we got fewer resources back than we asked for, it's possible that the search
 				 * completed. If that's the case, the cached version of the search entity is probably
@@ -443,101 +467,94 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	// Note: Leave as protected, HSPC depends on this
 	@SuppressWarnings("WeakerAccess")
-	protected List<IBaseResource> toResourceList(ISearchBuilder theSearchBuilder, List<JpaPid> thePids) {
-
+	protected List<IBaseResource> toResourceList(
+			ISearchBuilder theSearchBuilder,
+			List<JpaPid> thePids,
+			ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 		List<JpaPid> includedPidList = new ArrayList<>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
 			Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
 
-			// Decide whether to perform include or revincludes first based on which one has iterate.
-			boolean performIncludesBeforeRevincludes = shouldPerformIncludesBeforeRevincudes();
-
-			if (performIncludesBeforeRevincludes) {
-				// Load _includes
-				Set<JpaPid> includedPids = theSearchBuilder.loadIncludes(
-						myContext,
-						myEntityManager,
-						thePids,
-						mySearchEntity.toIncludesList(),
-						false,
-						mySearchEntity.getLastUpdated(),
-						myUuid,
-						myRequest,
-						maxIncludes);
-				if (maxIncludes != null) {
-					maxIncludes -= includedPids.size();
-				}
-				thePids.addAll(includedPids);
-				includedPidList.addAll(includedPids);
-
-				// Load _revincludes
-				Set<JpaPid> revIncludedPids = theSearchBuilder.loadIncludes(
-						myContext,
-						myEntityManager,
-						thePids,
-						mySearchEntity.toRevIncludesList(),
-						true,
-						mySearchEntity.getLastUpdated(),
-						myUuid,
-						myRequest,
-						maxIncludes);
-				thePids.addAll(revIncludedPids);
-				includedPidList.addAll(revIncludedPids);
-			} else {
-				// Load _revincludes
-				Set<JpaPid> revIncludedPids = theSearchBuilder.loadIncludes(
-						myContext,
-						myEntityManager,
-						thePids,
-						mySearchEntity.toRevIncludesList(),
-						true,
-						mySearchEntity.getLastUpdated(),
-						myUuid,
-						myRequest,
-						maxIncludes);
-				if (maxIncludes != null) {
-					maxIncludes -= revIncludedPids.size();
-				}
-				thePids.addAll(revIncludedPids);
-				includedPidList.addAll(revIncludedPids);
-
-				// Load _includes
-				Set<JpaPid> includedPids = theSearchBuilder.loadIncludes(
-						myContext,
-						myEntityManager,
-						thePids,
-						mySearchEntity.toIncludesList(),
-						false,
-						mySearchEntity.getLastUpdated(),
-						myUuid,
-						myRequest,
-						maxIncludes);
-				thePids.addAll(includedPids);
-				includedPidList.addAll(includedPids);
+			// Load non-iterate _revincludes
+			Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(
+					myContext,
+					myEntityManager,
+					thePids,
+					mySearchEntity.toRevIncludesList(false),
+					true,
+					mySearchEntity.getLastUpdated(),
+					myUuid,
+					myRequest,
+					maxIncludes);
+			if (maxIncludes != null) {
+				maxIncludes -= nonIterateRevIncludedPids.size();
 			}
+			thePids.addAll(nonIterateRevIncludedPids);
+			includedPidList.addAll(nonIterateRevIncludedPids);
+
+			// Load non-iterate _includes
+			Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(
+					myContext,
+					myEntityManager,
+					thePids,
+					mySearchEntity.toIncludesList(false),
+					false,
+					mySearchEntity.getLastUpdated(),
+					myUuid,
+					myRequest,
+					maxIncludes);
+			if (maxIncludes != null) {
+				maxIncludes -= nonIterateIncludedPids.size();
+			}
+			thePids.addAll(nonIterateIncludedPids);
+			includedPidList.addAll(nonIterateIncludedPids);
+
+			// Load iterate _revinclude
+			Set<JpaPid> iterateRevIncludedPids = theSearchBuilder.loadIncludes(
+					myContext,
+					myEntityManager,
+					thePids,
+					mySearchEntity.toRevIncludesList(true),
+					true,
+					mySearchEntity.getLastUpdated(),
+					myUuid,
+					myRequest,
+					maxIncludes);
+			if (maxIncludes != null) {
+				maxIncludes -= iterateRevIncludedPids.size();
+			}
+			thePids.addAll(iterateRevIncludedPids);
+			includedPidList.addAll(iterateRevIncludedPids);
+
+			// Load iterate _includes
+			Set<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(
+					myContext,
+					myEntityManager,
+					thePids,
+					mySearchEntity.toIncludesList(true),
+					false,
+					mySearchEntity.getLastUpdated(),
+					myUuid,
+					myRequest,
+					maxIncludes);
+			thePids.addAll(iterateIncludedPids);
+			includedPidList.addAll(iterateIncludedPids);
 		}
 
 		// Execute the query and make sure we return distinct results
 		List<IBaseResource> resources = new ArrayList<>();
 		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false, myRequest);
 
+		// we will send the resource list to our interceptors
+		// this can (potentially) change the results being returned.
+		int precount = resources.size();
 		resources = ServerInterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
+		// we only care about omitted results from this page
+		theResponsePageBuilder.setOmittedResourceCount(precount - resources.size());
+		theResponsePageBuilder.setResources(resources);
+		theResponsePageBuilder.setIncludedResourceCount(includedPidList.size());
 
 		return resources;
-	}
-
-	private boolean shouldPerformIncludesBeforeRevincudes() {
-		// When revincludes contain a :iterate, we should perform them last so they can iterate through the includes
-		// found so far
-		boolean retval = false;
-
-		for (Include nextInclude : mySearchEntity.toRevIncludesList()) {
-			if (nextInclude.isRecurse()) {
-				retval = true;
-				break;
-			}
-		}
-		return retval;
 	}
 
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {

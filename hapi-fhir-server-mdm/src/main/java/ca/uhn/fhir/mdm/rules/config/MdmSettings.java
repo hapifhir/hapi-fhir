@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ public class MdmSettings implements IMdmSettings {
 	private boolean myPreventEidUpdates;
 	private String myGoldenResourcePartitionName;
 	private boolean mySearchAllPartitionForMatch = false;
+	private boolean myShouldAutoDeleteGoldenResources = true;
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
@@ -157,5 +158,15 @@ public class MdmSettings implements IMdmSettings {
 	@Override
 	public void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch) {
 		mySearchAllPartitionForMatch = theSearchAllPartitionForMatch;
+	}
+
+	@Override
+	public boolean isAutoExpungeGoldenResources() {
+		return myShouldAutoDeleteGoldenResources;
+	}
+
+	@Override
+	public void setAutoExpungeGoldenResources(boolean theShouldAutoExpunge) {
+		myShouldAutoDeleteGoldenResources = theShouldAutoExpunge;
 	}
 }

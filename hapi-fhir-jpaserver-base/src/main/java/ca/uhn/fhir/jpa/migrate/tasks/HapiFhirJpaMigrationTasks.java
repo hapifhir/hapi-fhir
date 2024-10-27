@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,16 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
+import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationCopyTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationFixTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
+import ca.uhn.fhir.jpa.migrate.tasks.api.ColumnAndNullable;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -44,6 +49,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
+import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,6 +67,28 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
 	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS =
 			new DriverTypeEnum[] {DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012};
+	private static final String QUERY_FOR_COLUMN_COLLATION_TEMPLATE = "WITH defcoll AS (\n"
+			+ "	SELECT datcollate AS coll\n"
+			+ "	FROM pg_database\n"
+			+ "	WHERE datname = current_database())\n"
+			+ ", collation_by_column AS (\n"
+			+ "	SELECT a.attname,\n"
+			+ "		CASE WHEN c.collname = 'default'\n"
+			+ "			THEN defcoll.coll\n"
+			+ "			ELSE c.collname\n"
+			+ "		END AS my_collation\n"
+			+ "	FROM pg_attribute AS a\n"
+			+ "		CROSS JOIN defcoll\n"
+			+ "		LEFT JOIN pg_collation AS c ON a.attcollation = c.oid\n"
+			+ "	WHERE a.attrelid = '%s'::regclass\n"
+			+ "		AND a.attnum > 0\n"
+			+ "		AND attname = '%s'\n"
+			+ ")\n"
+			+ "SELECT TRUE as result\n"
+			+ "FROM collation_by_column\n"
+			+ "WHERE EXISTS (SELECT 1\n"
+			+ "	FROM collation_by_column\n"
+			+ "	WHERE my_collation != 'C')";
 	private final Set<FlagEnum> myFlags;
 
 	/**
@@ -93,11 +121,712 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init640_after_20230126();
 		init660();
 		init680();
+		init680_Part2();
+		init700();
+		init720();
+		init740();
+		init780();
+	}
+
+	protected void init780() {
+		final Builder version = forVersion(VersionEnum.V7_8_0);
+
+		version.onTable("NPM_PACKAGE_VER")
+				.addColumn("20241023.10", "PKG_AUTHOR")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 512);
+		version.onTable("NPM_PACKAGE_VER")
+				.addColumn("20241023.20", "AUTHOR_UPPER")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 512);
+		version.onTable("NPM_PACKAGE_VER")
+				.modifyColumn("20241023.30", "PKG_DESC")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 512);
+		version.onTable("NPM_PACKAGE_VER")
+				.modifyColumn("20241023.40", "DESC_UPPER")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 512);
+
+		version.onTable("NPM_PACKAGE")
+				.modifyColumn("20241023.50", "PACKAGE_DESC")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 512);
+	}
+
+	protected void init740() {
+		// Start of migrations from 7.2 to 7.4
+
+		final Builder version = forVersion(VersionEnum.V7_4_0);
+
+		{
+			version.onTable("HFJ_RES_SEARCH_URL")
+					.addForeignKey("20240515.1", "FK_RES_SEARCH_URL_RESOURCE")
+					.toColumn("RES_ID")
+					.references("HFJ_RESOURCE", "RES_ID");
+		}
+
+		/*
+		 * Make a bunch of columns non-nullable. Note that we won't actually apply this migration
+		 * on the live system as it would take a loooooong time to execute these on heavily loaded
+		 * databases.
+		 */
+		// Skipping numbers 20240601.1 and 20240601.2 as they were found to not
+		// be needed during code review.
+		version.onTable("HFJ_RESOURCE")
+				.modifyColumn("20240601.3", "SP_HAS_LINKS")
+				.nonNullable()
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("HFJ_RESOURCE")
+				.modifyColumn("20240601.4", "SP_COORDS_PRESENT")
+				.nonNullable()
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("HFJ_RESOURCE")
+				.modifyColumn("20240601.5", "SP_DATE_PRESENT")
+				.nonNullable()
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("HFJ_RESOURCE")
+				.modifyColumn("20240601.6", "SP_NUMBER_PRESENT")
+				.nonNullable()
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("HFJ_RESOURCE")
+				.modifyColumn("20240601.7", "SP_QUANTITY_PRESENT")
+				.nonNullable()
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("HFJ_RESOURCE")
+				.modifyColumn("20240601.8", "SP_QUANTITY_NRML_PRESENT")
+				.nonNullable()
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("HFJ_RESOURCE")
+				.modifyColumn("20240601.9", "SP_STRING_PRESENT")
+				.nonNullable()
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("HFJ_RESOURCE")
+				.modifyColumn("20240601.10", "SP_TOKEN_PRESENT")
+				.nonNullable()
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("HFJ_RESOURCE")
+				.modifyColumn("20240601.11", "SP_URI_PRESENT")
+				.nonNullable()
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("HFJ_RESOURCE")
+				.modifyColumn("20240601.12", "RES_VER")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("TRM_CONCEPT")
+				.modifyColumn("20240601.13", "CODESYSTEM_PID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("BT2_JOB_INSTANCE")
+				.modifyColumn("20240601.14", "PROGRESS_PCT")
+				.nonNullable()
+				.withType(ColumnTypeEnum.DOUBLE)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("BT2_JOB_INSTANCE")
+				.modifyColumn("20240601.15", "ERROR_COUNT")
+				.nonNullable()
+				.withType(ColumnTypeEnum.INT)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+		version.onTable("HFJ_BINARY_STORAGE_BLOB")
+				.modifyColumn("20240601.16", "BLOB_SIZE")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.heavyweightSkipByDefault()
+				.failureAllowed();
+
+		/*
+		 * Add RES_ID to two indexes on HFJ_RES_VER which support history operations.
+		 * This makes server and type level _history work properly on large databases
+		 * on postgres. These are both marked as heavyweightSkipByDefault because the
+		 * necessary reindexing would be very expensive for a rarely used FHIR feature.
+		 */
+		version.onTable("HFJ_RES_VER")
+				.dropIndex("20240601.17", "IDX_RESVER_TYPE_DATE")
+				.heavyweightSkipByDefault();
+		version.onTable("HFJ_RES_VER")
+				.addIndex("20240601.18", "IDX_RESVER_TYPE_DATE")
+				.unique(false)
+				.withColumns("RES_TYPE", "RES_UPDATED", "RES_ID")
+				.heavyweightSkipByDefault();
+		version.onTable("HFJ_RES_VER")
+				.dropIndex("20240601.19", "IDX_RESVER_DATE")
+				.heavyweightSkipByDefault();
+		version.onTable("HFJ_RES_VER")
+				.addIndex("20240601.20", "IDX_RESVER_DATE")
+				.unique(false)
+				.withColumns("RES_UPDATED", "RES_ID")
+				.heavyweightSkipByDefault();
+
+		// Allow null values in SP_NAME, RES_TYPE columns for all HFJ_SPIDX_* tables. These are marked as failure
+		// allowed, since SQL Server won't let us change nullability on columns with indexes pointing to them.
+		{
+			Builder.BuilderWithTableName spidxCoords = version.onTable("HFJ_SPIDX_COORDS");
+			spidxCoords
+					.modifyColumn("20240617.1", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxCoords
+					.modifyColumn("20240617.2", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+			spidxDate
+					.modifyColumn("20240617.3", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxDate
+					.modifyColumn("20240617.4", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxNumber = version.onTable("HFJ_SPIDX_NUMBER");
+			spidxNumber
+					.modifyColumn("20240617.5", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxNumber
+					.modifyColumn("20240617.6", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxQuantity = version.onTable("HFJ_SPIDX_QUANTITY");
+			spidxQuantity
+					.modifyColumn("20240617.7", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxQuantity
+					.modifyColumn("20240617.8", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxQuantityNorm = version.onTable("HFJ_SPIDX_QUANTITY_NRML");
+			spidxQuantityNorm
+					.modifyColumn("20240617.9", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxQuantityNorm
+					.modifyColumn("20240617.10", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxString = version.onTable("HFJ_SPIDX_STRING");
+			spidxString
+					.modifyColumn("20240617.11", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxString
+					.modifyColumn("20240617.12", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxToken = version.onTable("HFJ_SPIDX_TOKEN");
+			spidxToken
+					.modifyColumn("20240617.13", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxToken
+					.modifyColumn("20240617.14", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxUri = version.onTable("HFJ_SPIDX_URI");
+			spidxUri.modifyColumn("20240617.15", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxUri.modifyColumn("20240617.16", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			{
+				// Please see https://github.com/hapifhir/hapi-fhir/issues/6033 for why we're doing this
+				version.onTable("HFJ_RES_SEARCH_URL")
+						.addColumn("20240618.2", "PARTITION_ID", -1)
+						.nullable()
+						.type(ColumnTypeEnum.INT);
+
+				version.onTable("HFJ_RES_SEARCH_URL")
+						.addColumn("20240618.3", "PARTITION_DATE")
+						.nullable()
+						.type(ColumnTypeEnum.DATE_ONLY);
+
+				version.executeRawSql("20240618.4", "UPDATE HFJ_RES_SEARCH_URL SET PARTITION_ID = -1");
+
+				version.onTable("HFJ_RES_SEARCH_URL")
+						.modifyColumn("20240618.5", "PARTITION_ID")
+						.nonNullable()
+						.withType(ColumnTypeEnum.INT);
+
+				version.onTable("HFJ_RES_SEARCH_URL").dropPrimaryKey("20240618.6");
+
+				version.onTable("HFJ_RES_SEARCH_URL").addPrimaryKey("20240618.7", "RES_SEARCH_URL", "PARTITION_ID");
+			}
+		}
+
+		{
+			// Note that these are recreations of a previous migration from 6.6.0. The original migration had these set
+			// as unique,
+			// which causes SQL Server to create a filtered index. See
+			// https://www.sqlshack.com/introduction-to-sql-server-filtered-indexes/
+			// What this means for hibernate search is that for any column that is nullable, the SQLServerDialect will
+			// omit the whole row from the index if
+			// the value of the nullable column is actually null. Removing the uniqueness constraint works around this
+			// problem.
+			Builder.BuilderWithTableName uriTable = version.onTable("HFJ_SPIDX_URI");
+
+			uriTable.dropIndex("20240620.10", "IDX_SP_URI_HASH_URI_V2");
+			uriTable.dropIndex("20240620.20", "IDX_SP_URI_HASH_IDENTITY_V2");
+
+			uriTable.addIndex("20240620.30", "IDX_SP_URI_HASH_URI_V2")
+					.unique(false)
+					.online(true)
+					.withPossibleNullableColumns(
+							new ColumnAndNullable("HASH_URI", true),
+							new ColumnAndNullable("RES_ID", false),
+							new ColumnAndNullable("PARTITION_ID", true));
+			uriTable.addIndex("20240620.40", "IDX_SP_URI_HASH_IDENTITY_V2")
+					.unique(false)
+					.online(true)
+					.withPossibleNullableColumns(
+							new ColumnAndNullable("HASH_IDENTITY", true),
+							new ColumnAndNullable("SP_URI", true),
+							new ColumnAndNullable("RES_ID", false),
+							new ColumnAndNullable("PARTITION_ID", true));
+		}
+
+		/*
+		 * Add hash columns to the combo param index tables
+		 */
+		{
+			version.onTable("HFJ_IDX_CMB_TOK_NU")
+					.addIndex("20240625.10", "IDX_IDXCMBTOKNU_HASHC")
+					.unique(false)
+					.online(true)
+					.withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
+			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+					.addColumn("20240625.20", "HASH_COMPLETE")
+					.nullable()
+					.type(ColumnTypeEnum.LONG);
+			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+					.addColumn("20240625.30", "HASH_COMPLETE_2")
+					.nullable()
+					.type(ColumnTypeEnum.LONG);
+			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+					.addTask(
+							new CalculateHashesTask(VersionEnum.V7_4_0, "20240625.40") {
+								@Override
+								protected boolean shouldSkipTask() {
+									return false;
+								}
+							}.setPidColumnName("PID")
+									.addCalculator(
+											"HASH_COMPLETE",
+											t -> ResourceIndexedComboStringUnique.calculateHashComplete(
+													t.getString("IDX_STRING")))
+									.addCalculator(
+											"HASH_COMPLETE_2",
+											t -> ResourceIndexedComboStringUnique.calculateHashComplete2(
+													t.getString("IDX_STRING")))
+									.setColumnName("HASH_COMPLETE"));
+
+			{
+				version.onTable("TRM_CONCEPT_DESIG")
+						.modifyColumn("20240705.10", "VAL")
+						.nullable()
+						.withType(ColumnTypeEnum.STRING, 2000);
+
+				version.onTable("TRM_CONCEPT_DESIG")
+						.addColumn("20240705.20", "VAL_VC")
+						.nullable()
+						.type(ColumnTypeEnum.TEXT);
+			}
+			{ // These migrations permit much longer values to be stored in SPIDX_TOKEN and SPIDX_STRING value
+				Builder.BuilderWithTableName spidxString = version.onTable("HFJ_SPIDX_STRING");
+				// components.
+				// This is mostly helpful for `:contains` searches on long values, since exact searches use the hash
+				// anyhow.
+				spidxString
+						.modifyColumn("20240708.10", "SP_VALUE_EXACT")
+						.nullable()
+						.withType(ColumnTypeEnum.STRING, 768)
+						.failureAllowed();
+				spidxString
+						.modifyColumn("20240708.20", "SP_VALUE_NORMALIZED")
+						.nullable()
+						.withType(ColumnTypeEnum.STRING, 768)
+						.failureAllowed();
+			}
+		}
+
+		{
+			// Add target resource partition id/date columns to resource link
+			Builder.BuilderWithTableName resourceLinkTable = version.onTable("HFJ_RES_LINK");
+
+			resourceLinkTable
+					.addColumn("20240718.10", "TARGET_RES_PARTITION_ID")
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+			resourceLinkTable
+					.addColumn("20240718.20", "TARGET_RES_PARTITION_DATE")
+					.nullable()
+					.type(ColumnTypeEnum.DATE_ONLY);
+		}
+
+		{
+			version.onTable(Search.HFJ_SEARCH)
+					.modifyColumn("20240722.1", Search.SEARCH_UUID)
+					.nonNullable()
+					.withType(ColumnTypeEnum.STRING, 48);
+		}
+
+		{
+			final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+
+			@Language(("SQL"))
+			final String onlyIfSql = "SELECT CASE CHARINDEX('_CI_', COLLATION_NAME) WHEN 0 THEN 0 ELSE 1 END "
+					+ "FROM INFORMATION_SCHEMA.COLUMNS "
+					+ "WHERE TABLE_SCHEMA = SCHEMA_NAME() "
+					+ "AND TABLE_NAME = 'HFJ_RESOURCE' "
+					+ "AND COLUMN_NAME = 'FHIR_ID' ";
+			final String onlyfIReason =
+					"Skipping change to HFJ_RESOURCE.FHIR_ID collation to SQL_Latin1_General_CP1_CS_AS because it is already using it";
+
+			hfjResource
+					.dropIndex("20240724.10", "IDX_RES_FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			hfjResource
+					.dropIndex("20240724.20", "IDX_RES_TYPE_FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			version.executeRawSql(
+							"20240724.30",
+							"ALTER TABLE HFJ_RESOURCE ALTER COLUMN FHIR_ID varchar(64) COLLATE SQL_Latin1_General_CP1_CS_AS")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			hfjResource
+					.addIndex("20240724.40", "IDX_RES_FHIR_ID")
+					.unique(false)
+					.online(true)
+					.withColumns("FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			hfjResource
+					.addIndex("20240724.50", "IDX_RES_TYPE_FHIR_ID")
+					.unique(true)
+					.online(true)
+					// include res_id and our deleted flag so we can satisfy Observation?_sort=_id from the index on
+					// platforms that support it.
+					.includeColumns("RES_ID, RES_DELETED_AT")
+					.withColumns("RES_TYPE", "FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.onlyIf(onlyIfSql, onlyfIReason);
+		}
+	}
+
+	protected void init720() {
+		// Start of migrations from 7.0 to 7.2
+
+		Builder version = forVersion(VersionEnum.V7_2_0);
+
+		// allow null codes in concept map targets (see comment on "20190722.27" if you are going to change this)
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+				.modifyColumn("20240327.1", "TARGET_CODE")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 500);
+
+		// Stop writing to hfj_forced_id https://github.com/hapifhir/hapi-fhir/pull/5817
+		Builder.BuilderWithTableName forcedId = version.onTable("HFJ_FORCED_ID");
+		forcedId.dropForeignKey("20240402.1", "FK_FORCEDID_RESOURCE", "HFJ_RESOURCE");
+		forcedId.dropIndex("20240402.2", "IDX_FORCEDID_RESID");
+		forcedId.dropIndex("20240402.3", "IDX_FORCEDID_TYPE_FID");
+		forcedId.dropIndex("20240402.4", "IDX_FORCEID_FID");
+
+		// Migration from LOB
+		{
+			Builder.BuilderWithTableName binaryStorageBlobTable = version.onTable("HFJ_BINARY_STORAGE_BLOB");
+
+			binaryStorageBlobTable
+					.renameColumn("20240404.1", "BLOB_ID", "CONTENT_ID")
+					.getLastAddedTask()
+					.ifPresent(t -> t.addFlag(TaskFlagEnum.DO_NOTHING));
+			binaryStorageBlobTable
+					.renameColumn("20240404.2", "BLOB_SIZE", "CONTENT_SIZE")
+					.getLastAddedTask()
+					.ifPresent(t -> t.addFlag(TaskFlagEnum.DO_NOTHING));
+			binaryStorageBlobTable
+					.renameColumn("20240404.3", "BLOB_HASH", "CONTENT_HASH")
+					.getLastAddedTask()
+					.ifPresent(t -> t.addFlag(TaskFlagEnum.DO_NOTHING));
+
+			binaryStorageBlobTable
+					.modifyColumn("20240404.4", "BLOB_DATA")
+					.nullable()
+					.withType(ColumnTypeEnum.BLOB);
+
+			binaryStorageBlobTable
+					.addColumn("20240404.5", "STORAGE_CONTENT_BIN")
+					.nullable()
+					.type(ColumnTypeEnum.BINARY);
+
+			binaryStorageBlobTable
+					.migrateBlobToBinary("20240404.6", "BLOB_DATA", "STORAGE_CONTENT_BIN")
+					.doNothing();
+
+			binaryStorageBlobTable
+					.renameTable("20240404.7", "HFJ_BINARY_STORAGE")
+					.doNothing();
+
+			Builder.BuilderWithTableName binaryStorageTableFix = version.onTable("HFJ_BINARY_STORAGE");
+
+			binaryStorageTableFix.renameColumn("20240404.10", "CONTENT_ID", "BLOB_ID", true, true);
+			binaryStorageTableFix.renameColumn("20240404.20", "CONTENT_SIZE", "BLOB_SIZE", true, true);
+			binaryStorageTableFix.renameColumn("20240404.30", "CONTENT_HASH", "BLOB_HASH", true, true);
+
+			binaryStorageTableFix
+					.renameTable("20240404.40", "HFJ_BINARY_STORAGE_BLOB")
+					.failureAllowed();
+		}
+
+		{
+			Builder.BuilderWithTableName termConceptPropertyTable = version.onTable("TRM_CONCEPT_PROPERTY");
+
+			termConceptPropertyTable
+					.addColumn("20240409.1", "PROP_VAL_BIN")
+					.nullable()
+					.type(ColumnTypeEnum.BINARY);
+
+			termConceptPropertyTable
+					.migrateBlobToBinary("20240409.2", "PROP_VAL_LOB", "PROP_VAL_BIN")
+					.doNothing();
+		}
+
+		{
+			Builder.BuilderWithTableName termValueSetConceptTable = version.onTable("TRM_VALUESET_CONCEPT");
+			termValueSetConceptTable
+					.addColumn("20240409.3", "SOURCE_DIRECT_PARENT_PIDS_VC")
+					.nullable()
+					.type(ColumnTypeEnum.TEXT);
+
+			termValueSetConceptTable
+					.migrateClobToText("20240409.4", "SOURCE_DIRECT_PARENT_PIDS", "SOURCE_DIRECT_PARENT_PIDS_VC")
+					.doNothing();
+		}
+
+		{
+			Builder.BuilderWithTableName termConceptTable = version.onTable("TRM_CONCEPT");
+			termConceptTable
+					.addColumn("20240410.1", "PARENT_PIDS_VC")
+					.nullable()
+					.type(ColumnTypeEnum.TEXT);
+
+			termConceptTable
+					.migrateClobToText("20240410.2", "PARENT_PIDS", "PARENT_PIDS_VC")
+					.doNothing();
+		}
+	}
+
+	protected void init700() {
+		/* ************************************************
+		 * Start of 6.10 migrations
+		 *********************************************** */
+
+		Builder version = forVersion(VersionEnum.V7_0_0);
+
+		// new indices on MdmLink
+		Builder.BuilderWithTableName mdmLinkTable = version.onTable("MPI_LINK");
+
+		mdmLinkTable
+				.addIndex("20230911.1", "IDX_EMPI_TGT_MR_LS")
+				.unique(false)
+				.online(true)
+				.withColumns("TARGET_TYPE", "MATCH_RESULT", "LINK_SOURCE");
+		mdmLinkTable
+				.addIndex("20230911.2", "IDX_EMPi_TGT_MR_SCore")
+				.unique(false)
+				.online(true)
+				.withColumns("TARGET_TYPE", "MATCH_RESULT", "SCORE");
+
+		// Move forced_id constraints to hfj_resource and the new fhir_id column
+		// Note: we leave the HFJ_FORCED_ID.IDX_FORCEDID_TYPE_FID index in place to support old writers for a while.
+		version.addTask(
+				new ForceIdMigrationCopyTask(version.getRelease(), "20231018.1").addFlag(TaskFlagEnum.DO_NOTHING));
+
+		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+		// commented out to make numeric space for the fix task below.
+		// This constraint can't be enabled until the column is fully populated, and the shipped version of 20231018.1
+		// was broken.
+		// hfjResource.modifyColumn("20231018.2", "FHIR_ID").nonNullable();
+
+		// this was inserted after the release.
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231018.3"));
+
+		// added back in place of 20231018.2.  If 20231018.2 already ran, this is a no-op.
+		hfjResource.modifyColumn("20231018.4", "FHIR_ID").nonNullable();
+
+		hfjResource.dropIndex("20231027.1", "IDX_RES_FHIR_ID");
+		hfjResource
+				.addIndex("20231027.2", "IDX_RES_TYPE_FHIR_ID")
+				.unique(true)
+				.online(true)
+				// include res_id and our deleted flag so we can satisfy Observation?_sort=_id from the index on
+				// platforms that support it.
+				.includeColumns("RES_ID, RES_DELETED_AT")
+				.withColumns("RES_TYPE", "FHIR_ID");
+
+		// For resolving references that don't supply the type.
+		hfjResource
+				.addIndex("20231027.3", "IDX_RES_FHIR_ID")
+				.unique(false)
+				.online(true)
+				.withColumns("FHIR_ID");
+
+		Builder.BuilderWithTableName batch2JobInstanceTable = version.onTable("BT2_JOB_INSTANCE");
+
+		batch2JobInstanceTable.addColumn("20231128.1", "USER_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
+
+		batch2JobInstanceTable.addColumn("20231128.2", "CLIENT_ID").nullable().type(ColumnTypeEnum.STRING, 200);
+
+		{
+			version.executeRawSql(
+							"20231212.1",
+							"CREATE INDEX CONCURRENTLY idx_sp_string_hash_nrm_pattern_ops ON hfj_spidx_string USING btree (hash_norm_prefix, sp_value_normalized varchar_pattern_ops, res_id, partition_id)")
+					.setTransactional(false)
+					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
+					.onlyIf(
+							String.format(
+									QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
+									"HFJ_SPIDX_STRING".toLowerCase(),
+									"SP_VALUE_NORMALIZED".toLowerCase()),
+							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing")
+					.onlyIf(
+							"SELECT NOT EXISTS(select 1 from pg_indexes where indexname='idx_sp_string_hash_nrm_pattern_ops')",
+							"Index idx_sp_string_hash_nrm_pattern_ops already exists");
+			version.executeRawSql(
+							"20231212.2",
+							"CREATE UNIQUE INDEX CONCURRENTLY idx_sp_uri_hash_identity_pattern_ops ON hfj_spidx_uri USING btree (hash_identity, sp_uri varchar_pattern_ops, res_id, partition_id)")
+					.setTransactional(false)
+					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
+					.onlyIf(
+							String.format(
+									QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
+									"HFJ_SPIDX_URI".toLowerCase(),
+									"SP_URI".toLowerCase()),
+							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing")
+					.onlyIf(
+							"SELECT NOT EXISTS(select 1 from pg_indexes where indexname='idx_sp_uri_hash_identity_pattern_ops')",
+							"Index idx_sp_uri_hash_identity_pattern_ops already exists.");
+		}
+
+		// This fix was bad for MSSQL, it has been set to do nothing.
+		version.addTask(
+				new ForceIdMigrationFixTask(version.getRelease(), "20231213.1").addFlag(TaskFlagEnum.DO_NOTHING));
+
+		// This fix will work for MSSQL or Oracle.
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231222.1"));
+
+		// add index to Batch2WorkChunkEntity
+		Builder.BuilderWithTableName workChunkTable = version.onTable("BT2_WORK_CHUNK");
+
+		workChunkTable
+				.addIndex("20240321.1", "IDX_BT2WC_II_SI_S_SEQ_ID")
+				.unique(false)
+				.withColumns("INSTANCE_ID", "TGT_STEP_ID", "STAT", "SEQ", "ID");
+
+		// add columns to Batch2WorkChunkEntity
+		Builder.BuilderWithTableName batch2WorkChunkTable = version.onTable("BT2_WORK_CHUNK");
+
+		batch2WorkChunkTable
+				.addColumn("20240322.1", "NEXT_POLL_TIME")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batch2WorkChunkTable.addColumn("20240322.2", "POLL_ATTEMPTS").nullable().type(ColumnTypeEnum.INT);
+	}
+
+	private void init680_Part2() {
+		Builder version = forVersion(VersionEnum.V6_8_0);
+
+		// Add additional LOB migration columns
+		version.onTable("BT2_JOB_INSTANCE")
+				.addColumn("20240227.1", "REPORT_VC")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+		version.onTable("BT2_JOB_INSTANCE")
+				.addColumn("20240227.2", "PARAMS_JSON_VC")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+
+		version.onTable("BT2_WORK_CHUNK")
+				.addColumn("20240227.3", "CHUNK_DATA_VC")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+
+		version.onTable("HFJ_SEARCH")
+				.addColumn("20240227.4", "SEARCH_QUERY_STRING_VC")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+		version.onTable("HFJ_SEARCH")
+				.addColumn("20240227.5", "SEARCH_PARAM_MAP_BIN")
+				.nullable()
+				.type(ColumnTypeEnum.BINARY);
+
+		version.onTable("HFJ_BLK_IMPORT_JOBFILE")
+				.addColumn("20240227.6", "JOB_CONTENTS_VC")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+
+		version.onTable("HFJ_BLK_IMPORT_JOBFILE")
+				.modifyColumn("20240227.7", "JOB_CONTENTS")
+				.nullable()
+				.withType(ColumnTypeEnum.BLOB);
 	}
 
 	protected void init680() {
 		Builder version = forVersion(VersionEnum.V6_8_0);
-
 		// HAPI-FHIR #4801 - Add New Index On HFJ_RESOURCE
 		Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
 
@@ -126,8 +855,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.withColumns("RES_VER_PID")
 				.failureAllowed();
 
+		// drop the index for any database that has RES_PID column already indexed from previous migrations
 		version.onTable("HFJ_RES_VER_PROV")
-				.addIndex("20230510.2", "IDX_RESVERPROV_RES_PID")
+				.dropIndex("20230510.2", "FK_RESVERPROV_RES_PID")
+				.failureAllowed();
+
+		version.onTable("HFJ_RES_VER_PROV")
+				.addIndex("20230510.3", "IDX_RESVERPROV_RES_PID")
 				.unique(false)
 				.withColumns("RES_PID");
 
@@ -335,7 +1069,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable(Search.HFJ_SEARCH)
 				.addColumn("20230215.1", Search.SEARCH_UUID)
 				.nullable()
-				.type(ColumnTypeEnum.STRING, Search.SEARCH_UUID_COLUMN_LENGTH);
+				.type(ColumnTypeEnum.STRING, 48)
+				.doNothing(); // This migration used add instead of modify, so was skipped.  See 20240722 for modify.
 		version.onTable(BulkImportJobEntity.HFJ_BLK_IMPORT_JOB)
 				.addColumn("20230215.2", BulkImportJobEntity.JOB_ID)
 				.nullable()
@@ -433,6 +1168,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		}
 
 		{
+			Builder.BuilderAddTableByColumns resourceModifiedTable =
+					version.addTableByColumns("20230315.1", "HFJ_RESOURCE_MODIFIED", "RES_ID", "RES_VER");
+			resourceModifiedTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.STRING, 256);
+			resourceModifiedTable.addColumn("RES_VER").nonNullable().type(ColumnTypeEnum.STRING, 8);
+			resourceModifiedTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+			resourceModifiedTable.addColumn("SUMMARY_MESSAGE").nonNullable().type(ColumnTypeEnum.STRING, 4000);
+			resourceModifiedTable.addColumn("RESOURCE_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 40);
+		}
+
+		{
 			// The pre-release already contains the long version of this column
 			// We do this becausea doing a modifyColumn on Postgres (and possibly other RDBMS's) will fail with a nasty
 			// error:
@@ -497,11 +1242,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.executeRawSqls("20230402.1", Map.of(DriverTypeEnum.POSTGRES_9_4, postgresTuningStatements));
 
 		// Use an unlimited length text column for RES_TEXT_VC
+		// N.B. This will FAIL SILENTLY on Oracle due to the fact that Oracle does not support an ALTER TABLE from
+		// VARCHAR to
+		// CLOB.  Because of failureAllowed() this won't halt the migration
 		version.onTable("HFJ_RES_VER")
 				.modifyColumn("20230421.1", "RES_TEXT_VC")
 				.nullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.TEXT);
+				.withType(ColumnTypeEnum.TEXT)
+				.failureAllowed();
 
 		{
 			// add hash_norm to res_id to speed up joins on a second string.
@@ -590,6 +1338,48 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addColumn("20230110.2", "UPDATE_TIME")
 				.nullable()
 				.type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+		Map<DriverTypeEnum, String> updateBatch2JobInstance = new HashMap<>();
+		updateBatch2JobInstance.put(
+				DriverTypeEnum.H2_EMBEDDED,
+				"update BT2_JOB_INSTANCE set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2JobInstance.put(
+				DriverTypeEnum.MARIADB_10_1,
+				"update BT2_JOB_INSTANCE set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2JobInstance.put(
+				DriverTypeEnum.MYSQL_5_7,
+				"update BT2_JOB_INSTANCE set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2JobInstance.put(
+				DriverTypeEnum.ORACLE_12C,
+				"update BT2_JOB_INSTANCE set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2JobInstance.put(
+				DriverTypeEnum.POSTGRES_9_4,
+				"update BT2_JOB_INSTANCE set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2JobInstance.put(
+				DriverTypeEnum.MSSQL_2012,
+				"update BT2_JOB_INSTANCE set UPDATE_TIME = coalesce(end_time, start_time, create_time, CONVERT(DATETIME,'2023-01-01 00:00:00')) where UPDATE_TIME is null");
+		version.executeRawSql("20230397.1", updateBatch2JobInstance);
+
+		Map<DriverTypeEnum, String> updateBatch2WorkChunk = new HashMap<>();
+		updateBatch2WorkChunk.put(
+				DriverTypeEnum.H2_EMBEDDED,
+				"update bt2_work_chunk set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2WorkChunk.put(
+				DriverTypeEnum.MARIADB_10_1,
+				"update bt2_work_chunk set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2WorkChunk.put(
+				DriverTypeEnum.MYSQL_5_7,
+				"update bt2_work_chunk set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2WorkChunk.put(
+				DriverTypeEnum.ORACLE_12C,
+				"update bt2_work_chunk set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2WorkChunk.put(
+				DriverTypeEnum.POSTGRES_9_4,
+				"update bt2_work_chunk set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2WorkChunk.put(
+				DriverTypeEnum.MSSQL_2012,
+				"update bt2_work_chunk set UPDATE_TIME = coalesce(end_time, start_time, create_time, CONVERT(DATETIME,'2023-01-01 00:00:00')) where UPDATE_TIME is null");
+		version.executeRawSql("20230397.2", updateBatch2WorkChunk);
 	}
 
 	private void init610() {
@@ -924,27 +1714,34 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			// Ugh.  Only oracle supports using IDX_TAG_DEF_TP_CD_SYS to enforce this constraint.  The others will
 			// create another index.
 			// For Sql Server, should change the index to be unique with include columns.  Do this in 6.1
-			tagTable.dropIndex("20220429.8", "IDX_TAGDEF_TYPESYSCODE");
-			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
-			addTagDefConstraint.put(
-					DriverTypeEnum.H2_EMBEDDED,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.MARIADB_10_1,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.MSSQL_2012,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.MYSQL_5_7,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.ORACLE_12C,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.POSTGRES_9_4,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			version.executeRawSql("20220429.9", addTagDefConstraint);
+			//			tagTable.dropIndex("20220429.8", "IDX_TAGDEF_TYPESYSCODE");
+			//			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.H2_EMBEDDED,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.MARIADB_10_1,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.MSSQL_2012,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.MYSQL_5_7,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.ORACLE_12C,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.POSTGRES_9_4,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			version.executeRawSql("20220429.9", addTagDefConstraint);
+			version.addNop("20220429.9");
 		}
 
 		// Fix for https://github.com/hapifhir/hapi-fhir-jpaserver-starter/issues/328
@@ -1162,9 +1959,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addIndex("20211210.4", "FK_FORCEDID_RESOURCE")
 				.unique(true)
 				.withColumns("RESOURCE_PID")
-				.doNothing() // This migration was added in error, as this table already has a unique constraint on
 				// RESOURCE_PID and every database creates an index on anything that is unique.
-				.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+				.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS)
+				.doNothing(); // This migration was added in error, as this table already has a unique constraint on
 	}
 
 	private void init570() {
@@ -1388,8 +2185,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RES_LINK")
 				.modifyColumn("20210505.1", "SRC_PATH")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 500);
+				.withType(ColumnTypeEnum.STRING, 500)
+				.failureAllowed();
 	}
 
 	private void init530() {
@@ -1439,18 +2236,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName nrmlTable = version.onTable("HFJ_SPIDX_QUANTITY_NRML");
 		nrmlTable.addColumn("20210111.1", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
 		nrmlTable.addColumn("20210111.2", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
-		// - The fk name is generated from Hibernate, have to use this name here
+		// Disabled - superceded by 20220304.33
 		nrmlTable
 				.addForeignKey("20210111.3", "FKRCJOVMUH5KC0O6FVBLE319PYV")
 				.toColumn("RES_ID")
-				.references("HFJ_RESOURCE", "RES_ID");
+				.references("HFJ_RESOURCE", "RES_ID")
+				.doNothing();
 
 		Builder.BuilderWithTableName quantityTable = version.onTable("HFJ_SPIDX_QUANTITY");
 		quantityTable
 				.modifyColumn("20210116.1", "SP_VALUE")
 				.nullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.DOUBLE);
+				.withType(ColumnTypeEnum.DOUBLE)
+				.failureAllowed();
 
 		// HFJ_RES_LINK
 		version.onTable("HFJ_RES_LINK")
@@ -1647,8 +2445,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RES_VER")
 				.modifyColumn("20200220.1", "RES_ID")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 		//
 
 		// Drop unused column
@@ -1804,38 +2602,38 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SPIDX_STRING")
 				.modifyColumn("20200420.36", "SP_MISSING")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.BOOLEAN);
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_COORDS")
 				.modifyColumn("20200420.37", "SP_MISSING")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.BOOLEAN);
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_NUMBER")
 				.modifyColumn("20200420.38", "SP_MISSING")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.BOOLEAN);
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_TOKEN")
 				.modifyColumn("20200420.39", "SP_MISSING")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.BOOLEAN);
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_DATE")
 				.modifyColumn("20200420.40", "SP_MISSING")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.BOOLEAN);
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_URI")
 				.modifyColumn("20200420.41", "SP_MISSING")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.BOOLEAN);
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_QUANTITY")
 				.modifyColumn("20200420.42", "SP_MISSING")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.BOOLEAN);
+				.withType(ColumnTypeEnum.BOOLEAN)
+				.failureAllowed();
 
 		// Add support for integer comparisons during day-precision date search.
 		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
@@ -1945,38 +2743,38 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SPIDX_NUMBER")
 				.modifyColumn("20190920.1", "RES_ID")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_COORDS")
 				.modifyColumn("20190920.2", "RES_ID")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_TOKEN")
 				.modifyColumn("20190920.3", "RES_ID")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_STRING")
 				.modifyColumn("20190920.4", "RES_ID")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_DATE")
 				.modifyColumn("20190920.5", "RES_ID")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_QUANTITY")
 				.modifyColumn("20190920.6", "RES_ID")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_URI")
 				.modifyColumn("20190920.7", "RES_ID")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 
 		// HFJ_SEARCH
 		version.onTable("HFJ_SEARCH")
@@ -2105,33 +2903,33 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RESOURCE")
 				.modifyColumn("20191002.1", "RES_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 40);
+				.withType(ColumnTypeEnum.STRING, 40)
+				.failureAllowed();
 		version.onTable("HFJ_RES_VER")
 				.modifyColumn("20191002.2", "RES_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 40);
+				.withType(ColumnTypeEnum.STRING, 40)
+				.failureAllowed();
 		version.onTable("HFJ_HISTORY_TAG")
 				.modifyColumn("20191002.3", "RES_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 40);
+				.withType(ColumnTypeEnum.STRING, 40)
+				.failureAllowed();
 		version.onTable("HFJ_RES_LINK")
 				.modifyColumn("20191002.4", "SOURCE_RESOURCE_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 40);
+				.withType(ColumnTypeEnum.STRING, 40)
+				.failureAllowed();
 		version.onTable("HFJ_RES_LINK")
 				.modifyColumn("20191002.5", "TARGET_RESOURCE_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 40);
+				.withType(ColumnTypeEnum.STRING, 40)
+				.failureAllowed();
 		version.onTable("HFJ_RES_TAG")
 				.modifyColumn("20191002.6", "RES_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 40);
+				.withType(ColumnTypeEnum.STRING, 40)
+				.failureAllowed();
 
 		// TermConceptDesignation
 		version.startSectionWithMessage("Processing table: TRM_CONCEPT_DESIG");
@@ -2240,10 +3038,26 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.modifyColumn("20190722.26", "SYSTEM_VERSION")
 				.nullable()
 				.withType(ColumnTypeEnum.STRING, 200);
+
+		/*
+		DISABLED THIS STEP (20190722.27) ON PURPOSE BECAUSE IT STARTED CAUSING FAILURES ON MSSQL FOR A FRESH DB.
+		I left it here for historical purposes.
+		The reason for the failure is as follows. The TARGET_CODE column was originally 'not nullable' when it was
+		first introduced. And in 7_2_0, it is being changed to a nullable column (see 20240327.1 in init720()).
+		Starting with 7_2_0, on a fresh db, we create the table with nullable TARGET_CODE (as it is made nullable now).
+		Since we run all migration steps on fresh db, this step will try to convert the column which is created as nullable
+		to not nullable (which will then need to be coverted back to nullable in 7_2_0 migration).
+		Changing a nullable column to not nullable is not allowed in
+		MSSQL if there is an index on the column, which is the case here, as there is IDX_CNCPT_MP_GRP_ELM_TGT_CD
+		on this column. Since init720() has the right migration
+		step, where the column is set to nullable and has the right type and length, this statement is also
+		not necessary anymore even for not fresh dbs.
+
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
 				.modifyColumn("20190722.27", "TARGET_CODE")
 				.nonNullable()
 				.withType(ColumnTypeEnum.STRING, 500);
+		*/
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
 				.modifyColumn("20190722.28", "VALUESET_URL")
 				.nullable()
@@ -2376,7 +3190,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SEARCH")
 				.modifyColumn("20190814.7", "SEARCH_UUID")
 				.nonNullable()
-				.withType(ColumnTypeEnum.STRING, Search.SEARCH_UUID_COLUMN_LENGTH);
+				.withType(ColumnTypeEnum.STRING, 36);
 
 		version.onTable("HFJ_SEARCH_PARM").dropThisTable("20190814.8");
 
@@ -2385,18 +3199,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SPIDX_COORDS")
 				.modifyColumn("20190814.9", "RES_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 100);
+				.withType(ColumnTypeEnum.STRING, 100)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_DATE")
 				.modifyColumn("20190814.10", "RES_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 100);
+				.withType(ColumnTypeEnum.STRING, 100)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_STRING")
 				.modifyColumn("20190814.11", "RES_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 100);
+				.withType(ColumnTypeEnum.STRING, 100)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_STRING")
 				.addColumn("20190814.12", "HASH_IDENTITY")
 				.nullable()
@@ -2408,50 +3222,50 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SPIDX_COORDS")
 				.modifyColumn("20190814.14", "RES_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 100);
+				.withType(ColumnTypeEnum.STRING, 100)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_QUANTITY")
 				.modifyColumn("20190814.15", "RES_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 100);
+				.withType(ColumnTypeEnum.STRING, 100)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_QUANTITY").dropColumn("20190814.16", "HASH_UNITS_AND_VALPREFIX");
 		version.onTable("HFJ_SPIDX_QUANTITY").dropColumn("20190814.17", "HASH_VALPREFIX");
 		version.onTable("HFJ_SPIDX_NUMBER")
 				.modifyColumn("20190814.18", "RES_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 100);
+				.withType(ColumnTypeEnum.STRING, 100)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_TOKEN")
 				.modifyColumn("20190814.19", "RES_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 100);
+				.withType(ColumnTypeEnum.STRING, 100)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_URI")
 				.modifyColumn("20190814.20", "RES_TYPE")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 100);
+				.withType(ColumnTypeEnum.STRING, 100)
+				.failureAllowed();
 		version.onTable("HFJ_SPIDX_URI")
 				.modifyColumn("20190814.21", "SP_URI")
 				.nullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 254);
+				.withType(ColumnTypeEnum.STRING, 254)
+				.failureAllowed();
 		version.onTable("TRM_CODESYSTEM")
 				.modifyColumn("20190814.22", "CODE_SYSTEM_URI")
 				.nonNullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 200);
+				.withType(ColumnTypeEnum.STRING, 200)
+				.failureAllowed();
 		version.onTable("TRM_CODESYSTEM")
 				.modifyColumn("20190814.23", "CS_NAME")
 				.nullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 200);
+				.withType(ColumnTypeEnum.STRING, 200)
+				.failureAllowed();
 		version.onTable("TRM_CODESYSTEM_VER")
 				.modifyColumn("20190814.24", "CS_VERSION_ID")
 				.nullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.STRING, 200);
+				.withType(ColumnTypeEnum.STRING, 200)
+				.failureAllowed();
 	}
 
 	private void init360() { // 20180918 - 20181112

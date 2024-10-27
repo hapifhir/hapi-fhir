@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -11,8 +12,7 @@ import org.hl7.fhir.r5.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
@@ -46,7 +46,7 @@ public class FhirResourceDaoR5ReindexTest extends BaseJpaR5Test {
 
 		Parameters outcome = (Parameters) myInstanceReindexService.reindex(mySrd, id);
 		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertThat(outcome.getParameter("Narrative").getValueStringType().getValue(), containsString("Reindex completed in"));
+		assertThat(outcome.getParameter("Narrative").getValueStringType().getValue()).contains("Reindex completed in");
 		assertEquals("REMOVE", outcome.getParameter("UriIndexes").getPartFirstRep().getPartFirstRep().getValueCodeType().getValue());
 
 		runInTransaction(() -> {

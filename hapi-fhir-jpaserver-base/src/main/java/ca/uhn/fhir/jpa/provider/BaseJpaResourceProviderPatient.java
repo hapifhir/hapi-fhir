@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			idempotent = true,
 			bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientInstanceEverything(
-			javax.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@IdParam IIdType theId,
 			@Description(
 							shortDefinition =
@@ -112,6 +112,11 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 							max = OperationParam.MAX_UNLIMITED,
 							typeName = "string")
 					List<IPrimitiveType<String>> theTypes,
+			@Description(
+							shortDefinition =
+									"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+					@OperationParam(name = Constants.PARAM_MDM, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theMdmExpand,
 			@Sort SortSpec theSortSpec,
 			RequestDetails theRequestDetails) {
 
@@ -126,6 +131,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			everythingParams.setNarrative(toStringAndList(theNarrative));
 			everythingParams.setFilter(toStringAndList(theFilter));
 			everythingParams.setTypes(toStringAndList(theTypes));
+			everythingParams.setMdmExpand(resolveNullValue(theMdmExpand));
 
 			return ((IFhirResourceDaoPatient<?>) getDao())
 					.patientInstanceEverything(theServletRequest, theRequestDetails, everythingParams, theId);
@@ -143,7 +149,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			idempotent = true,
 			bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientTypeEverything(
-			javax.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@Description(
 							shortDefinition =
 									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
@@ -202,6 +208,11 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 							max = OperationParam.MAX_UNLIMITED,
 							typeName = "id")
 					List<IIdType> theId,
+			@Description(
+							shortDefinition =
+									"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+					@OperationParam(name = Constants.PARAM_MDM, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theMdmExpand,
 			@Sort SortSpec theSortSpec,
 			RequestDetails theRequestDetails) {
 
@@ -216,6 +227,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			everythingParams.setNarrative(toStringAndList(theNarrative));
 			everythingParams.setFilter(toStringAndList(theFilter));
 			everythingParams.setTypes(toStringAndList(theTypes));
+			everythingParams.setMdmExpand(resolveNullValue(theMdmExpand));
 
 			return ((IFhirResourceDaoPatient<?>) getDao())
 					.patientTypeEverything(
@@ -260,5 +272,9 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			return null;
 		}
 		return retVal;
+	}
+
+	private boolean resolveNullValue(IPrimitiveType<Boolean> theMdmExpand) {
+		return theMdmExpand == null ? Boolean.FALSE : theMdmExpand.getValue();
 	}
 }

@@ -9,7 +9,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.hibernate.dialect.PostgreSQL9Dialect;
+import org.hibernate.dialect.PostgreSQLDialect;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Disabled;
@@ -115,9 +115,7 @@ public class MdmLinkSlowDeletionSandboxIT  extends BaseJpaR4Test {
 
 		@Override
 		public String getHibernateDialect() {
-			return PostgreSQL9Dialect.class.getName();
-
-//			return Oracle12cDialect.class.getName();
+			return PostgreSQLDialect.class.getName();
 		}
 
 		@Override

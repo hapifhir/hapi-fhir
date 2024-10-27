@@ -19,8 +19,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -63,7 +62,8 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		assertEquals(2, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous()).size());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
-		jobParameters.addUrl("Observation?subject.active=false").addUrl("DiagnosticReport?subject.active=false");
+		jobParameters.addUrl("Observation?subject.active=false");
+		jobParameters.addUrl("DiagnosticReport?subject.active=false");
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setParameters(jobParameters);
@@ -107,7 +107,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// Validate
 		JobInstance failure = myBatch2JobHelper.awaitJobFailure(startResponse);
-		assertThat(failure.getErrorMessage(), containsString("Unable to delete " + p1.getValue() + " because " + o1.getValue() + " refers to it"));
+		assertThat(failure.getErrorMessage()).contains("Unable to delete " + p1.getValue() + " because " + o1.getValue() + " refers to it");
 	}
 
 	@Test
@@ -207,7 +207,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// Validate
 		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(startResponse);
-		assertThat(outcome.getErrorMessage(), containsString("refers to it via the path"));
+		assertThat(outcome.getErrorMessage()).contains("refers to it via the path");
 		assertNotGone(p1);
 		assertNotGone(o1);
 		assertNotGone(o1b);
@@ -231,7 +231,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 
 			// validate
-			assertThat(e.getMessage(), containsString("Delete expunge URLs must be in the format"));
+			assertThat(e.getMessage()).contains("Delete expunge URLs must be in the format");
 		}
 
 	}

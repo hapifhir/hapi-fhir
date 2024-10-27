@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,36 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OptimisticLock;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.persistence.*;
 
 @Entity
 @Table(
@@ -41,9 +60,9 @@ import javax.persistence.*;
 					columnNames = {"RES_ID", "RES_VER"})
 		},
 		indexes = {
-			@Index(name = "IDX_RESVER_TYPE_DATE", columnList = "RES_TYPE,RES_UPDATED"),
+			@Index(name = "IDX_RESVER_TYPE_DATE", columnList = "RES_TYPE,RES_UPDATED,RES_ID"),
 			@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
-			@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED")
+			@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED,RES_ID")
 		})
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
@@ -56,11 +75,12 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	public static final int ENCODING_COL_LENGTH = 5;
 
 	public static final String HFJ_RES_VER = "HFJ_RES_VER";
-	public static final int RES_TEXT_VC_MAX_LENGTH = 4000;
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
+	@GenericGenerator(
+			name = "SEQ_RESOURCE_HISTORY_ID",
+			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
 	@Column(name = "PID")
 	private Long myId;
@@ -90,8 +110,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OptimisticLock(excluded = true)
 	private byte[] myResource;
 
-	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
-	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
+	@Column(name = "RES_TEXT_VC", length = Length.LONG32, nullable = true)
 	@OptimisticLock(excluded = true)
 	private String myResourceTextVc;
 
@@ -110,6 +129,15 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	// TODO: This was added in 6.8.0 - In the future we should drop ResourceHistoryProvenanceEntity
 	@Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
 	private String myRequestId;
+
+	@Transient
+	private transient ResourceHistoryProvenanceEntity myNewHistoryProvenanceEntity;
+	/**
+	 * This is stored as an optimization to avoid needing to fetch ResourceTable
+	 * to access the resource id.
+	 */
+	@Transient
+	private transient String myTransientForcedId;
 
 	/**
 	 * Constructor
@@ -274,24 +302,9 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		if (getTransientForcedId() != null) {
 			resourceIdPart = getTransientForcedId();
 		} else {
-			if (getResourceTable().getForcedId() == null) {
-				Long id = getResourceId();
-				resourceIdPart = id.toString();
-			} else {
-				resourceIdPart = getResourceTable().getForcedId().getForcedId();
-			}
+			resourceIdPart = getResourceTable().getFhirId();
 		}
 		return new IdDt(getResourceType() + '/' + resourceIdPart + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-	}
-
-	@Override
-	public ForcedId getForcedId() {
-		return getResourceTable().getForcedId();
-	}
-
-	@Override
-	public void setForcedId(ForcedId theForcedId) {
-		getResourceTable().setForcedId(theForcedId);
 	}
 
 	/**
@@ -301,5 +314,26 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	 */
 	public boolean hasResource() {
 		return myResource != null || myResourceTextVc != null;
+	}
+
+	/**
+	 * This method creates a new HistoryProvenance entity, or might reuse the current one if we've
+	 * already created one in the current transaction. This is because we can only increment
+	 * the version once in a DB transaction (since hibernate manages that number) so creating
+	 * multiple {@link ResourceHistoryProvenanceEntity} entities will result in a constraint error.
+	 */
+	public ResourceHistoryProvenanceEntity toProvenance() {
+		if (myNewHistoryProvenanceEntity == null) {
+			myNewHistoryProvenanceEntity = new ResourceHistoryProvenanceEntity();
+		}
+		return myNewHistoryProvenanceEntity;
+	}
+
+	public String getTransientForcedId() {
+		return myTransientForcedId;
+	}
+
+	public void setTransientForcedId(String theTransientForcedId) {
+		myTransientForcedId = theTransientForcedId;
 	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -14,12 +15,11 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -28,12 +28,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.Binary;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CarePlan;
@@ -49,44 +43,39 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AuthorizationInterceptorDstu3Test {
 
-	private static final String ERR403 = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\"Access denied by default policy (no applicable rules)\"}]}";
-	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptorDstu3Test.class);
-	private static CloseableHttpClient ourClient;
-	private static String ourConditionalCreateId;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static boolean ourHitMethod;
-	private static int ourPort;
+	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static List<Resource> ourReturn;
 	private static List<IBaseResource> ourDeleted;
-	private static Server ourServer;
-	private static RestfulServer ourServlet;
+
+	@RegisterExtension
+	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new PlainProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100));
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.NEVER);
-		ourServlet.getInterceptorService().unregisterAllInterceptors();
-		ourServlet.setTenantIdentificationStrategy(null);
+		ourServer.getInterceptorService().unregisterAllInterceptors();
+		ourServer.getRestfulServer().setTenantIdentificationStrategy(null);
 		ourReturn = null;
 		ourDeleted = null;
-		ourHitMethod = false;
-		ourConditionalCreateId = "1123";
 	}
 
 	private Resource createCarePlan(Integer theId, String theSubjectId) {
@@ -176,7 +165,7 @@ public class AuthorizationInterceptorDstu3Test {
 	@Test
 	public void testTransactionWithPatch() throws IOException {
 
-		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -207,7 +196,7 @@ public class AuthorizationInterceptorDstu3Test {
 		responseBundle.setType(Bundle.BundleType.TRANSACTION);
 		ourReturn = Collections.singletonList(responseBundle);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl());
 		httpPost.setEntity(createFhirResourceEntity(requestBundle));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		String resp = extractResponseAndClose(status);
@@ -220,31 +209,26 @@ public class AuthorizationInterceptorDstu3Test {
 
 		@History()
 		public List<Resource> history() {
-			ourHitMethod = true;
 			return (ourReturn);
 		}
 
 		@Operation(name = "opName", idempotent = true)
 		public Parameters operation() {
-			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
 		}
 
 		@Operation(name = "process-message", idempotent = true)
 		public Parameters processMessage(@OperationParam(name = "content") Bundle theInput) {
-			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
 		}
 
 		@GraphQL
 		public String processGraphQlRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String theQuery) {
-			ourHitMethod = true;
 			return "{'foo':'bar'}";
 		}
 
 		@Transaction()
 		public Bundle search(ServletRequestDetails theRequestDetails, IInterceptorBroadcaster theInterceptorBroadcaster, @TransactionParam Bundle theInput) {
-			ourHitMethod = true;
 			if (ourDeleted != null) {
 				for (IBaseResource next : ourDeleted) {
 					HookParams params = new HookParams()
@@ -261,33 +245,7 @@ public class AuthorizationInterceptorDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		PlainProvider plainProvider = new PlainProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setFhirContext(ourCtx);
-		ourServlet.registerProvider(plainProvider);
-		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 

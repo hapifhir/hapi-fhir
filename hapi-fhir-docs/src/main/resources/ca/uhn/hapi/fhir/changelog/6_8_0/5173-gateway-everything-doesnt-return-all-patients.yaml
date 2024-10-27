@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5173
+title: "Fix gateway `$everything` operation to respect server configured default and maximum page sizes."

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.escape.Escaper;
 import com.google.common.net.PercentEscaper;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -40,6 +42,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,8 +52,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -313,6 +315,7 @@ public class UrlUtil {
 		return theCtx.getResourceDefinition(resourceName);
 	}
 
+	@Nonnull
 	public static Map<String, String[]> parseQueryString(String theQueryString) {
 		HashMap<String, List<String>> map = new HashMap<>();
 		parseQueryString(theQueryString, map);
@@ -600,6 +603,39 @@ public class UrlUtil {
 		}
 
 		return parameters;
+	}
+
+	/**
+	 * Creates list of sub URIs candidates for search with :above modifier
+	 * Example input: http://[host]/[pathPart1]/[pathPart2]
+	 * Example output: http://[host], http://[host]/[pathPart1], http://[host]/[pathPart1]/[pathPart2]
+	 *
+	 * @param theUri String URI parameter
+	 * @return List of URI candidates
+	 */
+	public static List<String> getAboveUriCandidates(String theUri) {
+		try {
+			URI uri = new URI(theUri);
+			if (uri.getScheme() == null || uri.getHost() == null) {
+				throwInvalidRequestExceptionForNotValidUri(theUri, null);
+			}
+		} catch (URISyntaxException theCause) {
+			throwInvalidRequestExceptionForNotValidUri(theUri, theCause);
+		}
+
+		List<String> candidates = new ArrayList<>();
+		Path path = Paths.get(theUri);
+		candidates.add(path.toString().replace(":/", "://"));
+		while (path.getParent() != null && path.getParent().toString().contains("/")) {
+			candidates.add(path.getParent().toString().replace(":/", "://"));
+			path = path.getParent();
+		}
+		return candidates;
+	}
+
+	private static void throwInvalidRequestExceptionForNotValidUri(String theUri, Exception theCause) {
+		throw new InvalidRequestException(
+				Msg.code(2419) + String.format("Provided URI is not valid: %s", theUri), theCause);
 	}
 
 	public static class UrlParts {

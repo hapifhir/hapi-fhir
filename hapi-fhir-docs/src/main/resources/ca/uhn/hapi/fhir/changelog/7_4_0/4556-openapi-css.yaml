@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4556
+title: "The CSS file used by the OpenApiInterceptor to serve up the Swagger UI
+  component inadvertently blocked the authorization button evem when it was
+  wanted. This has been fixed. Thanks Jesse Bonzo for the contribution!"

@@ -1,0 +1,27 @@
+{
+    "resourceType": "Bundle",
+    "type": "transaction",
+    "entry": [
+        {
+            "fullUrl": "Provenance/1.2.40.0.13.1.1.584109161.20230630175432428.38899",
+            "resource": {
+                "resourceType": "Provenance",
+                "id": "1.2.40.0.13.1.1.584109161.20230630175432428.38899",
+                "entity": [
+                    {
+                        "what": {
+                            "reference": "https://somehost:8443/mhd/r4/responder/DocumentReference/urn:oid:1.2.40.0.13.1.1.584109161.20230630175432428.38899",
+                            "identifier": {
+                                "value": "urn:oid:1.2.40.0.13.1.1.584109161.20230630175432428.38899"
+                            }
+                        }
+                    }
+                ]
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Provenance/1.2.40.0.13.1.1.584109161.20230630175432428.38899"
+            }
+        }
+    ]
+}

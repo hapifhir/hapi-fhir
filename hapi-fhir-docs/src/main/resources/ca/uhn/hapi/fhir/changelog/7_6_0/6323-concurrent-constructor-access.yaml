@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 6323
+title: "A synchronization choke point was removed from the model object initialization code, reducing the risk of
+multi-thread contention."

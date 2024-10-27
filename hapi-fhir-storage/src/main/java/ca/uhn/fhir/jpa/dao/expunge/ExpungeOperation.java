@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	public static final String THREAD_PREFIX = "expunge";
 
 	@Autowired
-	private IResourceExpungeService myExpungeDaoService;
+	private IResourceExpungeService myResourceExpungeService;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
@@ -101,15 +102,12 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private List<IResourcePersistentId> findHistoricalVersionsOfDeletedResources() {
-		List<IResourcePersistentId> retVal = myExpungeDaoService.findHistoricalVersionsOfDeletedResources(
-				myResourceName, myResourceId, myRemainingCount.get());
+		List<IResourcePersistentId> retVal = getPartitionAwareSupplier()
+				.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfDeletedResources(
+						myResourceName, myResourceId, myRemainingCount.get()));
+
 		ourLog.debug("Found {} historical versions", retVal.size());
 		return retVal;
-	}
-
-	private List<IResourcePersistentId> findHistoricalVersionsOfNonDeletedResources() {
-		return myExpungeDaoService.findHistoricalVersionsOfNonDeletedResources(
-				myResourceName, myResourceId, myRemainingCount.get());
 	}
 
 	private boolean expungeLimitReached() {
@@ -121,13 +119,19 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private void expungeOldVersions() {
-		List<IResourcePersistentId> historicalIds = findHistoricalVersionsOfNonDeletedResources();
+		List<IResourcePersistentId> historicalIds = getPartitionAwareSupplier()
+				.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(
+						myResourceName, myResourceId, myRemainingCount.get()));
 
 		getPartitionRunner()
 				.runInPartitionedThreads(
 						historicalIds,
-						partition -> myExpungeDaoService.expungeHistoricalVersions(
+						partition -> myResourceExpungeService.expungeHistoricalVersions(
 								myRequestDetails, partition, myRemainingCount));
+	}
+
+	private PartitionAwareSupplier getPartitionAwareSupplier() {
+		return new PartitionAwareSupplier(myTxService, myRequestDetails);
 	}
 
 	private PartitionRunner getPartitionRunner() {
@@ -144,7 +148,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 		getPartitionRunner()
 				.runInPartitionedThreads(
 						theResourceIds,
-						partition -> myExpungeDaoService.expungeCurrentVersionOfResources(
+						partition -> myResourceExpungeService.expungeCurrentVersionOfResources(
 								myRequestDetails, partition, myRemainingCount));
 	}
 
@@ -152,11 +156,26 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 		getPartitionRunner()
 				.runInPartitionedThreads(
 						theResourceIds,
-						partition -> myExpungeDaoService.expungeHistoricalVersionsOfIds(
+						partition -> myResourceExpungeService.expungeHistoricalVersionsOfIds(
 								myRequestDetails, partition, myRemainingCount));
 	}
 
 	private ExpungeOutcome expungeOutcome() {
 		return new ExpungeOutcome().setDeletedCount(myExpungeOptions.getLimit() - myRemainingCount.get());
+	}
+
+	@VisibleForTesting
+	public void setHapiTransactionServiceForTesting(HapiTransactionService theHapiTransactionService) {
+		myTxService = theHapiTransactionService;
+	}
+
+	@VisibleForTesting
+	public void setStorageSettingsForTesting(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
+	}
+
+	@VisibleForTesting
+	public void setExpungeDaoServiceForTesting(IResourceExpungeService theIResourceExpungeService) {
+		myResourceExpungeService = theIResourceExpungeService;
 	}
 }

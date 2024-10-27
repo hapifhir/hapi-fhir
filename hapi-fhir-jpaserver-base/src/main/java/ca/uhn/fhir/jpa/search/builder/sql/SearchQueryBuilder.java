@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPre
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
@@ -62,11 +61,14 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbJoin;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import org.apache.commons.lang3.Validate;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
-import org.hibernate.engine.spi.RowSelection;
+import org.hibernate.query.internal.QueryOptionsImpl;
+import org.hibernate.query.spi.Limit;
+import org.hibernate.query.spi.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,8 +78,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
@@ -102,6 +102,7 @@ public class SearchQueryBuilder {
 	private final SqlObjectFactory mySqlBuilderFactory;
 	private final boolean myCountQuery;
 	private final Dialect myDialect;
+	private final boolean mySelectPartitionId;
 	private boolean myMatchNothing;
 	private ResourceTablePredicateBuilder myResourceTableRoot;
 	private boolean myHaveAtLeastOnePredicate;
@@ -110,6 +111,8 @@ public class SearchQueryBuilder {
 	private boolean dialectIsMySql;
 	private boolean myNeedResourceTableRoot;
 	private int myNextNearnessColumnId = 0;
+	private DbColumn mySelectedResourceIdColumn;
+	private DbColumn mySelectedPartitionIdColumn;
 
 	/**
 	 * Constructor
@@ -133,7 +136,8 @@ public class SearchQueryBuilder {
 				UUID.randomUUID() + "-",
 				theDialectProvider.getDialect(),
 				theCountQuery,
-				new ArrayList<>());
+				new ArrayList<>(),
+				thePartitionSettings.isPartitioningEnabled());
 	}
 
 	/**
@@ -149,7 +153,8 @@ public class SearchQueryBuilder {
 			String theBindVariableSubstitutionBase,
 			Dialect theDialect,
 			boolean theCountQuery,
-			ArrayList<Object> theBindVariableValues) {
+			ArrayList<Object> theBindVariableValues,
+			boolean theSelectPartitionId) {
 		myFhirContext = theFhirContext;
 		myStorageSettings = theStorageSettings;
 		myPartitionSettings = thePartitionSettings;
@@ -171,6 +176,7 @@ public class SearchQueryBuilder {
 
 		myBindVariableSubstitutionBase = theBindVariableSubstitutionBase;
 		myBindVariableValues = theBindVariableValues;
+		mySelectPartitionId = theSelectPartitionId;
 	}
 
 	public FhirContext getFhirContext() {
@@ -200,7 +206,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a COORDS search parameter
 	 */
-	public CoordsPredicateBuilder addCoordsPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public CoordsPredicateBuilder addCoordsPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		CoordsPredicateBuilder retVal = mySqlBuilderFactory.coordsPredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -209,7 +215,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a DATE search parameter
 	 */
-	public DatePredicateBuilder addDatePredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public DatePredicateBuilder addDatePredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		DatePredicateBuilder retVal = mySqlBuilderFactory.dateIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -223,21 +229,9 @@ public class SearchQueryBuilder {
 	}
 
 	/**
-	 * Add and return a predicate builder for selecting a forced ID. This is only intended for use with sorts so it can not
-	 * be the root query.
-	 */
-	public ForcedIdPredicateBuilder addForcedIdPredicateBuilder(@Nonnull DbColumn theSourceJoinColumn) {
-		Validate.isTrue(theSourceJoinColumn != null);
-
-		ForcedIdPredicateBuilder retVal = mySqlBuilderFactory.newForcedIdPredicateBuilder(this);
-		addTableForSorting(retVal, theSourceJoinColumn);
-		return retVal;
-	}
-
-	/**
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a NUMBER search parameter
 	 */
-	public NumberPredicateBuilder addNumberPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public NumberPredicateBuilder addNumberPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		NumberPredicateBuilder retVal = createNumberPredicateBuilder();
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -253,7 +247,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on the Resource table
 	 */
-	public ResourceTablePredicateBuilder addResourceTablePredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public ResourceTablePredicateBuilder addResourceTablePredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		ResourceTablePredicateBuilder retVal = mySqlBuilderFactory.resourceTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -262,7 +256,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a QUANTITY search parameter
 	 */
-	public QuantityPredicateBuilder addQuantityPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public QuantityPredicateBuilder addQuantityPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		QuantityPredicateBuilder retVal = createQuantityPredicateBuilder();
 		addTable(retVal, theSourceJoinColumn);
 
@@ -277,7 +271,7 @@ public class SearchQueryBuilder {
 	}
 
 	public QuantityNormalizedPredicateBuilder addQuantityNormalizedPredicateBuilder(
-			@Nullable DbColumn theSourceJoinColumn) {
+			@Nullable DbColumn[] theSourceJoinColumn) {
 
 		QuantityNormalizedPredicateBuilder retVal = mySqlBuilderFactory.quantityNormalizedIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
@@ -288,9 +282,10 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_source</code> search parameter
 	 */
-	public SourcePredicateBuilder addSourcePredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public SourcePredicateBuilder addSourcePredicateBuilder(
+			@Nullable DbColumn[] theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
 		SourcePredicateBuilder retVal = mySqlBuilderFactory.newSourcePredicateBuilder(this);
-		addTable(retVal, theSourceJoinColumn);
+		addTable(retVal, theSourceJoinColumn, theJoinType);
 		return retVal;
 	}
 
@@ -298,7 +293,7 @@ public class SearchQueryBuilder {
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a REFERENCE search parameter
 	 */
 	public ResourceLinkPredicateBuilder addReferencePredicateBuilder(
-			QueryStack theQueryStack, @Nullable DbColumn theSourceJoinColumn) {
+			QueryStack theQueryStack, @Nullable DbColumn[] theSourceJoinColumn) {
 		ResourceLinkPredicateBuilder retVal = createReferencePredicateBuilder(theQueryStack);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -316,7 +311,7 @@ public class SearchQueryBuilder {
 	 * source and target are reversed. This is used for _has queries.
 	 */
 	public ResourceLinkPredicateBuilder addReferencePredicateBuilderReversed(
-			QueryStack theQueryStack, DbColumn theSourceJoinColumn) {
+			QueryStack theQueryStack, DbColumn[] theSourceJoinColumn) {
 		ResourceLinkPredicateBuilder retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, true);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -325,7 +320,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a STRING search parameter
 	 */
-	public StringPredicateBuilder addStringPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public StringPredicateBuilder addStringPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		StringPredicateBuilder retVal = createStringPredicateBuilder();
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -341,7 +336,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_tag</code> search parameter
 	 */
-	public TagPredicateBuilder addTagPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public TagPredicateBuilder addTagPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		TagPredicateBuilder retVal = mySqlBuilderFactory.newTagPredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -350,7 +345,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a TOKEN search parameter
 	 */
-	public TokenPredicateBuilder addTokenPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public TokenPredicateBuilder addTokenPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		TokenPredicateBuilder retVal = createTokenPredicateBuilder();
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -368,10 +363,11 @@ public class SearchQueryBuilder {
 		mySelect.addCustomJoin(theJoinType, theFromTable, theToTable, theCondition);
 	}
 
-	public ComboCondition createOnCondition(DbColumn theSourceColumn, DbColumn theTargetColumn) {
+	public ComboCondition createOnCondition(DbColumn[] theSourceColumn, DbColumn[] theTargetColumn) {
 		ComboCondition onCondition = ComboCondition.and();
-		onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn, theTargetColumn));
-
+		for (int i = 0; i < theSourceColumn.length; i += 1) {
+			onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn[i], theTargetColumn[i]));
+		}
 		return onCondition;
 	}
 
@@ -379,7 +375,7 @@ public class SearchQueryBuilder {
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>:missing</code> search parameter
 	 */
 	public SearchParamPresentPredicateBuilder addSearchParamPresentPredicateBuilder(
-			@Nullable DbColumn theSourceJoinColumn) {
+			@Nullable DbColumn[] theSourceJoinColumn) {
 		SearchParamPresentPredicateBuilder retVal = mySqlBuilderFactory.searchParamPresentPredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -388,7 +384,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a URI search parameter
 	 */
-	public UriPredicateBuilder addUriPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public UriPredicateBuilder addUriPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		UriPredicateBuilder retVal = createUriPredicateBuilder();
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -412,24 +408,19 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for an arbitrary table
 	 */
-	private void addTable(BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
+	private void addTable(BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn[] theSourceJoinColumn) {
 		addTable(thePredicateBuilder, theSourceJoinColumn, SelectQuery.JoinType.INNER);
-	}
-
-	private void addTableForSorting(
-			BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
-		addTable(thePredicateBuilder, theSourceJoinColumn, SelectQuery.JoinType.LEFT_OUTER);
 	}
 
 	private void addTable(
 			BaseJoiningPredicateBuilder thePredicateBuilder,
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumns,
 			SelectQuery.JoinType theJoinType) {
-		if (theSourceJoinColumn != null) {
-			DbTable fromTable = theSourceJoinColumn.getTable();
+		if (theSourceJoinColumns != null) {
+			DbTable fromTable = theSourceJoinColumns[0].getTable();
 			DbTable toTable = thePredicateBuilder.getTable();
-			DbColumn toColumn = thePredicateBuilder.getResourceIdColumn();
-			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn, theJoinType);
+			DbColumn[] toColumn = toJoinColumns(thePredicateBuilder);
+			addJoin(fromTable, toTable, theSourceJoinColumns, toColumn, theJoinType);
 		} else {
 			if (myFirstPredicateBuilder == null) {
 
@@ -448,7 +439,14 @@ public class SearchQueryBuilder {
 					mySelect.addCustomColumns(
 							FunctionCall.count().setIsDistinct(true).addColumnParams(root.getResourceIdColumn()));
 				} else {
-					mySelect.addColumns(root.getResourceIdColumn());
+					if (mySelectPartitionId) {
+						mySelectedResourceIdColumn = root.getResourceIdColumn();
+						mySelectedPartitionIdColumn = root.getPartitionIdColumn();
+						mySelect.addColumns(mySelectedPartitionIdColumn, mySelectedResourceIdColumn);
+					} else {
+						mySelectedResourceIdColumn = root.getResourceIdColumn();
+						mySelect.addColumns(mySelectedResourceIdColumn);
+					}
 				}
 				mySelect.addFromTable(root.getTable());
 				myFirstPredicateBuilder = root;
@@ -460,27 +458,52 @@ public class SearchQueryBuilder {
 
 			DbTable fromTable = myFirstPredicateBuilder.getTable();
 			DbTable toTable = thePredicateBuilder.getTable();
-			DbColumn fromColumn = myFirstPredicateBuilder.getResourceIdColumn();
-			DbColumn toColumn = thePredicateBuilder.getResourceIdColumn();
+			DbColumn[] fromColumn = toJoinColumns(myFirstPredicateBuilder);
+			DbColumn[] toColumn = toJoinColumns(thePredicateBuilder);
 			addJoin(fromTable, toTable, fromColumn, toColumn, theJoinType);
 		}
+	}
+
+	@Nonnull
+	public DbColumn[] toJoinColumns(BaseJoiningPredicateBuilder theBuilder) {
+		DbColumn partitionIdColumn = theBuilder.getPartitionIdColumn();
+		DbColumn resourceIdColumn = theBuilder.getResourceIdColumn();
+		return toJoinColumns(partitionIdColumn, resourceIdColumn);
+	}
+
+	/**
+	 * Remove or keep partition_id columns depending on settings.
+	 */
+	@Nonnull
+	public DbColumn[] toJoinColumns(DbColumn partitionIdColumn, DbColumn resourceIdColumn) {
+		if (isIncludePartitionIdInJoins()) {
+			return new DbColumn[] {partitionIdColumn, resourceIdColumn};
+		} else {
+			return new DbColumn[] {resourceIdColumn};
+		}
+	}
+
+	public boolean isIncludePartitionIdInJoins() {
+		return mySelectPartitionId && myPartitionSettings.isPartitionIdsInPrimaryKeys();
+	}
+
+	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
+		addJoin(theFromTable, theToTable, theFromColumn, theToColumn, SelectQuery.JoinType.INNER);
 	}
 
 	public void addJoin(
 			DbTable theFromTable,
 			DbTable theToTable,
-			DbColumn theFromColumn,
-			DbColumn theToColumn,
+			DbColumn[] theFromColumn,
+			DbColumn[] theToColumn,
 			SelectQuery.JoinType theJoinType) {
-		Join join = new DbJoin(
-				mySpec, theFromTable, theToTable, new DbColumn[] {theFromColumn}, new DbColumn[] {theToColumn});
+		assert theFromColumn.length == theToColumn.length;
+		Join join = new DbJoin(mySpec, theFromTable, theToTable, theFromColumn, theToColumn);
 		mySelect.addJoins(theJoinType, join);
 	}
 
-	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
-		Join join = new DbJoin(
-				mySpec, theFromTable, theToTable, new DbColumn[] {theFromColumn}, new DbColumn[] {theToColumn});
-		mySelect.addJoins(SelectQuery.JoinType.INNER, join);
+	public boolean isSelectPartitionId() {
+		return mySelectPartitionId;
 	}
 
 	/**
@@ -517,69 +540,117 @@ public class SearchQueryBuilder {
 		if (maxResultsToFetch != null || offset != null) {
 
 			maxResultsToFetch = defaultIfNull(maxResultsToFetch, 10000);
+			String selectedResourceIdColumn = mySelectedResourceIdColumn.getColumnNameSQL();
 
-			AbstractLimitHandler limitHandler = (AbstractLimitHandler) myDialect.getLimitHandler();
-			RowSelection selection = new RowSelection();
-			selection.setFirstRow(offset);
-			selection.setMaxRows(maxResultsToFetch);
-			sql = limitHandler.processSql(sql, selection);
-
-			int startOfQueryParameterIndex = 0;
-
-			boolean isSqlServer = (myDialect instanceof SQLServerDialect);
-			if (isSqlServer) {
-
-				// The SQLServerDialect has a bunch of one-off processing to deal with rules on when
-				// a limit can be used, so we can't rely on the flags that the limithandler exposes since
-				// the exact structure of the query depends on the parameters
-				if (sql.contains("top(?)")) {
-					bindVariables.add(0, maxResultsToFetch);
-				}
-				if (sql.contains("offset 0 rows fetch next ? rows only")) {
-					bindVariables.add(maxResultsToFetch);
-				}
-				if (sql.contains("offset ? rows fetch next ? rows only")) {
-					bindVariables.add(theOffset);
-					bindVariables.add(maxResultsToFetch);
-				}
-				if (offset != null && sql.contains("__row__")) {
-					bindVariables.add(theOffset + 1);
-					bindVariables.add(theOffset + maxResultsToFetch + 1);
-				}
-
-			} else if (limitHandler.supportsVariableLimit()) {
-
-				boolean bindLimitParametersFirst = limitHandler.bindLimitParametersFirst();
-				if (limitHandler.useMaxForLimit() && offset != null) {
-					maxResultsToFetch = maxResultsToFetch + offset;
-				}
-
-				if (limitHandler.bindLimitParametersInReverseOrder()) {
-					startOfQueryParameterIndex = bindCountParameter(
-							bindVariables,
-							maxResultsToFetch,
-							limitHandler,
-							startOfQueryParameterIndex,
-							bindLimitParametersFirst);
-					bindOffsetParameter(
-							bindVariables, offset, limitHandler, startOfQueryParameterIndex, bindLimitParametersFirst);
-				} else {
-					startOfQueryParameterIndex = bindOffsetParameter(
-							bindVariables, offset, limitHandler, startOfQueryParameterIndex, bindLimitParametersFirst);
-					bindCountParameter(
-							bindVariables,
-							maxResultsToFetch,
-							limitHandler,
-							startOfQueryParameterIndex,
-							bindLimitParametersFirst);
-				}
-			}
+			sql = applyLimitToSql(myDialect, offset, maxResultsToFetch, sql, selectedResourceIdColumn, bindVariables);
 		}
 
 		return new GeneratedSql(myMatchNothing, sql, bindVariables);
 	}
 
-	private int bindCountParameter(
+	/**
+	 * This method applies the theDialect limiter (select first NNN offset MMM etc etc..) to
+	 * a SQL string. It enhances the built-in Hibernate dialect version with some additional
+	 * enhancements.
+	 */
+	public static String applyLimitToSql(
+			Dialect theDialect,
+			Integer theOffset,
+			Integer theMaxResultsToFetch,
+			String theInputSql,
+			@Nullable String theSelectedColumnOrNull,
+			List<Object> theBindVariables) {
+		AbstractLimitHandler limitHandler = (AbstractLimitHandler) theDialect.getLimitHandler();
+		Limit selection = new Limit();
+		selection.setFirstRow(theOffset);
+		selection.setMaxRows(theMaxResultsToFetch);
+		QueryOptions queryOptions = new QueryOptionsImpl();
+		theInputSql = limitHandler.processSql(theInputSql, selection, queryOptions);
+
+		int startOfQueryParameterIndex = 0;
+
+		boolean isSqlServer = (theDialect instanceof SQLServerDialect);
+		if (isSqlServer) {
+
+			/*
+			 * SQL server requires an ORDER BY clause to be present in the SQL if there is
+			 * an OFFSET/FETCH FIRST clause, so if there isn't already an ORDER BY clause,
+			 * the theDialect will automatically add an order by with a pseudo-column name. This
+			 * happens in SQLServer2012LimitHandler.
+			 *
+			 * But, SQL Server also pukes if you include an ORDER BY on a column that you
+			 * aren't also SELECTing, if the select statement contains a UNION, INTERSECT or EXCEPT operator.
+			 * Who knows why SQL Server is so picky.. but anyhow, this causes an issue, so we manually replace
+			 * the pseudo-column with an actual selected column.
+			 */
+			if (theInputSql.contains("order by @@version")) {
+				if (theSelectedColumnOrNull != null) {
+					theInputSql = theInputSql.replace("order by @@version", "order by " + theSelectedColumnOrNull);
+				} else {
+					// not certain if this case can happen, but ordering by the ordinal first column should always
+					// be syntactically valid and seems like a better option than ordering by a static value
+					// regardless
+					theInputSql = theInputSql.replace("order by @@version", "order by 1");
+				}
+			}
+
+			// The SQLServerDialect has a bunch of one-off processing to deal with rules on when
+			// a limit can be used, so we can't rely on the flags that the limithandler exposes since
+			// the exact structure of the query depends on the parameters
+			if (theInputSql.contains("top(?)")) {
+				theBindVariables.add(0, theMaxResultsToFetch);
+			}
+			if (theInputSql.contains("offset 0 rows fetch first ? rows only")) {
+				theBindVariables.add(theMaxResultsToFetch);
+			}
+			if (theInputSql.contains("offset ? rows fetch next ? rows only")) {
+				theBindVariables.add(theOffset);
+				theBindVariables.add(theMaxResultsToFetch);
+			}
+			if (theOffset != null && theInputSql.contains("rownumber_")) {
+				theBindVariables.add(theOffset + 1);
+				theBindVariables.add(theOffset + theMaxResultsToFetch + 1);
+			}
+
+		} else if (limitHandler.supportsVariableLimit()) {
+
+			boolean bindLimitParametersFirst = limitHandler.bindLimitParametersFirst();
+			if (limitHandler.useMaxForLimit() && theOffset != null) {
+				theMaxResultsToFetch = theMaxResultsToFetch + theOffset;
+			}
+
+			if (limitHandler.bindLimitParametersInReverseOrder()) {
+				startOfQueryParameterIndex = bindCountParameter(
+						theBindVariables,
+						theMaxResultsToFetch,
+						limitHandler,
+						startOfQueryParameterIndex,
+						bindLimitParametersFirst);
+				bindOffsetParameter(
+						theBindVariables,
+						theOffset,
+						limitHandler,
+						startOfQueryParameterIndex,
+						bindLimitParametersFirst);
+			} else {
+				startOfQueryParameterIndex = bindOffsetParameter(
+						theBindVariables,
+						theOffset,
+						limitHandler,
+						startOfQueryParameterIndex,
+						bindLimitParametersFirst);
+				bindCountParameter(
+						theBindVariables,
+						theMaxResultsToFetch,
+						limitHandler,
+						startOfQueryParameterIndex,
+						bindLimitParametersFirst);
+			}
+		}
+		return theInputSql;
+	}
+
+	private static int bindCountParameter(
 			List<Object> bindVariables,
 			Integer maxResultsToFetch,
 			AbstractLimitHandler limitHandler,
@@ -595,7 +666,7 @@ public class SearchQueryBuilder {
 		return startOfQueryParameterIndex;
 	}
 
-	public int bindOffsetParameter(
+	public static int bindOffsetParameter(
 			List<Object> theBindVariables,
 			@Nullable Integer theOffset,
 			AbstractLimitHandler theLimitHandler,
@@ -698,15 +769,24 @@ public class SearchQueryBuilder {
 
 	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
 		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder(false);
+		return addPredicateLastUpdated(theDateRange, resourceTableRoot);
+	}
+
+	public ComboCondition addPredicateLastUpdated(
+			DateRangeParam theDateRange, ResourceTablePredicateBuilder theResourceTablePredicateBuilder) {
 		List<Condition> conditions = new ArrayList<>(2);
 		BinaryCondition condition;
 
 		if (isNotEqualsComparator(theDateRange)) {
 			condition = createConditionForValueWithComparator(
-					LESSTHAN, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+					LESSTHAN,
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
+					theDateRange.getLowerBoundAsInstant());
 			conditions.add(condition);
 			condition = createConditionForValueWithComparator(
-					GREATERTHAN, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
+					GREATERTHAN,
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
+					theDateRange.getUpperBoundAsInstant());
 			conditions.add(condition);
 			return ComboCondition.or(conditions.toArray(new Condition[0]));
 		}
@@ -714,7 +794,7 @@ public class SearchQueryBuilder {
 		if (theDateRange.getLowerBoundAsInstant() != null) {
 			condition = createConditionForValueWithComparator(
 					GREATERTHAN_OR_EQUALS,
-					resourceTableRoot.getLastUpdatedColumn(),
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
 					theDateRange.getLowerBoundAsInstant());
 			conditions.add(condition);
 		}
@@ -722,7 +802,7 @@ public class SearchQueryBuilder {
 		if (theDateRange.getUpperBoundAsInstant() != null) {
 			condition = createConditionForValueWithComparator(
 					LESSTHAN_OR_EQUALS,
-					resourceTableRoot.getLastUpdatedColumn(),
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
 					theDateRange.getUpperBoundAsInstant());
 			conditions.add(condition);
 		}
@@ -756,7 +836,7 @@ public class SearchQueryBuilder {
 
 		List<Long> excludePids = JpaPid.toLongList(theExistingPidSetToExclude);
 
-		ourLog.trace("excludePids = " + excludePids);
+		ourLog.trace("excludePids = {}", excludePids);
 
 		DbColumn resourceIdColumn = getOrCreateFirstPredicateBuilder().getResourceIdColumn();
 		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(excludePids));
@@ -777,16 +857,18 @@ public class SearchQueryBuilder {
 				return BinaryCondition.greaterThanOrEq(theColumn, generatePlaceholder(theValue));
 			case NOT_EQUAL:
 				return BinaryCondition.notEqualTo(theColumn, generatePlaceholder(theValue));
+			case EQUAL:
+				// NB: fhir searches are always range searches;
+				// which is why we do not use "EQUAL"
 			case STARTS_AFTER:
 			case APPROXIMATE:
 			case ENDS_BEFORE:
-			case EQUAL:
 			default:
 				throw new IllegalArgumentException(Msg.code(1263));
 		}
 	}
 
-	public SearchQueryBuilder newChildSqlBuilder() {
+	public SearchQueryBuilder newChildSqlBuilder(boolean theSelectPartitionId) {
 		return new SearchQueryBuilder(
 				myFhirContext,
 				myStorageSettings,
@@ -797,7 +879,8 @@ public class SearchQueryBuilder {
 				myBindVariableSubstitutionBase,
 				myDialect,
 				false,
-				myBindVariableValues);
+				myBindVariableValues,
+				theSelectPartitionId);
 	}
 
 	public SelectQuery getSelect() {

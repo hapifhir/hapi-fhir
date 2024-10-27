@@ -1,0 +1,7 @@
+---
+type: add
+issue: 5593
+title: "Hibernate SQL log filtering capability was added. 
+    See [Hibernate SQL Log Filtering](/hapi-fhir/docs/appendix/logging.html#hibernate-sql-log-filtering)."
+
+

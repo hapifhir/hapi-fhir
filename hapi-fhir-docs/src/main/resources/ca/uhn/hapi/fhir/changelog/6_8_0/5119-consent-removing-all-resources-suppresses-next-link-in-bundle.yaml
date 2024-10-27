@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5119
+jira: SMILE-7090
+title: "Previously, when the consent service would remove all resources to be returned, the response bundle would
+ not provide the previous/next link(s). This has been corrected."

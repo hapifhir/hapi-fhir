@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package ca.uhn.hapi.fhir.cdshooks.controller;
 
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServicesJson;
 import org.springframework.http.HttpStatus;
@@ -73,7 +72,7 @@ public class CdsHooksController {
 			method = {RequestMethod.POST},
 			consumes = {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<CdsServiceResponseJson> cdsServiceRequest(
-			@PathVariable("cds_hook") String theCdsHook, @RequestBody CdsServiceRequestJson theCdsServiceRequestJson) {
+			@PathVariable("cds_hook") String theCdsHook, @RequestBody Object theCdsServiceRequestJson) {
 		CdsServiceResponseJson response = myCdsServiceRegistry.callService(theCdsHook, theCdsServiceRequestJson);
 		return ResponseEntity.status(200)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -94,13 +93,12 @@ public class CdsHooksController {
 			path = "{cds_hook}/feedback",
 			method = {RequestMethod.POST},
 			consumes = {MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<String> cdsServiceFeedback(
+	public ResponseEntity<CdsServiceFeedbackJson> cdsServiceFeedback(
 			@PathVariable("cds_hook") String theCdsHook,
 			@RequestBody CdsServiceFeedbackJson theCdsServiceFeedbackJson) {
-		String json = myCdsServiceRegistry.callFeedback(theCdsHook, theCdsServiceFeedbackJson);
-
+		CdsServiceFeedbackJson response = myCdsServiceRegistry.callFeedback(theCdsHook, theCdsServiceFeedbackJson);
 		return ResponseEntity.status(200)
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(json);
+				.body(response);
 	}
 }

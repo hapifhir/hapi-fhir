@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 
@@ -205,6 +207,13 @@ public class MdmRulesJson implements IModelJson {
 
 	public String getFieldMatchNamesForVector(long theVector) {
 		return myVectorMatchResultMap.getFieldMatchNames(theVector);
+	}
+
+	public Set<Map.Entry<String, MdmMatchResultEnum>> getMatchedRulesFromVectorMap(Long theLong) {
+		Set<String> matchedRules = myVectorMatchResultMap.getMatchedRules(theLong);
+		return myMatchResultMap.entrySet().stream()
+				.filter(e -> matchedRules.contains(e.getKey()))
+				.collect(Collectors.toSet());
 	}
 
 	public String getDetailedFieldMatchResultWithSuccessInformation(long theVector) {

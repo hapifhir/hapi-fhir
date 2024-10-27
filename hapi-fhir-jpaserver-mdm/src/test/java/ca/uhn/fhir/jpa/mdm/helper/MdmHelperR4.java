@@ -5,15 +5,16 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.mdm.api.MdmLinkEvent;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD;
@@ -51,7 +52,7 @@ public class MdmHelperR4 extends BaseMdmHelper {
 		String resourceType = myFhirContext.getResourceType(theResource);
 
 		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
-		return isExternalHttpRequest ? dao.create(theResource, myMockSrd): dao.create(theResource);
+		return isExternalHttpRequest ? dao.create(theResource, myMockSrd): dao.create(theResource, new SystemRequestDetails());
 	}
 
 	public DaoMethodOutcome doUpdateResource(IBaseResource theResource, boolean isExternalHttpRequest) {

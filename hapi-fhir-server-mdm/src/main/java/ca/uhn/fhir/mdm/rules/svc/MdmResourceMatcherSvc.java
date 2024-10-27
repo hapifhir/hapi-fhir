@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,13 +151,13 @@ public class MdmResourceMatcherSvc {
 						fieldComparator.getName(),
 						matchEvaluation.score,
 						vector);
+				score += matchEvaluation.score;
 			} else {
 				ourLog.trace(
 						"No match: Matcher {} did not match (score: {}).",
 						fieldComparator.getName(),
 						matchEvaluation.score);
 			}
-			score += matchEvaluation.score;
 			appliedRuleCount += 1;
 		}
 

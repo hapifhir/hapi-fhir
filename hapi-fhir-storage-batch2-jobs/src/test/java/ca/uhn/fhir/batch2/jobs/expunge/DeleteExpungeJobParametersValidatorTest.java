@@ -12,9 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,7 +40,7 @@ public class DeleteExpungeJobParametersValidatorTest {
 		List<String> outcome = mySvc.validate(new SystemRequestDetails(), parameters);
 
 		// Verify
-		assertThat(outcome.toString(), outcome, contains("Cascading delete is not supported on this server"));
+		assertThat(outcome).as(outcome.toString()).containsExactly("Cascading delete is not supported on this server");
 	}
 
 	@Test
@@ -58,7 +56,7 @@ public class DeleteExpungeJobParametersValidatorTest {
 		List<String> outcome = mySvc.validate(new SystemRequestDetails(), parameters);
 
 		// Verify
-		assertThat(outcome, empty());
+		assertThat(outcome).isEmpty();
 	}
 
 }

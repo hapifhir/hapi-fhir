@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5023
+backport: 6.6.2
+title: "Jpa migration task used awssdk StringUtils rather than apache commons string utils. Thanks to @Thopap for the contribution"

@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 5589
+backport: 6.10.5
+title: "When encoding resources using the RDF parser, placeholder IDs (i.e. resource IDs
+   starting with `urn:`) were not omitted as they are in the XML and JSON parsers. This has
+   been corrected."
+

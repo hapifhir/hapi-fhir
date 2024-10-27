@@ -1,8 +1,8 @@
 /*
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,23 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -55,15 +63,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamRegistryImpl
-		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
+		implements ISearchParamRegistry,
+				IResourceChangeListener,
+				ISearchParamRegistryController,
+				ISearchParamHashIdentityRegistry {
 
 	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
 			Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*"));
@@ -125,6 +132,7 @@ public class SearchParamRegistryImpl
 
 	private void requiresActiveSearchParams() {
 		if (myActiveSearchParams == null) {
+			// forced refreshes should not use a cache - we're forcibly refrsching it, after all
 			myResourceChangeListenerCache.forceRefresh();
 		}
 	}
@@ -143,6 +151,11 @@ public class SearchParamRegistryImpl
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
 		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames);
+	}
+
+	@Override
+	public Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity) {
+		return myJpaSearchParamCache.getIndexedSearchParamByHashIdentity(theHashIdentity);
 	}
 
 	@Nullable
@@ -193,7 +206,32 @@ public class SearchParamRegistryImpl
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 		removeInactiveSearchParams(searchParams);
-		myActiveSearchParams = searchParams;
+
+		/*
+		 * The _language SearchParameter is a weird exception - It is actually just a normal
+		 * token SP, but we explcitly ban SPs from registering themselves with a prefix
+		 * of "_" since that's system reserved so we put this one behind a settings toggle
+		 */
+		if (myStorageSettings.isLanguageSearchParameterEnabled()) {
+			IIdType id = myFhirContext.getVersion().newIdType();
+			id.setValue("SearchParameter/Resource-language");
+			RuntimeSearchParam sp = new RuntimeSearchParam(
+					id,
+					"http://hl7.org/fhir/SearchParameter/Resource-language",
+					Constants.PARAM_LANGUAGE,
+					"Language of the resource content",
+					"language",
+					RestSearchParameterTypeEnum.TOKEN,
+					Collections.emptySet(),
+					Collections.emptySet(),
+					RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
+					myFhirContext.getResourceTypes());
+			for (String baseResourceType : sp.getBase()) {
+				searchParams.add(baseResourceType, sp.getName(), sp);
+			}
+		}
+
+		setActiveSearchParams(searchParams);
 
 		myJpaSearchParamCache.populateActiveSearchParams(
 				myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
@@ -282,7 +320,13 @@ public class SearchParamRegistryImpl
 
 	@Override
 	public void forceRefresh() {
+		RuntimeSearchParamCache activeSearchParams = myActiveSearchParams;
 		myResourceChangeListenerCache.forceRefresh();
+
+		// If the refresh didn't trigger a change, proceed with one anyway
+		if (myActiveSearchParams == activeSearchParams) {
+			rebuildActiveSearchParams();
+		}
 	}
 
 	@Override
@@ -389,9 +433,15 @@ public class SearchParamRegistryImpl
 		initializeActiveSearchParams(searchParams);
 	}
 
+	@Override
+	public boolean isInitialized() {
+		return myActiveSearchParams != null;
+	}
+
 	@VisibleForTesting
 	public void resetForUnitTest() {
 		myBuiltInSearchParams = null;
+		setActiveSearchParams(null);
 		handleInit(Collections.emptyList());
 	}
 
@@ -404,5 +454,10 @@ public class SearchParamRegistryImpl
 	@VisibleForTesting
 	public int getMaxManagedParamCountForUnitTests() {
 		return MAX_MANAGED_PARAM_COUNT;
+	}
+
+	@VisibleForTesting
+	public void setActiveSearchParams(RuntimeSearchParamCache theSearchParams) {
+		myActiveSearchParams = theSearchParams;
 	}
 }

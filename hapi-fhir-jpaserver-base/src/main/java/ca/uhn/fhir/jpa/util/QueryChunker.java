@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.util.TaskChunker;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * As always, Oracle can't handle things that other databases don't mind.. In this
@@ -36,5 +37,9 @@ public class QueryChunker<T> extends TaskChunker<T> {
 
 	public void chunk(Collection<T> theInput, Consumer<List<T>> theBatchConsumer) {
 		chunk(theInput, SearchBuilder.getMaximumPageSize(), theBatchConsumer);
+	}
+
+	public Stream<List<T>> chunk(Stream<T> theStream) {
+		return chunk(theStream, SearchBuilder.getMaximumPageSize());
 	}
 }

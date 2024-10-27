@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -71,8 +73,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -101,7 +101,7 @@ public class FhirTerser {
 		return newList;
 	}
 
-	private ExtensionDt createEmptyExtensionDt(IBaseExtension theBaseExtension, String theUrl) {
+	private ExtensionDt createEmptyExtensionDt(IBaseExtension<?, ?> theBaseExtension, String theUrl) {
 		return createEmptyExtensionDt(theBaseExtension, false, theUrl);
 	}
 
@@ -122,13 +122,13 @@ public class FhirTerser {
 		return theSupportsUndeclaredExtensions.addUndeclaredExtension(theIsModifier, theUrl);
 	}
 
-	private IBaseExtension createEmptyExtension(IBaseHasExtensions theBaseHasExtensions, String theUrl) {
-		return (IBaseExtension) theBaseHasExtensions.addExtension().setUrl(theUrl);
+	private IBaseExtension<?, ?> createEmptyExtension(IBaseHasExtensions theBaseHasExtensions, String theUrl) {
+		return (IBaseExtension<?, ?>) theBaseHasExtensions.addExtension().setUrl(theUrl);
 	}
 
-	private IBaseExtension createEmptyModifierExtension(
+	private IBaseExtension<?, ?> createEmptyModifierExtension(
 			IBaseHasModifierExtensions theBaseHasModifierExtensions, String theUrl) {
-		return (IBaseExtension)
+		return (IBaseExtension<?, ?>)
 				theBaseHasModifierExtensions.addModifierExtension().setUrl(theUrl);
 	}
 
@@ -192,6 +192,14 @@ public class FhirTerser {
 			throw new DataFormatException(Msg.code(1788) + "Can not copy value from primitive of type "
 					+ theSource.getClass().getName() + " into type "
 					+ theTarget.getClass().getName());
+		}
+
+		if (theSource instanceof IBaseReference && theTarget instanceof IBaseReference) {
+			IBaseReference sourceReference = (IBaseReference) theSource;
+			IBaseReference targetReference = (IBaseReference) theTarget;
+			if (sourceReference.getResource() != null) {
+				targetReference.setResource(sourceReference.getResource());
+			}
 		}
 
 		BaseRuntimeElementCompositeDefinition<?> sourceDef =
@@ -287,9 +295,33 @@ public class FhirTerser {
 		return retVal;
 	}
 
+	/**
+	 * Extracts all outbound references from a resource
+	 *
+	 * @param theResource the resource to be analyzed
+	 * @return a list of references to other resources
+	 */
 	public List<ResourceReferenceInfo> getAllResourceReferences(final IBaseResource theResource) {
+		return getAllResourceReferencesExcluding(theResource, Lists.newArrayList());
+	}
+
+	/**
+	 * Extracts all outbound references from a resource, excluding any that are located on black-listed parts of the
+	 * resource
+	 *
+	 * @param theResource       the resource to be analyzed
+	 * @param thePathsToExclude a list of dot-delimited paths not to include in the result
+	 * @return a list of references to other resources
+	 */
+	public List<ResourceReferenceInfo> getAllResourceReferencesExcluding(
+			final IBaseResource theResource, List<String> thePathsToExclude) {
 		final ArrayList<ResourceReferenceInfo> retVal = new ArrayList<>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
+		List<List<String>> tokenizedPathsToExclude = thePathsToExclude.stream()
+				.map(path -> StringUtils.split(path, "."))
+				.map(Lists::newArrayList)
+				.collect(Collectors.toList());
+
 		visit(newMap(), theResource, theResource, null, null, def, new IModelVisitor() {
 			@Override
 			public void acceptElement(
@@ -301,6 +333,10 @@ public class FhirTerser {
 				if (theElement == null || theElement.isEmpty()) {
 					return;
 				}
+
+				if (thePathToElement != null && pathShouldBeExcluded(tokenizedPathsToExclude, thePathToElement)) {
+					return;
+				}
 				if (IBaseReference.class.isAssignableFrom(theElement.getClass())) {
 					retVal.add(new ResourceReferenceInfo(
 							myContext, theOuterResource, thePathToElement, (IBaseReference) theElement));
@@ -308,6 +344,19 @@ public class FhirTerser {
 			}
 		});
 		return retVal;
+	}
+
+	private boolean pathShouldBeExcluded(List<List<String>> theTokenizedPathsToExclude, List<String> thePathToElement) {
+		return theTokenizedPathsToExclude.stream().anyMatch(p -> {
+			// Check whether the path to the element starts with the path to be excluded
+			if (p.size() > thePathToElement.size()) {
+				return false;
+			}
+
+			List<String> prefix = thePathToElement.subList(0, p.size());
+
+			return Objects.equals(p, prefix);
+		});
 	}
 
 	private BaseRuntimeChildDefinition getDefinition(
@@ -366,7 +415,7 @@ public class FhirTerser {
 
 	public String getSinglePrimitiveValueOrNull(IBase theTarget, String thePath) {
 		return getSingleValue(theTarget, thePath, IPrimitiveType.class)
-				.map(t -> t.getValueAsString())
+				.map(IPrimitiveType::getValueAsString)
 				.orElse(null);
 	}
 
@@ -446,7 +495,7 @@ public class FhirTerser {
 			} else {
 				// DSTU3+
 				final String extensionUrlForLambda = extensionUrl;
-				List<IBaseExtension> extensions = Collections.emptyList();
+				List<IBaseExtension<?, ?>> extensions = Collections.emptyList();
 				if (theCurrentObj instanceof IBaseHasExtensions) {
 					extensions = ((IBaseHasExtensions) theCurrentObj)
 							.getExtension().stream()
@@ -464,7 +513,7 @@ public class FhirTerser {
 					}
 				}
 
-				for (IBaseExtension next : extensions) {
+				for (IBaseExtension<?, ?> next : extensions) {
 					if (theWantedClass.isAssignableFrom(next.getClass())) {
 						retVal.add((T) next);
 					}
@@ -540,7 +589,7 @@ public class FhirTerser {
 			} else {
 				// DSTU3+
 				final String extensionUrlForLambda = extensionUrl;
-				List<IBaseExtension> extensions = Collections.emptyList();
+				List<IBaseExtension<?, ?>> extensions = Collections.emptyList();
 
 				if (theCurrentObj instanceof IBaseHasModifierExtensions) {
 					extensions = ((IBaseHasModifierExtensions) theCurrentObj)
@@ -561,7 +610,7 @@ public class FhirTerser {
 					}
 				}
 
-				for (IBaseExtension next : extensions) {
+				for (IBaseExtension<?, ?> next : extensions) {
 					if (theWantedClass.isAssignableFrom(next.getClass())) {
 						retVal.add((T) next);
 					}
@@ -1162,7 +1211,6 @@ public class FhirTerser {
 	public void visit(IBase theElement, IModelVisitor2 theVisitor) {
 		BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
 		if (def instanceof BaseRuntimeElementCompositeDefinition) {
-			BaseRuntimeElementCompositeDefinition<?> defComposite = (BaseRuntimeElementCompositeDefinition<?>) def;
 			visit(theElement, null, def, theVisitor, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 		} else if (theElement instanceof IBaseExtension) {
 			theVisitor.acceptUndeclaredExtension(
@@ -1521,7 +1569,7 @@ public class FhirTerser {
 				throw new DataFormatException(Msg.code(1796) + "Invalid path " + thePath + ": Element of type "
 						+ def.getName() + " has no child named " + nextPart + ". Valid names: "
 						+ def.getChildrenAndExtension().stream()
-								.map(t -> t.getElementName())
+								.map(BaseRuntimeChildDefinition::getElementName)
 								.sorted()
 								.collect(Collectors.joining(", ")));
 			}
@@ -1776,7 +1824,18 @@ public class FhirTerser {
 			if (getResourceToIdMap() == null) {
 				return null;
 			}
-			return getResourceToIdMap().get(theNext);
+
+			var idFromMap = getResourceToIdMap().get(theNext);
+			if (idFromMap != null) {
+				return idFromMap;
+			} else if (theNext.getIdElement().getIdPart() != null) {
+				return getResourceToIdMap().values().stream()
+						.filter(id -> theNext.getIdElement().getIdPart().equals(id.getIdPart()))
+						.findAny()
+						.orElse(null);
+			} else {
+				return null;
+			}
 		}
 
 		private List<IBaseResource> getOrCreateResourceList() {

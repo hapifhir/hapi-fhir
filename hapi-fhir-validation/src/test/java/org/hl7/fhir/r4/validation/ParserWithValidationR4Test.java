@@ -3,6 +3,7 @@ package org.hl7.fhir.r4.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -10,13 +11,13 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.jupiter.api.Test;
 
-import static ca.uhn.fhir.util.ClasspathUtil.loadResource;
+import java.io.IOException;
 
-public class ParserWithValidationR4Test {
+public class ParserWithValidationR4Test extends BaseValidationTestWithInlineMocks {
 	private static final FhirContext ourCtx = FhirContext.forR4();
 
 	@Test
-	public void testActivityDefinitionElementsOrder() {
+	public void testActivityDefinitionElementsOrder() throws IOException {
 		ourCtx.setValidationSupport(getValidationSupport());
 		MedicationRequest med_req = ourCtx.newJsonParser().parseResource(MedicationRequest.class, loadResource("/r4/amz/medication-request-amz.json"));
 

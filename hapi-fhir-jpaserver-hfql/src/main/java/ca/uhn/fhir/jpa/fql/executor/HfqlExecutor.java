@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - HFQL Driver
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,13 +42,18 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -76,8 +81,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -142,6 +145,8 @@ public class HfqlExecutor implements IHfqlExecutor {
 
 		massageSelectColumnNames(statement);
 		populateSelectColumnDataTypes(statement);
+		validateWhereClauses(statement);
+		massageWhereClauses(statement);
 
 		SearchParameterMap map = new SearchParameterMap();
 		addHfqlWhereClausesToSearchParameterMap(statement, map);
@@ -177,6 +182,98 @@ public class HfqlExecutor implements IHfqlExecutor {
 		}
 
 		return executionResult;
+	}
+
+	private void validateWhereClauses(HfqlStatement theStatement) {
+		for (HfqlStatement.WhereClause next : theStatement.getWhereClauses()) {
+			if (isDataValueWhereClause(next)) {
+				if (next.getLeft().matches("^[a-zA-Z]+$")) {
+					RuntimeResourceDefinition resDef =
+							myFhirContext.getResourceDefinition(theStatement.getFromResourceName());
+					if (resDef.getChildByName(next.getLeft()) == null) {
+						throw new InvalidRequestException(
+								Msg.code(2429) + "Resource type " + theStatement.getFromResourceName()
+										+ " does not have a root element named '" + next.getLeft() + "'");
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * If the user has included a WHERE clause that has a FHIRPath expression but
+	 * could actually be satisfied by a Search Parameter, we'll insert a
+	 * search_match expression so that it's more efficient.
+	 */
+	private void massageWhereClauses(HfqlStatement theStatement) {
+		String fromResourceName = theStatement.getFromResourceName();
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(fromResourceName);
+
+		for (HfqlStatement.WhereClause nextWhereClause : theStatement.getWhereClauses()) {
+
+			String left = null;
+			List<String> rightValues = null;
+			String comparator;
+			if (isDataValueWhereClause(nextWhereClause)) {
+				left = nextWhereClause.getLeft();
+				comparator = "";
+				rightValues = nextWhereClause.getRightAsStrings();
+			} else if (nextWhereClause.getOperator() == HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN
+					&& nextWhereClause.getRightAsStrings().size() > 1) {
+				left = nextWhereClause.getLeft();
+				rightValues = nextWhereClause
+						.getRightAsStrings()
+						.subList(1, nextWhereClause.getRightAsStrings().size());
+				switch (nextWhereClause.getRightAsStrings().get(0)) {
+					case "=":
+						comparator = "";
+						break;
+					case "<":
+						comparator = ParamPrefixEnum.LESSTHAN.getValue();
+						break;
+					case "<=":
+						comparator = ParamPrefixEnum.LESSTHAN_OR_EQUALS.getValue();
+						break;
+					case ">":
+						comparator = ParamPrefixEnum.GREATERTHAN.getValue();
+						break;
+					case ">=":
+						comparator = ParamPrefixEnum.GREATERTHAN_OR_EQUALS.getValue();
+						break;
+					case "!=":
+						comparator = ParamPrefixEnum.NOT_EQUAL.getValue();
+						break;
+					case "~":
+						comparator = ParamPrefixEnum.APPROXIMATE.getValue();
+						break;
+					default:
+						left = null;
+						comparator = null;
+						rightValues = null;
+				}
+			} else {
+				comparator = null;
+			}
+
+			if (left != null) {
+				if (isFhirPathExpressionEquivalent("id", left, fromResourceName)) {
+					// This is an expression for Resource.id
+					nextWhereClause.setLeft("id");
+					nextWhereClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
+					String joinedParamValues =
+							rightValues.stream().map(ParameterUtil::escape).collect(Collectors.joining(","));
+					nextWhereClause.setRight(Constants.PARAM_ID, joinedParamValues);
+				} else if (isFhirPathExpressionEquivalent("meta.lastUpdated", left, fromResourceName)) {
+					// This is an expression for Resource.meta.lastUpdated
+					nextWhereClause.setLeft("id");
+					nextWhereClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
+					String joinedParamValues = rightValues.stream()
+							.map(value -> comparator + ParameterUtil.escape(value))
+							.collect(Collectors.joining(","));
+					nextWhereClause.setRight(Constants.PARAM_LASTUPDATED, joinedParamValues);
+				}
+			}
+		}
 	}
 
 	private void addHfqlWhereClausesToSearchParameterMap(HfqlStatement statement, SearchParameterMap map) {
@@ -453,8 +550,12 @@ public class HfqlExecutor implements IHfqlExecutor {
 						}
 					}
 				} catch (FhirPathExecutionException e) {
+					String expression =
+							nextWhereClause.getOperator() == HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN
+									? nextWhereClause.asUnaryExpression()
+									: nextWhereClause.getLeft();
 					throw new InvalidRequestException(Msg.code(2403) + "Unable to evaluate FHIRPath expression \""
-							+ nextWhereClause.getLeft() + "\". Error: " + e.getMessage());
+							+ expression + "\". Error: " + e.getMessage());
 				}
 
 				if (!haveMatch) {
@@ -740,6 +841,28 @@ public class HfqlExecutor implements IHfqlExecutor {
 		return new StaticHfqlExecutionResult(null, columns, dataTypes, rows);
 	}
 
+	private static boolean isFhirPathExpressionEquivalent(
+			String wantedExpression, String actualExpression, String fromResourceName) {
+		if (wantedExpression.equals(actualExpression)) {
+			return true;
+		}
+		if (("Resource." + wantedExpression).equals(actualExpression)) {
+			return true;
+		}
+		return (fromResourceName + "." + wantedExpression).equals(actualExpression);
+	}
+
+	/**
+	 * Returns {@literal true} if a where clause has an operator of
+	 * {@link ca.uhn.fhir.jpa.fql.parser.HfqlStatement.WhereClauseOperatorEnum#EQUALS}
+	 * or
+	 * {@link ca.uhn.fhir.jpa.fql.parser.HfqlStatement.WhereClauseOperatorEnum#IN}
+	 */
+	private static boolean isDataValueWhereClause(HfqlStatement.WhereClause next) {
+		return next.getOperator() == HfqlStatement.WhereClauseOperatorEnum.EQUALS
+				|| next.getOperator() == HfqlStatement.WhereClauseOperatorEnum.IN;
+	}
+
 	@SuppressWarnings("unchecked")
 	static Comparator<IHfqlExecutionResult.Row> newRowComparator(int columnIndex, HfqlDataTypeEnum dataType) {
 		return Comparator.comparing(new RowValueExtractor(columnIndex, dataType));
@@ -748,9 +871,10 @@ public class HfqlExecutor implements IHfqlExecutor {
 	private static boolean evaluateWhereClauseUnaryBoolean(
 			HfqlExecutionContext theExecutionContext, IBaseResource r, HfqlStatement.WhereClause theNextWhereClause) {
 		boolean haveMatch = false;
-		assert theNextWhereClause.getRight().isEmpty();
-		List<IPrimitiveType> values =
-				theExecutionContext.evaluate(r, theNextWhereClause.getLeft(), IPrimitiveType.class);
+
+		String fullExpression = theNextWhereClause.asUnaryExpression();
+
+		List<IPrimitiveType> values = theExecutionContext.evaluate(r, fullExpression, IPrimitiveType.class);
 		for (IPrimitiveType<?> nextValue : values) {
 			if (Boolean.TRUE.equals(nextValue.getValue())) {
 				haveMatch = true;

@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 6000
+title: "In an MDM enabled system with multi-delete enabled, deleting
+        both the final source resource and it's linked golden resource
+        at the same time results in an error being thrown.
+        This has been fixed.
+"

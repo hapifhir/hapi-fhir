@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,16 +32,23 @@ public class MetadataSource {
 	 */
 	public boolean isOnlineIndexSupported(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
 
+		// todo: delete this once we figure out how run Oracle try-catch as well.
 		switch (theConnectionProperties.getDriverType()) {
 			case POSTGRES_9_4:
 			case COCKROACHDB_21_1:
 				return true;
 			case MSSQL_2012:
+				// use a deny-list instead of allow list, so we have a better failure mode for new/unknown versions.
+				// Better to fail in dev than run with a table lock in production.
 				String mssqlEdition = getEdition(theConnectionProperties);
-				return mssqlEdition.startsWith("Enterprise");
+				return mssqlEdition == null // some weird version without an edition?
+						||
+						// these versions don't support ONLINE index creation
+						!mssqlEdition.startsWith("Standard Edition");
 			case ORACLE_12C:
 				String oracleEdition = getEdition(theConnectionProperties);
-				return oracleEdition.contains("Enterprise");
+				return oracleEdition == null // weird unknown version - try, and maybe fail.
+						|| oracleEdition.contains("Enterprise");
 			default:
 				return false;
 		}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -58,6 +58,7 @@ public class RequestTenantPartitionInterceptor {
 		// We will use the tenant ID that came from the request as the partition name
 		String tenantId = theRequestDetails.getTenantId();
 		if (isBlank(tenantId)) {
+			// this branch is no-op happen when "partitioning.tenant_identification_strategy" is set to URL_BASED
 			if (theRequestDetails instanceof SystemRequestDetails) {
 				SystemRequestDetails requestDetails = (SystemRequestDetails) theRequestDetails;
 				if (requestDetails.getRequestPartitionId() != null) {
@@ -68,6 +69,11 @@ public class RequestTenantPartitionInterceptor {
 			throw new InternalErrorException(Msg.code(343) + "No partition ID has been specified");
 		}
 
+		// for REQUEST_TENANT partition selection mode, allPartitions is supported when URL includes _ALL as the tenant
+		// else if no tenant is provided in the URL, DEFAULT will be used as per UrlBaseTenantIdentificationStrategy
+		if (tenantId.equals(ProviderConstants.ALL_PARTITIONS_TENANT_NAME)) {
+			return RequestPartitionId.allPartitions();
+		}
 		return RequestPartitionId.fromPartitionName(tenantId);
 	}
 }

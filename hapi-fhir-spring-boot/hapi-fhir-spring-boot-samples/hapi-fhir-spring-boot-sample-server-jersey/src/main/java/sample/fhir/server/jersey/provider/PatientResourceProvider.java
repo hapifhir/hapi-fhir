@@ -50,8 +50,8 @@ public class PatientResourceProvider extends AbstractJaxRsResourceProvider<Patie
 		}
 	}
 
-	public PatientResourceProvider(FhirContext fhirContext) {
-		super(fhirContext);
+	public PatientResourceProvider() {
+		super(FhirContext.forDstu3Cached());
 	}
 
 	@Read

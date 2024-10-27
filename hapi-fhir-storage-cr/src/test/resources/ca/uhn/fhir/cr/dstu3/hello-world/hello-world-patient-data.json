@@ -1,0 +1,459 @@
+{
+	"resourceType": "Bundle",
+	"id": "hello-world-patient-data",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "Encounter",
+				"id": "helloworld-patient-1-encounter-1",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+					]
+				},
+				"status": "finished",
+				"class": {
+					"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+					"code": "AMB",
+					"display": "ambulatory"
+				},
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://snomed.info/sct",
+								"version": "2020-09",
+								"code": "185463005",
+								"display": "Visit out of hours (procedure)"
+							}
+						]
+					}
+				],
+				"subject": {
+					"reference": "Patient/helloworld-patient-1"
+				},
+				"period": {
+					"start": "2020-01-01T10:00:00-07:00",
+					"end": "2020-01-01T11:00:00-07:00"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Encounter/helloworld-patient-1-encounter-1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"id": "helloworld-patient-1",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+					]
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+									"code": "2106-3",
+									"display": "White"
+								}
+							},
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+									"code": "1002-5",
+									"display": "American Indian or Alaska Native"
+								}
+							},
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+									"code": "2028-9",
+									"display": "Asian"
+								}
+							},
+							{
+								"url": "detailed",
+								"valueCoding": {
+									"system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+									"code": "1586-7",
+									"display": "Shoshone"
+								}
+							},
+							{
+								"url": "detailed",
+								"valueCoding": {
+									"system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+									"code": "2036-2",
+									"display": "Filipino"
+								}
+							},
+							{
+								"url": "text",
+								"valueString": "Mixed"
+							}
+						]
+					},
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+									"code": "2135-2",
+									"display": "Hispanic or Latino"
+								}
+							},
+							{
+								"url": "detailed",
+								"valueCoding": {
+									"system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+									"code": "2184-0",
+									"display": "Dominican"
+								}
+							},
+							{
+								"url": "detailed",
+								"valueCoding": {
+									"system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+									"code": "2148-5",
+									"display": "Mexican"
+								}
+							},
+							{
+								"url": "text",
+								"valueString": "Hispanic or Latino"
+							}
+						]
+					},
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+						"valueCode": "M"
+					}
+				],
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MR"
+								}
+							]
+						},
+						"system": "urn:oid:1.2.36.146.595.217.0.1",
+						"value": "12345",
+						"period": {
+							"start": "2001-05-06"
+						},
+						"assigner": {
+							"display": "Acme Healthcare"
+						}
+					}
+				],
+				"active": true,
+				"name": [
+					{
+						"use": "official",
+						"family": "Doe",
+						"given": [
+							"John"
+						]
+					}
+				],
+				"gender": "male",
+				"birthDate": "1991-01-01",
+				"deceasedBoolean": false
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Patient/helloworld-patient-1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "MeasureReport",
+				"id": "measurereport-helloworld-patient-1",
+				"contained": [
+					{
+						"resourceType": "Observation",
+						"id": "256ebb02-c5d6-4b37-ae5f-66b027e67c53",
+						"extension": [
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+								"extension": [
+									{
+										"url": "measure",
+										"valueUri": "http://content.alphora.com/fhir/dqm/Measure/helloworld"
+									},
+									{
+										"url": "populationId",
+										"valueString": "sde-race"
+									}
+								]
+							}
+						],
+						"status": "final",
+						"code": {
+							"text": "sde-race"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+									"code": "2106-3",
+									"display": "White"
+								}
+							]
+						}
+					},
+					{
+						"resourceType": "Observation",
+						"id": "54f1aa42-627e-45df-a655-18a88c5f5d6c",
+						"extension": [
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+								"extension": [
+									{
+										"url": "measure",
+										"valueUri": "http://content.alphora.com/fhir/dqm/Measure/helloworld"
+									},
+									{
+										"url": "populationId",
+										"valueString": "sde-payer"
+									}
+								]
+							}
+						],
+						"status": "final",
+						"code": {
+							"text": "sde-payer"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "https://nahdo.org/sopt",
+									"code": "31",
+									"display": "Department of Defense"
+								}
+							]
+						}
+					},
+					{
+						"resourceType": "Observation",
+						"id": "2499fe18-2a97-4ad8-8d5f-154d94f5f4e9",
+						"extension": [
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+								"extension": [
+									{
+										"url": "measure",
+										"valueUri": "http://content.alphora.com/fhir/dqm/Measure/helloworld"
+									},
+									{
+										"url": "populationId",
+										"valueString": "sde-ethnicity"
+									}
+								]
+							}
+						],
+						"status": "final",
+						"code": {
+							"text": "sde-ethnicity"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+									"code": "2135-2",
+									"display": "Hispanic or Latino"
+								}
+							]
+						}
+					},
+					{
+						"resourceType": "Observation",
+						"id": "6f2b2210-564c-4614-bbe7-0fe5de354b99",
+						"extension": [
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+								"extension": [
+									{
+										"url": "measure",
+										"valueUri": "http://content.alphora.com/fhir/dqm/Measure/helloworld"
+									},
+									{
+										"url": "populationId",
+										"valueString": "sde-sex"
+									}
+								]
+							}
+						],
+						"status": "final",
+						"code": {
+							"text": "sde-sex"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"code": "M"
+								}
+							]
+						}
+					}
+				],
+				"status": "complete",
+				"type": "individual",
+				"measure": {
+					"reference": "http://content.alphora.com/fhir/dqm/Measure/helloworld"
+				},
+				"patient": {
+					"reference": "Patient/helloworld-patient-1"
+				},
+				"period": {
+					"start": "2020-01-01T00:00:00-07:00",
+					"end": "2020-12-31T00:00:00-07:00"
+				},
+				"group": [
+					{
+						"id": "group-1",
+						"population": [
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "initial-population",
+											"display": "Initial Population"
+										}
+									]
+								},
+								"count": 0
+							},
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "numerator",
+											"display": "Numerator"
+										}
+									]
+								},
+								"count": 0
+							},
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "denominator",
+											"display": "Denominator"
+										}
+									]
+								},
+								"count": 0
+							}
+						]
+					},
+					{
+						"id": "group-2",
+						"population": [
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "initial-population",
+											"display": "Initial Population"
+										}
+									]
+								},
+								"count": 0
+							},
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "numerator",
+											"display": "Numerator"
+										}
+									]
+								},
+								"count": 0
+							},
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "denominator",
+											"display": "Denominator"
+										}
+									]
+								},
+								"count": 0
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "MeasureReport/measurereport-helloworld-patient-1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Coverage",
+				"id": "helloworld-patient-1-coverage-1",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-coverage"
+					]
+				},
+				"status": "active",
+				"type": {
+					"coding": [
+						{
+							"system": "https://nahdo.org/sopt",
+							"version": "9.2",
+							"code": "31",
+							"display": "Department of Defense"
+						}
+					]
+				},
+				"policyHolder": {
+					"reference": "Patient/helloworld-patient-1"
+				},
+				"beneficiary": {
+					"reference": "Patient/helloworld-patient-1"
+				},
+				"period": {
+					"start": "2020-01-01T00:00:00-07:00",
+					"end": "2021-01-01T00:00:00-07:00"
+				},
+				"payor": [
+					{
+						"reference": "Patient/helloworld-patient-1"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Coverage/helloworld-patient-1-coverage-1"
+			}
+		}
+	]
+}

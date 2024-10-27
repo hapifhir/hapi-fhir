@@ -41,6 +41,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -104,7 +105,7 @@ public class OperationClientR4Test {
 		ourLog.info(requestBody);
 		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
 		assertEquals("http://foo/$nonrepeating", value.getURI().toASCIIString());
-		assertEquals(2, request.getParameter().size());
+		assertThat(request.getParameter()).hasSize(2);
 		assertEquals("valstr", request.getParameter().get(0).getName());
 		assertEquals("str", ((StringType) request.getParameter().get(0).getValue()).getValue());
 		assertEquals("valtok", request.getParameter().get(1).getName());
@@ -155,8 +156,7 @@ public class OperationClientR4Test {
 				.named("nonrepeating")
 				.withSearchParameter(Parameters.class, "valstr", new StringParam("str"))
 				.execute();
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("Can not invoke operation \"$nonrepeating\" on instance \"123\" - No resource type specified", e.getMessage());
 		}
 	}
@@ -172,7 +172,7 @@ public class OperationClientR4Test {
 		ourLog.info(requestBody);
 		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
 		assertEquals("http://foo/$nonrepeating", value.getURI().toASCIIString());
-		assertEquals(2, request.getParameter().size());
+		assertThat(request.getParameter()).hasSize(2);
 		assertEquals("valstr", request.getParameter().get(0).getName());
 		assertEquals("str", ((StringType) request.getParameter().get(0).getValue()).getValue());
 		assertEquals("valtok", request.getParameter().get(1).getName());

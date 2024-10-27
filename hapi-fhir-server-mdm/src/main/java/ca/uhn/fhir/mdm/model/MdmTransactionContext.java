@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,12 @@ public class MdmTransactionContext {
 	private OperationType myRestOperation;
 
 	private String myResourceType;
+
+	/**
+	 * Whether or not the currently processed resource is a 'blocked resource'.
+	 * This will only be set on matching.
+	 */
+	private boolean myIsBlockedResource;
 
 	private List<IMdmLink> myMdmLinkEvents = new ArrayList<>();
 
@@ -110,5 +116,13 @@ public class MdmTransactionContext {
 
 	public void setMdmLinks(List<IMdmLink> theMdmLinkEvents) {
 		myMdmLinkEvents = theMdmLinkEvents;
+	}
+
+	public void setIsBlocked(boolean theIsBlocked) {
+		myIsBlockedResource = theIsBlocked;
+	}
+
+	public boolean getIsBlocked() {
+		return myIsBlockedResource;
 	}
 }

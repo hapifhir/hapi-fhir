@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 public class FhirContextR4Test {
 
@@ -20,7 +20,7 @@ public class FhirContextR4Test {
 
 		final Set<String> resourceTypes = fhirContext.getResourceTypes();
 
-		assertTrue(resourceTypes.contains("Clock"));
+		assertThat(resourceTypes).contains("Clock");
 	}
 
 	@Test
@@ -34,7 +34,7 @@ public class FhirContextR4Test {
 
 		final Set<String> resourceTypes = fhirContext.getResourceTypes();
 
-		assertTrue(resourceTypes.contains("CustomResourceResourceDef"));
+		assertThat(resourceTypes).contains("CustomResourceResourceDef");
 	}
 
 	@Test
@@ -43,6 +43,6 @@ public class FhirContextR4Test {
 
 		fhirContext.registerCustomType(NoResourceDef.class);
 
-		assertThrows(ConfigurationException.class, () -> fhirContext.getAllResourceDefinitions());
+		assertThatExceptionOfType(ConfigurationException.class).isThrownBy(() -> fhirContext.getAllResourceDefinitions());
 	}
 }

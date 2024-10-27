@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public abstract class BaseCandidateFinder {
 
 	CandidateList findCandidates(IAnyResource theTarget) {
 		CandidateList candidateList = new CandidateList(getStrategy());
-		candidateList.addAll(findMatchGoldenResourceCandidates(theTarget));
+		candidateList.addAll(getStrategy(), findMatchGoldenResourceCandidates(theTarget));
 		return candidateList;
 	}
 

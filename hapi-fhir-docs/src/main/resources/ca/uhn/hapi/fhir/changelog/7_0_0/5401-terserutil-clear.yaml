@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5401
+title: "Previously, it was only possible to clear a top-level field on a resource using TerserUtil.  A new method has been added
+to TerserUtil to support clearing a value by FhirPath."

@@ -11,8 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,7 +30,7 @@ class FhirValidatorTest {
 		List<SingleValidationMessage> resultMessages = FhirValidator.buildValidationMessages(tasks);
 
 		// validate
-		assertThat(resultMessages, hasSize(1));
+		assertThat(resultMessages).hasSize(1);
 		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
 		assertEquals(PREFIX + ".name.first", resultMessages.get(0).getLocationString());
 	}
@@ -45,7 +44,7 @@ class FhirValidatorTest {
 		List<SingleValidationMessage> resultMessages = FhirValidator.buildValidationMessages(tasks);
 
 		// validate
-		assertThat(resultMessages, hasSize(1));
+		assertThat(resultMessages).hasSize(1);
 		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
 		assertEquals(PREFIX + ".name", resultMessages.get(0).getLocationString());
 	}
@@ -59,7 +58,7 @@ class FhirValidatorTest {
 		List<SingleValidationMessage> resultMessages = FhirValidator.buildValidationMessages(tasks);
 
 		// validate
-		assertThat(resultMessages, hasSize(1));
+		assertThat(resultMessages).hasSize(1);
 		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
 		assertEquals(PREFIX, resultMessages.get(0).getLocationString());
 	}
@@ -73,7 +72,7 @@ class FhirValidatorTest {
 		List<SingleValidationMessage> resultMessages = FhirValidator.buildValidationMessages(tasks);
 
 		// validate
-		assertThat(resultMessages, hasSize(1));
+		assertThat(resultMessages).hasSize(1);
 		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
 		assertEquals(PREFIX + ".patient", resultMessages.get(0).getLocationString());
 	}

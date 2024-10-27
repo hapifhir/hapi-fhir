@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6142
+jira: SMILE-8701
+title: "Previously, if you upgraded from any older HAPI version to 6.6.0 or later, the `SEARCH_UUID` column length still 
+showed as 36 despite it being updated to have a length of 48. This has now been fixed."

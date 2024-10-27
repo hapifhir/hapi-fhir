@@ -38,7 +38,7 @@
 			},
 			{
 				"system": "http://loinc.org",
-				"code": "59408-5",
+				"code": "not-a-real-code",
 				"display": "Oxygen saturation in Arterial blood by Pulse oximetry"
 			},
 			{

@@ -6,9 +6,11 @@ import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NicknameMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NicknameMatcherTest {
 	IMdmFieldMatcher matcher;
@@ -22,23 +24,23 @@ class NicknameMatcherTest {
 
 	@Test
 	public void testMatches() {
-		Assertions.assertTrue(match("Ken", "ken"));
-		Assertions.assertTrue(match("ken", "Ken"));
-		Assertions.assertTrue(match("Ken", "Ken"));
-		Assertions.assertTrue(match("Kenneth", "Ken"));
-		Assertions.assertTrue(match("Kenneth", "Kenny"));
-		Assertions.assertTrue(match("Ken", "Kenneth"));
-		Assertions.assertTrue(match("Kenny", "Kenneth"));
-		Assertions.assertTrue(match("Jim", "Jimmy"));
-		Assertions.assertTrue(match("Jimmy", "Jim"));
-		Assertions.assertTrue(match("Jim", "James"));
-		Assertions.assertTrue(match("Jimmy", "James"));
-		Assertions.assertTrue(match("James", "Jimmy"));
-		Assertions.assertTrue(match("James", "Jim"));
+		assertTrue(match("Ken", "ken"));
+		assertTrue(match("ken", "Ken"));
+		assertTrue(match("Ken", "Ken"));
+		assertTrue(match("Kenneth", "Ken"));
+		assertTrue(match("Kenneth", "Kenny"));
+		assertTrue(match("Ken", "Kenneth"));
+		assertTrue(match("Kenny", "Kenneth"));
+		assertTrue(match("Jim", "Jimmy"));
+		assertTrue(match("Jimmy", "Jim"));
+		assertTrue(match("Jim", "James"));
+		assertTrue(match("Jimmy", "James"));
+		assertTrue(match("James", "Jimmy"));
+		assertTrue(match("James", "Jim"));
 
-		Assertions.assertFalse(match("Ken", "Bob"));
+		assertFalse(match("Ken", "Bob"));
 		// These aren't nickname matches.  If you want matches like these use a phonetic matcher
-		Assertions.assertFalse(match("Allen", "Allan"));
+		assertFalse(match("Allen", "Allan"));
 	}
 
 	private boolean match(String theFirst, String theSecond) {

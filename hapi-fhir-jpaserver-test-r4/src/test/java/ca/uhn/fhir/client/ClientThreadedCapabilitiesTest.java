@@ -1,5 +1,6 @@
 package ca.uhn.fhir.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -36,7 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -113,7 +114,7 @@ public class ClientThreadedCapabilitiesTest {
 			} else {
 				// metadata request must always be first
 				if (counter.get() == 0) {
-					fail("A non-metadata request was executed before metadata request");
+					fail("A non-metadata request was executed before metadata request: " + theRequest.getUri() + " counter: " + counter.get());
 				}
 			}
 		}

@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5855
+title: "If using an OpenTelemetry agent, a span is now generated for each interceptor method call. The span is named 
+as 'hapifhir.interceptor' and it has the following attributes about the interceptor:
+'hapifhir.interceptor.pointcut_name','hapifhir.interceptor.class_name', 'hapifhir.interceptor.method_name'"

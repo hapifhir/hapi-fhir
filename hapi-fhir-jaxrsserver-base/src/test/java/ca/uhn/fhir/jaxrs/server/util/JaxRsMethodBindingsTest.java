@@ -21,9 +21,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class JaxRsMethodBindingsTest {
@@ -35,7 +35,7 @@ public class JaxRsMethodBindingsTest {
 
 	@Test
 	public void testFindMethodsForProviderNotDefinedMappingMethods() {
-		assertThrows(NotImplementedOperationException.class, () -> {
+		assertThatExceptionOfType(NotImplementedOperationException.class).isThrownBy(() -> {
 			new TestJaxRsDummyPatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "");
 		});
 	}
@@ -87,8 +87,8 @@ public class JaxRsMethodBindingsTest {
 			new TestDoubleSearchProvider();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertTrue(e.getMessage().contains("search1"));
-			assertTrue(e.getMessage().contains("search2"));
+			assertThat(e.getMessage()).contains("search1");
+			assertThat(e.getMessage()).contains("search2");
 		}
 	}
 

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3761
+title: "Fixed behaviour of the `_list` query parameter. Now it returns exclusively resources that are members of the given list. Thanks to Jens Villadsen (@jkiddo) for the contribution!"
+

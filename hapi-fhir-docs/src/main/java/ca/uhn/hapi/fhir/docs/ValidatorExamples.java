@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
@@ -35,6 +36,8 @@ import ca.uhn.fhir.validation.SchemaBaseValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.ServletException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
@@ -58,8 +61,6 @@ import org.hl7.fhir.r4.model.ValueSet;
 import java.io.File;
 import java.io.FileReader;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
 
 @SuppressWarnings({"serial", "unused"})
 public class ValidatorExamples {
@@ -308,9 +309,7 @@ public class ValidatorExamples {
 			@Override
 			public LookupCodeResult lookupCode(
 					ValidationSupportContext theValidationSupportContext,
-					String theSystem,
-					String theCode,
-					String theDisplayLanguage) {
+					@Nonnull LookupCodeRequest validationSupportParameterObject) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}

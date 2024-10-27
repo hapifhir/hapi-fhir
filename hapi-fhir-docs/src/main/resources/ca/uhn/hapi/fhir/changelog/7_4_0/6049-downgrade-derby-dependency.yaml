@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6049
+title: "Rolled back org.apache.derby dependency to one that
+        supports JREs 11 - 17.
+"

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4630
+backport: 6.4.3
+title: "Default values are provided for the new UPDATE_TIME columns so batch jobs started before an upgrade can complete."

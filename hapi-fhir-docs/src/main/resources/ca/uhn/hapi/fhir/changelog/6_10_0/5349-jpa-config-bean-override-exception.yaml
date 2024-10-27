@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5349
+title: "Removed duplicate helperSvc bean in JpaConfig (also defined in imported MdmJpaConfig) to resolve BeanDefinitionOverrideException"

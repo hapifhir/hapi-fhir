@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5722
+backport: 7.0.1
+title: "An incorrect migration script caused a failure when upgrading to HAPI FHIR 7.0.0 on
+  PostgreSQL if the database was not in the `public` schema. Thanks to GitHub 
+  user @pano-smals for the contribution!"

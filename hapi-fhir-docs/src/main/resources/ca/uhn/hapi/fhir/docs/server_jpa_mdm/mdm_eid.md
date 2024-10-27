@@ -1,8 +1,9 @@
 # MDM Enterprise Identifiers
 
-An Enterprise Identifier (EID) is a unique identifier that can be attached to source resources. Each implementation is expected to use exactly one EID system for incoming resources, defined in the MDM Rules file. If a source resource with a valid EID is submitted, that EID will be copied over to the Golden Resource that was matched. In the case that the incoming source resource had no EID assigned, an internal EID will be created for it. There are thus two classes of EID:
- * Internal EIDs, created by HAPI-MDM, and 
- * External EIDs, provided by the submitted resources.
+An Enterprise Identifier (EID) is a unique identifier that can be attached to source resources.
+Each implementation is expected to use exactly one EID system for incoming resources,
+defined in the MDM Rules file.
+If a source resource with a valid EID is submitted, that EID will be copied over to the Golden Resource that was matched.
 
 ## MDM EID Settings
 

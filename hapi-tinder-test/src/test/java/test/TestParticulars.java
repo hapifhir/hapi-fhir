@@ -1,9 +1,8 @@
 package test;
 
-import org.junit.jupiter.api.Test;
-
-import ca.uhn.test.realstructs.resource.ListResource;
 import ca.uhn.test.realstructs.resource.AuditEvent.ObjectElement;
+import ca.uhn.test.realstructs.resource.ListResource;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,9 @@ public class Logs {
 	private static final Logger ourNarrativeGenerationTroubleshootingLog =
 			LoggerFactory.getLogger("ca.uhn.fhir.log.narrative_generation_troubleshooting");
 
+	private static final Logger ourTerminologyTroubleshootingLog =
+			LoggerFactory.getLogger("ca.uhn.fhir.log.terminology_troubleshooting");
+
 	private static final Logger ourSubscriptionTroubleshootingLog =
 			LoggerFactory.getLogger("ca.cdr.log.subscription_troubleshooting");
 
@@ -40,6 +43,10 @@ public class Logs {
 
 	public static Logger getNarrativeGenerationTroubleshootingLog() {
 		return ourBatchTroubleshootingLog;
+	}
+
+	public static Logger getTerminologyTroubleshootingLog() {
+		return ourTerminologyTroubleshootingLog;
 	}
 
 	public static Logger getSubscriptionTroubleshootingLog() {

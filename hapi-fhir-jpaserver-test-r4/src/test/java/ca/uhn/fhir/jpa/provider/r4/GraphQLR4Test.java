@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.util.FileUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -25,10 +26,7 @@ import java.nio.charset.StandardCharsets;
 
 import static ca.uhn.fhir.jpa.provider.GraphQLProviderTestUtil.DATA_PREFIX;
 import static ca.uhn.fhir.jpa.provider.GraphQLProviderTestUtil.DATA_SUFFIX;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class GraphQLR4Test extends BaseResourceProviderR4Test {
@@ -96,13 +94,13 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info(resp);
 				assertEquals(200, response.getStatusLine().getStatusCode());
-				assertThat(resp, containsString("{\"kind\":\"OBJECT\",\"name\":\"Patient\","));
-				assertThat(resp, not(containsString("{\"kind\":\"OBJECT\",\"name\":\"Observation\",")));
-				assertThat(resp, not(containsString("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"")));
-				assertThat(resp, not(containsString("\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"")));
-				assertThat(resp, not(containsString("\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"")));
-				assertThat(resp, containsString("\"name\":\"Patient\",\"args\":[{\"name\":\"id\""));
-				assertThat(resp, containsString("\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\""));
+				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
+				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
+				assertThat(resp).doesNotContain("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
+				assertThat(resp).doesNotContain("\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"");
+				assertThat(resp).doesNotContain("\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"");
+				assertThat(resp).contains("\"name\":\"Patient\",\"args\":[{\"name\":\"id\"");
+				assertThat(resp).contains("\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"");
 			}
 		}
 	}
@@ -122,14 +120,14 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info(resp);
 				assertEquals(200, response.getStatusLine().getStatusCode());
-				assertThat(resp, not(containsString("{\"kind\":\"OBJECT\",\"name\":\"Patient\",")));
-				assertThat(resp, containsString("{\"kind\":\"OBJECT\",\"name\":\"Observation\","));
-				assertThat(resp, not(containsString("{\"kind\":\"OBJECT\",\"name\":\"Query\",\"fields\":[{\"name\":\"PatientList\"")));
-				assertThat(resp, containsString("\"name\":\"Observation\",\"args\":[{\"name\":\"id\""));
-				assertThat(resp, containsString("\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\""));
-				assertThat(resp, containsString("\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\""));
-				assertThat(resp, not(containsString("\"name\":\"Patient\",\"args\":[{\"name\":\"id\"")));
-				assertThat(resp, not(containsString("\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"")));
+				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
+				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
+				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Query\",\"fields\":[{\"name\":\"PatientList\"");
+				assertThat(resp).contains("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
+				assertThat(resp).contains("\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"");
+				assertThat(resp).contains("\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"");
+				assertThat(resp).doesNotContain("\"name\":\"Patient\",\"args\":[{\"name\":\"id\"");
+				assertThat(resp).doesNotContain("\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"");
 			}
 		}
 	}
@@ -149,13 +147,13 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info("Response has size: {}", FileUtil.formatFileSize(resp.length()));
 				assertEquals(200, response.getStatusLine().getStatusCode());
-				assertThat(resp, containsString("{\"kind\":\"OBJECT\",\"name\":\"Patient\","));
-				assertThat(resp, containsString("{\"kind\":\"OBJECT\",\"name\":\"Observation\","));
-				assertThat(resp, containsString("\"name\":\"Observation\",\"args\":[{\"name\":\"id\""));
-				assertThat(resp, containsString("\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\""));
-				assertThat(resp, containsString("\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\""));
-				assertThat(resp, containsString("\"name\":\"Patient\",\"args\":[{\"name\":\"id\""));
-				assertThat(resp, containsString("\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\""));
+				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
+				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
+				assertThat(resp).contains("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
+				assertThat(resp).contains("\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"");
+				assertThat(resp).contains("\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"");
+				assertThat(resp).contains("\"name\":\"Patient\",\"args\":[{\"name\":\"id\"");
+				assertThat(resp).contains("\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"");
 			}
 		}
 	}
@@ -183,9 +181,9 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				}]
 				}
 				}""";
-			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX +
+			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX +
 				expected +
-				DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+				DATA_SUFFIX));
 		}
 
 	}
@@ -235,6 +233,31 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 		}
 		myCaptureQueriesListener.logSelectQueries();
+	}
+
+	@Test
+	public void testId_Search_Patient() throws IOException {
+		initTestPatients();
+
+		String query = "{PatientList(_id: " + myPatientId0.getIdPart() + ") {id}}";
+		HttpGet httpGet = new HttpGet(myServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+
+			@Language("json")
+			String expected = """
+				{
+				"PatientList":[{
+				"id":" """ + myPatientId0 + """
+				/_history/1"
+				}]
+				}""";
+			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX +
+				expected +
+				DATA_SUFFIX));
+		}
 	}
 
 	private void initTestPatients() {

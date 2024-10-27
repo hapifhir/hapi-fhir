@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -53,10 +54,13 @@ import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -77,8 +81,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
@@ -108,9 +110,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
 
-	@SuppressWarnings("rawtypes")
 	@Autowired
-	private IMdmLinkDao myMdmLinkDao;
+	protected IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
 
 	@Autowired
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
@@ -120,6 +121,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	@Autowired
 	private IHapiTransactionService myHapiTransactionService;
+
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	private IFhirPath myFhirPath;
 
@@ -298,28 +302,36 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	private LinkedHashSet<JpaPid> getRelatedResourceTypePids(
 			ExportPIDIteratorParameters theParams, RuntimeResourceDefinition theDef) throws IOException {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
-		// expand the group pid -> list of patients in that group (list of patient pids)
-		Set<JpaPid> expandedMemberResourceIds = expandAllPatientPidsFromGroup(theParams);
-		assert !expandedMemberResourceIds.isEmpty();
-		Logs.getBatchTroubleshootingLog()
-				.debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
+		// Check if the patient compartment search parameter is active to enable export of this resource
+		RuntimeSearchParam activeSearchParam =
+				getActivePatientSearchParamForCurrentResourceType(theParams.getResourceType());
+		if (activeSearchParam != null) {
+			// expand the group pid -> list of patients in that group (list of patient pids)
+			Set<JpaPid> expandedMemberResourceIds = expandAllPatientPidsFromGroup(theParams);
+			assert !expandedMemberResourceIds.isEmpty();
+			Logs.getBatchTroubleshootingLog()
+					.debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
 
-		// for each patient pid ->
-		//	search for the target resources, with their correct patient references, chunked.
-		// The results will be jammed into myReadPids
-		QueryChunker<JpaPid> queryChunker = new QueryChunker<>();
-		queryChunker.chunk(expandedMemberResourceIds, QUERY_CHUNK_SIZE, (idChunk) -> {
-			try {
-				queryResourceTypeWithReferencesToPatients(pids, idChunk, theParams, theDef);
-			} catch (IOException ex) {
-				// we will never see this;
-				// SearchBuilder#QueryIterator does not (nor can ever) throw
-				// an IOException... but Java requires the check,
-				// so we'll put a log here (just in the off chance)
-				ourLog.error("Couldn't close query iterator ", ex);
-				throw new RuntimeException(Msg.code(2346) + "Couldn't close query iterator", ex);
-			}
-		});
+			// for each patient pid ->
+			//	search for the target resources, with their correct patient references, chunked.
+			// The results will be jammed into myReadPids
+			QueryChunker<JpaPid> queryChunker = new QueryChunker<>();
+			queryChunker.chunk(expandedMemberResourceIds, QUERY_CHUNK_SIZE, (idChunk) -> {
+				try {
+					queryResourceTypeWithReferencesToPatients(pids, idChunk, theParams, theDef);
+				} catch (IOException ex) {
+					// we will never see this;
+					// SearchBuilder#QueryIterator does not (nor can ever) throw
+					// an IOException... but Java requires the check,
+					// so we'll put a log here (just in the off chance)
+					ourLog.error("Couldn't close query iterator ", ex);
+					throw new RuntimeException(Msg.code(2346) + "Couldn't close query iterator", ex);
+				}
+			});
+		} else {
+			ourLog.warn("No active patient compartment search parameter(s) for resource type "
+					+ theParams.getResourceType());
+		}
 		return pids;
 	}
 
@@ -598,6 +610,22 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 					.filter((id) -> !id.getResourceType().equals("Patient"))
 					.collect(Collectors.toSet()));
 		}
+	}
+
+	private RuntimeSearchParam getActivePatientSearchParamForCurrentResourceType(String theResourceType) {
+		String activeSearchParamName = "";
+		String resourceToCheck = theResourceType;
+		if (!PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(theResourceType)) {
+			activeSearchParamName =
+					getPatientSearchParamForCurrentResourceType(theResourceType).getName();
+		} else if ("Practitioner".equalsIgnoreCase(theResourceType)) {
+			resourceToCheck = "Patient";
+			activeSearchParamName = "general-practitioner";
+		} else if ("Organization".equalsIgnoreCase(theResourceType)) {
+			resourceToCheck = "Patient";
+			activeSearchParamName = "organization";
+		}
+		return mySearchParamRegistry.getActiveSearchParam(resourceToCheck, activeSearchParamName);
 	}
 
 	/**

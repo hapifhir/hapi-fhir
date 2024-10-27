@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPre
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ICanMakeMissingParamPredicate;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ParsedLocationParam;
@@ -56,6 +55,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
 import ca.uhn.fhir.jpa.search.builder.sql.PredicateBuilderFactory;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -69,10 +69,10 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -95,12 +95,12 @@ import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.Expression;
 import com.healthmarketscience.sqlbuilder.InCondition;
-import com.healthmarketscience.sqlbuilder.OrderObject;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.SetOperationQuery;
 import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.UnionQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -117,11 +117,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
+import static ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder.getResourceIdColumn;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.fromOperation;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.getChainedPart;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.getParamNameWithPrefix;
@@ -139,6 +142,7 @@ public class QueryStack {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(QueryStack.class);
 	public static final String LOCATION_POSITION = "Location.position";
+	private static final Pattern PATTERN_DOT_AND_ALL_AFTER = Pattern.compile("\\..*");
 
 	private final FhirContext myFhirContext;
 	private final SearchQueryBuilder mySqlBuilder;
@@ -151,6 +155,7 @@ public class QueryStack {
 	private Map<String, BaseJoiningPredicateBuilder> myParamNameToPredicateBuilderMap;
 	// used for _offset queries with sort, should be removed once the fix is applied to the async path too.
 	private boolean myUseAggregate;
+	private boolean myGroupingAdded;
 
 	/**
 	 * Constructor
@@ -243,7 +248,7 @@ public class QueryStack {
 			resourceTablePredicateBuilder = (ResourceTablePredicateBuilder) firstPredicateBuilder;
 		} else {
 			resourceTablePredicateBuilder =
-					mySqlBuilder.addResourceTablePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+					mySqlBuilder.addResourceTablePredicateBuilder(firstPredicateBuilder.getJoinColumns());
 		}
 		mySqlBuilder.addSortDate(resourceTablePredicateBuilder.getColumnLastUpdated(), theAscending, myUseAggregate);
 	}
@@ -274,16 +279,21 @@ public class QueryStack {
 	}
 
 	public void addSortOnResourceId(boolean theAscending) {
+		ResourceTablePredicateBuilder resourceTablePredicateBuilder;
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		ForcedIdPredicateBuilder sortPredicateBuilder =
-				mySqlBuilder.addForcedIdPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
-		if (!theAscending) {
-			mySqlBuilder.addSortString(
-					sortPredicateBuilder.getColumnForcedId(), false, OrderObject.NullOrder.FIRST, myUseAggregate);
+		if (firstPredicateBuilder instanceof ResourceTablePredicateBuilder) {
+			resourceTablePredicateBuilder = (ResourceTablePredicateBuilder) firstPredicateBuilder;
 		} else {
-			mySqlBuilder.addSortString(sortPredicateBuilder.getColumnForcedId(), true, myUseAggregate);
+			resourceTablePredicateBuilder =
+					mySqlBuilder.addResourceTablePredicateBuilder(firstPredicateBuilder.getJoinColumns());
 		}
-		mySqlBuilder.addSortNumeric(firstPredicateBuilder.getResourceIdColumn(), theAscending, myUseAggregate);
+		mySqlBuilder.addSortString(resourceTablePredicateBuilder.getColumnFhirId(), theAscending, myUseAggregate);
+	}
+
+	/** Sort on RES_ID -- used to break ties for reliable sort */
+	public void addSortOnResourcePID(boolean theAscending) {
+		BaseJoiningPredicateBuilder predicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		mySqlBuilder.addSortString(predicateBuilder.getResourceIdColumn(), theAscending);
 	}
 
 	public void addSortOnResourceLink(
@@ -291,7 +301,8 @@ public class QueryStack {
 			String theReferenceTargetType,
 			String theParamName,
 			String theChain,
-			boolean theAscending) {
+			boolean theAscending,
+			SearchParameterMap theParams) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		ResourceLinkPredicateBuilder resourceLinkPredicateBuilder = mySqlBuilder.createReferencePredicateBuilder(this);
 
@@ -345,26 +356,39 @@ public class QueryStack {
 			throw new InvalidRequestException(Msg.code(2289) + msg);
 		}
 
-		BaseSearchParamPredicateBuilder chainedPredicateBuilder;
-		DbColumn[] sortColumn;
+		// add a left-outer join to a predicate for the target type, then sort on value columns(s).
 		switch (targetSearchParameter.getParamType()) {
 			case STRING:
 				StringPredicateBuilder stringPredicateBuilder = mySqlBuilder.createStringPredicateBuilder();
-				sortColumn = new DbColumn[] {stringPredicateBuilder.getColumnValueNormalized()};
-				chainedPredicateBuilder = stringPredicateBuilder;
-				break;
+				addSortCustomJoin(
+						resourceLinkPredicateBuilder.getJoinColumnsForTarget(),
+						stringPredicateBuilder,
+						stringPredicateBuilder.createHashIdentityPredicate(targetType, theChain));
+
+				mySqlBuilder.addSortString(
+						stringPredicateBuilder.getColumnValueNormalized(), theAscending, myUseAggregate);
+				return;
+
 			case TOKEN:
 				TokenPredicateBuilder tokenPredicateBuilder = mySqlBuilder.createTokenPredicateBuilder();
-				sortColumn =
-						new DbColumn[] {tokenPredicateBuilder.getColumnSystem(), tokenPredicateBuilder.getColumnValue()
-						};
-				chainedPredicateBuilder = tokenPredicateBuilder;
-				break;
+				addSortCustomJoin(
+						resourceLinkPredicateBuilder.getJoinColumnsForTarget(),
+						tokenPredicateBuilder,
+						tokenPredicateBuilder.createHashIdentityPredicate(targetType, theChain));
+
+				mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnSystem(), theAscending, myUseAggregate);
+				mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnValue(), theAscending, myUseAggregate);
+				return;
+
 			case DATE:
 				DatePredicateBuilder datePredicateBuilder = mySqlBuilder.createDatePredicateBuilder();
-				sortColumn = new DbColumn[] {datePredicateBuilder.getColumnValueLow()};
-				chainedPredicateBuilder = datePredicateBuilder;
-				break;
+				addSortCustomJoin(
+						resourceLinkPredicateBuilder.getJoinColumnsForTarget(),
+						datePredicateBuilder,
+						datePredicateBuilder.createHashIdentityPredicate(targetType, theChain));
+
+				mySqlBuilder.addSortDate(datePredicateBuilder.getColumnValueLow(), theAscending, myUseAggregate);
+				return;
 
 				/*
 				 * Note that many of the options below aren't implemented because they
@@ -373,25 +397,42 @@ public class QueryStack {
 				 * sort on a target that was a reference or a quantity, but if someone needed
 				 * that we could implement it here.
 				 */
+			case SPECIAL: {
+				if (LOCATION_POSITION.equals(targetSearchParameter.getPath())) {
+					List<List<IQueryParameterType>> params = theParams.get(theParamName);
+					if (params != null && !params.isEmpty() && !params.get(0).isEmpty()) {
+						IQueryParameterType locationParam = params.get(0).get(0);
+						final SpecialParam specialParam =
+								new SpecialParam().setValue(locationParam.getValueAsQueryToken(myFhirContext));
+						ParsedLocationParam location = ParsedLocationParam.from(theParams, specialParam);
+						double latitudeValue = location.getLatitudeValue();
+						double longitudeValue = location.getLongitudeValue();
+						final CoordsPredicateBuilder coordsPredicateBuilder = mySqlBuilder.addCoordsPredicateBuilder(
+								resourceLinkPredicateBuilder.getJoinColumnsForTarget());
+						mySqlBuilder.addSortCoordsNear(
+								coordsPredicateBuilder, latitudeValue, longitudeValue, theAscending);
+					} else {
+						String msg = myFhirContext
+								.getLocalizer()
+								.getMessageSanitized(
+										QueryStack.class, "cantSortOnCoordParamWithoutValues", theParamName);
+						throw new InvalidRequestException(Msg.code(2497) + msg);
+					}
+					return;
+				}
+			}
+				//noinspection fallthrough
 			case NUMBER:
 			case REFERENCE:
 			case COMPOSITE:
 			case QUANTITY:
 			case URI:
 			case HAS:
-			case SPECIAL:
+
 			default:
 				throw new InvalidRequestException(Msg.code(2290) + "Unable to sort on a chained parameter "
 						+ theParamName + "." + theChain + " as this parameter. Can not sort on chains of target type: "
 						+ targetSearchParameter.getParamType().name());
-		}
-
-		addSortCustomJoin(resourceLinkPredicateBuilder.getColumnTargetResourceId(), chainedPredicateBuilder, null);
-		Condition predicate = chainedPredicateBuilder.createHashIdentityPredicate(targetType, theChain);
-		mySqlBuilder.addPredicate(predicate);
-
-		for (DbColumn next : sortColumn) {
-			mySqlBuilder.addSortNumeric(next, theAscending, myUseAggregate);
 		}
 	}
 
@@ -436,16 +477,16 @@ public class QueryStack {
 			BaseJoiningPredicateBuilder theFromJoiningPredicateBuilder,
 			BaseJoiningPredicateBuilder theToJoiningPredicateBuilder,
 			Condition theCondition) {
-		addSortCustomJoin(
-				theFromJoiningPredicateBuilder.getResourceIdColumn(), theToJoiningPredicateBuilder, theCondition);
+		addSortCustomJoin(theFromJoiningPredicateBuilder.getJoinColumns(), theToJoiningPredicateBuilder, theCondition);
 	}
 
 	private void addSortCustomJoin(
-			DbColumn theFromDbColumn,
+			DbColumn theFromDbColumn[],
 			BaseJoiningPredicateBuilder theToJoiningPredicateBuilder,
 			Condition theCondition) {
+
 		ComboCondition onCondition =
-				mySqlBuilder.createOnCondition(theFromDbColumn, theToJoiningPredicateBuilder.getResourceIdColumn());
+				mySqlBuilder.createOnCondition(theFromDbColumn, theToJoiningPredicateBuilder.getJoinColumns());
 
 		if (theCondition != null) {
 			onCondition.addCondition(theCondition);
@@ -453,7 +494,7 @@ public class QueryStack {
 
 		mySqlBuilder.addCustomJoin(
 				SelectQuery.JoinType.LEFT_OUTER,
-				theFromDbColumn.getTable(),
+				theFromDbColumn[0].getTable(),
 				theToJoiningPredicateBuilder.getTable(),
 				onCondition);
 	}
@@ -465,7 +506,7 @@ public class QueryStack {
 	@SuppressWarnings("unchecked")
 	private <T extends BaseJoiningPredicateBuilder> PredicateBuilderCacheLookupResult<T> createOrReusePredicateBuilder(
 			PredicateBuilderTypeEnum theType,
-			DbColumn theSourceJoinColumn,
+			DbColumn[] theSourceJoinColumn,
 			String theParamName,
 			Supplier<T> theFactoryMethod) {
 		boolean cacheHit = false;
@@ -497,7 +538,7 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateComposite(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theParamDef,
@@ -514,7 +555,7 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateComposite(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theParamDef,
@@ -568,7 +609,7 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateCompositePart(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theParam,
@@ -776,7 +817,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateCoords(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -821,7 +862,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateDate(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -840,7 +881,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateDate(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -1068,7 +1109,7 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateHas(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceType,
 			List<List<IQueryParameterType>> theHasParameters,
 			RequestDetails theRequest,
@@ -1088,7 +1129,7 @@ public class QueryStack {
 				targetResourceType = next.getTargetResourceType();
 				paramReference = next.getReferenceFieldName();
 				parameterName = next.getParameterName();
-				paramName = parameterName.replaceAll("\\..*", "");
+				paramName = PATTERN_DOT_AND_ALL_AFTER.matcher(parameterName).replaceAll("");
 				parameters.add(QualifiedParamList.singleton(null, next.getValueAsQueryToken(myFhirContext)));
 			}
 
@@ -1106,7 +1147,7 @@ public class QueryStack {
 
 			if (paramName.startsWith("_has:")) {
 
-				ourLog.trace("Handing double _has query: {}", paramName);
+				ourLog.trace("Handling double _has query: {}", paramName);
 
 				String qualifier = paramName.substring(4);
 				for (IQueryParameterType next : nextOrList) {
@@ -1145,11 +1186,23 @@ public class QueryStack {
 
 			// Handle internal chain inside the has.
 			if (parameterName.contains(".")) {
-				String chainedPartOfParameter = getChainedPart(parameterName);
+				// Previously, for some unknown reason, we were calling getChainedPart() twice.  This broke the _has
+				// then chain, then _has use case by effectively cutting off the second part of the chain and
+				// missing one iteration of the recursive call to build the query.
+				// So, for example, for
+				// Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id=list1
+				// instead of passing " payor._has:List:item:_id=list1" to the next recursion, the second call to
+				// getChainedPart() was wrongly removing "payor." and passing down "_has:List:item:_id=list1" instead.
+				// This resulted in running incorrect SQL with nonsensical join that resulted in 0 results.
+				// However, after running the pipeline,  I've concluded there's no use case at all for the
+				// double call to "getChainedPart()", which is why there's no conditional logic at all to make a double
+				// call to getChainedPart().
+				final String chainedPart = getChainedPart(parameterName);
+
 				orValues.stream()
 						.filter(qp -> qp instanceof ReferenceParam)
 						.map(qp -> (ReferenceParam) qp)
-						.forEach(rp -> rp.setChain(getChainedPart(chainedPartOfParameter)));
+						.forEach(rp -> rp.setChain(chainedPart));
 
 				parameterName = parameterName.substring(0, parameterName.indexOf('.'));
 			}
@@ -1159,26 +1212,30 @@ public class QueryStack {
 				parameterName = parameterName.substring(0, colonIndex);
 			}
 
-			ResourceLinkPredicateBuilder join =
+			ResourceLinkPredicateBuilder resourceLinkTableJoin =
 					mySqlBuilder.addReferencePredicateBuilderReversed(this, theSourceJoinColumn);
-			Condition partitionPredicate = join.createPartitionIdPredicate(theRequestPartitionId);
+			Condition partitionPredicate = resourceLinkTableJoin.createPartitionIdPredicate(theRequestPartitionId);
 
-			List<String> paths = join.createResourceLinkPaths(targetResourceType, paramReference, new ArrayList<>());
+			List<String> paths = resourceLinkTableJoin.createResourceLinkPaths(
+					targetResourceType, paramReference, new ArrayList<>());
 			if (CollectionUtils.isEmpty(paths)) {
 				throw new InvalidRequestException(Msg.code(2305) + "Reference field does not exist: " + paramReference);
 			}
+
 			Condition typePredicate = BinaryCondition.equalTo(
-					join.getColumnTargetResourceType(), mySqlBuilder.generatePlaceholder(theResourceType));
-			Condition pathPredicate =
-					toEqualToOrInPredicate(join.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
-			Condition linkedPredicate = searchForIdsWithAndOr(
-					join.getColumnSrcResourceId(),
-					targetResourceType,
-					parameterName,
-					Collections.singletonList(orValues),
-					theRequest,
-					theRequestPartitionId,
-					SearchContainedModeEnum.FALSE);
+					resourceLinkTableJoin.getColumnTargetResourceType(),
+					mySqlBuilder.generatePlaceholder(theResourceType));
+			Condition pathPredicate = toEqualToOrInPredicate(
+					resourceLinkTableJoin.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
+
+			Condition linkedPredicate =
+					searchForIdsWithAndOr(with().setSourceJoinColumn(resourceLinkTableJoin.getJoinColumnsForSource())
+							.setResourceName(targetResourceType)
+							.setParamName(parameterName)
+							.setAndOrParams(Collections.singletonList(orValues))
+							.setRequest(theRequest)
+							.setRequestPartitionId(theRequestPartitionId));
+
 			andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
 		}
 
@@ -1186,7 +1243,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateNumber(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -1205,7 +1262,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateNumber(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -1265,7 +1322,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateQuantity(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -1284,7 +1341,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateQuantity(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -1352,7 +1409,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateReference(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theParamName,
 			List<String> theQualifiers,
@@ -1373,7 +1430,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateReference(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theParamName,
 			List<String> theQualifiers,
@@ -1420,12 +1477,33 @@ public class QueryStack {
 	}
 
 	public void addGrouping() {
+		if (!myGroupingAdded) {
+			BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+
+			/*
+			 * Postgres and Oracle don't like it if we are doing a SELECT DISTINCT
+			 * with multiple selected columns but no GROUP BY clause.
+			 */
+			if (mySqlBuilder.isSelectPartitionId()) {
+				mySqlBuilder
+						.getSelect()
+						.addGroupings(
+								firstPredicateBuilder.getPartitionIdColumn(),
+								firstPredicateBuilder.getResourceIdColumn());
+			} else {
+				mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getJoinColumns());
+			}
+			myGroupingAdded = true;
+		}
+	}
+
+	public void addOrdering() {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getResourceIdColumn());
+		mySqlBuilder.getSelect().addOrderings(firstPredicateBuilder.getJoinColumns());
 	}
 
 	public Condition createPredicateReferenceForEmbeddedChainedSearchResource(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			RuntimeSearchParam theSearchParam,
 			List<? extends IQueryParameterType> theList,
@@ -1469,12 +1547,12 @@ public class QueryStack {
 			for (LeafNodeDefinition leafNodeDefinition : referenceLinks.get(nextReferenceLink)) {
 				SearchQueryBuilder builder;
 				if (wantChainedAndNormal) {
-					builder = mySqlBuilder.newChildSqlBuilder();
+					builder = mySqlBuilder.newChildSqlBuilder(mySqlBuilder.isIncludePartitionIdInJoins());
 				} else {
 					builder = mySqlBuilder;
 				}
 
-				DbColumn previousJoinColumn = null;
+				DbColumn[] previousJoinColumn = null;
 
 				// Create a reference link predicates to the subselect for every link but the last one
 				for (String nextLink : nextReferenceLink) {
@@ -1485,7 +1563,7 @@ public class QueryStack {
 							builder.addReferencePredicateBuilder(this, previousJoinColumn);
 					builder.addPredicate(
 							resourceLinkPredicateBuilder.createPredicateSourcePaths(Lists.newArrayList(nextLink)));
-					previousJoinColumn = resourceLinkPredicateBuilder.getColumnTargetResourceId();
+					previousJoinColumn = resourceLinkPredicateBuilder.getJoinColumnsForTarget();
 				}
 
 				Condition containedCondition = createIndexPredicate(
@@ -1514,8 +1592,15 @@ public class QueryStack {
 		if (wantChainedAndNormal) {
 
 			if (theSourceJoinColumn == null) {
-				retVal = new InCondition(
-						mySqlBuilder.getOrCreateFirstPredicateBuilder(false).getResourceIdColumn(), union);
+				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false);
+				DbColumn[] joinColumns = root.getJoinColumns();
+				Object joinColumnObject;
+				if (joinColumns.length == 1) {
+					joinColumnObject = joinColumns[0];
+				} else {
+					joinColumnObject = ColumnTupleObject.from(joinColumns);
+				}
+				retVal = new InCondition(joinColumnObject, union);
 			} else {
 				// -- for the resource link, need join with target_resource_id
 				retVal = new InCondition(theSourceJoinColumn, union);
@@ -1711,7 +1796,7 @@ public class QueryStack {
 	}
 
 	private Condition createIndexPredicate(
-			DbColumn theSourceJoinColumn,
+			DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			String theParamName,
@@ -1825,7 +1910,7 @@ public class QueryStack {
 
 	@Nullable
 	public Condition createPredicateResourceId(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			List<List<IQueryParameterType>> theValues,
 			String theResourceName,
 			SearchFilterParser.CompareOperation theOperation,
@@ -1836,7 +1921,7 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateSourceForAndList(
-			@Nullable DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theAndOrParams) {
+			@Nullable DbColumn[] theSourceJoinColumn, List<List<IQueryParameterType>> theAndOrParams) {
 		mySqlBuilder.getOrCreateFirstPredicateBuilder();
 
 		List<Condition> andPredicates = new ArrayList<>(theAndOrParams.size());
@@ -1847,21 +1932,30 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateSource(
-			@Nullable DbColumn theSourceJoinColumn, List<? extends IQueryParameterType> theList) {
+			@Nullable DbColumn[] theSourceJoinColumn, List<? extends IQueryParameterType> theList) {
 		if (myStorageSettings.getStoreMetaSourceInformation()
 				== JpaStorageSettings.StoreMetaSourceInformationEnum.NONE) {
 			String msg = myFhirContext.getLocalizer().getMessage(QueryStack.class, "sourceParamDisabled");
 			throw new InvalidRequestException(Msg.code(1216) + msg);
 		}
 
-		SourcePredicateBuilder join = createOrReusePredicateBuilder(
-						PredicateBuilderTypeEnum.SOURCE,
-						theSourceJoinColumn,
-						Constants.PARAM_SOURCE,
-						() -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn))
-				.getResult();
-
 		List<Condition> orPredicates = new ArrayList<>();
+
+		// :missing=true modifier processing requires "LEFT JOIN" with HFJ_RESOURCE table to return correct results
+		// if both sourceUri and requestId are not populated for the resource
+		Optional<? extends IQueryParameterType> isMissingSourceOptional = theList.stream()
+				.filter(nextParameter -> nextParameter.getMissing() != null && nextParameter.getMissing())
+				.findFirst();
+
+		if (isMissingSourceOptional.isPresent()) {
+			SourcePredicateBuilder join =
+					getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.LEFT_OUTER);
+			orPredicates.add(join.createPredicateMissingSourceUri());
+			return toOrPredicate(orPredicates);
+		}
+		// for all other cases we use "INNER JOIN" to match search parameters
+		SourcePredicateBuilder join = getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.INNER);
+
 		for (IQueryParameterType nextParameter : theList) {
 			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myFhirContext));
 			String sourceUri = sourceParameter.getSourceUri();
@@ -1870,7 +1964,8 @@ public class QueryStack {
 				orPredicates.add(toAndPredicate(
 						join.createPredicateSourceUri(sourceUri), join.createPredicateRequestId(requestId)));
 			} else if (isNotBlank(sourceUri)) {
-				orPredicates.add(join.createPredicateSourceUri(sourceUri));
+				orPredicates.add(
+						join.createPredicateSourceUriWithModifiers(nextParameter, myStorageSettings, sourceUri));
 			} else if (isNotBlank(requestId)) {
 				orPredicates.add(join.createPredicateRequestId(requestId));
 			}
@@ -1879,8 +1974,18 @@ public class QueryStack {
 		return toOrPredicate(orPredicates);
 	}
 
+	private SourcePredicateBuilder getSourcePredicateBuilder(
+			@Nullable DbColumn[] theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
+		return createOrReusePredicateBuilder(
+						PredicateBuilderTypeEnum.SOURCE,
+						theSourceJoinColumn,
+						Constants.PARAM_SOURCE,
+						() -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn, theJoinType))
+				.getResult();
+	}
+
 	public Condition createPredicateString(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -1899,7 +2004,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateString(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -1939,7 +2044,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateTag(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			List<List<IQueryParameterType>> theList,
 			String theParamName,
 			RequestPartitionId theRequestPartitionId) {
@@ -1970,7 +2075,8 @@ public class QueryStack {
 			BaseJoiningPredicateBuilder join;
 			if (paramInverted) {
 
-				SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder();
+				boolean selectPartitionId = myPartitionSettings.isPartitionIdsInPrimaryKeys();
+				SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder(selectPartitionId);
 				TagPredicateBuilder tagSelector = sqlBuilder.addTagPredicateBuilder(null);
 				sqlBuilder.addPredicate(
 						tagSelector.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId));
@@ -1978,7 +2084,14 @@ public class QueryStack {
 
 				join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 				Expression subSelect = new Subquery(sql);
-				tagPredicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
+
+				Object left;
+				if (selectPartitionId) {
+					left = new ColumnTupleObject(join.getJoinColumns());
+				} else {
+					left = join.getResourceIdColumn();
+				}
+				tagPredicate = new InCondition(left, subSelect).setNegate(true);
 
 			} else {
 				// Tag table can't be a query root because it will include deleted resources, and can't select by
@@ -2051,7 +2164,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateToken(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -2070,7 +2183,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateToken(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -2141,7 +2254,8 @@ public class QueryStack {
 		BaseJoiningPredicateBuilder join;
 
 		if (paramInverted) {
-			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder();
+			boolean selectPartitionId = myPartitionSettings.isPartitionIdsInPrimaryKeys();
+			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder(selectPartitionId);
 			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(
 					tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
@@ -2150,12 +2264,15 @@ public class QueryStack {
 
 			join = theSqlBuilder.getOrCreateFirstPredicateBuilder();
 
+			DbColumn[] leftColumns;
 			if (theSourceJoinColumn == null) {
-				predicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
+				leftColumns = join.getJoinColumns();
 			} else {
-				// -- for the resource link, need join with target_resource_id
-				predicate = new InCondition(theSourceJoinColumn, subSelect).setNegate(true);
+				leftColumns = theSourceJoinColumn;
 			}
+
+			Object left = new ColumnTupleObject(leftColumns);
+			predicate = new InCondition(left, subSelect).setNegate(true);
 
 		} else {
 			Boolean isMissing = theList.get(0).getMissing();
@@ -2186,7 +2303,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateUri(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -2207,7 +2324,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateUri(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theSpnamePrefix,
 			RuntimeSearchParam theSearchParam,
@@ -2249,60 +2366,128 @@ public class QueryStack {
 	}
 
 	@Nullable
-	public Condition searchForIdsWithAndOr(
-			@Nullable DbColumn theSourceJoinColumn,
-			String theResourceName,
-			String theParamName,
-			List<List<IQueryParameterType>> theAndOrParams,
-			RequestDetails theRequest,
-			RequestPartitionId theRequestPartitionId,
-			SearchContainedModeEnum theSearchContainedMode) {
+	public Condition searchForIdsWithAndOr(SearchForIdsParams theSearchForIdsParams) {
 
-		if (theAndOrParams.isEmpty()) {
+		if (theSearchForIdsParams.myAndOrParams.isEmpty()) {
 			return null;
 		}
 
-		switch (theParamName) {
+		switch (theSearchForIdsParams.myParamName) {
 			case IAnyResource.SP_RES_ID:
 				return createPredicateResourceId(
-						theSourceJoinColumn, theAndOrParams, theResourceName, null, theRequestPartitionId);
+						theSearchForIdsParams.mySourceJoinColumn,
+						theSearchForIdsParams.myAndOrParams,
+						theSearchForIdsParams.myResourceName,
+						null,
+						theSearchForIdsParams.myRequestPartitionId);
+
+			case Constants.PARAM_PID:
+				return createPredicateResourcePID(
+						theSearchForIdsParams.mySourceJoinColumn, theSearchForIdsParams.myAndOrParams);
 
 			case PARAM_HAS:
 				return createPredicateHas(
-						theSourceJoinColumn, theResourceName, theAndOrParams, theRequest, theRequestPartitionId);
+						theSearchForIdsParams.mySourceJoinColumn,
+						theSearchForIdsParams.myResourceName,
+						theSearchForIdsParams.myAndOrParams,
+						theSearchForIdsParams.myRequest,
+						theSearchForIdsParams.myRequestPartitionId);
 
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
 				if (myStorageSettings.getTagStorageMode() == JpaStorageSettings.TagStorageModeEnum.INLINE) {
 					return createPredicateSearchParameter(
-							theSourceJoinColumn,
-							theResourceName,
-							theParamName,
-							theAndOrParams,
-							theRequest,
-							theRequestPartitionId);
+							theSearchForIdsParams.mySourceJoinColumn,
+							theSearchForIdsParams.myResourceName,
+							theSearchForIdsParams.myParamName,
+							theSearchForIdsParams.myAndOrParams,
+							theSearchForIdsParams.myRequest,
+							theSearchForIdsParams.myRequestPartitionId);
 				} else {
-					return createPredicateTag(theSourceJoinColumn, theAndOrParams, theParamName, theRequestPartitionId);
+					return createPredicateTag(
+							theSearchForIdsParams.mySourceJoinColumn,
+							theSearchForIdsParams.myAndOrParams,
+							theSearchForIdsParams.myParamName,
+							theSearchForIdsParams.myRequestPartitionId);
 				}
 
 			case Constants.PARAM_SOURCE:
-				return createPredicateSourceForAndList(theSourceJoinColumn, theAndOrParams);
+				return createPredicateSourceForAndList(
+						theSearchForIdsParams.mySourceJoinColumn, theSearchForIdsParams.myAndOrParams);
+
+			case Constants.PARAM_LASTUPDATED:
+				// this case statement handles a _lastUpdated query as part of a reverse search
+				// only (/Patient?_has:Encounter:patient:_lastUpdated=ge2023-10-24).
+				// performing a _lastUpdated query on a resource (/Patient?_lastUpdated=eq2023-10-24)
+				// is handled in {@link SearchBuilder#createChunkedQuery}.
+				return createReverseSearchPredicateLastUpdated(
+						theSearchForIdsParams.myAndOrParams, theSearchForIdsParams.mySourceJoinColumn);
 
 			default:
 				return createPredicateSearchParameter(
-						theSourceJoinColumn,
-						theResourceName,
-						theParamName,
-						theAndOrParams,
-						theRequest,
-						theRequestPartitionId);
+						theSearchForIdsParams.mySourceJoinColumn,
+						theSearchForIdsParams.myResourceName,
+						theSearchForIdsParams.myParamName,
+						theSearchForIdsParams.myAndOrParams,
+						theSearchForIdsParams.myRequest,
+						theSearchForIdsParams.myRequestPartitionId);
 		}
+	}
+
+	/**
+	 * Raw match on RES_ID
+	 */
+	private Condition createPredicateResourcePID(
+			DbColumn[] theSourceJoinColumn, List<List<IQueryParameterType>> theAndOrParams) {
+
+		DbColumn pidColumn = getResourceIdColumn(theSourceJoinColumn);
+
+		if (pidColumn == null) {
+			BaseJoiningPredicateBuilder predicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+			pidColumn = predicateBuilder.getResourceIdColumn();
+		}
+
+		// we don't support any modifiers for now
+		Set<Long> pids = theAndOrParams.stream()
+				.map(orList -> orList.stream()
+						.map(v -> v.getValueAsQueryToken(myFhirContext))
+						.map(Long::valueOf)
+						.collect(Collectors.toSet()))
+				.reduce(Sets::intersection)
+				.orElse(Set.of());
+
+		if (pids.isEmpty()) {
+			mySqlBuilder.setMatchNothing();
+			return null;
+		}
+
+		return toEqualToOrInPredicate(pidColumn, mySqlBuilder.generatePlaceholders(pids));
+	}
+
+	private Condition createReverseSearchPredicateLastUpdated(
+			List<List<IQueryParameterType>> theAndOrParams, DbColumn[] theSourceColumn) {
+
+		ResourceTablePredicateBuilder resourceTableJoin =
+				mySqlBuilder.addResourceTablePredicateBuilder(theSourceColumn);
+
+		List<Condition> andPredicates = new ArrayList<>(theAndOrParams.size());
+
+		for (List<IQueryParameterType> aList : theAndOrParams) {
+			if (!aList.isEmpty()) {
+				DateParam dateParam = (DateParam) aList.get(0);
+				DateRangeParam dateRangeParam = new DateRangeParam(dateParam);
+				Condition aCondition = mySqlBuilder.addPredicateLastUpdated(dateRangeParam, resourceTableJoin);
+				andPredicates.add(aCondition);
+			}
+		}
+
+		return toAndPredicate(andPredicates);
 	}
 
 	@Nullable
 	private Condition createPredicateSearchParameter(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theParamName,
 			List<List<IQueryParameterType>> theAndOrParams,
@@ -2369,7 +2554,7 @@ public class QueryStack {
 								theRequestPartitionId,
 								andPredicates,
 								nextAnd)) {
-							break;
+							continue;
 						}
 
 						EmbeddedChainedSearchModeEnum embeddedChainedSearchModeEnum =
@@ -2544,7 +2729,7 @@ public class QueryStack {
 	 * by this method
 	 */
 	private boolean handleFullyChainedParameter(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			String theParamName,
 			RequestDetails theRequest,
@@ -2638,16 +2823,16 @@ public class QueryStack {
 		}
 	}
 
-	public void addPredicateCompositeUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {
+	public void addPredicateCompositeUnique(List<String> theIndexStrings, RequestPartitionId theRequestPartitionId) {
 		ComboUniqueSearchParameterPredicateBuilder predicateBuilder = mySqlBuilder.addComboUniquePredicateBuilder();
-		Condition predicate = predicateBuilder.createPredicateIndexString(theRequestPartitionId, theIndexString);
+		Condition predicate = predicateBuilder.createPredicateIndexString(theRequestPartitionId, theIndexStrings);
 		mySqlBuilder.addPredicate(predicate);
 	}
 
-	public void addPredicateCompositeNonUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {
+	public void addPredicateCompositeNonUnique(List<String> theIndexStrings, RequestPartitionId theRequestPartitionId) {
 		ComboNonUniqueSearchParameterPredicateBuilder predicateBuilder =
 				mySqlBuilder.addComboNonUniquePredicateBuilder();
-		Condition predicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theIndexString);
+		Condition predicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theIndexStrings);
 		mySqlBuilder.addPredicate(predicate);
 	}
 
@@ -2658,6 +2843,7 @@ public class QueryStack {
 		Condition predicate =
 				table.createEverythingPredicate(theResourceName, theTypeSourceResourceNames, theTargetPids);
 		mySqlBuilder.addPredicate(predicate);
+		mySqlBuilder.getSelect().setIsDistinct(true);
 	}
 
 	public IQueryParameterType newParameterInstance(
@@ -2787,7 +2973,7 @@ public class QueryStack {
 		private List<String> extractPaths(String theResourceType, RuntimeSearchParam theSearchParam) {
 			List<String> pathsForType = theSearchParam.getPathsSplit().stream()
 					.map(String::trim)
-					.filter(t -> t.startsWith(theResourceType))
+					.filter(t -> (t.startsWith(theResourceType) || t.startsWith("(" + theResourceType)))
 					.collect(Collectors.toList());
 			if (pathsForType.isEmpty()) {
 				ourLog.warn(
@@ -2996,6 +3182,84 @@ public class QueryStack {
 		public LeafNodeDefinition withParam(RuntimeSearchParam theParamDefinition) {
 			return new LeafNodeDefinition(
 					theParamDefinition, myOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
+		}
+	}
+
+	public static class SearchForIdsParams {
+		DbColumn[] mySourceJoinColumn;
+		String myResourceName;
+		String myParamName;
+		List<List<IQueryParameterType>> myAndOrParams;
+		RequestDetails myRequest;
+		RequestPartitionId myRequestPartitionId;
+		ResourceTablePredicateBuilder myResourceTablePredicateBuilder;
+
+		public static SearchForIdsParams with() {
+			return new SearchForIdsParams();
+		}
+
+		public DbColumn[] getSourceJoinColumn() {
+			return mySourceJoinColumn;
+		}
+
+		public SearchForIdsParams setSourceJoinColumn(DbColumn[] theSourceJoinColumn) {
+			mySourceJoinColumn = theSourceJoinColumn;
+			return this;
+		}
+
+		public String getResourceName() {
+			return myResourceName;
+		}
+
+		public SearchForIdsParams setResourceName(String theResourceName) {
+			myResourceName = theResourceName;
+			return this;
+		}
+
+		public String getParamName() {
+			return myParamName;
+		}
+
+		public SearchForIdsParams setParamName(String theParamName) {
+			myParamName = theParamName;
+			return this;
+		}
+
+		public List<List<IQueryParameterType>> getAndOrParams() {
+			return myAndOrParams;
+		}
+
+		public SearchForIdsParams setAndOrParams(List<List<IQueryParameterType>> theAndOrParams) {
+			myAndOrParams = theAndOrParams;
+			return this;
+		}
+
+		public RequestDetails getRequest() {
+			return myRequest;
+		}
+
+		public SearchForIdsParams setRequest(RequestDetails theRequest) {
+			myRequest = theRequest;
+			return this;
+		}
+
+		public RequestPartitionId getRequestPartitionId() {
+			return myRequestPartitionId;
+		}
+
+		public SearchForIdsParams setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+			myRequestPartitionId = theRequestPartitionId;
+			return this;
+		}
+
+		public ResourceTablePredicateBuilder getResourceTablePredicateBuilder() {
+			return myResourceTablePredicateBuilder;
+		}
+
+		public SearchForIdsParams setResourceTablePredicateBuilder(
+				ResourceTablePredicateBuilder theResourceTablePredicateBuilder) {
+			myResourceTablePredicateBuilder = theResourceTablePredicateBuilder;
+			return this;
 		}
 	}
 }

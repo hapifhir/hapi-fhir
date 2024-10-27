@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
@@ -7,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class NumberParamTest {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -43,7 +45,7 @@ public class NumberParamTest {
 	public void testNoQualifier() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "5.4");
-		assertEquals(null, p.getPrefix());
+		assertNull(p.getPrefix());
 		assertEquals("5.4", p.getValue().toPlainString());
 		assertEquals("5.4", p.getValueAsQueryToken(ourCtx));
 	}
@@ -56,7 +58,7 @@ public class NumberParamTest {
 	public void testNegativeNumber() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "-5.4");
-		assertEquals(null, p.getPrefix());
+		assertNull(p.getPrefix());
 		assertEquals("-5.4", p.getValue().toPlainString());
 		assertEquals(new BigDecimal("-5.4"), p.getValue());
 		assertEquals("-5.4", p.getValueAsQueryToken(ourCtx));

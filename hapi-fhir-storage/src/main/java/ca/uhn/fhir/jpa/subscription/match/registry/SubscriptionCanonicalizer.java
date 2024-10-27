@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -38,6 +39,8 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SubscriptionUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -56,10 +59,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
@@ -67,10 +69,23 @@ public class SubscriptionCanonicalizer {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionCanonicalizer.class);
 
 	final FhirContext myFhirContext;
+	private final SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired
+	public SubscriptionCanonicalizer(FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings) {
+		myFhirContext = theFhirContext;
+		mySubscriptionSettings = theSubscriptionSettings;
+	}
+
+	// TODO:  LD:  remove this constructor once all callers call the 2 arg constructor above
+
+	/**
+	 * @deprecated All callers should invoke {@link SubscriptionCanonicalizer()} instead.
+	 */
+	@Deprecated
 	public SubscriptionCanonicalizer(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
+		mySubscriptionSettings = new SubscriptionSettings();
 	}
 
 	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
@@ -108,7 +123,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(channel.getPayload());
 			retVal.setTags(extractTags(subscription));
-			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+			retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription));
 			retVal.setSendDeleteMessages(extractDeleteExtensionDstu2(subscription));
 		} catch (FHIRException theE) {
 			throw new InternalErrorException(Msg.code(557) + theE);
@@ -119,7 +134,7 @@ public class SubscriptionCanonicalizer {
 	private boolean extractDeleteExtensionDstu2(ca.uhn.fhir.model.dstu2.resource.Subscription theSubscription) {
 		return theSubscription.getChannel().getUndeclaredExtensionsByUrl(EX_SEND_DELETE_MESSAGES).stream()
 				.map(ExtensionDt::getValue)
-				.map(value -> (BooleanDt) value)
+				.map(BooleanDt.class::cast)
 				.map(BasePrimitive::getValue)
 				.findFirst()
 				.orElse(false);
@@ -160,7 +175,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setPayloadSearchCriteria(
 					getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 			retVal.setTags(extractTags(subscription));
-			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+			retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription));
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
@@ -291,7 +306,7 @@ public class SubscriptionCanonicalizer {
 				getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 		retVal.setTags(extractTags(subscription));
 		setPartitionIdOnReturnValue(theSubscription, retVal);
-		retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+		retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription));
 
 		List<org.hl7.fhir.r4.model.CanonicalType> profiles =
 				subscription.getMeta().getProfile();
@@ -305,8 +320,6 @@ public class SubscriptionCanonicalizer {
 			CanonicalTopicSubscription topicSubscription = retVal.getTopicSubscription();
 			topicSubscription.setTopic(getCriteria(theSubscription));
 
-			// WIP STR5 support other content types
-			topicSubscription.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
 			retVal.setEndpointUrl(channel.getEndpoint());
 			retVal.setChannelType(getChannelType(subscription));
 
@@ -320,31 +333,37 @@ public class SubscriptionCanonicalizer {
 			}
 
 			if (channel.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_HEARTBEAT_PERIOD_URL)) {
-				org.hl7.fhir.r4.model.Extension timeoutExtension = channel.getExtensionByUrl(
+				org.hl7.fhir.r4.model.Extension channelHeartbeatPeriotUrlExtension = channel.getExtensionByUrl(
 						SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_HEARTBEAT_PERIOD_URL);
-				topicSubscription.setHeartbeatPeriod(
-						Integer.valueOf(timeoutExtension.getValue().primitiveValue()));
+				topicSubscription.setHeartbeatPeriod(Integer.valueOf(
+						channelHeartbeatPeriotUrlExtension.getValue().primitiveValue()));
 			}
 			if (channel.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_TIMEOUT_URL)) {
-				org.hl7.fhir.r4.model.Extension timeoutExtension =
+				org.hl7.fhir.r4.model.Extension channelTimeoutUrlExtension =
 						channel.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_TIMEOUT_URL);
 				topicSubscription.setTimeout(
-						Integer.valueOf(timeoutExtension.getValue().primitiveValue()));
+						Integer.valueOf(channelTimeoutUrlExtension.getValue().primitiveValue()));
 			}
 			if (channel.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_MAX_COUNT)) {
-				org.hl7.fhir.r4.model.Extension timeoutExtension =
+				org.hl7.fhir.r4.model.Extension channelMaxCountExtension =
 						channel.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_MAX_COUNT);
 				topicSubscription.setMaxCount(
-						Integer.valueOf(timeoutExtension.getValue().primitiveValue()));
-			}
-			if (channel.getPayloadElement()
-					.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT)) {
-				org.hl7.fhir.r4.model.Extension timeoutExtension = channel.getPayloadElement()
-						.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT);
-				topicSubscription.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(
-						timeoutExtension.getValue().primitiveValue()));
+						Integer.valueOf(channelMaxCountExtension.getValue().primitiveValue()));
 			}
 
+			// setting full-resource PayloadContent if backport-payload-content is not provided
+			org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent payloadContent =
+					org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE;
+
+			org.hl7.fhir.r4.model.Extension channelPayloadContentExtension = channel.getPayloadElement()
+					.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT);
+
+			if (nonNull(channelPayloadContentExtension)) {
+				payloadContent = org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(
+						channelPayloadContentExtension.getValue().primitiveValue());
+			}
+
+			topicSubscription.setContent(payloadContent);
 		} else {
 			retVal.setCriteriaString(getCriteria(theSubscription));
 			retVal.setEndpointUrl(channel.getEndpoint());
@@ -382,7 +401,7 @@ public class SubscriptionCanonicalizer {
 		}
 
 		List<Extension> topicExts = subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
-		if (topicExts.size() > 0) {
+		if (!topicExts.isEmpty()) {
 			IBaseReference ref = (IBaseReference) topicExts.get(0).getValueAsPrimitive();
 			if (!"EventDefinition".equals(ref.getReferenceElement().getResourceType())) {
 				throw new PreconditionFailedException(Msg.code(563) + "Topic reference must be an EventDefinition");
@@ -423,13 +442,25 @@ public class SubscriptionCanonicalizer {
 		}
 
 		if (retVal.isTopicSubscription()) {
-			retVal.getTopicSubscription().setTopic(getCriteria(theSubscription));
+			CanonicalTopicSubscription topicSubscription = retVal.getTopicSubscription();
+			topicSubscription.setTopic(getCriteria(theSubscription));
 
-			// WIP STR5 support other content types
-			retVal.getTopicSubscription()
-					.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
 			retVal.setEndpointUrl(channel.getEndpoint());
 			retVal.setChannelType(getChannelType(subscription));
+
+			// setting full-resource PayloadContent if backport-payload-content is not provided
+			org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent payloadContent =
+					org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE;
+
+			org.hl7.fhir.r4b.model.Extension channelPayloadContentExtension = channel.getPayloadElement()
+					.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT);
+
+			if (nonNull(channelPayloadContentExtension)) {
+				payloadContent = org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(
+						channelPayloadContentExtension.getValue().primitiveValue());
+			}
+
+			topicSubscription.setContent(payloadContent);
 		} else {
 			retVal.setCriteriaString(getCriteria(theSubscription));
 			retVal.setEndpointUrl(channel.getEndpoint());
@@ -468,7 +499,7 @@ public class SubscriptionCanonicalizer {
 
 		List<org.hl7.fhir.r4b.model.Extension> topicExts =
 				subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
-		if (topicExts.size() > 0) {
+		if (!topicExts.isEmpty()) {
 			IBaseReference ref = (IBaseReference) topicExts.get(0).getValueAsPrimitive();
 			if (!"EventDefinition".equals(ref.getReferenceElement().getResourceType())) {
 				throw new PreconditionFailedException(Msg.code(566) + "Topic reference must be an EventDefinition");
@@ -479,6 +510,8 @@ public class SubscriptionCanonicalizer {
 		if (extension != null && extension.hasValue() && extension.hasValueBooleanType()) {
 			retVal.setSendDeleteMessages(extension.getValueBooleanType().booleanValue());
 		}
+
+		retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription));
 
 		return retVal;
 	}
@@ -498,7 +531,7 @@ public class SubscriptionCanonicalizer {
 
 		List<org.hl7.fhir.r5.model.Extension> topicExts =
 				subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
-		if (topicExts.size() > 0) {
+		if (!topicExts.isEmpty()) {
 			IBaseReference ref = (IBaseReference) topicExts.get(0).getValueAsPrimitive();
 			if (!"EventDefinition".equals(ref.getReferenceElement().getResourceType())) {
 				throw new PreconditionFailedException(Msg.code(2325) + "Topic reference must be an EventDefinition");
@@ -535,14 +568,15 @@ public class SubscriptionCanonicalizer {
 		retVal.getTopicSubscription().setTopic(subscription.getTopic());
 		retVal.setChannelType(getChannelType(subscription));
 
-		subscription.getFilterBy().forEach(filter -> {
-			retVal.getTopicSubscription().addFilter(convertFilter(filter));
-		});
+		subscription.getFilterBy().forEach(filter -> retVal.getTopicSubscription()
+				.addFilter(convertFilter(filter)));
 
 		retVal.getTopicSubscription().setHeartbeatPeriod(subscription.getHeartbeatPeriod());
 		retVal.getTopicSubscription().setMaxCount(subscription.getMaxCount());
 
 		setR5FlagsBasedOnChannelType(subscription, retVal);
+
+		retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription));
 
 		return retVal;
 	}
@@ -744,5 +778,25 @@ public class SubscriptionCanonicalizer {
 			return null;
 		}
 		return status.getValueAsString();
+	}
+
+	private boolean handleCrossPartition(IBaseResource theSubscription) {
+		RequestPartitionId requestPartitionId =
+				(RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
+
+		boolean isSubscriptionCreatedOnDefaultPartition = false;
+
+		if (nonNull(requestPartitionId)) {
+			isSubscriptionCreatedOnDefaultPartition = requestPartitionId.isDefaultPartition();
+		}
+
+		boolean isSubscriptionDefinededAsCrossPartitionSubscription =
+				SubscriptionUtil.isDefinedAsCrossPartitionSubcription(theSubscription);
+		boolean isGlobalSettingCrossPartitionSubscriptionEnabled =
+				mySubscriptionSettings.isCrossPartitionSubscriptionEnabled();
+
+		return isSubscriptionCreatedOnDefaultPartition
+				&& isSubscriptionDefinededAsCrossPartitionSubscription
+				&& isGlobalSettingCrossPartitionSubscriptionEnabled;
 	}
 }

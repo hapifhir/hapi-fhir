@@ -1,14 +1,14 @@
 <!--/* FunctionalStatus -->
 <!--
-Assessment: ClinicalImpression.code.text ||  ClinicalImpression.code[x].display
+Assessment: ClinicalImpression.code.text || ClinicalImpression.code[x].display (separated by <br />)
 Status: ClinicalImpression.status.code
-Finding:  ClinicalImpression.summary
-Comments: ClinicalImpression.note[x].text (display all notes separated by <br /> )
-Date: ClinicalImpression.effectiveDateTime
+Finding: ClinicalImpression.summary
+Comments: ClinicalImpression.note[x].text (separated by <br />)
+Date: ClinicalImpression.effectiveDateTime || ClinicalImpression.effectivePeriod.start
 */-->
 <div xmlns:th="http://www.thymeleaf.org">
+   <h5>Functional Status</h5>
    <table class="hapiPropertyTable">
-      <caption>Functional Status</caption>
       <thead>
       <tr>
          <th>Assessment</th>
@@ -23,11 +23,11 @@ Date: ClinicalImpression.effectiveDateTime
          <th:block th:unless='*{getResourceType().name() == "Composition"}'>
             <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
                <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
-                  <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')">Assessment</td>
+                  <td th:insert="~{IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')}">Assessment</td>
                   <td th:text="*{getStatus().getCode()}">Status</td>
                   <td th:text="*{getSummary()}">Finding</td>
-                  <td th:insert="IpsUtilityFragments :: concat (list=*{getNote()},attr='text')">Comments</td>
-                  <td th:insert="IpsUtilityFragments :: renderEffective (effective=*{getEffective()})">Date</td>
+                  <td th:insert="~{IpsUtilityFragments :: concat (list=*{getNote()},attr='text')}">Comments</td>
+                  <td th:insert="~{IpsUtilityFragments :: renderEffective (effective=*{getEffective()})}">Date</td>
                </tr>
             </th:block>
          </th:block>

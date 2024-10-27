@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4636
+title: "Fixed Oracle syntax problem with the fix that was previously provided via Pull Request 4630."

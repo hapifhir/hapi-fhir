@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5242
+title: "Previously, `$mdm-clear` failed to expunge `REDIRECTED` golden resources which left them as orphans. This is now fixed."
+   

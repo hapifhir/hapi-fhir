@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,10 +56,12 @@ public final class IdentifierUtil {
 	 * @param theFhirContext FHIR context to use for determining the identifier version
 	 * @param eid EID to get equivalent FHIR Identifier from
 	 * @param <T> Generic Identifier base interface
-	 * @return Returns appropriate R4 or DSTU3 Identifier instance
+	 * @return Returns appropriate R5, R4 or DSTU3 Identifier instance
 	 */
 	public static <T extends IBase> T toId(FhirContext theFhirContext, CanonicalEID eid) {
 		switch (theFhirContext.getVersion().getVersion()) {
+			case R5:
+				return (T) eid.toR5();
 			case R4:
 				return (T) eid.toR4();
 			case DSTU3:

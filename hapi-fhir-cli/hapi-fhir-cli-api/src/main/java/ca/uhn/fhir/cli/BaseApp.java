@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -270,14 +270,6 @@ public abstract class BaseApp {
 
 			// Actually execute the command
 			command.run(parsedOptions);
-
-			myShutdownHookHasNotRun = true;
-			runCleanupHookAndUnregister();
-
-			if (!HapiSystemProperties.isTestModeEnabled()) {
-				System.exit(0);
-			}
-
 		} catch (ParseException e) {
 			if (!HapiSystemProperties.isTestModeEnabled()) {
 				LogbackUtil.loggingConfigOff();
@@ -296,6 +288,13 @@ public abstract class BaseApp {
 			ourLog.error("Error during execution: ", t);
 			runCleanupHookAndUnregister();
 			exitDueToException(new CommandFailureException("Error: " + t, t));
+		} finally {
+			myShutdownHookHasNotRun = true;
+			runCleanupHookAndUnregister();
+
+			if (!HapiSystemProperties.isTestModeEnabled()) {
+				System.exit(0);
+			}
 		}
 	}
 

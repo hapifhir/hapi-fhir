@@ -1,12 +1,4 @@
-package ca.uhn.hapi.fhir.cdshooks.model;/*-
- * #%L
- * Smile CDR - CDR
- * %%
- * Copyright (C) 2016 - 2017 Simpatico Intelligent Systems Inc
- * %%
- * All rights reserved.
- * #L%
- */
+package ca.uhn.hapi.fhir.cdshooks.model;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4Test;
-import ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseOperationsProvider;
+import ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
@@ -10,21 +9,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class QuestionnaireResponseOperationsProviderTest extends BaseCrR4Test {
+public class QuestionnaireResponseOperationsProviderTest extends BaseCrR4TestServer {
 	@Autowired
-	QuestionnaireResponseOperationsProvider questionnaireResponseOperationsProvider;
+	QuestionnaireResponseExtractProvider myQuestionnaireResponseExtractProvider;
 
 	@Test
 	void testExtract() throws IOException {
 		var requestDetails = setupRequestDetails();
 		loadResource(Questionnaire.class, "ca/uhn/fhir/cr/r4/Questionnaire-MyPainQuestionnaire.json", requestDetails);
 		var questionnaireResponse = readResource(QuestionnaireResponse.class, "ca/uhn/fhir/cr/r4/QuestionnaireResponse-QRSharonDecision.json");
-		var result = (Bundle) this.questionnaireResponseOperationsProvider.extract(null, questionnaireResponse, requestDetails);
+		var result = (Bundle) myQuestionnaireResponseExtractProvider.extract(null, questionnaireResponse, null, null, null, null, requestDetails);
 
 		assertNotNull(result);
-		assertEquals(5, result.getEntry().size());
+		assertThat(result.getEntry()).hasSize(5);
 	}
 }

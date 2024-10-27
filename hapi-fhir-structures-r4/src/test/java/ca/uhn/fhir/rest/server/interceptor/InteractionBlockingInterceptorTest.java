@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -22,14 +23,12 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 	public static final String SERVER_OP = "$server-op";
@@ -60,17 +59,7 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 
 		// Verify CapabilityStatement
 		Set<String> supportedOps = fetchCapabilityInteractions();
-		assertThat(supportedOps.toString(), supportedOps, containsInAnyOrder(
-			"Observation:create",
-			"Observation:read",
-			"Observation:vread",
-			"OperationDefinition:read",
-			"Patient:read",
-			"Patient:vread",
-			"Patient:search-type",
-			"Patient:history-instance",
-			"Patient:history-type"
-		));
+		assertThat(supportedOps).as(supportedOps.toString()).containsExactlyInAnyOrder("Observation:create", "Observation:read", "Observation:vread", "OperationDefinition:read", "Patient:read", "Patient:vread", "Patient:search-type", "Patient:history-instance", "Patient:history-type");
 
 		// Verify Server
 		verifyCreateObservationOk();
@@ -94,12 +83,7 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 
 		// Verify CapabilityStatement
 		Set<String> supportedOps = fetchCapabilityInteractions();
-		assertThat(supportedOps.toString(), supportedOps, containsInAnyOrder(
-			"OperationDefinition:read",
-			"Patient:$instance-op",
-			"Patient:$type-op",
-			"server:$server-op"
-		));
+		assertThat(supportedOps).as(supportedOps.toString()).containsExactlyInAnyOrder("OperationDefinition:read", "Patient:$instance-op", "Patient:$type-op", "server:$server-op");
 
 		// Verify Server
 		verifyCreateObservationFails();
@@ -109,9 +93,8 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 	private void verifyReadEncounterFails() {
 		try {
 			myServer.getFhirClient().read().resource("Encounter").withId("E0").execute();
-			fail();
-		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), containsString("Unknown resource type"));
+			fail();		} catch (ResourceNotFoundException e) {
+			assertThat(e.getMessage()).contains("Unknown resource type");
 		}
 	}
 
@@ -135,9 +118,8 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 	private void verifyCreateObservationFails() {
 		try {
 			myServer.getFhirClient().create().resource(new Observation()).execute();
-			fail();
-		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), containsString("Unknown resource type"));
+			fail();		} catch (ResourceNotFoundException e) {
+			assertThat(e.getMessage()).contains("Unknown resource type");
 		}
 	}
 

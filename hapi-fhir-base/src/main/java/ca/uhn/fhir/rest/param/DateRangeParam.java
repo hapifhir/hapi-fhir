@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -34,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
@@ -112,6 +112,8 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 						theDateParam.setValueAsString(DateUtils.getCompletedDate(theDateParam.getValueAsString())
 								.getRight());
 					}
+					// there is only one value; we will set it as the lower bound
+					// as a >= operation
 					validateAndSet(theDateParam, null);
 					break;
 				case ENDS_BEFORE:
@@ -121,6 +123,9 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 						theDateParam.setValueAsString(DateUtils.getCompletedDate(theDateParam.getValueAsString())
 								.getLeft());
 					}
+
+					// there is only one value; we will set it as the upper bound
+					// as a <= operation
 					validateAndSet(null, theDateParam);
 					break;
 				default:
@@ -318,8 +323,8 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case NOT_EQUAL:
 					break;
 				case LESSTHAN:
-				case APPROXIMATE:
 				case LESSTHAN_OR_EQUALS:
+				case APPROXIMATE:
 				case ENDS_BEFORE:
 					throw new IllegalStateException(
 							Msg.code(1926) + "Invalid lower bound comparator: " + myLowerBound.getPrefix());
@@ -383,9 +388,9 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case NOT_EQUAL:
 				case GREATERTHAN_OR_EQUALS:
 					break;
+				case LESSTHAN_OR_EQUALS:
 				case LESSTHAN:
 				case APPROXIMATE:
-				case LESSTHAN_OR_EQUALS:
 				case ENDS_BEFORE:
 					throw new IllegalStateException(
 							Msg.code(1928) + "Invalid lower bound comparator: " + theLowerBound.getPrefix());
@@ -470,10 +475,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		if (myLowerBound != null && myLowerBound.getMissing() != null) {
 			retVal.add((myLowerBound));
 		} else {
-			if (myLowerBound != null && !myLowerBound.isEmpty()) {
+			boolean hasLowerBound = myLowerBound != null && !myLowerBound.isEmpty();
+			boolean hasUpperBound = myUpperBound != null && !myUpperBound.isEmpty();
+
+			if (hasLowerBound) {
 				retVal.add((myLowerBound));
 			}
-			if (myUpperBound != null && !myUpperBound.isEmpty()) {
+			if (hasUpperBound) {
 				retVal.add((myUpperBound));
 			}
 		}

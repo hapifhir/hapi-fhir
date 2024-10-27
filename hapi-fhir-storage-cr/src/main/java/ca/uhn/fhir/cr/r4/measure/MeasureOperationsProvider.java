@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
+import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -31,13 +33,19 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.function.Function;
+import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class MeasureOperationsProvider {
-	@Autowired
-	Function<RequestDetails, MeasureService> myR4MeasureServiceFactory;
+
+	private final IMeasureServiceFactory myR4MeasureServiceFactory;
+	private final StringTimePeriodHandler myStringTimePeriodHandler;
+
+	public MeasureOperationsProvider(
+			IMeasureServiceFactory theR4MeasureServiceFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+		myR4MeasureServiceFactory = theR4MeasureServiceFactory;
+		myStringTimePeriodHandler = theStringTimePeriodHandler;
+	}
 
 	/**
 	 * Implements the <a href=
@@ -62,7 +70,7 @@ public class MeasureOperationsProvider {
 	 *                          autopopulated HAPI.
 	 * @return the calculated MeasureReport
 	 */
-	@Operation(name = ProviderConstants.CQL_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
+	@Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
 	public MeasureReport evaluateMeasure(
 			@IdParam IdType theId,
 			@OperationParam(name = "periodStart") String thePeriodStart,
@@ -74,20 +82,24 @@ public class MeasureOperationsProvider {
 			@OperationParam(name = "productLine") String theProductLine,
 			@OperationParam(name = "additionalData") Bundle theAdditionalData,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			@OperationParam(name = "parameters") Parameters theParameters,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return this.myR4MeasureServiceFactory
-				.apply(theRequestDetails)
-				.evaluateMeasure(
-						theId,
-						thePeriodStart,
-						thePeriodEnd,
+		return myR4MeasureServiceFactory
+				.create(theRequestDetails)
+				.evaluate(
+						Eithers.forMiddle3(theId),
+						myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails),
+						myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails),
 						theReportType,
 						theSubject,
-						thePractitioner,
 						theLastReceivedOn,
-						theProductLine,
+						null,
+						theTerminologyEndpoint,
+						null,
 						theAdditionalData,
-						theTerminologyEndpoint);
+						theParameters,
+						theProductLine,
+						thePractitioner);
 	}
 }

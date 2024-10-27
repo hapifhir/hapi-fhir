@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5322
+title: "Update DSTU3 validation resources to FHIR 3.0.2 instead of 3.0.1"

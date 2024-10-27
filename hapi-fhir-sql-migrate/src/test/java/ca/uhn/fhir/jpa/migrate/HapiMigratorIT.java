@@ -3,33 +3,41 @@ package ca.uhn.fhir.jpa.migrate;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
+import ca.uhn.fhir.jpa.migrate.tasks.SchemaInitializationProvider;
+import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@SuppressWarnings("SqlDialectInspection")
 class HapiMigratorIT {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigratorIT.class);
 	private static final String MIGRATION_TABLENAME = "TEST_MIGRATOR_TABLE";
@@ -43,6 +51,7 @@ class HapiMigratorIT {
 		HapiMigrator migrator = buildMigrator();
 		migrator.createMigrationTableIfRequired();
 		Integer count = myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME, Integer.class);
+		assertNotNull(count);
 		assertTrue(count > 0);
 		HapiMigrationDao migrationDao = new HapiMigrationDao(myDataSource, DriverTypeEnum.H2_EMBEDDED, MIGRATION_TABLENAME);
 		myMigrationStorageSvc = new HapiMigrationStorageSvc(migrationDao);
@@ -58,6 +67,62 @@ class HapiMigratorIT {
 	}
 
 	@Test
+	public void testInitializeSchema() {
+		SchemaInitializationProvider schemaInitProvider = new SchemaInitializationProvider(
+			"A schema",
+			"/hapi-migrator-it-init-schema",
+			"HFJ_RES_REINDEX_JOB",
+			true
+		);
+
+		MigrationTaskList taskList = new MigrationTaskList();
+		Builder version = HapiMigrationStorageSvcTest.forVersion(taskList);
+
+		version.initializeSchema("1", schemaInitProvider);
+
+		Builder.BuilderAddTableByColumns nonSchemaInit = version.addTableByColumns("2", "NON_SCHEMA_INIT", "PID");
+		nonSchemaInit.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+
+		Builder.BuilderAddTableByColumns schemaInit = version.addTableByColumns("3", "SCHEMA_INIT", "PID");
+		schemaInit.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		schemaInit.withFlags().runEvenDuringSchemaInitialization();
+
+		HapiMigrator migrator;
+		MigrationResult outcome;
+
+		/*
+		 * Run the migrator for the first time. This should execute 2 tasks: the initial
+		 * schema initialization, and the task set to run even during initialization. Task
+		 * 2 should not run.
+		 */
+		migrator = buildMigrator(taskList.toTaskArray());
+		outcome = migrator.migrate();
+		assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("1", "3");
+
+		/*
+		 * Run again - Nothing should happen since we've already finished the migration
+		 */
+		migrator = buildMigrator(taskList.toTaskArray());
+		outcome = migrator.migrate();
+		assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).isEmpty();
+
+		/*
+		 * Add another pair of tasks - Both should run
+		 */
+		Builder.BuilderAddTableByColumns nonSchemaInit2 = version.addTableByColumns("4", "NON_SCHEMA_INIT_2", "PID");
+		nonSchemaInit2.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+
+		Builder.BuilderAddTableByColumns schemaInit2 = version.addTableByColumns("5", "SCHEMA_INIT_2", "PID");
+		schemaInit2.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		schemaInit2.withFlags().runEvenDuringSchemaInitialization();
+
+		migrator = buildMigrator(taskList.toTaskArray());
+		outcome = migrator.migrate();
+		assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("4", "5");
+
+	}
+
+	@Test
 	void test_onecall_noblock() throws InterruptedException, ExecutionException {
 
 		ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -66,12 +131,12 @@ class HapiMigratorIT {
 		HapiMigrator migrator = buildMigrator(latchMigrationTask);
 
 		latchMigrationTask.setExpectedCount(1);
-		Future<MigrationResult> future = executor.submit(() -> migrator.migrate());
+		Future<MigrationResult> future = executor.submit(migrator::migrate);
 		latchMigrationTask.awaitExpected();
 		latchMigrationTask.release("1");
 
 		MigrationResult result = future.get();
-		assertThat(result.succeededTasks, hasSize(1));
+		assertThat(result.succeededTasks).hasSize(1);
 	}
 
 	@Test
@@ -92,7 +157,7 @@ class HapiMigratorIT {
 		// is released, the first one will have already run so there will be nothing to do
 
 		latchMigrationTask1.setExpectedCount(1);
-		Future<MigrationResult> future1 = executor.submit(() -> migrator1.migrate());
+		Future<MigrationResult> future1 = executor.submit(migrator1::migrate);
 		latchMigrationTask1.awaitExpected();
 
 		// We wait until the first migration is in the middle of executing the migration task before we start the second one
@@ -102,7 +167,7 @@ class HapiMigratorIT {
 		latchMigrationTask1.release("1");
 
 		latchMigrationTask2.setExpectedCount(1);
-		Future<MigrationResult> future2 = executor.submit(() -> migrator2.migrate());
+		Future<MigrationResult> future2 = executor.submit(migrator2::migrate);
 		latchMigrationTask2.awaitExpected();
 
 		// This second call shouldn't be necessary, but it will help the test fail faster with a clearer error
@@ -113,8 +178,8 @@ class HapiMigratorIT {
 		MigrationResult result2 = future2.get();
 
 		// Tasks were only run on the first migration
-		assertThat(result1.succeededTasks, hasSize(1));
-		assertThat(result2.succeededTasks, hasSize(1));
+		assertThat(result1.succeededTasks).hasSize(1);
+		assertThat(result2.succeededTasks).hasSize(1);
 	}
 
 	@Test
@@ -128,26 +193,25 @@ class HapiMigratorIT {
 
 		{
 			latchMigrationTask.setExpectedCount(1);
-			Future<MigrationResult> future = executor.submit(() -> migrator.migrate());
+			Future<MigrationResult> future = executor.submit(migrator::migrate);
 			latchMigrationTask.awaitExpected();
 			assertEquals(1, countLockRecords());
 			latchMigrationTask.release("1");
 
 			MigrationResult result = future.get();
 			assertEquals(0, countLockRecords());
-			assertThat(result.succeededTasks, hasSize(1));
+			assertThat(result.succeededTasks).hasSize(1);
 		}
 
 		{
-			Future<MigrationResult> future = executor.submit(() -> migrator.migrate());
+			Future<MigrationResult> future = executor.submit(migrator::migrate);
 
 			MigrationResult result = future.get();
 			assertEquals(0, countLockRecords());
-			assertThat(result.succeededTasks, hasSize(0));
+			assertThat(result.succeededTasks).hasSize(0);
 		}
 
 	}
-
 
 	@Test
 	void test_oldLockFails_block() {
@@ -174,10 +238,34 @@ class HapiMigratorIT {
 		System.setProperty(HapiMigrationLock.CLEAR_LOCK_TABLE_WITH_DESCRIPTION, description);
 
 		MigrationResult result = migrator.migrate();
-		assertThat(result.succeededTasks, hasSize(1));
+		assertThat(result.succeededTasks).hasSize(1);
 	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void test_HeavyweightSkippable(boolean theShouldRun) throws InterruptedException, ExecutionException {
 
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		LatchMigrationTask latchMigrationTask = new LatchMigrationTask("only", "1");
+		latchMigrationTask.addFlag(TaskFlagEnum.HEAVYWEIGHT_SKIP_BY_DEFAULT);
+
+		HapiMigrator migrator = buildMigrator(latchMigrationTask);
+		int expectedInvocations = 0;
+		if (theShouldRun) {
+			migrator.setRunHeavyweightSkippableTasks(true);
+			expectedInvocations = 1;
+		}
+		latchMigrationTask.setExpectedCount(expectedInvocations);
+
+		Future<MigrationResult> future = executor.submit(migrator::migrate);
+		latchMigrationTask.awaitExpected();
+		latchMigrationTask.release("1");
+
+		MigrationResult result = future.get();
+		assertThat(result.succeededTasks).hasSize(expectedInvocations);
+	}
+
+	@SuppressWarnings("DataFlowIssue")
 	private int countLockRecords() {
 		return myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME + " WHERE \"installed_rank\" = " + HapiMigrationLock.LOCK_PID, Integer.class);
 	}
@@ -196,8 +284,15 @@ class HapiMigratorIT {
 		return new HapiMigrator(MIGRATION_TABLENAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
 	}
 
+	private static @Nonnull String toTaskStatementDescriptions(MigrationResult outcome) {
+		return "Statements:\n * " + outcome.executedStatements.stream().map(BaseTask.ExecutedStatement::toString).collect(Collectors.joining("\n * "));
+	}
 
-	private class LatchMigrationTask extends BaseTask implements IPointcutLatch {
+	private static @Nonnull List<String> toTaskVersionList(MigrationResult outcome) {
+		return outcome.executedStatements.stream().map(BaseTask.ExecutedStatement::getSchemaVersion).toList();
+	}
+
+	private static class LatchMigrationTask extends BaseTask implements IPointcutLatch {
 		private final PointcutLatch myLatch;
 		private final PointcutLatch myWaitLatch;
 

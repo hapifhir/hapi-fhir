@@ -1,13 +1,13 @@
 package ca.uhn.hapi.fhir.cdshooks.module;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSystemActionJson;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -23,17 +23,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.io.IOException;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(SpringExtension.class)
-public class SerializationTest {
+class SerializationTest {
 	public static final String HOOK_NAME = "Hook Name";
 	public static final String FHIR_SERVER = "https://localhost:2401";
 	public static final String FAMILY = "Jehoshaphat";
@@ -60,7 +58,7 @@ public class SerializationTest {
 	private String myRequestJson;
 
 	@BeforeEach
-	public void loadJson() throws IOException {
+	public void loadJson() throws Exception {
 		myRequestJson = IOUtils.toString(myRequestJsonResource.getInputStream(), Charsets.UTF_8);
 		myResponseJson = IOUtils.toString(myResponseJsonResource.getInputStream(), Charsets.UTF_8);
 	}
@@ -78,7 +76,7 @@ public class SerializationTest {
 	// These tests verify that nulls prefetch values are preserved in serialization and deserialization so their
 	// missing status is properly determined
 	@Test
-	public void testSerializeRequest() throws JsonProcessingException {
+	void testSerializeRequest() throws Exception {
 		CdsServiceRequestJson cdsServiceRequestJson = new CdsServiceRequestJson();
 		cdsServiceRequestJson.setHook(HOOK_NAME);
 		cdsServiceRequestJson.setFhirServer(FHIR_SERVER);
@@ -106,15 +104,15 @@ public class SerializationTest {
 
 		String json = ourObjectMapper.writeValueAsString(cdsServiceRequestJson);
 		ourLog.debug(json);
-		assertThat(json, equalToIgnoringWhiteSpace(myRequestJson));
+		assertThat(json).isEqualToIgnoringWhitespace(myRequestJson);
 	}
 
 	@Test
-	public void testDeserializeRequest() throws JsonProcessingException {
+	void testDeserializeRequest() throws Exception {
 		CdsServiceRequestJson cdsServiceRequestJson = ourObjectMapper.readValue(myRequestJson, CdsServiceRequestJson.class);
 		assertEquals(HOOK_NAME, cdsServiceRequestJson.getHook());
 
-		assertThat(cdsServiceRequestJson.getPrefetchKeys(), contains(PATIENT_KEY, DAUGHTER_KEY, PARENT_KEY));
+		assertThat(cdsServiceRequestJson.getPrefetchKeys()).containsExactly(PATIENT_KEY, DAUGHTER_KEY, PARENT_KEY);
 		Patient patient = (Patient) cdsServiceRequestJson.getPrefetch(PATIENT_KEY);
 		assertEquals(FAMILY, patient.getNameFirstRep().getFamily());
 
@@ -126,12 +124,12 @@ public class SerializationTest {
 
 		assertEquals(CONTEXT_PATIENT_VALUE, cdsServiceRequestJson.getContext().getString(CONTEXT_PATIENT_KEY));
 		List<String> selections = cdsServiceRequestJson.getContext().getArray(CONTEXT_SELECTIONS_KEY);
-		assertThat(selections, contains(CONTEXT_SELECTIONS_VALUE1, CONTEXT_SELECTIONS_VALUE2));
-		Bundle bundle = (Bundle) cdsServiceRequestJson.getContext().getResource(CONTEXT_DRAFT_ORDERS_KEY);
+		assertThat(selections).containsExactly(CONTEXT_SELECTIONS_VALUE1, CONTEXT_SELECTIONS_VALUE2);
+		cdsServiceRequestJson.getContext().getResource(CONTEXT_DRAFT_ORDERS_KEY);
 	}
 
 	@Test
-	public void testSerializeResponse() throws JsonProcessingException {
+	void testSerializeResponse() throws Exception {
 		Patient patient = new Patient();
 		patient.addName().setFamily(FAMILY);
 		CdsServiceResponseSystemActionJson systemAction = new CdsServiceResponseSystemActionJson();
@@ -151,13 +149,41 @@ public class SerializationTest {
 
 		String json = ourObjectMapper.writeValueAsString(cdsServiceRequestJson);
 		ourLog.debug(json);
-		assertThat(json, equalToIgnoringWhiteSpace(myResponseJson));
+		assertThat(json).isEqualToIgnoringWhitespace(myResponseJson);
 	}
 
 	@Test
-	public void testDeserializeResponse() throws JsonProcessingException {
+	void testDeserializeResponse() throws Exception {
 		CdsServiceResponseJson cdsServiceResponseJson = ourObjectMapper.readValue(myResponseJson, CdsServiceResponseJson.class);
 		Patient patient = (Patient) cdsServiceResponseJson.getServiceActions().get(0).getResource();
 		assertEquals(FAMILY, patient.getNameFirstRep().getFamily());
 	}
+
+	@Test
+	void testSerializeDeserializeEmptyRequest() throws Exception {
+		// setup
+		final CdsServiceRequestJson expected = new CdsServiceRequestJson();
+		final String expectedAsJson = ourObjectMapper.writeValueAsString(expected);
+		// execute
+		final CdsServiceRequestJson actual = ourObjectMapper.readValue(expectedAsJson, CdsServiceRequestJson.class);
+		// validate
+		final String actualAsJson = ourObjectMapper.writeValueAsString(actual);
+		assertNotSame(expected, actual);
+		assertEquals(expectedAsJson, actualAsJson);
+	}
+
+	@Test
+	void testSerializeDeserializeRequestWithEmptyContext() throws Exception {
+		// setup
+		final CdsServiceRequestJson expected = new CdsServiceRequestJson();
+		expected.setContext(new CdsServiceRequestContextJson());
+		final String expectedAsJson = ourObjectMapper.writeValueAsString(expected);
+		// execute
+		final CdsServiceRequestJson actual = ourObjectMapper.readValue(expectedAsJson, CdsServiceRequestJson.class);
+		// validate
+		final String actualAsJson = ourObjectMapper.writeValueAsString(actual);
+		assertNotSame(expected, actual);
+		assertEquals(expectedAsJson, actualAsJson);
+	}
+
 }

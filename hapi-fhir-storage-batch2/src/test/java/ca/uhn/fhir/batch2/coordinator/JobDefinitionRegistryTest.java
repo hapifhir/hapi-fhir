@@ -11,9 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -129,11 +127,11 @@ class JobDefinitionRegistryTest {
 	public void testRemoveJobDefinition() {
 		mySvc.removeJobDefinition("A", 1);
 
-		assertThat(mySvc.getJobDefinitionIds(), containsInAnyOrder("A"));
-		assertThat(mySvc.getJobDefinitionVersions("A"), containsInAnyOrder(2));
+		assertThat(mySvc.getJobDefinitionIds()).containsExactlyInAnyOrder("A");
+		assertThat(mySvc.getJobDefinitionVersions("A")).containsExactlyInAnyOrder(2);
 
 		mySvc.removeJobDefinition("A", 2);
-		assertThat(mySvc.getJobDefinitionIds(), empty());
+		assertThat(mySvc.getJobDefinitionIds()).isEmpty();
 	}
 
 

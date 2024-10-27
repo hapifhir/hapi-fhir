@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,16 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.IMetaTagSorter;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -83,8 +88,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -115,9 +120,17 @@ public abstract class BaseStorageDao {
 	@Autowired
 	protected JpaStorageSettings myStorageSettings;
 
+	@Autowired
+	protected IMetaTagSorter myMetaTagSorter;
+
 	@VisibleForTesting
 	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
 		mySearchParamRegistry = theSearchParamRegistry;
+	}
+
+	@VisibleForTesting
+	public void setMyMetaTagSorter(IMetaTagSorter theMetaTagSorter) {
+		myMetaTagSorter = theMetaTagSorter;
 	}
 
 	/**
@@ -153,6 +166,8 @@ public abstract class BaseStorageDao {
 		}
 
 		performAutoVersioning(theResource, thePerformIndexing);
+
+		myMetaTagSorter.sort(theResource.getMeta());
 	}
 
 	/**
@@ -679,29 +694,67 @@ public abstract class BaseStorageDao {
 	}
 
 	/**
-	 * @see StorageSettings#getAutoVersionReferenceAtPaths()
+	 * Extracts a list of references that should be auto-versioned.
+	 *
+	 * @return A set of references that should be versioned according to both storage settings
+	 * 		   and auto-version reference extensions, or it may also be empty.
 	 */
 	@Nonnull
 	public static Set<IBaseReference> extractReferencesToAutoVersion(
 			FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
-		Map<IBaseReference, Object> references = Collections.emptyMap();
+		Set<IBaseReference> referencesToAutoVersionFromConfig =
+				getReferencesToAutoVersionFromConfig(theFhirContext, theStorageSettings, theResource);
+
+		Set<IBaseReference> referencesToAutoVersionFromExtensions =
+				getReferencesToAutoVersionFromExtension(theFhirContext, theResource);
+
+		return Stream.concat(referencesToAutoVersionFromConfig.stream(), referencesToAutoVersionFromExtensions.stream())
+				.collect(Collectors.toMap(ref -> ref, ref -> ref, (oldRef, newRef) -> oldRef, IdentityHashMap::new))
+				.keySet();
+	}
+
+	/**
+	 * Extracts a list of references that should be auto-versioned according to
+	 * <code>auto-version-references-at-path</code> extensions.
+	 * @see HapiExtensions#EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH
+	 */
+	@Nonnull
+	private static Set<IBaseReference> getReferencesToAutoVersionFromExtension(
+			FhirContext theFhirContext, IBaseResource theResource) {
+		String resourceType = theFhirContext.getResourceType(theResource);
+		Set<String> autoVersionReferencesAtPaths =
+				MetaUtil.getAutoVersionReferencesAtPath(theResource.getMeta(), resourceType);
+
+		if (!autoVersionReferencesAtPaths.isEmpty()) {
+			return getReferencesWithoutVersionId(autoVersionReferencesAtPaths, theFhirContext, theResource);
+		}
+		return Collections.emptySet();
+	}
+
+	/**
+	 * Extracts a list of references that should be auto-versioned according to storage configuration.
+	 * @see StorageSettings#getAutoVersionReferenceAtPaths()
+	 */
+	@Nonnull
+	private static Set<IBaseReference> getReferencesToAutoVersionFromConfig(
+			FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
 		if (!theStorageSettings.getAutoVersionReferenceAtPaths().isEmpty()) {
 			String resourceName = theFhirContext.getResourceType(theResource);
-			for (String nextPath : theStorageSettings.getAutoVersionReferenceAtPathsByResourceType(resourceName)) {
-				List<IBaseReference> nextReferences =
-						theFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
-				for (IBaseReference next : nextReferences) {
-					if (next.getReferenceElement().hasVersionIdPart()) {
-						continue;
-					}
-					if (references.isEmpty()) {
-						references = new IdentityHashMap<>();
-					}
-					references.put(next, null);
-				}
-			}
+			Set<String> autoVersionReferencesPaths =
+					theStorageSettings.getAutoVersionReferenceAtPathsByResourceType(resourceName);
+			return getReferencesWithoutVersionId(autoVersionReferencesPaths, theFhirContext, theResource);
 		}
-		return references.keySet();
+		return Collections.emptySet();
+	}
+
+	private static Set<IBaseReference> getReferencesWithoutVersionId(
+			Set<String> autoVersionReferencesPaths, FhirContext theFhirContext, IBaseResource theResource) {
+		return autoVersionReferencesPaths.stream()
+				.map(fullPath -> theFhirContext.newTerser().getValues(theResource, fullPath, IBaseReference.class))
+				.flatMap(Collection::stream)
+				.filter(reference -> !reference.getReferenceElement().hasVersionIdPart())
+				.collect(Collectors.toMap(ref -> ref, ref -> ref, (oldRef, newRef) -> oldRef, IdentityHashMap::new))
+				.keySet();
 	}
 
 	public static void clearRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {

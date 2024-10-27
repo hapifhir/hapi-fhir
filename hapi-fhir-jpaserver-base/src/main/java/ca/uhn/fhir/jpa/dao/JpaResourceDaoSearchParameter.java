@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Enumeration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -60,8 +61,14 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 					@Override
 					public void afterCommit() {
-						myCacheReloadTriggered.set(false);
-						mySearchParamRegistry.forceRefresh();
+						myTransactionService
+								.withSystemRequest()
+								.withPropagation(Propagation.NOT_SUPPORTED)
+								.execute(() -> {
+									// do this outside any current tx.
+									myCacheReloadTriggered.set(false);
+									mySearchParamRegistry.forceRefresh();
+								});
 					}
 				});
 			}

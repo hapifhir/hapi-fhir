@@ -12,8 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class InitializeSchemaTaskTest extends BaseTest {
 
@@ -25,7 +24,7 @@ public class InitializeSchemaTaskTest extends BaseTest {
 		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", new TestProvider());
 		getMigrator().addTask(task);
 		getMigrator().migrate();
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), containsInAnyOrder("SOMETABLE"));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).containsExactlyInAnyOrder("SOMETABLE");
 
 		// Second migrate runs without issue
 		getMigrator().removeAllTasksForUnitTest();

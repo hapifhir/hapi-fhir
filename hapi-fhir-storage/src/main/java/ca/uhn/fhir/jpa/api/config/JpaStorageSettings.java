@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.api.config;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -27,7 +28,10 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
+import com.google.common.annotations.Beta;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -42,12 +46,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 @SuppressWarnings("JavadocLinkAsPlainText")
 public class JpaStorageSettings extends StorageSettings {
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageSettings.class);
 
+	/**
+	 * Default value for {@link #getBulkExportFileMaximumSize()}: 100 MB
+	 */
+	public static final long DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE = 100 * FileUtils.ONE_MB;
 	/**
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
 	 */
@@ -100,13 +107,16 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageSettings.class);
 	private static final int DEFAULT_REINDEX_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
 	/**
 	 * Child Configurations
 	 */
 	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
+
+	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
+	private static final long DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD = 10000;
+
 	/**
 	 * Do not change default of {@code 0}!
 	 *
@@ -263,14 +273,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @since 5.6.0
 	 */
 	private boolean myAdvancedHSearchIndexing = false;
-	/**
-	 * If set to a positive number, any resources with a character length at or below the given number
-	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
-	 * separate LOB column.
-	 *
-	 * @since 5.7.0
-	 */
-	private int myInlineResourceTextBelowSize = 0;
 
 	/**
 	 * @since 5.7.0
@@ -317,6 +319,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	private int myBulkExportFileMaximumCapacity = DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY;
 	/**
+	 * Since 7.2.0
+	 */
+	private long myBulkExportFileMaximumSize = DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE;
+	/**
 	 * Since 6.4.0
 	 */
 	private boolean myJobFastTrackingEnabled = false;
@@ -326,6 +332,52 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Applies to MDM links.
 	 */
 	private boolean myNonResourceDbHistoryEnabled = true;
+	/**
+	 * Since 7.0.0
+	 */
+	private boolean myResourceHistoryDbEnabled = true;
+
+	/**
+	 * @since 7.0.0
+	 */
+	@Nonnull
+	private IValidationSupport.IssueSeverity myIssueSeverityForCodeDisplayMismatch =
+			IValidationSupport.IssueSeverity.WARNING;
+
+	/**
+	 * This setting allows preventing a conditional update to invalidate the match criteria.
+	 * <p/>
+	 * By default, this is disabled unless explicitly enabled.
+	 *
+	 * @since 6.8.2
+	 */
+	private boolean myPreventInvalidatingConditionalMatchCriteria =
+			DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA;
+
+	/**
+	 * This setting helps to enforce a threshold in number of resolved resources for DELETE by URL REST calls
+	 *
+	 * @since 7.2.0
+	 */
+	private long myRestDeleteByUrlResourceIdThreshold = DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD;
+
+	/**
+	 * If enabled, this setting causes persisting data to legacy LOB columns as well as columns introduced
+	 * to migrate away from LOB columns which effectively duplicates stored information.
+	 *
+	 * @since 7.2.0
+	 */
+	private boolean myWriteToLegacyLobColumns = false;
+
+	/**
+	 * If this is enabled (default is {@literal false}), searches on token indexes will
+	 * include the {@literal HASH_IDENTITY} column on all generated FHIR search query SQL.
+	 * This is an experimental flag that may be changed or removed in a future release.
+	 *
+	 * @since 7.6.0
+	 */
+	@Beta
+	private boolean myIncludeHashIdentityForTokenSearches = false;
 
 	/**
 	 * Constructor
@@ -350,28 +402,49 @@ public class JpaStorageSettings extends StorageSettings {
 		if (HapiSystemProperties.isUnitTestModeEnabled()) {
 			setJobFastTrackingEnabled(true);
 		}
+		if (HapiSystemProperties.isPreventInvalidatingConditionalMatchCriteria()) {
+			setPreventInvalidatingConditionalMatchCriteria(true);
+		}
 	}
 
 	/**
-	 * If set to a positive number, any resources with a character length at or below the given number
-	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
-	 * separate LOB column.
+	 * If this is enabled (default is {@literal false}), searches on token indexes will
+	 * include the {@literal HASH_IDENTITY} column on all generated FHIR search query SQL.
+	 * This is an experimental flag that may be changed or removed in a future release.
 	 *
-	 * @since 5.7.0
+	 * @since 7.6.0
 	 */
+	public boolean isIncludeHashIdentityForTokenSearches() {
+		return myIncludeHashIdentityForTokenSearches;
+	}
+
+	/**
+	 * If this is enabled (default is {@literal false}), searches on token indexes will
+	 * include the {@literal HASH_IDENTITY} column on all generated FHIR search query SQL.
+	 * This is an experimental flag that may be changed or removed in a future release.
+	 *
+	 * @since 7.6.0
+	 */
+	public void setIncludeHashIdentityForTokenSearches(boolean theIncludeHashIdentityForTokenSearches) {
+		myIncludeHashIdentityForTokenSearches = theIncludeHashIdentityForTokenSearches;
+	}
+
+	/**
+	 * @since 5.7.0
+	 * @deprecated This setting no longer does anything as of HAPI FHIR 7.0.0
+	 */
+	@Deprecated
 	public int getInlineResourceTextBelowSize() {
-		return myInlineResourceTextBelowSize;
+		return 0;
 	}
 
 	/**
-	 * If set to a positive number, any resources with a character length at or below the given number
-	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
-	 * separate LOB column.
-	 *
 	 * @since 5.7.0
+	 * @deprecated This setting no longer does anything as of HAPI FHIR 7.0.0
 	 */
+	@Deprecated
 	public void setInlineResourceTextBelowSize(int theInlineResourceTextBelowSize) {
-		myInlineResourceTextBelowSize = theInlineResourceTextBelowSize;
+		// ignored
 	}
 
 	/**
@@ -2277,9 +2350,40 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Default is 1000 resources per file.
 	 *
 	 * @since 6.2.0
+	 * @see #setBulkExportFileMaximumCapacity(int)
 	 */
 	public void setBulkExportFileMaximumCapacity(int theBulkExportFileMaximumCapacity) {
 		myBulkExportFileMaximumCapacity = theBulkExportFileMaximumCapacity;
+	}
+
+	/**
+	 * Defines the maximum size for a single work chunk or report file to be held in
+	 * memory or stored in the database for bulk export jobs.
+	 * Note that the framework will attempt to not exceed this limit, but will only
+	 * estimate the actual chunk size as it works, so this value should be set
+	 * below any hard limits that may be present.
+	 *
+	 * @since 7.2.0
+	 * @see #DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE The default value for this setting
+	 */
+	public long getBulkExportFileMaximumSize() {
+		return myBulkExportFileMaximumSize;
+	}
+
+	/**
+	 * Defines the maximum size for a single work chunk or report file to be held in
+	 * memory or stored in the database for bulk export jobs. Default is 100 MB.
+	 * Note that the framework will attempt to not exceed this limit, but will only
+	 * estimate the actual chunk size as it works, so this value should be set
+	 * below any hard limits that may be present.
+	 *
+	 * @since 7.2.0
+	 * @see #setBulkExportFileMaximumCapacity(int)
+	 * @see #DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE The default value for this setting
+	 */
+	public void setBulkExportFileMaximumSize(long theBulkExportFileMaximumSize) {
+		Validate.isTrue(theBulkExportFileMaximumSize > 0, "theBulkExportFileMaximumSize must be positive");
+		myBulkExportFileMaximumSize = theBulkExportFileMaximumSize;
 	}
 
 	/**
@@ -2303,8 +2407,49 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
+	 * If set to {@literal false} (default is {@literal true}), the server will not
+	 * preserve resource history and will delete previous versions of resources when
+	 * a resource is updated.
+	 * <p>
+	 * Note that this does not make the server completely version-less. Resources will
+	 * still have a version number which increases every time a resource is modified,
+	 * operations such as vread and history will still be supported, and features
+	 * such as ETags and ETag-aware updates will still work. Disabling this setting
+	 * simply means that when a resource is updated, the previous version of the
+	 * resource will be expunged. This could be done in order to conserve space, or
+	 * in cases where there is no business value to storing previous versions of
+	 * resources.
+	 * </p>
+	 *
+	 * @since 7.0.0
+	 */
+	public boolean isResourceDbHistoryEnabled() {
+		return myResourceHistoryDbEnabled;
+	}
+
+	/**
+	 * If set to {@literal false} (default is {@literal true}), the server will not
+	 * preserve resource history and will delete previous versions of resources when
+	 * a resource is updated.
+	 * <p>
+	 * Note that this does not make the server completely version-less. Resources will
+	 * still have a version number which increases every time a resource is modified,
+	 * operations such as vread and history will still be supported, and features
+	 * such as ETags and ETag-aware updates will still work. Disabling this setting
+	 * simply means that when a resource is updated, the previous version of the
+	 * resource will be expunged. This could be done in order to conserve space, or
+	 * in cases where there is no business value to storing previous versions of
+	 * resources.
+	 * </p>
+	 *
+	 * @since 7.0.0
+	 */
+	public void setResourceDbHistoryEnabled(boolean theResourceHistoryEnabled) {
+		myResourceHistoryDbEnabled = theResourceHistoryEnabled;
+	}
+
+	/**
 	 * This setting controls whether MdmLink and other non-resource DB history is enabled.
-	 * This setting controls whether non-resource DB history is enabled
 	 * <p/>
 	 * By default, this is enabled unless explicitly disabled.
 	 *
@@ -2315,8 +2460,94 @@ public class JpaStorageSettings extends StorageSettings {
 		return myNonResourceDbHistoryEnabled;
 	}
 
+	/**
+	 * This setting controls the validation issue severity to report when a code validation
+	 * finds that the code is present in the given CodeSystem, but the display name being
+	 * validated doesn't match the expected value(s). Defaults to
+	 * {@link IValidationSupport.IssueSeverity#WARNING}. Set this
+	 * value to {@link IValidationSupport.IssueSeverity#INFORMATION}
+	 * if you don't want to see display name validation issues at all in resource validation
+	 * outcomes.
+	 *
+	 * @since 7.0.0
+	 */
+	@Nonnull
+	public IValidationSupport.IssueSeverity getIssueSeverityForCodeDisplayMismatch() {
+		return myIssueSeverityForCodeDisplayMismatch;
+	}
+
+	/**
+	 * This setting controls the validation issue severity to report when a code validation
+	 * finds that the code is present in the given CodeSystem, but the display name being
+	 * validated doesn't match the expected value(s). Defaults to
+	 * {@link IValidationSupport.IssueSeverity#WARNING}. Set this
+	 * value to {@link IValidationSupport.IssueSeverity#INFORMATION}
+	 * if you don't want to see display name validation issues at all in resource validation
+	 * outcomes.
+	 *
+	 * @param theIssueSeverityForCodeDisplayMismatch The severity. Must not be {@literal null}.
+	 * @since 7.0.0
+	 */
+	public void setIssueSeverityForCodeDisplayMismatch(
+			@Nonnull IValidationSupport.IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
+		Validate.notNull(
+				theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
+		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
+	}
+
+	/**
+	 * This method returns whether data will be stored in LOB columns as well as the columns
+	 * introduced to migrate away from LOB.  Writing to LOB columns is set to false by
+	 * default.  Enabling the setting will effectively double the persisted information.
+	 * If enabled, a careful monitoring of LOB table (if applicable) is required to avoid
+	 * exceeding the table maximum capacity.
+	 *
+	 * @since 7.2.0
+	 */
+	public boolean isWriteToLegacyLobColumns() {
+		return myWriteToLegacyLobColumns;
+	}
+
+	/**
+	 * This setting controls whether data will be stored in LOB columns as well as the columns
+	 * introduced to migrate away from LOB.  Writing to LOB columns is set to false by
+	 * default.  Enabling the setting will effectively double the persisted information.
+	 * When enabled, a careful monitoring of LOB table (if applicable) is required to avoid
+	 * exceeding the table maximum capacity.
+	 *
+	 * @param theWriteToLegacyLobColumns
+	 * @since 7.2.0
+	 */
+	public void setWriteToLegacyLobColumns(boolean theWriteToLegacyLobColumns) {
+		myWriteToLegacyLobColumns = theWriteToLegacyLobColumns;
+	}
+
+	/**
+	 * This setting controls whether MdmLink and other non-resource DB history is enabled.
+	 * <p/>
+	 * By default, this is enabled unless explicitly disabled.
+	 *
+	 * @param theNonResourceDbHistoryEnabled Whether non-resource DB history is enabled (default is true);
+	 * @since 6.6.0
+	 */
 	public void setNonResourceDbHistoryEnabled(boolean theNonResourceDbHistoryEnabled) {
 		myNonResourceDbHistoryEnabled = theNonResourceDbHistoryEnabled;
+	}
+
+	public void setPreventInvalidatingConditionalMatchCriteria(boolean theCriteria) {
+		myPreventInvalidatingConditionalMatchCriteria = theCriteria;
+	}
+
+	public boolean isPreventInvalidatingConditionalMatchCriteria() {
+		return myPreventInvalidatingConditionalMatchCriteria;
+	}
+
+	public long getRestDeleteByUrlResourceIdThreshold() {
+		return myRestDeleteByUrlResourceIdThreshold;
+	}
+
+	public void setRestDeleteByUrlResourceIdThreshold(long theRestDeleteByUrlResourceIdThreshold) {
+		myRestDeleteByUrlResourceIdThreshold = theRestDeleteByUrlResourceIdThreshold;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

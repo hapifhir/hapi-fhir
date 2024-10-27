@@ -1,13 +1,16 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -18,6 +21,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,9 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
@@ -45,13 +47,15 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	protected LocalDate myPartitionDate2;
 	protected int myPartitionId;
 	protected int myPartitionId2;
+	protected int myPartitionId3;
+	protected int myPartitionId4;
 	private boolean myHaveDroppedForcedIdUniqueConstraint;
 	@Autowired
 	private IPartitionLookupSvc myPartitionConfigSvc;
 
 	@AfterEach
 	public void after() {
-		myPartitionInterceptor.assertNoRemainingIds();
+		assertNoRemainingPartitionIds();
 
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
@@ -60,17 +64,14 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
 
-		if (myHaveDroppedForcedIdUniqueConstraint) {
-			runInTransaction(() -> {
-				myEntityManager.createNativeQuery("delete from HFJ_FORCED_ID").executeUpdate();
-				myEntityManager.createNativeQuery("alter table HFJ_FORCED_ID add constraint IDX_FORCEDID_TYPE_FID unique (RESOURCE_TYPE, FORCED_ID)");
-			});
-		}
-
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
 		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().getMatchUrlCache());
+	}
+
+	protected void assertNoRemainingPartitionIds() {
+		myPartitionInterceptor.assertNoRemainingIds();
 	}
 
 	@Override
@@ -88,14 +89,17 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionDate2 = LocalDate.of(2020, Month.FEBRUARY, 15);
 		myPartitionId = 1;
 		myPartitionId2 = 2;
+		myPartitionId3 = 3;
+		myPartitionId4 = 4;
 
 		myPartitionInterceptor = new MyReadWriteInterceptor();
-		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName(PARTITION_3), null);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(4).setName(PARTITION_4), null);
+		registerPartitionInterceptor();
+
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(myPartitionId).setName(PARTITION_1), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(myPartitionId2).setName(PARTITION_2), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(myPartitionId3).setName(PARTITION_3), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(myPartitionId4).setName(PARTITION_4), null);
 
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
@@ -103,29 +107,65 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_1, PARTITION_2, PARTITION_3, PARTITION_4));
 		myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true), mySrd);
 
+		// Pre-fetch the partitions by ID
+		for (int i = 1; i <= 4; i++) {
+			myPartitionConfigSvc.getPartitionById(i);
+		}
+
 	}
 
-	protected void createUniqueCompositeSp() {
+	protected void registerPartitionInterceptor() {
+		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
+	}
+
+	@Override
+	public void afterPurgeDatabase() {
+		super.afterPurgeDatabase();
+
+		if (myHaveDroppedForcedIdUniqueConstraint) {
+			runInTransaction(() -> {
+				myEntityManager.createNativeQuery("delete from HFJ_RESOURCE").executeUpdate();
+				myEntityManager.createNativeQuery("alter table " + ResourceTable.HFJ_RESOURCE +
+					" add constraint " + IDX_RES_TYPE_FHIR_ID + " unique (RES_TYPE, FHIR_ID)").executeUpdate();
+			});
+		}
+	}
+
+	protected void createUniqueComboSp() {
 		addCreateDefaultPartition();
 		addReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-birthdate");
-		sp.setType(Enumerations.SearchParamType.DATE);
-		sp.setCode("birthdate");
-		sp.setExpression("Patient.birthDate");
+		sp.setId("SearchParameter/patient-gender");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setCode("gender");
+		sp.setExpression("Patient.gender");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		addCreateDefaultPartition();
+		addReadDefaultPartition(); // one for search param validation
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("family");
+		sp.setExpression("Patient.name[0].family");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp, mySrd);
 
 		addCreateDefaultPartition();
 		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-birthdate-unique");
+		sp.setId("SearchParameter/patient-gender-family-unique");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
 		sp.addComponent()
 			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-birthdate");
+			.setDefinition("SearchParameter/patient-gender");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-family");
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
@@ -134,9 +174,52 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		mySearchParamRegistry.forceRefresh();
 	}
 
+	protected void createNonUniqueComboSp() {
+		addCreateDefaultPartition();
+		addReadDefaultPartition(); // one for search param validation
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("family");
+		sp.setExpression("Patient.name.family");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		addCreateDefaultPartition();
+		addReadDefaultPartition(); // one for search param validation
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-managingorg");
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setCode(Patient.SP_ORGANIZATION);
+		sp.setExpression("Patient.managingOrganization");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		addCreateDefaultPartition();
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family-and-org");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-family");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-managingorg");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(false));
+		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+	}
+
 	protected void dropForcedIdUniqueConstraint() {
 		runInTransaction(() -> {
-			myEntityManager.createNativeQuery("alter table " + ForcedId.HFJ_FORCED_ID + " drop constraint " + ForcedId.IDX_FORCEDID_TYPE_FID).executeUpdate();
+			myEntityManager.createNativeQuery("alter table " + ResourceTable.HFJ_RESOURCE + " drop constraint " + IDX_RES_TYPE_FHIR_ID).executeUpdate();
 		});
 		myHaveDroppedForcedIdUniqueConstraint = true;
 	}
@@ -205,7 +288,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-		public RequestPartitionId partitionIdentifyRead(ServletRequestDetails theRequestDetails) {
+		public RequestPartitionId partitionIdentifyRead(ServletRequestDetails theRequestDetails,
+																		ReadPartitionIdRequestDetails theDetails) {
 
 			// Just to be nice, figure out the first line in the stack that isn't a part of the
 			// partitioning or interceptor infrastructure, just so it's obvious who is asking
@@ -231,7 +315,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		@Override
 		public void assertNoRemainingIds() {
 			super.assertNoRemainingIds();
-			assertEquals(0, myReadRequestPartitionIds.size(), () -> "Found " + myReadRequestPartitionIds.size() + " READ partitions remaining in interceptor");
+			assertThat(myReadRequestPartitionIds).as("Found " + myReadRequestPartitionIds.size() + " READ partitions remaining in interceptor").hasSize(0);
 		}
 
 	}
@@ -249,14 +333,14 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 			assertNotNull(theResource);
-			assertTrue(!myCreateRequestPartitionIds.isEmpty(), "No create partitions left in interceptor");
+			assertThat(!myCreateRequestPartitionIds.isEmpty()).as("No create partitions left in interceptor").isTrue();
 			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
 			ourLog.debug("Returning partition [{}] for create of resource {} with date {}", retVal, theResource, retVal.getPartitionDate());
 			return retVal;
 		}
 
 		public void assertNoRemainingIds() {
-			assertEquals(0, myCreateRequestPartitionIds.size(), () -> "Still have " + myCreateRequestPartitionIds.size() + " CREATE partitions remaining in interceptor");
+			assertThat(myCreateRequestPartitionIds.size()).as(() -> "Still have " + myCreateRequestPartitionIds.size() + " CREATE partitions remaining in interceptor").isEqualTo(0);
 		}
 
 	}

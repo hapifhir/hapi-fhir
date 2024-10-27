@@ -17,7 +17,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.r4b.model.IdType;
 import org.hl7.fhir.r4b.model.InstantType;
 import org.hl7.fhir.r4b.model.OperationOutcome;
@@ -33,7 +32,7 @@ import org.mockito.stubbing.Answer;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -101,7 +100,7 @@ public class GenericClientR4BTest {
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 
-		assertEquals(myAnswerCount, capt.getAllValues().size());
+		assertThat(capt.getAllValues()).hasSize(myAnswerCount);
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
 		assertEquals(Constants.CT_FHIR_JSON_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 
@@ -125,7 +124,7 @@ public class GenericClientR4BTest {
 
 		Patient response = client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 
-		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
+		assertThat(response.getNameFirstRep().getFamily()).contains("Cardinal");
 
 		assertEquals("http://foo.com/Patient/123/_history/2333", response.getIdElement().getValue());
 

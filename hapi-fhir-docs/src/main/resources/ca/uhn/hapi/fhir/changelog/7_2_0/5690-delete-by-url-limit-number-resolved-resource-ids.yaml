@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5690
+title: "Previously, a DELETE on a specific URL search string would always attempt to delete no matter the number of
+        resolved resources.
+        This has been fixed by adding a storage setting to enforce a threshold for resolved resources, above which
+        the DELETE operation will fail to execute with HAPI-2496."

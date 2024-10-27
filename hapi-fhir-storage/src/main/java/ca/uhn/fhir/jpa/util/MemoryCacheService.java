@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -33,7 +34,6 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -68,7 +68,7 @@ public class MemoryCacheService {
 				case CONCEPT_TRANSLATION_REVERSE:
 					timeoutSeconds =
 							SECONDS.convert(myStorageSettings.getTranslationCachesExpireAfterWriteInMinutes(), MINUTES);
-					maximumSize = 10000;
+					maximumSize = 500000;
 					break;
 				case PID_TO_FORCED_ID:
 				case FORCED_ID_TO_PID:
@@ -77,6 +77,7 @@ public class MemoryCacheService {
 				case HISTORY_COUNT:
 				case TAG_DEFINITION:
 				case RESOURCE_CONDITIONAL_CREATE_VERSION:
+				case FHIRPATH_EXPRESSION:
 				default:
 					timeoutSeconds = SECONDS.convert(1, MINUTES);
 					maximumSize = 10000;
@@ -183,20 +184,35 @@ public class MemoryCacheService {
 		return getCache(theCache).estimatedSize();
 	}
 
+	public void invalidateCaches(CacheEnum... theCaches) {
+		for (CacheEnum next : theCaches) {
+			getCache(next).invalidateAll();
+		}
+	}
+
 	public enum CacheEnum {
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
 		RESOURCE_LOOKUP(String.class),
 		FORCED_ID_TO_PID(String.class),
+		FHIRPATH_EXPRESSION(String.class),
 		/**
 		 * Key type: {@literal Long}
 		 * Value type: {@literal Optional<String>}
 		 */
 		PID_TO_FORCED_ID(Long.class),
+		/**
+		 * TODO: JA this is duplicate with the CachingValidationSupport cache.
+		 * A better solution would be to drop this cache for this item, and to
+		 * create a new CachingValidationSupport implementation which uses
+		 * the MemoryCacheService for all of its caches.
+		 */
 		CONCEPT_TRANSLATION(TranslationQuery.class),
 		MATCH_URL(String.class),
 		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class),
 		RESOURCE_CONDITIONAL_CREATE_VERSION(Long.class),
-		HISTORY_COUNT(HistoryCountKey.class);
+		HISTORY_COUNT(HistoryCountKey.class),
+		NAME_TO_PARTITION(String.class),
+		ID_TO_PARTITION(Integer.class);
 
 		public Class<?> getKeyType() {
 			return myKeyType;

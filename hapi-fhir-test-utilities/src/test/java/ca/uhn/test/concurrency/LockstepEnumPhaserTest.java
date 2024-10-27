@@ -1,14 +1,12 @@
 package ca.uhn.test.concurrency;
 
-import com.github.seregamorph.hamcrest.OrderMatchers;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,7 +22,7 @@ import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.FINISHED;
 import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.ONE;
 import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.THREE;
 import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.TWO;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // All of these should run pretty quickly - 5s should be lots.
@@ -95,8 +93,8 @@ class LockstepEnumPhaserTest {
 
 		assertEquals(1, result1.get());
 		assertEquals(1, result2.get());
-		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
-		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(6));
+		assertEventsAreOrdered();
+		assertThat(myProgressEvents).as("all progress logged").hasSize(6);
 	}
 
 	private void recordProgress(int threadId) {
@@ -161,8 +159,8 @@ class LockstepEnumPhaserTest {
 		assertEquals(1, result1.get());
 		assertEquals(3, result3.get());
 
-		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
-		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(8));
+		assertEventsAreOrdered();
+		assertThat(myProgressEvents).as("all progress logged").hasSize(8);
 
 	}
 
@@ -227,9 +225,16 @@ class LockstepEnumPhaserTest {
 		assertEquals(2, result2.get());
 		assertEquals(3, result3.get());
 
-		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
-		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(2*3 + 2));
+		assertEventsAreOrdered();
+		assertThat(myProgressEvents).as("all progress logged").hasSize(2 * 3 + 2);
 
+	}
+
+	private void assertEventsAreOrdered() {
+		assertThat(myProgressEvents)
+			.as("progress is ordered")
+			.usingElementComparator(myProgressStageComparator)
+			.isSorted();
 	}
 
 }

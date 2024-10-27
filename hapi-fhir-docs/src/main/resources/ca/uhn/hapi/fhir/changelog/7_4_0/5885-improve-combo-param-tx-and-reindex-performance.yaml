@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 5885
+title: "When unique and non-unique combo parameters are in use on a server, FHIR Transaction and Reindex Job
+  performance has been optimized by pre-fetching all existing combo index rows for a large batch of resources
+  in a single database operation. This should yield a meaningful performance improvement on such systems."

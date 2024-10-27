@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +19,37 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
 public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 	private ColumnTypeEnum myColumnType;
 	private Boolean myNullable;
 	private Long myColumnLength;
 
+	@Nullable
+	private Object myDefaultValue;
+
 	/**
 	 * Constructor
 	 */
 	public BaseTableColumnTypeTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
+	}
+
+	BaseTableColumnTypeTask(
+			String theProductVersion,
+			String theSchemaVersion,
+			ColumnNameCase theColumnNameCase,
+			Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
+		super(theProductVersion, theSchemaVersion, theColumnNameCase, theColumnDriverMappingOverrides);
 	}
 
 	public ColumnTypeEnum getColumnType() {
@@ -87,6 +102,21 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 
 	public BaseTableColumnTypeTask setColumnLength(long theColumnLength) {
 		myColumnLength = theColumnLength;
+		return this;
+	}
+
+	@Nullable
+	public Object getDefaultValue() {
+		return myDefaultValue;
+	}
+
+	@Nonnull
+	String buildString(@Nullable Object theValue, Function<Object, String> doIfNull, String theDefaultResult) {
+		return Optional.ofNullable(theValue).map(doIfNull).orElse(theDefaultResult);
+	}
+
+	public BaseTableColumnTypeTask setDefaultValue(Object theDefaultValue) {
+		myDefaultValue = theDefaultValue;
 		return this;
 	}
 

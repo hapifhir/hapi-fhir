@@ -1,0 +1,6 @@
+---
+type: fix
+jira: SMILE-7624
+title: "Previously, it was impossible to find all resources from different partitions for $everything operation 
+        with partitioning.cross_partition_reference_mode=ALLOWED_UNQUALIFIED and dao_config.client_id_mode=ANY. 
+        It's fixed now"

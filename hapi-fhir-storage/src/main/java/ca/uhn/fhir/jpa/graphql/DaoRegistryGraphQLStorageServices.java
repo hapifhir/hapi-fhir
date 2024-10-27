@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 		RuntimeResourceDefinition typeDef = fhirContext.getResourceDefinition(theType);
 
 		SearchParameterMap params = new SearchParameterMap();
-		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(typeDef.getName());
+		ResourceSearchParams searchParams = mySearchParamRegistry.getRuntimeSearchParams(typeDef.getName());
 
 		for (Argument nextArgument : resourceSearchParam) {
 
@@ -320,8 +320,8 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			CacheControlDirective cacheControlDirective = new CacheControlDirective();
 			cacheControlDirective.parse(requestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
 
-			RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-					requestDetails, theType, params, null);
+			RequestPartitionId requestPartitionId =
+					myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(requestDetails, theType, params);
 			response = mySearchCoordinatorSvc.registerSearch(
 					getDao(theType), params, theType, cacheControlDirective, requestDetails, requestPartitionId);
 

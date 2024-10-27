@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This test extension makes sure that tests don't leave any interceptors
@@ -62,7 +62,7 @@ public class PreventDanglingInterceptorsExtension implements BeforeEachCallback,
 		afterInterceptors.forEach(t -> delta.put(t, t));
 		myBeforeInterceptors.forEach(t -> delta.remove(t));
 		delta.keySet().forEach(t->myInterceptorServiceSuplier.get().unregisterInterceptor(t));
-		assertTrue(delta.isEmpty(), () -> "Test added interceptor(s) and did not clean them up:\n * " + delta.keySet().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		assertThat(delta.isEmpty()).as(() -> "Test added interceptor(s) and did not clean them up:\n * " + delta.keySet().stream().map(t -> t.toString()).collect(Collectors.joining("\n * "))).isTrue();
 
 	}
 }

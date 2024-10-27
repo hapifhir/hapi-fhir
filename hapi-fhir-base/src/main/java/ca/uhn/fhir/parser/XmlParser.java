@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,7 +187,8 @@ public class XmlParser extends BaseParser {
 
 							String namespaceURI = elem.getName().getNamespaceURI();
 
-							if ("extension".equals(elem.getName().getLocalPart())) {
+							String localPart = elem.getName().getLocalPart();
+							if ("extension".equals(localPart)) {
 								Attribute urlAttr = elem.getAttributeByName(new QName("url"));
 								String url;
 								if (urlAttr == null || isBlank(urlAttr.getValue())) {
@@ -199,7 +200,7 @@ public class XmlParser extends BaseParser {
 									url = urlAttr.getValue();
 								}
 								parserState.enteringNewElementExtension(elem, url, false, getServerBaseUrl());
-							} else if ("modifierExtension".equals(elem.getName().getLocalPart())) {
+							} else if ("modifierExtension".equals(localPart)) {
 								Attribute urlAttr = elem.getAttributeByName(new QName("url"));
 								String url;
 								if (urlAttr == null || isBlank(urlAttr.getValue())) {
@@ -213,8 +214,7 @@ public class XmlParser extends BaseParser {
 								}
 								parserState.enteringNewElementExtension(elem, url, true, getServerBaseUrl());
 							} else {
-								String elementName = elem.getName().getLocalPart();
-								parserState.enteringNewElement(namespaceURI, elementName);
+								parserState.enteringNewElement(namespaceURI, localPart);
 							}
 
 							if (!heldComments.isEmpty()) {
@@ -372,7 +372,7 @@ public class XmlParser extends BaseParser {
 				case RESOURCE: {
 					IBaseResource resource = (IBaseResource) theElement;
 					String resourceName = getContext().getResourceType(resource);
-					if (!super.shouldEncodeResource(resourceName)) {
+					if (!super.shouldEncodeResource(resourceName, theEncodeContext)) {
 						break;
 					}
 					theEventWriter.writeStartElement(theChildName);
@@ -682,7 +682,7 @@ public class XmlParser extends BaseParser {
 		}
 
 		if (!theContainedResource) {
-			setContainedResources(getContext().newTerser().containResources(theResource));
+			containResourcesInReferences(theResource);
 		}
 
 		theEventWriter.writeStartElement(resDef.getName());
@@ -736,14 +736,14 @@ public class XmlParser extends BaseParser {
 
 			TagList tags = getMetaTagsForEncoding((resource), theEncodeContext);
 
-			if (super.shouldEncodeResourceMeta(resource)
+			if (super.shouldEncodeResourceMeta(resource, theEncodeContext)
 					&& ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
 				theEventWriter.writeStartElement("meta");
-				if (shouldEncodePath(resource, "meta.versionId")) {
+				if (shouldEncodePath(resource, "meta.versionId", theEncodeContext)) {
 					writeOptionalTagWithValue(theEventWriter, "versionId", versionIdPart);
 				}
 				if (updated != null) {
-					if (shouldEncodePath(resource, "meta.lastUpdated")) {
+					if (shouldEncodePath(resource, "meta.lastUpdated", theEncodeContext)) {
 						writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
 					}
 				}
@@ -768,6 +768,11 @@ public class XmlParser extends BaseParser {
 						writeOptionalTagWithValue(theEventWriter, "system", tag.getScheme());
 						writeOptionalTagWithValue(theEventWriter, "code", tag.getTerm());
 						writeOptionalTagWithValue(theEventWriter, "display", tag.getLabel());
+						writeOptionalTagWithValue(theEventWriter, "version", tag.getVersion());
+						Boolean userSelected = tag.getUserSelectedBoolean();
+						if (userSelected != null) {
+							writeOptionalTagWithValue(theEventWriter, "userSelected", userSelected.toString());
+						}
 						theEventWriter.writeEndElement();
 					}
 				}

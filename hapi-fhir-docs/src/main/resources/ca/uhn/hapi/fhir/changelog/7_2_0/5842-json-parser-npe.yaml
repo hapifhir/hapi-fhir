@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5842
+title: "Fixed a bug where an NPE was being thrown when trying to serialize a FHIR fragment (e.g., backboneElement
+, compound datatype) to a string representation if the fragment contains a `Reference`."

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,7 @@ public abstract class JpaEmbeddedDatabase {
 	private JdbcTemplate myJdbcTemplate;
 	private Connection myConnection;
 
+	@PreDestroy
 	public abstract void stop();
 
 	public abstract void disableConstraints();
@@ -111,12 +113,11 @@ public abstract class JpaEmbeddedDatabase {
 	}
 
 	public void executeSqlAsBatch(List<String> theStatements) {
-		try {
-			Statement statement = myConnection.createStatement();
+		try (final Statement statement = myConnection.createStatement()) {
 			for (String sql : theStatements) {
 				if (!StringUtils.isBlank(sql)) {
 					statement.addBatch(sql);
-					ourLog.info("Added to batch: {}", sql);
+					ourLog.debug("Added to batch: {}", sql);
 				}
 			}
 			statement.executeBatch();

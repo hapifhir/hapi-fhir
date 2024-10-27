@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5275
+title: "Added an API that allows to configure permission rules for operations with access to all resources.
+This permission is needed to allow a search across the entire patient's record in the scope of the $everything operation to access all 
+resources that references input Patient, including resources outside of the patient's compartment."

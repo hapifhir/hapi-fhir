@@ -8,7 +8,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Created by Bill de Beaubien on 12/20/2015.
@@ -34,7 +34,7 @@ public class EmptyElementWithExtensionDstu2Test {
 		ourLog.info(json);
 
 		observation = (Observation) parser.parseResource(json);
-		assertEquals(1, observation.getCode().getCoding().get(0).getUndeclaredExtensions().size());
+		assertThat(observation.getCode().getCoding().get(0).getUndeclaredExtensions()).hasSize(1);
 	}
 
 	@Test
@@ -47,7 +47,7 @@ public class EmptyElementWithExtensionDstu2Test {
 		ourLog.info(xml);
 
 		observation = (Observation) parser.parseResource(xml);
-		assertEquals(1, observation.getCode().getCoding().get(0).getUndeclaredExtensions().size());
+		assertThat(observation.getCode().getCoding().get(0).getUndeclaredExtensions()).hasSize(1);
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class EmptyElementWithExtensionDstu2Test {
 		ourLog.info(json);
 
 		observation = (Observation) parser.parseResource(json);
-		assertEquals(1, observation.getStatusElement().getUndeclaredExtensions().size());
+		assertThat(observation.getStatusElement().getUndeclaredExtensions()).hasSize(1);
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class EmptyElementWithExtensionDstu2Test {
 		ourLog.info(xml);
 
 		observation = (Observation) parser.parseResource(xml);
-		assertEquals(1, observation.getStatusElement().getUndeclaredExtensions().size());
+		assertThat(observation.getStatusElement().getUndeclaredExtensions()).hasSize(1);
 	}
 
 }

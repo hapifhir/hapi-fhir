@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - HFQL Driver
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
-import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
 import org.hl7.fhir.r4.model.Parameters;
 
@@ -43,8 +42,8 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public ResultSet executeQuery(String sql) throws SQLException {
-		execute(sql);
+	public ResultSet executeQuery(String theSqlText) throws SQLException {
+		execute(theSqlText);
 		return getResultSet();
 	}
 
@@ -122,7 +121,7 @@ class JdbcStatement implements Statement {
 
 		int fetchSize = myFetchSize;
 
-		Parameters input = HfqlRestProvider.newQueryRequestParameters(sql, limit, fetchSize);
+		Parameters input = HfqlRestClient.newQueryRequestParameters(sql, limit, fetchSize);
 		IHfqlExecutionResult result = myConnection.getClient().execute(input, true, getFetchSize());
 
 		myResultSet = new JdbcResultSet(result, this);

@@ -30,6 +30,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -72,12 +73,12 @@ public class IncludedResourceStitchingClientTest {
 		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
 		assertEquals("http://foo/Patient", get.getURI().toString());
-		
-		assertEquals(3, bundle.getEntry().size());
+
+		assertThat(bundle.getEntry()).hasSize(3);
 		
 		Patient p = (Patient) bundle.getEntry().get(0).getResource();
 		List<Extension> exts = p.getExtensionsByUrl("http://foo");
-		assertEquals(1,exts.size());
+		assertThat(exts).hasSize(1);
 		Extension ext = exts.get(0);
 		Reference ref = (Reference) ext.getValue();
 		assertEquals("Organization/o1", ref.getReferenceElement().getValue());
@@ -100,8 +101,8 @@ public class IncludedResourceStitchingClientTest {
 		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
 		assertEquals("http://foo/Patient", get.getURI().toString());
-		
-		assertEquals(4, bundle.getEntry().size());
+
+		assertThat(bundle.getEntry()).hasSize(4);
 		
 		ExtPatient p = (ExtPatient) bundle.getEntry().get(0).getResource();
 		Reference ref = p.getSecondOrg();

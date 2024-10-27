@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -129,11 +129,11 @@ public class FindCandidateByExampleSvcTest {
 
 		// verify
 		assertNotNull(goldenResourceCanddiates);
-		assertEquals(2, goldenResourceCanddiates.size());
+		assertThat(goldenResourceCanddiates).hasSize(2);
 		Set<String> ids = new HashSet<>();
 		for (MatchedGoldenResourceCandidate r : goldenResourceCanddiates) {
 			// we know these are strings
-			assertTrue(ids.add((String)r.getCandidateGoldenResourcePid().getId()));
+			assertTrue(ids.add((String) r.getCandidateGoldenResourcePid().getId()));
 		}
 	}
 }

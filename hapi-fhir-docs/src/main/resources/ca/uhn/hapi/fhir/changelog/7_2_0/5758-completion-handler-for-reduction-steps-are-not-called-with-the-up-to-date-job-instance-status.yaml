@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5758
+title: "Batch2 jobs with reduction steps didn't fire the completion handler with the up-to-date job status.
+        This has been fixed.
+"

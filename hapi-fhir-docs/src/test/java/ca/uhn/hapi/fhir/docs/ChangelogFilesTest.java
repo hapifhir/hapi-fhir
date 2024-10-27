@@ -17,9 +17,7 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ChangelogFilesTest {
@@ -58,10 +56,10 @@ public class ChangelogFilesTest {
 
 			List<String> fieldNames = IteratorUtils.toList(tree.fieldNames());
 			boolean title = fieldNames.remove("title");
-			assertTrue(title, "No 'title' element in " + next);
+			assertThat(title).as("No 'title' element in " + next).isTrue();
 
 			boolean type = fieldNames.remove("type");
-			assertTrue(type, "No 'type' element in " + next);
+			assertThat(type).as("No 'type' element in " + next).isTrue();
 
 			// this one is optional
 			boolean haveIssue = fieldNames.remove("issue");
@@ -72,7 +70,7 @@ public class ChangelogFilesTest {
 			// this one is optional
 			fieldNames.remove("jira");
 
-			assertThat("Invalid element in " + next + ": " + fieldNames, fieldNames, empty());
+			assertThat(fieldNames).as("Invalid element in " + next + ": " + fieldNames).isEmpty();
 
 			if (haveIssue) {
 				String issue = tree.get("issue").asText();

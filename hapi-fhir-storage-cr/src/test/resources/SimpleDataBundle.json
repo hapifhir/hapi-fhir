@@ -1,0 +1,37 @@
+{
+	"resourceType": "Bundle",
+	"id": "SimpleDataBundle",
+	"type": "collection",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"id": "SimplePatient",
+				"birthDate": "1995-01-01",
+				"gender": "female"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "SimpleObservation",
+				"status": "final",
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "10524-7",
+							"display": "Microscopic observation [Identifier] in Cervix by Cyto stain"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/SimplePatient",
+					"type": "Patient"
+				},
+				"effectiveDateTime": "2019-11-01T00:00:00"
+			}
+
+		}
+	]
+}

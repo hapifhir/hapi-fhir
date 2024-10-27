@@ -1,0 +1,4 @@
+---
+type: remove
+issue: 5505
+title: "Removed an incorrect implementation of $member-match."

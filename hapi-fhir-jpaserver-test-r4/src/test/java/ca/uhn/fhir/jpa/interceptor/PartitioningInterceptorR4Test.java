@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -27,7 +28,6 @@ import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,10 +47,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.dao.r4.PartitioningSqlR4Test.assertLocalDateFromDbMatches;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -120,18 +121,14 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		subscription.setChannel(subscriptionChannelComponent);
 
 		// set up partitioning for subscriptions
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 
 		// register interceptors that return different partition ids
 		MySubscriptionReadInterceptor readInterceptor = new MySubscriptionReadInterceptor();
 		MySubscriptionWriteInterceptor writeInterceptor = new MySubscriptionWriteInterceptor();
 		myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
-		readInterceptor.setObjectConsumer((obj) -> {
-			readIndex.getAndIncrement();
-		});
-		writeInterceptor.setObjectConsumer((ojb) -> {
-			writeIndex.getAndIncrement();
-		});
+		readInterceptor.setObjectConsumer((obj) -> readIndex.getAndIncrement());
+		writeInterceptor.setObjectConsumer((ojb) -> writeIndex.getAndIncrement());
 		myInterceptorRegistry.registerInterceptor(readInterceptor);
 		myInterceptorRegistry.registerInterceptor(writeInterceptor);
 
@@ -203,7 +200,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			myPatientDao.search(map);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(1319) + "No interceptor provided a value for pointcut: STORAGE_PARTITION_IDENTIFY_READ", e.getMessage());
+			assertEquals(Msg.code(1319) + "No interceptor provided a value for pointcuts: [STORAGE_PARTITION_IDENTIFY_ANY, STORAGE_PARTITION_IDENTIFY_READ]", e.getMessage());
 		}
 	}
 
@@ -222,11 +219,11 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			map.setLoadSynchronous(true);
 			IBundleProvider results = myPatientDao.search(map);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, Matchers.contains(patientIdNull, patientId1, patientId2));
+			assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
-			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -257,11 +254,11 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			myCaptureQueriesListener.clear();
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, Matchers.contains(patientId1));
+			assertThat(ids).containsExactly(patientId1);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -312,7 +309,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		}
 
 		public void assertNoRemainingIds() {
-			assertEquals(0, myCreateRequestPartitionIds.size());
+			assertThat(myCreateRequestPartitionIds).isEmpty();
 		}
 
 	}

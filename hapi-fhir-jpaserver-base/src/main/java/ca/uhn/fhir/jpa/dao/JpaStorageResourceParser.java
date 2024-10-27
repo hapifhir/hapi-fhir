@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
@@ -54,7 +55,10 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaUtil;
+import jakarta.annotation.Nullable;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -70,7 +74,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.decodeResource;
 import static java.util.Objects.nonNull;
@@ -97,6 +100,9 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 	@Autowired
 	private ExternallyStoredResourceServiceRegistry myExternallyStoredResourceServiceRegistry;
+
+	@Autowired
+	IMetaTagSorter myMetaTagSorter;
 
 	@Override
 	public IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation) {
@@ -229,6 +235,9 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		// 7. Add partition information
 		populateResourcePartitionInformation(theEntity, retVal);
 
+		// 8. sort tags, security labels and profiles
+		myMetaTagSorter.sort(retVal.getMeta());
+
 		return retVal;
 	}
 
@@ -241,7 +250,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 						myPartitionLookupSvc.getPartitionById(partitionId.getPartitionId());
 				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, persistedPartition.toRequestPartitionId());
 			} else {
-				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, null);
+				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, RequestPartitionId.defaultPartition());
 			}
 		}
 	}
@@ -394,11 +403,14 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 							secLabel.setSystem(nextTag.getSystem());
 							secLabel.setCode(nextTag.getCode());
 							secLabel.setDisplay(nextTag.getDisplay());
-							// wipmb these technically support userSelected and version
+							secLabel.setVersion(nextTag.getVersion());
+							Boolean userSelected = nextTag.getUserSelected();
+							if (userSelected != null) {
+								secLabel.setUserSelected(userSelected);
+							}
 							securityLabels.add(secLabel);
 							break;
 						case TAG:
-							// wipmb check xml, etc.
 							Tag e = new Tag(nextTag.getSystem(), nextTag.getCode(), nextTag.getDisplay());
 							e.setVersion(nextTag.getVersion());
 							// careful! These are Boolean, not boolean.
@@ -459,7 +471,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		res.getMeta().setLastUpdated(theEntity.getUpdatedDate());
 		IDao.RESOURCE_PID.put(res, theEntity.getResourceId());
 
-		if (theTagList != null) {
+		if (CollectionUtils.isNotEmpty(theTagList)) {
 			res.getMeta().getTag().clear();
 			res.getMeta().getProfile().clear();
 			res.getMeta().getSecurity().clear();

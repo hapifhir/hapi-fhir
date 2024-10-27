@@ -1,8 +1,8 @@
 /*
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -55,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
@@ -158,6 +158,7 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	public SearchParameterMap add(String theName, IQueryParameterAnd<?> theAnd) {
 		if (theAnd == null) {
 			return this;
@@ -166,12 +167,14 @@ public class SearchParameterMap implements Serializable {
 			put(theName, new ArrayList<>());
 		}
 
+		List<List<IQueryParameterType>> paramList = get(theName);
 		for (IQueryParameterOr<?> next : theAnd.getValuesAsQueryTokens()) {
 			if (next == null) {
 				continue;
 			}
-			get(theName).add((List<IQueryParameterType>) next.getValuesAsQueryTokens());
+			paramList.add((List<IQueryParameterType>) next.getValuesAsQueryTokens());
 		}
+
 		return this;
 	}
 
@@ -351,22 +354,6 @@ public class SearchParameterMap implements Serializable {
 	public SearchParameterMap setSort(SortSpec theSort) {
 		mySort = theSort;
 		return this;
-	}
-
-	/**
-	 * This will only return true if all parameters have no modifier of any kind
-	 */
-	public boolean isAllParametersHaveNoModifier() {
-		for (List<List<IQueryParameterType>> nextParamName : values()) {
-			for (List<IQueryParameterType> nextAnd : nextParamName) {
-				for (IQueryParameterType nextOr : nextAnd) {
-					if (isNotBlank(nextOr.getQueryParameterQualifier())) {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
 	}
 
 	/**
@@ -893,5 +880,14 @@ public class SearchParameterMap implements Serializable {
 		public int compare(IQueryParameterType theO1, IQueryParameterType theO2) {
 			return SearchParameterMap.compare(myCtx, theO1, theO2);
 		}
+	}
+
+	public List<SortSpec> getAllChainsInOrder() {
+		final List<SortSpec> allChainsInOrder = new ArrayList<>();
+		for (SortSpec sortSpec = getSort(); sortSpec != null; sortSpec = sortSpec.getChain()) {
+			allChainsInOrder.add(sortSpec);
+		}
+
+		return Collections.unmodifiableList(allChainsInOrder);
 	}
 }

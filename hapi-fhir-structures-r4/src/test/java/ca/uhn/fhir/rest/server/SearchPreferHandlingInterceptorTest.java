@@ -31,10 +31,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class SearchPreferHandlingInterceptorTest {
 
@@ -66,9 +66,8 @@ public class SearchPreferHandlingInterceptorTest {
 				.returnBundle(Bundle.class)
 				.encodedJson()
 				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [identifier]"));
+			fail();		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [identifier]");
 		}
 
 	}
@@ -79,7 +78,7 @@ public class SearchPreferHandlingInterceptorTest {
 			try (CloseableHttpResponse result = client.execute(new HttpGet("http://localhost:" + myPort + "/BadResource?foo=bar"))) {
 				assertEquals(404, result.getStatusLine().getStatusCode());
 				String response = IOUtils.toString(result.getEntity().getContent(), StandardCharsets.UTF_8);
-				assertThat(response, containsString("Unknown resource type 'BadResource' - Server knows how to handle: [Patient]"));
+				assertThat(response).contains("Unknown resource type 'BadResource' - Server knows how to handle: [Patient]");
 			}
 		}
 	}
@@ -96,9 +95,8 @@ public class SearchPreferHandlingInterceptorTest {
 				.returnBundle(Bundle.class)
 				.encodedJson()
 				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [identifier]"));
+			fail();		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [identifier]");
 		}
 
 	}
@@ -115,9 +113,8 @@ public class SearchPreferHandlingInterceptorTest {
 				.returnBundle(Bundle.class)
 				.encodedJson()
 				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [identifier]"));
+			fail();		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [identifier]");
 		}
 
 	}

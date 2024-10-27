@@ -11,8 +11,10 @@ import ca.uhn.fhir.rest.server.BundleProviderWithNamedPages;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,8 +36,7 @@ import static ca.uhn.fhir.rest.api.Constants.LINK_NEXT;
 import static ca.uhn.fhir.rest.api.Constants.LINK_PREVIOUS;
 import static ca.uhn.fhir.rest.api.Constants.LINK_SELF;
 import static java.lang.Math.max;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.r4.model.Bundle.BundleType.SEARCHSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -89,7 +89,7 @@ class ResponseBundleBuilderTest {
 
 		// verify
 		verifyBundle(bundle, 0, 0);
-		assertThat(bundle.getLink(), hasSize(1));
+		assertThat(bundle.getLink()).hasSize(1);
 		assertSelfLink(bundle);
 	}
 
@@ -145,9 +145,50 @@ class ResponseBundleBuilderTest {
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE);
 
-		assertThat(bundle.getLink(), hasSize(2));
+		assertThat(bundle.getLink()).hasSize(2);
 		assertSelfLink(bundle);
 		assertNextLink(bundle, DEFAULT_PAGE_SIZE);
+	}
+
+	@Test
+	public void buildResponseBundle_withIncludeParamAndFewerResultsThanPageSize_doesNotReturnNextLink() {
+		// setup
+		int includeResources = 4;
+		// we want the number of resources returned to be equal to the pagesize
+		List<IBaseResource> list = buildXPatientList(DEFAULT_PAGE_SIZE - includeResources);
+
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
+
+		SimpleBundleProvider provider = new SimpleBundleProvider() {
+			@Nonnull
+			@Override
+			public List<IBaseResource> getResources(int theFrom, int theTo, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+				List<IBaseResource> retList = new ArrayList<>(list);
+				// our fake includes
+				for (int i = 0; i < includeResources; i++) {
+					retList.add(new Organization().setId("Organization/" + i));
+				}
+				theResponsePageBuilder.setIncludedResourceCount(includeResources);
+				return retList;
+			}
+		};
+
+		provider.setSize(null);
+
+		// mocking
+		when(myServer.canStoreSearchResults()).thenReturn(true);
+		when(myServer.getPagingProvider()).thenReturn(myPagingProvider);
+		when(myPagingProvider.getDefaultPageSize()).thenReturn(DEFAULT_PAGE_SIZE);
+
+		ResponseBundleRequest req = buildResponseBundleRequest(provider, "search-id");
+
+		// test
+		Bundle bundle = (Bundle) svc.buildResponseBundle(req);
+
+		// verify
+		// no next link
+		assertThat(bundle.getLink()).hasSize(1);
+		assertThat(bundle.getEntry()).hasSize(DEFAULT_PAGE_SIZE);
 	}
 
 	@ParameterizedTest
@@ -170,7 +211,7 @@ class ResponseBundleBuilderTest {
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE - 1, "A0", "A14");
 
-		assertThat(bundle.getLink(), hasSize(2));
+		assertThat(bundle.getLink()).hasSize(2);
 		assertSelfLink(bundle);
 		assertNextLink(bundle, DEFAULT_PAGE_SIZE);
 	}
@@ -194,7 +235,7 @@ class ResponseBundleBuilderTest {
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, LIMIT);
-		assertThat(bundle.getLink(), hasSize(2));
+		assertThat(bundle.getLink()).hasSize(2);
 		assertSelfLink(bundle);
 		assertNextLink(bundle, LIMIT);
 	}
@@ -213,7 +254,7 @@ class ResponseBundleBuilderTest {
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
-		assertThat(bundle.getLink(), hasSize(1));
+		assertThat(bundle.getLink()).hasSize(1);
 		assertSelfLink(bundle);
 	}
 
@@ -233,7 +274,7 @@ class ResponseBundleBuilderTest {
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
-		assertThat(bundle.getLink(), hasSize(3));
+		assertThat(bundle.getLink()).hasSize(3);
 		assertSelfLink(bundle);
 		assertNextLink(bundle, CURRENT_PAGE_SIZE, CURRENT_PAGE_OFFSET + CURRENT_PAGE_SIZE);
 		//noinspection ConstantValue
@@ -258,7 +299,7 @@ class ResponseBundleBuilderTest {
 
 		// verify
 		verifyBundle(bundle, null, LIMIT);
-		assertThat(bundle.getLink(), hasSize(2));
+		assertThat(bundle.getLink()).hasSize(2);
 		assertSelfLink(bundle);
 		assertNextLink(bundle, LIMIT);
 	}
@@ -281,7 +322,7 @@ class ResponseBundleBuilderTest {
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
-		assertThat(bundle.getLink(), hasSize(3));
+		assertThat(bundle.getLink()).hasSize(3);
 		assertSelfLink(bundle);
 
 		Bundle.BundleLinkComponent nextLink = bundle.getLink().get(1);
@@ -313,7 +354,7 @@ class ResponseBundleBuilderTest {
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
-		assertThat(bundle.getLink(), hasSize(3));
+		assertThat(bundle.getLink()).hasSize(3);
 		assertSelfLink(bundle);
 		assertNextLink(bundle, CURRENT_PAGE_SIZE, CURRENT_PAGE_OFFSET + CURRENT_PAGE_SIZE);
 		assertPrevLink(bundle, 0);
@@ -336,7 +377,7 @@ class ResponseBundleBuilderTest {
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, LIMIT);
-		assertThat(bundle.getLink(), hasSize(2));
+		assertThat(bundle.getLink()).hasSize(2);
 		assertSelfLink(bundle);
 
 		assertNextLinkOffset(bundle, LIMIT, LIMIT);
@@ -357,7 +398,7 @@ class ResponseBundleBuilderTest {
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE, "A3", "A17");
-		assertThat(bundle.getLink(), hasSize(3));
+		assertThat(bundle.getLink()).hasSize(3);
 		assertSelfLink(bundle);
 
 		assertNextLinkOffset(bundle, DEFAULT_PAGE_SIZE + REQUEST_OFFSET, DEFAULT_PAGE_SIZE);
@@ -379,7 +420,7 @@ class ResponseBundleBuilderTest {
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT - NEAR_END_NO_NEXT_REQUEST_OFFSET, "A49", "A49");
-		assertThat(bundle.getLink(), hasSize(2));
+		assertThat(bundle.getLink()).hasSize(2);
 		assertSelfLink(bundle);
 
 		Bundle.BundleLinkComponent nextLink = bundle.getLink().get(1);
@@ -423,8 +464,12 @@ class ResponseBundleBuilderTest {
 	}
 
 	private List<IBaseResource> buildPatientList() {
+		return buildXPatientList(ResponseBundleBuilderTest.RESOURCE_COUNT);
+	}
+
+	private List<IBaseResource> buildXPatientList(int theCount) {
 		List<IBaseResource> retval = new ArrayList<>();
-		for (int i = 0; i < ResponseBundleBuilderTest.RESOURCE_COUNT; ++i) {
+		for (int i = 0; i < theCount; ++i) {
 			Patient p = new Patient();
 			p.setId("A" + i);
 			p.setActive(true);
@@ -435,8 +480,8 @@ class ResponseBundleBuilderTest {
 
 	private void setCanStoreSearchResults(boolean theCanStoreSearchResults) {
 		when(myServer.canStoreSearchResults()).thenReturn(theCanStoreSearchResults);
-		when(myServer.getPagingProvider()).thenReturn(myPagingProvider);
 		if (theCanStoreSearchResults) {
+			when(myServer.getPagingProvider()).thenReturn(myPagingProvider);
 			if (myLimit == null) {
 				when(myPagingProvider.getDefaultPageSize()).thenReturn(DEFAULT_PAGE_SIZE);
 			} else {
@@ -483,7 +528,7 @@ class ResponseBundleBuilderTest {
 		assertEquals(SEARCHSET, theBundle.getType());
 		assertEquals(theExpectedTotal, theBundle.getTotalElement().getValue());
 		List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();
-		assertEquals(theExpectedEntryCount, entries.size());
+		assertThat(entries).hasSize(theExpectedEntryCount);
 		if (theFirstId != null) {
 			assertEquals(theFirstId, entries.get(0).getResource().getId());
 		}
@@ -499,10 +544,9 @@ class ResponseBundleBuilderTest {
 		}
 
 		@Nonnull
-		@Override
-		public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+		public List<IBaseResource> getResources(int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponseBundleBuilder) {
 			getResourcesCalled = true;
-			return super.getResources(theFromIndex, theToIndex);
+			return super.getResources(theFromIndex, theToIndex, theResponseBundleBuilder);
 		}
 
 		// Emulate the behaviour of PersistedJpaBundleProvider where size() is only set after getResources() has been called

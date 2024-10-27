@@ -5,15 +5,16 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 
@@ -70,5 +71,13 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	@Nonnull
 	protected List<? extends IMdmLink> getPatientLinks() {
 		return myMdmLinkDaoSvc.findMdmLinksBySourceResource(myPatient);
+	}
+
+	protected List<MdmLinkWithRevision<MdmLink>> getHistoricalLinks(List<String> theGoldenResourceIds, List<String> theResourceIds) {
+		MdmHistorySearchParameters historySearchParameters = new MdmHistorySearchParameters()
+			.setGoldenResourceIds(theGoldenResourceIds)
+			.setSourceIds(theResourceIds);
+
+		return myMdmLinkDaoSvc.findMdmLinkHistory(historySearchParameters);
 	}
 }

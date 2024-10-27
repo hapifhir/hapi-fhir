@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.context.annotation.Scope;
 public class BulkExportAppCtx {
 
 	public static final String WRITE_TO_BINARIES = "write-to-binaries";
+	public static final String CREATE_REPORT_STEP = "create-report-step";
 
 	@Bean
 	public JobDefinition bulkExportJobDefinition() {
@@ -65,6 +66,41 @@ public class BulkExportAppCtx {
 						writeBinaryStep())
 				// finalize the job (set to complete)
 				.addFinalReducerStep(
+						CREATE_REPORT_STEP,
+						"Creates the output report from a bulk export job",
+						BulkExportJobResults.class,
+						createReportStep())
+				.build();
+
+		return def;
+	}
+
+	@Bean
+	public JobDefinition bulkExportJobV2Definition() {
+		JobDefinition.Builder<IModelJson, VoidModel> builder = JobDefinition.newBuilder();
+		builder.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		builder.setJobDescription("FHIR Bulk Export");
+		builder.setJobDefinitionVersion(2);
+
+		JobDefinition def = builder.setParametersType(BulkExportJobParameters.class)
+				// validator
+				.setParametersValidator(bulkExportJobParametersValidator())
+				.gatedExecution()
+				// first step - load in (all) ids and create id chunks of 1000 each
+				.addFirstStep(
+						"fetch-resources",
+						"Fetches resource PIDs for exporting",
+						ResourceIdList.class,
+						fetchResourceIdsStep())
+				// expand out - fetch resources
+				// and write binaries and save to db
+				.addIntermediateStep(
+						WRITE_TO_BINARIES,
+						"Writes the expanded resources to the binaries and saves",
+						BulkExportBinaryFileId.class,
+						expandResourceAndWriteBinaryStep())
+				// finalize the job (set to complete)
+				.addFinalReducerStep(
 						"create-report-step",
 						"Creates the output report from a bulk export job",
 						BulkExportJobResults.class,
@@ -84,14 +120,28 @@ public class BulkExportAppCtx {
 		return new FetchResourceIdsStep();
 	}
 
+	/**
+	 * Note, this bean is only used for version 1 of the bulk export job definition
+	 */
 	@Bean
 	public ExpandResourcesStep expandResourcesStep() {
 		return new ExpandResourcesStep();
 	}
 
+	/**
+	 * Note, this bean is only used for version 1 of the bulk export job definition
+	 */
 	@Bean
 	public WriteBinaryStep writeBinaryStep() {
 		return new WriteBinaryStep();
+	}
+
+	/**
+	 * Note, this bean is only used for version 2 of the bulk export job definition
+	 */
+	@Bean
+	public ExpandResourceAndWriteBinaryStep expandResourceAndWriteBinaryStep() {
+		return new ExpandResourceAndWriteBinaryStep();
 	}
 
 	@Bean

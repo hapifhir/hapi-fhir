@@ -1,0 +1,6 @@
+---
+type: change
+issue: 6341
+title: "The CachingValidationSupport cache for concept translations will 
+   now keep up to 500000 translations instead of the previous 5000. 
+   This will be made configurable in a future release."

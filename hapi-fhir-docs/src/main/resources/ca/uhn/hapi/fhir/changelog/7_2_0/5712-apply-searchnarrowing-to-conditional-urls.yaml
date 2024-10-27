@@ -1,0 +1,8 @@
+---
+type: add
+jira: SMILE-7971
+issue: 5712
+title: "The SearchNarrowingInterceptor can now optionally be configured to also apply
+  URL narrowing to conditional URLs used by conditional create/update/delete/patch
+  operations, both as raw HTTP transactions as well as within FHIR transaction
+  Bundles."

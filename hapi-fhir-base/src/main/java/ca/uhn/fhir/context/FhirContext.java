@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import ca.uhn.fhir.validation.FhirValidator;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.riot.Lang;
@@ -77,8 +79,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then
@@ -1001,9 +1001,9 @@ public class FhirContext {
 	 */
 	public void registerCustomType(final Class<? extends IBase> theType) {
 		Validate.notNull(theType, "theType must not be null");
-
 		ensureCustomTypeList();
 		myCustomTypes.add(theType);
+		myResourceNames = null;
 	}
 
 	/**
@@ -1025,6 +1025,7 @@ public class FhirContext {
 		ensureCustomTypeList();
 
 		myCustomTypes.addAll(theTypes);
+		myResourceNames = null;
 	}
 
 	private BaseRuntimeElementDefinition<?> scanDatatype(final Class<? extends IElement> theResourceType) {
@@ -1177,7 +1178,14 @@ public class FhirContext {
 			synchronized (this) {
 				if (!myInitialized && !myInitializing) {
 					myInitializing = true;
-					scanResourceTypes(toElementList(myResourceTypesToScan));
+					try {
+						scanResourceTypes(toElementList(myResourceTypesToScan));
+					} catch (Exception e) {
+						ourLog.error("Failed to initialize FhirContext", e);
+						throw e;
+					} finally {
+						myInitializing = false;
+					}
 				}
 			}
 		}

@@ -3,11 +3,14 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,8 +27,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
@@ -195,15 +196,13 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 	@Override
 	public LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
-		String key = "lookupCode " + theSystem + " " + theCode + " " + defaultIfBlank(theDisplayLanguage, "NO_LANG");
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
+		String key = "lookupCode " + theLookupCodeRequest.getSystem() + " "
+				+ theLookupCodeRequest.getCode()
+				+ " " + defaultIfBlank(theLookupCodeRequest.getDisplayLanguage(), "NO_LANG")
+				+ " " + theLookupCodeRequest.getPropertyNames().toString();
 		return loadFromCache(
-				myLookupCodeCache,
-				key,
-				t -> super.lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage));
+				myLookupCodeCache, key, t -> super.lookupCode(theValidationSupportContext, theLookupCodeRequest));
 	}
 
 	@Override
@@ -254,6 +253,13 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		Function<S, Optional<T>> loaderWrapper = key -> Optional.ofNullable(theLoader.apply(theKey));
 		Optional<T> result = (Optional<T>) theCache.get(theKey, loaderWrapper);
 		assert result != null;
+
+		// UGH!  Animal sniffer :(
+		if (!result.isPresent()) {
+			ourLog.debug(
+					"Invalidating cache entry for key: {} since the result of the underlying query is empty", theKey);
+			theCache.invalidate(theKey);
+		}
 
 		return result.orElse(null);
 	}

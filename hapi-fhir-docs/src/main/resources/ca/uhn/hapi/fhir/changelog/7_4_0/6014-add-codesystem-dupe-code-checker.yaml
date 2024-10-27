@@ -1,0 +1,7 @@
+---
+type: add
+issue: 6014
+title: "When uploading an invalid CodeSystem to the JPA server containing
+  duplicate codes, the server responded with an unhelpful error message
+  referring to a database constraint error. This has been fixed so that 
+  a more informative error message is returned."

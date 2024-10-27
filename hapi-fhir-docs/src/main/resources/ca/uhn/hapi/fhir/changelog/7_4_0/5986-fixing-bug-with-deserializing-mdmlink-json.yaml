@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 5985
+title: "Fixed an issue where MDM json links were unserializable
+        due to using the IResourcePersistenceId objects.
+        This has been fixed, and IResourcePersistenceId objects
+        will not be serialized or returned to users.
+"

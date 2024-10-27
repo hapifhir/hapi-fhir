@@ -1,5 +1,9 @@
 package org.hl7.fhir.dstu3.hapi.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -32,6 +36,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -40,6 +45,7 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
+import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -71,9 +77,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -81,17 +87,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -167,7 +163,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		CapabilityStatementRestResourceComponent resource = findRestResource(conformance, "Patient");
 
-		assertEquals(1, resource.getSearchParam().size());
+		assertThat(resource.getSearchParam()).hasSize(1);
 		CapabilityStatementRestResourceSearchParamComponent param = resource.getSearchParam().get(0);
 		assertEquals("organization", param.getName());
 
@@ -213,10 +209,10 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		List<String> formatCodes = serverConformance.getFormat().stream().map(c -> c.asStringValue()).collect(Collectors.toList());;
 
-		assertThat(formatCodes, hasItem(Constants.FORMAT_XML));
-		assertThat(formatCodes, hasItem(Constants.FORMAT_JSON));
-		assertThat(formatCodes, hasItem(Constants.CT_FHIR_JSON_NEW));
-		assertThat(formatCodes, hasItem(Constants.CT_FHIR_XML_NEW));
+		assertThat(formatCodes).contains(Constants.FORMAT_XML);
+		assertThat(formatCodes).contains(Constants.FORMAT_JSON);
+		assertThat(formatCodes).contains(Constants.CT_FHIR_JSON_NEW);
+		assertThat(formatCodes).contains(Constants.CT_FHIR_XML_NEW);
 	}
 
 
@@ -236,15 +232,15 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertEquals(1, conformance.getRest().get(0).getOperation().size());
+		assertThat(conformance.getRest().get(0).getOperation()).hasSize(1);
 		assertEquals("everything", conformance.getRest().get(0).getOperation().get(0).getName());
 
 		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
 		assertEquals("everything", opDef.getCode());
-		assertThat(opDef.getSystem(), is(false));
-		assertThat(opDef.getType(), is(false));
-		assertThat(opDef.getInstance(), is(true));
+		assertEquals(false, opDef.getSystem());
+		assertEquals(false, opDef.getType());
+		assertEquals(true, opDef.getInstance());
 	}
 
 	@Test
@@ -285,7 +281,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode() + "\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode() + "\"/></interaction>");
 	}
 
 	@Test
@@ -316,9 +312,9 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier\"/>"));
-		assertThat(conf, containsString("<documentation value=\"The patient's name\"/>"));
-		assertThat(conf, containsString("<type value=\"token\"/>"));
+		assertThat(conf).contains("<documentation value=\"The patient's identifier\"/>");
+		assertThat(conf).contains("<documentation value=\"The patient's name\"/>");
+		assertThat(conf).contains("<type value=\"token\"/>");
 	}
 
 	@Test
@@ -362,12 +358,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertEquals(2, conformance.getRest().get(0).getOperation().size());
+		assertThat(conformance.getRest().get(0).getOperation()).hasSize(2);
 		List<String> operationNames = toOperationNames(conformance.getRest().get(0).getOperation());
-		assertThat(operationNames, containsInAnyOrder("someOp", "validate"));
+		assertThat(operationNames).containsExactlyInAnyOrder("someOp", "validate");
 
 		List<String> operationIdParts = toOperationIdParts(conformance.getRest().get(0).getOperation());
-		assertThat(operationIdParts, containsInAnyOrder("EncounterPatient-i-someOp", "EncounterPatient-i-validate"));
+		assertThat(operationIdParts).containsExactlyInAnyOrder("EncounterPatient-i-someOp", "EncounterPatient-i-validate");
 
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
@@ -377,8 +373,8 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
 			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Patient", "Encounter"));
-			assertEquals(2, opDef.getParameter().size());
+			assertThat(types).containsExactlyInAnyOrder("Patient", "Encounter");
+			assertThat(opDef.getParameter()).hasSize(2);
 			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
 			assertEquals("date", opDef.getParameter().get(0).getType());
 			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
@@ -400,8 +396,8 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
-		assertThat(conf, containsString("<type value=\"token\"/>"));
+		assertThat(conf).contains("<documentation value=\"The patient's identifier (MRN or other card number)\"/>");
+		assertThat(conf).contains("<type value=\"token\"/>");
 
 	}
 
@@ -431,7 +427,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
 
-		assertEquals(1, res.getSearchInclude().size());
+		assertThat(res.getSearchInclude()).hasSize(1);
 		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
 	}
 
@@ -461,7 +457,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
 
-		assertEquals(1, res.getSearchInclude().size());
+		assertThat(res.getSearchInclude()).hasSize(1);
 		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
 	}
 
@@ -481,8 +477,8 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"vread\"/></interaction>"));
-		assertThat(conf, containsString("<interaction><code value=\"read\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"vread\"/></interaction>");
+		assertThat(conf).contains("<interaction><code value=\"read\"/></interaction>");
 	}
 
 	@Test
@@ -501,8 +497,8 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, not(containsString("<interaction><code value=\"vread\"/></interaction>")));
-		assertThat(conf, containsString("<interaction><code value=\"read\"/></interaction>"));
+		assertThat(conf).doesNotContain("<interaction><code value=\"vread\"/></interaction>");
+		assertThat(conf).contains("<interaction><code value=\"read\"/></interaction>");
 	}
 
 	@Test
@@ -537,8 +533,8 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
-		assertThat(conf, containsString("<type value=\"token\"/>"));
+		assertThat(conf).contains("<documentation value=\"The patient's identifier (MRN or other card number)\"/>");
+		assertThat(conf).contains("<type value=\"token\"/>");
 
 	}
 
@@ -652,7 +648,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ourLog.info(confWithType);
 
 		assertEquals(confNoType, confWithType);
-		assertThat(confNoType, containsString("<date value=\"2011-02-22T11:22:33Z\"/>"));
+		assertThat(confNoType).contains("<date value=\"2011-02-22T11:22:33Z\"/>");
 	}
 
 	@Test
@@ -671,7 +667,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + SystemRestfulInteraction.HISTORYSYSTEM.toCode() + "\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"" + SystemRestfulInteraction.HISTORYSYSTEM.toCode() + "\"/></interaction>");
 	}
 
 	@Test
@@ -690,7 +686,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode() + "\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode() + "\"/></interaction>");
 	}
 
 	@Test
@@ -708,7 +704,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
-		assertTrue(result.isSuccessful(), result.getMessages().toString());
+		assertThat(result.isSuccessful()).as(result.getMessages().toString()).isTrue();
 	}
 
 	@Test
@@ -727,33 +723,33 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
 		CapabilityStatementRestOperationComponent operationComponent = restComponent.getOperation().get(0);
-		assertThat(operationComponent.getName(), is(NamedQueryPlainProvider.QUERY_NAME));
+		assertEquals(NamedQueryPlainProvider.QUERY_NAME, operationComponent.getName());
 
 		String operationReference = operationComponent.getDefinition().getReference();
-		assertThat(operationReference, not(nullValue()));
+		assertNotNull(operationReference);
 
 		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
-		assertThat(operationDefinition.getCode(), is(NamedQueryPlainProvider.QUERY_NAME));
-		assertThat("The operation name should be the description, if a description is set", operationDefinition.getName(), is(NamedQueryPlainProvider.DESCRIPTION));
-		assertThat(operationDefinition.getStatus(), is(PublicationStatus.ACTIVE));
-		assertThat(operationDefinition.getKind(), is(OperationKind.QUERY));
-		assertThat(operationDefinition.getDescription(), is(NamedQueryPlainProvider.DESCRIPTION));
-		assertThat(operationDefinition.getIdempotent(), is(true));
-		assertThat("A system level search has no target resources", operationDefinition.getResource(), is(empty()));
-		assertThat(operationDefinition.getSystem(), is(true));
-		assertThat(operationDefinition.getType(), is(false));
-		assertThat(operationDefinition.getInstance(), is(false));
+		assertEquals(NamedQueryPlainProvider.QUERY_NAME, operationDefinition.getCode());
+		assertThat(operationDefinition.getName()).as("The operation name should be the description, if a description is set").isEqualTo(NamedQueryPlainProvider.DESCRIPTION);
+		assertEquals(PublicationStatus.ACTIVE, operationDefinition.getStatus());
+		assertEquals(OperationKind.QUERY, operationDefinition.getKind());
+		assertEquals(NamedQueryPlainProvider.DESCRIPTION, operationDefinition.getDescription());
+		assertEquals(true, operationDefinition.getIdempotent());
+		assertThat(operationDefinition.getResource()).as("A system level search has no target resources").isEmpty();
+		assertEquals(true, operationDefinition.getSystem());
+		assertEquals(false, operationDefinition.getType());
+		assertEquals(false, operationDefinition.getInstance());
 		List<OperationDefinitionParameterComponent> parameters = operationDefinition.getParameter();
-		assertThat(parameters.size(), is(1));
+		assertThat(parameters).hasSize(1);
 		OperationDefinitionParameterComponent param = parameters.get(0);
-		assertThat(param.getName(), is(NamedQueryPlainProvider.SP_QUANTITY));
-		assertThat(param.getType(), is("string"));
-		assertThat(param.getSearchTypeElement().asStringValue(), is(RestSearchParameterTypeEnum.QUANTITY.getCode()));
-		assertThat(param.getMin(), is(1));
-		assertThat(param.getMax(), is("1"));
-		assertThat(param.getUse(), is(OperationParameterUse.IN));
+		assertEquals(NamedQueryPlainProvider.SP_QUANTITY, param.getName());
+		assertEquals("string", param.getType());
+		assertEquals(RestSearchParameterTypeEnum.QUANTITY.getCode(), param.getSearchTypeElement().asStringValue());
+		assertEquals(1, param.getMin());
+		assertEquals("1", param.getMax());
+		assertEquals(OperationParameterUse.IN, param.getUse());
 	}
 
 	@Test
@@ -772,31 +768,31 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
 		CapabilityStatementRestOperationComponent operationComponent = restComponent.getOperation().get(0);
 		String operationReference = operationComponent.getDefinition().getReference();
-		assertThat(operationReference, not(nullValue()));
+		assertNotNull(operationReference);
 
 		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
-		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), is(NamedQueryResourceProvider.QUERY_NAME));
+		assertThat(operationDefinition.getName()).as("The operation name should be the code if no description is set").isEqualTo(NamedQueryResourceProvider.QUERY_NAME);
 		String patientResourceName = "Patient";
-		assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValue(), is(patientResourceName));
-		assertThat(operationDefinition.getSystem(), is(false));
-		assertThat(operationDefinition.getType(), is(true));
-		assertThat(operationDefinition.getInstance(), is(false));
+		assertThat(operationDefinition.getResource().get(0).getValue()).as("A resource level search targets the resource of the provider it's defined in").isEqualTo(patientResourceName);
+		assertEquals(false, operationDefinition.getSystem());
+		assertEquals(true, operationDefinition.getType());
+		assertEquals(false, operationDefinition.getInstance());
 		List<OperationDefinitionParameterComponent> parameters = operationDefinition.getParameter();
-		assertThat(parameters.size(), is(1));
+		assertThat(parameters).hasSize(1);
 		OperationDefinitionParameterComponent param = parameters.get(0);
-		assertThat(param.getName(), is(NamedQueryResourceProvider.SP_PARAM));
-		assertThat(param.getType(), is("string"));
-		assertThat(param.getSearchTypeElement().asStringValue(), is(RestSearchParameterTypeEnum.STRING.getCode()));
-		assertThat(param.getMin(), is(0));
-		assertThat(param.getMax(), is("1"));
-		assertThat(param.getUse(), is(OperationParameterUse.IN));
+		assertEquals(NamedQueryResourceProvider.SP_PARAM, param.getName());
+		assertEquals("string", param.getType());
+		assertEquals(RestSearchParameterTypeEnum.STRING.getCode(), param.getSearchTypeElement().asStringValue());
+		assertEquals(0, param.getMin());
+		assertEquals("1", param.getMax());
+		assertEquals(OperationParameterUse.IN, param.getUse());
 
 		CapabilityStatementRestResourceComponent patientResource = restComponent.getResource().stream()
 				.filter(r -> patientResourceName.equals(r.getType()))
 				.findAny().get();
-		assertThat("Named query parameters should not appear in the resource search params", patientResource.getSearchParam(), is(empty()));
+		assertThat(patientResource.getSearchParam()).as("Named query parameters should not appear in the resource search params").isEmpty();
 	}
 
 	@Test
@@ -815,15 +811,15 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ourLog.info(conf);
 
 		List<CapabilityStatementRestOperationComponent> operations = conformance.getRest().get(0).getOperation();
-		assertThat(operations.size(), is(1));
-		assertThat(operations.get(0).getName(), is(TypeLevelOperationProvider.OPERATION_NAME));
+		assertThat(operations).hasSize(1);
+		assertEquals(TypeLevelOperationProvider.OPERATION_NAME, operations.get(0).getName());
 
 		OperationDefinition opDef = sc.readOperationDefinition(new IdType(operations.get(0).getDefinition().getReference()), createRequestDetails(rs));
 		validate(opDef);
 		assertEquals(TypeLevelOperationProvider.OPERATION_NAME, opDef.getCode());
-		assertThat(opDef.getSystem(), is(false));
-		assertThat(opDef.getType(), is(true));
-		assertThat(opDef.getInstance(), is(false));
+		assertEquals(false, opDef.getSystem());
+		assertEquals(true, opDef.getType());
+		assertEquals(false, opDef.getInstance());
 	}
 
     @Test
@@ -843,8 +839,26 @@ public class ServerCapabilityStatementProviderDstu3Test {
         CapabilityStatementRestResourceComponent patientResource = resources.stream()
             .filter(resource -> "Patient".equals(resource.getType()))
             .findFirst().get();
-        assertThat(patientResource.getProfile().getReference(), containsString(PATIENT_SUB));
+			assertThat(patientResource.getProfile().getReference()).contains(PATIENT_SUB);
     }
+
+	@Test
+	public void testMethodGetServerConformance_whenServerSupportsExportOperation_willIncludeInstantiatesElement() throws Exception {
+		// given
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new BulkDataExportProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR3"));
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
+		rs.setServerConformanceProvider(sc);
+
+		// when
+		rs.init(createServletConfig());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		// then
+		String instantiatesFirstRepValue = conformance.getInstantiates().get(0).getValue();
+		assertEquals(Constants.BULK_DATA_ACCESS_IG_URL, instantiatesFirstRepValue);
+	}
 
 	private List<String> toOperationIdParts(List<CapabilityStatementRestOperationComponent> theOperation) {
 		ArrayList<String> retVal = Lists.newArrayList();
@@ -877,8 +891,8 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ValidationResult result = ourValidator.validateWithResult(theOpDef);
 		String outcome = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info("Outcome: {}", outcome);
-		
-		assertTrue(result.isSuccessful(), outcome);
+
+		assertThat(result.isSuccessful()).as(outcome).isTrue();
 	}
 
 	public static class SearchProviderWithExplicitChains {
@@ -948,7 +962,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	public static class MultiTypeEncounterProvider implements IResourceProvider {
 
 		@Operation(name = "someOp")
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId,
+		public IBundleProvider everything(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId,
 				@OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Encounter theEnd) {
 			return null;
 		}
@@ -959,7 +973,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		}
 
 		@Validate
-		public IBundleProvider validate(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @ResourceParam Encounter thePatient) {
+		public IBundleProvider validate(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @ResourceParam Encounter thePatient) {
 			return null;
 		}
 
@@ -969,7 +983,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	public static class MultiTypePatientProvider implements IResourceProvider {
 
 		@Operation(name = "someOp")
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId,
+		public IBundleProvider everything(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId,
 				@OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Patient theEnd) {
 			return null;
 		}
@@ -980,7 +994,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		}
 
 		@Validate
-		public IBundleProvider validate(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @ResourceParam Patient thePatient) {
+		public IBundleProvider validate(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @ResourceParam Patient thePatient) {
 			return null;
 		}
 
@@ -1015,7 +1029,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	public static class PlainProviderWithExtendedOperationOnNoType {
 
 		@Operation(name = "plain", idempotent = true, returnParameters = { @OperationParam(min = 1, max = 2, name = "out1", type = StringType.class) })
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart,
+		public IBundleProvider everything(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart,
 				@OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
@@ -1026,7 +1040,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	public static class ProviderWithExtendedOperationReturningBundle implements IResourceProvider {
 
 		@Operation(name = "everything", idempotent = true)
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart,
+		public IBundleProvider everything(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart,
 				@OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}

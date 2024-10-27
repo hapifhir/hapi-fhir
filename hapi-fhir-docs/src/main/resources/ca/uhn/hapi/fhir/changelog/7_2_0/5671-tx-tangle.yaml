@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5671
+backport: 7.0.1
+title: "Avoid lock contention by refreshing SearchParameter cache in a new transaction."

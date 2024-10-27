@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -34,11 +35,9 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -120,8 +119,8 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 			.newSynchronous(Constants.PARAM_ID, new TokenParam(patient2Id.getValue()))
 			.addInclude(Patient.INCLUDE_LINK);
 		IBundleProvider search = myPatientDao.search(params, mySrd);
-		assertThat(toUnqualifiedVersionlessIdValues(search), contains(patient2Id.getValue(), patient1Id.getValue()));
-		assertEquals(2, search.getAllResources().size());
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(patient2Id.getValue(), patient1Id.getValue());
+		assertThat(search.getAllResources()).hasSize(2);
 		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
 	}
 
@@ -147,8 +146,8 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IBundleProvider search = myPatientDao.search(params, mySrd);
 
 		// Verify
-		assertThat(toUnqualifiedVersionlessIdValues(search), contains(patient2Id.getValue(), patient1Id.getValue()));
-		assertEquals(2, search.getAllResources().size());
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(patient2Id.getValue(), patient1Id.getValue());
+		assertThat(search.getAllResources()).hasSize(2);
 		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
 	}
 
@@ -194,8 +193,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		when(myCrossPartitionReferencesDetectedInterceptor.handle(any(),any())).thenAnswer(t->{
 			CrossPartitionReferenceDetails theDetails = t.getArgument(1, CrossPartitionReferenceDetails.class);
 			IIdType targetId = theDetails.getPathAndRef().getRef().getReferenceElement();
-			ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forRead(targetId);
-			RequestPartitionId referenceTargetPartition = myPartitionHelperSvc.determineReadPartitionForRequest(theDetails.getRequestDetails(), details);
+			RequestPartitionId referenceTargetPartition = myPartitionHelperSvc.determineReadPartitionForRequestForRead(theDetails.getRequestDetails(), targetId.getResourceType(), targetId);
 
 			IResourceLookup targetResource = myTransactionService
 				.withRequest(theDetails.getRequestDetails())

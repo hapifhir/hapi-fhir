@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5913
+title: "Bulk export was failing with a HAPI-2222 error with the persistence module configured for R5.
+        This has been fixed."

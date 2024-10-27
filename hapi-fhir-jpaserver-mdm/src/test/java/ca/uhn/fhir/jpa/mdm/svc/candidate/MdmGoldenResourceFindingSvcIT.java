@@ -4,9 +4,12 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,8 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,14 +44,15 @@ class MdmGoldenResourceFindingSvcIT extends BaseMdmR4Test {
 
 		// hack the link into a NO_MATCH
 		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(jane);
-		assertThat(links, hasSize(1));
+		assertThat(links).hasSize(1);
 		MdmLink link = links.get(0);
 		link.setMatchResult(MdmMatchResultEnum.NO_MATCH);
 		link.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		myMdmLinkDaoSvc.save(link);
 
 		// the NO_MATCH golden resource should not be a candidate
-		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(jane);
+		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(
+			createFindGoldenResourceCandidateParams(jane));
 		assertEquals(0, candidateList.size());
 	}
 
@@ -131,7 +134,8 @@ class MdmGoldenResourceFindingSvcIT extends BaseMdmR4Test {
 		}
 
 		// test
-		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(candidate);
+		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(
+			createFindGoldenResourceCandidateParams(candidate));
 
 		// verify
 		assertNotNull(candidateList);
@@ -153,5 +157,13 @@ class MdmGoldenResourceFindingSvcIT extends BaseMdmR4Test {
 		}
 
 		return (Patient) daoOutcome.getResource();
+	}
+
+	private FindGoldenResourceCandidatesParams createFindGoldenResourceCandidateParams(IAnyResource theResource) {
+		FindGoldenResourceCandidatesParams params = new FindGoldenResourceCandidatesParams(
+			theResource,
+			new MdmTransactionContext()
+		);
+		return params;
 	}
 }

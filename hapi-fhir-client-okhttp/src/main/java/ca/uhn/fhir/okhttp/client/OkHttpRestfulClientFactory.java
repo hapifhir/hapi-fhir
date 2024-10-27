@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR OkHttp Client
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import okhttp3.Call;
+import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 
 import java.net.InetSocketAddress;
@@ -65,6 +66,7 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 			myNativeClient = new OkHttpClient()
 					.newBuilder()
 					.connectTimeout(getConnectTimeout(), TimeUnit.MILLISECONDS)
+					.connectionPool(new ConnectionPool(5, getConnectionTimeToLive(), TimeUnit.MILLISECONDS))
 					.readTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
 					.writeTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
 					.build();

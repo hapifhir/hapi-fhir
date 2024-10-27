@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5198
+title: "Resolved an issue with type-everything search operations (eg, /Patient/$everything),
+      where not all page results were being returned if _count was specified to be
+      the same value as the maximum page size to fetch.
+"

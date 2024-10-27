@@ -1,12 +1,11 @@
 package ca.uhn.fhir.parser.i423;
 
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class CustomProcedureRequestTest {
 
@@ -26,7 +25,7 @@ public class CustomProcedureRequestTest {
 		ourLog.info(encoded);
 		
 		//@formatter:off
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"<ProcedureRequest xmlns=\"http://hl7.org/fhir\">",
 				"<meta>",
 					"<profile value=\"http://test/\"/>",
@@ -36,7 +35,7 @@ public class CustomProcedureRequestTest {
 						"<frequency value=\"2\"/>",
 					"</repeat>",
 				"</scheduledTiming>",
-			"</ProcedureRequest>"));
+			"</ProcedureRequest>");
 		//@formatter:on
 	}
 	

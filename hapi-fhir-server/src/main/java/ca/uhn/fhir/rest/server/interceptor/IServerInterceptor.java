@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Provides methods to intercept requests and responses. Note that implementations of this interface may wish to use
@@ -64,12 +64,12 @@ public interface IServerInterceptor {
 	 *
 	 * @param theRequestDetails  A bean containing details about the request that is about to be processed, including details such as the
 	 *                           resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
-	 *                           pulled out of the {@link javax.servlet.http.HttpServletRequest servlet request}. Note that the bean
+	 *                           pulled out of the {@link jakarta.servlet.http.HttpServletRequest servlet request}. Note that the bean
 	 *                           properties are not all guaranteed to be populated, depending on how early during processing the
 	 *                           exception occurred.
 	 * @param theServletRequest  The incoming request
 	 * @param theServletResponse The response. Note that interceptors may choose to provide a response (i.e. by calling
-	 *                           {@link javax.servlet.http.HttpServletResponse#getWriter()}) but in that case it is important to return
+	 *                           {@link jakarta.servlet.http.HttpServletResponse#getWriter()}) but in that case it is important to return
 	 *                           <code>false</code> to indicate that the server itself should not also provide a response.
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
 	 * If your interceptor is providing a response rather than letting HAPI handle the response normally, you
