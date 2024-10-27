@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -38,8 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
-
-import javax.annotation.Nonnull;
 
 /**
  * Responsible for transitioning subscription resources from REQUESTED to ACTIVE
@@ -52,8 +51,10 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -107,7 +108,8 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 			return;
 		}
 
-		SubscriptionTopic subscriptionTopic = SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, payloadResource);
+		SubscriptionTopic subscriptionTopic =
+				SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, payloadResource);
 		if (subscriptionTopic.getStatus() == Enumerations.PublicationStatus.ACTIVE) {
 			mySubscriptionTopicRegistry.register(subscriptionTopic);
 		} else {
@@ -124,12 +126,11 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
 		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition()) {
-			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is enabled
+			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is
+			// enabled
 			// creates a corrupt default partition.  This resets it to a clean one.
 			payloadPartitionId = RequestPartitionId.defaultPartition();
 		}
 		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
 	}
-
-
 }

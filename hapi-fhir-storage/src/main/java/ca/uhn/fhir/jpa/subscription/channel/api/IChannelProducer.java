@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,5 +22,4 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.InterceptableChannel;
 
-public interface IChannelProducer extends MessageChannel, InterceptableChannel {
-}
+public interface IChannelProducer extends MessageChannel, InterceptableChannel {}

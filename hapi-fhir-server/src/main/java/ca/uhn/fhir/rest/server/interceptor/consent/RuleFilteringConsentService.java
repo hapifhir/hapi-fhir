@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,12 +58,13 @@ public class RuleFilteringConsentService implements IConsentService {
 	 * @return REJECT if the rules don't ALLOW, PROCEED otherwise.
 	 */
 	@Override
-	public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+	public ConsentOutcome canSeeResource(
+			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		ourLog.trace("canSeeResource() {} {}", theRequestDetails, theResource);
 
 		// apply rules!  If yes, then yes!
-		AuthorizationInterceptor.Verdict ruleResult =
-			myRuleApplier.applyRulesAndReturnDecision(theRequestDetails.getRestOperationType(), theRequestDetails, null, null, theResource, CAN_SEE_POINTCUT);
+		AuthorizationInterceptor.Verdict ruleResult = myRuleApplier.applyRulesAndReturnDecision(
+				theRequestDetails.getRestOperationType(), theRequestDetails, null, null, theResource, CAN_SEE_POINTCUT);
 		if (ruleResult.getDecision() == PolicyEnum.ALLOW) {
 			// are these the right codes?
 			return ConsentOutcome.PROCEED;

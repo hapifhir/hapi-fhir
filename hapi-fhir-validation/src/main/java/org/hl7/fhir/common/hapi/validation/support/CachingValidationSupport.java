@@ -3,11 +3,14 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -15,8 +18,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +71,10 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	 * @param theWrap          The validation support module to wrap
 	 * @param theCacheTimeouts The timeouts to use
 	 */
-	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts, boolean theIsEnabledValidationForCodingsLogicalAnd) {
+	public CachingValidationSupport(
+			IValidationSupport theWrap,
+			CacheTimeouts theCacheTimeouts,
+			boolean theIsEnabledValidationForCodingsLogicalAnd) {
 		super(theWrap.getFhirContext(), theWrap);
 		myExpandValueSetCache = CacheFactory.build(theCacheTimeouts.getExpandValueSetMillis(), 100);
 		myValidateCodeCache = CacheFactory.build(theCacheTimeouts.getValidateCodeMillis(), 5000);
@@ -81,18 +85,12 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
 		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
-			.namingPattern("CachingValidationSupport-%d")
-			.daemon(false)
-			.priority(Thread.NORM_PRIORITY)
-			.build();
+				.namingPattern("CachingValidationSupport-%d")
+				.daemon(false)
+				.priority(Thread.NORM_PRIORITY)
+				.build();
 		myBackgroundExecutor = new ThreadPoolExecutor(
-			1,
-			1,
-			0L,
-			TimeUnit.MILLISECONDS,
-			executorQueue,
-			threadFactory,
-			new ThreadPoolExecutor.DiscardPolicy());
+				1, 1, 0L, TimeUnit.MILLISECONDS, executorQueue, threadFactory, new ThreadPoolExecutor.DiscardPolicy());
 
 		myIsEnabledValidationForCodingsLogicalAnd = theIsEnabledValidationForCodingsLogicalAnd;
 	}
@@ -134,7 +132,8 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
-		return loadFromCache(myCache, "fetchStructureDefinition " + theUrl, t -> super.fetchStructureDefinition(theUrl));
+		return loadFromCache(
+				myCache, "fetchStructureDefinition " + theUrl, t -> super.fetchStructureDefinition(theUrl));
 	}
 
 	@Override
@@ -144,57 +143,101 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
-		return loadFromCache(myCache, "fetchResource " + theClass + " " + theUri,
-			t -> super.fetchResource(theClass, theUri));
+		return loadFromCache(
+				myCache, "fetchResource " + theClass + " " + theUri, t -> super.fetchResource(theClass, theUri));
 	}
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		String key = "isCodeSystemSupported " + theSystem;
-		Boolean retVal = loadFromCacheReentrantSafe(myCache, key, t -> super.isCodeSystemSupported(theValidationSupportContext, theSystem));
+		Boolean retVal = loadFromCacheReentrantSafe(
+				myCache, key, t -> super.isCodeSystemSupported(theValidationSupportContext, theSystem));
 		assert retVal != null;
 		return retVal;
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(
+			ValidationSupportContext theValidationSupportContext,
+			ValueSetExpansionOptions theExpansionOptions,
+			@Nonnull IBaseResource theValueSetToExpand) {
 		if (!theValueSetToExpand.getIdElement().hasIdPart()) {
 			return super.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand);
 		}
 
 		ValueSetExpansionOptions expansionOptions = defaultIfNull(theExpansionOptions, EMPTY_EXPANSION_OPTIONS);
-		String key = "expandValueSet " +
-			theValueSetToExpand.getIdElement().getValue() + " " +
-			expansionOptions.isIncludeHierarchy() + " " +
-			expansionOptions.getFilter() + " " +
-			expansionOptions.getOffset() + " " +
-			expansionOptions.getCount();
-		return loadFromCache(myExpandValueSetCache, key, t -> super.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand));
+		String key = "expandValueSet " + theValueSetToExpand.getIdElement().getValue()
+				+ " " + expansionOptions.isIncludeHierarchy()
+				+ " " + expansionOptions.getFilter()
+				+ " " + expansionOptions.getOffset()
+				+ " " + expansionOptions.getCount();
+		return loadFromCache(
+				myExpandValueSetCache,
+				key,
+				t -> super.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand));
 	}
 
 	@Override
-	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		String key = "validateCode " + theCodeSystem + " " + theCode + " " + defaultString(theDisplay) + " " + defaultIfBlank(theValueSetUrl, "NO_VS");
-		return loadFromCache(myValidateCodeCache, key, t -> super.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl));
+	public CodeValidationResult validateCode(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
+		String key = "validateCode " + theCodeSystem + " " + theCode + " " + defaultString(theDisplay) + " "
+				+ defaultIfBlank(theValueSetUrl, "NO_VS");
+		return loadFromCache(
+				myValidateCodeCache,
+				key,
+				t -> super.validateCode(
+						theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl));
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
-		String key = "lookupCode " + theSystem + " " + theCode + " " + defaultIfBlank(theDisplayLanguage, "NO_LANG");
-		return loadFromCache(myLookupCodeCache, key, t -> super.lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage));
+	public LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
+		String key = "lookupCode " + theLookupCodeRequest.getSystem() + " "
+				+ theLookupCodeRequest.getCode()
+				+ " " + defaultIfBlank(theLookupCodeRequest.getDisplayLanguage(), "NO_LANG")
+				+ " " + theLookupCodeRequest.getPropertyNames().toString();
+		return loadFromCache(
+				myLookupCodeCache, key, t -> super.lookupCode(theValidationSupportContext, theLookupCodeRequest));
 	}
 
 	@Override
-	public IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public IValidationSupport.CodeValidationResult validateCodeInValueSet(
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theValidationOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			@Nonnull IBaseResource theValueSet) {
 
-		BaseRuntimeChildDefinition urlChild = myCtx.getResourceDefinition(theValueSet).getChildByName("url");
-		Optional<String> valueSetUrl = urlChild.getAccessor().getValues(theValueSet).stream().map(t -> ((IPrimitiveType<?>) t).getValueAsString()).filter(t -> isNotBlank(t)).findFirst();
+		BaseRuntimeChildDefinition urlChild =
+				myCtx.getResourceDefinition(theValueSet).getChildByName("url");
+		Optional<String> valueSetUrl = urlChild.getAccessor().getValues(theValueSet).stream()
+				.map(t -> ((IPrimitiveType<?>) t).getValueAsString())
+				.filter(t -> isNotBlank(t))
+				.findFirst();
 		if (valueSetUrl.isPresent()) {
-			String key = "validateCodeInValueSet " + theValidationOptions.toString() + " " + defaultString(theCodeSystem) + " " + defaultString(theCode) + " " + defaultString(theDisplay) + " " + valueSetUrl.get();
-			return loadFromCache(myValidateCodeCache, key, t -> super.validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet));
+			String key =
+					"validateCodeInValueSet " + theValidationOptions.toString() + " " + defaultString(theCodeSystem)
+							+ " " + defaultString(theCode) + " " + defaultString(theDisplay) + " " + valueSetUrl.get();
+			return loadFromCache(
+					myValidateCodeCache,
+					key,
+					t -> super.validateCodeInValueSet(
+							theValidationSupportContext,
+							theValidationOptions,
+							theCodeSystem,
+							theCode,
+							theDisplay,
+							theValueSet));
 		}
 
-		return super.validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet);
+		return super.validateCodeInValueSet(
+				theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet);
 	}
 
 	@Override
@@ -210,6 +253,13 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		Function<S, Optional<T>> loaderWrapper = key -> Optional.ofNullable(theLoader.apply(theKey));
 		Optional<T> result = (Optional<T>) theCache.get(theKey, loaderWrapper);
 		assert result != null;
+
+		// UGH!  Animal sniffer :(
+		if (!result.isPresent()) {
+			ourLog.debug(
+					"Invalidating cache entry for key: {} since the result of the underlying query is empty", theKey);
+			theCache.invalidate(theKey);
+		}
 
 		return result.orElse(null);
 	}
@@ -255,7 +305,6 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		myNonExpiringCache.put(theKey, retVal);
 		return retVal;
 	}
-
 
 	@Override
 	public void invalidateCaches() {
@@ -324,11 +373,11 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 		public static CacheTimeouts defaultValues() {
 			return new CacheTimeouts()
-				.setLookupCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
-				.setExpandValueSetMillis(1 * DateUtils.MILLIS_PER_MINUTE)
-				.setTranslateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
-				.setValidateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
-				.setMiscMillis(10 * DateUtils.MILLIS_PER_MINUTE);
+					.setLookupCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
+					.setExpandValueSetMillis(1 * DateUtils.MILLIS_PER_MINUTE)
+					.setTranslateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
+					.setValidateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
+					.setMiscMillis(10 * DateUtils.MILLIS_PER_MINUTE);
 		}
 	}
 

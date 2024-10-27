@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ public class TermConceptDaoSvc {
 	@Autowired
 	protected ITermConceptDesignationDao myConceptDesignationDao;
 
+	private boolean mySupportLegacyLob = false;
+
 	public int saveConcept(TermConcept theConcept) {
 		int retVal = 0;
 
@@ -70,20 +72,26 @@ public class TermConceptDaoSvc {
 			retVal++;
 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 			theConcept.setUpdated(new Date());
+			theConcept.flagForLegacyLobSupport(mySupportLegacyLob);
 			myConceptDao.save(theConcept);
 
 			for (TermConceptProperty next : theConcept.getProperties()) {
+				next.performLegacyLobSupport(mySupportLegacyLob);
 				myConceptPropertyDao.save(next);
 			}
 
 			for (TermConceptDesignation next : theConcept.getDesignations()) {
 				myConceptDesignationDao.save(next);
 			}
-
 		}
 
 		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
 		return retVal;
+	}
+
+	public TermConceptDaoSvc setSupportLegacyLob(boolean theSupportLegacyLob) {
+		mySupportLegacyLob = theSupportLegacyLob;
+		return this;
 	}
 
 	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
@@ -96,6 +104,7 @@ public class TermConceptDaoSvc {
 				retVal += ensureParentsSaved(nextParent.getParents());
 				if (nextParent.getId() == null) {
 					nextParent.setUpdated(new Date());
+					nextParent.flagForLegacyLobSupport(mySupportLegacyLob);
 					myConceptDao.saveAndFlush(nextParent);
 					retVal++;
 					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
@@ -106,4 +115,3 @@ public class TermConceptDaoSvc {
 		return retVal;
 	}
 }
-

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -13,7 +14,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,16 +29,16 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.annotation.Nullable;
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,8 +50,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -309,22 +308,20 @@ public class BaseHapiFhirDaoTest {
 //			service.awaitTermination(threads, TimeUnit.SECONDS)
 //		);
 
-		Assertions.assertEquals(threads + 1, getSingleResultInt.get(), "Not enough gets " + getSingleResultInt.get());
-		Assertions.assertEquals(threads, persistInt.get(), "Not enough persists " + persistInt.get());
+		assertThat(getSingleResultInt.get()).as("Not enough gets " + getSingleResultInt.get()).isEqualTo(threads + 1);
+		assertThat(persistInt.get()).as("Not enough persists " + persistInt.get()).isEqualTo(threads);
 
 		// verify
-		Assertions.assertEquals(1, outcomes.size());
-		Assertions.assertEquals(threads, counter.get());
-		Assertions.assertEquals(0, errors.size(),
-			errors.values().stream().map(Throwable::getMessage)
-				.collect(Collectors.joining(", ")));
+		assertThat(outcomes).hasSize(1);
+		assertEquals(threads, counter.get());
+		assertThat(errors.size()).as(errors.values().stream().map(Throwable::getMessage)
+			.collect(Collectors.joining(", "))).isEqualTo(0);
 
 		// verify we logged some race conditions
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender, Mockito.atLeastOnce())
 			.doAppend(captor.capture());
-		assertTrue(captor.getAllValues().get(0).getMessage()
-			.contains(raceConditionError));
+		assertThat(captor.getAllValues().get(0).getMessage()).contains(raceConditionError);
 	}
 
 	@Test
@@ -368,23 +365,20 @@ public class BaseHapiFhirDaoTest {
 			fail();
 		} catch (Exception ex) {
 			// verify
-			assertTrue(ex.getMessage().contains("Tag get/create failed after 10 attempts with error(s): " + exMsg));
+			assertThat(ex.getMessage()).contains("Tag get/create failed after 10 attempts with error(s): " + exMsg);
 
 			ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 			verify(myAppender, Mockito.times(10))
 				.doAppend(appenderCaptor.capture());
 			List<ILoggingEvent> events = appenderCaptor.getAllValues();
-			assertEquals(10, events.size());
+			assertThat(events).hasSize(10);
 			for (int i = 0; i < 10; i++) {
 				String actualMsg = events.get(i).getMessage();
-				assertEquals(
-					"Tag read/write failed: "
-						+ exMsg
-						+ ". "
-						+ "This is not a failure on its own, "
-						+ "but could be useful information in the result of an actual failure.",
-					actualMsg
-				);
+				assertThat(actualMsg).isEqualTo("Tag read/write failed: "
+					+ exMsg
+					+ ". "
+					+ "This is not a failure on its own, "
+					+ "but could be useful information in the result of an actual failure.");
 			}
 		}
 	}

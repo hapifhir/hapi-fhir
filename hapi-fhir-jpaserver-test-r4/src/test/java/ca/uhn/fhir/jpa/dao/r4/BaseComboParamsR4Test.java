@@ -36,6 +36,7 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 		myStorageSettings.setSchedulingDisabled(true);
 		myStorageSettings.setUniqueIndexesEnabled(true);

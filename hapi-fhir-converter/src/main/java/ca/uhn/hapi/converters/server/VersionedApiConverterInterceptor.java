@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Converter
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationConstants;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.converter.NullVersionConverterAdvisor10_30;
 import org.hl7.fhir.converter.NullVersionConverterAdvisor10_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_30;
@@ -40,8 +42,6 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.StringTokenizer;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -57,7 +57,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Versioned API features.
  * </p>
  */
-
 @Interceptor(order = AuthorizationConstants.ORDER_CONVERTER_INTERCEPTOR)
 public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 	private final FhirContext myCtxDstu2;
@@ -74,7 +73,12 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 	}
 
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
+	public boolean outgoingResponse(
+			RequestDetails theRequestDetails,
+			ResponseDetails theResponseDetails,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws AuthenticationException {
 		IBaseResource responseResource = theResponseDetails.getResponseResource();
 		if (responseResource == null) {
 			return true;
@@ -133,7 +137,9 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 
 	private org.hl7.fhir.dstu2.model.Resource toDstu2(IBaseResource theResponseResource) {
 		if (theResponseResource instanceof IResource) {
-			return (org.hl7.fhir.dstu2.model.Resource) myCtxDstu2Hl7Org.newJsonParser().parseResource(myCtxDstu2.newJsonParser().encodeResourceToString(theResponseResource));
+			return (org.hl7.fhir.dstu2.model.Resource) myCtxDstu2Hl7Org
+					.newJsonParser()
+					.parseResource(myCtxDstu2.newJsonParser().encodeResourceToString(theResponseResource));
 		}
 		return (org.hl7.fhir.dstu2.model.Resource) theResponseResource;
 	}

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4989
+title: "Bulk export with patient ID specific user rules/permissions will fail with Parameters that include that patient ID in a _typeFilter.
+        This has been fixed."

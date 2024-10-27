@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5682
+title: "The BundleBuilder utility class will no longer include the `/_version/xxx` portion of the
+   resource ID in the `Bundle.entry.fullUrl` it generates, as the FHIR specification states that this
+   should be omitted."

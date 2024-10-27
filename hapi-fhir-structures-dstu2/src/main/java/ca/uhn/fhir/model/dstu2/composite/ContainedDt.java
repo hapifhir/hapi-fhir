@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,13 @@
 package ca.uhn.fhir.model.dstu2.composite;
 
 import ca.uhn.fhir.i18n.Msg;
-import java.util.ArrayList;
-import java.util.List;
-
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @DatatypeDef(name = "contained")
 public class ContainedDt extends BaseContainedDt {
@@ -61,5 +60,4 @@ public class ContainedDt extends BaseContainedDt {
 	public void setUserData(String theName, Object theValue) {
 		throw new UnsupportedOperationException(Msg.code(581));
 	}
-
 }

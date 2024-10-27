@@ -2,13 +2,13 @@
 <!--
 Activity: CarePlan.description
 Intent: CarePlan.intent.code
-Comments: CarePlan.dosage [x].text // Not dosaage but note... right?
+Comments: CarePlan.note[x].text (separated by <br />)
 Planned Start: CarePlan.period.start
 Planned End: CarePlan.period.end
 */-->
 <div xmlns:th="http://www.thymeleaf.org">
+   <h5>Plan of Care</h5>
    <table class="hapiPropertyTable">
-      <caption>Plan of Care</caption>
       <thead>
       <tr>
          <th>Activity</th>
@@ -25,7 +25,7 @@ Planned End: CarePlan.period.end
                <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
                   <td th:text="*{getDescription()}">Activity</td>
                   <td th:text="*{getIntent().toCode()}">Intent</td>
-                  <td th:insert="IpsUtilityFragments :: concat (list=*{getNote()},attr='text')">Comments</td>
+                  <td th:insert="~{IpsUtilityFragments :: concat (list=*{getNote()},attr='text')}">Comments</td>
                   <td th:text="*{getPeriod().getStartElement().getValue()}">Planned Start</td>
                   <td th:text="*{getPeriod().getEndElement().getValue()}">Planned End</td>
                </tr>

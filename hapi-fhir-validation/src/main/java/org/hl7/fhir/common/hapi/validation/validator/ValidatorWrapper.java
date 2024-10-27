@@ -14,8 +14,8 @@ import org.apache.commons.io.input.ReaderInputStream;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
+import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r5.model.StructureDefinition;
-import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.XVerExtensionManager;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
@@ -47,6 +47,7 @@ class ValidatorWrapper {
 	private boolean myAssumeValidRestReferences;
 	private boolean myNoExtensibleWarnings;
 	private boolean myNoBindingMsgSuppressed;
+
 	private Collection<? extends String> myExtensionDomains;
 	private IValidatorResourceFetcher myValidatorResourceFetcher;
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
@@ -112,14 +113,15 @@ class ValidatorWrapper {
 		return this;
 	}
 
-	public List<ValidationMessage> validate(IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
+	public List<ValidationMessage> validate(
+			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
 		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
 		try {
 			v = new InstanceValidator(theWorkerContext, evaluationCtx, xverManager);
 		} catch (Exception e) {
-			throw new ConfigurationException(Msg.code(648) + e);
+			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
 		}
 
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
@@ -128,6 +130,8 @@ class ValidatorWrapper {
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(myNoTerminologyChecks);
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
+		/* setUnknownCodeSystemsCauseErrors interacts with UnknownCodeSystemWarningValidationSupport. Until this interaction is resolved, the value here should remain fixed. */
+		v.setUnknownCodeSystemsCauseErrors(true);
 		v.getExtensionDomains().addAll(myExtensionDomains);
 		v.setFetcher(myValidatorResourceFetcher);
 		v.setPolicyAdvisor(myValidationPolicyAdvisor);
@@ -197,21 +201,30 @@ class ValidatorWrapper {
 		}
 		// TODO: are these still needed?
 		messages = messages.stream()
-			.filter(m -> m.getMessageId() == null
-				|| !(m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE)
-				|| m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE2)
-				|| (m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_VALUESET_NOTFOUND) && m.getMessage().contains("http://hl7.org/fhir/ValueSet/mimetypes"))))
-			.collect(Collectors.toList());
+				.filter(m -> m.getMessageId() == null
+						|| !(m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE)
+								|| m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE2)
+								|| (m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_VALUESET_NOTFOUND)
+										&& m.getMessage().contains("http://hl7.org/fhir/ValueSet/mimetypes"))))
+				.collect(Collectors.toList());
 
 		if (myErrorForUnknownProfiles) {
-			messages.stream().filter(m -> m.getMessageId() != null && (m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN) || m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY)))
-				.filter(m -> m.getLevel() == ValidationMessage.IssueSeverity.WARNING)
-				.forEach(m -> m.setLevel(ValidationMessage.IssueSeverity.ERROR));
+			messages.stream()
+					.filter(m -> m.getMessageId() != null
+							&& (m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN)
+									|| m.getMessageId()
+											.equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY)))
+					.filter(m -> m.getLevel() == ValidationMessage.IssueSeverity.WARNING)
+					.forEach(m -> m.setLevel(ValidationMessage.IssueSeverity.ERROR));
 		}
 		return messages;
 	}
 
-	private void fetchAndAddProfile(IWorkerContext theWorkerContext, List<StructureDefinition> theProfileStructureDefinitions, String theUrl, List<ValidationMessage> theMessages) {
+	private void fetchAndAddProfile(
+			IWorkerContext theWorkerContext,
+			List<StructureDefinition> theProfileStructureDefinitions,
+			String theUrl,
+			List<ValidationMessage> theMessages) {
 		try {
 			StructureDefinition structureDefinition = theWorkerContext.fetchResource(StructureDefinition.class, theUrl);
 			if (structureDefinition != null) {
@@ -222,7 +235,6 @@ class ValidatorWrapper {
 		}
 	}
 
-
 	private ArrayList<String> determineIfProfilesSpecified(Document theDocument) {
 		ArrayList<String> profileNames = new ArrayList<>();
 		NodeList list = theDocument.getChildNodes().item(0).getChildNodes();
@@ -231,7 +243,8 @@ class ValidatorWrapper {
 				NodeList metaList = list.item(i).getChildNodes();
 				for (int j = 0; j < metaList.getLength(); j++) {
 					if (metaList.item(j).getNodeName().compareToIgnoreCase("profile") == 0) {
-						profileNames.add(metaList.item(j).getAttributes().item(0).getNodeValue());
+						profileNames.add(
+								metaList.item(j).getAttributes().item(0).getNodeValue());
 					}
 				}
 				break;
@@ -239,5 +252,4 @@ class ValidatorWrapper {
 		}
 		return profileNames;
 	}
-
 }

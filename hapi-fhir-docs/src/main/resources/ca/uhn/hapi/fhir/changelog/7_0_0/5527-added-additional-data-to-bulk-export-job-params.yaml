@@ -1,0 +1,10 @@
+---
+type: add
+issue: 5527
+title: "Added a map of `additionalData` to BulkExport job params.
+        This will allow consumers of BulkExport to add additional
+        data to be accessed at later steps by using various pointcuts
+        in the system.
+        Updated ConsentService so that BulkExport operations will
+        call the willSeeResource method for each exported resource.
+    "

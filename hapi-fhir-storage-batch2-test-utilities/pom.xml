@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.7.1-SNAPSHOT</version>
+		<version>7.7.0-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -16,6 +16,12 @@
 
 	<name>HAPI FHIR JPA Server - Batch2 specification tests</name>
 	<description>Batch2 is a framework for managing and executing long running "batch" jobs</description>
+
+	<properties>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.release>17</maven.compiler.release>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -28,13 +34,12 @@
 			<artifactId>hapi-fhir-test-utilities</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
-		<!-- we export these since our exported tests use junit apis -->
 		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest</artifactId>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<!-- we export these since our exported tests use junit apis -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
@@ -53,11 +58,6 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-params</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.imprt;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BulkImportFileServletTest {
 

@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
@@ -124,7 +123,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 
 
 
-	protected Consumer<IBaseResource> withTenant(String theTenantId) {
+	protected ICreationArgument withTenant(String theTenantId) {
 		return t -> myTenantClientInterceptor.setTenantId(theTenantId);
 	}
 

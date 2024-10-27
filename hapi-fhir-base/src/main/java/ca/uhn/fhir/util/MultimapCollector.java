@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,7 @@ import java.util.stream.Collector;
 /**
  * Copied from https://stackoverflow.com/questions/23003542/cleanest-way-to-create-a-guava-multimap-from-a-java-8-stream
  */
-public class MultimapCollector<T, K, V> implements
-	Collector<T, ListMultimap<K, V>, ListMultimap<K, V>> {
+public class MultimapCollector<T, K, V> implements Collector<T, ListMultimap<K, V>, ListMultimap<K, V>> {
 
 	private final Function<T, K> keyGetter;
 	private final Function<T, V> valueGetter;
@@ -44,7 +43,8 @@ public class MultimapCollector<T, K, V> implements
 		this.valueGetter = valueGetter;
 	}
 
-	public static <T, K, V> MultimapCollector<T, K, V> toMultimap(Function<T, K> keyGetter, Function<T, V> valueGetter) {
+	public static <T, K, V> MultimapCollector<T, K, V> toMultimap(
+			Function<T, K> keyGetter, Function<T, V> valueGetter) {
 		return new MultimapCollector<>(keyGetter, valueGetter);
 	}
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,6 @@ public class QualifierDetails {
 		myWholeQualifier = theWholeQualifier;
 	}
 
-	
 	public static QualifierDetails extractQualifiersFromParameterName(String theParamName) {
 		QualifierDetails retVal = new QualifierDetails();
 		if (theParamName == null || theParamName.length() == 0) {
@@ -129,7 +128,4 @@ public class QualifierDetails {
 
 		return retVal;
 	}
-
-
-	
 }

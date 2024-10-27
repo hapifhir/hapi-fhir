@@ -1,8 +1,10 @@
 package ca.uhn.fhir.to.model;
 
-import java.io.IOException;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
-import ca.uhn.fhir.rest.client.api.*;
+import java.io.IOException;
 
 public class BufferResponseInterceptor implements IClientInterceptor {
 
@@ -15,5 +17,4 @@ public class BufferResponseInterceptor implements IClientInterceptor {
 	public void interceptResponse(IHttpResponse theResponse) throws IOException {
 		theResponse.bufferEntity();
 	}
-
 }

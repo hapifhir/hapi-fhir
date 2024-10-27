@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ package ca.uhn.fhir.mdm.dao;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -35,7 +35,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.history.Revisions;
-import org.springframework.data.history.Revision;
 
 import java.util.Date;
 import java.util.List;
@@ -46,15 +45,23 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 
 	int deleteWithAnyReferenceToPidAndMatchResultNot(P thePid, MdmMatchResultEnum theMatchResult);
 
-	List<MdmPidTuple<P>> expandPidsFromGroupPidGivenMatchResult(P theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple<P>> expandPidsFromGroupPidGivenMatchResult(
+			P theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
 
 	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(
+			P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+
+	// TODO: on next bump, make this method non-default
+	default List<M> findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingNoMatch(P theSourcePid) {
+		throw new UnsupportedOperationException(Msg.code(2428));
+	}
 
 	List<P> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable);
 
-	List<P> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable);
+	List<P> findPidByResourceNameAndThresholdAndPartitionId(
+			String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable);
 
 	List<M> findAllById(List<P> thePids);
 
@@ -80,9 +87,16 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	M validateMdmLink(IMdmLink theMdmLink) throws UnprocessableEntityException;
 
 	@Deprecated
-	Page<M> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
+	Page<M> search(
+			IIdType theGoldenResourceId,
+			IIdType theSourceId,
+			MdmMatchResultEnum theMatchResult,
+			MdmLinkSourceEnum theLinkSource,
+			MdmPageRequest thePageRequest,
+			List<Integer> thePartitionId);
 
 	Page<M> search(MdmQuerySearchParameters theMdmQuerySearchParameters);
+
 	Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
 
 	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);

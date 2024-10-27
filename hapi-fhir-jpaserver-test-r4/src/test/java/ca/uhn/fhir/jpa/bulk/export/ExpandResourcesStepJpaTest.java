@@ -3,14 +3,15 @@ package ca.uhn.fhir.jpa.bulk.export;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.ExpandResourcesStep;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import org.hl7.fhir.r4.model.Observation;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,13 +22,13 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -45,7 +46,9 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 	public void afterCleanupDao() {
 		super.afterCleanupDao();
 
-		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		JpaStorageSettings defaults = new JpaStorageSettings();
+		myStorageSettings.setTagStorageMode(defaults.getTagStorageMode());
+		myStorageSettings.setBulkExportFileMaximumSize(defaults.getBulkExportFileMaximumSize());
 	}
 
 	/**
@@ -67,7 +70,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 				p.getMeta().addTag().setSystem("http://dynamic").setCode("tag" + t).setUserSelected(true).setVersion("1");
 				return myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 			}).toList();
-		assertEquals(count, ids.size());
+		assertThat(ids).hasSize(count);
 
 		ResourceIdList resourceList = new ResourceIdList();
 		resourceList.setResourceType("Patient");
@@ -77,7 +80,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
 
 		// Test
 
@@ -88,9 +91,9 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 		verify(mySink, times(1)).accept(myWorkChunkCaptor.capture());
 		ExpandedResourcesList expandedResourceList = myWorkChunkCaptor.getValue();
-		assertEquals(10, expandedResourceList.getStringifiedResources().size());
-		assertThat(expandedResourceList.getStringifiedResources().get(0), containsString("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}"));
-		assertThat(expandedResourceList.getStringifiedResources().get(1), containsString("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}"));
+		assertThat(expandedResourceList.getStringifiedResources()).hasSize(10);
+		assertThat(expandedResourceList.getStringifiedResources().get(0)).contains("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}");
+		assertThat(expandedResourceList.getStringifiedResources().get(1)).contains("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}");
 
 		// Verify query counts
 		assertEquals(theExpectedSelectQueries, myCaptureQueriesListener.countSelectQueries());
@@ -134,7 +137,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
 
 		// Test
 
@@ -149,7 +152,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 			.stream()
 			.map(t -> myFhirContext.newJsonParser().parseResource(t).getIdElement().getIdPartAsLong())
 			.toList();
-		assertThat(resourceIds.toString(), resourceIds, containsInAnyOrder(matchingIds.toArray(new Long[0])));
+		assertThat(resourceIds).as(resourceIds.toString()).containsExactlyInAnyOrder(matchingIds.toArray(new Long[0]));
 
 	}
 
@@ -176,7 +179,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
 
 		// Test
 
@@ -191,7 +194,63 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 			.stream()
 			.map(t -> myFhirContext.newJsonParser().parseResource(t).getIdElement().getIdPartAsLong())
 			.toList();
-		assertThat(resourceIds.toString(), resourceIds, containsInAnyOrder(allIds.toArray(new Long[0])));
+		assertThat(resourceIds).as(resourceIds.toString()).containsExactlyInAnyOrder(allIds.toArray(new Long[0]));
+
+	}
+
+	@Test
+	public void testMaximumChunkSize() {
+		/*
+		 * We're going to set the maximum file size to 3000, and create some resources with
+		 * a name that is 1000 chars long. With the other boilerplate text in a resource that
+		 * will put the resource length at just over 1000 chars, meaning that any given
+		 * chunk or file should have only 2 resources in it.
+		 */
+		int testResourceSize = 1000;
+		int maxFileSize = 3 * testResourceSize;
+		myStorageSettings.setBulkExportFileMaximumSize(maxFileSize);
+
+		List<BatchResourceId> expectedIds = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.addName().setFamily(StringUtils.leftPad("", testResourceSize, 'A'));
+			String id = myPatientDao.create(p, mySrd).getId().getIdPart();
+			expectedIds.add(new BatchResourceId().setResourceType("Patient").setId(id));
+		}
+		Collections.sort(expectedIds);
+
+		ResourceIdList resourceList = new ResourceIdList();
+		resourceList.setResourceType("Patient");
+		resourceList.setIds(expectedIds);
+
+		BulkExportJobParameters params = new BulkExportJobParameters();
+		JobInstance jobInstance = new JobInstance();
+		String chunkId = "ABC";
+
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
+
+		// Test
+
+		myCaptureQueriesListener.clear();
+		myExpandResourcesStep.run(details, mySink);
+
+		// Verify
+		verify(mySink, atLeast(1)).accept(myWorkChunkCaptor.capture());
+		List<BatchResourceId> actualResourceIdList = new ArrayList<>();
+		for (var next : myWorkChunkCaptor.getAllValues()) {
+			int nextSize = String.join("\n", next.getStringifiedResources()).length();
+			ourLog.info("Next size: {}", nextSize);
+			assertThat(nextSize).isLessThanOrEqualTo(maxFileSize);
+			next.getStringifiedResources().stream()
+				.filter(StringUtils::isNotBlank)
+				.map(t->myFhirContext.newJsonParser().parseResource(t))
+				.map(t->new BatchResourceId().setResourceType(t.getIdElement().getResourceType()).setId(t.getIdElement().getIdPart()))
+				.forEach(actualResourceIdList::add);
+		}
+
+		Collections.sort(actualResourceIdList);
+		assertEquals(expectedIds, actualResourceIdList);
+
 
 	}
 

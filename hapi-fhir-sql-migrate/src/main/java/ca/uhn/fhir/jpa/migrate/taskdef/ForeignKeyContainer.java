@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class ForeignKeyContainer {
 
@@ -47,11 +46,10 @@ public class ForeignKeyContainer {
 	private String myParentTableColumnName;
 
 	public ForeignKeyContainer(
-		String theColumnName,
-		ColumnTypeEnum theColumnTypeEnum,
-		String theParentTableName,
-		String theParentTableColumnName
-	) {
+			String theColumnName,
+			ColumnTypeEnum theColumnTypeEnum,
+			String theParentTableName,
+			String theParentTableColumnName) {
 		myColumnName = theColumnName;
 		myColumnTypeEnum = theColumnTypeEnum;
 		myParentTableName = theParentTableName;
@@ -90,37 +88,22 @@ public class ForeignKeyContainer {
 		myColumnTypeEnum = theColumnTypeEnum;
 	}
 
-	public String generateSQL(
-		@Nonnull DriverTypeEnum theDriverTypeEnum,
-		boolean thePrettyPrint
-	) {
+	public String generateSQL(@Nonnull DriverTypeEnum theDriverTypeEnum, boolean thePrettyPrint) {
 		switch (theDriverTypeEnum) {
 			case MYSQL_5_7:
 				return String.format(
-					"FOREIGN KEY (%s) REFERENCES %s(%s)",
-					myColumnName,
-					myParentTableName,
-					myParentTableColumnName
-				);
+						"FOREIGN KEY (%s) REFERENCES %s(%s)", myColumnName, myParentTableName, myParentTableColumnName);
 			case MSSQL_2012:
 			case ORACLE_12C:
 				return String.format(
-					"%s %s FOREIGN KEY REFERENCES %s(%s)",
-					myColumnName,
-					myColumnTypeEnum.name(),
-					myParentTableName,
-					myParentTableColumnName
-				);
+						"%s %s FOREIGN KEY REFERENCES %s(%s)",
+						myColumnName, myColumnTypeEnum.name(), myParentTableName, myParentTableColumnName);
 			case POSTGRES_9_4:
 				return String.format(
-					"FOREIGN KEY(%s) REFERENCES %s(%s)",
-					myColumnName,
-					myParentTableName,
-					myParentTableColumnName
-				);
+						"FOREIGN KEY(%s) REFERENCES %s(%s)", myColumnName, myParentTableName, myParentTableColumnName);
 			default:
 				throw new UnsupportedOperationException(
-					Msg.code(2232) + " SQL Engine " + theDriverTypeEnum.name() + " not supported for foreign key!");
+						Msg.code(2232) + " SQL Engine " + theDriverTypeEnum.name() + " not supported for foreign key!");
 		}
 	}
 }

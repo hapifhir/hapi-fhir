@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 
@@ -67,24 +66,29 @@ public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 	@Override
 	public void setResource(int theIndex, IBaseResource theResource) {
 		Validate.isTrue(theIndex >= 0, "Invalid index %d - theIndex must not be < 0", theIndex);
-		Validate.isTrue(theIndex < myResources.length, "Invalid index {} - theIndex must be < %d", theIndex, myResources.length);
+		Validate.isTrue(
+				theIndex < myResources.length,
+				"Invalid index {} - theIndex must be < %d",
+				theIndex,
+				myResources.length);
 		myResources[theIndex] = theResource;
 	}
 
 	@Override
 	public void markResourceAtIndexAsSubset(int theIndex) {
 		Validate.isTrue(theIndex >= 0, "Invalid index %d - theIndex must not be < 0", theIndex);
-		Validate.isTrue(theIndex < myResources.length, "Invalid index {} - theIndex must be < %d", theIndex, myResources.length);
+		Validate.isTrue(
+				theIndex < myResources.length,
+				"Invalid index {} - theIndex must be < %d",
+				theIndex,
+				myResources.length);
 		myResourceMarkedAsSubset[theIndex] = true;
 	}
 
 	@Override
 	public List<IBaseResource> getAllResources() {
 		ArrayList<IBaseResource> retVal = new ArrayList<>(myResources.length);
-		Arrays
-			.stream(myResources)
-			.filter(Objects::nonNull)
-			.forEach(retVal::add);
+		Arrays.stream(myResources).filter(Objects::nonNull).forEach(retVal::add);
 		return Collections.unmodifiableList(retVal);
 	}
 

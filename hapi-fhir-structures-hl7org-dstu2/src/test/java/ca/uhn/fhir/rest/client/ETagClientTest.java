@@ -15,20 +15,18 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu2.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -95,7 +93,7 @@ public class ETagClientTest {
 
     Patient response = client.read(Patient.class, new IdDt("Patient/1234"));
 
-    assertEquals("http://foo.com/Patient/123/_history/2333", response.getIdElement().getValue());
+		assertEquals("http://foo.com/Patient/123/_history/2333", response.getIdElement().getValue());
   }
 
   @Test
@@ -117,12 +115,11 @@ public class ETagClientTest {
         .resource(Patient.class)
         .withId(new IdDt("Patient/1234"))
         .execute();
-      fail();
-    } catch (NotModifiedException e) {
+      fail("");    } catch (NotModifiedException e) {
       // good!
     }
-    //@formatter:on
-    assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
     count++;
 
     //@formatter:off
@@ -134,10 +131,10 @@ public class ETagClientTest {
       .withId(new IdDt("Patient/1234"))
       .ifVersionMatches("9876").returnResource(expected)
       .execute();
-    //@formatter:on
-    assertSame(expected, response);
-    assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-    assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_NONE_MATCH_LC)[0].getValue());
+		//@formatter:on
+		assertThat(response).isSameAs(expected);
+		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
+		assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_NONE_MATCH_LC)[0].getValue());
     count++;
 
   }
@@ -160,9 +157,9 @@ public class ETagClientTest {
       .resource(getResource())
       .withId(new IdDt("Patient/1234"))
       .execute();
-    //@formatter:on
-    assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-    assertEquals(0, capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC).length);
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
+		assertEquals(0, capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC).length);
     count++;
 
     //@formatter:off
@@ -172,9 +169,9 @@ public class ETagClientTest {
       .resource(getResource())
       .withId(new IdDt("Patient/1234/_history/9876"))
       .execute();
-    //@formatter:on
-    assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-    assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
+		assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
     count++;
 
   }
@@ -198,13 +195,12 @@ public class ETagClientTest {
         .resource(getResource())
         .withId(new IdDt("Patient/1234/_history/9876"))
         .execute();
-      fail();
-    } catch (PreconditionFailedException e) {
+      fail("");    } catch (PreconditionFailedException e) {
       // good
     }
-    //@formatter:on
-    assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-    assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
+		assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
     count++;
 
     //@formatter:off
@@ -216,13 +212,12 @@ public class ETagClientTest {
         .update()
         .resource(resource)
         .execute();
-      fail();
-    } catch (PreconditionFailedException e) {
+      fail("");    } catch (PreconditionFailedException e) {
       // good
     }
-    //@formatter:on
-    assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-    assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
+		assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
     count++;
   }
 
@@ -247,23 +242,23 @@ public class ETagClientTest {
     int count = 0;
 
     Patient response = client.read().resource(Patient.class).withId(new IdDt("Patient/1234")).execute();
-    assertThat(response.getName().get(0).getFamily().get(0).getValue(), StringContains.containsString("Cardinal"));
-    assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
+    assertThat(response.getName().get(0).getFamily().get(0).getValue()).contains("Cardinal");
+		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
 
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
     response = (Patient) client.read().resource("Patient").withId("1234").execute();
-    assertThat(response.getName().get(0).getFamily().get(0).getValue(), StringContains.containsString("Cardinal"));
-    assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
+    assertThat(response.getName().get(0).getFamily().get(0).getValue()).contains("Cardinal");
+		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
 
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
     response = client.read().resource(Patient.class).withIdAndVersion("1234", "22").execute();
-    assertThat(response.getName().get(0).getFamily().get(0).getValue(), StringContains.containsString("Cardinal"));
-    assertEquals("http://example.com/fhir/Patient/1234/_history/22", capt.getAllValues().get(count++).getURI().toString());
+    assertThat(response.getName().get(0).getFamily().get(0).getValue()).contains("Cardinal");
+		assertEquals("http://example.com/fhir/Patient/1234/_history/22", capt.getAllValues().get(count++).getURI().toString());
 
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
     response = client.read().resource(Patient.class).withUrl("http://foo/Patient/22").execute();
-    assertThat(response.getName().get(0).getFamily().get(0).getValue(), StringContains.containsString("Cardinal"));
-    assertEquals("http://foo/Patient/22", capt.getAllValues().get(count++).getURI().toString());
+    assertThat(response.getName().get(0).getFamily().get(0).getValue()).contains("Cardinal");
+		assertEquals("http://foo/Patient/22", capt.getAllValues().get(count++).getURI().toString());
 
   }
 

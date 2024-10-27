@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,32 +19,45 @@
  */
 package ca.uhn.fhir.jpa.subscription.submit.config;
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedProcessingSchedulerSvc;
+import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedSubmitterSvc;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.config.SubscriptionConfig;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.IChannelTypeValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RegexEndpointUrlValidationStrategy;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionChannelTypeValidatorFactory;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicValidatingInterceptor;
+import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+
+import java.util.List;
+
+import static ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator.noOpEndpointUrlValidationStrategy;
 
 /**
  * This Spring config should be imported by a system that submits resources to the
  * matching queue for processing
  */
 @Configuration
-@Import(SubscriptionModelConfig.class)
+@Import({SubscriptionModelConfig.class, SubscriptionMatcherInterceptorConfig.class, SubscriptionConfig.class})
 public class SubscriptionSubmitterConfig {
-
-	@Bean
-	public SubscriptionMatcherInterceptor subscriptionMatcherInterceptor() {
-		return new SubscriptionMatcherInterceptor();
-	}
 
 	@Bean
 	public SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
@@ -52,13 +65,18 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public SubscriptionQueryValidator subscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
-		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
-	}
-
-	@Bean
-	public SubscriptionSubmitInterceptorLoader subscriptionMatcherInterceptorLoader() {
-		return new SubscriptionSubmitInterceptorLoader();
+	public SubscriptionSubmitInterceptorLoader subscriptionMatcherInterceptorLoader(
+			@Nonnull IInterceptorService theInterceptorService,
+			@Nonnull SubscriptionSettings theSubscriptionSettings,
+			@Nonnull SubscriptionMatcherInterceptor theSubscriptionMatcherInterceptor,
+			@Nonnull SubscriptionValidatingInterceptor theSubscriptionValidatingInterceptor,
+			@Nullable SubscriptionTopicValidatingInterceptor theSubscriptionTopicValidatingInterceptor) {
+		return new SubscriptionSubmitInterceptorLoader(
+				theInterceptorService,
+				theSubscriptionSettings,
+				theSubscriptionMatcherInterceptor,
+				theSubscriptionValidatingInterceptor,
+				theSubscriptionTopicValidatingInterceptor);
 	}
 
 	@Bean
@@ -67,5 +85,49 @@ public class SubscriptionSubmitterConfig {
 		return new SubscriptionTriggeringSvcImpl();
 	}
 
+	@Bean
+	public ResourceModifiedSubmitterSvc resourceModifiedSvc(
+			IHapiTransactionService theHapiTransactionService,
+			IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
+			SubscriptionChannelFactory theSubscriptionChannelFactory,
+			SubscriptionSettings theSubscriptionSettings) {
 
+		return new ResourceModifiedSubmitterSvc(
+				theSubscriptionSettings,
+				theSubscriptionChannelFactory,
+				theResourceModifiedMessagePersistenceSvc,
+				theHapiTransactionService);
+	}
+
+	@Bean
+	public AsyncResourceModifiedProcessingSchedulerSvc asyncResourceModifiedProcessingSchedulerSvc() {
+		return new AsyncResourceModifiedProcessingSchedulerSvc();
+	}
+
+	@Bean
+	public AsyncResourceModifiedSubmitterSvc asyncResourceModifiedSubmitterSvc(
+			IResourceModifiedMessagePersistenceSvc theIResourceModifiedMessagePersistenceSvc,
+			IResourceModifiedConsumerWithRetries theResourceModifiedConsumer) {
+		return new AsyncResourceModifiedSubmitterSvc(
+				theIResourceModifiedMessagePersistenceSvc, theResourceModifiedConsumer);
+	}
+
+	@Bean
+	public IChannelTypeValidator restHookChannelValidator(SubscriptionSettings theSubscriptionSettings) {
+		RestHookChannelValidator.IEndpointUrlValidationStrategy iEndpointUrlValidationStrategy =
+				noOpEndpointUrlValidationStrategy;
+
+		if (theSubscriptionSettings.hasRestHookEndpointUrlValidationRegex()) {
+			String endpointUrlValidationRegex = theSubscriptionSettings.getRestHookEndpointUrlValidationRegex();
+			iEndpointUrlValidationStrategy = new RegexEndpointUrlValidationStrategy(endpointUrlValidationRegex);
+		}
+
+		return new RestHookChannelValidator(iEndpointUrlValidationStrategy);
+	}
+
+	@Bean
+	public SubscriptionChannelTypeValidatorFactory subscriptionChannelTypeValidatorFactory(
+			List<IChannelTypeValidator> theValidorList) {
+		return new SubscriptionChannelTypeValidatorFactory(theValidorList);
+	}
 }

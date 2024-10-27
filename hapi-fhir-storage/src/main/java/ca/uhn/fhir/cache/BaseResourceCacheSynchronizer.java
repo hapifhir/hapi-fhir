@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -42,9 +42,6 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -57,9 +54,8 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final String myResourceName;
 
 	@Autowired
-	protected ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+
 	@Autowired
 	DaoRegistry myDaoRegistry;
 
@@ -69,8 +65,17 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final Semaphore mySyncResourcesSemaphore = new Semaphore(1);
 	private final Object mySyncResourcesLock = new Object();
 
-	public BaseResourceCacheSynchronizer(String theResourceName) {
+	protected BaseResourceCacheSynchronizer(String theResourceName) {
 		myResourceName = theResourceName;
+	}
+
+	protected BaseResourceCacheSynchronizer(
+			String theResourceName,
+			IResourceChangeListenerRegistry theResourceChangeListenerRegistry,
+			DaoRegistry theDaoRegistry) {
+		myResourceName = theResourceName;
+		myDaoRegistry = theDaoRegistry;
+		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 	}
 
 	@PostConstruct
@@ -82,7 +87,9 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		mySearchParameterMap = getSearchParameterMap();
 		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
 
-		IResourceChangeListenerCache resourceCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(myResourceName, mySearchParameterMap, this, REFRESH_INTERVAL);
+		IResourceChangeListenerCache resourceCache =
+				myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+						myResourceName, mySearchParameterMap, this, REFRESH_INTERVAL);
 		resourceCache.forceRefresh();
 	}
 
@@ -118,7 +125,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	}
 
 	@VisibleForTesting
-	public int doSyncResourcessForUnitTest() {
+	public int doSyncResourcesForUnitTest() {
 		// Two passes for delete flag to take effect
 		int first = doSyncResourcesWithRetry();
 		int second = doSyncResourcesWithRetry();
@@ -132,6 +139,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		return syncResourceRetrier.runWithRetry();
 	}
 
+	@SuppressWarnings("unchecked")
 	private int doSyncResources() {
 		if (isStopping()) {
 			return 0;
@@ -140,16 +148,8 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		synchronized (mySyncResourcesLock) {
 			ourLog.debug("Starting sync {}s", myResourceName);
 
-			IBundleProvider resourceBundleList = getResourceDao().search(mySearchParameterMap, mySystemRequestDetails);
-
-			Integer resourceCount = resourceBundleList.size();
-			assert resourceCount != null;
-			if (resourceCount >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
-				ourLog.error("Currently over {} {}s.  Some {}s have not been loaded.", SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS, myResourceName, myResourceName);
-			}
-
-			List<IBaseResource> resourceList = resourceBundleList.getResources(0, resourceCount);
-
+			List<IBaseResource> resourceList = (List<IBaseResource>)
+					getResourceDao().searchForResources(mySearchParameterMap, mySystemRequestDetails);
 			return syncResourcesIntoCache(resourceList);
 		}
 	}
@@ -174,19 +174,20 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		return myDaoRegistry.getResourceDao(myResourceName);
 	}
 
-
-
-
-
 	@Override
 	public void handleInit(Collection<IIdType> theResourceIds) {
 		if (!resourceDaoExists()) {
-			ourLog.warn("The resource type {} is enabled on this server, but there is no {} DAO configured.", myResourceName, myResourceName);
+			ourLog.warn(
+					"The resource type {} is enabled on this server, but there is no {} DAO configured.",
+					myResourceName,
+					myResourceName);
 			return;
 		}
 		IFhirResourceDao<?> resourceDao = getResourceDao();
 		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
-		List<IBaseResource> resourceList = theResourceIds.stream().map(n -> resourceDao.read(n, systemRequestDetails)).collect(Collectors.toList());
+		List<IBaseResource> resourceList = theResourceIds.stream()
+				.map(n -> resourceDao.read(n, systemRequestDetails))
+				.collect(Collectors.toList());
 		handleInit(resourceList);
 	}
 
@@ -194,7 +195,8 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 	@Override
 	public void handleChange(IResourceChangeEvent theResourceChangeEvent) {
-		// For now ignore the contents of theResourceChangeEvent.  In the future, consider updating the registry based on
+		// For now ignore the contents of theResourceChangeEvent.  In the future, consider updating the registry based
+		// on
 		// known resources that have been created, updated & deleted
 		syncDatabaseToCache();
 	}

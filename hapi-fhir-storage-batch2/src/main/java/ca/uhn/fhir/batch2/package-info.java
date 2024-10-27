@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,11 +48,41 @@
  *
  * Job and chunk processing follow state machines described {@link hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md}
  * Chunks have a simple {@link ca.uhn.fhir.batch2.model.WorkChunkStatusEnum state system} with states
- * QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED.
- * The initial state is QUEUED, and the final states are FAILED, and COMPLETED:
+ * READY, QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED.
+ * The initial state is READY, and the final states are FAILED, and COMPLETED.
+ *
+ * There are 2 primary systems in play during Batch2 Jobs. A Maintenance Job and the Batch2 Job Notification topic.
+ *
+ * <h>The Maintenance Job</h>
+ *
+ * This runs every minute and does the following:
  *
  * <ul>
- *    <li> Chunks are created QUEUED (NB - should be READY or WAITING) and notification is posted to the channel for non-gated steps.</li>
+ *     <li>Moves POLL_WAITING work chunks to READY if their nextPollTime has expired.</li>
+ *     <li>Moves READY work chunks to QUEUE and publishes it to the Batch2 Notification topic</li>
+ *     <li>Calculates job progress (% of workchunks in complete status).</li>
+ *     <li>If the job is finished, purges any left over work chunks.</li>
+ *     <li>Cleans up any complete, failed, or cancelled jobs.</li>
+ *     <li>Moves any gated jobs onto their next step.</li>
+ *     <li>If the final step of a (gated) job is a reduction step, a reduction step execution will be triggered.</li>
+ * </ul>
+ *
+ * <h>Processing the Messages</h>
+ *
+ * <ul>
+ *     <li>Change the work chunk from QUEUED to IN_PROGRESS</li>
+ *     <li>Change the Job Instance status from QUEUED to IN_PROGRESS</li>
+ *     <li>If the Job Instance is cancelled, change the status to CANCELLED and abort processing</li>
+ *     <li>If the step creates new work chunks, each work chunk will be created in the READY state</li>
+ *     <li>If the step succeeds, the work chunk status is changed from IN_PROGRESS to COMPLETE</li>
+ *     <li>If the step throws a RetryChunkLaterException, the work chunk status is changed from IN_PROGRESS to POLL_WAITING and a nextPollTime value set.</li>
+ *     <li>If the step fails, the work chunk status is changed from IN_PROGRESS to either ERRORED or FAILED depending on the severity of the error</li>
+ * </ul>
+ *
+ * <h>The job lifecycle</h>
+ *
+ * <ul>
+ *    <li> Chunks are created READY (NB - should be READY or WAITING) and notification is posted to the channel for non-gated steps.</li>
  *    <li>
  *       Workers receive a notification and advance QUEUED->IN_PROGRESS.
  *       {@link ca.uhn.fhir.batch2.api.IWorkChunkPersistence#onWorkChunkDequeue(String)}
@@ -60,6 +90,7 @@
  *    <li>
  *       On normal execution, the chunk advances IN_PROGRESS->COMPLETED {@link ca.uhn.fhir.batch2.api.IWorkChunkPersistence#onWorkChunkCompletion} </li>
  *    <li> On a retryiable error, IN_PROGRESS->ERROR with an error message and the chunk is put back on the queue. {@link ca.uhn.fhir.batch2.api.IWorkChunkPersistence#onWorkChunkError} </li>
+ *    <li> On a RetryChunkLaterException, IN_PROGRESS->POLL_WAITING with a nextPollTime set. The chunk is *not* put back on the queue, but is left for the maintenance job to manage.</li>
  *    <li> On a hard failure, or too many errors, IN_PROGRESS->FAILED with the error message. {@link ca.uhn.fhir.batch2.api.IWorkChunkPersistence#onWorkChunkFailed} </li>
  * </ul>
  *

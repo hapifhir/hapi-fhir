@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5071
+title: "Previously, calls to the Fulltext Search service (Lucene/Elasticsearch) did not invoker the `JPA_PERFTRACE_INFO`. Now, they invoke this pointcut with information 
+of which query went out to the fulltext system."

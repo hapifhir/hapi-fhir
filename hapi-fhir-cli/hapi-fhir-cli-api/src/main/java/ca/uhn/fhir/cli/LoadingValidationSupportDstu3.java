@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.cli;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -32,21 +32,28 @@ public class LoadingValidationSupportDstu3 implements IValidationSupport {
 	private FhirContext myCtx = FhirContext.forDstu3();
 
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportDstu3.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportDstu3.class);
+
+	@Override
+	public String getName() {
+		return "Dstu3 CLI Loading Validation Support";
+	}
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		String resName = myCtx.getResourceType(theClass);
 		ourLog.info("Attempting to fetch {} at URL: {}", resName, theUri);
-		
+
 		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com");
-		
+
 		T result;
 		try {
 			result = client.read(theClass, theUri);
 		} catch (BaseServerResponseException e) {
-			throw new CommandFailureException(Msg.code(1565) + "FAILURE: Received HTTP " + e.getStatusCode() + ": " + e.getMessage());
+			throw new CommandFailureException(
+					Msg.code(1565) + "FAILURE: Received HTTP " + e.getStatusCode() + ": " + e.getMessage());
 		}
 		ourLog.info("Successfully loaded resource");
 		return result;
@@ -56,5 +63,4 @@ public class LoadingValidationSupportDstu3 implements IValidationSupport {
 	public FhirContext getFhirContext() {
 		return myCtx;
 	}
-
 }

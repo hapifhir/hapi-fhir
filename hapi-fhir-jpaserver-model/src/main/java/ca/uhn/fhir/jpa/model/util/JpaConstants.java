@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,15 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 
+import java.util.Set;
+
 public class JpaConstants {
 
 	/**
 	 * Userdata key for tracking the fact that a resource ID was assigned by the server
 	 */
-	public static final String RESOURCE_ID_SERVER_ASSIGNED = JpaConstants.class.getName() + "_RESOURCE_ID_SERVER_ASSIGNED";
+	public static final String RESOURCE_ID_SERVER_ASSIGNED =
+			JpaConstants.class.getName() + "_RESOURCE_ID_SERVER_ASSIGNED";
 	/**
 	 * Operation name for the $apply-codesystem-delta-add operation
 	 */
@@ -58,27 +61,31 @@ public class JpaConstants {
 	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
 	@Deprecated
-	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES;
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES =
+			ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES;
 	/**
 	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
 	@Deprecated
-	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS;
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS =
+			ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS;
 	/**
 	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
 	@Deprecated
-	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING;
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING =
+			ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING;
 	/**
 	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
 	@Deprecated
-	public static final String OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT = ProviderConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT;
+	public static final String OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT =
+			ProviderConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT;
 	/**
 	 * Header name for the "X-Meta-Snapshot-Mode" header, which
 	 * specifies that properties in meta (tags, profiles, security labels)
 	 * should be treated as a snapshot, meaning that these things will
-	 * be removed if they are nt explicitly included in updates
+	 * be removed if they are not explicitly included in updates
 	 */
 	public static final String HEADER_META_SNAPSHOT_MODE = "X-Meta-Snapshot-Mode";
 	/**
@@ -100,7 +107,8 @@ public class JpaConstants {
 	/**
 	 * Operation name for the $validate operation
 	 */
-	// NB don't delete this, it's used in Smile as well, even though hapi-fhir-server uses the version from Constants.java
+	// NB don't delete this, it's used in Smile as well, even though hapi-fhir-server uses the version from
+	// Constants.java
 	public static final String OPERATION_VALIDATE = Constants.EXTOP_VALIDATE;
 	/**
 	 * Operation name for the $everything operation
@@ -159,14 +167,6 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_IMPORT_POLL_STATUS = "$import-poll-status";
 	/**
-	 * Operation name for the "$export" operation
-	 */
-	public static final String OPERATION_EXPORT = "$export";
-	/**
-	 * Operation name for the "$export-poll-status" operation
-	 */
-	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
-	/**
 	 * Operation name for the "$lastn" operation
 	 */
 	public static final String OPERATION_LASTN = "$lastn";
@@ -210,8 +210,6 @@ public class JpaConstants {
 	 */
 	public static final String PARAM_EXPORT_PATIENT = "patient";
 
-
-
 	/**
 	 * Parameter for the $import operation
 	 */
@@ -246,13 +244,13 @@ public class JpaConstants {
 	/**
 	 * Parameter for delete to indicate the deleted resources should also be expunged
 	 */
-
 	public static final String PARAM_DELETE_EXPUNGE = "_expunge";
 
 	/**
 	 * URL for extension on a SearchParameter indicating that text values should not be indexed
 	 */
-	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
+	public static final String EXTENSION_EXT_SYSTEMDEFINED =
+			JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
 
 	/**
 	 * Deprecated.  Please use {@link HapiExtensions#EXT_SEARCHPARAM_PHONETIC_ENCODER} instead.
@@ -265,7 +263,7 @@ public class JpaConstants {
 	/**
 	 * The name of the default partition
 	 */
-	public static final String DEFAULT_PARTITION_NAME = "DEFAULT";
+	public static final String DEFAULT_PARTITION_NAME = ProviderConstants.DEFAULT_PARTITION_NAME;
 
 	/**
 	 * The name of the collection of all partitions
@@ -276,10 +274,10 @@ public class JpaConstants {
 	 * Parameter for the $expand operation
 	 */
 	public static final String OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY = "includeHierarchy";
+
 	public static final String OPERATION_EXPAND_PARAM_DISPLAY_LANGUAGE = "displayLanguage";
 	public static final String HEADER_UPSERT_EXISTENCE_CHECK = "X-Upsert-Extistence-Check";
 	public static final String HEADER_UPSERT_EXISTENCE_CHECK_DISABLED = "disabled";
-
 
 	/**
 	 * Parameters for the rewrite history operation
@@ -295,12 +293,16 @@ public class JpaConstants {
 	 * IPS Generation operation URL
 	 */
 	public static final String SUMMARY_OPERATION_URL = "http://hl7.org/fhir/uv/ips/OperationDefinition/summary";
-    public static final String ORG_HIBERNATE_TYPE_TEXT_TYPE = "org.hibernate.type.TextType";
-	public static final String BULK_META_EXTENSION_EXPORT_IDENTIFIER = "https://hapifhir.org/NamingSystem/bulk-export-identifier";
-	public static final String BULK_META_EXTENSION_JOB_ID = "https://hapifhir.org/NamingSystem/bulk-export-job-id";
-	public static final String BULK_META_EXTENSION_RESOURCE_TYPE = "https://hapifhir.org/NamingSystem/bulk-export-binary-resource-type";
 
-    /**
+	public static final String BULK_META_EXTENSION_EXPORT_IDENTIFIER =
+			"https://hapifhir.org/NamingSystem/bulk-export-identifier";
+	public static final String BULK_META_EXTENSION_JOB_ID = "https://hapifhir.org/NamingSystem/bulk-export-job-id";
+	public static final String BULK_META_EXTENSION_RESOURCE_TYPE =
+			"https://hapifhir.org/NamingSystem/bulk-export-binary-resource-type";
+	public static final Set<String> UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE =
+			Set.of("Provenance", "List", "Group");
+
+	/**
 	 * Non-instantiable
 	 */
 	private JpaConstants() {

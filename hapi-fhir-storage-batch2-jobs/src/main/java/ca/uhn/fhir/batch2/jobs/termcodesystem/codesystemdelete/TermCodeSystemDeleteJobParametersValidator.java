@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,20 @@ package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TermCodeSystemDeleteJobParametersValidator implements IJobParametersValidator<TermCodeSystemDeleteJobParameters> {
+public class TermCodeSystemDeleteJobParametersValidator
+		implements IJobParametersValidator<TermCodeSystemDeleteJobParameters> {
 
 	@Nullable
 	@Override
-	public List<String> validate(@Nonnull TermCodeSystemDeleteJobParameters theParameters) {
+	public List<String> validate(
+			RequestDetails theRequestDetails, @Nonnull TermCodeSystemDeleteJobParameters theParameters) {
 		List<String> errors = new ArrayList<>();
 		if (theParameters.getTermPid() <= 0) {
 			errors.add("Invalid Term Code System PID " + theParameters.getTermPid());

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4853
+title: "Previously, when validating resources that contain a display in a Coding/CodeableConcept different from the 
+display defined in the CodeSystem that is used, no errors are returned in the outcome. This is now fixed."

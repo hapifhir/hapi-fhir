@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -138,13 +138,16 @@ public class InteractionBlockingInterceptor {
 		}
 
 		if (!allowed) {
-			ourLog.info("Skipping method binding for {}:{} provided by {}", resourceName, restOperationType, theMethodBinding.getMethod());
+			ourLog.info(
+					"Skipping method binding for {}:{} provided by {}",
+					resourceName,
+					restOperationType,
+					theMethodBinding.getMethod());
 			return null;
 		}
 
 		return theMethodBinding;
 	}
-
 
 	private static String toKey(String theResourceType, RestOperationTypeEnum theRestOperationTypeEnum) {
 		if (isBlank(theResourceType)) {
@@ -152,7 +155,6 @@ public class InteractionBlockingInterceptor {
 		}
 		return theResourceType + ":" + theRestOperationTypeEnum.getCode();
 	}
-
 
 	public static class Builder {
 
@@ -226,7 +228,10 @@ public class InteractionBlockingInterceptor {
 		private void addAllowedInteraction(String theResourceType, RestOperationTypeEnum theInteractionType) {
 			Validate.notBlank(theResourceType, "theResourceType must not be null or blank");
 			Validate.notNull(theInteractionType, "theInteractionType must not be null");
-			Validate.isTrue(ALLOWED_OP_TYPES.contains(theInteractionType), "Operation type %s can not be used as an allowable rule", theInteractionType);
+			Validate.isTrue(
+					ALLOWED_OP_TYPES.contains(theInteractionType),
+					"Operation type %s can not be used as an allowable rule",
+					theInteractionType);
 			Validate.isTrue(myCtx.getResourceType(theResourceType) != null, "Unknown resource type: %s");
 			String key = toKey(theResourceType, theInteractionType);
 			myAllowedKeys.add(key);
@@ -241,9 +246,5 @@ public class InteractionBlockingInterceptor {
 		public InteractionBlockingInterceptor build() {
 			return new InteractionBlockingInterceptor(this);
 		}
-
-
 	}
-
-
 }

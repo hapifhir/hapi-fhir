@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -14,14 +15,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings({"Duplicates"})
 public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchWithInterceptorR4Test.class);
+
 
 
 	@Test
@@ -61,14 +60,14 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 
 			IBundleProvider results = myConditionDao.search(map, mySrd);
 			List<String> ids = toUnqualifiedVersionlessIdValues(results);
-			assertEquals(2, ids.size());
+			assertThat(ids).hasSize(2);
 
 			SqlQueryList list = (SqlQueryList) mySrd.getUserData().get("QUERIES");
-			assertEquals(1, list.size());
+			assertThat(list).hasSize(1);
 			String query = list.get(0).getSql(true, false);
 			ourLog.info("Query: {}", query);
 
-			assertThat(query, containsString("HASH_SYS_AND_VALUE = '3788488238034018567'"));
+			assertThat(query).contains("HASH_SYS_AND_VALUE = '3788488238034018567'");
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

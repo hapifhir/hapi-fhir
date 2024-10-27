@@ -9,11 +9,15 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
@@ -71,6 +75,24 @@ public class ValueSetConceptAccumulatorTest {
 
 			myAccumulator.excludeConcept("sys", "code"+i);
 		}
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	public void testPersistValueSetConcept_whenSupportLegacyLob(boolean theSupportLegacyLob){
+		final String sourceConceptDirectParentPids = "1 2 3 4 5 6 7";
+		ArgumentCaptor<TermValueSetConcept> captor = ArgumentCaptor.forClass(TermValueSetConcept.class);
+
+		myAccumulator.setSupportLegacyLob(theSupportLegacyLob);
+		myAccumulator.includeConcept("sys", "code", "display", null, sourceConceptDirectParentPids, null);
+
+		verify(myValueSetConceptDao, times(1)).save(captor.capture());
+
+		TermValueSetConcept capturedTermValueSetConcept = captor.getValue();
+
+		assertEquals(theSupportLegacyLob, capturedTermValueSetConcept.hasSourceConceptDirectParentPidsLob());
+		assertEquals(sourceConceptDirectParentPids, capturedTermValueSetConcept.getSourceConceptDirectParentPids());
 
 	}
 

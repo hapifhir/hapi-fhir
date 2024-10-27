@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4922
+title: "R5 Subscription.filterBy.resourceType failed to deserialize because the deserializer skipped all elements named
+'resourceType'. This has been changed so that only toplevel resourceType elements are skipped in the deserialization process."

@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,8 @@ public class InMemoryMatchResult {
 		return new InMemoryMatchResult(null, theUnsupportedReason);
 	}
 
-	public static InMemoryMatchResult unsupportedFromParameterAndReason(String theUnsupportedParameter, String theUnsupportedReason) {
+	public static InMemoryMatchResult unsupportedFromParameterAndReason(
+			String theUnsupportedParameter, String theUnsupportedReason) {
 		return new InMemoryMatchResult(theUnsupportedParameter, theUnsupportedReason);
 	}
 
@@ -116,7 +117,9 @@ public class InMemoryMatchResult {
 			return InMemoryMatchResult.fromBoolean(theLeft.matched() && theRight.matched());
 		}
 		if (!theLeft.supported() && !theRight.supported()) {
-			return InMemoryMatchResult.unsupportedFromReason(List.of(theLeft.getUnsupportedReason(), theRight.getUnsupportedReason()).toString());
+			return InMemoryMatchResult.unsupportedFromReason(
+					List.of(theLeft.getUnsupportedReason(), theRight.getUnsupportedReason())
+							.toString());
 		}
 		if (!theLeft.supported()) {
 			return theLeft;
@@ -135,12 +138,13 @@ public class InMemoryMatchResult {
 			return InMemoryMatchResult.successfulMatch();
 		}
 		if (!theLeft.supported() && !theRight.supported()) {
-			return InMemoryMatchResult.unsupportedFromReason(List.of(theLeft.getUnsupportedReason(), theRight.getUnsupportedReason()).toString());
+			return InMemoryMatchResult.unsupportedFromReason(
+					List.of(theLeft.getUnsupportedReason(), theRight.getUnsupportedReason())
+							.toString());
 		}
 		if (!theLeft.supported()) {
 			return theLeft;
 		}
 		return theRight;
 	}
-
 }

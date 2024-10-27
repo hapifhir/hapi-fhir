@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<title th:replace="~{window-title :: hfql}" />
+		<th:block th:insert="~{tmpl-head :: head}" />
+		<th:block th:insert="~{tmpl-buttonclick-handler :: handler}" />
+
+      <style type="text/css" media="screen">
+         #editor {
+            width: 100%;
+            height: 150px;
+            border-top: 1px solid #AAAAAA;
+         }
+         #resultsTableCard {
+            padding: 0;
+         }
+         .resultsTable {
+            margin-bottom: 0;
+            width: auto;
+         }
+         .card {
+            margin-bottom: 10px;
+         }
+      </style>
+
+	</head>
+
+	<body>
+		<form action="" method="get" id="outerForm">
+		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"></input> 
+		<input th:if="${_csrf} != null" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+		<div th:replace="~{tmpl-navbar-top :: top}" ></div>
+		
+		<div class="container-fluid">
+			<div class="row">
+
+				<div th:replace="~{tmpl-navbar-left :: left}" ></div>
+
+				<div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main" style="height: calc(100% - 200px);">
+
+					<div th:replace="~{tmpl-banner :: banner}"></div>
+
+               <div th:replace="~{tmpl-hfql-banner-card :: banner}"></div>
+
+               <!-- ************************************************ -->
+               <!-- ** SQL Editor                                 ** -->
+               <!-- ************************************************ -->
+
+               <div class="card">
+                  <h3 class="card-header">Query</h3>
+                  <div class="card-body" style="padding: 0;">
+                     <button type="button" id="execute-btn" class="btn btn-primary" style="margin: 5px;">
+                        <i class="fas fa-play"></i> Execute
+                     </button>
+                     <button type="button" id="copy-link-btn" class="btn btn-info" style="margin: 5px;">
+                        <i class="fas fa-link"></i> Link to Query
+                     </button>
+
+                     <div id="editor" th:text="${query}"></div>
+
+                     <script th:src="@{/resources/ace-builds/src-min-noconflict/ace.js}"></script>
+                     <script>
+                        const editor = ace.edit("editor");
+                        editor.setTheme("ace/theme/cobalt");
+                        editor.session.setMode("ace/mode/sql");
+                        editor.setShowPrintMargin(false);
+
+                        $('#execute-btn').click(
+                           function() {
+                              let btn = $(this);
+                              document.getElementById('execute-btn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Execute';
+                              handleActionButtonClick(btn);
+                              let value = editor.getValue();
+                              btn.append($('<input />', { type: 'hidden', name: 'hfql-query', value: value }));
+                              $("#outerForm").attr("method", "post");
+                              $("#outerForm").attr("action", "hfql").submit();
+                           }
+                        );
+
+                        $('#copy-link-btn').click(
+                           function() {
+                              let btn = $(this);
+                              handleActionButtonClick(btn);
+                              let value = editor.getValue();
+                              btn.append($('<input />', { type: 'hidden', name: 'hfql-query', value: value }));
+                              $("#outerForm").attr("method", "get");
+                              $("#outerForm").attr("action", "hfql").submit();
+                           }
+                        );
+
+                     </script>
+                  </div>
+               </div>
+
+               <!-- ************************************************ -->
+               <!-- ** Query Results                              ** -->
+               <!-- ************************************************ -->
+
+               <div th:if="${resultRows} != null" class="card">
+                  <h3 class="card-header">Results</h3>
+                  <div class="card-header">
+                     Query executed in [[${executionTime}]].
+                  </div>
+                  <div class="card-body" id="resultsTableCard">
+                     <div class="table-responsive">
+                        <table class="table table-striped table-bordered table-sm resultsTable" id="resultsTable">
+                           <thead>
+                              <tr>
+                                 <th th:each="columnName : ${columnNames}" th:text="${columnName}"></th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr th:each="row : ${resultRows}">
+                                 <td th:each="col,colIterStat : ${row}">
+                                    <th:block th:switch="${columnTypes[colIterStat.index]}">
+                                       <th:block th:case="'JSON'" th:utext="${HfqlRenderingUtil.formatAsJson(col)}"/>
+                                       <th:block th:case="*" th:text="${col}"/>
+                                    </th:block>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </div>
+			</div>
+		</div>
+
+	</form>
+	
+	<div th:replace="~{tmpl-footer :: footer}" ></div>
+</body>
+</html>

@@ -1,10 +1,10 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2016may.formats.IParser;
@@ -96,7 +96,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		throw new UnsupportedOperationException(Msg.code(471));
 	}
 
-
 	@Override
 	public IParser getParser(ParserType theType) {
 		throw new UnsupportedOperationException(Msg.code(472));
@@ -144,7 +143,9 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public StructureDefinition fetchTypeDefinition(String typeName) {
-		return fetchResource(org.hl7.fhir.dstu2016may.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
+		return fetchResource(
+				org.hl7.fhir.dstu2016may.model.StructureDefinition.class,
+				"http://hl7.org/fhir/StructureDefinition/" + typeName);
 	}
 
 	@Override
@@ -152,15 +153,48 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		if (myValidationSupport == null) {
 			return false;
 		} else {
-			return myValidationSupport.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), theSystem);
+			return myValidationSupport.isCodeSystemSupported(
+					new ValidationSupportContext(myValidationSupport), theSystem);
 		}
 	}
 
 	@Override
 	public Set<String> typeTails() {
-		return new HashSet<>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code",
-			"Markdown", "Base64Binary", "Coding", "CodeableConcept", "Attachment", "Identifier", "Quantity", "SampledData", "Range", "Period", "Ratio", "HumanName", "Address", "ContactPoint",
-			"Timing", "Reference", "Annotation", "Signature", "Meta"));
+		return new HashSet<>(Arrays.asList(
+				"Integer",
+				"UnsignedInt",
+				"PositiveInt",
+				"Decimal",
+				"DateTime",
+				"Date",
+				"Time",
+				"Instant",
+				"String",
+				"Uri",
+				"Oid",
+				"Uuid",
+				"Id",
+				"Boolean",
+				"Code",
+				"Markdown",
+				"Base64Binary",
+				"Coding",
+				"CodeableConcept",
+				"Attachment",
+				"Identifier",
+				"Quantity",
+				"SampledData",
+				"Range",
+				"Period",
+				"Ratio",
+				"HumanName",
+				"Address",
+				"ContactPoint",
+				"Timing",
+				"Reference",
+				"Annotation",
+				"Signature",
+				"Meta"));
 	}
 
 	@Override
@@ -185,7 +219,13 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), theSystem, theCode, theDisplay, null);
+		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(
+				new ValidationSupportContext(myValidationSupport),
+				new ConceptValidationOptions(),
+				theSystem,
+				theCode,
+				theDisplay,
+				null);
 		if (result == null) {
 			return null;
 		}
@@ -193,12 +233,14 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		if (result.getSeverity() != null) {
 			severity = OperationOutcome.IssueSeverity.fromCode(result.getSeverityCode());
 		}
-		ConceptDefinitionComponent definition = result.getCode() != null ? new ConceptDefinitionComponent().setCode(result.getCode()) : null;
+		ConceptDefinitionComponent definition =
+				result.getCode() != null ? new ConceptDefinitionComponent().setCode(result.getCode()) : null;
 		return new ValidationResult(severity, result.getMessage(), definition);
 	}
 
 	@Override
-	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
+	public ValidationResult validateCode(
+			String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
 		throw new UnsupportedOperationException(Msg.code(479));
 	}
 
@@ -218,12 +260,14 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			}
 		}
 
-
 		boolean caseSensitive = true;
 		if (isNotBlank(theSystem)) {
 			CodeSystem system = fetchCodeSystem(theSystem);
 			if (system == null) {
-				return new ValidationResult(OperationOutcome.IssueSeverity.INFORMATION, "Code " + Constants.codeSystemWithDefaultDescription(theSystem) + "/" + theCode + " was not validated because the code system is not present");
+				return new ValidationResult(
+						OperationOutcome.IssueSeverity.INFORMATION,
+						"Code " + Constants.codeSystemWithDefaultDescription(theSystem) + "/" + theCode
+								+ " was not validated because the code system is not present");
 			}
 
 			if (system.hasCaseSensitive()) {
@@ -245,7 +289,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			ValueSet expansion = new ValueSet();
 			for (ConceptSetComponent nextInclude : theVs.getCompose().getInclude()) {
 				for (ConceptReferenceComponent nextConcept : nextInclude.getConcept()) {
-					expansion.getExpansion().addContains().setCode(nextConcept.getCode()).setDisplay(nextConcept.getDisplay());
+					expansion
+							.getExpansion()
+							.addContains()
+							.setCode(nextConcept.getCode())
+							.setDisplay(nextConcept.getDisplay());
 				}
 			}
 			expandedValueSet = new ValueSetExpansionOutcome(expansion);
@@ -255,7 +303,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			expandedValueSet = expandVS(theVs, true);
 		}
 
-		for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
+		for (ValueSetExpansionContainsComponent next :
+				expandedValueSet.getValueset().getExpansion().getContains()) {
 			String nextCode = next.getCode();
 			if (!caseSensitive) {
 				nextCode = nextCode.toUpperCase();
@@ -271,7 +320,10 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			}
 		}
 
-		return new ValidationResult(OperationOutcome.IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + Constants.codeSystemWithDefaultDescription(theSystem) + "]");
+		return new ValidationResult(
+				OperationOutcome.IssueSeverity.ERROR,
+				"Unknown code[" + theCode + "] in system[" + Constants.codeSystemWithDefaultDescription(theSystem)
+						+ "]");
 	}
 
 	@Override
@@ -283,6 +335,4 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc) {
 		throw new UnsupportedOperationException(Msg.code(481));
 	}
-
-
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ public interface IChannelFactory {
 	 * @param theMessageType     The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
 	 * @param theChannelSettings Contains the configuration for subscribers.
 	 */
-	IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings);
+	IChannelReceiver getOrCreateReceiver(
+			String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings);
 
 	/**
 	 * Create a channel that is used to send messages to the queue.
@@ -53,7 +54,8 @@ public interface IChannelFactory {
 	 * @param theMessageType     The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
 	 * @param theChannelSettings Contains the configuration for senders.
 	 */
-	IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings);
+	IChannelProducer getOrCreateProducer(
+			String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings);
 
 	/**
 	 * @return the IChannelNamer used by this factory

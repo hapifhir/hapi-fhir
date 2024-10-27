@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,18 @@ public class LocalFileValidationSupport extends PrePopulatedValidationSupport {
 	}
 
 	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " Local File Validation Support";
+	}
+
+	@Override
 	public FhirContext getFhirContext() {
 		return myCtx;
 	}
 
 	public void loadFile(String theFileName) throws IOException {
 		String contents = IOUtils.toString(new InputStreamReader(new FileInputStream(theFileName), "UTF-8"));
-		IBaseResource resource  = myCtx.newJsonParser().parseResource(contents);
+		IBaseResource resource = myCtx.newJsonParser().parseResource(contents);
 		this.addResource(resource);
 	}
-
 }

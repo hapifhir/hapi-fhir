@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,20 @@
  */
 package ca.uhn.fhir.rest.client.apache;
 
-import java.util.List;
-import java.util.Map;
-
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.HttpClientUtil;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+
+import java.util.List;
+import java.util.Map;
 
 public abstract class BaseHttpClient implements IHttpClient {
 
@@ -44,7 +45,12 @@ public abstract class BaseHttpClient implements IHttpClient {
 	/**
 	 * Constructor
 	 */
-	public BaseHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+	public BaseHttpClient(
+			StringBuilder theUrl,
+			Map<String, List<String>> theIfNoneExistParams,
+			String theIfNoneExistString,
+			RequestTypeEnum theRequestType,
+			List<Header> theHeaders) {
 		this.myUrl = theUrl;
 		this.myIfNoneExistParams = theIfNoneExistParams;
 		this.myIfNoneExistString = theIfNoneExistString;
@@ -75,7 +81,6 @@ public abstract class BaseHttpClient implements IHttpClient {
 		}
 
 		theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "apache"));
-		theHttpRequest.addHeader("Accept-Charset", "utf-8");
 		theHttpRequest.addHeader("Accept-Encoding", "gzip");
 
 		addHeaderIfNoneExist(theHttpRequest);
@@ -93,7 +98,8 @@ public abstract class BaseHttpClient implements IHttpClient {
 	}
 
 	@Override
-	public IHttpRequest createByteRequest(FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
+	public IHttpRequest createByteRequest(
+			FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
 		IHttpRequest retVal = createHttpRequest(theContents);
 		addHeadersToRequest(retVal, theEncoding, theContext);
 		retVal.addHeader(Constants.HEADER_CONTENT_TYPE, theContentType + Constants.HEADER_SUFFIX_CT_UTF_8);
@@ -116,7 +122,8 @@ public abstract class BaseHttpClient implements IHttpClient {
 	protected abstract IHttpRequest createHttpRequest(String theContents);
 
 	@Override
-	public IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
+	public IHttpRequest createParamRequest(
+			FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
 		IHttpRequest retVal = createHttpRequest(theParams);
 		addHeadersToRequest(retVal, theEncoding, theContext);
 		return retVal;

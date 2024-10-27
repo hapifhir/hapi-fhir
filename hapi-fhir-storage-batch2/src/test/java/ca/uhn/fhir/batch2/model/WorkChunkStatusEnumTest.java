@@ -5,10 +5,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.Arrays;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -28,9 +25,9 @@ public class WorkChunkStatusEnumTest {
 	void allowedPriorStates_matchesNextStates(WorkChunkStatusEnum theEnum) {
 		Arrays.stream(WorkChunkStatusEnum.values()).forEach(nextPrior->{
 			if (nextPrior.getNextStates().contains(theEnum)) {
-				assertThat("is prior", theEnum.getPriorStates(), hasItem(nextPrior));
+				assertThat(theEnum.getPriorStates()).as("is prior").contains(nextPrior);
 			} else {
-				assertThat("is not prior", theEnum.getPriorStates(), not(hasItem(nextPrior)));
+				assertThat(theEnum.getPriorStates()).as("is not prior").doesNotContain(nextPrior);
 			}
 		});
 	}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ package ca.uhn.fhir.jpa.dao.search;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -60,42 +60,43 @@ public class LastNAggregation {
 	 */
 	public JsonObject toAggregation() {
 		JsonObject lastNAggregation = myJsonParser.fromJson(
-			"{" +
-				"   \"terms\":{" +
-				"      \"field\":\"" + SP_CODE_TOKEN_CODE_AND_SYSTEM + "\"," +
-				"      \"size\":10000," +
-				"      \"min_doc_count\":1" +
-				"   }," +
-				"   \"aggs\":{" +
-				"      \"" + MOST_RECENT_EFFECTIVE_SUB_AGGREGATION + "\":{" +
-				"         \"top_hits\":{" +
-				"            \"size\":" + myLastNMax + "," +
-				"            \"sort\":[" +
-				"               {" +
-				"                  \"" + SP_DATE_DT_UPPER + "\":{" +
-				"                     \"order\":\"desc\"" +
-				"                  }" +
-				"               }" +
-				"            ]," +
-				"            \"_source\":[" +
-				"               \"myId\"" +
-				"            ]" +
-				"         }" +
-				"      }" +
-				"   }" +
-				"}", JsonObject.class);
+				"{" + "   \"terms\":{"
+						+ "      \"field\":\""
+						+ SP_CODE_TOKEN_CODE_AND_SYSTEM + "\"," + "      \"size\":10000,"
+						+ "      \"min_doc_count\":1"
+						+ "   },"
+						+ "   \"aggs\":{"
+						+ "      \""
+						+ MOST_RECENT_EFFECTIVE_SUB_AGGREGATION + "\":{" + "         \"top_hits\":{"
+						+ "            \"size\":"
+						+ myLastNMax + "," + "            \"sort\":["
+						+ "               {"
+						+ "                  \""
+						+ SP_DATE_DT_UPPER + "\":{" + "                     \"order\":\"desc\""
+						+ "                  }"
+						+ "               }"
+						+ "            ],"
+						+ "            \"_source\":["
+						+ "               \"myId\""
+						+ "            ]"
+						+ "         }"
+						+ "      }"
+						+ "   }"
+						+ "}",
+				JsonObject.class);
 		if (myAggregateOnSubject) {
 			lastNAggregation = myJsonParser.fromJson(
-				"{" +
-					"  \"terms\": {" +
-					"    \"field\": \"" + SP_SUBJECT + "\"," +
-					"    \"size\": 10000," +
-					"    \"min_doc_count\": 1" +
-					"  }," +
-					"  \"aggs\": {" +
-					"    \"" + GROUP_BY_CODE_SYSTEM_SUB_AGGREGATION + "\": " + myJsonParser.toJson(lastNAggregation) + "" +
-					"  }" +
-					"}", JsonObject.class);
+					"{" + "  \"terms\": {"
+							+ "    \"field\": \""
+							+ SP_SUBJECT + "\"," + "    \"size\": 10000,"
+							+ "    \"min_doc_count\": 1"
+							+ "  },"
+							+ "  \"aggs\": {"
+							+ "    \""
+							+ GROUP_BY_CODE_SYSTEM_SUB_AGGREGATION + "\": " + myJsonParser.toJson(lastNAggregation) + ""
+							+ "  }"
+							+ "}",
+					JsonObject.class);
 		}
 		return lastNAggregation;
 	}
@@ -174,20 +175,25 @@ public class LastNAggregation {
 
 		// was it grouped by subject?
 		if (myAggregateOnSubject) {
-			resultBuckets = StreamSupport.stream(theAggregationResult.getAsJsonArray("buckets").spliterator(), false)
-				.map(bucket -> bucket.getAsJsonObject().getAsJsonObject(GROUP_BY_CODE_SYSTEM_SUB_AGGREGATION));
+			resultBuckets = StreamSupport.stream(
+							theAggregationResult.getAsJsonArray("buckets").spliterator(), false)
+					.map(bucket -> bucket.getAsJsonObject().getAsJsonObject(GROUP_BY_CODE_SYSTEM_SUB_AGGREGATION));
 		}
 
 		return resultBuckets
-			.flatMap(grouping -> StreamSupport.stream(grouping.getAsJsonArray("buckets").spliterator(), false))
-			.flatMap(bucket -> {
-				JsonArray hits = bucket.getAsJsonObject()
-					.getAsJsonObject(MOST_RECENT_EFFECTIVE_SUB_AGGREGATION)
-					.getAsJsonObject("hits")
-					.getAsJsonArray("hits");
-				return StreamSupport.stream(hits.spliterator(), false);
-			})
-			.map(hit -> hit.getAsJsonObject().getAsJsonObject("_source").get("myId").getAsLong())
-			.collect(Collectors.toList());
+				.flatMap(grouping ->
+						StreamSupport.stream(grouping.getAsJsonArray("buckets").spliterator(), false))
+				.flatMap(bucket -> {
+					JsonArray hits = bucket.getAsJsonObject()
+							.getAsJsonObject(MOST_RECENT_EFFECTIVE_SUB_AGGREGATION)
+							.getAsJsonObject("hits")
+							.getAsJsonArray("hits");
+					return StreamSupport.stream(hits.spliterator(), false);
+				})
+				.map(hit -> hit.getAsJsonObject()
+						.getAsJsonObject("_source")
+						.get("myId")
+						.getAsLong())
+				.collect(Collectors.toList());
 	}
 }

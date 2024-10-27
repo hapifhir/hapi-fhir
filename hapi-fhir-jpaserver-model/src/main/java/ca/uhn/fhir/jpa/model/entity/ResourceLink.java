@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,43 +19,51 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import java.util.Date;
 
 @Entity
-@Table(name = "HFJ_RES_LINK", indexes = {
-	// We need to join both ways, so index from src->tgt and from tgt->src.
-	// From src->tgt, rows are usually written all together as part of ingestion - keep the index small, and read blocks as needed.
-	@Index(name = "IDX_RL_SRC", columnList = "SRC_RESOURCE_ID"),
-	// But from tgt->src, include all the match columns. Targets will usually be randomly distributed - each row in separate block.
-	@Index(name = "IDX_RL_TGT_v2", columnList = "TARGET_RESOURCE_ID, SRC_PATH, SRC_RESOURCE_ID, TARGET_RESOURCE_TYPE,PARTITION_ID")
-})
+@Table(
+		name = "HFJ_RES_LINK",
+		indexes = {
+			// We need to join both ways, so index from src->tgt and from tgt->src.
+			// From src->tgt, rows are usually written all together as part of ingestion - keep the index small, and
+			// read blocks as needed.
+			@Index(name = "IDX_RL_SRC", columnList = "SRC_RESOURCE_ID"),
+			// But from tgt->src, include all the match columns. Targets will usually be randomly distributed - each row
+			// in separate block.
+			@Index(
+					name = "IDX_RL_TGT_v2",
+					columnList = "TARGET_RESOURCE_ID, SRC_PATH, SRC_RESOURCE_ID, TARGET_RESOURCE_TYPE,PARTITION_ID")
+		})
 public class ResourceLink extends BaseResourceIndex {
 
 	public static final int SRC_PATH_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
-	@SequenceGenerator(name = "SEQ_RESLINK_ID", sequenceName = "SEQ_RESLINK_ID")
+
+	@GenericGenerator(name = "SEQ_RESLINK_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESLINK_ID")
 	@Id
 	@Column(name = "PID")
@@ -65,7 +73,11 @@ public class ResourceLink extends BaseResourceIndex {
 	private String mySourcePath;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_RESLINK_SOURCE"))
+	@JoinColumn(
+			name = "SRC_RESOURCE_ID",
+			referencedColumnName = "RES_ID",
+			nullable = false,
+			foreignKey = @ForeignKey(name = "FK_RESLINK_SOURCE"))
 	private ResourceTable mySourceResource;
 
 	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
@@ -76,7 +88,13 @@ public class ResourceLink extends BaseResourceIndex {
 	private String mySourceResourceType;
 
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = true, insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
+	@JoinColumn(
+			name = "TARGET_RESOURCE_ID",
+			referencedColumnName = "RES_ID",
+			nullable = true,
+			insertable = false,
+			updatable = false,
+			foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
 	private ResourceTable myTargetResource;
 
 	@Column(name = "TARGET_RESOURCE_ID", insertable = true, updatable = true, nullable = true)
@@ -90,14 +108,22 @@ public class ResourceLink extends BaseResourceIndex {
 	@Column(name = "TARGET_RESOURCE_URL", length = 200, nullable = true)
 	@FullTextField
 	private String myTargetResourceUrl;
+
 	@Column(name = "TARGET_RESOURCE_VERSION", nullable = true)
 	private Long myTargetResourceVersion;
+
 	@FullTextField
 	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
+
 	@Transient
 	private transient String myTargetResourceId;
+
+	@Embedded
+	@AttributeOverride(name = "myPartitionId", column = @Column(name = "TARGET_RES_PARTITION_ID"))
+	@AttributeOverride(name = "myPartitionDate", column = @Column(name = "TARGET_RES_PARTITION_DATE"))
+	private PartitionablePartitionId myTargetResourcePartitionId;
 
 	/**
 	 * Constructor
@@ -147,7 +173,8 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(myTargetResourceUrl, obj.myTargetResourceUrl);
 		b.append(myTargetResourceType, obj.myTargetResourceType);
 		b.append(myTargetResourceVersion, obj.myTargetResourceVersion);
-		// In cases where we are extracting links from a resource that has not yet been persisted, the target resource pid
+		// In cases where we are extracting links from a resource that has not yet been persisted, the target resource
+		// pid
 		// will be null so we use the target resource id to differentiate instead
 		if (getTargetResourcePid() == null) {
 			b.append(getTargetResourceId(), obj.getTargetResourceId());
@@ -167,6 +194,7 @@ public class ResourceLink extends BaseResourceIndex {
 		myTargetResourceType = source.getTargetResourceType();
 		myTargetResourceVersion = source.getTargetResourceVersion();
 		myTargetResourceUrl = source.getTargetResourceUrl();
+		myTargetResourcePartitionId = source.getTargetResourcePartitionId();
 	}
 
 	public String getSourcePath() {
@@ -207,14 +235,14 @@ public class ResourceLink extends BaseResourceIndex {
 		Validate.isTrue(theTargetResourceUrl.hasBaseUrl());
 		Validate.isTrue(theTargetResourceUrl.hasResourceType());
 
-//		if (theTargetResourceUrl.hasIdPart()) {
+		//		if (theTargetResourceUrl.hasIdPart()) {
 		// do nothing
-//		} else {
+		//		} else {
 		// Must have set an url like http://example.org/something
 		// We treat 'something' as the resource type because of fix for #659. Prior to #659 fix, 'something' was
 		// treated as the id and 'example.org' was treated as the resource type
 		// Maybe log a warning?
-//		}
+		//		}
 
 		myTargetResourceType = theTargetResourceUrl.getResourceType();
 		myTargetResourceUrl = theTargetResourceUrl.getValue();
@@ -249,6 +277,15 @@ public class ResourceLink extends BaseResourceIndex {
 		myId = theId;
 	}
 
+	public PartitionablePartitionId getTargetResourcePartitionId() {
+		return myTargetResourcePartitionId;
+	}
+
+	public ResourceLink setTargetResourcePartitionId(PartitionablePartitionId theTargetResourcePartitionId) {
+		myTargetResourcePartitionId = theTargetResourcePartitionId;
+		return this;
+	}
+
 	@Override
 	public void clearHashes() {
 		// nothing right now
@@ -267,7 +304,8 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(myTargetResourceUrl);
 		b.append(myTargetResourceVersion);
 
-		// In cases where we are extracting links from a resource that has not yet been persisted, the target resource pid
+		// In cases where we are extracting links from a resource that has not yet been persisted, the target resource
+		// pid
 		// will be null so we use the target resource id to differentiate instead
 		if (getTargetResourcePid() == null) {
 			b.append(getTargetResourceId());
@@ -282,11 +320,11 @@ public class ResourceLink extends BaseResourceIndex {
 		StringBuilder b = new StringBuilder();
 		b.append("ResourceLink[");
 		b.append("path=").append(mySourcePath);
-		b.append(", src=").append(mySourceResourcePid);
-		b.append(", target=").append(myTargetResourcePid);
-		b.append(", targetType=").append(myTargetResourceType);
-		b.append(", targetVersion=").append(myTargetResourceVersion);
-		b.append(", targetUrl=").append(myTargetResourceUrl);
+		b.append(", srcResId=").append(mySourceResourcePid);
+		b.append(", targetResId=").append(myTargetResourcePid);
+		b.append(", targetResType=").append(myTargetResourceType);
+		b.append(", targetResVersion=").append(myTargetResourceVersion);
+		b.append(", targetResUrl=").append(myTargetResourceUrl);
 
 		b.append("]");
 		return b.toString();
@@ -318,7 +356,8 @@ public class ResourceLink extends BaseResourceIndex {
 		return retVal;
 	}
 
-	public static ResourceLink forAbsoluteReference(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
+	public static ResourceLink forAbsoluteReference(
+			String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
 		ResourceLink retVal = new ResourceLink();
 		retVal.setSourcePath(theSourcePath);
 		retVal.setSourceResource(theSourceResource);
@@ -330,7 +369,8 @@ public class ResourceLink extends BaseResourceIndex {
 	/**
 	 * Factory for canonical URL
 	 */
-	public static ResourceLink forLogicalReference(String theSourcePath, ResourceTable theSourceResource, String theTargetResourceUrl, Date theUpdated) {
+	public static ResourceLink forLogicalReference(
+			String theSourcePath, ResourceTable theSourceResource, String theTargetResourceUrl, Date theUpdated) {
 		ResourceLink retVal = new ResourceLink();
 		retVal.setSourcePath(theSourcePath);
 		retVal.setSourceResource(theSourceResource);
@@ -339,17 +379,113 @@ public class ResourceLink extends BaseResourceIndex {
 		return retVal;
 	}
 
-	/**
-	 * @param theTargetResourceVersion This should only be populated if the reference actually had a version
-	 */
-	public static ResourceLink forLocalReference(String theSourcePath, ResourceTable theSourceResource, String theTargetResourceType, Long theTargetResourcePid, String theTargetResourceId, Date theUpdated, @Nullable Long theTargetResourceVersion) {
+	public static ResourceLink forLocalReference(
+			ResourceLinkForLocalReferenceParams theResourceLinkForLocalReferenceParams) {
+
 		ResourceLink retVal = new ResourceLink();
-		retVal.setSourcePath(theSourcePath);
-		retVal.setSourceResource(theSourceResource);
-		retVal.setTargetResource(theTargetResourceType, theTargetResourcePid, theTargetResourceId);
-		retVal.setTargetResourceVersion(theTargetResourceVersion);
-		retVal.setUpdated(theUpdated);
+		retVal.setSourcePath(theResourceLinkForLocalReferenceParams.getSourcePath());
+		retVal.setSourceResource(theResourceLinkForLocalReferenceParams.getSourceResource());
+		retVal.setTargetResource(
+				theResourceLinkForLocalReferenceParams.getTargetResourceType(),
+				theResourceLinkForLocalReferenceParams.getTargetResourcePid(),
+				theResourceLinkForLocalReferenceParams.getTargetResourceId());
+
+		retVal.setTargetResourcePartitionId(
+				theResourceLinkForLocalReferenceParams.getTargetResourcePartitionablePartitionId());
+		retVal.setTargetResourceVersion(theResourceLinkForLocalReferenceParams.getTargetResourceVersion());
+		retVal.setUpdated(theResourceLinkForLocalReferenceParams.getUpdated());
+
 		return retVal;
 	}
 
+	public static class ResourceLinkForLocalReferenceParams {
+		private String mySourcePath;
+		private ResourceTable mySourceResource;
+		private String myTargetResourceType;
+		private Long myTargetResourcePid;
+		private String myTargetResourceId;
+		private Date myUpdated;
+		private Long myTargetResourceVersion;
+		private PartitionablePartitionId myTargetResourcePartitionablePartitionId;
+
+		public static ResourceLinkForLocalReferenceParams instance() {
+			return new ResourceLinkForLocalReferenceParams();
+		}
+
+		public String getSourcePath() {
+			return mySourcePath;
+		}
+
+		public ResourceLinkForLocalReferenceParams setSourcePath(String theSourcePath) {
+			mySourcePath = theSourcePath;
+			return this;
+		}
+
+		public ResourceTable getSourceResource() {
+			return mySourceResource;
+		}
+
+		public ResourceLinkForLocalReferenceParams setSourceResource(ResourceTable theSourceResource) {
+			mySourceResource = theSourceResource;
+			return this;
+		}
+
+		public String getTargetResourceType() {
+			return myTargetResourceType;
+		}
+
+		public ResourceLinkForLocalReferenceParams setTargetResourceType(String theTargetResourceType) {
+			myTargetResourceType = theTargetResourceType;
+			return this;
+		}
+
+		public Long getTargetResourcePid() {
+			return myTargetResourcePid;
+		}
+
+		public ResourceLinkForLocalReferenceParams setTargetResourcePid(Long theTargetResourcePid) {
+			myTargetResourcePid = theTargetResourcePid;
+			return this;
+		}
+
+		public String getTargetResourceId() {
+			return myTargetResourceId;
+		}
+
+		public ResourceLinkForLocalReferenceParams setTargetResourceId(String theTargetResourceId) {
+			myTargetResourceId = theTargetResourceId;
+			return this;
+		}
+
+		public Date getUpdated() {
+			return myUpdated;
+		}
+
+		public ResourceLinkForLocalReferenceParams setUpdated(Date theUpdated) {
+			myUpdated = theUpdated;
+			return this;
+		}
+
+		public Long getTargetResourceVersion() {
+			return myTargetResourceVersion;
+		}
+
+		/**
+		 * @param theTargetResourceVersion This should only be populated if the reference actually had a version
+		 */
+		public ResourceLinkForLocalReferenceParams setTargetResourceVersion(Long theTargetResourceVersion) {
+			myTargetResourceVersion = theTargetResourceVersion;
+			return this;
+		}
+
+		public PartitionablePartitionId getTargetResourcePartitionablePartitionId() {
+			return myTargetResourcePartitionablePartitionId;
+		}
+
+		public ResourceLinkForLocalReferenceParams setTargetResourcePartitionablePartitionId(
+				PartitionablePartitionId theTargetResourcePartitionablePartitionId) {
+			myTargetResourcePartitionablePartitionId = theTargetResourcePartitionablePartitionId;
+			return this;
+		}
+	}
 }

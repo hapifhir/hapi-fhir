@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.context;
 
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+public class RuntimeIdDatatypeDefinition extends RuntimePrimitiveDatatypeDefinition
+		implements IRuntimeDatatypeDefinition {
 
-public class RuntimeIdDatatypeDefinition extends RuntimePrimitiveDatatypeDefinition implements IRuntimeDatatypeDefinition {
-
-	public RuntimeIdDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveType<?>> theImplementingClass, boolean theStandardType) {
+	public RuntimeIdDatatypeDefinition(
+			DatatypeDef theDef, Class<? extends IPrimitiveType<?>> theImplementingClass, boolean theStandardType) {
 		super(theDef, theImplementingClass, theStandardType);
 	}
 
@@ -33,5 +34,4 @@ public class RuntimeIdDatatypeDefinition extends RuntimePrimitiveDatatypeDefinit
 	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
 		return ChildTypeEnum.ID_DATATYPE;
 	}
-
 }

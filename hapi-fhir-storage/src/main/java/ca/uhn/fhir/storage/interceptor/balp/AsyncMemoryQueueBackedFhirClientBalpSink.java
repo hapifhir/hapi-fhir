@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,16 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ThreadPoolUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PreDestroy;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PreDestroy;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -67,10 +66,10 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 	 * @param theTargetBaseUrl The FHIR server base URL for the target/sink server to
 	 *                         receive audit events.
 	 */
-	public AsyncMemoryQueueBackedFhirClientBalpSink(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl) {
+	public AsyncMemoryQueueBackedFhirClientBalpSink(
+			@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl) {
 		this(theFhirContext, theTargetBaseUrl, null);
 	}
-
 
 	/**
 	 * Sets the FhirContext to use when initiating outgoing connections
@@ -84,7 +83,10 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 	 * @param theClientInterceptors An optional list of interceptors to register against
 	 *                              the client. May be {@literal null}.
 	 */
-	public AsyncMemoryQueueBackedFhirClientBalpSink(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl, @Nullable List<Object> theClientInterceptors) {
+	public AsyncMemoryQueueBackedFhirClientBalpSink(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull String theTargetBaseUrl,
+			@Nullable List<Object> theClientInterceptors) {
 		this(createClient(theFhirContext, theTargetBaseUrl, theClientInterceptors));
 	}
 
@@ -95,7 +97,8 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 	 */
 	public AsyncMemoryQueueBackedFhirClientBalpSink(IGenericClient theClient) {
 		super(theClient);
-		myThreadPool = ThreadPoolUtil.newThreadPool(1, 1, "BalpClientSink-" + ourNextThreadId.getAndIncrement() + "-", 100);
+		myThreadPool = ThreadPoolUtil.newThreadPool(
+				1, 1, "BalpClientSink-" + ourNextThreadId.getAndIncrement() + "-", Integer.MAX_VALUE);
 	}
 
 	@Override
@@ -139,7 +142,10 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 				myClient.transaction().withBundle(transactionBundle).execute();
 				return;
 			} catch (BaseServerResponseException e) {
-				ourLog.error("Failed to transmit AuditEvent items to target. Will re-attempt {} failed events once. Error: {}", queue.length, e.toString());
+				ourLog.error(
+						"Failed to transmit AuditEvent items to target. Will re-attempt {} failed events once. Error: {}",
+						queue.length,
+						e.toString());
 			}
 
 			// Retry once then give up
@@ -152,5 +158,4 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 			}
 		}
 	}
-
 }

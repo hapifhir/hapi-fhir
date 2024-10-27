@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,15 @@
 package ca.uhn.fhir.mdm.util;
 
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nonnull;
 import java.util.Optional;
 
 public final class MdmResourceUtil {
 
-	private MdmResourceUtil() {
-	}
+	private MdmResourceUtil() {}
 
 	/**
 	 * If the resource is tagged as not managed by MDM, return false. Otherwise true.
@@ -38,7 +37,8 @@ public final class MdmResourceUtil {
 	 * @return A boolean indicating whether MDM can manage this resource.
 	 */
 	public static boolean isMdmAllowed(IBaseResource theBaseResource) {
-		return theBaseResource.getMeta().getTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED) == null;
+		return theBaseResource.getMeta().getTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED)
+				== null;
 	}
 
 	/**
@@ -53,7 +53,8 @@ public final class MdmResourceUtil {
 	}
 
 	public static boolean isGoldenRecord(IBaseResource theBaseResource) {
-		return resourceHasTag(theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD);
+		return resourceHasTag(
+				theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD);
 	}
 
 	public static boolean hasGoldenRecordSystemTag(IBaseResource theIBaseResource) {
@@ -65,7 +66,8 @@ public final class MdmResourceUtil {
 	}
 
 	public static boolean isGoldenRecordRedirected(IBaseResource theBaseResource) {
-		return resourceHasTag(theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED);
+		return resourceHasTag(
+				theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED);
 	}
 
 	private static boolean resourceHasTag(IBaseResource theBaseResource, String theSystem, String theCode) {
@@ -82,8 +84,11 @@ public final class MdmResourceUtil {
 		return theBaseResource.getMeta().getTag().stream().anyMatch(tag -> theSystem.equalsIgnoreCase(tag.getSystem()));
 	}
 
-	private static Optional<? extends IBaseCoding> getTagWithSystem(IBaseResource theResource, @Nonnull String theSystem) {
-		return theResource.getMeta().getTag().stream().filter(tag -> theSystem.equalsIgnoreCase(tag.getSystem())).findFirst();
+	private static Optional<? extends IBaseCoding> getTagWithSystem(
+			IBaseResource theResource, @Nonnull String theSystem) {
+		return theResource.getMeta().getTag().stream()
+				.filter(tag -> theSystem.equalsIgnoreCase(tag.getSystem()))
+				.findFirst();
 	}
 
 	public static void removeTagWithSystem(IBaseResource theResource, @Nonnull String theSystem) {
@@ -98,15 +103,51 @@ public final class MdmResourceUtil {
 	 * @return Returns resource with the tag set.
 	 */
 	public static IBaseResource setMdmManaged(IBaseResource theBaseResource) {
-		return setTagOnResource(theBaseResource, MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_HAPI_MDM_MANAGED, MdmConstants.DISPLAY_HAPI_MDM_MANAGED);
+		return setTagOnResource(
+				theBaseResource,
+				MdmConstants.SYSTEM_MDM_MANAGED,
+				MdmConstants.CODE_HAPI_MDM_MANAGED,
+				MdmConstants.DISPLAY_HAPI_MDM_MANAGED);
 	}
 
 	public static IBaseResource setGoldenResource(IBaseResource theBaseResource) {
-		return setTagOnResource(theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD, MdmConstants.DISPLAY_GOLDEN_RECORD);
+		return setTagOnResource(
+				theBaseResource,
+				MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS,
+				MdmConstants.CODE_GOLDEN_RECORD,
+				MdmConstants.DISPLAY_GOLDEN_RECORD);
 	}
 
+	/**
+	 * Sets the provided resource as 'redirected' golden resource.
+	 * This is done when a Golden Resource has been deprecated
+	 * and is no longer the primary golden resource (for example,
+	 * after a merge of 2 golden resources).
+	 */
 	public static IBaseResource setGoldenResourceRedirected(IBaseResource theBaseResource) {
-		return setTagOnResource(theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED, MdmConstants.DISPLAY_GOLDEN_REDIRECT);
+		return setTagOnResource(
+				theBaseResource,
+				MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS,
+				MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED,
+				MdmConstants.DISPLAY_GOLDEN_REDIRECT);
+	}
+
+	/**
+	 * Adds the BLOCKED tag to the golden resource.
+	 * Because this is called *before* a resource is saved,
+	 * we must add a new system/code combo to it
+	 * @param theBaseResource
+	 * @return
+	 */
+	public static IBaseResource setGoldenResourceAsBlockedResourceGoldenResource(IBaseResource theBaseResource) {
+		IBaseCoding tag = theBaseResource.getMeta().addTag();
+		tag.setSystem(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS);
+		tag.setCode(MdmConstants.CODE_BLOCKED);
+		tag.setDisplay(MdmConstants.CODE_BLOCKED_DISPLAY);
+		tag.setUserSelected(false);
+		tag.setVersion("1");
+
+		return theBaseResource;
 	}
 
 	/**
@@ -116,7 +157,8 @@ public final class MdmResourceUtil {
 	 * a reference to a tag, to make sure it isn't double-added.
 	 */
 	@Nonnull
-	private static IBaseResource setTagOnResource(IBaseResource theGoldenResource, String theSystem, String theCode, String theDisplay) {
+	private static IBaseResource setTagOnResource(
+			IBaseResource theGoldenResource, String theSystem, String theCode, String theDisplay) {
 		Optional<? extends IBaseCoding> tagWithSystem = getTagWithSystem(theGoldenResource, theSystem);
 		if (tagWithSystem.isPresent()) {
 			tagWithSystem.get().setCode(theCode);

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class ConfigLoader {
 	public static final String CLASSPATH = "classpath:";
 
 	public static String loadResourceContent(String theResourcePath) {
-		if(theResourcePath.startsWith(CLASSPATH)) {
+		if (theResourcePath.startsWith(CLASSPATH)) {
 			theResourcePath = theResourcePath.substring(CLASSPATH.length());
 		}
 		return ClasspathUtil.loadResource(theResourcePath);
@@ -47,7 +47,8 @@ public class ConfigLoader {
 		try {
 			props.load(new StringReader(propsString));
 		} catch (IOException e) {
-			throw new RuntimeException(Msg.code(324) + String.format("Unable to load properties at %s", theResourcePath), e);
+			throw new RuntimeException(
+					Msg.code(324) + String.format("Unable to load properties at %s", theResourcePath), e);
 		}
 		return props;
 	}
@@ -57,8 +58,8 @@ public class ConfigLoader {
 		try {
 			return mapper.readValue(loadResourceContent(theResourcePath), theModelClass);
 		} catch (Exception e) {
-			throw new RuntimeException(Msg.code(325) + String.format("Unable to parse resource at %s", theResourcePath), e);
+			throw new RuntimeException(
+					Msg.code(325) + String.format("Unable to parse resource at %s", theResourcePath), e);
 		}
 	}
-
 }

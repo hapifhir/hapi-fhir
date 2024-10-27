@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class LoincConsumerNameHandler implements IZipContentsHandlerCsv {
 
 	@Override
 	public void accept(CSVRecord theRecord) {
-		
+
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		if (isBlank(loincNumber)) {
 			return;
@@ -48,15 +48,12 @@ public class LoincConsumerNameHandler implements IZipContentsHandlerCsv {
 		if (isBlank(consumerName)) {
 			return;
 		}
-		
+
 		TermConcept loincCode = myCode2Concept.get(loincNumber);
 		if (loincCode == null) {
 			return;
 		}
-			
-		loincCode.addDesignation()
-		    .setUseDisplay("ConsumerName")
-		    .setValue(consumerName);
-	}
 
+		loincCode.addDesignation().setUseDisplay("ConsumerName").setValue(consumerName);
+	}
 }

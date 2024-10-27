@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -81,13 +81,14 @@ public class ReflectionUtil {
 		return retVal;
 	}
 
-	private static void populateDeclaredMethodsMap(Class<?> theClazz, HashMap<String, Method> foundMethods, boolean theIncludeMethodsFromSuperclasses) {
+	private static void populateDeclaredMethodsMap(
+			Class<?> theClazz, HashMap<String, Method> foundMethods, boolean theIncludeMethodsFromSuperclasses) {
 		Method[] declaredMethods = theClazz.getDeclaredMethods();
 		for (Method next : declaredMethods) {
 
-			if (Modifier.isAbstract(next.getModifiers()) ||
-				Modifier.isStatic(next.getModifiers()) ||
-				Modifier.isPrivate(next.getModifiers())) {
+			if (Modifier.isAbstract(next.getModifiers())
+					|| Modifier.isStatic(next.getModifiers())
+					|| Modifier.isPrivate(next.getModifiers())) {
 				continue;
 			}
 
@@ -218,12 +219,19 @@ public class ReflectionUtil {
 	}
 
 	public static Object newInstanceOfFhirServerType(String theType) {
-		String errorMessage = "Unable to instantiate server framework. Please make sure that hapi-fhir-server library is on your classpath!";
+		String errorMessage =
+				"Unable to instantiate server framework. Please make sure that hapi-fhir-server library is on your classpath!";
 		String wantedType = "ca.uhn.fhir.rest.api.server.IFhirVersionServer";
 		return newInstanceOfType(theType, theType, errorMessage, wantedType, new Class[0], new Object[0]);
 	}
 
-	private static Object newInstanceOfType(String theKey, String theType, String errorMessage, String wantedType, Class<?>[] theParameterArgTypes, Object[] theConstructorArgs) {
+	private static Object newInstanceOfType(
+			String theKey,
+			String theType,
+			String errorMessage,
+			String wantedType,
+			Class<?>[] theParameterArgTypes,
+			Object[] theConstructorArgs) {
 		Object fhirServerVersion = ourFhirServerVersions.get(theKey);
 		if (fhirServerVersion == null) {
 			try {
@@ -245,7 +253,8 @@ public class ReflectionUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T newInstanceOrReturnNull(String theClassName, Class<T> theType, Class<?>[] theArgTypes, Object[] theArgs) {
+	public static <T> T newInstanceOrReturnNull(
+			String theClassName, Class<T> theType, Class<?>[] theArgTypes, Object[] theArgs) {
 		try {
 			return newInstance(theClassName, theType, theArgTypes, theArgs);
 		} catch (ConfigurationException e) {
@@ -264,8 +273,11 @@ public class ReflectionUtil {
 				throw new ConfigurationException(Msg.code(1787) + theClassName + " is not assignable to " + theType);
 			}
 			return (T) clazz.getConstructor(theArgTypes).newInstance(theArgs);
-		} catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
-					InvocationTargetException e) {
+		} catch (ClassNotFoundException
+				| NoSuchMethodException
+				| InstantiationException
+				| IllegalAccessException
+				| InvocationTargetException e) {
 			throw new InternalErrorException(Msg.code(2330) + e.getMessage(), e);
 		}
 	}

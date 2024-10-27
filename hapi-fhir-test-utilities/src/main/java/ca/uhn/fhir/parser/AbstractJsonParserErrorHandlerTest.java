@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 
-abstract public non-sealed class AbstractJsonParserErrorHandlerTest extends AbstractParserErrorHandlerTest {
+public abstract non-sealed class AbstractJsonParserErrorHandlerTest extends AbstractParserErrorHandlerTest {
 
-	private static String PATIENT_DUPLICATE_CHOICE = 
-			""" 
+	private static String PATIENT_DUPLICATE_CHOICE =
+			"""
 			{
 				"resourceType": "Patient",
 				"deceasedBoolean": "true",
@@ -33,7 +33,7 @@ abstract public non-sealed class AbstractJsonParserErrorHandlerTest extends Abst
 			""";
 
 	protected abstract FhirContext getFhirContext();
-	
+
 	@Override
 	protected IParser createParser() {
 		return getFhirContext().newJsonParser();
@@ -43,5 +43,4 @@ abstract public non-sealed class AbstractJsonParserErrorHandlerTest extends Abst
 	protected String createResourceWithRepeatingChoice() {
 		return PATIENT_DUPLICATE_CHOICE;
 	}
-
 }

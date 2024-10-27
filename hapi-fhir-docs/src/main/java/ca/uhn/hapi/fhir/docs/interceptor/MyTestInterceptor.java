@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,8 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 public class MyTestInterceptor {
 
 	@Hook(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY)
-	public boolean beforeRestHookDelivery(ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
+	public boolean beforeRestHookDelivery(
+			ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
 
 		String header = "Authorization: Bearer 1234567";
 
@@ -40,5 +41,4 @@ public class MyTestInterceptor {
 
 		return true;
 	}
-
 }

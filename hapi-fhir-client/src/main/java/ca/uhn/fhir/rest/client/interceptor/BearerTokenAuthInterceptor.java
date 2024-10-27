@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class BearerTokenAuthInterceptor implements IClientInterceptor {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theToken
 	 *           The bearer token to use (must not be null)
 	 */
@@ -70,7 +70,8 @@ public class BearerTokenAuthInterceptor implements IClientInterceptor {
 
 	@Override
 	public void interceptRequest(IHttpRequest theRequest) {
-		theRequest.addHeader(Constants.HEADER_AUTHORIZATION, (Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + myToken));
+		theRequest.addHeader(
+				Constants.HEADER_AUTHORIZATION, (Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + myToken));
 	}
 
 	@Override
@@ -85,5 +86,4 @@ public class BearerTokenAuthInterceptor implements IClientInterceptor {
 		Validate.notNull(theToken, "theToken must not be null");
 		myToken = theToken;
 	}
-
 }

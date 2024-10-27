@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ package ca.uhn.fhir.jpa.esr;
 
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 
-public class ExternallyStoredResourceAddressMetadataKey extends ResourceMetadataKeyEnum<ExternallyStoredResourceAddress> {
+public class ExternallyStoredResourceAddressMetadataKey
+		extends ResourceMetadataKeyEnum<ExternallyStoredResourceAddress> {
 
 	/**
 	 * Singleton instance
 	 */
-	public static final ExternallyStoredResourceAddressMetadataKey INSTANCE = new ExternallyStoredResourceAddressMetadataKey();
+	public static final ExternallyStoredResourceAddressMetadataKey INSTANCE =
+			new ExternallyStoredResourceAddressMetadataKey();
 
 	/**
 	 * Constructor
@@ -34,5 +36,4 @@ public class ExternallyStoredResourceAddressMetadataKey extends ResourceMetadata
 	private ExternallyStoredResourceAddressMetadataKey() {
 		super("ExternallyStoredResourceAddress", ExternallyStoredResourceAddress.class);
 	}
-
 }

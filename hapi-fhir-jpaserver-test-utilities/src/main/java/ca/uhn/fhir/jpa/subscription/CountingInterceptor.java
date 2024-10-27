@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,13 @@ public class CountingInterceptor implements ChannelInterceptor {
 	private List<String> mySent = new ArrayList<>();
 
 	public int getSentCount(String theContainingKeyword) {
-		return (int) mySent.stream().filter(t -> t.contains(theContainingKeyword)).count();
+		return (int)
+				mySent.stream().filter(t -> t.contains(theContainingKeyword)).count();
 	}
 
 	@Override
-	public void afterSendCompletion(Message<?> theMessage, MessageChannel theChannel, boolean theSent, Exception theException) {
+	public void afterSendCompletion(
+			Message<?> theMessage, MessageChannel theChannel, boolean theSent, Exception theException) {
 		ourLog.info("Send complete for message: {}", theMessage);
 		if (theSent) {
 			mySent.add(theMessage.toString());

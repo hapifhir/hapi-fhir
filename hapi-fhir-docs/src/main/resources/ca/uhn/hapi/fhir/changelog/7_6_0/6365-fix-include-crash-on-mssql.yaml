@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6365
+title: "A crash while executing a search with named `_include` parameters on
+  MSSQL has been fixed. Thanks to Craig McClendon for the pull request!"

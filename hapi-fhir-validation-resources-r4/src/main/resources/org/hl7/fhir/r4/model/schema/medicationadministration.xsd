@@ -34,7 +34,8 @@
   any profiles that apply to the resources in order to make a conformant implementation.
 
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" targetNamespace="http://hl7.org/fhir"
+           elementFormDefault="qualified" version="1.0">
   <xs:include schemaLocation="fhir-base.xsd"/>
   <xs:element name="MedicationAdministration" type="MedicationAdministration">
     <xs:annotation>
@@ -182,7 +183,9 @@
         <xs:sequence>
           <xs:element name="text" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.The dosage instructions should reflect the dosage of the medication that was administered.</xs:documentation>
+              <xs:documentation xml:lang="en">Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.
+
+The dosage instructions should reflect the dosage of the medication that was administered.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="site" minOccurs="0" maxOccurs="1" type="CodeableConcept">

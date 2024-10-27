@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class CanonicalEID {
 	private String myUse;
 	private String myValue;
 
-	public CanonicalEID(String theSystem, String theValue, String theUse){
+	public CanonicalEID(String theSystem, String theValue, String theUse) {
 		mySystem = theSystem;
 		myUse = theUse;
 		myValue = theValue;
@@ -63,36 +63,41 @@ public class CanonicalEID {
 	 * Patient.identifier.where(system='test-system').value
 	 *
 	 */
-	private static String buildEidFhirPath(FhirContext theFhirContext, String theEidSystem, IBaseResource theBaseResource) {
-		return theFhirContext.getResourceType(theBaseResource)
-			+ ".identifier.where(system='"
-			+ theEidSystem
-			+ "')";
+	private static String buildEidFhirPath(
+			FhirContext theFhirContext, String theEidSystem, IBaseResource theBaseResource) {
+		return theFhirContext.getResourceType(theBaseResource) + ".identifier.where(system='" + theEidSystem + "')";
 	}
 
 	public Identifier toR4() {
 		return new Identifier()
-			.setUse(Identifier.IdentifierUse.fromCode(myUse))
-			.setSystem(mySystem)
-			.setValue(myValue);
+				.setUse(Identifier.IdentifierUse.fromCode(myUse))
+				.setSystem(mySystem)
+				.setValue(myValue);
 	}
 
-	public org.hl7.fhir.dstu3.model.Identifier toDSTU3(){
+	public org.hl7.fhir.dstu3.model.Identifier toDSTU3() {
 		return new org.hl7.fhir.dstu3.model.Identifier()
-			.setUse(org.hl7.fhir.dstu3.model.Identifier.IdentifierUse.fromCode(myUse))
-			.setSystem(mySystem)
-			.setValue(myValue);
+				.setUse(org.hl7.fhir.dstu3.model.Identifier.IdentifierUse.fromCode(myUse))
+				.setSystem(mySystem)
+				.setValue(myValue);
 	}
 
-	public  String getSystem() {
+	public org.hl7.fhir.r5.model.Identifier toR5() {
+		return new org.hl7.fhir.r5.model.Identifier()
+				.setUse(org.hl7.fhir.r5.model.Identifier.IdentifierUse.fromCode(myUse))
+				.setSystem(mySystem)
+				.setValue(myValue);
+	}
+
+	public String getSystem() {
 		return mySystem;
 	}
 
-	public  String getUse() {
+	public String getUse() {
 		return myUse;
 	}
 
-	public  String getValue() {
+	public String getValue() {
 		return myValue;
 	}
 
@@ -113,7 +118,6 @@ public class CanonicalEID {
 		return mySystem + '|' + myValue;
 	}
 
-
 	/**
 	 * A Factory method to generate a {@link CanonicalEID} object from an incoming resource.
 	 *
@@ -123,14 +127,13 @@ public class CanonicalEID {
 	 *
 	 * @return an optional {@link CanonicalEID} object, representing a resource identifier that matched the given eidSystem.
 	 */
-	public static List<CanonicalEID> extractFromResource(FhirContext theFhirContext, String theEidSystem, IBaseResource theBaseResource) {
+	public static List<CanonicalEID> extractFromResource(
+			FhirContext theFhirContext, String theEidSystem, IBaseResource theBaseResource) {
 		IFhirPath fhirPath = theFhirContext.newFhirPath();
 		String eidPath = buildEidFhirPath(theFhirContext, theEidSystem, theBaseResource);
 		List<IBase> evaluate = fhirPath.evaluate(theBaseResource, eidPath, IBase.class);
 
-		return evaluate.stream()
-			.map(ibase -> new CanonicalEID(fhirPath, ibase))
-			.collect(Collectors.toList());
+		return evaluate.stream().map(ibase -> new CanonicalEID(fhirPath, ibase)).collect(Collectors.toList());
 	}
 
 	@Override
@@ -138,10 +141,10 @@ public class CanonicalEID {
 		if (!(o instanceof CanonicalEID)) {
 			return false;
 		}
-		CanonicalEID otherEid = (CanonicalEID)o;
+		CanonicalEID otherEid = (CanonicalEID) o;
 		return Objects.equals(otherEid.getSystem(), this.getSystem())
-			&& Objects.equals(otherEid.getValue(), this.getValue())
-			&& Objects.equals(otherEid.getUse(), this.getUse());
+				&& Objects.equals(otherEid.getValue(), this.getValue())
+				&& Objects.equals(otherEid.getUse(), this.getUse());
 	}
 
 	@Override

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -41,7 +42,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -53,13 +53,18 @@ import java.util.Set;
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
+
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
 	private Map<WarmCacheEntry, Long> myCacheEntryToNextRefresh = new LinkedHashMap<>();
+
 	@Autowired
 	private FhirContext myCtx;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
@@ -78,11 +83,8 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs 
 				// Set the next time to warm this search
 				nextRefresh = nextCacheEntry.getPeriodMillis() + System.currentTimeMillis();
 				myCacheEntryToNextRefresh.put(nextCacheEntry, nextRefresh);
-
 			}
-
 		}
-
 	}
 
 	private void refreshNow(WarmCacheEntry theCacheEntry) {

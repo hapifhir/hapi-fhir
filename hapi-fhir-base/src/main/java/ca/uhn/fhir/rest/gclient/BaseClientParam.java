@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,12 @@ abstract class BaseClientParam implements IParam {
 
 	@Override
 	public ICriterion<?> isMissing(boolean theMissing) {
-		return new MissingCriterion(theMissing ? Constants.PARAMQUALIFIER_MISSING_TRUE : Constants.PARAMQUALIFIER_MISSING_FALSE);
+		return new MissingCriterion(
+				theMissing ? Constants.PARAMQUALIFIER_MISSING_TRUE : Constants.PARAMQUALIFIER_MISSING_FALSE);
 	}
 
-	private class MissingCriterion implements ICriterion<IParam>, ICriterionInternal
-	{
+	private class MissingCriterion implements ICriterion<IParam>, ICriterionInternal {
 		private String myParameterValue;
-
 
 		public MissingCriterion(String theParameterValue) {
 			myParameterValue = theParameterValue;
@@ -47,7 +46,5 @@ abstract class BaseClientParam implements IParam {
 		public String getParameterName() {
 			return BaseClientParam.this.getParamName() + Constants.PARAMQUALIFIER_MISSING;
 		}
-		
 	}
-	
 }

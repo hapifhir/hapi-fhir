@@ -1,6 +1,7 @@
 package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.parser.IParser;
 import org.apache.commons.io.IOUtils;
@@ -19,7 +20,8 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class HapiFhirCodeSystemGeneratorTest {
+
+public class HapiFhirCodeSystemGeneratorTest extends BaseValidationTestWithInlineMocks {
 
 	public static final String HAPI_FHIR_STORAGE_RESPONSE_CODE_JSON = "HapiFhirStorageResponseCode.json";
 	public static final FhirContext ourCtx = FhirContext.forR5Cached();

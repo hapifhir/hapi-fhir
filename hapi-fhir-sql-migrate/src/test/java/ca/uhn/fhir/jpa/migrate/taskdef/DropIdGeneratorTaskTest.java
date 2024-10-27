@@ -10,9 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DropIdGeneratorTaskTest extends BaseTest {
 
@@ -23,13 +21,13 @@ public class DropIdGeneratorTaskTest extends BaseTest {
 		before(theTestDatabaseDetails);
 
 		executeSql("create sequence SEQ_FOO start with 1 increment by 50");
-		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), containsInAnyOrder("SEQ_FOO"));
+		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties())).containsExactlyInAnyOrder("SEQ_FOO");
 
 		MyMigrationTasks migrator = new MyMigrationTasks();
 		getMigrator().addTasks(migrator.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), empty());
+		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties())).isEmpty();
 	}
 
 

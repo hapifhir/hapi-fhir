@@ -5,11 +5,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.StopWatch;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 
 public class DefaultProfileValidationSupportNpmStrategy extends NpmPackageValidationSupport {
@@ -31,9 +31,17 @@ public class DefaultProfileValidationSupportNpmStrategy extends NpmPackageValida
 			loadPackageFromClasspath("org/hl7/fhir/r5/packages/hl7.fhir.uv.extensions.r5-1.0.0.tgz");
 			loadPackageFromClasspath("org/hl7/fhir/r5/packages/hl7.terminology-5.1.0.tgz");
 		} catch (IOException e) {
-			throw new ConfigurationException(Msg.code(2333) + "Failed to load required validation resources. Make sure that the appropriate hapi-fhir-validation-resources-VER JAR is on the classpath", e);
+			throw new ConfigurationException(
+					Msg.code(2333)
+							+ "Failed to load required validation resources. Make sure that the appropriate hapi-fhir-validation-resources-VER JAR is on the classpath",
+					e);
 		}
 
 		ourLog.info("Loaded {} Core+Extension resources in {}", countAll(), sw);
+	}
+
+	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " FHIR Standard Profile NPM Validation Support";
 	}
 }

@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 5103
+title: "
+      Remove + from the list of characters that are escaped automatically
+      since + is already an escaped character (representing a space)
+      in the query part of URLs.
+"

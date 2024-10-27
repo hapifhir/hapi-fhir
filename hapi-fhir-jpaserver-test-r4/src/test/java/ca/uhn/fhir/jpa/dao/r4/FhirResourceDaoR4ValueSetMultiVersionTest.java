@@ -7,8 +7,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
@@ -21,10 +19,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 
@@ -195,8 +195,7 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 			assertEquals(2, myTermValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 10), URL_MY_VALUE_SET).size());
 			Optional<TermValueSet> optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET);
 			if (optionalTermValueSet.isPresent()) {
-				fail();
-			}
+				fail();			}
 			assertNotNull(myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v1").orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " version v1")));
 			assertNotNull(myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2").orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " version v2")));
 		});
@@ -207,12 +206,10 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 			assertEquals(1, myTermValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 10), URL_MY_VALUE_SET).size());
 			Optional<TermValueSet> optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET);
 			if (optionalTermValueSet.isPresent()) {
-				fail();
-			}
+				fail();			}
 			optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v1");
 			if (optionalTermValueSet.isPresent()) {
-				fail();
-			}
+				fail();			}
 			assertNotNull(myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2").orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " version v2")));
 		});
 
@@ -221,16 +218,13 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 			assertEquals(0, myTermValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 10), URL_MY_VALUE_SET).size());
 			Optional<TermValueSet> optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET);
 			if (optionalTermValueSet.isPresent()) {
-				fail();
-			}
+				fail();			}
 			optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v1");
 			if (optionalTermValueSet.isPresent()) {
-				fail();
-			}
+				fail();			}
 			optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2");
 			if (optionalTermValueSet.isPresent()) {
-				fail();
-			}
+				fail();			}
 		});
 	}
 
@@ -249,7 +243,7 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 		include.addConcept().setCode("A");
 
 		ValueSet expansion = myValueSetDao.expand(vs, null);
-		MatcherAssert.assertThat(myValueSetTestUtil.toCodes(expansion), Matchers.contains("A"));
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
 
 	}
 

@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
-import org.hamcrest.Matchers;
 import org.hibernate.search.engine.search.sort.dsl.CompositeSortComponentsStep;
 import org.hibernate.search.engine.search.sort.dsl.FieldSortMissingValueBehaviorStep;
 import org.hibernate.search.engine.search.sort.dsl.FieldSortOptionsStep;
@@ -22,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -58,7 +57,7 @@ class HSearchSortHelperImplTest {
 
 		List<String> sortPropertyList = tested.getSortPropertyList(RestSearchParameterTypeEnum.TOKEN, "the-param-name");
 
-		assertThat(sortPropertyList, Matchers.contains("nsp.the-param-name.token.system", "nsp.the-param-name.token.code"));
+		assertThat(sortPropertyList).containsExactly("nsp.the-param-name.token.system", "nsp.the-param-name.token.code");
 	}
 
 	/**

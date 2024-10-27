@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -79,7 +79,8 @@ public class TolerantJsonParser extends JsonParser {
 			 */
 
 			String msg = defaultString(e.getMessage(), "");
-			if (msg.contains("Unexpected character ('.' (code 46))") || msg.contains("Invalid numeric value: Leading zeroes not allowed")) {
+			if (msg.contains("Unexpected character ('.' (code 46))")
+					|| msg.contains("Invalid numeric value: Leading zeroes not allowed")) {
 				Gson gson = new Gson();
 
 				JsonObject object = gson.fromJson(theMessageString, JsonObject.class);
@@ -87,20 +88,30 @@ public class TolerantJsonParser extends JsonParser {
 
 				T parsed = super.parseResource(theResourceType, corrected);
 
-				myContext.newTerser().visit(parsed, (theElement, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath) -> {
+				myContext
+						.newTerser()
+						.visit(
+								parsed,
+								(theElement,
+										theContainingElementPath,
+										theChildDefinitionPath,
+										theElementDefinitionPath) -> {
+									BaseRuntimeElementDefinition<?> def =
+											theElementDefinitionPath.get(theElementDefinitionPath.size() - 1);
+									if (def.getName().equals("decimal")) {
+										IPrimitiveType<BigDecimal> decimal = (IPrimitiveType<BigDecimal>) theElement;
+										String oldValue = decimal.getValueAsString();
+										String newValue = decimal.getValue().toPlainString();
+										ourLog.warn(
+												"Correcting invalid previously saved decimal number for Resource[pid={}] - Was {} and now is {}",
+												Objects.isNull(myResourcePid) ? "" : myResourcePid,
+												oldValue,
+												newValue);
+										decimal.setValueAsString(newValue);
+									}
 
-					BaseRuntimeElementDefinition<?> def = theElementDefinitionPath.get(theElementDefinitionPath.size() - 1);
-					if (def.getName().equals("decimal")) {
-						IPrimitiveType<BigDecimal> decimal = (IPrimitiveType<BigDecimal>) theElement;
-						String oldValue = decimal.getValueAsString();
-						String newValue = decimal.getValue().toPlainString();
-						ourLog.warn("Correcting invalid previously saved decimal number for Resource[pid={}] - Was {} and now is {}",
-							Objects.isNull(myResourcePid) ? "" : myResourcePid, oldValue, newValue);
-						decimal.setValueAsString(newValue);
-					}
-
-					return true;
-				});
+									return true;
+								});
 
 				return parsed;
 			}
@@ -109,7 +120,8 @@ public class TolerantJsonParser extends JsonParser {
 		}
 	}
 
-	public static TolerantJsonParser createWithLenientErrorHandling(FhirContext theContext, @Nullable Long theResourcePid) {
+	public static TolerantJsonParser createWithLenientErrorHandling(
+			FhirContext theContext, @Nullable Long theResourcePid) {
 		LenientErrorHandler errorHandler = new LenientErrorHandler(false).disableAllErrors();
 		return new TolerantJsonParser(theContext, errorHandler, theResourcePid);
 	}

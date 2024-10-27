@@ -13,26 +13,27 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class MdmLinkSvcTest extends BaseMdmR4Test {
+	private static final Logger ourLog = getLogger(MdmLinkSvcTest.class);
+
 	private static final MdmMatchOutcome POSSIBLE_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
@@ -137,7 +138,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, null);
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), is(equalTo(Msg.code(760) + "MDM system is not allowed to modify links on manually created links")));
+			assertEquals(Msg.code(760) + "MDM system is not allowed to modify links on manually created links", e.getMessage());
 		}
 	}
 
@@ -151,7 +152,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.AUTO, createContextForUpdate("Patient"));
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), is(equalTo(Msg.code(761) + "MDM system is not allowed to automatically NO_MATCH a resource")));
+			assertEquals(Msg.code(761) + "MDM system is not allowed to automatically NO_MATCH a resource", e.getMessage());
 		}
 	}
 
@@ -166,8 +167,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient2, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
 		List<MdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
-		assertFalse(targets.isEmpty());
-		assertEquals(2, targets.size());
+		assertThat(targets).isNotEmpty();
+		assertThat(targets).hasSize(2);
 
 		//TODO GGG update this test once we decide what has to happen here. There is no more "syncing links"
 		//assertEquals(patient1.getIdElement().toVersionless().getValue(), sourcePatient.getLinkFirstRep().getTarget().getReference());
@@ -176,14 +177,11 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 			.map(link -> link.getSourcePersistenceId().getId().toString())
 			.collect(Collectors.toList());
 
-		List<String> expected = Arrays.asList(patient1, patient2)
-			.stream().map(p -> p.getIdElement().toVersionless().getIdPart())
+		List<String> expected = Stream.of(patient1, patient2)
+			.map(p -> p.getIdElement().toVersionless().getIdPart())
 			.collect(Collectors.toList());
 
-		System.out.println(actual);
-		System.out.println(expected);
-
-		assertThat(actual, Matchers.containsInAnyOrder(expected.toArray()));
+		assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
 	}
 
 	@Test
@@ -196,8 +194,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		List<? extends IMdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
-		assertFalse(targets.isEmpty());
-		assertEquals(1, targets.size());
+		assertThat(targets).isNotEmpty();
+		assertThat(targets).hasSize(1);
 		assertEquals(requestPartitionId.getFirstPartitionIdOrNull(), targets.get(0).getPartitionId().getPartitionId());
 	}
 }

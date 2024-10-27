@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,5 +37,4 @@ public interface IHistoryUntyped {
 	 * @since 4.0.0
 	 */
 	<T extends IBaseBundle> IHistoryTyped<T> returnBundle(Class<T> theType);
-
 }

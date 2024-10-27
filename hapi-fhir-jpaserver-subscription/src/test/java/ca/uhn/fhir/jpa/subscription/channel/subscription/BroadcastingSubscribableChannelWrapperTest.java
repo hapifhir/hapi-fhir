@@ -9,8 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.MessageDeliveryException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -27,7 +26,7 @@ class BroadcastingSubscribableChannelWrapperTest {
 		try {
 			svc.send(new ResourceModifiedJsonMessage(new ResourceModifiedMessage()));
 		} catch (MessageDeliveryException e) {
-			assertThat(e.getMessage(), containsString("Channel has zero subscribers"));
+			assertThat(e.getCause().getMessage()).contains("Channel has zero subscribers");
 		}
 	}
 

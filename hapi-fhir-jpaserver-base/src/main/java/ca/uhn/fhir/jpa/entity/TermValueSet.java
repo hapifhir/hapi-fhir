@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,30 +21,31 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
 
-import javax.annotation.Nonnull;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -53,9 +54,18 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
-@Table(name = "TRM_VALUESET", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_VALUESET_URL", columnNames = {"URL", "VER"})
-})
+@Table(
+		name = "TRM_VALUESET",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_VALUESET_URL",
+					columnNames = {"URL", "VER"})
+		},
+		indexes = {
+			// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index
+			// automatically
+			@Index(name = "FK_TRMVALUESET_RES", columnList = "RES_ID")
+		})
 @Entity()
 public class TermValueSet implements Serializable {
 	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
@@ -63,6 +73,7 @@ public class TermValueSet implements Serializable {
 	public static final int MAX_URL_LENGTH = 200;
 	public static final int MAX_VER_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
+
 	@Id()
 	@SequenceGenerator(name = "SEQ_VALUESET_PID", sequenceName = "SEQ_VALUESET_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_PID")
@@ -76,7 +87,12 @@ public class TermValueSet implements Serializable {
 	private String myVersion;
 
 	@OneToOne()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_TRMVALUESET_RES"))
+	@JoinColumn(
+			name = "RES_ID",
+			referencedColumnName = "RES_ID",
+			nullable = false,
+			updatable = false,
+			foreignKey = @ForeignKey(name = "FK_TRMVALUESET_RES"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", insertable = false, updatable = false)
@@ -132,8 +148,8 @@ public class TermValueSet implements Serializable {
 
 	public TermValueSet setUrl(@Nonnull String theUrl) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theUrl, "theUrl must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUrl, MAX_URL_LENGTH,
-			"URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theUrl));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theUrl, MAX_URL_LENGTH, "URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theUrl));
 		myUrl = theUrl;
 		return this;
 	}
@@ -219,8 +235,10 @@ public class TermValueSet implements Serializable {
 	}
 
 	public TermValueSet setVersion(String theVersion) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theVersion, MAX_VER_LENGTH,
-			"Version exceeds maximum length (" + MAX_VER_LENGTH + "): " + length(theVersion));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theVersion,
+				MAX_VER_LENGTH,
+				"Version exceeds maximum length (" + MAX_VER_LENGTH + "): " + length(theVersion));
 		myVersion = theVersion;
 		return this;
 	}
@@ -233,9 +251,7 @@ public class TermValueSet implements Serializable {
 
 		TermValueSet that = (TermValueSet) theO;
 
-		return new EqualsBuilder()
-			.append(getUrl(), that.getUrl())
-			.isEquals();
+		return new EqualsBuilder().append(getUrl(), that.getUrl()).isEquals();
 	}
 
 	@Override
@@ -249,15 +265,15 @@ public class TermValueSet implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("id", myId)
-			.append("url", myUrl)
-			.append(myResource != null ? ("resource=" + myResource.toString()) : ("resource=(null)"))
-			.append("resourcePid", myResourcePid)
-			.append("name", myName)
-			.append(myConcepts != null ? ("concepts - size=" + myConcepts.size()) : ("concepts=(null)"))
-			.append("totalConcepts", myTotalConcepts)
-			.append("totalConceptDesignations", myTotalConceptDesignations)
-			.append("expansionStatus", myExpansionStatus)
-			.toString();
+				.append("id", myId)
+				.append("url", myUrl)
+				.append(myResource != null ? ("resource=" + myResource.toString()) : ("resource=(null)"))
+				.append("resourcePid", myResourcePid)
+				.append("name", myName)
+				.append(myConcepts != null ? ("concepts - size=" + myConcepts.size()) : ("concepts=(null)"))
+				.append("totalConcepts", myTotalConcepts)
+				.append("totalConceptDesignations", myTotalConceptDesignations)
+				.append("expansionStatus", myExpansionStatus)
+				.toString();
 	}
 }

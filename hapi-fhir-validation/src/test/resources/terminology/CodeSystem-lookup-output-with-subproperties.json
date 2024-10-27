@@ -1,0 +1,113 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "name",
+      "valueString": "Client_Config_CodeSystem"
+    },
+    {
+      "name": "display",
+      "valueString": "Value to display"
+    },
+    {
+      "name": "abstract",
+      "valueBoolean": false
+    },
+    {
+      "name": "property",
+      "part": [
+        {
+          "name": "code",
+          "valueCode": "interfaces"
+        },
+        {
+          "name": "subproperty",
+          "part": [
+            {
+              "name": "code",
+              "valueCode": "dataType"
+            },
+            {
+              "name": "value",
+              "valueString": "drugs"
+            }
+          ]
+        },
+        {
+          "name": "subproperty",
+          "part": [
+            {
+              "name": "code",
+              "valueCode": "apiVersion"
+            },
+            {
+              "name": "value",
+              "valueString": "4.5.0"
+            }
+          ]
+        },
+        {
+          "name": "subproperty",
+          "part": [
+            {
+              "name": "code",
+              "valueCode": "onboardStatus"
+            },
+            {
+              "name": "value",
+              "valueString": "unauthorized"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "property",
+      "part": [
+        {
+          "name": "code",
+          "valueCode": "interfaces"
+        },
+        {
+          "name": "subproperty",
+          "part": [
+            {
+              "name": "code",
+              "valueCode": "dataType"
+            },
+            {
+              "name": "value",
+              "valueString": "ps"
+            }
+          ]
+        },
+        {
+          "name": "subproperty",
+          "part": [
+            {
+              "name": "code",
+              "valueCode": "apiVersion"
+            },
+            {
+              "name": "value",
+              "valueString": "4.0.0"
+            }
+          ]
+        },
+        {
+          "name": "subproperty",
+          "part": [
+            {
+              "name": "code",
+              "valueCode": "onboardStatus"
+            },
+            {
+              "name": "value",
+              "valueString": "contributor-testing"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

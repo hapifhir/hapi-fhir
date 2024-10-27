@@ -1,35 +1,42 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Logger;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -44,6 +51,9 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	protected StringType myMedicationId;
 	protected IAnyResource myGoldenMedication;
 	protected StringType myGoldenMedicationId;
+
+	@RegisterExtension
+	LogbackTestExtension myLogCapture = new LogbackTestExtension((Logger) Logs.getMdmTroubleshootingLog());
 
 	@Autowired
 	IInterceptorService myInterceptorService;
@@ -90,6 +100,27 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		myInterceptorService.unregisterInterceptor(afterMdmLatch);
 		myMdmSettings.setEnabled(false);
 		super.after();
+	}
+
+	protected void clearMdmLinks() {
+		// Override of super class.
+		//
+		// Each resource that needs to be cleared produces a separate work chunk in batch processing, owing to a loop
+		// in MdmGenerateRangeChunksStep. There are three resource types used in this test, so that means there are
+		// three work chunks created for finding GoldenResourceIds and deleting them.
+		//
+		// TestR4Config proscribes (via JpaBatch2Config/BaseBatch2Config) that there are 4 threads processing chunks.
+		// However, TestR4Config also proscribes that there is somewhere between 3 and 8 database connections available.
+		//
+		// Consequently, if we clear all resource types at once, we can end up with 3 threads processing a chunk each.
+		// Which would be fine, except LoadGoldenIdsStep requires 2 database connections - one to read data,
+		// and the second to create the clear step chunks based on that data. If TestR4Config rolls low and there
+		// are only three connections available, we risk a deadlock due to database connection exhaustion if we
+		// process all 3 resource types at once. (With 4 connections or more, one of the three chunks is guaranteed to
+		// be able to finish, thereby freeing resources for the other chunks to finish.)
+		clearMdmLinks("Medication");
+		clearMdmLinks("Practitioner");
+		clearMdmLinks("Patient");
 	}
 
 	@ParameterizedTest
@@ -180,10 +211,61 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria , null, theSyncOrAsyncRequest);
 			fail();
 		} catch (InvalidRequestException e) {
-
-			assertThat(e.getMessage(), either(
-				containsString(Msg.code(2039) + "Failed to validate parameters for job"))//Async case
-				.or(containsString(Msg.code(488) + "Failed to parse match URL")));// Sync case
+			assertThat(e.getMessage())
+				.overridingErrorMessage("Expected error message to contain specific codes and messages")
+				.satisfiesAnyOf(
+					message -> assertThat(message).contains(Msg.code(2039) + "Failed to validate parameters for job"),
+					message -> assertThat(message).contains(Msg.code(488) + "Failed to parse match URL")
+				);
 		}
+	}
+
+	@Test
+	public void testClearAndUpdateResource_WithoutMdmSubmit_LogsError() {
+		// Given
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Patient janePatient2 = createPatientAndUpdateLinks(buildJanePatient());
+		assertLinkCount(5);
+
+		// When
+		clearMdmLinks();
+
+		updatePatientAndUpdateLinks(janePatient);
+		try {
+			updatePatientAndUpdateLinks(janePatient2);
+		} catch (InternalErrorException e) {
+			// Then
+			assertLinkCount(1);
+			String expectedMsg = Msg.code(2362) + "Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.";
+			assertEquals(expectedMsg, e.getMessage());
+		}
+	}
+
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testUpdateResource_WithClearAndSubmit_Succeeds(ServletRequestDetails theSyncOrAsyncRequest) throws InterruptedException {
+		// Given
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Patient janePatient2 = createPatientAndUpdateLinks(buildJanePatient());
+		assertLinkCount(5);
+		final AtomicBoolean mdmSubmitBeforeMessageDeliveryHookCalled = new AtomicBoolean();
+		final Object interceptor =  new Object() {
+			@Hook(Pointcut.MDM_SUBMIT_PRE_MESSAGE_DELIVERY)
+			void hookMethod(ResourceModifiedJsonMessage theResourceModifiedJsonMessage) {
+				mdmSubmitBeforeMessageDeliveryHookCalled.set(true);
+			}
+		};
+		myInterceptorService.registerInterceptor(interceptor);
+		// When
+		clearMdmLinks();
+		afterMdmLatch.runWithExpectedCount(3, () -> {
+			myMdmProvider.mdmBatchPatientType(null , null, theSyncOrAsyncRequest);
+		});
+		// Then
+		assertThat(mdmSubmitBeforeMessageDeliveryHookCalled).isTrue();
+		updatePatientAndUpdateLinks(janePatient);
+		updatePatientAndUpdateLinks(janePatient2);
+		assertLinkCount(3);
+		myInterceptorService.unregisterInterceptor(interceptor);
 	}
 }

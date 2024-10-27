@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,8 @@ public class LoggingInterceptor implements IClientInterceptor {
 					myLog.debug("Client request body:\n{}", content);
 				}
 			} catch (IllegalStateException | IOException e) {
-				myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
+				myLog.warn(
+						"Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
 			}
 		}
 	}
@@ -240,5 +241,4 @@ public class LoggingInterceptor implements IClientInterceptor {
 		myLogResponseSummary = theValue;
 		return this;
 	}
-
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,18 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 public final class MdmMatchOutcome {
 
-	public static final MdmMatchOutcome POSSIBLE_DUPLICATE = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
-	public static final MdmMatchOutcome NO_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.NO_MATCH);
-	public static final MdmMatchOutcome NEW_GOLDEN_RESOURCE_MATCH = new MdmMatchOutcome(null, 1.0).setMatchResultEnum(MdmMatchResultEnum.MATCH).setCreatedNewResource(true);
-	public static final MdmMatchOutcome EID_MATCH = new MdmMatchOutcome(null, 1.0).setMatchResultEnum(MdmMatchResultEnum.MATCH).setEidMatch(true);
-	public static final MdmMatchOutcome POSSIBLE_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
+	public static final MdmMatchOutcome POSSIBLE_DUPLICATE =
+			new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+	public static final MdmMatchOutcome NO_MATCH =
+			new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.NO_MATCH);
+	public static final MdmMatchOutcome NEW_GOLDEN_RESOURCE_MATCH = new MdmMatchOutcome(null, 1.0)
+			.setMatchResultEnum(MdmMatchResultEnum.MATCH)
+			.setCreatedNewResource(true);
+	public static final MdmMatchOutcome EID_MATCH = new MdmMatchOutcome(null, 1.0)
+			.setMatchResultEnum(MdmMatchResultEnum.MATCH)
+			.setEidMatch(true);
+	public static final MdmMatchOutcome POSSIBLE_MATCH =
+			new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
 
 	/**
 	 * A bitmap that indicates which rules matched
@@ -73,7 +80,7 @@ public final class MdmMatchOutcome {
 	}
 
 	public boolean isPossibleMatch() {
-		 return myMatchResultEnum == MdmMatchResultEnum.POSSIBLE_MATCH;
+		return myMatchResultEnum == MdmMatchResultEnum.POSSIBLE_MATCH;
 	}
 
 	public boolean isPossibleDuplicate() {
@@ -132,9 +139,13 @@ public final class MdmMatchOutcome {
 		return this;
 	}
 
-	public Double getScore() { return score; }
+	public Double getScore() {
+		return score;
+	}
 
-	public Long getVector() { return vector; }
+	public Long getVector() {
+		return vector;
+	}
 
 	/**
 	 * Gets normalized score that is in the range from zero to one
@@ -152,11 +163,11 @@ public final class MdmMatchOutcome {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("vector", vector)
-			.append("score", score)
-			.append("myCreatedNewResource", myCreatedNewResource)
-			.append("myEidMatch", myEidMatch)
-			.append("myMatchResultEnum", myMatchResultEnum)
-			.toString();
+				.append("vector", vector)
+				.append("score", score)
+				.append("myCreatedNewResource", myCreatedNewResource)
+				.append("myEidMatch", myEidMatch)
+				.append("myMatchResultEnum", myMatchResultEnum)
+				.toString();
 	}
 }

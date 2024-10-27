@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,18 @@ import java.util.function.Supplier;
  * a future version will allow lambda params
  */
 public class MessageSupplier {
-    private Supplier<?> supplier;
+	private Supplier<?> supplier;
 
-    public MessageSupplier(Supplier<?> supplier) {
-        this.supplier = supplier;
-    }
+	public MessageSupplier(Supplier<?> supplier) {
+		this.supplier = supplier;
+	}
 
-    @Override
-    public String toString() {
-        return supplier.get().toString();
-    }
+	@Override
+	public String toString() {
+		return supplier.get().toString();
+	}
 
-    public static MessageSupplier msg(Supplier<?> supplier) {
-        return new MessageSupplier(supplier);
-    }
+	public static MessageSupplier msg(Supplier<?> supplier) {
+		return new MessageSupplier(supplier);
+	}
 }

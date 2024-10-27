@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 
 public class MetaUtil {
 	private static final Logger ourLog = LoggerFactory.getLogger(MetaUtil.class);
@@ -58,7 +59,9 @@ public class MetaUtil {
 		} else if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
 			return getSourceDstu3((IBaseHasExtensions) theMeta);
 		} else {
-			throw new UnsupportedOperationException(Msg.code(1782) + MetaUtil.class.getSimpleName() + ".getSource() not supported on FHIR Version " + theContext.getVersion().getVersion());
+			throw new UnsupportedOperationException(
+					Msg.code(1782) + MetaUtil.class.getSimpleName() + ".getSource() not supported on FHIR Version "
+							+ theContext.getVersion().getVersion());
 		}
 	}
 
@@ -75,7 +78,8 @@ public class MetaUtil {
 	}
 
 	private static String getSourceR4Plus(FhirContext theFhirContext, IBaseMetaType theMeta) {
-		BaseRuntimeElementCompositeDefinition<?> elementDef = (BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition(theMeta.getClass());
+		BaseRuntimeElementCompositeDefinition<?> elementDef =
+				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition(theMeta.getClass());
 		BaseRuntimeChildDefinition sourceChild = elementDef.getChildByName("source");
 		if (sourceChild == null) {
 			return null;
@@ -88,13 +92,14 @@ public class MetaUtil {
 		return retVal;
 	}
 
-	public static <R extends IBaseResource> void populateResourceSource(FhirContext theFhirContext, String theProvenanceSourceUri, String theProvenanceRequestId, R theRetVal) {
+	public static <R extends IBaseResource> void populateResourceSource(
+			FhirContext theFhirContext, String theProvenanceSourceUri, String theProvenanceRequestId, R theRetVal) {
 		String sourceString = cleanProvenanceSourceUriOrEmpty(theProvenanceSourceUri);
-		if (isNotBlank(theProvenanceRequestId)){
+		if (isNotBlank(theProvenanceRequestId)) {
 			sourceString = sourceString + "#" + theProvenanceRequestId;
 		}
 
-		if (isNotBlank(sourceString)){
+		if (isNotBlank(sourceString)) {
 			setSource(theFhirContext, theRetVal, sourceString);
 		}
 	}
@@ -116,27 +121,37 @@ public class MetaUtil {
 		} else if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
 			IBaseExtension<?, ?> sourceExtension = ((IBaseHasExtensions) theResource.getMeta()).addExtension();
 			sourceExtension.setUrl(HapiExtensions.EXT_META_SOURCE);
-			IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("uri").newInstance();
+			IPrimitiveType<String> value = (IPrimitiveType<String>)
+					theContext.getElementDefinition("uri").newInstance();
 			value.setValue(theValue);
 			sourceExtension.setValue(value);
 		} else {
-			ourLog.debug(MetaUtil.class.getSimpleName() + ".setSource() not supported on FHIR Version " + theContext.getVersion().getVersion());
+			ourLog.debug(MetaUtil.class.getSimpleName() + ".setSource() not supported on FHIR Version "
+					+ theContext.getVersion().getVersion());
 		}
 	}
 
 	public static void setSource(FhirContext theContext, IBaseMetaType theMeta, String theValue) {
-		BaseRuntimeElementCompositeDefinition<?> elementDef = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theMeta.getClass());
+		BaseRuntimeElementCompositeDefinition<?> elementDef =
+				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theMeta.getClass());
 		BaseRuntimeChildDefinition sourceChild = elementDef.getChildByName("source");
 		List<IBase> sourceValues = sourceChild.getAccessor().getValues(theMeta);
 		IPrimitiveType<?> sourceElement;
 		if (sourceValues.size() > 0) {
 			sourceElement = ((IPrimitiveType<?>) sourceValues.get(0));
 		} else {
-			sourceElement = (IPrimitiveType<?>) theContext.getElementDefinition("uri").newInstance();
+			sourceElement =
+					(IPrimitiveType<?>) theContext.getElementDefinition("uri").newInstance();
 			sourceChild.getMutator().setValue(theMeta, sourceElement);
 		}
 		sourceElement.setValueAsString(theValue);
 	}
 
-
+	public static Set<String> getAutoVersionReferencesAtPath(IBaseMetaType theMeta, String theResourceType) {
+		return ExtensionUtil.getExtensionPrimitiveValues(
+						theMeta, HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH)
+				.stream()
+				.map(path -> String.format("%s.%s", theResourceType, path))
+				.collect(Collectors.toSet());
+	}
 }

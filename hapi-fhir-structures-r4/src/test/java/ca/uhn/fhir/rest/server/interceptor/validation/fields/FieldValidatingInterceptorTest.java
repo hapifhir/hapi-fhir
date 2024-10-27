@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,9 +13,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static ca.uhn.fhir.rest.server.interceptor.s13n.StandardizingInterceptor.STANDARDIZATION_DISABLED_HEADER;
 import static ca.uhn.fhir.rest.server.interceptor.validation.fields.FieldValidatingInterceptor.VALIDATION_DISABLED_HEADER;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -46,8 +46,7 @@ class FieldValidatingInterceptorTest {
 			myInterceptor.resourcePreCreate(null, null);
 			myInterceptor.resourcePreUpdate(null, null, null);
 		} catch (Exception ex) {
-			fail();
-		}
+			fail();		}
 	}
 
 	@Test
@@ -70,8 +69,7 @@ class FieldValidatingInterceptorTest {
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), person);
 		} catch (Exception e) {
-			fail();
-		}
+			fail();		}
 	}
 
 	@Test
@@ -83,8 +81,7 @@ class FieldValidatingInterceptorTest {
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), person);
 		} catch (Exception e) {
-			fail();
-		}
+			fail();		}
 
 		ourLog.debug("Resource looks like {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(person));
 
@@ -102,8 +99,7 @@ class FieldValidatingInterceptorTest {
 		myInterceptor.getConfig().put("telecom.where(system='phone')", "ClassThatDoesntExist");
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), new Person());
-			fail();
-		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 		}
 	}
 
@@ -117,23 +113,20 @@ class FieldValidatingInterceptorTest {
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), person);
 		} catch (Exception e) {
-			fail();
-		}
+			fail();		}
 
 		person.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("123456");
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), person);
 		} catch (Exception e) {
-			fail();
-		}
+			fail();		}
 
 		person = new Person();
 		person.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue(" ");
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), person);
 		} catch (Exception e) {
-			fail();
-		}
+			fail();		}
 	}
 
 	public static class EmptyValidator implements IValidator {

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,20 +23,21 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-//START SNIPPET: interceptor
+// START SNIPPET: interceptor
 public class RequestExceptionInterceptor {
 
 	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
 	public boolean handleException(
-		RequestDetails theRequestDetails,
-		BaseServerResponseException theException,
-		HttpServletRequest theServletRequest,
-		HttpServletResponse theServletResponse) throws IOException {
+			RequestDetails theRequestDetails,
+			BaseServerResponseException theException,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws IOException {
 
 		// HAPI's server exceptions know what the appropriate HTTP status code is
 		theServletResponse.setStatus(theException.getStatusCode());
@@ -50,6 +51,5 @@ public class RequestExceptionInterceptor {
 		// to stop processing immediately
 		return false;
 	}
-
 }
-//END SNIPPET: interceptor
+// END SNIPPET: interceptor

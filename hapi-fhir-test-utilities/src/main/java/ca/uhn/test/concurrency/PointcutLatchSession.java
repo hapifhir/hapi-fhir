@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,9 @@ public class PointcutLatchSession {
 
 	List<HookParams> awaitExpectedWithTimeout(int theTimeoutSecond) throws InterruptedException {
 		if (!myCountdownLatch.await(theTimeoutSecond, TimeUnit.SECONDS)) {
+			if (!myFailures.isEmpty()) {
+				ourLog.error(String.join(",", myFailures));
+			}
 			throw new LatchTimedOutError(Msg.code(1483) + myName + " timed out waiting " + theTimeoutSecond + " seconds for latch to countdown from " + myInitialCount + " to 0.  Is " + myCountdownLatch.getCount() + ".");
 		}
 

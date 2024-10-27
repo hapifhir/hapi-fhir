@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,18 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public class WorkChunkCompletionEvent extends BaseWorkChunkEvent {
 	int myRecordsProcessed;
 	int myRecoveredErrorCount;
+	String myRecoveredWarningMessage;
 
 	public WorkChunkCompletionEvent(String theChunkId, int theRecordsProcessed, int theRecoveredErrorCount) {
 		super(theChunkId);
 		myRecordsProcessed = theRecordsProcessed;
 		myRecoveredErrorCount = theRecoveredErrorCount;
+	}
+
+	public WorkChunkCompletionEvent(
+			String theChunkId, int theRecordsProcessed, int theRecoveredErrorCount, String theRecoveredWarningMessage) {
+		this(theChunkId, theRecordsProcessed, theRecoveredErrorCount);
+		myRecoveredWarningMessage = theRecoveredWarningMessage;
 	}
 
 	public int getRecordsProcessed() {
@@ -43,6 +50,10 @@ public class WorkChunkCompletionEvent extends BaseWorkChunkEvent {
 		return myRecoveredErrorCount;
 	}
 
+	public String getRecoveredWarningMessage() {
+		return myRecoveredWarningMessage;
+	}
+
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
@@ -51,11 +62,21 @@ public class WorkChunkCompletionEvent extends BaseWorkChunkEvent {
 
 		WorkChunkCompletionEvent that = (WorkChunkCompletionEvent) theO;
 
-		return new EqualsBuilder().appendSuper(super.equals(theO)).append(myRecordsProcessed, that.myRecordsProcessed).append(myRecoveredErrorCount, that.myRecoveredErrorCount).isEquals();
+		return new EqualsBuilder()
+				.appendSuper(super.equals(theO))
+				.append(myRecordsProcessed, that.myRecordsProcessed)
+				.append(myRecoveredErrorCount, that.myRecoveredErrorCount)
+				.append(myRecoveredWarningMessage, that.myRecoveredWarningMessage)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(myRecordsProcessed).append(myRecoveredErrorCount).toHashCode();
+		return new HashCodeBuilder(17, 37)
+				.appendSuper(super.hashCode())
+				.append(myRecordsProcessed)
+				.append(myRecoveredErrorCount)
+				.append(myRecoveredWarningMessage)
+				.toHashCode();
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class JobWorkNotification implements IModelJson {
 
@@ -41,10 +40,14 @@ public class JobWorkNotification implements IModelJson {
 	@JsonProperty(value = "instanceId")
 	private String myInstanceId;
 
-	public JobWorkNotification() {
-	}
+	public JobWorkNotification() {}
 
-	public JobWorkNotification(@Nonnull String theJobDefinitionId, int jobDefinitionVersion, @Nonnull String theInstanceId, @Nonnull String theTargetStepId, @Nonnull String theChunkId) {
+	public JobWorkNotification(
+			@Nonnull String theJobDefinitionId,
+			int jobDefinitionVersion,
+			@Nonnull String theInstanceId,
+			@Nonnull String theTargetStepId,
+			@Nonnull String theChunkId) {
 		setJobDefinitionId(theJobDefinitionId);
 		setJobDefinitionVersion(jobDefinitionVersion);
 		setChunkId(theChunkId);
@@ -52,11 +55,17 @@ public class JobWorkNotification implements IModelJson {
 		setTargetStepId(theTargetStepId);
 	}
 
-    public JobWorkNotification(JobInstance theInstance, String theNextStepId, String theNextChunkId) {
-		this(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion(), theInstance.getInstanceId(), theNextStepId, theNextChunkId);
-    }
+	public JobWorkNotification(JobInstance theInstance, String theNextStepId, String theNextChunkId) {
+		this(
+				theInstance.getJobDefinitionId(),
+				theInstance.getJobDefinitionVersion(),
+				theInstance.getInstanceId(),
+				theNextStepId,
+				theNextChunkId);
+	}
 
-    public static JobWorkNotification firstStepNotification(JobDefinition<?> theJobDefinition, String theInstanceId, String theChunkId) {
+	public static JobWorkNotification firstStepNotification(
+			JobDefinition<?> theJobDefinition, String theInstanceId, String theChunkId) {
 		String firstStepId = theJobDefinition.getFirstStepId();
 		String jobDefinitionId = theJobDefinition.getJobDefinitionId();
 		int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
@@ -105,6 +114,7 @@ public class JobWorkNotification implements IModelJson {
 
 	@Override
 	public String toString() {
-		return String.format("job[%s] instance[%s] step[%s] chunk[%s]", myJobDefinitionId, myInstanceId, myTargetStepId, myChunkId);
+		return String.format(
+				"job[%s] instance[%s] step[%s] chunk[%s]", myJobDefinitionId, myInstanceId, myTargetStepId, myChunkId);
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
@@ -31,9 +33,6 @@ import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValid
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 public class JpaValidationSupportChain extends ValidationSupportChain {
 
@@ -46,14 +45,21 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	@Qualifier("myDefaultProfileValidationSupport")
 	@Autowired
 	private IValidationSupport myDefaultProfileValidationSupport;
+
 	@Autowired
 	private ITermReadSvc myTerminologyService;
+
 	@Autowired
 	private NpmJpaValidationSupport myNpmJpaValidationSupport;
+
 	@Autowired
 	private ITermConceptMappingSvc myConceptMappingSvc;
+
 	@Autowired
 	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
+
+	@Autowired
+	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
 	/**
 	 * Constructor
@@ -78,7 +84,7 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(myJpaValidationSupport);
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
-		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
+		addValidationSupport(myInMemoryTerminologyServerValidationSupport);
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myConceptMappingSvc);
@@ -86,5 +92,4 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		// This needs to be last in the chain, it was designed for that
 		addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
 	}
-
 }

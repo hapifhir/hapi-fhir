@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IReadIfNoneMatch<T extends IBaseResource> {
 
@@ -30,17 +29,16 @@ public interface IReadIfNoneMatch<T extends IBaseResource> {
 	 * return the given instance.
 	 */
 	IReadExecutable<T> returnResource(T theInstance);
-	
+
 	/**
 	 * If the server responds with an <code>HTTP 301 Not Modified</code>,
 	 * return <code>null</code>.
 	 */
 	IReadExecutable<T> returnNull();
-	
+
 	/**
 	 * If the server responds with an <code>HTTP 301 Not Modified</code>,
 	 * throw a {@link NotModifiedException}.
 	 */
 	IReadExecutable<T> throwNotModifiedException();
-	
 }

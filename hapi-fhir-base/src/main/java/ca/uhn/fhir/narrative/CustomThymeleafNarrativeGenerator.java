@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,14 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	}
 
 	/**
-		 * Create a new narrative generator
-		 *
-		 * @param theNarrativePropertyFiles The name of the property file, in one of the following formats:
-		 *                                  <ul>
-		 *                                  <li>file:/path/to/file/file.properties</li>
-		 *                                  <li>classpath:/com/package/file.properties</li>
-		 *                                  </ul>
-		 */
+	 * Create a new narrative generator
+	 *
+	 * @param theNarrativePropertyFiles The name of the property file, in one of the following formats:
+	 *                                  <ul>
+	 *                                  <li>file:/path/to/file/file.properties</li>
+	 *                                  <li>classpath:/com/package/file.properties</li>
+	 *                                  </ul>
+	 */
 	public CustomThymeleafNarrativeGenerator(String... theNarrativePropertyFiles) {
 		this();
 		setPropertyFile(theNarrativePropertyFiles);

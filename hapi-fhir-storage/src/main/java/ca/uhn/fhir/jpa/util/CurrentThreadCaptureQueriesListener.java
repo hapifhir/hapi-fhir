@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,6 @@ public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListe
 		return new SqlQueryList(retVal);
 	}
 
-
 	/**
 	 * Starts capturing queries for the current thread.
 	 * <p>
@@ -87,10 +86,9 @@ public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * @return Returns the number of queries captured
 	 */
 	public static int logQueriesForCurrentThreadAndStopCapturing(int... theIndexes) {
-		List<String> queries = getCurrentQueueAndStopCapturing()
-			.stream()
-			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
-			.collect(Collectors.toList());
+		List<String> queries = getCurrentQueueAndStopCapturing().stream()
+				.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
+				.collect(Collectors.toList());
 
 		if (theIndexes != null && theIndexes.length > 0) {
 			List<String> newList = new ArrayList<>();

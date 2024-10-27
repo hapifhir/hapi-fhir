@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class PackageVersionComparator implements Comparator<String> {
 		String[] o1parts = theSpec.split("\\.");
 		String[] o2parts = thePackageVersion.split("\\.");
 
-		for (int i = 0; i < o1parts.length; i++ ) {
+		for (int i = 0; i < o1parts.length; i++) {
 			if (!o1parts[i].equals("x")) {
 				if (!o1parts[i].equals(o2parts[i])) {
 					return false;

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,19 +28,20 @@ import org.springframework.aop.support.AopUtils;
  */
 public class SpringObjectCaster {
 
-    /**
-     * Retrieve the Spring proxy object's target object
-     * @param proxy
-     * @param clazz
-     * @param <T>
-     * @return
-     * @throws Exception
-     */
-    public static <T> T getTargetObject(Object proxy, Class<T> clazz) throws Exception {
-        while( (AopUtils.isJdkDynamicProxy(proxy))) {
-            return clazz.cast(getTargetObject(((Advised)proxy).getTargetSource().getTarget(), clazz));
-        }
+	/**
+	 * Retrieve the Spring proxy object's target object
+	 * @param proxy
+	 * @param clazz
+	 * @param <T>
+	 * @return
+	 * @throws Exception
+	 */
+	public static <T> T getTargetObject(Object proxy, Class<T> clazz) throws Exception {
+		while ((AopUtils.isJdkDynamicProxy(proxy))) {
+			return clazz.cast(
+					getTargetObject(((Advised) proxy).getTargetSource().getTarget(), clazz));
+		}
 
-        return clazz.cast(proxy);
-    }
+		return clazz.cast(proxy);
+	}
 }

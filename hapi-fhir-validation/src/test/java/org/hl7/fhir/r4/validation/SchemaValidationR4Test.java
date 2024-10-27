@@ -1,6 +1,7 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -14,15 +15,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.xpath.XPathFactory;
-
 import java.security.CodeSource;
 import java.text.MessageFormat;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class SchemaValidationR4Test {
+public class SchemaValidationR4Test extends BaseValidationTestWithInlineMocks {
 	private static final Logger ourLog = LoggerFactory.getLogger(SchemaValidationR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 
@@ -77,8 +76,8 @@ public class SchemaValidationR4Test {
 		 */
 
 		assertFalse(result.isSuccessful());
-		assertThat(encoded, containsString("passwd"));
-		assertThat(encoded, containsString("accessExternalDTD"));
+		assertThat(encoded).contains("passwd");
+		assertThat(encoded).contains("accessExternalDTD");
 	}
 
 	private static String getJaxpImplementationInfo(String componentName, Class componentClass) {

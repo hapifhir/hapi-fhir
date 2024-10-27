@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4957
+title: "Previously, performing a $validate-code operation with a remote terminology service on an invalid CodeSystem or ValueSet returned 500. This problem has been fixed."

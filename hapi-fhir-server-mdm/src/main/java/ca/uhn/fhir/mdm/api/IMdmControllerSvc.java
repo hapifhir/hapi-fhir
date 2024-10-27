@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,47 +20,136 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
+import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.MdmUnduplicateGoldenResourceParams;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.data.domain.Page;
 
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.List;
 
 public interface IMdmControllerSvc {
 	@Deprecated
-	Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest);
+	Page<MdmLinkJson> queryLinks(
+			@Nullable String theGoldenResourceId,
+			@Nullable String theSourceResourceId,
+			@Nullable String theMatchResult,
+			@Nullable String theLinkSource,
+			MdmTransactionContext theMdmTransactionContext,
+			MdmPageRequest thePageRequest);
 
 	@Deprecated
-	Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails);
+	Page<MdmLinkJson> queryLinks(
+			@Nullable String theGoldenResourceId,
+			@Nullable String theSourceResourceId,
+			@Nullable String theMatchResult,
+			@Nullable String theLinkSource,
+			MdmTransactionContext theMdmTransactionContext,
+			MdmPageRequest thePageRequest,
+			RequestDetails theRequestDetails);
 
-	Page<MdmLinkJson> queryLinks(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext, RequestDetails theRequestDetails);
+	Page<MdmLinkJson> queryLinks(
+			MdmQuerySearchParameters theMdmQuerySearchParameters,
+			MdmTransactionContext theMdmTransactionContext,
+			RequestDetails theRequestDetails);
 
 	@Deprecated
-	Page<MdmLinkJson> queryLinksFromPartitionList(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, List<Integer> thePartitionIds);
+	Page<MdmLinkJson> queryLinksFromPartitionList(
+			@Nullable String theGoldenResourceId,
+			@Nullable String theSourceResourceId,
+			@Nullable String theMatchResult,
+			@Nullable String theLinkSource,
+			MdmTransactionContext theMdmTransactionContext,
+			MdmPageRequest thePageRequest,
+			List<Integer> thePartitionIds);
 
-	Page<MdmLinkJson> queryLinksFromPartitionList(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext);
+	Page<MdmLinkJson> queryLinksFromPartitionList(
+			MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext);
 
-	List<MdmLinkWithRevisionJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails);
+	List<MdmLinkWithRevisionJson> queryLinkHistory(
+			MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails);
 
-	Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest);
+	Page<MdmLinkJson> getDuplicateGoldenResources(
+			MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest);
 
-	Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails, String theRequestResourceType);
+	Page<MdmLinkJson> getDuplicateGoldenResources(
+			MdmTransactionContext theMdmTransactionContext,
+			MdmPageRequest thePageRequest,
+			RequestDetails theRequestDetails,
+			String theRequestResourceType);
 
-	void notDuplicateGoldenResource(String theGoldenResourceId, String theTargetGoldenResourceId, MdmTransactionContext theMdmTransactionContext);
+	@Deprecated(forRemoval = true, since = "6.8.0")
+	void notDuplicateGoldenResource(
+			String theGoldenResourceId,
+			String theTargetGoldenResourceId,
+			MdmTransactionContext theMdmTransactionContext);
 
-	IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, IAnyResource theManuallyMergedGoldenResource, MdmTransactionContext theMdmTransactionContext);
+	default void unduplicateGoldenResource(MdmUnduplicateGoldenResourceParams theParams) {
+		notDuplicateGoldenResource(
+				theParams.getGoldenResourceId(), theParams.getTargetGoldenResourceId(), theParams.getMdmContext());
+	}
 
-	IAnyResource updateLink(String theGoldenResourceId, String theSourceResourceId, String theMatchResult, MdmTransactionContext theMdmTransactionContext);
+	@Deprecated(forRemoval = true, since = "6.8.0")
+	IAnyResource mergeGoldenResources(
+			String theFromGoldenResourceId,
+			String theToGoldenResourceId,
+			IAnyResource theManuallyMergedGoldenResource,
+			MdmTransactionContext theMdmTransactionContext);
 
-	IAnyResource createLink(String theGoldenResourceId, String theSourceResourceId, @Nullable String theMatchResult, MdmTransactionContext theMdmTransactionContext);
+	default IAnyResource mergeGoldenResources(MdmMergeGoldenResourcesParams theParams) {
+		return mergeGoldenResources(
+				theParams.getFromGoldenResourceId(),
+				theParams.getToGoldenResourceId(),
+				theParams.getManuallyMergedResource(),
+				theParams.getMdmTransactionContext());
+	}
 
-	IBaseParameters submitMdmClearJob(List<String> theResourceNames, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails);
+	@Deprecated(forRemoval = true, since = "6.8.0")
+	IAnyResource updateLink(
+			String theGoldenResourceId,
+			String theSourceResourceId,
+			String theMatchResult,
+			MdmTransactionContext theMdmTransactionContext);
 
-	IBaseParameters submitMdmSubmitJob(List<String> theUrls, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails);
+	default IAnyResource updateLink(MdmCreateOrUpdateParams theParams) {
+		String matchResult = theParams.getMatchResult() == null
+				? null
+				: theParams.getMatchResult().name();
+		return updateLink(
+				theParams.getGoldenResourceId(), theParams.getResourceId(), matchResult, theParams.getMdmContext());
+	}
+
+	@Deprecated(forRemoval = true, since = "6.8.0")
+	IAnyResource createLink(
+			String theGoldenResourceId,
+			String theSourceResourceId,
+			@Nullable String theMatchResult,
+			MdmTransactionContext theMdmTransactionContext);
+
+	default IAnyResource createLink(MdmCreateOrUpdateParams theParams) {
+		String matchResult = theParams.getMatchResult() == null
+				? null
+				: theParams.getMatchResult().name();
+		return createLink(
+				theParams.getGoldenResourceId(), theParams.getResourceId(), matchResult, theParams.getMdmContext());
+	}
+
+	IBaseParameters submitMdmClearJob(
+			List<String> theResourceNames,
+			IPrimitiveType<BigDecimal> theBatchSize,
+			ServletRequestDetails theRequestDetails);
+
+	IBaseParameters submitMdmSubmitJob(
+			List<String> theUrls, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails);
 }

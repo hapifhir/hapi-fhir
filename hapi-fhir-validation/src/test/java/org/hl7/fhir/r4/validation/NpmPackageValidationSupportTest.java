@@ -2,8 +2,10 @@ package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -16,15 +18,15 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class NpmPackageValidationSupportTest {
+public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlineMocks {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(NpmPackageValidationSupportTest.class);
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -67,7 +69,7 @@ public class NpmPackageValidationSupportTest {
 
 		String outcomeSerialized = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
 		ourLog.info(outcomeSerialized);
-		assertThat(outcomeSerialized, containsString("Patient.identifier:nhsNumber.value: minimum required = 1, but only found 0"));
+		assertThat(outcomeSerialized).contains("Patient.identifier:nhsNumber.value: minimum required = 1, but only found 0");
 
 	}
 
@@ -85,7 +87,37 @@ public class NpmPackageValidationSupportTest {
 		for (Map.Entry<String, byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
 			byte[] expectedBytes = entry.getValue();
 			byte[] actualBytes = npmPackageSupport.fetchBinary(entry.getKey());
-			assertArrayEquals(expectedBytes, actualBytes);
+			assertThat(actualBytes).containsExactly(expectedBytes);
 		}
+	}
+
+	@Test
+	public void testValidateIheMhdPackage() throws IOException {
+		ValidationSupportChain validationSupportChain = new ValidationSupportChain();
+		validationSupportChain.addValidationSupport(getNpmPackageValidationSupport("classpath:package/ihe.iti.mhd.tgz"));
+		validationSupportChain.addValidationSupport(new DefaultProfileValidationSupport(myFhirContext));
+		validationSupportChain.addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
+		validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
+		validationSupportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
+
+		CachingValidationSupport validationSupport = new CachingValidationSupport(validationSupportChain);
+
+		FhirValidator validator = myFhirContext.newValidator();
+		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(validationSupport);
+		validator.registerValidatorModule(instanceValidator);
+
+		String bundle = loadResource("/r4/mhd_minimal_provide_document_bundle.json");
+		ValidationResult validationResult = validator.validateWithResult(bundle);
+
+		assertEquals(3, validationResult.getMessages().size());
+
+		assertTrue(validationResult.isSuccessful());
+
+		String outcomeSerialized = myFhirContext.newJsonParser()
+			.setPrettyPrint(true)
+			.encodeResourceToString(validationResult.toOperationOutcome());
+		ourLog.info(outcomeSerialized);
+
+		assertThat(outcomeSerialized).contains("Terminology_TX_ValueSet_NotFound");
 	}
 }

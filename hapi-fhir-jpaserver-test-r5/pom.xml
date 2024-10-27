@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.7.1-SNAPSHOT</version>
+		<version>7.7.0-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -29,9 +29,23 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.sourceforge.htmlunit</groupId>
+			<groupId>org.htmlunit</groupId>
 			<artifactId>htmlunit</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- Needed for Testcontainers -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.2</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hamcrest</groupId>
+					<artifactId>hamcrest-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 	</dependencies>
@@ -41,16 +55,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<!--<useManifestOnlyJar>false</useManifestOnlyJar>-->
-					<forkCount>1</forkCount>
-					<reuseForks>false</reuseForks>
-					<runOrder>alphabetical</runOrder>
-					<includes>
-						<include>**/*IT.java</include>
-					</includes>
-					<useModulePath>false</useModulePath>
-				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -70,13 +74,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<runOrder>alphabetical</runOrder>
-					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-					<forkCount>0.6C</forkCount>
-					<excludes>*StressTest*</excludes>
-					<skip>${skipFailsafe}</skip>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -87,38 +84,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>NOPARALLEL</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<excludes>
-								<exclude>**/stresstest/*</exclude>
-							</excludes>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>CI</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<runOrder>alphabetical</runOrder>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-
 </project>

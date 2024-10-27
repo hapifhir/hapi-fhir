@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5316
+jira: SMILE-7168
+title: "Previously, performing a FHIR transaction containing both a conditional delete and a conditional update 
+on the same resource would fail. This has been fixed."

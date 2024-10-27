@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,11 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -64,7 +66,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -155,13 +156,11 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 		myCreateCount.incrementAndGet();
 
-		return new MethodOutcome()
-			.setCreated(true)
-			.setResource(theResource)
-			.setId(theResource.getIdElement());
+		return new MethodOutcome().setCreated(true).setResource(theResource).setId(theResource.getIdElement());
 	}
 
-	private void createInternal(@ResourceParam T theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
+	private void createInternal(
+			@ResourceParam T theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		long idPart = myNextId++;
 		String idPartAsString = Long.toString(idPart);
 		Long versionIdPart = 1L;
@@ -181,14 +180,15 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			throw new ResourceNotFoundException(Msg.code(2250) + theId);
 		}
 
-		T deletedInstance = (T) myFhirContext.getResourceDefinition(myResourceType).newInstance();
+		T deletedInstance =
+				(T) myFhirContext.getResourceDefinition(myResourceType).newInstance();
 		long nextVersion = versions.lastEntry().getKey() + 1L;
-		IIdType id = store(deletedInstance, theId.getIdPart(), nextVersion, theRequestDetails, transactionDetails, true);
+		IIdType id =
+				store(deletedInstance, theId.getIdPart(), nextVersion, theRequestDetails, transactionDetails, true);
 
 		myDeleteCount.incrementAndGet();
 
-		return new MethodOutcome()
-			.setId(id);
+		return new MethodOutcome().setId(id);
 	}
 
 	/**
@@ -302,15 +302,13 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		if (theRequestDetails.getParameters().containsKey(Constants.PARAM_ID)) {
 			for (String nextParam : theRequestDetails.getParameters().get(Constants.PARAM_ID)) {
 				List<IdDt> wantIds = Arrays.stream(nextParam.split(","))
-					.map(StringUtils::trim)
-					.filter(StringUtils::isNotBlank)
-					.map(IdDt::new)
-					.collect(Collectors.toList());
+						.map(StringUtils::trim)
+						.filter(StringUtils::isNotBlank)
+						.map(IdDt::new)
+						.collect(Collectors.toList());
 				for (Iterator<T> iter = allResources.iterator(); iter.hasNext(); ) {
 					T next = iter.next();
-					boolean found = wantIds
-						.stream()
-						.anyMatch(t -> resourceIdMatches(next, t));
+					boolean found = wantIds.stream().anyMatch(t -> resourceIdMatches(next, t));
 					if (!found) {
 						iter.remove();
 					}
@@ -322,7 +320,10 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			@SuppressWarnings("unchecked")
 			@Nonnull
 			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+			public List<IBaseResource> getResources(
+					int theFromIndex,
+					int theToIndex,
+					@Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 
 				// Make sure that "from" isn't less than 0, "to" isn't more than the number available,
 				// and "from" <= "to"
@@ -359,14 +360,21 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@SuppressWarnings({"unchecked", "DataFlowIssue"})
-	private IIdType store(@Nonnull T theResource, String theIdPart, Long theVersionIdPart, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, boolean theDeleted) {
+	private IIdType store(
+			@Nonnull T theResource,
+			String theIdPart,
+			Long theVersionIdPart,
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
+			boolean theDeleted) {
 		IIdType id = myFhirContext.getVersion().newIdType();
 		String versionIdPart = Long.toString(theVersionIdPart);
 		id.setParts(null, myResourceName, theIdPart, versionIdPart);
 		theResource.setId(id);
 
 		if (theDeleted) {
-			IPrimitiveType<Date> deletedAt = (IPrimitiveType<Date>) myFhirContext.getElementDefinition("instant").newInstance();
+			IPrimitiveType<Date> deletedAt = (IPrimitiveType<Date>)
+					myFhirContext.getElementDefinition("instant").newInstance();
 			deletedAt.setValue(new Date());
 			ResourceMetadataKeyEnum.DELETED_AT.put(theResource, deletedAt);
 			ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(theResource, BundleEntryTransactionMethodEnum.DELETE);
@@ -375,7 +383,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			if (theVersionIdPart > 1) {
 				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(theResource, BundleEntryTransactionMethodEnum.PUT);
 			} else {
-				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(theResource, BundleEntryTransactionMethodEnum.POST);
+				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(
+						theResource, BundleEntryTransactionMethodEnum.POST);
 			}
 		}
 
@@ -387,7 +396,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU2) {
 			ResourceMetadataKeyEnum.VERSION.put(theResource, versionIdPart);
 		} else {
-			BaseRuntimeChildDefinition metaChild = myFhirContext.getResourceDefinition(myResourceType).getChildByName("meta");
+			BaseRuntimeChildDefinition metaChild =
+					myFhirContext.getResourceDefinition(myResourceType).getChildByName("meta");
 			List<IBase> metaValues = metaChild.getAccessor().getValues(theResource);
 			if (metaValues.size() > 0) {
 				theResource.getMeta().setVersionId(versionIdPart);
@@ -403,63 +413,67 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 				// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_DELETED
 				HookParams preStorageParams = new HookParams()
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
-					.add(TransactionDetails.class, theTransactionDetails);
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
+						.add(TransactionDetails.class, theTransactionDetails);
 				interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, preStorageParams);
 
 				// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_DELETED
 				HookParams preCommitParams = new HookParams()
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
-					.add(TransactionDetails.class, theTransactionDetails)
-					.add(InterceptorInvocationTimingEnum.class, theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
+						.add(TransactionDetails.class, theTransactionDetails)
+						.add(
+								InterceptorInvocationTimingEnum.class,
+								theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
 				interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, preCommitParams);
-
 
 			} else if (!myIdToHistory.containsKey(theIdPart)) {
 
 				// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_CREATED
 				HookParams preStorageParams = new HookParams()
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(IBaseResource.class, theResource)
-					.add(RequestPartitionId.class, null) // we should add this if we want - but this is test usage
-					.add(TransactionDetails.class, theTransactionDetails);
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, theResource)
+						.add(RequestPartitionId.class, null) // we should add this if we want - but this is test usage
+						.add(TransactionDetails.class, theTransactionDetails);
 				interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, preStorageParams);
 
 				// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_CREATED
 				HookParams preCommitParams = new HookParams()
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(IBaseResource.class, theResource)
-					.add(TransactionDetails.class, theTransactionDetails)
-					.add(InterceptorInvocationTimingEnum.class, theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, theResource)
+						.add(TransactionDetails.class, theTransactionDetails)
+						.add(
+								InterceptorInvocationTimingEnum.class,
+								theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
 				interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, preCommitParams);
 
 			} else {
 
 				// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_UPDATED
 				HookParams preStorageParams = new HookParams()
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
-					.add(IBaseResource.class, theResource)
-					.add(TransactionDetails.class, theTransactionDetails);
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
+						.add(IBaseResource.class, theResource)
+						.add(TransactionDetails.class, theTransactionDetails);
 				interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, preStorageParams);
 
 				// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
 				HookParams preCommitParams = new HookParams()
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
-					.add(IBaseResource.class, theResource)
-					.add(TransactionDetails.class, theTransactionDetails)
-					.add(InterceptorInvocationTimingEnum.class, theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
+						.add(IBaseResource.class, theResource)
+						.add(TransactionDetails.class, theTransactionDetails)
+						.add(
+								InterceptorInvocationTimingEnum.class,
+								theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
 				interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
-
 			}
 		}
 
@@ -483,23 +497,22 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 */
 	@Update
 	public synchronized MethodOutcome update(
-		@ResourceParam T theResource,
-		@ConditionalUrlParam String theConditional,
-		RequestDetails theRequestDetails) {
+			@ResourceParam T theResource,
+			@ConditionalUrlParam String theConditional,
+			RequestDetails theRequestDetails) {
 		TransactionDetails transactionDetails = new TransactionDetails();
 
-		ValidateUtil.isTrueOrThrowInvalidRequest(isBlank(theConditional), "This server doesn't support conditional update");
+		ValidateUtil.isTrueOrThrowInvalidRequest(
+				isBlank(theConditional), "This server doesn't support conditional update");
 
 		boolean created = updateInternal(theResource, theRequestDetails, transactionDetails);
 		myUpdateCount.incrementAndGet();
 
-		return new MethodOutcome()
-			.setCreated(created)
-			.setResource(theResource)
-			.setId(theResource.getIdElement());
+		return new MethodOutcome().setCreated(created).setResource(theResource).setId(theResource.getIdElement());
 	}
 
-	private boolean updateInternal(@ResourceParam T theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
+	private boolean updateInternal(
+			@ResourceParam T theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		String idPartAsString = theResource.getIdElement().getIdPart();
 		TreeMap<Long, T> versionToResource = getVersionToResource(idPartAsString);
 
@@ -553,7 +566,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	private boolean resourceIdMatches(T theResource, IdDt theId) {
-		if (theId.getResourceType() == null || theId.getResourceType().equals(myFhirContext.getResourceType(theResource))) {
+		if (theId.getResourceType() == null
+				|| theId.getResourceType().equals(myFhirContext.getResourceType(theResource))) {
 			if (theResource.getIdElement().getIdPart().equals(theId.getIdPart())) {
 				return true;
 			}
@@ -561,39 +575,45 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		return false;
 	}
 
-	private static <T extends IBaseResource> T fireInterceptorsAndFilterAsNeeded(T theResource, RequestDetails theRequestDetails) {
-		List<IBaseResource> output = fireInterceptorsAndFilterAsNeeded(Lists.newArrayList(theResource), theRequestDetails);
+	private static <T extends IBaseResource> T fireInterceptorsAndFilterAsNeeded(
+			T theResource, RequestDetails theRequestDetails) {
+		List<IBaseResource> output =
+				fireInterceptorsAndFilterAsNeeded(Lists.newArrayList(theResource), theRequestDetails);
 		if (output.size() == 1) {
-			return theResource;
+			// do not return theResource here but return whatever the interceptor returned in the list because
+			// the interceptor might have set the resource in the list to null (if it didn't want it to be returned).
+			// ConsentInterceptor might do this for example.
+			return (T) output.get(0);
 		} else {
 			return null;
 		}
 	}
 
-	protected static <T extends IBaseResource> List<IBaseResource> fireInterceptorsAndFilterAsNeeded(List<T> theResources, RequestDetails theRequestDetails) {
+	protected static <T extends IBaseResource> List<IBaseResource> fireInterceptorsAndFilterAsNeeded(
+			List<T> theResources, RequestDetails theRequestDetails) {
 		List<IBaseResource> resourcesToReturn = new ArrayList<>(theResources);
 
 		if (theRequestDetails != null) {
 			IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
 
 			// Call the STORAGE_PREACCESS_RESOURCES pointcut (used for consent/auth interceptors)
-			SimplePreResourceAccessDetails preResourceAccessDetails = new SimplePreResourceAccessDetails(resourcesToReturn);
+			SimplePreResourceAccessDetails preResourceAccessDetails =
+					new SimplePreResourceAccessDetails(resourcesToReturn);
 			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-				.add(IPreResourceAccessDetails.class, preResourceAccessDetails);
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(IPreResourceAccessDetails.class, preResourceAccessDetails);
 			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 			preResourceAccessDetails.applyFilterToList();
 
 			// Call the STORAGE_PREACCESS_RESOURCES pointcut (used for consent/auth interceptors)
 			SimplePreResourceShowDetails preResourceShowDetails = new SimplePreResourceShowDetails(resourcesToReturn);
 			HookParams preShowParams = new HookParams()
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-				.add(IPreResourceShowDetails.class, preResourceShowDetails);
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(IPreResourceShowDetails.class, preResourceShowDetails);
 			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, preShowParams);
 			resourcesToReturn = preResourceShowDetails.toList();
-
 		}
 
 		return resourcesToReturn;

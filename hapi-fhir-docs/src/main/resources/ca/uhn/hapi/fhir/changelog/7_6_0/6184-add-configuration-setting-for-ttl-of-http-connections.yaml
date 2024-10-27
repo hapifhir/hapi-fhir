@@ -1,0 +1,10 @@
+---
+type: add
+issue: 6184
+title: "Added a configuration setting for the TTL of HTTP connections to IRestfulClientFactory.
+        The following implementations have been updated to respect this new setting:
+        1. ApacheRestfulClientFactory
+        2. OkHttpRestfulClientFactory
+        3. HapiFhirCliRestfulClientFactory
+        Thanks to Alex Kopp and Alex Cote for the contribution!
+"

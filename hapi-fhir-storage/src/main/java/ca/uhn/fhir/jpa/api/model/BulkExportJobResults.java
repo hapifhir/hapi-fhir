@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,7 @@ public class BulkExportJobResults implements IModelJson {
 	@JsonProperty("originalRequestUrl")
 	private String myOriginalRequestUrl;
 
-	public BulkExportJobResults() {
-	}
+	public BulkExportJobResults() {}
 
 	public Map<String, List<String>> getResourceTypeToBinaryIds() {
 		if (myResourceTypeToBinaryIds == null) {

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 package ca.uhn.fhir.mdm.model;
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 
 import java.util.ArrayList;
@@ -50,14 +49,19 @@ public class MdmTransactionContext {
 
 	private String myResourceType;
 
+	/**
+	 * Whether or not the currently processed resource is a 'blocked resource'.
+	 * This will only be set on matching.
+	 */
+	private boolean myIsBlockedResource;
+
 	private List<IMdmLink> myMdmLinkEvents = new ArrayList<>();
 
 	public TransactionLogMessages getTransactionLogMessages() {
 		return myTransactionLogMessages;
 	}
 
-	public MdmTransactionContext() {
-	}
+	public MdmTransactionContext() {}
 
 	public MdmTransactionContext(OperationType theRestOperation) {
 		myRestOperation = theRestOperation;
@@ -68,7 +72,8 @@ public class MdmTransactionContext {
 		myTransactionLogMessages = theTransactionLogMessages;
 	}
 
-	public MdmTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, String theResourceType) {
+	public MdmTransactionContext(
+			TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, String theResourceType) {
 		this(theTransactionLogMessages, theRestOperation);
 		setResourceType(theResourceType);
 	}
@@ -111,5 +116,13 @@ public class MdmTransactionContext {
 
 	public void setMdmLinks(List<IMdmLink> theMdmLinkEvents) {
 		myMdmLinkEvents = theMdmLinkEvents;
+	}
+
+	public void setIsBlocked(boolean theIsBlocked) {
+		myIsBlockedResource = theIsBlocked;
+	}
+
+	public boolean getIsBlocked() {
+		return myIsBlockedResource;
 	}
 }

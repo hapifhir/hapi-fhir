@@ -13,8 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -38,10 +37,10 @@ class MdmClearJobParametersValidatorTest {
 		MdmClearJobParameters parameters = new MdmClearJobParameters();
 
 		// execute
-		List<String> result = myMdmClearJobParametersValidator.validate(parameters);
+		List<String> result = myMdmClearJobParametersValidator.validate(null, parameters);
 
 		// verify
-		assertThat(result, hasSize(1));
+		assertThat(result).hasSize(1);
 		assertEquals("Mdm is not enabled on this server", result.get(0));
 	}
 
@@ -52,10 +51,10 @@ class MdmClearJobParametersValidatorTest {
 		when(myMdmSettings.isEnabled()).thenReturn(true);
 
 		// execute
-		List<String> result = myMdmClearJobParametersValidator.validate(parameters);
+		List<String> result = myMdmClearJobParametersValidator.validate(null, parameters);
 
 		// verify
-		assertThat(result, hasSize(1));
+		assertThat(result).hasSize(1);
 		assertEquals("Mdm Clear Job Parameters must define at least one resource type", result.get(0));
 	}
 
@@ -69,10 +68,10 @@ class MdmClearJobParametersValidatorTest {
 		when(myMdmSettings.getMdmRules()).thenReturn(rules);
 
 		// execute
-		List<String> result = myMdmClearJobParametersValidator.validate(parameters);
+		List<String> result = myMdmClearJobParametersValidator.validate(null, parameters);
 
 		// verify
-		assertThat(result, hasSize(2));
+		assertThat(result).hasSize(2);
 		assertEquals("Resource type 'Immunization' is not supported on this server.", result.get(0));
 		assertEquals("There are no mdm rules for resource type 'Immunization'", result.get(1));
 	}
@@ -88,10 +87,10 @@ class MdmClearJobParametersValidatorTest {
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 
 		// execute
-		List<String> result = myMdmClearJobParametersValidator.validate(parameters);
+		List<String> result = myMdmClearJobParametersValidator.validate(null, parameters);
 
 		// verify
-		assertThat(result, hasSize(0));
+		assertThat(result).hasSize(0);
 	}
 
 }

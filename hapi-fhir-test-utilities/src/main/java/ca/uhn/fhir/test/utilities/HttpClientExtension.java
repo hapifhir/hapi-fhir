@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -34,6 +36,12 @@ import java.util.concurrent.TimeUnit;
 // TODO KHS merge with HttpClientHelper
 public class HttpClientExtension implements BeforeEachCallback, AfterEachCallback {
 	private CloseableHttpClient myClient;
+	private boolean myDontFollowRedirects;
+
+	public HttpClientExtension dontFollowRedirects() {
+		myDontFollowRedirects = true;
+		return this;
+	}
 
 	public CloseableHttpClient getClient() {
 		return myClient;
@@ -49,10 +57,23 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		connectionManager.setMaxTotal(99);
 		connectionManager.setDefaultMaxPerRoute(99);
-		myClient = HttpClientBuilder
+
+		SocketConfig socketConfig = SocketConfig
+			.copy(SocketConfig.DEFAULT)
+			.setSoTimeout((int) (30 * DateUtils.MILLIS_PER_SECOND))
+			.build();
+		connectionManager.setDefaultSocketConfig(socketConfig);
+
+		HttpClientBuilder builder = HttpClientBuilder
 			.create()
 			.setConnectionManager(connectionManager)
-			.setMaxConnPerRoute(99)
+			.setMaxConnPerRoute(99);
+
+		if (myDontFollowRedirects) {
+			builder.disableRedirectHandling();
+		}
+
+		myClient = builder
 			.build();
 	}
 

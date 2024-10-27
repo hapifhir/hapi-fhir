@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,11 @@ public class Bindings {
 	private final HashMap<String, List<OperationMethodBinding>> myOperationIdToBindings;
 	private final IdentityHashMap<OperationMethodBinding, String> myOperationBindingToId;
 
-	public Bindings(IdentityHashMap<SearchMethodBinding, String> theNamedSearchMethodBindingToName, HashMap<String, List<SearchMethodBinding>> theSearchNameToBindings, HashMap<String, List<OperationMethodBinding>> theOperationIdToBindings, IdentityHashMap<OperationMethodBinding, String> theOperationBindingToName) {
+	public Bindings(
+			IdentityHashMap<SearchMethodBinding, String> theNamedSearchMethodBindingToName,
+			HashMap<String, List<SearchMethodBinding>> theSearchNameToBindings,
+			HashMap<String, List<OperationMethodBinding>> theOperationIdToBindings,
+			IdentityHashMap<OperationMethodBinding, String> theOperationBindingToName) {
 		myNamedSearchMethodBindingToName = theNamedSearchMethodBindingToName;
 		mySearchNameToBindings = theSearchNameToBindings;
 		myOperationIdToBindings = theOperationIdToBindings;

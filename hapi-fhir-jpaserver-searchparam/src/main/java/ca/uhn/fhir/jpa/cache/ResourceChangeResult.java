@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,19 +47,23 @@ public class ResourceChangeResult {
 	}
 
 	public static ResourceChangeResult fromResourceChangeEvent(IResourceChangeEvent theResourceChangeEvent) {
-		return new ResourceChangeResult(theResourceChangeEvent.getCreatedResourceIds().size(), theResourceChangeEvent.getUpdatedResourceIds().size(), theResourceChangeEvent.getDeletedResourceIds().size());
+		return new ResourceChangeResult(
+				theResourceChangeEvent.getCreatedResourceIds().size(),
+				theResourceChangeEvent.getUpdatedResourceIds().size(),
+				theResourceChangeEvent.getDeletedResourceIds().size());
 	}
 
 	public ResourceChangeResult plus(ResourceChangeResult theResult) {
-		return new ResourceChangeResult(created + theResult.created, updated + theResult.updated, deleted + theResult.deleted);
+		return new ResourceChangeResult(
+				created + theResult.created, updated + theResult.updated, deleted + theResult.deleted);
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("created", created)
-			.append("updated", updated)
-			.append("deleted", deleted)
-			.toString();
+				.append("created", created)
+				.append("updated", updated)
+				.append("deleted", deleted)
+				.toString();
 	}
 }

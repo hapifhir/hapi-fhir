@@ -4,7 +4,7 @@ package ca.uhn.fhir.sl.cache.caffeine;
  * #%L
  * HAPI FHIR - ServiceLoaders - Caching Caffeine
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,9 @@ public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 	}
 
 	@Override
-	public Map<K, V> getAllPresent(Iterable<? extends K> keys) { return cache.getAllPresent(keys); }
+	public Map<K, V> getAllPresent(Iterable<? extends K> keys) {
+		return cache.getAllPresent(keys);
+	}
 
 	@Override
 	public void put(K key, V value) {
@@ -55,10 +57,12 @@ public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 	}
 
 	@Override
-	public void invalidate(K key) { cache.invalidate(key); }
+	public void invalidate(K key) {
+		cache.invalidate(key);
+	}
 
 	@Override
-	public void invalidateAll(Iterable<? extends K> keys)  {
+	public void invalidateAll(Iterable<? extends K> keys) {
 		cache.invalidateAll(keys);
 	}
 
@@ -73,7 +77,7 @@ public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 	}
 
 	@Override
-	public void cleanUp(){
+	public void cleanUp() {
 		cache.cleanUp();
 	}
 }

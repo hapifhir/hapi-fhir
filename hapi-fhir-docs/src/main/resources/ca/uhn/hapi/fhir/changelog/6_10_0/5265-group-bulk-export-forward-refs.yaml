@@ -1,0 +1,4 @@
+---
+type: fix
+jira: SMILE-7307
+title: "Previously, executing a Group Bulk Export without defining the `_type` parameter would accidentally omit `Patient` and `Organization` types. This has been corrected."

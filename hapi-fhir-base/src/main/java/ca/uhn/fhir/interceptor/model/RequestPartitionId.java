@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,21 +24,23 @@ import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -47,20 +49,26 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  */
 public class RequestPartitionId implements IModelJson {
 	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
-	private static final ObjectMapper ourObjectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+	private static final ObjectMapper ourObjectMapper =
+			new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+
 	@JsonProperty("partitionDate")
 	private final LocalDate myPartitionDate;
+
 	@JsonProperty("allPartitions")
 	private final boolean myAllPartitions;
+
 	@JsonProperty("partitionIds")
 	private final List<Integer> myPartitionIds;
+
 	@JsonProperty("partitionNames")
 	private final List<String> myPartitionNames;
 
 	/**
 	 * Constructor for a single partition
 	 */
-	private RequestPartitionId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+	private RequestPartitionId(
+			@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
 		myPartitionIds = toListOrNull(thePartitionId);
 		myPartitionNames = toListOrNull(thePartitionName);
 		myPartitionDate = thePartitionDate;
@@ -70,7 +78,10 @@ public class RequestPartitionId implements IModelJson {
 	/**
 	 * Constructor for a multiple partition
 	 */
-	private RequestPartitionId(@Nullable List<String> thePartitionName, @Nullable List<Integer> thePartitionId, @Nullable LocalDate thePartitionDate) {
+	private RequestPartitionId(
+			@Nullable List<String> thePartitionName,
+			@Nullable List<Integer> thePartitionId,
+			@Nullable LocalDate thePartitionDate) {
 		myPartitionIds = toListOrNull(thePartitionId);
 		myPartitionNames = toListOrNull(thePartitionName);
 		myPartitionDate = thePartitionDate;
@@ -88,12 +99,43 @@ public class RequestPartitionId implements IModelJson {
 		myAllPartitions = true;
 	}
 
+	/**
+	 * Creates a new RequestPartitionId which includes all partition IDs from
+	 * this {@link RequestPartitionId} but also includes all IDs from the given
+	 * {@link RequestPartitionId}. Any duplicates are only included once, and
+	 * partition names and dates are ignored and not returned. This {@link RequestPartitionId}
+	 * and {@literal theOther} are not modified.
+	 *
+	 * @since 7.4.0
+	 */
+	public RequestPartitionId mergeIds(RequestPartitionId theOther) {
+		if (isAllPartitions() || theOther.isAllPartitions()) {
+			return RequestPartitionId.allPartitions();
+		}
+
+		// don't know why this is required - otherwise PartitionedStrictTransactionR4Test fails
+		if (this.equals(theOther)) {
+			return this;
+		}
+
+		List<Integer> thisPartitionIds = getPartitionIds();
+		List<Integer> otherPartitionIds = theOther.getPartitionIds();
+		List<Integer> newPartitionIds = Stream.concat(thisPartitionIds.stream(), otherPartitionIds.stream())
+				.distinct()
+				.collect(Collectors.toList());
+		return RequestPartitionId.fromPartitionIds(newPartitionIds);
+	}
+
 	public static RequestPartitionId fromJson(String theJson) throws JsonProcessingException {
 		return ourObjectMapper.readValue(theJson, RequestPartitionId.class);
 	}
 
 	public boolean isAllPartitions() {
 		return myAllPartitions;
+	}
+
+	public boolean isPartitionCovered(Integer thePartitionId) {
+		return isAllPartitions() || getPartitionIds().contains(thePartitionId);
 	}
 
 	@Nullable
@@ -121,6 +163,9 @@ public class RequestPartitionId implements IModelJson {
 		if (hasPartitionNames()) {
 			b.append("names", getPartitionNames());
 		}
+		if (myAllPartitions) {
+			b.append("allPartitions", myAllPartitions);
+		}
 		return b.build();
 	}
 
@@ -147,11 +192,11 @@ public class RequestPartitionId implements IModelJson {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(myPartitionDate)
-			.append(myAllPartitions)
-			.append(myPartitionIds)
-			.append(myPartitionNames)
-			.toHashCode();
+				.append(myPartitionDate)
+				.append(myAllPartitions)
+				.append(myPartitionIds)
+				.append(myPartitionNames)
+				.toHashCode();
 	}
 
 	public String toJson() {
@@ -180,7 +225,9 @@ public class RequestPartitionId implements IModelJson {
 		if (isAllPartitions()) {
 			return false;
 		}
-		return hasPartitionIds() && getPartitionIds().size() == 1 && getPartitionIds().get(0) == null;
+		return hasPartitionIds()
+				&& getPartitionIds().size() == 1
+				&& getPartitionIds().get(0) == null;
 	}
 
 	public boolean hasPartitionId(Integer thePartitionId) {
@@ -201,7 +248,7 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	public List<Integer> getPartitionIdsWithoutDefault() {
-		return getPartitionIds().stream().filter(t -> t != null).collect(Collectors.toList());
+		return getPartitionIds().stream().filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	@Nullable
@@ -253,7 +300,8 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	@Nonnull
-	public static RequestPartitionId fromPartitionId(@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+	public static RequestPartitionId fromPartitionId(
+			@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
 		return new RequestPartitionId(null, Collections.singletonList(thePartitionId), thePartitionDate);
 	}
 
@@ -263,7 +311,8 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	@Nonnull
-	public static RequestPartitionId fromPartitionIds(@Nonnull Collection<Integer> thePartitionIds, @Nullable LocalDate thePartitionDate) {
+	public static RequestPartitionId fromPartitionIds(
+			@Nonnull Collection<Integer> thePartitionIds, @Nullable LocalDate thePartitionDate) {
 		return new RequestPartitionId(null, toListOrNull(thePartitionIds), thePartitionDate);
 	}
 
@@ -278,7 +327,8 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	@Nonnull
-	public static RequestPartitionId fromPartitionName(@Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
+	public static RequestPartitionId fromPartitionName(
+			@Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
 		return new RequestPartitionId(thePartitionName, null, thePartitionDate);
 	}
 
@@ -293,18 +343,29 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	@Nonnull
-	public static RequestPartitionId fromPartitionIdAndName(@Nullable Integer thePartitionId, @Nullable String thePartitionName) {
+	public static RequestPartitionId fromPartitionIdAndName(
+			@Nullable Integer thePartitionId, @Nullable String thePartitionName) {
 		return new RequestPartitionId(thePartitionName, thePartitionId, null);
 	}
 
 	@Nonnull
-	public static RequestPartitionId forPartitionIdAndName(@Nullable Integer thePartitionId, @Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
+	public static RequestPartitionId forPartitionIdAndName(
+			@Nullable Integer thePartitionId, @Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
 		return new RequestPartitionId(thePartitionName, thePartitionId, thePartitionDate);
 	}
 
 	@Nonnull
-	public static RequestPartitionId forPartitionIdsAndNames(List<String> thePartitionNames, List<Integer> thePartitionIds, LocalDate thePartitionDate) {
+	public static RequestPartitionId forPartitionIdsAndNames(
+			List<String> thePartitionNames, List<Integer> thePartitionIds, LocalDate thePartitionDate) {
 		return new RequestPartitionId(thePartitionNames, thePartitionIds, thePartitionDate);
+	}
+
+	public static boolean isDefaultPartition(@Nullable RequestPartitionId thePartitionId) {
+		if (thePartitionId == null) {
+			return false;
+		}
+
+		return thePartitionId.isDefaultPartition();
 	}
 
 	/**
@@ -316,11 +377,9 @@ public class RequestPartitionId implements IModelJson {
 		String retVal = "(all)";
 		if (!theRequestPartitionId.isAllPartitions()) {
 			assert theRequestPartitionId.hasPartitionIds();
-			retVal = theRequestPartitionId
-				.getPartitionIds()
-				.stream()
-				.map(t -> defaultIfNull(t, "null").toString())
-				.collect(Collectors.joining(" "));
+			retVal = theRequestPartitionId.getPartitionIds().stream()
+					.map(t -> defaultIfNull(t, "null").toString())
+					.collect(Collectors.joining(" "));
 		}
 		return retVal;
 	}

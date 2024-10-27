@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ package ca.uhn.fhir.rest.api;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,9 +37,18 @@ import java.util.Set;
  */
 public interface IVersionSpecificBundleFactory {
 
-	void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, @Nullable BundleInclusionRule theBundleInclusionRule, @Nullable Set<Include> theIncludes);
+	void addResourcesToBundle(
+			List<IBaseResource> theResult,
+			BundleTypeEnum theBundleType,
+			String theServerBase,
+			@Nullable BundleInclusionRule theBundleInclusionRule,
+			@Nullable Set<Include> theIncludes);
 
-	void addRootPropertiesToBundle(String theId, @Nonnull BundleLinks theBundleLinks, Integer theTotalResults, IPrimitiveType<Date> theLastUpdated);
+	void addRootPropertiesToBundle(
+			String theId,
+			@Nonnull BundleLinks theBundleLinks,
+			Integer theTotalResults,
+			IPrimitiveType<Date> theLastUpdated);
 
 	IBaseResource getResourceBundle();
 
@@ -48,7 +57,13 @@ public interface IVersionSpecificBundleFactory {
 	 * and {@link #addResourcesToBundle(List, BundleTypeEnum, String, BundleInclusionRule, Set)} methods
 	 */
 	@Deprecated
-	default void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
+	default void initializeBundleFromResourceList(
+			String theAuthor,
+			List<? extends IBaseResource> theResult,
+			String theServerBase,
+			String theCompleteUrl,
+			int theTotalResults,
+			BundleTypeEnum theBundleType) {
 		addTotalResultsToBundle(theResult.size(), theBundleType);
 		addResourcesToBundle(new ArrayList<>(theResult), theBundleType, null, null, null);
 	}

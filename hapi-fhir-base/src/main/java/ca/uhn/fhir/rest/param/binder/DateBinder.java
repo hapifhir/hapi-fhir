@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,12 @@
  */
 package ca.uhn.fhir.rest.param.binder;
 
-import java.util.Date;
-
 import ca.uhn.fhir.model.primitive.InstantDt;
 
+import java.util.Date;
+
 public final class DateBinder extends BaseJavaPrimitiveBinder<Date> {
-	public DateBinder() {
-	}
+	public DateBinder() {}
 
 	@Override
 	protected String doEncode(Date theString) {
@@ -36,6 +35,4 @@ public final class DateBinder extends BaseJavaPrimitiveBinder<Date> {
 	protected Date doParse(String theString) {
 		return new InstantDt(theString).getValue();
 	}
-
-
 }

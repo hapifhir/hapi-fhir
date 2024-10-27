@@ -3,8 +3,8 @@ package ca.uhn.fhirtest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import org.eclipse.jetty.ee10.webapp.WebAppContext;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.webapp.WebAppContext;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Subscription;
@@ -12,13 +12,13 @@ import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import static ca.uhn.fhirtest.config.TestDstu3Config.FHIR_LUCENE_LOCATION_DSTU3;
-
 public class UhnFhirTestApp {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UhnFhirTestApp.class);
 
 	public static void main(String[] args) throws Exception {
+
+		org.h2.Driver.load();
 
 		int myPort = 8889;
 		String base = "http://localhost:" + myPort + "/baseR4";
@@ -59,7 +59,7 @@ public class UhnFhirTestApp {
 
 		root.setContextPath("/");
 		root.setDescriptor("hapi-fhir-jpaserver-uhnfhirtest/src/main/webapp/WEB-INF/web.xml");
-		root.setResourceBase("hapi-fhir-jpaserver-uhnfhirtest/target/hapi-fhir-jpaserver");
+		root.setBaseResourceAsString("hapi-fhir-jpaserver-uhnfhirtest/target/hapi-fhir-jpaserver");
 
 		root.setParentLoaderPriority(true);
 

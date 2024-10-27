@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5192
+title: "Fixed a bug where search Bundles with `include` entries from an _include query parameter might
+      trigger a 'next' link to blank pages when
+      no more results `match` results are available.
+"

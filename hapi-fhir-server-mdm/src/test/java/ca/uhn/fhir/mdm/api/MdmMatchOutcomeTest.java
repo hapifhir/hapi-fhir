@@ -2,7 +2,9 @@ package ca.uhn.fhir.mdm.api;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MdmMatchOutcomeTest {
 
@@ -15,11 +17,11 @@ class MdmMatchOutcomeTest {
 
 		outcome = new MdmMatchOutcome(null, 10.0);
 		outcome.setMdmRuleCount(10);
-		assertEquals(1.0, outcome.getNormalizedScore(), DELTA);
+		assertThat(outcome.getNormalizedScore()).isCloseTo(1.0, within(DELTA));
 
 		outcome = new MdmMatchOutcome(null, 2.0);
 		outcome.setMdmRuleCount(3);
-		assertEquals(2.0 / 3.0, outcome.getNormalizedScore(), DELTA);
+		assertThat(outcome.getNormalizedScore()).isCloseTo(2.0 / 3.0, within(DELTA));
 	}
 
 }

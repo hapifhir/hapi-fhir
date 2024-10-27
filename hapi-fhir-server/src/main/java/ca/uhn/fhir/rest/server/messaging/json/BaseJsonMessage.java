@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,11 @@
  */
 package ca.uhn.fhir.rest.server.messaging.json;
 
-
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.StringUtils;
+import jakarta.annotation.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
-
-import javax.annotation.Nullable;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -34,6 +31,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
 	private static final long serialVersionUID = 1L;
+
 	@JsonProperty("headers")
 	private HapiMessageHeaders myHeaders;
 
@@ -73,9 +71,9 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	}
 
 	@Nullable
-   public String getMessageKey() {
+	public String getMessageKey() {
 		return null;
-    }
+	}
 
 	/**
 	 * Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link #getMessageKey()} returns null.
@@ -93,7 +91,7 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	 * @return null by default
 	 */
 	@Nullable
-	protected String getMessageKeyDefaultValue(){
+	protected String getMessageKeyDefaultValue() {
 		return null;
 	}
 }

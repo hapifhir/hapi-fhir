@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +19,32 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.i18n.Msg;
-import java.lang.reflect.Method;
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody {
 
 	public DeleteMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
-		super(theMethod, theContext, theProvider, Delete.class, theMethod.getAnnotation(Delete.class).type());
+		super(
+				theMethod,
+				theContext,
+				theProvider,
+				Delete.class,
+				theMethod.getAnnotation(Delete.class).type());
 	}
 
 	@Override
@@ -73,7 +80,8 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		if (id.hasResourceType() == false) {
 			id = id.withResourceType(getResourceName());
 		} else if (getResourceName().equals(id.getResourceType()) == false) {
-			throw new InvalidRequestException(Msg.code(1473) + "ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + id.getResourceType());
+			throw new InvalidRequestException(Msg.code(1473) + "ID parameter has the wrong resource type, expected '"
+					+ getResourceName() + "', found: " + id.getResourceType());
 		}
 
 		HttpDeleteClientInvocation retVal = createDeleteInvocation(getContext(), id, Collections.emptyMap());
@@ -86,18 +94,18 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return retVal;
 	}
 
-	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, IIdType theId, Map<String, List<String>> theAdditionalParams) {
+	public static HttpDeleteClientInvocation createDeleteInvocation(
+			FhirContext theContext, IIdType theId, Map<String, List<String>> theAdditionalParams) {
 		return new HttpDeleteClientInvocation(theContext, theId, theAdditionalParams);
 	}
-
 
 	@Override
 	protected String getMatchingOperation() {
 		return null;
 	}
 
-	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, String theSearchUrl, Map<String, List<String>> theParams) {
+	public static HttpDeleteClientInvocation createDeleteInvocation(
+			FhirContext theContext, String theSearchUrl, Map<String, List<String>> theParams) {
 		return new HttpDeleteClientInvocation(theContext, theSearchUrl, theParams);
 	}
-
 }

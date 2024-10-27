@@ -1,0 +1,8 @@
+---
+type: add
+issue: 6073
+title: "Previously, if a unique or non-unique combo SeaerchParameter was
+  defined, it would not be used by searches if any parameter contained
+  multiple OR clauses (e.g. `Patient?family=simpson&given=homer,marge`).
+  Such searches will now use the combo index table, which should result
+  in much more performant searches in some cases."

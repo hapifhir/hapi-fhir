@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5734
+title: "A scheduled job to clean up the Search URL table used to enforce uniqueness of conditional create/update jobs was created as a local job and not a clustered job. This has been fixed."

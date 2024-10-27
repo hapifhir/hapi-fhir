@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 public class SearchNarrowingConsentService implements IConsentService {
@@ -57,7 +57,8 @@ public class SearchNarrowingConsentService implements IConsentService {
 	 * @param theValidationSupport   The validation support module
 	 * @param theSearchParamRegistry The search param registry
 	 */
-	public SearchNarrowingConsentService(IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
+	public SearchNarrowingConsentService(
+			IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		myValidationSupport = theValidationSupport;
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
@@ -73,25 +74,29 @@ public class SearchNarrowingConsentService implements IConsentService {
 	}
 
 	@Override
-	public boolean shouldProcessCanSeeResource(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
-		List<AllowedCodeInValueSet> postFilteringList = SearchNarrowingInterceptor.getPostFilteringListOrNull(theRequestDetails);
+	public boolean shouldProcessCanSeeResource(
+			RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		List<AllowedCodeInValueSet> postFilteringList =
+				SearchNarrowingInterceptor.getPostFilteringListOrNull(theRequestDetails);
 		return postFilteringList != null && !postFilteringList.isEmpty();
 	}
 
-
 	@Override
-	public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+	public ConsentOutcome canSeeResource(
+			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return applyFilterForResource(theRequestDetails, theResource);
 	}
 
 	@Override
-	public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+	public ConsentOutcome willSeeResource(
+			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return applyFilterForResource(theRequestDetails, theResource);
 	}
 
 	@Nonnull
 	private ConsentOutcome applyFilterForResource(RequestDetails theRequestDetails, IBaseResource theResource) {
-		List<AllowedCodeInValueSet> postFilteringList = SearchNarrowingInterceptor.getPostFilteringListOrNull(theRequestDetails);
+		List<AllowedCodeInValueSet> postFilteringList =
+				SearchNarrowingInterceptor.getPostFilteringListOrNull(theRequestDetails);
 		if (postFilteringList == null) {
 			return ConsentOutcome.PROCEED;
 		}
@@ -108,9 +113,20 @@ public class SearchNarrowingConsentService implements IConsentService {
 			String searchParamName = next.getSearchParameterName();
 			String valueSetUrl = next.getValueSetUrl();
 
-			SearchParameterAndValueSetRuleImpl.CodeMatchCount outcome = SearchParameterAndValueSetRuleImpl.countMatchingCodesInValueSetForSearchParameter(theResource, myValidationSupport, mySearchParamRegistry, returnOnFirstMatch, searchParamName, valueSetUrl, myTroubleshootingLog, "Search Narrowing");
+			SearchParameterAndValueSetRuleImpl.CodeMatchCount outcome =
+					SearchParameterAndValueSetRuleImpl.countMatchingCodesInValueSetForSearchParameter(
+							theResource,
+							myValidationSupport,
+							mySearchParamRegistry,
+							returnOnFirstMatch,
+							searchParamName,
+							valueSetUrl,
+							myTroubleshootingLog,
+							"Search Narrowing");
 			if (outcome.isAtLeastOneUnableToValidate()) {
-				myTroubleshootingLog.warn("Terminology Services failed to validate value from " + next.getResourceName() + ":" + next.getSearchParameterName() + " in ValueSet " + next.getValueSetUrl() + " - Assuming REJECT");
+				myTroubleshootingLog.warn("Terminology Services failed to validate value from " + next.getResourceName()
+						+ ":" + next.getSearchParameterName() + " in ValueSet " + next.getValueSetUrl()
+						+ " - Assuming REJECT");
 				return ConsentOutcome.REJECT;
 			}
 
@@ -124,7 +140,6 @@ public class SearchNarrowingConsentService implements IConsentService {
 					break;
 				}
 			}
-
 		}
 
 		if (!allPositiveRulesMatched) {

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface IResourceIndexedSearchParamStringDao extends JpaRepository<ResourceIndexedSearchParamString, Long>, IHapiFhirJpaRepository {
+public interface IResourceIndexedSearchParamStringDao
+		extends JpaRepository<ResourceIndexedSearchParamString, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :resId")

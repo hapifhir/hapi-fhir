@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,14 @@ import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 
 public class QuantityPredicateBuilder extends BaseQuantityPredicateBuilder {
 
-
 	/**
 	 * Constructor
 	 */
 	public QuantityPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_QUANTITY"));
-		
+
 		myColumnHashIdentitySystemUnits = getTable().addColumn("HASH_IDENTITY_SYS_UNITS");
 		myColumnHashIdentityUnits = getTable().addColumn("HASH_IDENTITY_AND_UNITS");
 		myColumnValue = getTable().addColumn("SP_VALUE");
 	}
-	
 }

@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +19,37 @@
  */
 package ca.uhn.fhir.batch2.jobs.reindex;
 
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-public class ReindexJobParameters extends PartitionedUrlListJobParameters {
+public class ReindexJobParameters extends PartitionedUrlJobParameters {
 
 	public static final String OPTIMIZE_STORAGE = "optimizeStorage";
 	public static final String REINDEX_SEARCH_PARAMETERS = "reindexSearchParameters";
 	public static final String OPTIMISTIC_LOCK = "optimisticLock";
 
-	@JsonProperty(value = OPTIMIZE_STORAGE, defaultValue = ReindexParameters.OPTIMIZE_STORAGE_DEFAULT_STRING, required = false)
+	@JsonProperty(
+			value = OPTIMIZE_STORAGE,
+			defaultValue = ReindexParameters.OPTIMIZE_STORAGE_DEFAULT_STRING,
+			required = false)
 	@Nullable
 	private ReindexParameters.OptimizeStorageModeEnum myOptimizeStorage;
-	@JsonProperty(value = REINDEX_SEARCH_PARAMETERS, defaultValue = ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT_STRING, required = false)
+
+	@JsonProperty(
+			value = REINDEX_SEARCH_PARAMETERS,
+			defaultValue = ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT_STRING,
+			required = false)
 	@Nullable
 	private ReindexParameters.ReindexSearchParametersEnum myReindexSearchParameters;
-	@JsonProperty(value = OPTIMISTIC_LOCK, defaultValue = ReindexParameters.OPTIMISTIC_LOCK_DEFAULT + "", required = false)
+
+	@JsonProperty(
+			value = OPTIMISTIC_LOCK,
+			defaultValue = ReindexParameters.OPTIMISTIC_LOCK_DEFAULT + "",
+			required = false)
 	@Nullable
 	private Boolean myOptimisticLock;
 
@@ -65,11 +75,9 @@ public class ReindexJobParameters extends PartitionedUrlListJobParameters {
 		return defaultIfNull(myReindexSearchParameters, ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT);
 	}
 
-	public ReindexJobParameters setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
+	public ReindexJobParameters setReindexSearchParameters(
+			ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
 		this.myReindexSearchParameters = theReindexSearchParameters;
 		return this;
 	}
-
-
-
 }

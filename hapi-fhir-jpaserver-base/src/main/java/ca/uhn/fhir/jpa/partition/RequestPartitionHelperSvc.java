@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,10 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	@Autowired
 	IPartitionLookupSvc myPartitionConfigSvc;
 
+	public RequestPartitionHelperSvc() {}
+
 	@Override
-	protected RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
+	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
 		List<String> names = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionIds().size(); i++) {
 
@@ -49,16 +51,29 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				try {
 					partition = myPartitionConfigSvc.getPartitionById(id);
 				} catch (IllegalArgumentException e) {
-					String msg = myFhirContext.getLocalizer().getMessage(BaseRequestPartitionHelperSvc.class, "unknownPartitionId", theRequestPartitionId.getPartitionIds().get(i));
+					String msg = myFhirContext
+							.getLocalizer()
+							.getMessage(
+									BaseRequestPartitionHelperSvc.class,
+									"unknownPartitionId",
+									theRequestPartitionId.getPartitionIds().get(i));
 					throw new ResourceNotFoundException(Msg.code(1316) + msg);
 				}
 			}
 
-			if (theRequestPartitionId.getPartitionNames() != null) {
+			if (theRequestPartitionId.hasPartitionNames()) {
 				if (partition == null) {
-					Validate.isTrue(theRequestPartitionId.getPartitionIds().get(i) == null, "Partition %s must not have an ID", JpaConstants.DEFAULT_PARTITION_NAME);
+					Validate.isTrue(
+							theRequestPartitionId.getPartitionIds().get(i) == null,
+							"Partition %s must not have an ID",
+							JpaConstants.DEFAULT_PARTITION_NAME);
 				} else {
-					Validate.isTrue(Objects.equals(theRequestPartitionId.getPartitionIds().get(i), partition.getId()), "Partition name %s does not match ID %n", theRequestPartitionId.getPartitionNames().get(i), theRequestPartitionId.getPartitionIds().get(i));
+					Validate.isTrue(
+							Objects.equals(
+									theRequestPartitionId.getPartitionNames().get(i), partition.getName()),
+							"Partition name %s does not match ID %s",
+							theRequestPartitionId.getPartitionNames().get(i),
+							theRequestPartitionId.getPartitionIds().get(i));
 				}
 			} else {
 				if (names == null) {
@@ -70,34 +85,48 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 					names.add(null);
 				}
 			}
-
 		}
 
 		if (names != null) {
-			return RequestPartitionId.forPartitionIdsAndNames(names, theRequestPartitionId.getPartitionIds(), theRequestPartitionId.getPartitionDate());
+			return RequestPartitionId.forPartitionIdsAndNames(
+					names, theRequestPartitionId.getPartitionIds(), theRequestPartitionId.getPartitionDate());
 		}
 
 		return theRequestPartitionId;
 	}
 
 	@Override
-	protected RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId)  {
+	public RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
 		List<Integer> ids = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionNames().size(); i++) {
 
 			PartitionEntity partition;
 			try {
-				partition = myPartitionConfigSvc.getPartitionByName(theRequestPartitionId.getPartitionNames().get(i));
+				partition = myPartitionConfigSvc.getPartitionByName(
+						theRequestPartitionId.getPartitionNames().get(i));
 			} catch (IllegalArgumentException e) {
-				String msg = myFhirContext.getLocalizer().getMessage(BaseRequestPartitionHelperSvc.class, "unknownPartitionName", theRequestPartitionId.getPartitionNames().get(i));
+				String msg = myFhirContext
+						.getLocalizer()
+						.getMessage(
+								BaseRequestPartitionHelperSvc.class,
+								"unknownPartitionName",
+								theRequestPartitionId.getPartitionNames().get(i));
 				throw new ResourceNotFoundException(Msg.code(1317) + msg);
 			}
 
 			if (theRequestPartitionId.hasPartitionIds()) {
 				if (partition == null) {
-					Validate.isTrue(theRequestPartitionId.getPartitionIds().get(i) == null, "Partition %s must not have an ID", JpaConstants.DEFAULT_PARTITION_NAME);
+					Validate.isTrue(
+							theRequestPartitionId.getPartitionIds().get(i) == null,
+							"Partition %s must not have an ID",
+							JpaConstants.DEFAULT_PARTITION_NAME);
 				} else {
-					Validate.isTrue(Objects.equals(theRequestPartitionId.getPartitionIds().get(i), partition.getId()), "Partition name %s does not match ID %n", theRequestPartitionId.getPartitionNames().get(i), theRequestPartitionId.getPartitionIds().get(i));
+					Validate.isTrue(
+							Objects.equals(
+									theRequestPartitionId.getPartitionIds().get(i), partition.getId()),
+							"Partition ID %s does not match name %s",
+							theRequestPartitionId.getPartitionIds().get(i),
+							theRequestPartitionId.getPartitionNames().get(i));
 				}
 			} else {
 				if (ids == null) {
@@ -109,15 +138,13 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 					ids.add(null);
 				}
 			}
-
 		}
 
 		if (ids != null) {
-			return RequestPartitionId.forPartitionIdsAndNames(theRequestPartitionId.getPartitionNames(), ids, theRequestPartitionId.getPartitionDate());
+			return RequestPartitionId.forPartitionIdsAndNames(
+					theRequestPartitionId.getPartitionNames(), ids, theRequestPartitionId.getPartitionDate());
 		}
 
 		return theRequestPartitionId;
 	}
-
-
 }

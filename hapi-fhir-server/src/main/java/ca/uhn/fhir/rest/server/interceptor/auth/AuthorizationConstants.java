@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 public class AuthorizationConstants {
 
 	public static final int ORDER_CONSENT_INTERCEPTOR = 100;
+	public static final int ORDER_BINARY_SECURITY_INTERCEPTOR = 150;
 	public static final int ORDER_AUTH_INTERCEPTOR = 200;
 	public static final int ORDER_CONVERTER_INTERCEPTOR = 300;
 
 	private AuthorizationConstants() {
 		super();
 	}
-
 }

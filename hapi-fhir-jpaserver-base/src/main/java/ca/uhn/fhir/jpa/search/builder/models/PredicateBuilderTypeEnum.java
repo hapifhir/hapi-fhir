@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,5 +20,13 @@
 package ca.uhn.fhir.jpa.search.builder.models;
 
 public enum PredicateBuilderTypeEnum {
-	DATE, COORDS, NUMBER, QUANTITY, REFERENCE, SOURCE, STRING, TOKEN, TAG
+	DATE,
+	COORDS,
+	NUMBER,
+	QUANTITY,
+	REFERENCE,
+	SOURCE,
+	STRING,
+	TOKEN,
+	TAG
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
@@ -37,16 +36,13 @@ import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
-import org.hl7.fhir.dstu2.model.Subscription;
+import jakarta.servlet.http.HttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +73,10 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, MetaDt> theSystemDao, JpaStorageSettings theStorageSettings) {
+	public JpaConformanceProviderDstu2(
+			RestfulServer theRestfulServer,
+			IFhirSystemDao<Bundle, MetaDt> theSystemDao,
+			JpaStorageSettings theStorageSettings) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
@@ -103,15 +102,18 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 
 			for (RestResource nextResource : nextRest.getResource()) {
 
-				ConditionalDeleteStatusEnum conditionalDelete = nextResource.getConditionalDeleteElement().getValueAsEnum();
-				if (conditionalDelete == ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED && myStorageSettings.isAllowMultipleDelete() == false) {
+				ConditionalDeleteStatusEnum conditionalDelete =
+						nextResource.getConditionalDeleteElement().getValueAsEnum();
+				if (conditionalDelete == ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED
+						&& myStorageSettings.isAllowMultipleDelete() == false) {
 					nextResource.setConditionalDelete(ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
 				}
 
 				// Add resource counts
 				Long count = counts.get(nextResource.getTypeElement().getValueAsString());
 				if (count != null) {
-					nextResource.addUndeclaredExtension(false, ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalDt(count));
+					nextResource.addUndeclaredExtension(
+							false, ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalDt(count));
 				}
 
 				// Add chained params
@@ -126,16 +128,6 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 						}
 					}
 				}
-
-			}
-		}
-
-		if (myStorageSettings.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
-				ExtensionDt websocketExtension = new ExtensionDt();
-				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
-				websocketExtension.setValue(new UriDt(myStorageSettings.getWebsocketContextPath()));
-				retVal.getRestFirstRep().addUndeclaredExtension(websocketExtension);
 			}
 		}
 

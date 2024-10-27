@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,28 +24,32 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 
 public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
 
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegistry;
 
 	/**
 	 * Constructor
@@ -109,8 +113,8 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 		} else if (theResource instanceof org.hl7.fhir.r4b.model.SubscriptionTopic) {
 			return SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theResource);
 		} else {
-			throw new IllegalArgumentException(Msg.code(2332) + "Only R4B and R5 SubscriptionTopic is currently supported.  Found " + theResource.getClass());
+			throw new IllegalArgumentException(Msg.code(2332)
+					+ "Only R4B and R5 SubscriptionTopic is currently supported.  Found " + theResource.getClass());
 		}
 	}
 }
-

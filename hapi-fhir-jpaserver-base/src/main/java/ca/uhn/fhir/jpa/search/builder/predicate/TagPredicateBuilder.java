@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,14 +61,20 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 		myTagDefinitionColumnTagType = myTagDefinitionTable.addColumn("TAG_TYPE");
 	}
 
-
-	public Condition createPredicateTag(TagTypeEnum theTagType, List<Triple<String, String, String>> theTokens, String theParamName, RequestPartitionId theRequestPartitionId) {
-		addJoin(getTable(), myTagDefinitionTable, myColumnTagId, myTagDefinitionColumnTagId);
+	public Condition createPredicateTag(
+			TagTypeEnum theTagType,
+			List<Triple<String, String, String>> theTokens,
+			String theParamName,
+			RequestPartitionId theRequestPartitionId) {
+		addJoin(getTable(), myTagDefinitionTable, new DbColumn[] {myColumnTagId}, new DbColumn[] {
+			myTagDefinitionColumnTagId
+		});
 		return createPredicateTagList(theTagType, theTokens);
 	}
 
 	private Condition createPredicateTagList(TagTypeEnum theTagType, List<Triple<String, String, String>> theTokens) {
-		Condition typePredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagType, generatePlaceholder(theTagType.ordinal()));
+		Condition typePredicate =
+				BinaryCondition.equalTo(myTagDefinitionColumnTagType, generatePlaceholder(theTagType.ordinal()));
 
 		List<Condition> orPredicates = Lists.newArrayList();
 		for (Triple<String, String, String> next : theTokens) {
@@ -81,11 +87,13 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 			}
 
 			Condition codePredicate = Objects.equals(qualifier, UriParamQualifierEnum.BELOW.getValue())
-				? BinaryCondition.like(myTagDefinitionColumnTagCode, generatePlaceholder(createLeftMatchLikeExpression(code)))
-				: BinaryCondition.equalTo(myTagDefinitionColumnTagCode, generatePlaceholder(code));
+					? BinaryCondition.like(
+							myTagDefinitionColumnTagCode, generatePlaceholder(createLeftMatchLikeExpression(code)))
+					: BinaryCondition.equalTo(myTagDefinitionColumnTagCode, generatePlaceholder(code));
 
 			if (isNotBlank(system)) {
-				Condition systemPredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagSystem, generatePlaceholder(system));
+				Condition systemPredicate =
+						BinaryCondition.equalTo(myTagDefinitionColumnTagSystem, generatePlaceholder(system));
 				orPredicates.add(ComboCondition.and(typePredicate, systemPredicate, codePredicate));
 			} else {
 				// Note: We don't have an index for this combo, which means that this may not perform

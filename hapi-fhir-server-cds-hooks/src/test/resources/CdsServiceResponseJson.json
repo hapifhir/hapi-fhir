@@ -1,0 +1,22 @@
+{
+	"cards" : [ {
+		"suggestions" : [ {
+			"actions" : [ {
+				"resource" : {
+					"resourceType": "Patient",
+					"name": [ {
+						"family": "Athaliah"
+					} ]
+				}
+			} ]
+		} ]
+	} ],
+	"systemActions" : [ {
+		"resource" : {
+			"resourceType": "Patient",
+			"name": [ {
+				"family": "Jehoshaphat"
+			} ]
+		}
+	} ]
+}

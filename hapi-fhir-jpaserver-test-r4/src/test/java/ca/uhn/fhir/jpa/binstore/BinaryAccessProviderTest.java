@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.binstore;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -10,7 +12,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
-import ca.uhn.fhir.mdm.util.MessageHelper;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -26,19 +28,19 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -65,8 +67,6 @@ public class BinaryAccessProviderTest {
 	private IFhirResourceDao myResourceDao;
 	@Spy
 	protected IBinaryStorageSvc myBinaryStorageSvc;
-	@Autowired
-	private MessageHelper myMessageHelper;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -104,7 +104,7 @@ public class BinaryAccessProviderTest {
 		ServletOutputStream sos = spy(ServletOutputStream.class);
 		when(myDaoRegistry.getResourceDao(eq("DocumentReference"))).thenReturn(myResourceDao);
 		when(myResourceDao.read(any(), any(), anyBoolean())).thenReturn(docRef);
-		when(myBinaryStorageSvc.fetchBlobDetails(any(), any())).thenReturn(blobDetails);
+		when(myBinaryStorageSvc.fetchBinaryContentDetails(any(), any())).thenReturn(blobDetails);
 		when(theServletResponse.getOutputStream()).thenReturn(sos);
 		myBinaryAccessProvider.setTargetAttachmentIdForUnitTest(true);
 
@@ -112,8 +112,8 @@ public class BinaryAccessProviderTest {
 			myBinaryAccessProvider.binaryAccessRead(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
 		} catch (IOException e) {
 		}
-		verify(myBinaryStorageSvc, times(1)).fetchBlobDetails(any(), any());
-		verify(myBinaryStorageSvc, times(1)).writeBlob(any(), any(), any());
+		verify(myBinaryStorageSvc, times(1)).fetchBinaryContentDetails(any(), any());
+		verify(myBinaryStorageSvc, times(1)).writeBinaryContent(any(), any(), any());
 		verify(theServletResponse, times(1)).setStatus(200);
 		verify(theServletResponse, times(1)).setContentType(any());
 		verify(theServletResponse, times(1)).setContentLength(0);
@@ -133,7 +133,7 @@ public class BinaryAccessProviderTest {
 		} catch (InvalidRequestException | IOException e) {
 			assertEquals(Msg.code(1331) + "Can not find the requested binary content. It may have been deleted.", e.getMessage());
 		}
-		verify(myBinaryStorageSvc, times(1)).fetchBlobDetails(any(), any());
+		verify(myBinaryStorageSvc, times(1)).fetchBinaryContentDetails(any(), any());
 	}
 
 	@Test
@@ -157,7 +157,7 @@ public class BinaryAccessProviderTest {
 	}
 
 	@Test
-	public void testBinaryAccessRead_WithoutAttachmentId_NullData() throws IOException {
+	public void testBinaryAccessRead_WithoutAttachmentId_NullData() {
 		DocumentReference docRef = new DocumentReference();
 		DocumentReference.DocumentReferenceContentComponent content = docRef.addContent();
 		content.getAttachment().setContentType("application/octet-stream");
@@ -248,16 +248,16 @@ public class BinaryAccessProviderTest {
 		DaoMethodOutcome daoOutcome = new DaoMethodOutcome();
 		daoOutcome.setResource(docRef);
 		StoredDetails sd = spy(StoredDetails.class);
-		sd.setBlobId("123");
+		sd.setBinaryContentId("123");
 		sd.setBytes(15);
 		when(myDaoRegistry.getResourceDao(eq("DocumentReference"))).thenReturn(myResourceDao);
 		when(myResourceDao.read(any(), any(), anyBoolean())).thenReturn(docRef);
 		when(myResourceDao.update(docRef, myRequestDetails)).thenReturn(daoOutcome);
 		when(theServletRequest.getContentType()).thenReturn("Integer");
 		when(theServletRequest.getContentLength()).thenReturn(15);
-		when(myBinaryStorageSvc.shouldStoreBlob(15, docRef.getIdElement(), "Integer")).thenReturn(true);
+		when(myBinaryStorageSvc.shouldStoreBinaryContent(15, docRef.getIdElement(), "Integer")).thenReturn(true);
 		myRequestDetails.setServletRequest(theServletRequest);
-		when(myBinaryStorageSvc.storeBlob(eq(docRef.getIdElement()), isNull(), eq("Integer"), any(InputStream.class))).thenReturn(sd);
+		doReturn(sd).when(myBinaryStorageSvc).storeBinaryContent(eq(docRef.getIdElement()), isNull(), eq("Integer"), any(InputStream.class), any(RequestDetails.class));
 		myRequestDetails.setRequestContents(SOME_BYTES);
 
 		try {
@@ -266,7 +266,7 @@ public class BinaryAccessProviderTest {
 			assertEquals(docRef.getId(), outcome.getIdElement().getValue());
 		} catch (IOException e) {
 		}
-		verify(myBinaryStorageSvc, times(1)).storeBlob(any(), any(), any(), any());
+		verify(myBinaryStorageSvc, times(1)).storeBinaryContent(any(), any(), any(), any(), any(ServletRequestDetails.class));
 	}
 
 	@Test

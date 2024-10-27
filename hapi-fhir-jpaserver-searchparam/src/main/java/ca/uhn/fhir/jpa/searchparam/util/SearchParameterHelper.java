@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,9 @@ public class SearchParameterHelper {
 		mySearchParameterCanonicalizer = theSearchParameterCanonicalizer;
 	}
 
-
 	public Optional<SearchParameterMap> buildSearchParameterMapFromCanonical(IBaseResource theRuntimeSearchParam) {
-		RuntimeSearchParam canonicalSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theRuntimeSearchParam);
+		RuntimeSearchParam canonicalSearchParam =
+				mySearchParameterCanonicalizer.canonicalizeSearchParameter(theRuntimeSearchParam);
 		if (canonicalSearchParam == null) {
 			return Optional.empty();
 		}
@@ -60,7 +60,6 @@ public class SearchParameterHelper {
 		return Optional.of(retVal);
 	}
 
-
 	private TokenAndListParam toTokenAndList(List<String> theBases) {
 		TokenAndListParam retVal = new TokenAndListParam();
 
@@ -78,6 +77,4 @@ public class SearchParameterHelper {
 
 		return retVal.getValuesAsQueryTokens().isEmpty() ? null : retVal;
 	}
-
-
 }

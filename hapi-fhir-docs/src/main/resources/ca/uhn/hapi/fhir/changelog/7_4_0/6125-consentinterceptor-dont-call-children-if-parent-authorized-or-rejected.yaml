@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6124
+title: "Previously, when retrieving a resource which may contain other resources, such as a document Bundle, 
+if a ConsentService's willSeeResource returned AUTHORIZED or REJECT on this parent resource, the willSeeResource was 
+still being called for the child resources. This has now been fixed so that if a consent service 
+returns AUTHORIZED or REJECT for a parent resource, willSeeResource is not called for the child resources."

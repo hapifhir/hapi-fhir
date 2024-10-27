@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,18 +28,19 @@ import org.hl7.fhir.r5.model.SubscriptionTopic;
 public final class SubscriptionTopicCanonicalizer {
 	private static final FhirContext ourFhirContextR5 = FhirContext.forR5();
 
-	private SubscriptionTopicCanonicalizer() {
-	}
+	private SubscriptionTopicCanonicalizer() {}
 
-	// WIP STR5 use elsewhere
 	public static SubscriptionTopic canonicalizeTopic(FhirContext theFhirContext, IBaseResource theSubscriptionTopic) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R4B:
-			return (SubscriptionTopic) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.SubscriptionTopic) theSubscriptionTopic);
+				return (SubscriptionTopic) VersionConvertorFactory_43_50.convertResource(
+						(org.hl7.fhir.r4b.model.SubscriptionTopic) theSubscriptionTopic);
 			case R5:
 				return (SubscriptionTopic) theSubscriptionTopic;
 			default:
-				throw new UnsupportedOperationException(Msg.code(2337) + "Subscription topics are not supported in FHIR version " + theFhirContext.getVersion().getVersion());
+				throw new UnsupportedOperationException(
+						Msg.code(2337) + "Subscription topics are not supported in FHIR version "
+								+ theFhirContext.getVersion().getVersion());
 		}
 	}
 }

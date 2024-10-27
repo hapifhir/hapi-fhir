@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,25 +209,24 @@ public class TranslationRequest {
 
 	public IValidationSupport.TranslateCodeRequest asTranslateCodeRequest() {
 		return new IValidationSupport.TranslateCodeRequest(
-			Collections.unmodifiableList(this.getCodeableConcept().getCoding()),
-			this.getTargetSystem(),
-			this.getUrl(),
-			this.getConceptMapVersion(),
-			this.getSource(),
-			this.getTarget(),
-			this.getResourceId(),
-			this.getReverseAsBoolean()
-		);
+				Collections.unmodifiableList(this.getCodeableConcept().getCoding()),
+				this.getTargetSystem(),
+				this.getUrl(),
+				this.getConceptMapVersion(),
+				this.getSource(),
+				this.getTarget(),
+				this.getResourceId(),
+				this.getReverseAsBoolean());
 	}
 
 	public static TranslationRequest fromTranslateCodeRequest(IValidationSupport.TranslateCodeRequest theRequest) {
 		CodeableConcept sourceCodeableConcept = new CodeableConcept();
 		for (IBaseCoding aCoding : theRequest.getCodings()) {
 			sourceCodeableConcept
-				.addCoding()
-				.setSystem(aCoding.getSystem())
-				.setCode(aCoding.getCode())
-				.setVersion(((Coding) aCoding).getVersion());
+					.addCoding()
+					.setSystem(aCoding.getSystem())
+					.setCode(aCoding.getCode())
+					.setVersion(((Coding) aCoding).getVersion());
 		}
 
 		TranslationRequest translationRequest = new TranslationRequest();
@@ -240,6 +239,5 @@ public class TranslationRequest {
 		translationRequest.setResourceId(theRequest.getResourceId());
 		translationRequest.setReverse(theRequest.isReverse());
 		return translationRequest;
-
 	}
 }

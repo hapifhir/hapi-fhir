@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5195
+title: "MAX_SUBSCRIPTION_RESULTS was set to an arbitrarily high 50000. This resulted in a failures in hapi-fhir-jpaserver-starter. Other constants, such as SearchParamRegistryImpl.MAX_MANAGED_PARAM_COUNT have a limit of 10000 as well. This aligns the MAX_SUBSCRIPTION results with that value."

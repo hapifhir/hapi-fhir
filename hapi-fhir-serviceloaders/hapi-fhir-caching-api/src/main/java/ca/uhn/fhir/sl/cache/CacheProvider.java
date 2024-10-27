@@ -4,7 +4,7 @@ package ca.uhn.fhir.sl.cache;
  * #%L
  * HAPI FHIR - ServiceLoaders - Caching API
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ package ca.uhn.fhir.sl.cache;
  * #L%
  */
 
-public interface CacheProvider<K,V> {
-    Cache create(long timeoutMillis);
+public interface CacheProvider<K, V> {
+	Cache create(long timeoutMillis);
 
-    Cache create(long timeoutMillis, long maximumSize);
+	Cache create(long timeoutMillis, long maximumSize);
 
-    LoadingCache create(long timeoutMillis, CacheLoader<K,V> cacheLoader);
+	LoadingCache create(long timeoutMillis, CacheLoader<K, V> cacheLoader);
 
-    LoadingCache create(long timeoutMillis, long maximumSize, CacheLoader<K,V> cacheLoader);
+	LoadingCache create(long timeoutMillis, long maximumSize, CacheLoader<K, V> cacheLoader);
 }

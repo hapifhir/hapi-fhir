@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.slf4j.Logger;
@@ -60,6 +61,11 @@ public class TestSubscriptionDstu3Config {
 		IFhirResourceDao mock = mock(IFhirResourceDao.class);
 		when(mock.getResourceType()).thenReturn(Subscription.class);
 		return mock;
+	}
+
+	@Bean
+	public IResourceModifiedMessagePersistenceSvc resourceModifiedMessagePersistenceSvc() {
+		return mock(IResourceModifiedMessagePersistenceSvc.class);
 	}
 
 }

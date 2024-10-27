@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,8 @@ import org.hl7.fhir.r4.model.CodeSystem;
 
 public abstract class BaseTermVersionAdapterSvcImpl implements ITermVersionAdapterSvc {
 
-
 	protected void validateCodeSystemForStorage(CodeSystem theCodeSystemResource) {
-		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theCodeSystemResource.getUrl(), "Can not store a CodeSystem without a valid URL");
+		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(
+				theCodeSystemResource.getUrl(), "Can not store a CodeSystem without a valid URL");
 	}
-
 }

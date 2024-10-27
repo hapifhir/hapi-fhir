@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
 
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import jakarta.annotation.Nonnull;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -58,10 +58,9 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 
 	@Override
 	public boolean hasSubscription(@Nonnull MessageHandler handler) {
-		return getSubscribers()
-			.stream()
-			.map(t -> (RetryingMessageHandlerWrapper) t)
-			.anyMatch(t -> t.getWrappedHandler() == handler);
+		return getSubscribers().stream()
+				.map(t -> (RetryingMessageHandlerWrapper) t)
+				.anyMatch(t -> t.getWrappedHandler() == handler);
 	}
 
 	@Override
@@ -71,11 +70,10 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 
 	@Override
 	public boolean unsubscribe(@Nonnull MessageHandler handler) {
-		Optional<RetryingMessageHandlerWrapper> match = getSubscribers()
-			.stream()
-			.map(t -> (RetryingMessageHandlerWrapper) t)
-			.filter(t -> t.getWrappedHandler() == handler)
-			.findFirst();
+		Optional<RetryingMessageHandlerWrapper> match = getSubscribers().stream()
+				.map(t -> (RetryingMessageHandlerWrapper) t)
+				.filter(t -> t.getWrappedHandler() == handler)
+				.findFirst();
 		match.ifPresent(super::unsubscribe);
 		return match.isPresent();
 	}

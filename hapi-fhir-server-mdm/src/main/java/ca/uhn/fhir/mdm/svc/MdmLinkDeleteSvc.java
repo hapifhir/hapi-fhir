@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ public class MdmLinkDeleteSvc {
 
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
+
 	@Autowired
 	private IIdHelperService myIdHelperService;
 
@@ -46,19 +47,27 @@ public class MdmLinkDeleteSvc {
 	 * @return the number of records deleted
 	 */
 	public int deleteWithAnyReferenceTo(IBaseResource theResource) {
-		IResourcePersistentId pid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResource.getIdElement());
+		IResourcePersistentId pid = myIdHelperService.getPidOrThrowException(
+				RequestPartitionId.allPartitions(), theResource.getIdElement());
 		int removed = myMdmLinkDao.deleteWithAnyReferenceToPid(pid);
 		if (removed > 0) {
-			ourLog.info("Removed {} MDM links with references to {}", removed, theResource.getIdElement().toVersionless());
+			ourLog.info(
+					"Removed {} MDM links with references to {}",
+					removed,
+					theResource.getIdElement().toVersionless());
 		}
 		return removed;
 	}
 
 	public int deleteNonRedirectWithAnyReferenceTo(IBaseResource theResource) {
-		IResourcePersistentId pid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResource.getIdElement());
+		IResourcePersistentId pid = myIdHelperService.getPidOrThrowException(
+				RequestPartitionId.allPartitions(), theResource.getIdElement());
 		int removed = myMdmLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(pid, MdmMatchResultEnum.REDIRECT);
 		if (removed > 0) {
-			ourLog.info("Removed {} non-redirect MDM links with references to {}", removed, theResource.getIdElement().toVersionless());
+			ourLog.info(
+					"Removed {} non-redirect MDM links with references to {}",
+					removed,
+					theResource.getIdElement().toVersionless());
 		}
 		return removed;
 	}

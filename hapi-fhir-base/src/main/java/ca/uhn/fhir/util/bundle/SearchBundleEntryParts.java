@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,19 +22,20 @@ package ca.uhn.fhir.util.bundle;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.math.BigDecimal;
+
 public class SearchBundleEntryParts {
 	private final IBaseResource myResource;
 	private final BundleEntrySearchModeEnum mySearchMode;
+	private final BigDecimal mySearchScore;
 	private final String myFullUrl;
 
-	public SearchBundleEntryParts(String theFullUrl, IBaseResource theResource, String theSearchMode) {
+	public SearchBundleEntryParts(
+			String theFullUrl, IBaseResource theResource, String theSearchMode, BigDecimal theSearchScore) {
 		myFullUrl = theFullUrl;
 		myResource = theResource;
-		if ("match".equalsIgnoreCase(theSearchMode)) {
-			mySearchMode = BundleEntrySearchModeEnum.MATCH;
-		} else {
-			mySearchMode = BundleEntrySearchModeEnum.INCLUDE;
-		}
+		mySearchMode = BundleEntrySearchModeEnum.forCode(theSearchMode);
+		mySearchScore = theSearchScore;
 	}
 
 	public String getFullUrl() {
@@ -49,5 +50,7 @@ public class SearchBundleEntryParts {
 		return mySearchMode;
 	}
 
-
+	public BigDecimal getSearchScore() {
+		return mySearchScore;
+	}
 }

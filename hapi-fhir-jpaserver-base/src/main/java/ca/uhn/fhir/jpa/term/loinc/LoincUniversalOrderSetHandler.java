@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,15 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -37,7 +39,11 @@ public class LoincUniversalOrderSetHandler extends BaseLoincHandler implements I
 	public static final String VS_URI = "http://loinc.org/vs/loinc-universal-order-set";
 	public static final String VS_NAME = "LOINC Universal Order Set";
 
-	public LoincUniversalOrderSetHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+	public LoincUniversalOrderSetHandler(
+			Map<String, TermConcept> theCode2concept,
+			List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties) {
 		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
 	}
 
@@ -58,6 +64,4 @@ public class LoincUniversalOrderSetHandler extends BaseLoincHandler implements I
 		ValueSet valueSet = getValueSet(valueSetId, VS_URI, VS_NAME, null);
 		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
 	}
-
-
 }

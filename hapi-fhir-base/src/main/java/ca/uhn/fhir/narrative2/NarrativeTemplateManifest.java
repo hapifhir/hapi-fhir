@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -37,12 +38,20 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -94,36 +103,46 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 	}
 
 	@Override
-	public List<INarrativeTemplate> getTemplateByResourceName(@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull String theResourceName, @Nonnull Collection<String> theProfiles) {
+	public List<INarrativeTemplate> getTemplateByResourceName(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
+			@Nonnull String theResourceName,
+			@Nonnull Collection<String> theProfiles) {
 		return getFromMap(theStyles, theResourceName.toUpperCase(), myResourceTypeToTemplate, theProfiles);
 	}
 
 	@Override
-	public List<INarrativeTemplate> getTemplateByName(@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull String theName) {
+	public List<INarrativeTemplate> getTemplateByName(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
+			@Nonnull String theName) {
 		return getFromMap(theStyles, theName, myNameToTemplate, Collections.emptyList());
 	}
 
 	@Override
-	public List<INarrativeTemplate> getTemplateByFragmentName(@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull String theFragmentName) {
+	public List<INarrativeTemplate> getTemplateByFragmentName(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
+			@Nonnull String theFragmentName) {
 		return getFromMap(theStyles, theFragmentName, myFragmentNameToTemplate, Collections.emptyList());
 	}
 
 	@SuppressWarnings("PatternVariableCanBeUsed")
 	@Override
-	public List<INarrativeTemplate> getTemplateByElement(@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull IBase theElement) {
+	public List<INarrativeTemplate> getTemplateByElement(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
+			@Nonnull IBase theElement) {
 		List<INarrativeTemplate> retVal = Collections.emptyList();
 
 		if (theElement instanceof IBaseResource) {
 			IBaseResource resource = (IBaseResource) theElement;
 			String resourceName = theFhirContext.getResourceDefinition(resource).getName();
-			List<String> profiles = resource
-				.getMeta()
-				.getProfile()
-				.stream()
-				.filter(Objects::nonNull)
-				.map(IPrimitiveType::getValueAsString)
-				.filter(StringUtils::isNotBlank)
-				.collect(Collectors.toList());
+			List<String> profiles = resource.getMeta().getProfile().stream()
+					.filter(Objects::nonNull)
+					.map(IPrimitiveType::getValueAsString)
+					.filter(StringUtils::isNotBlank)
+					.collect(Collectors.toList());
 			retVal = getTemplateByResourceName(theFhirContext, theStyles, resourceName, profiles);
 		}
 
@@ -132,12 +151,12 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		}
 
 		if (retVal.isEmpty()) {
-			String datatypeName = theFhirContext.getElementDefinition(theElement.getClass()).getName();
+			String datatypeName =
+					theFhirContext.getElementDefinition(theElement.getClass()).getName();
 			retVal = getFromMap(theStyles, datatypeName.toUpperCase(), myDatatypeToTemplate, Collections.emptyList());
 		}
 		return retVal;
 	}
-
 
 	public static NarrativeTemplateManifest forManifestFileLocation(String... thePropertyFilePaths) {
 		return forManifestFileLocation(Arrays.asList(thePropertyFilePaths));
@@ -180,11 +199,13 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		file.load(new StringReader(theManifestText));
 		for (Object nextKeyObj : file.keySet()) {
 			String nextKey = (String) nextKeyObj;
-			Validate.isTrue(StringUtils.countMatches(nextKey, ".") == 1, "Invalid narrative property file key: %s", nextKey);
+			Validate.isTrue(
+					StringUtils.countMatches(nextKey, ".") == 1, "Invalid narrative property file key: %s", nextKey);
 			String name = nextKey.substring(0, nextKey.indexOf('.'));
 			Validate.notBlank(name, "Invalid narrative property file key: %s", nextKey);
 
-			NarrativeTemplate nextTemplate = nameToTemplate.computeIfAbsent(name, t -> new NarrativeTemplate().setTemplateName(name));
+			NarrativeTemplate nextTemplate =
+					nameToTemplate.computeIfAbsent(name, t -> new NarrativeTemplate().setTemplateName(name));
 
 			if (nextKey.endsWith(".class")) {
 				String className = file.getProperty(nextKey);
@@ -192,7 +213,8 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 					try {
 						nextTemplate.addAppliesToClass((Class<? extends IBase>) Class.forName(className));
 					} catch (ClassNotFoundException theE) {
-						throw new InternalErrorException(Msg.code(1867) + "Could not find class " + className + " declared in narrative manifest");
+						throw new InternalErrorException(Msg.code(1867) + "Could not find class " + className
+								+ " declared in narrative manifest");
 					}
 				}
 			} else if (nextKey.endsWith(".profile")) {
@@ -226,21 +248,19 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 				ourLog.debug("Ignoring title property as narrative generator no longer generates titles: {}", nextKey);
 			} else {
 				throw new ConfigurationException(Msg.code(1868) + "Invalid property name: " + nextKey
-					+ " - the key must end in one of the expected extensions "
-					+ "'.profile', '.resourceType', '.dataType', '.style', '.contextPath', '.narrative', '.title'");
+						+ " - the key must end in one of the expected extensions "
+						+ "'.profile', '.resourceType', '.dataType', '.style', '.contextPath', '.narrative', '.title'");
 			}
-
 		}
 
 		return nameToTemplate.values();
 	}
 
 	private static void parseValuesAndAddToMap(String resourceType, Consumer<String> addAppliesToResourceType) {
-		Arrays
-			.stream(resourceType.split(","))
-			.map(String::trim)
-			.filter(StringUtils::isNotBlank)
-			.forEach(addAppliesToResourceType);
+		Arrays.stream(resourceType.split(","))
+				.map(String::trim)
+				.filter(StringUtils::isNotBlank)
+				.forEach(addAppliesToResourceType);
 	}
 
 	static String loadResource(String theName) {
@@ -257,17 +277,20 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 				throw new InternalErrorException(Msg.code(1869) + e.getMessage(), e);
 			}
 		} else {
-			throw new InternalErrorException(Msg.code(1871) + "Invalid resource name: '" + theName + "' (must start with classpath: or file: )");
+			throw new InternalErrorException(
+					Msg.code(1871) + "Invalid resource name: '" + theName + "' (must start with classpath: or file: )");
 		}
 	}
 
-	private static <T> List<INarrativeTemplate> getFromMap(EnumSet<TemplateTypeEnum> theStyles, T theKey, ListMultimap<T, NarrativeTemplate> theMap, Collection<String> theProfiles) {
-		return theMap
-			.get(theKey)
-			.stream()
-			.filter(t -> theStyles.contains(t.getTemplateType()))
-			.filter(t -> theProfiles.isEmpty() || t.getAppliesToProfiles().stream().anyMatch(theProfiles::contains))
-			.collect(Collectors.toList());
+	private static <T> List<INarrativeTemplate> getFromMap(
+			EnumSet<TemplateTypeEnum> theStyles,
+			T theKey,
+			ListMultimap<T, NarrativeTemplate> theMap,
+			Collection<String> theProfiles) {
+		return theMap.get(theKey).stream()
+				.filter(t -> theStyles.contains(t.getTemplateType()))
+				.filter(t -> theProfiles.isEmpty()
+						|| t.getAppliesToProfiles().stream().anyMatch(theProfiles::contains))
+				.collect(Collectors.toList());
 	}
-
 }

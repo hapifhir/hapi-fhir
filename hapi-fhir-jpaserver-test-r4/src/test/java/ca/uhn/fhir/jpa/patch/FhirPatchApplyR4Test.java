@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -12,8 +11,8 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -29,16 +28,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.XmlExpectationsHelper;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FhirPatchApplyR4Test {
 
@@ -281,7 +277,7 @@ public class FhirPatchApplyR4Test {
 
 		svc.apply(patient, patch);
 
-		assertEquals(1, patient.getIdentifier().size());
+		assertThat(patient.getIdentifier()).hasSize(1);
 
 		assertEquals("{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
 
@@ -318,7 +314,7 @@ public class FhirPatchApplyR4Test {
 
 		svc.apply(patient, patch);
 
-		assertEquals(2, patient.getExtension().size());
+		assertThat(patient.getExtension()).hasSize(2);
 
 		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"url1\",\"extension\":[{\"url\":\"text\",\"valueString\":\"first text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"123\",\"display\":\"Abc\"}]}}]},{\"url\":\"url3\",\"extension\":[{\"url\":\"text\",\"valueString\":\"third text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"345\",\"display\":\"Ghi\"}]}},{\"url\":\"detail\",\"valueInteger\":12}]}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
 
@@ -434,11 +430,11 @@ public class FhirPatchApplyR4Test {
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: New identifier is added, and does not overwrite.
-		assertThat(patient.getIdentifier(), hasSize(2));
-		assertThat(patient.getIdentifier().get(0).getSystem(), is(equalTo("first-system")));
-		assertThat(patient.getIdentifier().get(0).getValue(), is(equalTo("first-value")));
-		assertThat(patient.getIdentifier().get(1).getSystem(), is(equalTo("second-system")));
-		assertThat(patient.getIdentifier().get(1).getValue(), is(equalTo("second-value")));
+		assertThat(patient.getIdentifier()).hasSize(2);
+		assertEquals("first-system", patient.getIdentifier().get(0).getSystem());
+		assertEquals("first-value", patient.getIdentifier().get(0).getValue());
+		assertEquals("second-system", patient.getIdentifier().get(1).getSystem());
+		assertEquals("second-value", patient.getIdentifier().get(1).getValue());
 	}
 
 	@Test
@@ -456,9 +452,9 @@ public class FhirPatchApplyR4Test {
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: it applies the new identifier correctly.
-		assertThat(patient.getIdentifier(), hasSize(1));
-		assertThat(patient.getIdentifier().get(0).getSystem(), is(equalTo("third-system")));
-		assertThat(patient.getIdentifier().get(0).getValue(), is(equalTo("third-value")));
+		assertThat(patient.getIdentifier()).hasSize(1);
+		assertEquals("third-system", patient.getIdentifier().get(0).getSystem());
+		assertEquals("third-value", patient.getIdentifier().get(0).getValue());
 	}
 	@Test
 	public void testReplaceToHighCardinalityFieldRemovesAllAndSetsValue() {
@@ -477,9 +473,9 @@ public class FhirPatchApplyR4Test {
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: it applies the new identifier correctly.
-		assertThat(patient.getIdentifier(), hasSize(1));
-		assertThat(patient.getIdentifier().get(0).getSystem(), is(equalTo("third-system")));
-		assertThat(patient.getIdentifier().get(0).getValue(), is(equalTo("third-value")));
+		assertThat(patient.getIdentifier()).hasSize(1);
+		assertEquals("third-system", patient.getIdentifier().get(0).getSystem());
+		assertEquals("third-value", patient.getIdentifier().get(0).getValue());
 	}
 
 	//TODO: https://github.com/hapifhir/hapi-fhir/issues/3796
@@ -526,9 +522,62 @@ public class FhirPatchApplyR4Test {
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: it adds the new extension correctly.
-		assertThat(patient.getExtension(), hasSize(1));
-		assertThat(patient.getExtension().get(0).getUrl(), is(equalTo("http://foo/fhir/extension/foo")));
-		assertThat(patient.getExtension().get(0).getValueAsPrimitive().getValueAsString(), is(equalTo("foo")));
+		assertThat(patient.getExtension()).hasSize(1);
+		assertEquals("http://foo/fhir/extension/foo", patient.getExtension().get(0).getUrl());
+		assertEquals("foo", patient.getExtension().get(0).getValueAsPrimitive().getValueAsString());
+	}
+
+	@Test
+	public void testAddExtensionWithExtension() {
+		final String extensionUrl  = "http://foo/fhir/extension/foo";
+		final String innerExtensionUrl  = "http://foo/fhir/extension/innerExtension";
+		final String innerExtensionValue = "2021-07-24T13:23:30-04:00";
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent addOperation = createPatchAddOperation("Patient", "extension", null);
+		addOperation
+			.addPart()
+			.setName("value")
+			.addPart(
+				new Parameters.ParametersParameterComponent()
+					.setName("url")
+					.setValue(new UriType(extensionUrl))
+			)
+			.addPart(
+				new Parameters.ParametersParameterComponent()
+					.setName("extension")
+					.addPart(
+						new Parameters.ParametersParameterComponent()
+							.setName("url")
+							.setValue(new UriType(innerExtensionUrl))
+					)
+					.addPart(
+						new Parameters.ParametersParameterComponent()
+							.setName("value")
+							.setValue(new DateTimeType(innerExtensionValue))
+					)
+			);
+
+		patch.addParameter(addOperation);
+
+		ourLog.info("Patch:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+
+		svc.apply(patient, patch);
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		//Then: it adds the new extension correctly.
+		assertThat(patient.getExtension()).hasSize(1);
+		Extension extension = patient.getExtension().get(0);
+		assertEquals(extensionUrl, extension.getUrl());
+		Extension innerExtension = extension.getExtensionFirstRep();
+
+		assertNotNull(innerExtension);
+		assertEquals(innerExtensionUrl, innerExtension.getUrl());
+		assertEquals(innerExtensionValue, innerExtension.getValue().primitiveValue());
+
 	}
 
 	private Parameters.ParametersParameterComponent createPatchAddOperation(String thePath, String theName, Type theValue) {
@@ -641,6 +690,6 @@ public class FhirPatchApplyR4Test {
 		svc.apply(patient, parameters);
 
 		new XmlExpectationsHelper().assertXmlEqual(theOutputResource, parser.encodeResourceToString(patient));
-		assertTrue(expectedPatient.equalsDeep(patient), theName);
+		assertThat(expectedPatient.equalsDeep(patient)).as(theName).isTrue();
 	}
 }

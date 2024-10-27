@@ -1,0 +1,38 @@
+{
+	"resourceType" : "ValueSet",
+	"id" : "v2-0131",
+	"text" : {
+		"status" : "generated",
+		"div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Include all codes defined in <a href=\"CodeSystem-v2-0131.html\"><code>http://terminology.hl7.org/CodeSystem/v2-0131</code></a></li></ul></div>"
+	},
+	"url" : "http://terminology.hl7.org/ValueSet/v2-0131",
+	"identifier" : [{
+		"system" : "urn:ietf:rfc:3986",
+		"value" : "urn:oid:2.16.840.1.113883.21.69"
+	}],
+	"version" : "2.0.0",
+	"name" : "Hl7VSContactRole2",
+	"title" : "hl7VS-contactRole2",
+	"status" : "active",
+	"experimental" : false,
+	"date" : "2019-12-01",
+	"publisher" : "Health Level Seven International",
+	"contact" : [{
+		"telecom" : [{
+			"system" : "url",
+			"value" : "http://hl7.org"
+		},
+			{
+				"system" : "email",
+				"value" : "hq@HL7.org"
+			}]
+	}],
+	"description" : "Concepts which specify a relationship role that the next of kin/associated parties plays with regard to the patient. Built on the updated code system.  Also used in referrals, for example, it may be necessary to identify the contact representative at the clinic that sent a referral.",
+	"copyright" : "This material derives from the HL7 Terminology (THO). THO is copyright ©1989+ Health Level Seven International and is made available under the CC0 designation. For more licensing information see: https://terminology.hl7.org/license",
+	"compose" : {
+		"include" : [{
+			"system" : "http://terminology.hl7.org/CodeSystem/v2-0131",
+			"version" : "2.0.0"
+		}]
+	}
+}

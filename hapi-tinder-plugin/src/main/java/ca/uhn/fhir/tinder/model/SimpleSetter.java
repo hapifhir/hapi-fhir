@@ -26,7 +26,7 @@ public class SimpleSetter {
 	}
 
 	public void setSuffix(String theSuffix) {
-		mySuffix=theSuffix;
+		mySuffix = theSuffix;
 	}
 
 	public static class Parameter {
@@ -49,7 +49,5 @@ public class SimpleSetter {
 		public void setParameter(String theParameter) {
 			myParameter = theParameter;
 		}
-
 	}
-
 }

@@ -16,16 +16,16 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.test.utilities.HtmlUtil;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlTable;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlTable;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -134,7 +134,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexResourceLink() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myLinks.add(ResourceLink.forLocalReference("Observation.subject", myEntity, "Patient", 123L, "123", new Date(), 555L));
+		newParams.myLinks.add(getResourceLinkForLocalReference());
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -307,7 +307,22 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 
 	@Nonnull
 	private static ResourceIndexedSearchParams newParams() {
-		return new ResourceIndexedSearchParams();
+		return ResourceIndexedSearchParams.withSets();
+	}
+
+	private ResourceLink getResourceLinkForLocalReference(){
+
+		ResourceLink.ResourceLinkForLocalReferenceParams params = ResourceLink.ResourceLinkForLocalReferenceParams
+			.instance()
+			.setSourcePath("Observation.subject")
+			.setSourceResource(myEntity)
+			.setTargetResourceType("Patient")
+			.setTargetResourcePid(123L)
+			.setTargetResourceId("123")
+			.setUpdated(new Date())
+			.setTargetResourceVersion(555L);
+
+		return ResourceLink.forLocalReference(params);
 	}
 
 }

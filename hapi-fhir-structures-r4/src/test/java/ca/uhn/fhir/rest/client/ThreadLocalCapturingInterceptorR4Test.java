@@ -149,8 +149,7 @@ public class ThreadLocalCapturingInterceptorR4Test {
 				.forResource("Device")
 				.returnBundle(Bundle.class)
 				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
+			fail();		} catch (InvalidRequestException e) {
 			// good
 		}
 

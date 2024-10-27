@@ -1,8 +1,8 @@
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,18 +27,18 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 
-import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -74,8 +74,10 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	@Autowired
 	private Environment myEnvironment;
+
 	@Autowired
 	private ApplicationContext myApplicationContext;
+
 	@Autowired
 	protected AutowiringSpringBeanJobFactory mySchedulerJobFactory;
 
@@ -134,7 +136,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		return retval;
 	}
 
-	private boolean isSchedulingDisabled() {
+	public boolean isSchedulingDisabled() {
 		return !isLocalSchedulingEnabled() || isSchedulingDisabledForUnitTests();
 	}
 
@@ -169,12 +171,13 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	}
 
 	private void scheduleJobs() {
-		Collection<IHasScheduledJobs> values = myApplicationContext.getBeansOfType(IHasScheduledJobs.class).values();
+		Collection<IHasScheduledJobs> values =
+				myApplicationContext.getBeansOfType(IHasScheduledJobs.class).values();
 		ourLog.info("Scheduling {} jobs in {}", values.size(), myApplicationContext.getId());
 		values.forEach(t -> t.scheduleJobs(this));
 	}
 
-	@EventListener(ContextClosedEvent.class)
+	@PreDestroy
 	public void stop() {
 		ourLog.info("Shutting down task scheduler...");
 
@@ -196,6 +199,18 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	}
 
 	@Override
+	public void pause() {
+		myLocalScheduler.pause();
+		myClusteredScheduler.pause();
+	}
+
+	@Override
+	public void unpause() {
+		myLocalScheduler.unpause();
+		myClusteredScheduler.unpause();
+	}
+
+	@Override
 	public void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		scheduleJob("local", myLocalScheduler, theIntervalMillis, theJobDefinition);
 	}
@@ -205,7 +220,11 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		scheduleJob("clustered", myClusteredScheduler, theIntervalMillis, theJobDefinition);
 	}
 
-	private void scheduleJob(String theInstanceName, IHapiScheduler theScheduler, long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+	private void scheduleJob(
+			String theInstanceName,
+			IHapiScheduler theScheduler,
+			long theIntervalMillis,
+			ScheduledJobDefinition theJobDefinition) {
 		if (isSchedulingDisabled()) {
 			return;
 		}
@@ -213,7 +232,11 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		assert theJobDefinition.getId() != null;
 		assert theJobDefinition.getJobClass() != null;
 
-		ourLog.info("Scheduling {} job {} with interval {}", theInstanceName, theJobDefinition.getId(), StopWatch.formatMillis(theIntervalMillis));
+		ourLog.info(
+				"Scheduling {} job {} with interval {}",
+				theInstanceName,
+				theJobDefinition.getId(),
+				StopWatch.formatMillis(theIntervalMillis));
 		defaultGroup(theJobDefinition);
 		theScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
 	}

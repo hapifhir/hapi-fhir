@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,17 +65,17 @@ public interface IMdmLink<T extends IResourcePersistentId> {
 
 	IMdmLink<T> setLinkSource(MdmLinkSourceEnum theLinkSource);
 
-    default boolean isAuto() {
-        return getLinkSource() == MdmLinkSourceEnum.AUTO;
-    }
+	default boolean isAuto() {
+		return getLinkSource() == MdmLinkSourceEnum.AUTO;
+	}
 
-    default boolean isManual() {
-        return getLinkSource() == MdmLinkSourceEnum.MANUAL;
-    }
+	default boolean isManual() {
+		return getLinkSource() == MdmLinkSourceEnum.MANUAL;
+	}
 
-    Date getCreated();
+	Date getCreated();
 
-	 IMdmLink<T> setCreated(Date theCreated);
+	IMdmLink<T> setCreated(Date theCreated);
 
 	Date getUpdated();
 

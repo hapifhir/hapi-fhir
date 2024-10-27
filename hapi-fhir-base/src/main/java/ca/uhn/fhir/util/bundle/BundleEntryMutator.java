@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,12 @@ public class BundleEntryMutator {
 	private final FhirContext myFhirContext;
 	private final BaseRuntimeElementCompositeDefinition<?> myEntryDefinition;
 
-	public BundleEntryMutator(FhirContext theFhirContext, IBase theEntry, BaseRuntimeChildDefinition theRequestChildDef, BaseRuntimeElementCompositeDefinition<?> theChildContentsDef, BaseRuntimeElementCompositeDefinition<?> theEntryDefinition) {
+	public BundleEntryMutator(
+			FhirContext theFhirContext,
+			IBase theEntry,
+			BaseRuntimeChildDefinition theRequestChildDef,
+			BaseRuntimeElementCompositeDefinition<?> theChildContentsDef,
+			BaseRuntimeElementCompositeDefinition<?> theEntryDefinition) {
 		myFhirContext = theFhirContext;
 		myEntry = theEntry;
 		myRequestChildDef = theRequestChildDef;
@@ -52,7 +57,8 @@ public class BundleEntryMutator {
 
 	@SuppressWarnings("unchecked")
 	public void setFullUrl(String theFullUrl) {
-		IPrimitiveType<String> value = (IPrimitiveType<String>) myFhirContext.getElementDefinition("uri").newInstance();
+		IPrimitiveType<String> value = (IPrimitiveType<String>)
+				myFhirContext.getElementDefinition("uri").newInstance();
 		value.setValue(theFullUrl);
 
 		BaseRuntimeChildDefinition fullUrlChild = myEntryDefinition.getChildByName("fullUrl");
@@ -62,5 +68,13 @@ public class BundleEntryMutator {
 	public void setResource(IBaseResource theUpdatedResource) {
 		BaseRuntimeChildDefinition resourceChild = myEntryDefinition.getChildByName("resource");
 		resourceChild.getMutator().setValue(myEntry, theUpdatedResource);
+	}
+
+	public void setRequestIfNoneExist(FhirContext theFhirContext, String theIfNoneExist) {
+		BaseRuntimeChildDefinition requestUrlChildDef = myRequestChildContentsDef.getChildByName("ifNoneExist");
+		IPrimitiveType<?> url = ParametersUtil.createString(theFhirContext, theIfNoneExist);
+		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
+			requestUrlChildDef.getMutator().addValue(nextRequest, url);
+		}
 	}
 }

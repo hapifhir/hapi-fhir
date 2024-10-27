@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,6 @@ public class XhtmlDt extends BasePrimitive<String> {
 		return theValue;
 	}
 
-
 	/**
 	 * Note that as of HAPI FHIR 3.1.0, this method no longer uses
 	 * the StAX XMLEvent type as the XML representation, and uses a
@@ -153,5 +152,4 @@ public class XhtmlDt extends BasePrimitive<String> {
 		}
 		return value;
 	}
-
 }

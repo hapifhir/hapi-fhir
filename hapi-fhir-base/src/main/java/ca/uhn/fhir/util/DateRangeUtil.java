@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Date;
 
 public class DateRangeUtil {
@@ -36,11 +36,15 @@ public class DateRangeUtil {
 	 * @return a DateRange within the original range, and between theStartInclusive and theEnd
 	 */
 	@Nonnull
-	public static DateRangeParam narrowDateRange(@Nullable DateRangeParam theDateRangeParam, @Nullable Date theStartInclusive, @Nullable Date theEndExclusive) {
+	public static DateRangeParam narrowDateRange(
+			@Nullable DateRangeParam theDateRangeParam,
+			@Nullable Date theStartInclusive,
+			@Nullable Date theEndExclusive) {
 		if (theStartInclusive == null && theEndExclusive == null) {
 			return theDateRangeParam;
 		}
-		DateRangeParam result = theDateRangeParam == null ? new DateRangeParam() : new DateRangeParam(theDateRangeParam);
+		DateRangeParam result =
+				theDateRangeParam == null ? new DateRangeParam() : new DateRangeParam(theDateRangeParam);
 
 		Date startInclusive = theStartInclusive;
 		if (startInclusive != null) {
@@ -56,7 +60,9 @@ public class DateRangeUtil {
 			}
 		}
 		if (theEndExclusive != null) {
-			Date inputEnd = result.getUpperBound() == null ? null : result.getUpperBound().getValue();
+			Date inputEnd = result.getUpperBound() == null
+					? null
+					: result.getUpperBound().getValue();
 			if (theDateRangeParam == null || inputEnd == null || inputEnd.after(theEndExclusive)) {
 				result.setUpperBoundExclusive(theEndExclusive);
 			}
@@ -64,5 +70,4 @@ public class DateRangeUtil {
 
 		return result;
 	}
-
 }

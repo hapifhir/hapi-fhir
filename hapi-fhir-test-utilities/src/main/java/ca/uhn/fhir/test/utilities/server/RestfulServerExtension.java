@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,15 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
+import jakarta.servlet.http.HttpServlet;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServlet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServerExtension> {
+	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerExtension.class);
 	private FhirContext myFhirContext;
 	private List<Object> myProviders = new ArrayList<>();
 	private FhirVersionEnum myFhirVersion;
@@ -86,6 +87,8 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 
 		myFhirContext.getRestfulClientFactory().setSocketTimeout((int) (500 * DateUtils.MILLIS_PER_SECOND));
 		myFhirContext.getRestfulClientFactory().setServerValidationMode(myServerValidationMode);
+
+		ourLog.info("FHIR server has been started with base URL: {}", getBaseUrl());
 	}
 
 	@Override
@@ -217,5 +220,19 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 
 	public RestfulServerExtension withDefaultResponseEncoding(EncodingEnum theEncodingEnum) {
 		return withServer(t -> t.setDefaultResponseEncoding(theEncodingEnum));
+	}
+
+	public RestfulServerExtension setDefaultResponseEncoding(EncodingEnum theEncodingEnum) {
+		return withServer(s->myServlet.setDefaultResponseEncoding(theEncodingEnum));
+	}
+
+	public RestfulServerExtension setDefaultPrettyPrint(boolean theDefaultPrettyPrint) {
+		withServer(s -> s.setDefaultPrettyPrint(theDefaultPrettyPrint));
+		return this;
+	}
+
+	public RestfulServerExtension setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy) {
+		withServer(s -> s.setServerAddressStrategy(theServerAddressStrategy));
+		return this;
 	}
 }

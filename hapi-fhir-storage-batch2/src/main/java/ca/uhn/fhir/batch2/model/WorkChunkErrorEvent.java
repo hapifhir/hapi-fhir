@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
  * #L%
  */
 package ca.uhn.fhir.batch2.model;
-
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -58,18 +57,18 @@ public class WorkChunkErrorEvent extends BaseWorkChunkEvent {
 		WorkChunkErrorEvent that = (WorkChunkErrorEvent) theO;
 
 		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myChunkId, that.myChunkId)
-			.append(myErrorMsg, that.myErrorMsg)
-			.isEquals();
+				.appendSuper(super.equals(theO))
+				.append(myChunkId, that.myChunkId)
+				.append(myErrorMsg, that.myErrorMsg)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myChunkId)
-			.append(myErrorMsg)
-			.toHashCode();
+				.appendSuper(super.hashCode())
+				.append(myChunkId)
+				.append(myErrorMsg)
+				.toHashCode();
 	}
 }

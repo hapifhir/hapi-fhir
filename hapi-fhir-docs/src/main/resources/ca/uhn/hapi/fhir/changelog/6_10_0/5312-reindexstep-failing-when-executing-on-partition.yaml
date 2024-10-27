@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5312
+jira: SMILE-7323
+title: "Previously, issuing a reindex operation for resources on a specific partition would fail.  This problem has been fixed."

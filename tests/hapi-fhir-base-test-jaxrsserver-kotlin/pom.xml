@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.7.1-SNAPSHOT</version>
+		<version>7.7.0-SNAPSHOT</version>
 
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
@@ -56,21 +56,10 @@
 			<version>2.0.1</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>javax.ejb</groupId>
-			<artifactId>ejb-api</artifactId>
-			<version>3.0</version>
-			<scope>provided</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>${jetty_version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
 			<version>${jetty_version}</version>
 		</dependency>
 		<dependency>
@@ -97,6 +86,11 @@
 			<artifactId>kotlin-maven-noarg</artifactId>
 			<version>${kotlin.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-stdlib</artifactId>
+			<version>${kotlin.version}</version>
+		</dependency>
 	</dependencies>
 
 
@@ -105,11 +99,15 @@
 		<!-- This is to run the integration tests -->
 		<plugins>
 			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<configuration>
+					<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<redirectTestOutputToFile>true</redirectTestOutputToFile>
-				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -118,13 +116,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.jetbrains.kotlin</groupId>
@@ -198,6 +189,6 @@
 
 	<properties>
 		<!--<kotlin.compiler.incremental>true</kotlin.compiler.incremental>-->
-		<kotlin.version>1.6.21</kotlin.version>
+		<kotlin.version>1.9.23</kotlin.version>
 	</properties>
 </project>

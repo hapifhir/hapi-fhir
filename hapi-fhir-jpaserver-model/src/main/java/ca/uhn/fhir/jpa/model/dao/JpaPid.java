@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,16 @@
  */
 package ca.uhn.fhir.jpa.model.dao;
 
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * JPA implementation of IResourcePersistentId.  JPA uses a Long as the primary key.  This class should be used in any
@@ -32,6 +36,7 @@ import java.util.Objects;
  */
 public class JpaPid extends BaseResourcePersistentId<Long> {
 	private final Long myId;
+	private PartitionablePartitionId myPartitionablePartitionId;
 
 	private JpaPid(Long theId) {
 		super(null);
@@ -53,6 +58,19 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 		myId = theId;
 	}
 
+	public PartitionablePartitionId getPartitionablePartitionId() {
+		return myPartitionablePartitionId;
+	}
+
+	public JpaPid setPartitionablePartitionId(PartitionablePartitionId thePartitionablePartitionId) {
+		myPartitionablePartitionId = thePartitionablePartitionId;
+		return this;
+	}
+
+	public static List<Long> toLongList(JpaPid[] thePids) {
+		return toLongList(Arrays.asList(thePids));
+	}
+
 	public static List<Long> toLongList(Collection<JpaPid> thePids) {
 		List<Long> retVal = new ArrayList<>(thePids.size());
 		for (JpaPid next : thePids) {
@@ -61,7 +79,15 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 		return retVal;
 	}
 
-	public static List<JpaPid> fromLongList(List<Long> theResultList) {
+	public static Set<Long> toLongSet(Collection<JpaPid> thePids) {
+		Set<Long> retVal = new HashSet<>(thePids.size());
+		for (JpaPid next : thePids) {
+			retVal.add(next.getId());
+		}
+		return retVal;
+	}
+
+	public static List<JpaPid> fromLongList(Collection<Long> theResultList) {
 		List<JpaPid> retVal = new ArrayList<>(theResultList.size());
 		for (Long next : theResultList) {
 			retVal.add(fromId(next));
@@ -107,5 +133,11 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	@Override
 	public String toString() {
 		return myId.toString();
+	}
+
+	public Integer getPartitionId() {
+		// wipmb should we return null instead?
+		assert getPartitionablePartitionId() != null;
+		return getPartitionablePartitionId().getPartitionId();
 	}
 }

@@ -1,5 +1,18 @@
 package ca.uhn.fhir.jpa.partition;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+
+import ca.uhn.fhir.interceptor.api.Interceptor;
+
+import ca.uhn.fhir.interceptor.api.Pointcut;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+
+import java.util.ArrayList;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -11,11 +24,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
+	@Autowired
+	IInterceptorService myInterceptorService;
 
 	@AfterEach
 	public void after() {
@@ -55,6 +71,8 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testDeletePartition() {
+		DeletedPartitionsInterceptor deletedPartitionsInterceptor = new DeletedPartitionsInterceptor();
+		myInterceptorService.registerInterceptor(deletedPartitionsInterceptor);
 
 		PartitionEntity partition = new PartitionEntity();
 		partition.setId(123);
@@ -66,6 +84,8 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		assertEquals("NAME123", partition.getName());
 
 		myPartitionConfigSvc.deletePartition(123);
+		assertEquals(1, deletedPartitionsInterceptor.getDeletedPartitions().size());
+		assertThat(deletedPartitionsInterceptor.getDeletedPartitions().get(0).getFirstPartitionIdOrNull().intValue()).isEqualTo(123);
 
 		try {
 			myPartitionConfigSvc.getPartitionById(123);
@@ -74,6 +94,21 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			assertEquals("No partition exists with ID 123", e.getMessage());
 		}
 
+		myInterceptorService.unregisterInterceptor(deletedPartitionsInterceptor);
+	}
+
+	@Interceptor
+	public static class DeletedPartitionsInterceptor {
+		private List<RequestPartitionId> myDeletedPartitions = new ArrayList<>();
+
+		@Hook(Pointcut.STORAGE_PARTITION_DELETED)
+		public void partitionDeleted(RequestPartitionId partitionId) {
+			myDeletedPartitions.add(partitionId);
+		}
+
+		public List<RequestPartitionId> getDeletedPartitions() {
+			return myDeletedPartitions;
+		}
 	}
 
 	@Test
@@ -100,6 +135,27 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1309) + "Partition name \"NAME123\" is already defined", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testCreatePartition_whenPartitionIdAlreadyExists_operationNotAllowed(){
+		try {
+			PartitionEntity partition = new PartitionEntity();
+			partition.setId(123);
+			partition.setName("NAME123");
+			partition.setDescription("A description");
+			myPartitionConfigSvc.createPartition(partition, null);
+
+			partition = new PartitionEntity();
+			partition.setId(123);
+			partition.setName("NAME111");
+			partition.setDescription("A description");
+			myPartitionConfigSvc.createPartition(partition, null);
+		}
+
+		catch (InvalidRequestException e) {
+			assertEquals(Msg.code(2366) + "Partition ID already exists", e.getMessage());
 		}
 	}
 
@@ -187,7 +243,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 
 		List<PartitionEntity> actual = myPartitionConfigSvc.listPartitions();
 
-		assertEquals(2, actual.size());
+		assertThat(actual).hasSize(2);
 		assertTrue(actual.stream().anyMatch(item -> "PARTITION-1".equals(item.getName())));
 		assertTrue(actual.stream().anyMatch(item -> "PARTITION-2".equals(item.getName())));
 	}

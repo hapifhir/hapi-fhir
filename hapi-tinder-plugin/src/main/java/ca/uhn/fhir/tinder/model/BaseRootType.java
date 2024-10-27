@@ -1,10 +1,10 @@
 package ca.uhn.fhir.tinder.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ca.uhn.fhir.tinder.model.SearchParameter.Include;
 import edu.emory.mathcs.backport.java.util.Collections;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class BaseRootType extends BaseElement {
 
@@ -59,10 +59,10 @@ public abstract class BaseRootType extends BaseElement {
 	public void addSearchParameter(SearchParameter theParam) {
 		getSearchParameters();
 		mySearchParameters.add(theParam);
-		
+
 		List<Include> includes = theParam.getPaths();
 		for (Include include : includes) {
-			if (myIncludes.contains(include)==false) {
+			if (myIncludes.contains(include) == false) {
 				myIncludes.add(include);
 			}
 		}
@@ -72,5 +72,4 @@ public abstract class BaseRootType extends BaseElement {
 		Collections.sort(myIncludes);
 		return myIncludes;
 	}
-
 }

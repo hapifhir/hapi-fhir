@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,8 +45,8 @@ public class PatientNameModifierMdmPreProcessingInterceptor {
 		List<HumanName> nameList = patient.getName();
 
 		List<HumanName> validHumanNameList = nameList.stream()
-			.filter(theHumanName -> !myNamesToIgnore.contains(theHumanName.getNameAsSingleString()))
-			.collect(Collectors.toList());
+				.filter(theHumanName -> !myNamesToIgnore.contains(theHumanName.getNameAsSingleString()))
+				.collect(Collectors.toList());
 
 		patient.setName(validHumanNameList);
 	}

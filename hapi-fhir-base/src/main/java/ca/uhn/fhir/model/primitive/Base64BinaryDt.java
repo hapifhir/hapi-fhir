@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@
  */
 package ca.uhn.fhir.model.primitive;
 
-import org.apache.commons.codec.binary.Base64;
-
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.rest.api.Constants;
+import org.apache.commons.codec.binary.Base64;
 
 @DatatypeDef(name = "base64Binary")
 public class Base64BinaryDt extends BasePrimitive<byte[]> {
@@ -53,5 +52,4 @@ public class Base64BinaryDt extends BasePrimitive<byte[]> {
 	protected String encode(byte[] theValue) {
 		return new String(Base64.encodeBase64(theValue), Constants.CHARSET_UTF8);
 	}
-
 }

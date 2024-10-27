@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,12 +75,16 @@ public interface ISearchCacheSvc {
 	 * @param theRequestPartitionId Search should examine only the requested partitions. Cache MUST not return results matching the given partition IDs
 	 * @return A collection of candidate searches
 	 */
-	Optional<Search> findCandidatesForReuse(String theResourceType, String theQueryString, Instant theCreatedAfter, RequestPartitionId theRequestPartitionId);
+	Optional<Search> findCandidatesForReuse(
+			String theResourceType,
+			String theQueryString,
+			Instant theCreatedAfter,
+			RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * This method will be called periodically to delete stale searches. Implementations are not required to do anything
 	 * if they have some other mechanism for expiring stale results other than manually looking for them
 	 * and deleting them.
 	 */
-	void pollForStaleSearchesAndDeleteThem(RequestPartitionId theRequestPartitionId);
+	void pollForStaleSearchesAndDeleteThem(RequestPartitionId theRequestPartitionId, Instant theDeadline);
 }

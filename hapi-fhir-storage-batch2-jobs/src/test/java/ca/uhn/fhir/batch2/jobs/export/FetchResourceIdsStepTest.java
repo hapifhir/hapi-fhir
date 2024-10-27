@@ -1,10 +1,13 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -13,7 +16,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -36,17 +38,16 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.hamcrest.Matchers.containsString;
 
 @ExtendWith(MockitoExtension.class)
 public class FetchResourceIdsStepTest {
@@ -66,6 +67,7 @@ public class FetchResourceIdsStepTest {
 	@BeforeEach
 	public void init() {
 		ourLog.addAppender(myAppender);
+		myFirstStep.setBulkExportProcessorForUnitTest(myBulkExportProcessor);
 	}
 
 	@AfterEach
@@ -77,7 +79,7 @@ public class FetchResourceIdsStepTest {
 		BulkExportJobParameters jobParameters = new BulkExportJobParameters();
 		jobParameters.setSince(new Date());
 		jobParameters.setOutputFormat("json");
-		jobParameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		jobParameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		jobParameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		if (thePartitioned) {
 			jobParameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
@@ -93,7 +95,7 @@ public class FetchResourceIdsStepTest {
 			theParameters,
 			null,
 			theInstance,
-			"1"
+			new WorkChunk().setId("1")
 		);
 	}
 
@@ -130,6 +132,7 @@ public class FetchResourceIdsStepTest {
 			.thenReturn(observationIds.iterator());
 		int maxFileCapacity = 1000;
 		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
+		when(myStorageSettings.getBulkExportFileMaximumSize()).thenReturn(10000L);
 
 		// test
 		RunOutcome outcome = myFirstStep.run(input, sink);
@@ -141,33 +144,32 @@ public class FetchResourceIdsStepTest {
 			.accept(resultCaptor.capture());
 
 		List<ResourceIdList> results = resultCaptor.getAllValues();
-		assertEquals(parameters.getResourceTypes().size(), results.size());
+		assertThat(results).hasSize(parameters.getResourceTypes().size());
 		for (ResourceIdList idList: results) {
 			String resourceType = idList.getResourceType();
-			assertTrue(parameters.getResourceTypes().contains(resourceType));
+			assertThat(parameters.getResourceTypes()).contains(resourceType);
 
 			if (resourceType.equals("Patient")) {
-				assertEquals(patientIds.size(), idList.getIds().size());
+				assertThat(idList.getIds()).hasSize(patientIds.size());
 			}
 			else if (resourceType.equals("Observation")) {
-				assertEquals(observationIds.size(), idList.getIds().size());
+				assertThat(idList.getIds()).hasSize(observationIds.size());
 			}
 			else {
 				// we shouldn't have others
-				fail();
+				fail("");
 			}
 		}
 
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender, atLeastOnce()).doAppend(logCaptor.capture());
 		List<ILoggingEvent> events = logCaptor.getAllValues();
-		assertThat(events.get(0).getMessage(), containsString("Fetching resource IDs for bulk export job instance"));
-		assertThat(events.get(1).getMessage(), containsString("Running FetchResource"));
-		assertThat(events.get(2).getMessage(), containsString("Running FetchResource"));
-		assertThat(events.get(3).getFormattedMessage(), containsString("Submitted "
+		assertThat(events.get(0).getMessage()).contains("Fetching resource IDs for bulk export job instance");
+		assertThat(events.get(1).getMessage()).contains("Running FetchResource");
+		assertThat(events.get(2).getMessage()).contains("Running FetchResource");
+		assertThat(events.get(3).getFormattedMessage()).contains("Submitted "
 			+ parameters.getResourceTypes().size()
-			+ " groups of ids for processing"
-		));
+			+ " groups of ids for processing");
 
 		ArgumentCaptor<ExportPIDIteratorParameters> mapppedParamsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
 		verify(myBulkExportProcessor, times(2)).getResourcePidIterator(mapppedParamsCaptor.capture());
@@ -191,6 +193,7 @@ public class FetchResourceIdsStepTest {
 		// when
 		int maxFileCapacity = 5;
 		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
+		when(myStorageSettings.getBulkExportFileMaximumSize()).thenReturn(10000L);
 
 		for (int i = 0; i <= maxFileCapacity; i++) {
 			JpaPid id = JpaPid.fromId((long) i);

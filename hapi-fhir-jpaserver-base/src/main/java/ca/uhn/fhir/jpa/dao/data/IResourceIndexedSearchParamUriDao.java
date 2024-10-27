@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 
-public interface IResourceIndexedSearchParamUriDao extends JpaRepository<ResourceIndexedSearchParamUri, Long>, IHapiFhirJpaRepository {
-	
+public interface IResourceIndexedSearchParamUriDao
+		extends JpaRepository<ResourceIndexedSearchParamUri, Long>, IHapiFhirJpaRepository {
+
 	@Query("SELECT DISTINCT p.myUri FROM ResourceIndexedSearchParamUri p WHERE p.myHashIdentity = :hash_identity")
 	public Collection<String> findAllByHashIdentity(@Param("hash_identity") long theHashIdentity);
 

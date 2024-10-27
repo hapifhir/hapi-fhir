@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 public class NpmJpaValidationSupport implements IValidationSupport {
@@ -61,14 +61,14 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 		IBaseResource asset = myHapiPackageCacheManager.loadPackageAssetByUrl(fhirVersion, theUri);
 		if (asset != null) {
-			Class<? extends IBaseResource> type = myFhirContext.getResourceDefinition(theResourceType).getImplementingClass();
+			Class<? extends IBaseResource> type =
+					myFhirContext.getResourceDefinition(theResourceType).getImplementingClass();
 			if (type.isAssignableFrom(asset.getClass())) {
 				return asset;
 			}
 		}
 		return null;
 	}
-
 
 	@SuppressWarnings("unchecked")
 	@Nullable
@@ -77,5 +77,4 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 		return (List<T>) myHapiPackageCacheManager.loadPackageAssetsByType(fhirVersion, "StructureDefinition");
 	}
-
 }

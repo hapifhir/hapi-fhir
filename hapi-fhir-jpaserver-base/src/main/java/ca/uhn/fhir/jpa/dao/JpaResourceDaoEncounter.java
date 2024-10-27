@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,28 +27,37 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 
-public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoEncounter<T> {
+public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
+		implements IFhirResourceDaoEncounter<T> {
 
 	@Override
-	public IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort) {
+	public IBundleProvider encounterInstanceEverything(
+			HttpServletRequest theServletRequest,
+			IIdType theId,
+			IPrimitiveType<Integer> theCount,
+			IPrimitiveType<Integer> theOffset,
+			DateRangeParam theLastUpdated,
+			SortSpec theSort) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
 		}
 		if (theOffset != null) {
-			throw new IllegalArgumentException(Msg.code(1128) + "Everything operation does not support offset searching");
+			throw new IllegalArgumentException(
+					Msg.code(1128) + "Everything operation does not support offset searching");
 		}
 
-//		paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
+		//		paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 		paramMap.setIncludes(Collections.singleton(IBaseResource.INCLUDE_ALL.asRecursive()));
-		paramMap.setEverythingMode(theId != null ? EverythingModeEnum.ENCOUNTER_INSTANCE : EverythingModeEnum.ENCOUNTER_TYPE);
+		paramMap.setEverythingMode(
+				theId != null ? EverythingModeEnum.ENCOUNTER_INSTANCE : EverythingModeEnum.ENCOUNTER_TYPE);
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
 		if (theId != null) {
@@ -59,8 +68,12 @@ public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFh
 	}
 
 	@Override
-	public IBundleProvider encounterTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort) {
+	public IBundleProvider encounterTypeEverything(
+			HttpServletRequest theServletRequest,
+			IPrimitiveType<Integer> theCount,
+			IPrimitiveType<Integer> theOffset,
+			DateRangeParam theLastUpdated,
+			SortSpec theSort) {
 		return encounterInstanceEverything(theServletRequest, null, theCount, theOffset, theLastUpdated, theSort);
 	}
-
 }

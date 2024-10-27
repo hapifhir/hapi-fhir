@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class IntegerDt extends BasePrimitive<Integer> implements IBaseIntegerDat
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theIntegerAsString
 	 *            A string representation of an integer
 	 * @throws DataFormatException
@@ -69,5 +69,4 @@ public class IntegerDt extends BasePrimitive<Integer> implements IBaseIntegerDat
 	protected String encode(Integer theValue) {
 		return Integer.toString(theValue);
 	}
-
 }

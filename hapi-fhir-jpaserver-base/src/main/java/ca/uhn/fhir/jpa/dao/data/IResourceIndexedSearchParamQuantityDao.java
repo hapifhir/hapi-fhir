@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface IResourceIndexedSearchParamQuantityDao extends JpaRepository<ResourceIndexedSearchParamQuantity, Long>, IHapiFhirJpaRepository {
+public interface IResourceIndexedSearchParamQuantityDao
+		extends JpaRepository<ResourceIndexedSearchParamQuantity, Long>, IHapiFhirJpaRepository {
 	@Modifying
 	@Query("delete from ResourceIndexedSearchParamQuantity t WHERE t.myResourcePid = :resid")
 	void deleteByResourceId(@Param("resid") Long theResourcePid);

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,12 @@ public class BundleEntryParts {
 	private final String myConditionalUrl;
 	private final String myFullUrl;
 
-	public BundleEntryParts(String theFullUrl, RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource, String theConditionalUrl) {
+	public BundleEntryParts(
+			String theFullUrl,
+			RequestTypeEnum theRequestType,
+			String theUrl,
+			IBaseResource theResource,
+			String theConditionalUrl) {
 		super();
 		myFullUrl = theFullUrl;
 		myRequestType = theRequestType;

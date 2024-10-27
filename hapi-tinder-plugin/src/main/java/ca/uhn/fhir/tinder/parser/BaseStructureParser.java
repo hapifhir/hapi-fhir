@@ -1,8 +1,8 @@
 package ca.uhn.fhir.tinder.parser;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
@@ -120,7 +120,9 @@ public abstract class BaseStructureParser {
 				myLocallyDefinedClassNames.put(bindingClass, "valueset");
 			} else {
 				ourLog.debug("No binding found for: {}", theElement.getBinding());
-				ourLog.debug(" * Valid: {}", new TreeSet<String>(theVsp.getValueSets().keySet()));
+				ourLog.debug(
+						" * Valid: {}",
+						new TreeSet<String>(theVsp.getValueSets().keySet()));
 			}
 		}
 		for (BaseElement next : theElement.getChildren()) {
@@ -153,14 +155,16 @@ public abstract class BaseStructureParser {
 			if (theNextType.endsWith("Dt")) {
 				unqualifiedTypeName = theNextType.substring(0, theNextType.length() - 2);
 				try {
-					return Class.forName("org.hl7.fhir.dstu3.model." + unqualifiedTypeName + "Type").getName();
+					return Class.forName("org.hl7.fhir.dstu3.model." + unqualifiedTypeName + "Type")
+							.getName();
 				} catch (ClassNotFoundException e1) {
 					// not found
 				}
 			}
 
 			try {
-				return Class.forName("org.hl7.fhir.dstu3.model." + unqualifiedTypeName).getName();
+				return Class.forName("org.hl7.fhir.dstu3.model." + unqualifiedTypeName)
+						.getName();
 			} catch (ClassNotFoundException e) {
 				// not found
 			}
@@ -228,17 +232,21 @@ public abstract class BaseStructureParser {
 										Class.forName(type);
 										return (type);
 									} catch (ClassNotFoundException e6) {
-										String fileName = myBaseDir + "/src/main/java/" + myPackageBase.replace('.', '/') + "/composite/" + nextType + ".java";
+										String fileName = myBaseDir + "/src/main/java/"
+												+ myPackageBase.replace('.', '/') + "/composite/" + nextType + ".java";
 										File file = new File(fileName);
 										if (file.exists()) {
 											return myPackageBase + ".composite." + nextType;
 										}
-										fileName = myBaseDir + "/src/main/java/ca/uhn/fhir/model/primitive/" + nextType + ".java";
+										fileName = myBaseDir + "/src/main/java/ca/uhn/fhir/model/primitive/" + nextType
+												+ ".java";
 										file = new File(fileName);
 										if (file.exists()) {
 											return "ca.uhn.fhir.model.primitive." + nextType;
 										}
-										throw new MojoFailureException(Msg.code(152) + "Unknown type: " + nextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
+										throw new MojoFailureException(Msg.code(152) + "Unknown type: " + nextType
+												+ " - Have locally defined names: "
+												+ new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
 									}
 								}
 							}
@@ -249,13 +257,17 @@ public abstract class BaseStructureParser {
 		}
 	}
 
-	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations, Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
+	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(
+			Class<?> theBase,
+			Annotation[] theAnnotations,
+			Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
 		for (Annotation next : theAnnotations) {
 			if (theClass.equals(next.annotationType())) {
 				return (ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter) next;
 			}
 		}
-		throw new IllegalArgumentException(Msg.code(153) + theBase.getCanonicalName() + " has @" + SimpleSetter.class.getCanonicalName() + " constructor with no/invalid parameter annotation");
+		throw new IllegalArgumentException(Msg.code(153) + theBase.getCanonicalName() + " has @"
+				+ SimpleSetter.class.getCanonicalName() + " constructor with no/invalid parameter annotation");
 	}
 
 	/**
@@ -417,11 +429,13 @@ public abstract class BaseStructureParser {
 		Class<?> childDt;
 		if (theElem.getReferenceTypesForMultiple().size() == 1) {
 			try {
-				childDt = Class.forName("ca.uhn.fhir.model.primitive." + theElem.getReferenceTypesForMultiple().get(0));
+				childDt = Class.forName("ca.uhn.fhir.model.primitive."
+						+ theElem.getReferenceTypesForMultiple().get(0));
 			} catch (ClassNotFoundException e) {
 				if (myVersion.equals("dstu")) {
 					try {
-						childDt = Class.forName("ca.uhn.fhir.model.dstu.composite." + theElem.getReferenceTypesForMultiple().get(0));
+						childDt = Class.forName("ca.uhn.fhir.model.dstu.composite."
+								+ theElem.getReferenceTypesForMultiple().get(0));
 					} catch (ClassNotFoundException e2) {
 						return;
 					}
@@ -456,7 +470,8 @@ public abstract class BaseStructureParser {
 					}
 					p.setDatatype(paramTypes[i].getSimpleName());
 				}
-				p.setParameter(findAnnotation(childDt, paramAnn[i], SimpleSetter.Parameter.class).name());
+				p.setParameter(findAnnotation(childDt, paramAnn[i], SimpleSetter.Parameter.class)
+						.name());
 				ss.getParameters().add(p);
 			}
 		}
@@ -497,7 +512,8 @@ public abstract class BaseStructureParser {
 		myVelocityProperties = theVelocityProperties;
 	}
 
-	private void write(BaseRootType theResource, File theFile, String thePackageBase) throws IOException, MojoFailureException {
+	private void write(BaseRootType theResource, File theFile, String thePackageBase)
+			throws IOException, MojoFailureException {
 		ArrayList<String> imports = new ArrayList<>();
 		for (String next : myImports) {
 			next = Resource.correctName(next);
@@ -555,7 +571,8 @@ public abstract class BaseStructureParser {
 		ctx.put("versionCapitalized", capitalize);
 		ctx.put("this", theResource);
 
-		VelocityEngine v = VelocityHelper.configureVelocityEngine(getTemplateFile(), getVelocityPath(), myVelocityProperties);
+		VelocityEngine v =
+				VelocityHelper.configureVelocityEngine(getTemplateFile(), getVelocityPath(), myVelocityProperties);
 		InputStream templateIs = null;
 		if (getTemplateFile() != null) {
 			templateIs = new FileInputStream(getTemplateFile());
@@ -596,11 +613,14 @@ public abstract class BaseStructureParser {
 		}
 	}
 
-	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
+	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase)
+			throws MojoFailureException {
 		writeAll(TargetType.SOURCE, theOutputDirectory, theResourceOutputDirectory, thePackageBase);
 	}
 
-	public void writeAll(TargetType theTarget, File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
+	public void writeAll(
+			TargetType theTarget, File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase)
+			throws MojoFailureException {
 		myPackageBase = thePackageBase;
 
 		if (!theOutputDirectory.exists()) {
@@ -671,7 +691,9 @@ public abstract class BaseStructureParser {
 
 			if (determineVersionEnum() == FhirVersionEnum.DSTU2) {
 				myNameToDatatypeClass.put("boundCode", BoundCodeDt.class.getName());
-				myNameToDatatypeClass.put("boundCodeableConcept", ca.uhn.fhir.model.dstu2.composite.BoundCodeableConceptDt.class.getName());
+				myNameToDatatypeClass.put(
+						"boundCodeableConcept",
+						ca.uhn.fhir.model.dstu2.composite.BoundCodeableConceptDt.class.getName());
 			}
 
 			try {
@@ -701,10 +723,13 @@ public abstract class BaseStructureParser {
 
 				VelocityEngine v = new VelocityEngine();
 				v.setProperty(RuntimeConstants.RESOURCE_LOADERS, "cp");
-				v.setProperty("resource.loader.cp.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+				v.setProperty(
+						"resource.loader.cp.class",
+						"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 				v.setProperty("runtime.strict_mode.enable", Boolean.TRUE);
 
-				InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/fhirversion_properties.vm");
+				InputStream templateIs =
+						ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/fhirversion_properties.vm");
 				InputStreamReader templateReader = new InputStreamReader(templateIs);
 				v.evaluate(ctx, w, "", templateReader);
 
@@ -778,5 +803,4 @@ public abstract class BaseStructureParser {
 		m.setBuildDatatypes(true);
 		m.execute();
 	}
-
 }

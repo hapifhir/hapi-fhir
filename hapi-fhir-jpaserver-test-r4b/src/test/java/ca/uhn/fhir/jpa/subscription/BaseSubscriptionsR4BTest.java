@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.r4b.BaseResourceProviderR4BTest;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -26,7 +26,7 @@ import org.hl7.fhir.r4b.model.Observation;
 import org.hl7.fhir.r4b.model.Organization;
 import org.hl7.fhir.r4b.model.Patient;
 import org.hl7.fhir.r4b.model.Subscription;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,8 +34,8 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -63,7 +63,7 @@ public abstract class BaseSubscriptionsR4BTest extends BaseResourceProviderR4BTe
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
-	protected SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	protected ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
 	protected CountingInterceptor myCountingInterceptor;
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
@@ -104,12 +104,12 @@ public abstract class BaseSubscriptionsR4BTest extends BaseResourceProviderR4BTe
 			waitForActivatedSubscriptionCount(0);
 		}
 
-		LinkedBlockingChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		myCountingInterceptor = new CountingInterceptor();
+
+		LinkedBlockingChannel processingChannel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
+
 		if (processingChannel != null) {
 			processingChannel.clearInterceptorsForUnitTest();
-		}
-		myCountingInterceptor = new CountingInterceptor();
-		if (processingChannel != null) {
 			processingChannel.addInterceptor(myCountingInterceptor);
 		}
 	}
@@ -125,7 +125,7 @@ public abstract class BaseSubscriptionsR4BTest extends BaseResourceProviderR4BTe
 		return createSubscription(theCriteria, thePayload, theExtension, id);
 	}
 
-	@NotNull
+	@Nonnull
 	protected Subscription createSubscription(String theCriteria, String thePayload, Extension theExtension, String id) {
 		Subscription subscription = newSubscription(theCriteria, thePayload);
 		if (theExtension != null) {

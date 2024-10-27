@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,20 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.MdmLinkFactory;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -46,8 +48,6 @@ import org.springframework.data.history.Revisions;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -59,32 +59,47 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 
 	@Autowired
 	private IMdmLinkDao<P, M> myMdmLinkDao;
+
 	@Autowired
 	private MdmLinkFactory<M> myMdmLinkFactory;
+
 	@Autowired
 	private IIdHelperService<P> myIdHelperService;
+
 	@Autowired
 	private FhirContext myFhirContext;
 
 	@Transactional
-	public M createOrUpdateLinkEntity(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
+	public M createOrUpdateLinkEntity(
+			IAnyResource theGoldenResource,
+			IAnyResource theSourceResource,
+			MdmMatchOutcome theMatchOutcome,
+			MdmLinkSourceEnum theLinkSource,
+			@Nullable MdmTransactionContext theMdmTransactionContext) {
 		M mdmLink = getOrCreateMdmLinkByGoldenResourceAndSourceResource(theGoldenResource, theSourceResource);
 		mdmLink.setLinkSource(theLinkSource);
 		mdmLink.setMatchResult(theMatchOutcome.getMatchResultEnum());
 		// Preserve these flags for link updates
 		mdmLink.setEidMatch(theMatchOutcome.isEidMatch() | mdmLink.isEidMatchPresent());
-		mdmLink.setHadToCreateNewGoldenResource(theMatchOutcome.isCreatedNewResource() | mdmLink.getHadToCreateNewGoldenResource());
+		mdmLink.setHadToCreateNewGoldenResource(
+				theMatchOutcome.isCreatedNewResource() | mdmLink.getHadToCreateNewGoldenResource());
 		mdmLink.setMdmSourceType(myFhirContext.getResourceType(theSourceResource));
 
 		setScoreProperties(theMatchOutcome, mdmLink);
 
 		// Add partition for the mdm link if it's available in the source resource
-		RequestPartitionId partitionId = (RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		RequestPartitionId partitionId =
+				(RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (partitionId != null && partitionId.getFirstPartitionIdOrNull() != null) {
-			mdmLink.setPartitionId(new PartitionablePartitionId(partitionId.getFirstPartitionIdOrNull(), partitionId.getPartitionDate()));
+			mdmLink.setPartitionId(new PartitionablePartitionId(
+					partitionId.getFirstPartitionIdOrNull(), partitionId.getPartitionDate()));
 		}
 
-		String message = String.format("Creating %s link from %s to Golden Resource %s.", mdmLink.getMatchResult(), theSourceResource.getIdElement().toUnqualifiedVersionless(), theGoldenResource.getIdElement().toUnqualifiedVersionless());
+		String message = String.format(
+				"Creating %s link from %s to Golden Resource %s.",
+				mdmLink.getMatchResult(),
+				theSourceResource.getIdElement().toUnqualifiedVersionless(),
+				theGoldenResource.getIdElement().toUnqualifiedVersionless());
 		theMdmTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		save(mdmLink);
@@ -93,26 +108,28 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 
 	private void setScoreProperties(MdmMatchOutcome theMatchOutcome, M mdmLink) {
 		if (theMatchOutcome.getScore() != null) {
-			mdmLink.setScore(  mdmLink.getScore() != null
-				? Math.max(theMatchOutcome.getNormalizedScore(), mdmLink.getScore())
-				: theMatchOutcome.getNormalizedScore() );
+			mdmLink.setScore(
+					mdmLink.getScore() != null
+							? Math.max(theMatchOutcome.getNormalizedScore(), mdmLink.getScore())
+							: theMatchOutcome.getNormalizedScore());
 		}
 
 		if (theMatchOutcome.getVector() != null) {
-			mdmLink.setVector( mdmLink.getVector() != null
-				? Math.max(theMatchOutcome.getVector(), mdmLink.getVector())
-				: theMatchOutcome.getVector() );
+			mdmLink.setVector(
+					mdmLink.getVector() != null
+							? Math.max(theMatchOutcome.getVector(), mdmLink.getVector())
+							: theMatchOutcome.getVector());
 		}
 
-		mdmLink.setRuleCount( mdmLink.getRuleCount() != null
-			? Math.max(theMatchOutcome.getMdmRuleCount(), mdmLink.getRuleCount())
-			: theMatchOutcome.getMdmRuleCount() );
+		mdmLink.setRuleCount(
+				mdmLink.getRuleCount() != null
+						? Math.max(theMatchOutcome.getMdmRuleCount(), mdmLink.getRuleCount())
+						: theMatchOutcome.getMdmRuleCount());
 	}
 
 	@Nonnull
 	public M getOrCreateMdmLinkByGoldenResourceAndSourceResource(
-		IAnyResource theGoldenResource, IAnyResource theSourceResource
-	) {
+			IAnyResource theGoldenResource, IAnyResource theSourceResource) {
 		P goldenResourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource);
 		P sourceResourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource);
 		Optional<M> oExisting = getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourcePid, sourceResourcePid);
@@ -135,8 +152,10 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	 * @deprecated This was deprecated in favour of using ResourcePersistenceId rather than longs
 	 */
 	@Deprecated
-	public Optional<M> getLinkByGoldenResourcePidAndSourceResourcePid(Long theGoldenResourcePid, Long theSourceResourcePid) {
-		return getLinkByGoldenResourcePidAndSourceResourcePid(myIdHelperService.newPid(theGoldenResourcePid), myIdHelperService.newPid(theSourceResourcePid));
+	public Optional<M> getLinkByGoldenResourcePidAndSourceResourcePid(
+			Long theGoldenResourcePid, Long theSourceResourcePid) {
+		return getLinkByGoldenResourcePidAndSourceResourcePid(
+				myIdHelperService.newPid(theGoldenResourcePid), myIdHelperService.newPid(theSourceResourcePid));
 	}
 
 	/**
@@ -153,7 +172,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		link.setSourcePersistenceId(theSourceResourcePid);
 		link.setGoldenResourcePersistenceId(theGoldenResourcePid);
 
-		//TODO - replace the use of example search
+		// TODO - replace the use of example search
 		Example<M> example = Example.of(link);
 
 		return myMdmLinkDao.findOne(example);
@@ -224,13 +243,14 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	 * @param theMatchResult       The MatchResult you are looking for.
 	 * @return an Optional {@link IMdmLink} containing the matched link if it exists.
 	 */
-	public Optional<M> getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(Long theGoldenResourcePid,
-																															Long theSourcePid, MdmMatchResultEnum theMatchResult) {
-		return getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(myIdHelperService.newPid(theGoldenResourcePid), myIdHelperService.newPid(theSourcePid), theMatchResult);
+	public Optional<M> getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(
+			Long theGoldenResourcePid, Long theSourcePid, MdmMatchResultEnum theMatchResult) {
+		return getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(
+				myIdHelperService.newPid(theGoldenResourcePid), myIdHelperService.newPid(theSourcePid), theMatchResult);
 	}
 
-	public Optional<M> getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(P theGoldenResourcePid,
-																															P theSourcePid, MdmMatchResultEnum theMatchResult) {
+	public Optional<M> getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(
+			P theGoldenResourcePid, P theSourcePid, MdmMatchResultEnum theMatchResult) {
 		M exampleLink = myMdmLinkFactory.newMdmLinkVersionless();
 		exampleLink.setGoldenResourcePersistenceId(theGoldenResourcePid);
 		exampleLink.setSourcePersistenceId(theSourcePid);
@@ -261,8 +281,8 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		exampleLink.setSourcePersistenceId(pid);
 		Example<M> example = Example.of(exampleLink);
 		return myMdmLinkDao.findOne(example);
-
 	}
+
 	/**
 	 * Delete a given {@link IMdmLink}. Note that this does not clear out the Golden resource.
 	 * It is a simple entity delete.
@@ -375,13 +395,14 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		return retval;
 	}
 
-	public Optional<M> getLinkByGoldenResourceAndSourceResource(@Nullable IAnyResource theGoldenResource, @Nullable IAnyResource theSourceResource) {
+	public Optional<M> getLinkByGoldenResourceAndSourceResource(
+			@Nullable IAnyResource theGoldenResource, @Nullable IAnyResource theSourceResource) {
 		if (theGoldenResource == null || theSourceResource == null) {
 			return Optional.empty();
 		}
 		return getLinkByGoldenResourcePidAndSourceResourcePid(
-			myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource),
-			myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource));
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource),
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource));
 	}
 
 	@Transactional(propagation = Propagation.MANDATORY)

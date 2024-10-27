@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,31 @@
  */
 package ca.uhn.fhir.jpa.subscription.triggering;
 
-import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 public interface ISubscriptionTriggeringSvc {
 
-	IBaseParameters triggerSubscription(@Nullable List<IPrimitiveType<String>> theResourceIds, @Nullable List<IPrimitiveType<String>> theSearchUrls, @Nullable IIdType theSubscriptionId);
+	IBaseParameters triggerSubscription(
+			@Nullable List<IPrimitiveType<String>> theResourceIds,
+			@Nullable List<IPrimitiveType<String>> theSearchUrls,
+			@Nullable IIdType theSubscriptionId,
+			RequestDetails theRequestDetails);
+
+	@Deprecated(forRemoval = true)
+	/**
+	 * Use {@link ISubscriptionTriggeringSvc#triggerSubscription(List, List, IIdType, RequestDetails)} instead.
+	 * This implementation uses a SystemRequestDetails for All Partitions, as the previous behaviour did.
+	 */
+	IBaseParameters triggerSubscription(
+			@Nullable List<IPrimitiveType<String>> theResourceIds,
+			@Nullable List<IPrimitiveType<String>> theSearchUrls,
+			@Nullable IIdType theSubscriptionId);
 
 	void runDeliveryPass();
 }

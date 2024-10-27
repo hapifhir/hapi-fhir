@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,31 +39,52 @@ import java.util.List;
 public class SubscriptionTriggeringProvider implements IResourceProvider {
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 
-
 	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
 	public IBaseParameters triggerSubscription(
-		@OperationParam(name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "uri") List<IPrimitiveType<String>> theResourceIds,
-		@OperationParam(name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theSearchUrls
-	) {
-		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, null);
+			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
+			@OperationParam(
+							name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "uri")
+					List<IPrimitiveType<String>> theResourceIds,
+			@OperationParam(
+							name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theSearchUrls) {
+		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, null, theRequestDetails);
 	}
 
 	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
 	public IBaseParameters triggerSubscription(
-		@IdParam IIdType theSubscriptionId,
-		@OperationParam(name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "uri") List<IPrimitiveType<String>> theResourceIds,
-		@OperationParam(name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theSearchUrls
-	) {
-		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, theSubscriptionId);
+			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
+			@IdParam IIdType theSubscriptionId,
+			@OperationParam(
+							name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "uri")
+					List<IPrimitiveType<String>> theResourceIds,
+			@OperationParam(
+							name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theSearchUrls) {
+		return mySubscriptionTriggeringSvc.triggerSubscription(
+				theResourceIds, theSearchUrls, theSubscriptionId, theRequestDetails);
 	}
-
 
 	@Override
 	public Class<? extends IBaseResource> getResourceType() {
-		return myFhirContext.getResourceDefinition(ResourceTypeEnum.SUBSCRIPTION.getCode()).getImplementingClass();
+		return myFhirContext
+				.getResourceDefinition(ResourceTypeEnum.SUBSCRIPTION.getCode())
+				.getImplementingClass();
 	}
-
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,12 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.dialect.ISequenceValueMassager;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.util.HapiExtensions;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
 
@@ -51,6 +50,7 @@ public class StorageSettings {
 	 */
 	// Thread Pool size used by batch in bundle
 	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
+
 	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
 	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
@@ -61,8 +61,13 @@ public class StorageSettings {
 	 * <li><code>"http://hl7.org/fhir/StructureDefinition/*"</code></li>
 	 * </ul>
 	 */
-	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("http://hl7.org/fhir/ValueSet/*", "http://hl7.org/fhir/CodeSystem/*", "http://hl7.org/fhir/valueset-*", "http://hl7.org/fhir/codesystem-*", "http://hl7.org/fhir/StructureDefinition/*")));
-	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
+	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+			"http://hl7.org/fhir/ValueSet/*",
+			"http://hl7.org/fhir/CodeSystem/*",
+			"http://hl7.org/fhir/valueset-*",
+			"http://hl7.org/fhir/codesystem-*",
+			"http://hl7.org/fhir/StructureDefinition/*")));
+
 	/*
 	 * <p>
 	 * Note the following database documented limitations:
@@ -82,26 +87,22 @@ public class StorageSettings {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myAllowContainsSearches = false;
+
 	private boolean myAllowExternalReferences = false;
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myDefaultSearchParamsCanBeOverridden = true;
-	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private boolean myAutoCreatePlaceholderReferenceTargets;
-	private boolean myCrossPartitionSubscriptionEnabled = false;
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
-	private boolean myEnableInMemorySubscriptionMatching = true;
-	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 	private boolean myMassIngestionMode;
 	private Integer myMaximumTransactionBundleSize = DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE;
 	private boolean myNormalizeTerminologyForBulkExportJobs = false;
-	private String myEmailFromAddress = "noreply@unknown.com";
-	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 	/**
 	 * Update setter javadoc if default changes.
 	 */
 	private boolean myUseOrdinalDatesForDayPrecisionSearches = true;
+
 	private boolean mySuppressStringIndexingInTokens = false;
 	private Class<? extends ISequenceValueMassager> mySequenceValueMassagerClass;
 	private IPrimitiveType<Date> myPeriodIndexStartOfTime;
@@ -119,9 +120,28 @@ public class StorageSettings {
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 
 	/**
-	 * Since 6.4.0
+	 * Should the {@literal _lamguage} SearchParameter be supported
+	 * on this server?
+	 *
+	 * @since 7.0.0
 	 */
-	private boolean myQualifySubscriptionMatchingChannelName = true;
+	private boolean myLanguageSearchParameterEnabled = false;
+
+	/**
+	 * If set to false, all resource types will be installed via package installer, regardless of their status.
+	 * Otherwise, resources will be filtered based on status according to some criteria which can be found in
+	 * <code>PackageInstallerSvcImpl#isValidResourceStatusForPackageUpload<code>
+	 * @since 7.0.0
+	 */
+	private boolean myValidateResourceStatusForPackageUpload = true;
+
+	/**
+	 * If set to <code>true</code>, the server will not write data to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code>
+	 * columns for all HFJ_SPIDX tables.
+	 *
+	 * @since 7.4.0
+	 */
+	private boolean myIndexStorageOptimized = false;
 
 	/**
 	 * Constructor
@@ -220,48 +240,6 @@ public class StorageSettings {
 	}
 
 	/**
-	 * If set to <code>false</code> (default is true) the server will not use
-	 * in-memory subscription searching and instead use the database matcher for all subscription
-	 * criteria matching.
-	 * <p>
-	 * When there are subscriptions registered
-	 * on the server, the default behaviour is to compare the changed resource to the
-	 * subscription criteria directly in-memory without going out to the database.
-	 * Certain types of subscription criteria, e.g. chained references of queries with
-	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
-	 * to a database matcher.
-	 * <p>
-	 * The database matcher performs a query against the
-	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
-	 *
-	 * @since 3.6.1
-	 */
-	public boolean isEnableInMemorySubscriptionMatching() {
-		return myEnableInMemorySubscriptionMatching;
-	}
-
-	/**
-	 * If set to <code>false</code> (default is true) the server will not use
-	 * in-memory subscription searching and instead use the database matcher for all subscription
-	 * criteria matching.
-	 * <p>
-	 * When there are subscriptions registered
-	 * on the server, the default behaviour is to compare the changed resource to the
-	 * subscription criteria directly in-memory without going out to the database.
-	 * Certain types of subscription criteria, e.g. chained references of queries with
-	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
-	 * to a database matcher.
-	 * <p>
-	 * The database matcher performs a query against the
-	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
-	 *
-	 * @since 3.6.1
-	 */
-	public void setEnableInMemorySubscriptionMatching(boolean theEnableInMemorySubscriptionMatching) {
-		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
-	}
-
-	/**
 	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
 	 * the server will not create search indexes for search parameters with no values in resources.
 	 * <p>
@@ -306,6 +284,58 @@ public class StorageSettings {
 	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
 		Validate.notNull(theIndexMissingFields, "theIndexMissingFields must not be null");
 		myIndexMissingFieldsEnabled = theIndexMissingFields;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the server will not write data
+	 * to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code> columns for all HFJ_SPIDX tables.
+	 * <p>
+	 * This feature may be enabled on servers where HFJ_SPIDX tables are expected
+	 * to have a large amount of data (millions of rows) in order to reduce overall storage size.
+	 * </p>
+	 * <p>
+	 * Note that this setting only applies to newly inserted and updated rows in HFJ_SPIDX tables.
+	 * In order to apply this optimization setting to existing HFJ_SPIDX index rows,
+	 * <code>$reindex</code> operation should be executed at the instance or server level.
+	 * <p>
+	 * <p>
+	 * If this setting is enabled, {@link PartitionSettings#isIncludePartitionInSearchHashes()} should be disabled.
+	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#getIndexMissingFields()} is enabled, the following index may need to be added
+	 * into the HFJ_SPIDX tables to improve the search performance: <code>HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID</code>
+	 * </p>
+	 *
+	 * @since 7.4.0
+	 */
+	public boolean isIndexStorageOptimized() {
+		return myIndexStorageOptimized;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the server will not write data
+	 * to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code> columns for all HFJ_SPIDX tables.
+	 * <p>
+	 * This feature may be enabled on servers where HFJ_SPIDX tables are expected
+	 * to have a large amount of data (millions of rows) in order to reduce overall storage size.
+	 * </p>
+	 * <p>
+	 * Note that this setting only applies to newly inserted and updated rows in HFJ_SPIDX tables.
+	 * In order to apply this optimization setting to existing HFJ_SPIDX index rows,
+	 * <code>$reindex</code> operation should be executed at the instance or server level.
+	 * <p>
+	 * <p>
+	 * If this setting is enabled, {@link PartitionSettings#isIncludePartitionInSearchHashes()} should be set to <code>false</code>.
+	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#getIndexMissingFields()} ()} is enabled, the following index may need to be added
+	 * into the HFJ_SPIDX tables to improve the search performance: <code>HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID</code>
+	 * </p>
+	 *
+	 * @since 7.4.0
+	 */
+	public void setIndexStorageOptimized(boolean theIndexStorageOptimized) {
+		myIndexStorageOptimized = theIndexStorageOptimized;
 	}
 
 	/**
@@ -406,26 +436,6 @@ public class StorageSettings {
 	public void setSequenceValueMassagerClass(Class<? extends ISequenceValueMassager> theSequenceValueMassagerClass) {
 		Validate.notNull(theSequenceValueMassagerClass, "theSequenceValueMassagerClass must not be null");
 		mySequenceValueMassagerClass = theSequenceValueMassagerClass;
-	}
-
-	/**
-	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
-	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
-	 *
-	 * @since 5.5.0
-	 */
-	public boolean isTriggerSubscriptionsForNonVersioningChanges() {
-		return myTriggerSubscriptionsForNonVersioningChanges;
-	}
-
-	/**
-	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
-	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
-	 *
-	 * @since 5.5.0
-	 */
-	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
-		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
 	}
 
 	/**
@@ -728,61 +738,6 @@ public class StorageSettings {
 		return this;
 	}
 
-
-	/**
-	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
-	 * to the server matching these types will be activated.
-	 */
-	public StorageSettings addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
-		mySupportedSubscriptionTypes.add(theSubscriptionChannelType);
-		return this;
-	}
-
-	/**
-	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
-	 * to the server matching these types will be activated.
-	 */
-	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
-		return Collections.unmodifiableSet(mySupportedSubscriptionTypes);
-	}
-
-	@VisibleForTesting
-	public void clearSupportedSubscriptionTypesForUnitTest() {
-		mySupportedSubscriptionTypes.clear();
-	}
-
-	/**
-	 * If e-mail subscriptions are supported, the From address used when sending e-mails
-	 */
-
-	public String getEmailFromAddress() {
-		return myEmailFromAddress;
-	}
-
-	/**
-	 * If e-mail subscriptions are supported, the From address used when sending e-mails
-	 */
-
-	public void setEmailFromAddress(String theEmailFromAddress) {
-		myEmailFromAddress = theEmailFromAddress;
-	}
-
-	/**
-	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
-	 */
-
-	public String getWebsocketContextPath() {
-		return myWebsocketContextPath;
-	}
-
-	/**
-	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
-	 */
-
-	public void setWebsocketContextPath(String theWebsocketContextPath) {
-		myWebsocketContextPath = theWebsocketContextPath;
-	}
-
 	/**
 	 * <p>
 	 * Should searches use the integer field {@code SP_VALUE_LOW_DATE_ORDINAL} and {@code SP_VALUE_HIGH_DATE_ORDINAL} in
@@ -1071,7 +1026,6 @@ public class StorageSettings {
 			byType.computeIfAbsent(type, t -> new HashSet<>()).add(nextPath);
 		}
 
-
 		myAutoVersionReferenceAtPaths = paths;
 		myTypeToAutoVersionReferenceAtPaths = byType;
 	}
@@ -1204,58 +1158,37 @@ public class StorageSettings {
 	}
 
 	/**
-	 * If enabled, the server will support cross-partition subscription.
-	 * This subscription will be the responsible for all the requests from all the partitions on this server.
-	 * For example, if the server has 3 partitions, P1, P2, P3
-	 * The subscription will live in the DEFAULT partition. Resource posted to DEFAULT, P1, P2, and P3 will trigger this subscription.
-	 * <p>
-	 * Default is <code>false</code>
-	 * </p>
-	 *
-	 * @since 5.7.0
+	 * @return Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
+	 * @since 7.0.0
 	 */
-	public boolean isCrossPartitionSubscriptionEnabled() {
-		return myCrossPartitionSubscriptionEnabled;
+	public boolean isLanguageSearchParameterEnabled() {
+		return myLanguageSearchParameterEnabled;
 	}
 
 	/**
-	 * If enabled, the server will support cross-partition subscription.
-	 * This subscription will be the responsible for all the requests from all the partitions on this server.
-	 * For example, if the server has 3 partitions, P1, P2, P3
-	 * The subscription will live in the DEFAULT partition. Resource posted to DEFAULT, P1, P2, and P3 will trigger this subscription.
-	 * <p>
-	 * Default is <code>false</code>
-	 * </p>
+	 * Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
 	 *
-	 * @since 5.7.0
+	 * @since 7.0.0
 	 */
-	public void setCrossPartitionSubscriptionEnabled(boolean theAllowCrossPartitionSubscription) {
-		myCrossPartitionSubscriptionEnabled = theAllowCrossPartitionSubscription;
+	public void setLanguageSearchParameterEnabled(boolean theLanguageSearchParameterEnabled) {
+		myLanguageSearchParameterEnabled = theLanguageSearchParameterEnabled;
 	}
 
 	/**
-	 * This setting controls whether the {@link  BaseChannelSettings#isQualifyChannelName}
-	 * should be qualified or not.
-	 * Default is true, ie, the channel name will be qualified.
-	 *
-	 * @since 6.4.0
+	 * @return true if the filter is enabled for resources installed via package installer, false otherwise
+	 * @since 7.0.0
 	 */
-	public void setQualifySubscriptionMatchingChannelName(boolean theQualifySubscriptionMatchingChannelName) {
-		myQualifySubscriptionMatchingChannelName = theQualifySubscriptionMatchingChannelName;
+	public boolean isValidateResourceStatusForPackageUpload() {
+		return myValidateResourceStatusForPackageUpload;
 	}
 
 	/**
-	 * This setting return whether the {@link BaseChannelSettings#isQualifyChannelName}
-	 * should be qualified or not.
-	 *
-	 * @return whether the {@link BaseChannelSettings#isQualifyChannelName} is qualified or not
-	 * @since 6.4.0
+	 * Should resources being installed via package installer be filtered.
+	 * @since 7.0.0
 	 */
-	public boolean isQualifySubscriptionMatchingChannelName() {
-		return myQualifySubscriptionMatchingChannelName;
+	public void setValidateResourceStatusForPackageUpload(boolean theValidateResourceStatusForPackageUpload) {
+		myValidateResourceStatusForPackageUpload = theValidateResourceStatusForPackageUpload;
 	}
-
-
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
@@ -1263,15 +1196,14 @@ public class StorageSettings {
 		int starIdx = theUrl.indexOf('*');
 		if (starIdx != -1) {
 			if (starIdx != theUrl.length() - 1) {
-				throw new IllegalArgumentException(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
+				throw new IllegalArgumentException(Msg.code(1525)
+						+ "Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
 			}
 		}
-
 	}
 
 	public enum IndexEnabledEnum {
 		ENABLED,
 		DISABLED
 	}
-
 }

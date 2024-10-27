@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,10 @@ package ca.uhn.fhir.mdm.batch2.clear;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,12 +42,13 @@ public class MdmClearJobParametersValidator implements IJobParametersValidator<M
 
 	@Nullable
 	@Override
-	public List<String> validate(@Nonnull MdmClearJobParameters theParameters) {
+	public List<String> validate(RequestDetails theRequestDetails, @Nonnull MdmClearJobParameters theParameters) {
 		if (myMdmSettings == null || !myMdmSettings.isEnabled()) {
 			return Collections.singletonList("Mdm is not enabled on this server");
 		}
 		List<String> retval = new ArrayList<>();
-		if (theParameters.getResourceNames() == null || theParameters.getResourceNames().isEmpty()) {
+		if (theParameters.getResourceNames() == null
+				|| theParameters.getResourceNames().isEmpty()) {
 			retval.add("Mdm Clear Job Parameters must define at least one resource type");
 		} else {
 			for (String resourceType : theParameters.getResourceNames()) {
@@ -61,5 +63,4 @@ public class MdmClearJobParametersValidator implements IJobParametersValidator<M
 
 		return retval;
 	}
-
 }

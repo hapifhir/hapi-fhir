@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,11 @@ public class MigrationResult {
 	public final List<BaseTask> failedTasks = new ArrayList<>();
 
 	public String summary() {
-		return String.format("Completed executing %s migration tasks: %s succeeded, %s failed.  %s SQL statements were executed.",
-			succeededTasks.size() + failedTasks.size(),
-			succeededTasks.size(),
-			failedTasks.size(),
-			executedStatements.size());
+		return String.format(
+				"Completed executing %s migration tasks: %s succeeded, %s failed.  %s SQL statements were executed.",
+				succeededTasks.size() + failedTasks.size(),
+				succeededTasks.size(),
+				failedTasks.size(),
+				executedStatements.size());
 	}
 }

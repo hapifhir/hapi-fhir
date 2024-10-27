@@ -1,0 +1,45 @@
+{
+	"version": "1",
+	"mdmTypes": ["Patient"],
+	"candidateSearchParams": [
+		{
+			"resourceType": "Patient",
+			"searchParams": ["birthdate"]
+		}
+	],
+	"candidateFilterSearchParams": [],
+	"matchFields": [
+		{
+			"name": "birthday",
+			"resourceType": "Patient",
+			"resourcePath": "birthDate",
+			"matcher": {
+				"algorithm": "STRING"
+			}
+		},
+		{
+			"name": "firstname-jaro",
+			"resourceType": "Patient",
+			"resourcePath": "name.given",
+			"similarity": {
+				"algorithm": "JARO_WINKLER",
+				"matchThreshold": 0.8
+			}
+		},
+		{
+			"name": "lastname-jaro",
+			"resourceType": "Patient",
+			"resourcePath": "name.family",
+			"similarity": {
+				"algorithm": "JARO_WINKLER",
+				"matchThreshold": 0.8
+			}
+		}
+	],
+	"matchResultMap": {
+		"firstname-jaro,lastname-jaro,birthday": "MATCH",
+		"lastname-jaro,birthday": "POSSIBLE_MATCH",
+		"firstname-jaro,birthday": "POSSIBLE_MATCH"
+	},
+	"eidSystems": {}
+}

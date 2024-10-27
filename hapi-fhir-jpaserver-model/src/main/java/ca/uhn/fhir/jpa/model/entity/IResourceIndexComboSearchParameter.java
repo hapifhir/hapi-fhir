@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
-
 
 /**
  * Provides a common interface used to extract Combo Unique ({@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique})
@@ -28,9 +29,13 @@ import org.hl7.fhir.instance.model.api.IIdType;
  */
 public interface IResourceIndexComboSearchParameter {
 
+	/**
+	 * Will be in the exact form <code>[resourceType]/[id]</code>
+	 */
+	@Nullable // if it never got set, e.g. on a row pulled from the DB
 	IIdType getSearchParameterId();
 
-	void setSearchParameterId(IIdType theSearchParameterId);
+	void setSearchParameterId(@Nonnull IIdType theSearchParameterId);
 
 	String getIndexString();
 

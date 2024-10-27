@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5176
+jira: SMILE-6333
+title: "Previously, the use of search parameter _lastUpdated as part of a reverse chaining search would return an error
+ message to the client.  This issue has been fixed"

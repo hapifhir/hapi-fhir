@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5075
+title: "The system was failing to recognize custom resources during transaction processing.  This has been fixed."

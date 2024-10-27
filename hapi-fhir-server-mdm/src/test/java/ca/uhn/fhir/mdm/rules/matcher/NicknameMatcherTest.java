@@ -1,31 +1,51 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
+import ca.uhn.fhir.jpa.nickname.INicknameSvc;
+import ca.uhn.fhir.jpa.nickname.NicknameSvc;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NicknameMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
+import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NicknameMatcherTest {
-	IMdmStringMatcher matcher = new NicknameMatcher();
+	IMdmFieldMatcher matcher;
+
+	INicknameSvc myNicknameSvc = new NicknameSvc();
+
+	@BeforeEach
+	public void begin() {
+		matcher = new NicknameMatcher(myNicknameSvc);
+	}
 
 	@Test
 	public void testMatches() {
-		assertTrue(matcher.matches("Ken", "ken"));
-		assertTrue(matcher.matches("ken", "Ken"));
-		assertTrue(matcher.matches("Ken", "Ken"));
-		assertTrue(matcher.matches("Kenneth", "Ken"));
-		assertTrue(matcher.matches("Kenneth", "Kenny"));
-		assertTrue(matcher.matches("Ken", "Kenneth"));
-		assertTrue(matcher.matches("Kenny", "Kenneth"));
-		assertTrue(matcher.matches("Jim", "Jimmy"));
-		assertTrue(matcher.matches("Jimmy", "Jim"));
-		assertTrue(matcher.matches("Jim", "James"));
-		assertTrue(matcher.matches("Jimmy", "James"));
-		assertTrue(matcher.matches("James", "Jimmy"));
-		assertTrue(matcher.matches("James", "Jim"));
+		assertTrue(match("Ken", "ken"));
+		assertTrue(match("ken", "Ken"));
+		assertTrue(match("Ken", "Ken"));
+		assertTrue(match("Kenneth", "Ken"));
+		assertTrue(match("Kenneth", "Kenny"));
+		assertTrue(match("Ken", "Kenneth"));
+		assertTrue(match("Kenny", "Kenneth"));
+		assertTrue(match("Jim", "Jimmy"));
+		assertTrue(match("Jimmy", "Jim"));
+		assertTrue(match("Jim", "James"));
+		assertTrue(match("Jimmy", "James"));
+		assertTrue(match("James", "Jimmy"));
+		assertTrue(match("James", "Jim"));
 
-		assertFalse(matcher.matches("Ken", "Bob"));
+		assertFalse(match("Ken", "Bob"));
 		// These aren't nickname matches.  If you want matches like these use a phonetic matcher
-		assertFalse(matcher.matches("Allen", "Allan"));
+		assertFalse(match("Allen", "Allan"));
+	}
+
+	private boolean match(String theFirst, String theSecond) {
+		MdmMatcherJson json = new MdmMatcherJson();
+		json.setExact(true);
+		return matcher.matches(new StringType(theFirst), new StringType(theSecond), json);
 	}
 }

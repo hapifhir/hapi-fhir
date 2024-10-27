@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -82,6 +83,12 @@ public class ValidateUtil {
 		}
 	}
 
+	public static void isTrueOrThrowResourceNotFound(boolean theSuccess, String theMessage, Object... theValues) {
+		if (!theSuccess) {
+			throw new ResourceNotFoundException(Msg.code(2494) + String.format(theMessage, theValues));
+		}
+	}
+
 	public static void exactlyOneNotNullOrThrowInvalidRequestException(Object[] theObjects, String theMessage) {
 		int count = 0;
 		for (Object next : theObjects) {
@@ -93,5 +100,4 @@ public class ValidateUtil {
 			throw new InvalidRequestException(Msg.code(1770) + theMessage);
 		}
 	}
-
 }

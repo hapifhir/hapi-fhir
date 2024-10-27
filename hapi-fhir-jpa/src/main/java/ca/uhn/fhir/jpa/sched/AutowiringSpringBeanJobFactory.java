@@ -1,8 +1,8 @@
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,13 @@ public class AutowiringSpringBeanJobFactory extends SpringBeanJobFactory impleme
 		String next = toString(bundle.getNextFireTime());
 		String fireInstanceId = bundle.getTrigger().getFireInstanceId();
 		JobKey key = bundle.getJobDetail().getKey();
-		ourLog.trace("Firing job[{}] ID[{}] - Previous[{}] Scheduled[{}] Next[{}]", key, fireInstanceId, prev, scheduled, next);
+		ourLog.trace(
+				"Firing job[{}] ID[{}] - Previous[{}] Scheduled[{}] Next[{}]",
+				key,
+				fireInstanceId,
+				prev,
+				scheduled,
+				next);
 
 		Object job = super.createJobInstance(bundle);
 		myBeanFactory.autowireBean(job);

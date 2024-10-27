@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 import ca.uhn.fhir.context.FhirContext;
 
-public class CompositeCriterion<A extends IParam, B extends IParam> implements ICompositeWithLeft<B>, ICriterion<B>, ICriterionInternal {
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
+public class CompositeCriterion<A extends IParam, B extends IParam>
+		implements ICompositeWithLeft<B>, ICriterion<B>, ICriterionInternal {
 
 	private ICriterion<B> myRight;
 	private String myName;
@@ -44,12 +45,13 @@ public class CompositeCriterion<A extends IParam, B extends IParam> implements I
 	public String getParameterValue(FhirContext theContext) {
 		ICriterionInternal left = (ICriterionInternal) myLeft;
 		ICriterionInternal right = (ICriterionInternal) myRight;
-		return defaultString(left.getParameterValue(theContext)) + '$' + defaultString(right.getParameterValue(theContext));
+		return defaultString(left.getParameterValue(theContext))
+				+ '$'
+				+ defaultString(right.getParameterValue(theContext));
 	}
 
 	@Override
 	public String getParameterName() {
 		return myName;
 	}
-
 }

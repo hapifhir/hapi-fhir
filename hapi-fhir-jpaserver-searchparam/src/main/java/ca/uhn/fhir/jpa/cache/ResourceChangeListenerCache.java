@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,16 @@ import java.time.ZoneId;
 @Scope("prototype")
 public class ResourceChangeListenerCache implements IResourceChangeListenerCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCache.class);
+	/**
+	 * Max number of retries to do for cache refreshing
+	 */
 	private static final int MAX_RETRIES = 60;
 
 	private static Instant ourNowForUnitTests;
 
 	@Autowired
 	IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
 
@@ -61,7 +65,11 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 	private boolean myInitialized = false;
 	private Instant myNextRefreshTime = Instant.MIN;
 
-	public ResourceChangeListenerCache(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
+	public ResourceChangeListenerCache(
+			String theResourceName,
+			IResourceChangeListener theResourceChangeListener,
+			SearchParameterMap theSearchParameterMap,
+			long theRemoteRefreshIntervalMs) {
 		myResourceName = theResourceName;
 		myResourceChangeListener = theResourceChangeListener;
 		mySearchParameterMap = SerializationUtils.clone(theSearchParameterMap);
@@ -99,7 +107,8 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 		InMemoryMatchResult result = mySearchParamMatcher.match(mySearchParameterMap, theResource);
 		if (!result.supported()) {
 			// This should never happen since we enforce only in-memory SearchParamMaps at registration time
-			throw new IllegalStateException(Msg.code(483) + "Search Parameter Map " + mySearchParameterMap + " cannot be processed in-memory: " + result.getUnsupportedReason());
+			throw new IllegalStateException(Msg.code(483) + "Search Parameter Map " + mySearchParameterMap
+					+ " cannot be processed in-memory: " + result.getUnsupportedReason());
 		}
 		return result.matched();
 	}
@@ -117,7 +126,7 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 		return myNextRefreshTime.isBefore(now());
 	}
 
-	private static Instant now() {
+	static Instant now() {
 		if (ourNowForUnitTests != null) {
 			return ourNowForUnitTests;
 		}
@@ -135,16 +144,19 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 	}
 
 	@VisibleForTesting
-	public void setResourceChangeListenerCacheRefresher(IResourceChangeListenerCacheRefresher theResourceChangeListenerCacheRefresher) {
+	public void setResourceChangeListenerCacheRefresher(
+			IResourceChangeListenerCacheRefresher theResourceChangeListenerCacheRefresher) {
 		myResourceChangeListenerCacheRefresher = theResourceChangeListenerCacheRefresher;
 	}
 
 	private ResourceChangeResult refreshCacheAndNotifyListenersWithRetry() {
-		Retrier<ResourceChangeResult> refreshCacheRetrier = new Retrier<>(() -> {
-			synchronized (this) {
-				return myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(this);
-			}
-		}, MAX_RETRIES);
+		Retrier<ResourceChangeResult> refreshCacheRetrier = new Retrier<>(
+				() -> {
+					synchronized (this) {
+						return myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(this);
+					}
+				},
+				getMaxRetries());
 		return refreshCacheRetrier.runWithRetry();
 	}
 
@@ -209,9 +221,13 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myResourceName", myResourceName)
-			.append("mySearchParameterMap", mySearchParameterMap)
-			.append("myInitialized", myInitialized)
-			.toString();
+				.append("myResourceName", myResourceName)
+				.append("mySearchParameterMap", mySearchParameterMap)
+				.append("myInitialized", myInitialized)
+				.toString();
+	}
+
+	static int getMaxRetries() {
+		return MAX_RETRIES;
 	}
 }

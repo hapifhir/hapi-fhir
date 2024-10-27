@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 class ServletRequestParameter implements IParameter {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServletRequestParameter.class);
@@ -33,15 +33,20 @@ class ServletRequestParameter implements IParameter {
 	ServletRequestParameter() {
 		super();
 	}
-	
+
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(
+			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
+			throws InternalErrorException, InvalidRequestException {
 		return ((ServletRequestDetails) theRequest).getServletRequest();
 	}
 
 	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+	public void initializeTypes(
+			Method theMethod,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<?> theParameterType) {
 		// ignore
 	}
-
 }

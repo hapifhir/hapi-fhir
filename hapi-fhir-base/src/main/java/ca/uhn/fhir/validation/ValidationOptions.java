@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@ public class ValidationOptions {
 	private static ValidationOptions ourEmpty;
 	private Set<String> myProfiles;
 
-	public ValidationOptions() {
-	}
+	public ValidationOptions() {}
 
 	public Set<String> getProfiles() {
 		return myProfiles != null ? Collections.unmodifiableSet(myProfiles) : Collections.emptySet();
@@ -65,5 +64,4 @@ public class ValidationOptions {
 		}
 		return retVal;
 	}
-
 }

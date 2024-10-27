@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-
-public class WriteBundleForImportStep implements ILastJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportRecord> {
+public class WriteBundleForImportStep
+		implements ILastJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportRecord> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(WriteBundleForImportStep.class);
 
@@ -56,9 +56,9 @@ public class WriteBundleForImportStep implements ILastJobStepWorker<Batch2BulkIm
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<Batch2BulkImportPullJobParameters, BulkImportRecord> theStepExecutionDetails,
-		@Nonnull IJobDataSink<VoidModel> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<Batch2BulkImportPullJobParameters, BulkImportRecord> theStepExecutionDetails,
+			@Nonnull IJobDataSink<VoidModel> theDataSink)
+			throws JobExecutionFailedException {
 
 		BulkImportRecord record = theStepExecutionDetails.getData();
 
@@ -69,12 +69,7 @@ public class WriteBundleForImportStep implements ILastJobStepWorker<Batch2BulkIm
 		int lineIndex = record.getLineIndex();
 		String jobId = theStepExecutionDetails.getParameters().getJobId();
 
-		ourLog.info(
-			"Beginning bulk import write row {} for Job[{}] FileIndex[{}]",
-			lineIndex,
-			jobId,
-			fileIndex
-		);
+		ourLog.info("Beginning bulk import write row {} for Job[{}] FileIndex[{}]", lineIndex, jobId, fileIndex);
 
 		IParser parser = myFhirContext.newJsonParser();
 
@@ -92,12 +87,7 @@ public class WriteBundleForImportStep implements ILastJobStepWorker<Batch2BulkIm
 				break;
 		}
 
-		ourLog.info(
-			"Completed bulk import write for row {} Job[{}] FileIndex[{}]",
-			lineIndex,
-			jobId,
-			fileIndex
-		);
+		ourLog.info("Completed bulk import write for row {} Job[{}] FileIndex[{}]", lineIndex, jobId, fileIndex);
 		return RunOutcome.SUCCESS;
 	}
 }

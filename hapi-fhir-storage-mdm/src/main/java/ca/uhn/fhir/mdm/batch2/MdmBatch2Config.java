@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.batch2;
 
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.jobs.config.BatchCommonCtx;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
@@ -34,15 +35,13 @@ import static ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx.MDM_CLEAR_JOB_BEAN_NAM
 import static ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx.MDM_SUBMIT_JOB_BEAN_NAME;
 
 @Configuration
-@Import({
-	MdmClearAppCtx.class,
-	MdmSubmitAppCtx.class
-})
+@Import({MdmClearAppCtx.class, MdmSubmitAppCtx.class, BatchCommonCtx.class})
 public class MdmBatch2Config {
 	@Bean
-	MdmJobDefinitionLoader mdmJobDefinitionLoader(JobDefinitionRegistry theJobDefinitionRegistry,
-																 @Qualifier(MDM_CLEAR_JOB_BEAN_NAME)  JobDefinition<MdmClearJobParameters> theClearJobDefinition,
-																 @Qualifier(MDM_SUBMIT_JOB_BEAN_NAME) JobDefinition<MdmSubmitJobParameters> theSubmitJobDefinition) {
+	MdmJobDefinitionLoader mdmJobDefinitionLoader(
+			JobDefinitionRegistry theJobDefinitionRegistry,
+			@Qualifier(MDM_CLEAR_JOB_BEAN_NAME) JobDefinition<MdmClearJobParameters> theClearJobDefinition,
+			@Qualifier(MDM_SUBMIT_JOB_BEAN_NAME) JobDefinition<MdmSubmitJobParameters> theSubmitJobDefinition) {
 		return new MdmJobDefinitionLoader(theJobDefinitionRegistry, theClearJobDefinition, theSubmitJobDefinition);
 	}
 }

@@ -1,0 +1,8 @@
+---
+type: add
+issue: 5058
+title: "Added infrastructure to allow consumers to define
+   MDM block rules based on fhir path and specific values.
+   To utilize this feature, an IBlockListRuleProvider must be
+   wired up with the required rules json.
+"

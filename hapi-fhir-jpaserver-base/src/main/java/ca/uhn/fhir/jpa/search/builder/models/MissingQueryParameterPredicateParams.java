@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,10 +42,11 @@ public class MissingQueryParameterPredicateParams {
 	 */
 	private RequestPartitionId myRequestPartitionId;
 
-	public MissingQueryParameterPredicateParams(ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder theResourceTablePredicateBuilder,
-															  boolean theTheMissing,
-															  String theParamName,
-															  ca.uhn.fhir.interceptor.model.RequestPartitionId theRequestPartitionId) {
+	public MissingQueryParameterPredicateParams(
+			ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder theResourceTablePredicateBuilder,
+			boolean theTheMissing,
+			String theParamName,
+			ca.uhn.fhir.interceptor.model.RequestPartitionId theRequestPartitionId) {
 		myResourceTablePredicateBuilder = theResourceTablePredicateBuilder;
 		myIsMissing = theTheMissing;
 		myParamName = theParamName;

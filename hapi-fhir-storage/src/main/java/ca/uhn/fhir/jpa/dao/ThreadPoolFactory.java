@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import org.springframework.core.task.AsyncTaskExecutor;
  */
 public class ThreadPoolFactory {
 
-	public AsyncTaskExecutor newThreadPool(Integer theBundleBatchPoolSize, Integer theBundleBatchMaxPoolSize, String theThreadPrefix) {
+	public AsyncTaskExecutor newThreadPool(
+			Integer theBundleBatchPoolSize, Integer theBundleBatchMaxPoolSize, String theThreadPrefix) {
 		return ThreadPoolUtil.newThreadPool(theBundleBatchPoolSize, theBundleBatchMaxPoolSize, theThreadPrefix);
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@
 package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -32,6 +32,11 @@ import java.util.List;
  * An empty resource pid list
  */
 public class EmptyResourcePidList implements IResourcePidList {
+	@Override
+	public RequestPartitionId getRequestPartitionId() {
+		return null;
+	}
+
 	@Override
 	public Date getLastDate() {
 		return null;
@@ -50,7 +55,8 @@ public class EmptyResourcePidList implements IResourcePidList {
 
 	@Override
 	public String getResourceType(int i) {
-		throw new ArrayIndexOutOfBoundsException(Msg.code(2095) + "Attempting to get resource type from an empty resource pid list");
+		throw new ArrayIndexOutOfBoundsException(
+				Msg.code(2095) + "Attempting to get resource type from an empty resource pid list");
 	}
 
 	@Override

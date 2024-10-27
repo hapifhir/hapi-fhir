@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -65,8 +66,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
 	 */
-	public static final ResourceMetadataKeyEnum<IPrimitiveType<Date>> DELETED_AT = new ResourceMetadataKeyEnum<>("DELETED_AT", IPrimitiveType.class) {
-	};
+	public static final ResourceMetadataKeyEnum<IPrimitiveType<Date>> DELETED_AT =
+			new ResourceMetadataKeyEnum<>("DELETED_AT", IPrimitiveType.class) {};
 	/**
 	 * If present and populated with a {@link BundleEntrySearchModeEnum}, contains the "bundle entry search mode", which is the value of the status field in the Bundle entry containing this resource.
 	 * The value for this key corresponds to field <code>Bundle.entry.search.mode</code>. This value can be set to provide a status value of "include" for included resources being returned by a
@@ -78,8 +79,17 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * Values for this key are of type <b>{@link BundleEntrySearchModeEnum}</b>
 	 * </p>
 	 */
-	public static final ResourceMetadataKeyEnum<BundleEntrySearchModeEnum> ENTRY_SEARCH_MODE = new ResourceMetadataKeyEnum<>("ENTRY_SEARCH_MODE", BundleEntrySearchModeEnum.class) {
-	};
+	public static final ResourceMetadataKeyEnum<BundleEntrySearchModeEnum> ENTRY_SEARCH_MODE =
+			new ResourceMetadataKeyEnum<>("ENTRY_SEARCH_MODE", BundleEntrySearchModeEnum.class) {};
+	/**
+	 * If present and populated with a decimal value, contains the "bundle entry search score", which is the value of the status field in the Bundle entry containing this resource.
+	 * The value for this key corresponds to field <code>Bundle.entry.search.score</code>. This value represents the search ranking score, where 1.0 is relevant and 0.0 is irrelevant.
+	 * <p>
+	 * Note that status is only used in FHIR DSTU2 and later.
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<BigDecimal> ENTRY_SEARCH_SCORE =
+			new ResourceMetadataKeyEnum<>("ENTRY_SEARCH_SCORE", BigDecimal.class) {};
 	/**
 	 * If present and populated with a {@link BundleEntryTransactionMethodEnum}, contains the "bundle entry transaction operation", which is the value of the status field in the Bundle entry
 	 * containing this resource. The value for this key corresponds to field <code>Bundle.entry.transaction.operation</code>. This value can be set in resources being transmitted to a server to
@@ -92,8 +102,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * Values for this key are of type <b>{@link BundleEntryTransactionMethodEnum}</b>
 	 * </p>
 	 */
-	public static final ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum> ENTRY_TRANSACTION_METHOD = new ResourceMetadataKeyEnum<>("ENTRY_TRANSACTION_OPERATION", BundleEntryTransactionMethodEnum.class) {
-	};
+	public static final ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum> ENTRY_TRANSACTION_METHOD =
+			new ResourceMetadataKeyEnum<>("ENTRY_TRANSACTION_OPERATION", BundleEntryTransactionMethodEnum.class) {};
 	/**
 	 * The value for this key represents a {@link List} of profile IDs that this resource claims to conform to.
 	 * <p>
@@ -101,8 +111,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * Values for this key are of type <b>List&lt;IdDt&gt;</b>. Note that the returned list is <i>unmodifiable</i>, so you need to create a new list and call <code>put</code> to change its value.
 	 * </p>
 	 */
-	public static final ResourceMetadataKeyEnum<List<IdDt>> PROFILES = new ResourceMetadataKeyEnum<>("PROFILES", List.class) {
-	};
+	public static final ResourceMetadataKeyEnum<List<IdDt>> PROFILES =
+			new ResourceMetadataKeyEnum<>("PROFILES", List.class) {};
 	/**
 	 * The value for this key is the bundle entry <b>Published</b> time. This is defined by FHIR as "Time resource copied into the feed", which is generally best left to the current time.
 	 * <p>
@@ -114,10 +124,11 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 *
 	 * @see InstantDt
 	 */
-	public static final ResourceMetadataKeyEnum<InstantDt> PUBLISHED = new ResourceMetadataKeyEnum<>("PUBLISHED", InstantDt.class) {
-	};
-	public static final ResourceMetadataKeyEnum<List<BaseCodingDt>> SECURITY_LABELS = new ResourceMetadataKeyEnum<>("SECURITY_LABELS", List.class) {
-	};
+	public static final ResourceMetadataKeyEnum<InstantDt> PUBLISHED =
+			new ResourceMetadataKeyEnum<>("PUBLISHED", InstantDt.class) {};
+
+	public static final ResourceMetadataKeyEnum<List<BaseCodingDt>> SECURITY_LABELS =
+			new ResourceMetadataKeyEnum<>("SECURITY_LABELS", List.class) {};
 	/**
 	 * The value for this key is the list of tags associated with this resource
 	 * <p>
@@ -126,8 +137,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 *
 	 * @see TagList
 	 */
-	public static final ResourceMetadataKeyEnum<TagList> TAG_LIST = new ResourceMetadataKeyEnum<>("TAG_LIST", TagList.class) {
-	};
+	public static final ResourceMetadataKeyEnum<TagList> TAG_LIST =
+			new ResourceMetadataKeyEnum<>("TAG_LIST", TagList.class) {};
 	/**
 	 * The value for this key is the bundle entry <b>Updated</b> time. This is defined by FHIR as "Last Updated for resource". This value is also used for populating the "Last-Modified" header in the
 	 * case of methods that return a single resource (read, vread, etc.)
@@ -137,8 +148,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 *
 	 * @see InstantDt
 	 */
-	public static final ResourceMetadataKeyEnum<InstantDt> UPDATED = new ResourceMetadataKeyEnum<>("UPDATED", InstantDt.class) {
-	};
+	public static final ResourceMetadataKeyEnum<InstantDt> UPDATED =
+			new ResourceMetadataKeyEnum<>("UPDATED", InstantDt.class) {};
 	/**
 	 * The value for this key is the version ID of the resource object.
 	 * <p>
@@ -148,8 +159,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * @deprecated The {@link IResource#getId()} resource ID will now be populated with the version ID via the {@link IdDt#getVersionIdPart()} method
 	 */
 	@Deprecated
-	public static final ResourceMetadataKeyEnum<String> VERSION = new ResourceMetadataKeyEnum<>("VERSION", String.class) {
-	};
+	public static final ResourceMetadataKeyEnum<String> VERSION =
+			new ResourceMetadataKeyEnum<>("VERSION", String.class) {};
 	/**
 	 * The value for this key is the version ID of the resource object.
 	 * <p>
@@ -159,8 +170,9 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * @deprecated The {@link IResource#getId()} resource ID will now be populated with the version ID via the {@link IdDt#getVersionIdPart()} method
 	 */
 	@Deprecated
-	public static final ResourceMetadataKeyEnum<IdDt> VERSION_ID = new ResourceMetadataKeyEnum<>("VERSION_ID", IdDt.class) {
-	};
+	public static final ResourceMetadataKeyEnum<IdDt> VERSION_ID =
+			new ResourceMetadataKeyEnum<>("VERSION_ID", IdDt.class) {};
+
 	private static final long serialVersionUID = 1L;
 	private final String myValue;
 	private final Class<?> myType;
@@ -180,9 +192,10 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		}
 
 		if (retVal != null && !myType.isAssignableFrom(retVal.getClass())) {
-			throw new InternalErrorException(Msg.code(1890) + "Found an object of type '" + retVal.getClass().getCanonicalName()
-				+ "' in resource metadata for key " + this.name() + " - Expected "
-				+ myType.getCanonicalName());
+			throw new InternalErrorException(Msg.code(1890) + "Found an object of type '"
+					+ retVal.getClass().getCanonicalName()
+					+ "' in resource metadata for key " + this.name() + " - Expected "
+					+ myType.getCanonicalName());
 		}
 
 		//noinspection unchecked
@@ -191,9 +204,10 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 
 	public void put(IBaseResource theResource, T theValue) {
 		if (theValue != null && !myType.isAssignableFrom(theValue.getClass())) {
-			throw new InternalErrorException(Msg.code(1891) + "Can not put object of type '" + theValue.getClass().getCanonicalName()
-				+ "' in resource metadata for key " + this.name() + " - Expected "
-				+ myType.getCanonicalName());
+			throw new InternalErrorException(Msg.code(1891) + "Can not put object of type '"
+					+ theValue.getClass().getCanonicalName()
+					+ "' in resource metadata for key " + this.name() + " - Expected "
+					+ myType.getCanonicalName());
 		}
 
 		if (theResource instanceof IAnyResource) {
@@ -205,12 +219,9 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		ResourceMetadataKeyEnum<?> other = (ResourceMetadataKeyEnum<?>) obj;
 		if (myValue == null) {
 			return other.myValue == null;

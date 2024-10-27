@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR OkHttp Client
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,23 @@
 package ca.uhn.fhir.okhttp.client;
 
 import ca.uhn.fhir.i18n.Msg;
-import java.io.*;
-import java.util.List;
-import java.util.Map;
-
-import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
-import ca.uhn.fhir.util.StopWatch;
-import org.apache.commons.io.IOUtils;
-
 import ca.uhn.fhir.rest.api.Constants;
-
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.StopWatch;
 import okhttp3.MediaType;
 import okhttp3.Response;
+import org.apache.commons.io.IOUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Wraps an OkHttp {@link Response}
@@ -140,5 +143,4 @@ public class OkHttpRestfulResponse extends BaseHttpResponse implements IHttpResp
 	private MediaType typeAndSubtypeOnly(MediaType input) {
 		return MediaType.parse(input.type() + "/" + input.subtype());
 	}
-
 }

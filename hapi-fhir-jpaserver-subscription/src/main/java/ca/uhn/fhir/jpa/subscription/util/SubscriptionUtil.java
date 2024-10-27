@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.subscription.util;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 
 /**
  * Utilities for working with the subscription resource
@@ -31,9 +31,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 public class SubscriptionUtil {
 
 	public static RequestDetails createRequestDetailForPartitionedRequest(CanonicalSubscription theSubscription) {
-		RequestPartitionId requestPartitionId = new PartitionablePartitionId(theSubscription.getRequestPartitionId(), null).toPartitionId();
+		RequestPartitionId requestPartitionId =
+				new PartitionablePartitionId(theSubscription.getRequestPartitionId(), null).toPartitionId();
 
-		if (theSubscription.getCrossPartitionEnabled()) {
+		if (theSubscription.isCrossPartitionEnabled()) {
 			requestPartitionId = RequestPartitionId.allPartitions();
 		}
 

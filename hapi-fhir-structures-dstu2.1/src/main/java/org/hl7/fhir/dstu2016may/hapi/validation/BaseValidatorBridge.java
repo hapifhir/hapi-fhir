@@ -1,9 +1,11 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
-import org.hl7.fhir.utilities.validation.ValidationMessage;
+import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.validation.*;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import java.util.List;
 
@@ -30,7 +32,8 @@ abstract class BaseValidatorBridge implements IValidatorModule {
 			hapiMessage.setLocationString(riMessage.getLocation());
 			hapiMessage.setMessage(riMessage.getMessage());
 			if (riMessage.getLevel() != null) {
-				hapiMessage.setSeverity(ResultSeverityEnum.fromCode(riMessage.getLevel().toCode()));
+				hapiMessage.setSeverity(
+						ResultSeverityEnum.fromCode(riMessage.getLevel().toCode()));
 			}
 			theCtx.addValidationMessage(hapiMessage);
 		}
@@ -42,5 +45,4 @@ abstract class BaseValidatorBridge implements IValidatorModule {
 	public void validateResource(IValidationContext<IBaseResource> theCtx) {
 		doValidate(theCtx);
 	}
-
 }

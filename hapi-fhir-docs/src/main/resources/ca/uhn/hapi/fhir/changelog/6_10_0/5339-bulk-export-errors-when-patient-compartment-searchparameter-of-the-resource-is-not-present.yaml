@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5339
+jira: SMILE-7236
+title: "Previously, Bulk Export will error when processing a resource if the patient compartment SearchParameter of that resource is not present.
+This has been fixed, the new behaviour is to ignore such resources."

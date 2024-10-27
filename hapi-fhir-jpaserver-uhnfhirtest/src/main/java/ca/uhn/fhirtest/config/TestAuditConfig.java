@@ -12,6 +12,8 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManagerFactory;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
@@ -26,11 +28,9 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 
 @Configuration
 @Import({CommonConfig.class, JpaR4Config.class, HapiJpaConfig.class})
@@ -69,7 +69,6 @@ public class TestAuditConfig {
 		return retVal;
 	}
 
-
 	@Bean(name = "myPersistenceDataSourceR4")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
@@ -83,13 +82,12 @@ public class TestAuditConfig {
 		retVal.setPassword(myDbPassword);
 		TestR5Config.applyCommonDatasourceParams(retVal);
 
-		DataSource dataSource = ProxyDataSourceBuilder
-			.create(retVal)
-//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-			.logSlowQueryBySlf4j(10000, TimeUnit.MILLISECONDS)
-			.afterQuery(new CurrentThreadCaptureQueriesListener())
-			.countQuery()
-			.build();
+		DataSource dataSource = ProxyDataSourceBuilder.create(retVal)
+				//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+				.logSlowQueryBySlf4j(10000, TimeUnit.MILLISECONDS)
+				.afterQuery(new CurrentThreadCaptureQueriesListener())
+				.countQuery()
+				.build();
 
 		return dataSource;
 	}
@@ -103,8 +101,12 @@ public class TestAuditConfig {
 	}
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+			ConfigurableListableBeanFactory theConfigurableListableBeanFactory,
+			FhirContext theFhirContext,
+			JpaStorageSettings theStorageSettings) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(
+				theConfigurableListableBeanFactory, theFhirContext, theStorageSettings);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaAudit");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -120,7 +122,7 @@ public class TestAuditConfig {
 		}
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
-		extraProperties.put("hibernate.hbm2ddl.auto", "update");
+		extraProperties.put("hibernate.hbm2ddl.auto", "none");
 		extraProperties.put("hibernate.jdbc.batch_size", "20");
 		extraProperties.put("hibernate.cache.use_query_cache", "false");
 		extraProperties.put("hibernate.cache.use_second_level_cache", "false");
@@ -152,7 +154,6 @@ public class TestAuditConfig {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
 
-
 	@Bean
 	public OldAuditEventPurgeService oldEventPurgeService() {
 		return new OldAuditEventPurgeService();
@@ -172,7 +173,5 @@ public class TestAuditConfig {
 		public void start() {
 			myDaoRegistry.setSupportedResourceTypes("AuditEvent", "SearchParameter", "Subscription");
 		}
-
 	}
-
 }

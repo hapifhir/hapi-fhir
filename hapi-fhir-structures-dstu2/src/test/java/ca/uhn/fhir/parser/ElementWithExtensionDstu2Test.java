@@ -9,7 +9,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Created by Sébastien Rivière 12/04/2017
@@ -50,9 +50,9 @@ public class ElementWithExtensionDstu2Test {
         ourLog.info(json);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, json);
-        assertEquals(1, patient.getName().get(0).getFamilyFirstRep().getUndeclaredExtensions().size());
-        assertEquals(1, ((StringDt) patient.getUndeclaredExtensionsByUrl("/myExt").get(0).getValue()).getUndeclaredExtensions().size());
-        assertEquals(1, patient.getPetName().getUndeclaredExtensions().size());
+			assertThat(patient.getName().get(0).getFamilyFirstRep().getUndeclaredExtensions()).hasSize(1);
+			assertThat(((StringDt) patient.getUndeclaredExtensionsByUrl("/myExt").get(0).getValue()).getUndeclaredExtensions()).hasSize(1);
+			assertThat(patient.getPetName().getUndeclaredExtensions()).hasSize(1);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class ElementWithExtensionDstu2Test {
         ourLog.info(json);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, json);
-        assertEquals(1, patient.getPetName().getUndeclaredExtensions().size());
+			assertThat(patient.getPetName().getUndeclaredExtensions()).hasSize(1);
     }
 
 
@@ -96,9 +96,9 @@ public class ElementWithExtensionDstu2Test {
         ourLog.info(xml);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, xml);
-        assertEquals(1, patient.getName().get(0).getFamilyFirstRep().getUndeclaredExtensions().size());
-        assertEquals(1, ((StringDt) patient.getUndeclaredExtensionsByUrl("/myExt").get(0).getValue()).getUndeclaredExtensions().size());
-        assertEquals(1, patient.getPetName().getUndeclaredExtensions().size());
+			assertThat(patient.getName().get(0).getFamilyFirstRep().getUndeclaredExtensions()).hasSize(1);
+			assertThat(((StringDt) patient.getUndeclaredExtensionsByUrl("/myExt").get(0).getValue()).getUndeclaredExtensions()).hasSize(1);
+			assertThat(patient.getPetName().getUndeclaredExtensions()).hasSize(1);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class ElementWithExtensionDstu2Test {
         ourLog.info(xml);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, xml);
-        assertEquals(1, patient.getPetName().getUndeclaredExtensions().size());
+			assertThat(patient.getPetName().getUndeclaredExtensions()).hasSize(1);
     }
 
     @Test
@@ -126,7 +126,7 @@ public class ElementWithExtensionDstu2Test {
         ourLog.info(json);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, json);
-        assertEquals(1, patient.getId().getUndeclaredExtensions().size());
+			assertThat(patient.getId().getUndeclaredExtensions()).hasSize(1);
     }
 
 
@@ -142,7 +142,7 @@ public class ElementWithExtensionDstu2Test {
         ourLog.info(xml);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, xml);
-        assertEquals(1, patient.getId().getUndeclaredExtensions().size());
+			assertThat(patient.getId().getUndeclaredExtensions()).hasSize(1);
     }
 
     @Test
@@ -157,7 +157,7 @@ public class ElementWithExtensionDstu2Test {
         ourLog.info(json);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, json);
-        assertEquals(1, patient.getCustomId().getUndeclaredExtensions().size());
+			assertThat(patient.getCustomId().getUndeclaredExtensions()).hasSize(1);
     }
 
     @Test
@@ -171,7 +171,7 @@ public class ElementWithExtensionDstu2Test {
         ourLog.info(json);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, json);
-        assertEquals(1, patient.getCustomId().getUndeclaredExtensions().size());
+			assertThat(patient.getCustomId().getUndeclaredExtensions()).hasSize(1);
     }
 
     @Test
@@ -186,7 +186,7 @@ public class ElementWithExtensionDstu2Test {
         ourLog.info(xml);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, xml);
-        assertEquals(1, patient.getCustomId().getUndeclaredExtensions().size());
+			assertThat(patient.getCustomId().getUndeclaredExtensions()).hasSize(1);
     }
 
     @Test
@@ -200,7 +200,7 @@ public class ElementWithExtensionDstu2Test {
         ourLog.info(xml);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, xml);
-        assertEquals(1, patient.getCustomId().getUndeclaredExtensions().size());
+			assertThat(patient.getCustomId().getUndeclaredExtensions()).hasSize(1);
     }
 }
 

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5205
+title: "Previously, uploading a large vocabulary file (like Loinc) through the upload-external-code-system command would
+return an error.  The issue has been fixed."

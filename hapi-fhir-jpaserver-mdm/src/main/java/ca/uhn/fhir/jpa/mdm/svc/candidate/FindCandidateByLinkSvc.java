@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 			if (oLink.isPresent()) {
 				IResourcePersistentId goldenResourcePid = oLink.get().getGoldenResourcePersistenceId();
 				ourLog.debug("Resource previously linked. Using existing link.");
-					retval.add(new MatchedGoldenResourceCandidate(goldenResourcePid, oLink.get()));
+				retval.add(new MatchedGoldenResourceCandidate(goldenResourcePid, oLink.get()));
 			}
 		}
 		return retval;

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -39,29 +39,27 @@ class RuleRequireProfileDeclaration extends BaseTypedRule {
 
 	@Nonnull
 	@Override
-	public IRepositoryValidatingRule.RuleEvaluation evaluate(RequestDetails theRequestDetails, @Nonnull IBaseResource theResource) {
-		Optional<String> matchingProfile = theResource
-			.getMeta()
-			.getProfile()
-			.stream()
-			.map(t -> t.getValueAsString())
-			.filter(t -> myProfileOptions.contains(t))
-			.findFirst();
+	public IRepositoryValidatingRule.RuleEvaluation evaluate(
+			RequestDetails theRequestDetails, @Nonnull IBaseResource theResource) {
+		Optional<String> matchingProfile = theResource.getMeta().getProfile().stream()
+				.map(t -> t.getValueAsString())
+				.filter(t -> myProfileOptions.contains(t))
+				.findFirst();
 		if (matchingProfile.isPresent()) {
 			return IRepositoryValidatingRule.RuleEvaluation.forSuccess(this);
 		}
-		String msg = getFhirContext().getLocalizer().getMessage(RuleRequireProfileDeclaration.class, "noMatchingProfile", getResourceType(), myProfileOptions);
+		String msg = getFhirContext()
+				.getLocalizer()
+				.getMessage(
+						RuleRequireProfileDeclaration.class, "noMatchingProfile", getResourceType(), myProfileOptions);
 		return IRepositoryValidatingRule.RuleEvaluation.forFailure(this, msg);
 	}
-
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("resourceType", getResourceType())
-			.append("profiles", myProfileOptions)
-			.toString();
+				.append("resourceType", getResourceType())
+				.append("profiles", myProfileOptions)
+				.toString();
 	}
-
-
 }

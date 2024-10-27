@@ -1,8 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -28,7 +32,7 @@ import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.exparity.hamcrest.date.DateMatchers;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -39,44 +43,50 @@ import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SampledData;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.support.TransactionTemplate;
 
-import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -91,7 +101,6 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myStorageSettings.setIndexOnContainedResources(new JpaStorageSettings().isIndexOnContainedResources());
 		myStorageSettings.setIndexOnContainedResourcesRecursively(new JpaStorageSettings().isIndexOnContainedResourcesRecursively());
-		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 	}
 
 	@Test
@@ -139,7 +148,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 				.map(ResourceLink::getSourcePath)
 				.sorted()
 				.collect(Collectors.toList());
-			assertThat(paths.toString(), paths, contains("Observation.subject", "Observation.subject.where(resolve() is Patient)"));
+			assertThat(paths).as(paths.toString()).containsExactly("Observation.subject", "Observation.subject.where(resolve() is Patient)");
 		});
 
 		myCaptureQueriesListener.clear();
@@ -347,14 +356,14 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	public void testConditionalCreateWithPlusInUrl() {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue("20210427133226.444+0800");
-		DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444+0800", new SystemRequestDetails());
+		DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", new SystemRequestDetails());
 		assertTrue(outcome.getCreated());
 
 		logAllTokenIndexes();
 		myCaptureQueriesListener.clear();
 		obs = new Observation();
 		obs.addIdentifier().setValue("20210427133226.444+0800");
-		outcome = myObservationDao.create(obs, "identifier=20210427133226.444+0800", new SystemRequestDetails());
+		outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", new SystemRequestDetails());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertFalse(outcome.getCreated());
 	}
@@ -403,7 +412,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	public void testCreateResource_withConditionalCreate_willAddSearchUrlEntity(){
 		// given
 		String identifierCode = "20210427133226.4440+800";
-		String matchUrl = "identifier=" + identifierCode;
+		String matchUrl = "identifier=" + identifierCode.replace("+", "%2B");
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue(identifierCode);
 		// when
@@ -411,19 +420,22 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		// then
 		Long expectedResId = outcome.getId().getIdPartAsLong();
-		String expectedNormalizedMatchUrl = obs.fhirType() + "?" + StringUtils.replace(matchUrl, "+", "%2B");
+		String expectedNormalizedMatchUrl = obs.fhirType() + "?" + matchUrl;
 
 		assertTrue(outcome.getCreated());
 		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
-		assertThat(searchUrlEntity, is(notNullValue()) );
-		assertThat(searchUrlEntity.getResourcePid(), equalTo(expectedResId));
-		assertThat(searchUrlEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
-		assertThat(searchUrlEntity.getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
+		assertNotNull(searchUrlEntity);
+		assertEquals(expectedResId, searchUrlEntity.getResourcePid());
+		Instant now = Instant.now();
+		assertThat(searchUrlEntity.getCreatedTime())
+			.as("Check that the creation time of the URL is within the last second")
+			.isBetween(now.minus(1, ChronoUnit.SECONDS), now);
+		assertEquals(expectedNormalizedMatchUrl, searchUrlEntity.getSearchUrl());
 
 	}
 
 	@Test
-	public void testCreateResourceWithKoreanText() throws IOException {
+	public void testCreateResourceWithKoreanText() {
 		String input = ClasspathUtil.loadResource("/r4/bug832-korean-text.xml");
 		Patient p = myFhirContext.newXmlParser().parseResource(Patient.class, input);
 		String id = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
@@ -431,22 +443,22 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_FAMILY, new StringParam("김"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(id);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("준"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(id);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("준수"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(id);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("수")); // rightmost character only
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).isEmpty();
 	}
 
 	@Test
@@ -457,7 +469,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		IIdType id = myPatientDao.create(p).getId().toUnqualified();
 
-		assertThat(id.getIdPart(), matchesPattern("[a-z0-9]{8}-.*"));
+		assertThat(id.getIdPart()).matches("[a-z0-9]{8}-.*");
 
 		p = myPatientDao.read(id);
 		assertEquals("FAM", p.getNameFirstRep().getFamily());
@@ -473,7 +485,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		IIdType id = myPatientDao.create(p).getId().toUnqualified();
 
-		assertThat(id.getIdPart(), matchesPattern("[a-z0-9]{8}-.*"));
+		assertThat(id.getIdPart()).matches("[a-z0-9]{8}-.*");
 
 		p = myPatientDao.read(id);
 		assertEquals("FAM", p.getNameFirstRep().getFamily());
@@ -709,8 +721,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertThat(output.getEntry().get(0).getResponse().getLocation(), matchesPattern("Organization/[a-z0-9]{8}-.*"));
-		assertThat(output.getEntry().get(1).getResponse().getLocation(), matchesPattern("Patient/[a-z0-9]{8}-.*"));
+		assertThat(output.getEntry().get(0).getResponse().getLocation()).matches("Organization/[a-z0-9]{8}-.*");
+		assertThat(output.getEntry().get(1).getResponse().getLocation()).matches("Patient/[a-z0-9]{8}-.*");
 
 
 	}
@@ -726,7 +738,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Input: {}", encoded);
-		assertThat(encoded, containsString("#1"));
+		assertThat(encoded).contains("#1");
 
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
@@ -734,11 +746,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Output: {}", encoded);
-		assertThat(encoded, containsString("#1"));
+		assertThat(encoded).contains("#1");
 
 		Organization org = (Organization) p.getManagingOrganization().getResource();
 		assertEquals("#1", org.getId());
-		assertEquals(1, org.getMeta().getTag().size());
+		assertThat(org.getMeta().getTag()).hasSize(1);
 
 	}
 
@@ -799,7 +811,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("0.012"))
 			.setUnits("m")
 		);
-		assertEquals(1, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).hasSize(1);
 	}
 
 	@Test
@@ -850,9 +862,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY_NRML t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY_NRML t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
+		assertThat(ids).hasSize(1);
 
 		// Try with non-normalized value
 		myCaptureQueriesListener.clear();
@@ -863,9 +875,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY_NRML t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY_NRML t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
+		assertThat(ids).hasSize(1);
 
 		// Try with no units value
 		myCaptureQueriesListener.clear();
@@ -874,9 +886,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
+		assertThat(ids).hasSize(1);
 	}
 
 	@Test
@@ -925,7 +937,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		List<IBaseResource> resources = found.getResources(0, found.sizeOrThrowNpe());
 
-		assertEquals(1, ids.size());
+		assertThat(ids).hasSize(1);
 
 		ourLog.debug("Observation2: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 
@@ -968,7 +980,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("957412345"))
 			.setUnits("g.m-3")
 		);
-		assertEquals(1, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).hasSize(1);
 	}
 
 	@Test
@@ -1011,9 +1023,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '95.7412345'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '95.7412345'");
+		assertThat(ids).hasSize(1);
 
 	}
 
@@ -1066,9 +1078,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
-		assertEquals(0, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
+		assertThat(ids).isEmpty();
 
 		// Try with non-normalized value
 		myCaptureQueriesListener.clear();
@@ -1079,9 +1091,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
+		assertThat(ids).hasSize(1);
 
 		// Try with no units value
 		myCaptureQueriesListener.clear();
@@ -1090,9 +1102,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
+		assertThat(ids).hasSize(1);
 	}
 
 	@Test
@@ -1196,9 +1208,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
-		assertEquals(0, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
+		assertThat(ids).isEmpty();
 
 		// Try with non-normalized value
 		myCaptureQueriesListener.clear();
@@ -1209,9 +1221,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
+		assertThat(ids).hasSize(1);
 
 		// Try with no units value
 		myCaptureQueriesListener.clear();
@@ -1220,9 +1232,210 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
+		assertThat(ids).hasSize(1);
 	}
 
+	@Nested
+	class ConditionalCreates {
+		private static final String SYSTEM = "http://tempuri.org";
+		private static final String VALUE_1 = "1";
+		private static final String VALUE_2 = "2";
+
+		private final Task myTask1 = new Task()
+			.setStatus(Task.TaskStatus.DRAFT)
+			.setIntent(Task.TaskIntent.UNKNOWN)
+			.addIdentifier(new Identifier()
+				.setSystem(SYSTEM)
+				.setValue(VALUE_1));
+
+		private final Task myTask2 = new Task()
+			.setStatus(Task.TaskStatus.DRAFT)
+			.setIntent(Task.TaskIntent.UNKNOWN)
+			.addIdentifier(new Identifier()
+				.setSystem(SYSTEM)
+				.setValue(VALUE_2))
+			.addBasedOn(new Reference().setReference("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"));
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		public void testConditionalCreateDependsOnPOSTedResource(boolean theHasQuestionMark) {
+			final IFhirResourceDao<Task> taskDao = getTaskDao();
+			taskDao.create(myTask1, new SystemRequestDetails());
+
+			final List<Task> allTasksPreBundle = searchAllTasks();
+			assertEquals(1, allTasksPreBundle.size());
+			final Task taskPreBundle = allTasksPreBundle.get(0);
+			assertEquals(VALUE_1, taskPreBundle.getIdentifier().get(0).getValue());
+			assertEquals(SYSTEM, taskPreBundle.getIdentifier().get(0).getSystem());
+
+			final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+
+			final String entryConditionalTemplate = "%sidentifier=http://tempuri.org|1";
+			final String matchUrl = String.format(entryConditionalTemplate, theHasQuestionMark ? "?" : "");
+
+			bundleBuilder.addTransactionCreateEntry(myTask2)
+				.conditional(matchUrl);
+
+			final List<Bundle.BundleEntryComponent> responseEntries = sendBundleAndGetResponse(bundleBuilder.getBundle());
+
+			assertEquals(1, responseEntries.size());
+
+			final Bundle.BundleEntryComponent bundleEntry = responseEntries.get(0);
+
+			assertEquals("200 OK", bundleEntry.getResponse().getStatus());
+
+			final List<Task> allTasksPostBundle = searchAllTasks();
+			assertEquals(1, allTasksPostBundle.size());
+			final Task taskPostBundle = allTasksPostBundle.get(0);
+			assertEquals(VALUE_1, taskPostBundle.getIdentifier().get(0).getValue());
+			assertEquals(SYSTEM, taskPostBundle.getIdentifier().get(0).getSystem());
+		}
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		public void testConditionalCreateDependsOnFirstEntryExisting(boolean theHasQuestionMark) {
+			final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+
+			final String firstMatchUrl = "identifier=http://tempuri.org|1";
+			final String secondEntryConditionalTemplate = "%sidentifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea";
+			final String secondMatchUrl = String.format(secondEntryConditionalTemplate, theHasQuestionMark ? "?" : "");
+
+			bundleBuilder.addTransactionCreateEntry(myTask1, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
+				.conditional(firstMatchUrl);
+
+			bundleBuilder.addTransactionCreateEntry(myTask2)
+				.conditional(secondMatchUrl);
+
+			final IBaseBundle requestBundle = bundleBuilder.getBundle();
+			assertInstanceOf(Bundle.class, requestBundle);
+
+			final List<Bundle.BundleEntryComponent> responseEntries = sendBundleAndGetResponse(requestBundle);
+
+			assertEquals(2, responseEntries.size());
+			assertEquals(Set.of("201 Created"), responseEntries.stream().map(Bundle.BundleEntryComponent::getResponse).map(Bundle.BundleEntryResponseComponent::getStatus).collect(Collectors.toUnmodifiableSet()));
+
+			final List<Task> allTasksPostBundle = searchAllTasks();
+			assertEquals(2, allTasksPostBundle.size());
+			final Task taskPostBundle1 = allTasksPostBundle.get(0);
+			assertEquals(VALUE_1, taskPostBundle1.getIdentifier().get(0).getValue());
+			assertEquals(SYSTEM, taskPostBundle1.getIdentifier().get(0).getSystem());
+			final Task taskPostBundle2 = allTasksPostBundle.get(1);
+			assertEquals(VALUE_2, taskPostBundle2.getIdentifier().get(0).getValue());
+			assertEquals(SYSTEM, taskPostBundle2.getIdentifier().get(0).getSystem());
+
+			final List<Reference> task2BasedOn = taskPostBundle2.getBasedOn();
+			assertEquals(1, task2BasedOn.size());
+			final Reference task2BasedOnReference = task2BasedOn.get(0);
+			assertEquals(taskPostBundle1.getIdElement().toUnqualifiedVersionless().asStringValue(), task2BasedOnReference.getReference());
+
+			assertRemainingTasks(myTask1, myTask2);
+
+			deleteExpunge(myTask2);
+			assertRemainingTasks(myTask1);
+
+			deleteExpunge(myTask1);
+			assertRemainingTasks();
+		}
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		void conditionalCreateSameIdentifierCrossPartition(boolean theIsSearchUrlDuplicateAcrossPartitionsEnabled) {
+			myPartitionSettings.setPartitioningEnabled(true);
+			myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(theIsSearchUrlDuplicateAcrossPartitionsEnabled);
+
+			final PartitionEntity partitionEntity1 = new PartitionEntity();
+			partitionEntity1.setId(1);
+			partitionEntity1.setName("Partition-A");
+			myPartitionDao.save(partitionEntity1);
+
+			final PartitionEntity partitionEntity2 = new PartitionEntity();
+			partitionEntity2.setId(2);
+			partitionEntity2.setName("Partition-B");
+			myPartitionDao.save(partitionEntity2);
+
+			final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+			final String matchUrl = "identifier=http://tempuri.org|1";
+			bundleBuilder.addTransactionCreateEntry(myTask1, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
+				.conditional(matchUrl);
+
+			final RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1, LocalDate.now());
+			final RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2, LocalDate.now());
+
+			final List<Bundle.BundleEntryComponent> responseEntries1 = sendBundleAndGetResponse(bundleBuilder.getBundle(), requestPartitionId1);
+			assertEquals(1, responseEntries1.size());
+			final Bundle.BundleEntryComponent bundleEntry1 = responseEntries1.get(0);
+			assertEquals("201 Created", bundleEntry1.getResponse().getStatus());
+
+			if (!theIsSearchUrlDuplicateAcrossPartitionsEnabled) {
+				final IBaseBundle bundle = bundleBuilder.getBundle();
+				assertThatThrownBy(() -> sendBundleAndGetResponse(bundle, requestPartitionId2)).isInstanceOf(ResourceVersionConflictException.class);
+				return;
+			}
+
+			final List<Bundle.BundleEntryComponent> responseEntries2 = sendBundleAndGetResponse(bundleBuilder.getBundle(), requestPartitionId2);
+			assertEquals(1, responseEntries2.size());
+			final Bundle.BundleEntryComponent bundleEntry2 = responseEntries1.get(0);
+			assertEquals("201 Created", bundleEntry2.getResponse().getStatus());
+
+			final List<ResourceSearchUrlEntity> allSearchUrls = myResourceSearchUrlDao.findAll();
+
+			assertThat(allSearchUrls).hasSize(2);
+
+			final String resolvedSearchUrl = "Task?identifier=http%3A%2F%2Ftempuri.org%7C1";
+
+			final ResourceSearchUrlEntity resourceSearchUrlEntity1 = allSearchUrls.get(0);
+			final ResourceSearchUrlEntity resourceSearchUrlEntity2 = allSearchUrls.get(1);
+
+			assertThat(resourceSearchUrlEntity1.getSearchUrl()).isEqualTo(resolvedSearchUrl);
+			assertThat(resourceSearchUrlEntity1.getPartitionId()).isEqualTo(partitionEntity1.getId());
+
+			assertThat(resourceSearchUrlEntity2.getSearchUrl()).isEqualTo(resolvedSearchUrl);
+			assertThat(resourceSearchUrlEntity2.getPartitionId()).isEqualTo(partitionEntity2.getId());
+		}
+
+		private void assertRemainingTasks(Task... theExpectedTasks) {
+			final List<ResourceSearchUrlEntity> searchUrlsPreDelete = myResourceSearchUrlDao.findAll();
+
+			assertEquals(theExpectedTasks.length, searchUrlsPreDelete.size());
+			assertEquals(Arrays.stream(theExpectedTasks).map(Resource::getIdElement).map(IdType::getIdPartAsLong).toList(),
+						 searchUrlsPreDelete.stream().map(ResourceSearchUrlEntity::getResourcePid).toList());
+		}
+
+		private void deleteExpunge(Task theTask) {
+			final JpaPid pidOrThrowException = myIdHelperService.getPidOrThrowException(theTask);
+			final List<JpaPid> pidOrThrowException1 = List.of(pidOrThrowException);
+
+			final TransactionTemplate transactionTemplate = new TransactionTemplate(getTxManager());
+			transactionTemplate.execute(x -> myDeleteExpungeSvc.deleteExpunge(pidOrThrowException1, true, 10));
+		}
+	}
+
+	private List<Bundle.BundleEntryComponent> sendBundleAndGetResponse(IBaseBundle theRequestBundle, RequestPartitionId thePartitionId) {
+		assertThat(theRequestBundle).isInstanceOf(Bundle.class);
+
+		final SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestPartitionId(thePartitionId);
+		return mySystemDao.transaction(requestDetails, (Bundle)theRequestBundle).getEntry();
+	}
+
+	private List<Bundle.BundleEntryComponent> sendBundleAndGetResponse(IBaseBundle theRequestBundle) {
+		assertTrue(theRequestBundle instanceof Bundle);
+
+		return mySystemDao.transaction(new SystemRequestDetails(), (Bundle)theRequestBundle).getEntry();
+	}
+
+	private List<Task> searchAllTasks() {
+		return unsafeCast(getTaskDao().search(SearchParameterMap.newSynchronous(), new SystemRequestDetails()).getAllResources());
+	}
+
+	private IFhirResourceDao<Task> getTaskDao() {
+		return unsafeCast(myDaoRegistry.getResourceDao("Task"));
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T unsafeCast(Object theObject) {
+		return (T)theObject;
+	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@ import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 
-public class DeleteCodeSystemCompletionHandler
-	implements IJobCompletionHandler<TermCodeSystemDeleteJobParameters> {
+public class DeleteCodeSystemCompletionHandler implements IJobCompletionHandler<TermCodeSystemDeleteJobParameters> {
 
 	private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
 

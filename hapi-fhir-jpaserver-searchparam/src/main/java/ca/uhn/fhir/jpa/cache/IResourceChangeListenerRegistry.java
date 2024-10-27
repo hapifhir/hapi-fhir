@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,11 @@ public interface IResourceChangeListenerRegistry {
 	 * @throws IllegalArgumentException if theSearchParamMap cannot be evaluated in-memory
 	 * @return RegisteredResourceChangeListener a handle to the created cache that can be used to manually refresh the cache if required
 	 */
-	IResourceChangeListenerCache registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs);
+	IResourceChangeListenerCache registerResourceResourceChangeListener(
+			String theResourceName,
+			SearchParameterMap theSearchParameterMap,
+			IResourceChangeListener theResourceChangeListener,
+			long theRemoteRefreshIntervalMs);
 
 	/**
 	 * Unregister a listener from this service
@@ -78,7 +82,6 @@ public interface IResourceChangeListenerRegistry {
 	 * caches so their listeners are notified the next time the caches are refreshed.
 	 * @param theResource the resource that changed that might trigger a refresh
 	 */
-
 	void requestRefreshIfWatching(IBaseResource theResource);
 
 	/**

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
+
 import java.util.List;
 
 public interface IAuthRuleFinished {
@@ -55,5 +56,4 @@ public interface IAuthRuleFinished {
 	 * @param theQueryParameters a FHIR query parameter string.  E.g. category=laboratory&date=ge2021
 	 */
 	IAuthRuleFinished withFilterTester(String theQueryParameters);
-
 }

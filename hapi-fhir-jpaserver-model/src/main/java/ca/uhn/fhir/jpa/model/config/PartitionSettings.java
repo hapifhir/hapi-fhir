@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.config;
 
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+
 /**
  * @since 5.0.0
  */
@@ -30,6 +32,36 @@ public class PartitionSettings {
 	private boolean myUnnamedPartitionMode;
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
+	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
+	private boolean myPartitionIdsInPrimaryKeys = false;
+
+	public PartitionSettings() {
+		super();
+	}
+
+	/**
+	 * This flag activates partition IDs in PKs mode, which is newly introduced in HAPI FHIR 8.0.0.
+	 * This mode causes partition IDs to be included in all primary keys, joins, and emitted
+	 * SQL. It also affects the generated schema and migrations. This setting should not be changed
+	 * after the database has been initialized, unless you have performed an appropriate migration.
+	 *
+	 * @since 8.0.0
+	 */
+	public boolean isPartitionIdsInPrimaryKeys() {
+		return myPartitionIdsInPrimaryKeys;
+	}
+
+	/**
+	 * This flag activates partition IDs in PKs mode, which is newly introduced in HAPI FHIR 8.0.0.
+	 * This mode causes partition IDs to be included in all primary keys, joins, and emitted
+	 * SQL. It also affects the generated schema and migrations. This setting should not be changed
+	 * after the database has been initialized, unless you have performed an appropriate migration.
+	 *
+	 * @since 8.0.0
+	 */
+	public void setPartitionIdsInPrimaryKeys(boolean thePartitionIdsInPrimaryKeys) {
+		myPartitionIdsInPrimaryKeys = thePartitionIdsInPrimaryKeys;
+	}
 
 	/**
 	 * Should we always open a new database transaction if the partition context changes
@@ -45,7 +77,8 @@ public class PartitionSettings {
 	 *
 	 * @since 6.6.0
 	 */
-	public void setAlwaysOpenNewTransactionForDifferentPartition(boolean theAlwaysOpenNewTransactionForDifferentPartition) {
+	public void setAlwaysOpenNewTransactionForDifferentPartition(
+			boolean theAlwaysOpenNewTransactionForDifferentPartition) {
 		myAlwaysOpenNewTransactionForDifferentPartition = theAlwaysOpenNewTransactionForDifferentPartition;
 	}
 
@@ -56,6 +89,9 @@ public class PartitionSettings {
 	 * better when using native database partitioning features.
 	 * <p>
 	 * This setting has no effect if partitioning is not enabled via {@link #isPartitioningEnabled()}.
+	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#isIndexStorageOptimized()} is enabled this setting should be set to <code>false</code>.
 	 * </p>
 	 */
 	public boolean isIncludePartitionInSearchHashes() {
@@ -69,6 +105,9 @@ public class PartitionSettings {
 	 * better when using native database partitioning features.
 	 * <p>
 	 * This setting has no effect if partitioning is not enabled via {@link #isPartitioningEnabled()}.
+	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#isIndexStorageOptimized()} is enabled this setting should be set to <code>false</code>.
 	 * </p>
 	 */
 	public PartitionSettings setIncludePartitionInSearchHashes(boolean theIncludePartitionInSearchHashes) {
@@ -158,7 +197,17 @@ public class PartitionSettings {
 	 * If enabled the JPA server will allow unqualified cross partition reference
 	 */
 	public boolean isAllowUnqualifiedCrossPartitionReference() {
-		return myAllowReferencesAcrossPartitions.equals(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		return myAllowReferencesAcrossPartitions.equals(
+				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+	}
+
+	public boolean isConditionalCreateDuplicateIdentifiersEnabled() {
+		return myConditionalCreateDuplicateIdentifiersEnabled;
+	}
+
+	public void setConditionalCreateDuplicateIdentifiersEnabled(
+			boolean theConditionalCreateDuplicateIdentifiersEnabled) {
+		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;
 	}
 
 	public enum CrossPartitionReferenceMode {
@@ -173,7 +222,23 @@ public class PartitionSettings {
 		 * will be managed by the database.
 		 */
 		ALLOWED_UNQUALIFIED,
-
 	}
 
+	public enum BlockPatientCompartmentUpdateMode {
+		/**
+		 * Resource updates which would change resource's patient compartment are blocked.
+		 */
+		ALWAYS,
+
+		/**
+		 * Resource updates which would change resource's patient compartment are blocked
+		 * when Partition Selection Mode is PATIENT_ID
+		 */
+		DEFAULT,
+
+		/**
+		 * Resource updates which would change resource's patient compartment are allowed.
+		 */
+		NEVER,
+	}
 }

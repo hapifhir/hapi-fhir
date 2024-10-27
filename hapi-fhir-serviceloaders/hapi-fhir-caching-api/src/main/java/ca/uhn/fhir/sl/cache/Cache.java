@@ -4,7 +4,7 @@ package ca.uhn.fhir.sl.cache;
  * #%L
  * HAPI FHIR - ServiceLoaders - Caching API
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package ca.uhn.fhir.sl.cache;
  */
 
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 /**
@@ -32,23 +31,23 @@ import java.util.function.Function;
  * Please check their documentation for information in the methods below.
  */
 public interface Cache<K, V> {
-    V getIfPresent(K key);
+	V getIfPresent(K key);
 
-    V get(K key, Function<? super K, ? extends V> mappingFunction);
+	V get(K key, Function<? super K, ? extends V> mappingFunction);
 
-    Map<K, V> getAllPresent(Iterable<? extends K> keys);
+	Map<K, V> getAllPresent(Iterable<? extends K> keys);
 
-    void put(K key, V value);
+	void put(K key, V value);
 
-    void putAll(Map<? extends K, ? extends V> map);
+	void putAll(Map<? extends K, ? extends V> map);
 
-    void invalidate(K key);
+	void invalidate(K key);
 
-    void invalidateAll(Iterable<? extends K> keys);
+	void invalidateAll(Iterable<? extends K> keys);
 
-    void invalidateAll();
+	void invalidateAll();
 
-    long estimatedSize();
+	long estimatedSize();
 
-    void cleanUp();
+	void cleanUp();
 }

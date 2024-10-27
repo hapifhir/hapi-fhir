@@ -1,8 +1,8 @@
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,9 @@
  */
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.base.Strings;
 import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.query.criteria.LiteralHandlingMode;
+import org.hibernate.query.criteria.ValueHandlingMode;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.orm.hibernate5.SpringBeanContainer;
@@ -40,10 +38,11 @@ import java.util.Map;
  */
 public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContainerEntityManagerFactoryBean {
 
-	//https://stackoverflow.com/questions/57902388/how-to-inject-spring-beans-into-the-hibernate-envers-revisionlistener
+	// https://stackoverflow.com/questions/57902388/how-to-inject-spring-beans-into-the-hibernate-envers-revisionlistener
 	ConfigurableListableBeanFactory myConfigurableListableBeanFactory;
 
-	public HapiFhirLocalContainerEntityManagerFactoryBean(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
+	public HapiFhirLocalContainerEntityManagerFactoryBean(
+			ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
 		myConfigurableListableBeanFactory = theConfigurableListableBeanFactory;
 	}
 
@@ -52,12 +51,14 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		Map<String, Object> retVal = super.getJpaPropertyMap();
 
 		// SOMEDAY these defaults can be set in the constructor.  setJpaProperties does a merge.
-		if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {
-			retVal.put(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE, LiteralHandlingMode.BIND);
+		if (!retVal.containsKey(AvailableSettings.CRITERIA_VALUE_HANDLING_MODE)) {
+			retVal.put(AvailableSettings.CRITERIA_VALUE_HANDLING_MODE, ValueHandlingMode.BIND);
 		}
 
 		if (!retVal.containsKey(AvailableSettings.CONNECTION_HANDLING)) {
-			retVal.put(AvailableSettings.CONNECTION_HANDLING, PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
+			retVal.put(
+					AvailableSettings.CONNECTION_HANDLING,
+					PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION);
 		}
 
 		/*
@@ -79,7 +80,8 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		if (!retVal.containsKey(AvailableSettings.BATCH_VERSIONED_DATA)) {
 			retVal.put(AvailableSettings.BATCH_VERSIONED_DATA, "true");
 		}
-		// Why is this here, you ask? LocalContainerEntityManagerFactoryBean actually clobbers the setting hibernate needs
+		// Why is this here, you ask? LocalContainerEntityManagerFactoryBean actually clobbers the setting hibernate
+		// needs
 		// in order to be able to resolve beans, so we add it back in manually here
 		if (!retVal.containsKey(AvailableSettings.BEAN_CONTAINER)) {
 			retVal.put(AvailableSettings.BEAN_CONTAINER, new SpringBeanContainer(myConfigurableListableBeanFactory));
@@ -110,6 +112,4 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 			retVal.put(thePropertyName, String.join(",", listeners));
 		}
 	}
-
-
 }

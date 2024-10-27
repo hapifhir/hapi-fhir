@@ -1,0 +1,214 @@
+{
+	"resourceType": "Bundle",
+	"id": "hello-world-patient-view-bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "PlanDefinition",
+				"id": "hello-world-patient-view",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-recommendationdefinition"
+					]
+				},
+				"url": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view",
+				"identifier": [
+					{
+						"use": "official",
+						"value": "helloworld-patient-view-sample"
+					}
+				],
+				"version": "1.0.0",
+				"name": "HelloWorldPatientView",
+				"title": "Hello World (patient-view)",
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+							"code": "eca-rule",
+							"display": "ECA Rule"
+						}
+					]
+				},
+				"status": "draft",
+				"experimental": true,
+				"date": "2021-05-26T00:00:00-08:00",
+				"publisher": "Alphora",
+				"description": "This PlanDefinition defines a simple Hello World recommendation that triggers on patient-view.",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"version": "3.2.0",
+							"code": "focus",
+							"display": "Clinical Focus"
+						}
+					}
+				],
+				"jurisdiction": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/ValueSet/iso3166-1-3",
+								"version": "3.2.0",
+								"code": "USA",
+								"display": "United States of America"
+							}
+						]
+					}
+				],
+				"purpose": "The purpose of this is to test the system to make sure we have complete end-to-end functionality",
+				"usage": "This is to be used in conjunction with a patient-facing FHIR application.",
+				"copyright": "© CDC 2016+.",
+				"library": [
+					{
+						"reference": "http://fhir.org/guides/cdc/opioid-cds/Library/HelloWorld"
+					}
+				],
+				"action": [
+					{
+						"title": "Hello World!",
+						"description": "A simple Hello World (patient-view) recommendation",
+						"triggerDefinition": [
+							{
+								"type": "named-event",
+								"eventName": "patient-view"
+							}
+						],
+						"condition": [
+							{
+								"kind": "start",
+								"description": "Whether or not a Hello World! card should be returned",
+								"language": "text/cql.identifier",
+								"expression": "Main Action Condition Expression Is True"
+							}
+						],
+						"dynamicValue": [
+							{
+								"path": "action.title",
+								"language": "text/cql.identifier",
+								"expression": "Get Title"
+							},
+							{
+								"path": "action.description",
+								"language": "text/cql.identifier",
+								"expression": "Get Description"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "PlanDefinition/hello-world-patient-view"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Library",
+				"id": "HelloWorld",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					}
+				],
+				"url": "http://fhir.org/guides/cdc/opioid-cds/Library/HelloWorld",
+				"version": "1.0.0",
+				"name": "HelloWorld",
+				"relatedArtifact": [
+					{
+						"type": "depends-on",
+						"display": "FHIR model information",
+						"resource": {
+							"reference": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|3.2.0"
+						}
+					}
+				],
+				"parameter": [
+					{
+						"name": "Patient",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "Patient"
+					},
+					{
+						"name": "Info",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "string"
+					},
+					{
+						"name": "Warning",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "string"
+					},
+					{
+						"name": "Critical",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "string"
+					},
+					{
+						"name": "Main Action Condition Expression Is True",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "boolean"
+					},
+					{
+						"name": "Get Title",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "string"
+					},
+					{
+						"name": "Get Description",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "string"
+					},
+					{
+						"name": "Get Indicator",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "string"
+					}
+				],
+				"dataRequirement": [
+					{
+						"type": "Patient",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Patient"
+						]
+					}
+				],
+				"content": [
+					{
+						"contentType": "text/cql",
+						"data": "bGlicmFyeSBIZWxsb1dvcmxkIHZlcnNpb24gJzEuMC4wJwoKdXNpbmcgRkhJUiB2ZXJzaW9uICczLjIuMCcKCi8qIGluY2x1ZGUgRkhJUkhlbHBlcnMgdmVyc2lvbiAnMy4yLjAnKi8KCmNvbnRleHQgUGF0aWVudAoKZGVmaW5lICJJbmZvIjoKICAnaW5mbycKCmRlZmluZSAiV2FybmluZyI6CiAgJ3dhcm5pbmcnCgpkZWZpbmUgIkNyaXRpY2FsIjoKICAnY3JpdGljYWwnCgpkZWZpbmUgIk1haW4gQWN0aW9uIENvbmRpdGlvbiBFeHByZXNzaW9uIElzIFRydWUiOgogIHRydWUKCmRlZmluZSAiR2V0IFRpdGxlIjoKICAnSGVsbG8gV29ybGQhJwoKZGVmaW5lICJHZXQgRGVzY3JpcHRpb24iOgogICdUaGUgQ0RTIFNlcnZpY2UgaXMgYWxpdmUgYW5kIGNvbW11bmljYXRpbmcgc3VjY2Vzc2Z1bGx5IScKCmRlZmluZSAiR2V0IEluZGljYXRvciI6CiAgJ2luZm8nCg=="
+					},
+					{
+						"contentType": "application/elm+xml",
+						"data": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGxpYnJhcnkgeG1sbnM9InVybjpobDctb3JnOmVsbTpyMSIgeG1sbnM6dD0idXJuOmhsNy1vcmc6ZWxtLXR5cGVzOnIxIiB4bWxuczp4c2k9Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvWE1MU2NoZW1hLWluc3RhbmNlIiB4bWxuczp4c2Q9Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvWE1MU2NoZW1hIiB4bWxuczpmaGlyPSJodHRwOi8vaGw3Lm9yZy9maGlyIiB4bWxuczpxZG00Mz0idXJuOmhlYWx0aGl0LWdvdjpxZG06djRfMyIgeG1sbnM6cWRtNTM9InVybjpoZWFsdGhpdC1nb3Y6cWRtOnY1XzMiIHhtbG5zOmE9InVybjpobDctb3JnOmNxbC1hbm5vdGF0aW9uczpyMSI+CiAgIDxhbm5vdGF0aW9uIHRyYW5zbGF0b3JWZXJzaW9uPSIyLjIuMC1TTkFQU0hPVCIgdHJhbnNsYXRvck9wdGlvbnM9IiIgeHNpOnR5cGU9ImE6Q3FsVG9FbG1JbmZvIi8+CiAgIDxpZGVudGlmaWVyIGlkPSJIZWxsb1dvcmxkIiB2ZXJzaW9uPSIxLjAuMCIvPgogICA8c2NoZW1hSWRlbnRpZmllciBpZD0idXJuOmhsNy1vcmc6ZWxtIiB2ZXJzaW9uPSJyMSIvPgogICA8dXNpbmdzPgogICAgICA8ZGVmIGxvY2FsSWRlbnRpZmllcj0iU3lzdGVtIiB1cmk9InVybjpobDctb3JnOmVsbS10eXBlczpyMSIvPgogICAgICA8ZGVmIGxvY2FsSWRlbnRpZmllcj0iRkhJUiIgdXJpPSJodHRwOi8vaGw3Lm9yZy9maGlyIiB2ZXJzaW9uPSIzLjIuMCIvPgogICA8L3VzaW5ncz4KICAgPGNvbnRleHRzPgogICAgICA8ZGVmIG5hbWU9IlBhdGllbnQiLz4KICAgPC9jb250ZXh0cz4KICAgPHN0YXRlbWVudHM+CiAgICAgIDxkZWYgbmFtZT0iUGF0aWVudCIgY29udGV4dD0iUGF0aWVudCI+CiAgICAgICAgIDxleHByZXNzaW9uIHhzaTp0eXBlPSJTaW5nbGV0b25Gcm9tIj4KICAgICAgICAgICAgPG9wZXJhbmQgZGF0YVR5cGU9ImZoaXI6UGF0aWVudCIgeHNpOnR5cGU9IlJldHJpZXZlIi8+CiAgICAgICAgIDwvZXhwcmVzc2lvbj4KICAgICAgPC9kZWY+CiAgICAgIDxkZWYgbmFtZT0iSW5mbyIgY29udGV4dD0iUGF0aWVudCIgYWNjZXNzTGV2ZWw9IlB1YmxpYyI+CiAgICAgICAgIDxleHByZXNzaW9uIHZhbHVlVHlwZT0idDpTdHJpbmciIHZhbHVlPSJpbmZvIiB4c2k6dHlwZT0iTGl0ZXJhbCIvPgogICAgICA8L2RlZj4KICAgICAgPGRlZiBuYW1lPSJXYXJuaW5nIiBjb250ZXh0PSJQYXRpZW50IiBhY2Nlc3NMZXZlbD0iUHVibGljIj4KICAgICAgICAgPGV4cHJlc3Npb24gdmFsdWVUeXBlPSJ0OlN0cmluZyIgdmFsdWU9Indhcm5pbmciIHhzaTp0eXBlPSJMaXRlcmFsIi8+CiAgICAgIDwvZGVmPgogICAgICA8ZGVmIG5hbWU9IkNyaXRpY2FsIiBjb250ZXh0PSJQYXRpZW50IiBhY2Nlc3NMZXZlbD0iUHVibGljIj4KICAgICAgICAgPGV4cHJlc3Npb24gdmFsdWVUeXBlPSJ0OlN0cmluZyIgdmFsdWU9ImNyaXRpY2FsIiB4c2k6dHlwZT0iTGl0ZXJhbCIvPgogICAgICA8L2RlZj4KICAgICAgPGRlZiBuYW1lPSJNYWluIEFjdGlvbiBDb25kaXRpb24gRXhwcmVzc2lvbiBJcyBUcnVlIiBjb250ZXh0PSJQYXRpZW50IiBhY2Nlc3NMZXZlbD0iUHVibGljIj4KICAgICAgICAgPGV4cHJlc3Npb24gdmFsdWVUeXBlPSJ0OkJvb2xlYW4iIHZhbHVlPSJ0cnVlIiB4c2k6dHlwZT0iTGl0ZXJhbCIvPgogICAgICA8L2RlZj4KICAgICAgPGRlZiBuYW1lPSJHZXQgVGl0bGUiIGNvbnRleHQ9IlBhdGllbnQiIGFjY2Vzc0xldmVsPSJQdWJsaWMiPgogICAgICAgICA8ZXhwcmVzc2lvbiB2YWx1ZVR5cGU9InQ6U3RyaW5nIiB2YWx1ZT0iSGVsbG8gV29ybGQhIiB4c2k6dHlwZT0iTGl0ZXJhbCIvPgogICAgICA8L2RlZj4KICAgICAgPGRlZiBuYW1lPSJHZXQgRGVzY3JpcHRpb24iIGNvbnRleHQ9IlBhdGllbnQiIGFjY2Vzc0xldmVsPSJQdWJsaWMiPgogICAgICAgICA8ZXhwcmVzc2lvbiB2YWx1ZVR5cGU9InQ6U3RyaW5nIiB2YWx1ZT0iVGhlIENEUyBTZXJ2aWNlIGlzIGFsaXZlIGFuZCBjb21tdW5pY2F0aW5nIHN1Y2Nlc3NmdWxseSEiIHhzaTp0eXBlPSJMaXRlcmFsIi8+CiAgICAgIDwvZGVmPgogICAgICA8ZGVmIG5hbWU9IkdldCBJbmRpY2F0b3IiIGNvbnRleHQ9IlBhdGllbnQiIGFjY2Vzc0xldmVsPSJQdWJsaWMiPgogICAgICAgICA8ZXhwcmVzc2lvbiB2YWx1ZVR5cGU9InQ6U3RyaW5nIiB2YWx1ZT0iaW5mbyIgeHNpOnR5cGU9IkxpdGVyYWwiLz4KICAgICAgPC9kZWY+CiAgIDwvc3RhdGVtZW50cz4KPC9saWJyYXJ5Pg=="
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Library/HelloWorld"
+			}
+		}
+	]
+}

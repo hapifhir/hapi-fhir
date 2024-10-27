@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.dstu3.measure;
 
+import ca.uhn.fhir.cr.dstu3.IMeasureServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -30,16 +31,15 @@ import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.function.Function;
-
 @Component
 public class MeasureOperationsProvider {
 	@Autowired
-	Function<RequestDetails, MeasureService> myDstu3MeasureServiceFactory;
+	IMeasureServiceFactory myDstu3MeasureProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -65,30 +65,34 @@ public class MeasureOperationsProvider {
 	 *                          autopopulated HAPI.
 	 * @return the calculated MeasureReport
 	 */
-	@Operation(name = ProviderConstants.CQL_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
-	public MeasureReport evaluateMeasure(@IdParam IdType theId,
-													 @OperationParam(name = "periodStart") String thePeriodStart,
-													 @OperationParam(name = "periodEnd") String thePeriodEnd,
-													 @OperationParam(name = "reportType") String theReportType,
-													 @OperationParam(name = "patient") String thePatient,
-													 @OperationParam(name = "practitioner") String thePractitioner,
-													 @OperationParam(name = "lastReceivedOn") String theLastReceivedOn,
-													 @OperationParam(name = "productLine") String theProductLine,
-													 @OperationParam(name = "additionalData") Bundle theAdditionalData,
-													 @OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-													 RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return this.myDstu3MeasureServiceFactory
-			.apply(theRequestDetails)
-			.evaluateMeasure(
-				theId,
-				thePeriodStart,
-				thePeriodEnd,
-				theReportType,
-				thePatient,
-				thePractitioner,
-				theLastReceivedOn,
-				theProductLine,
-				theAdditionalData,
-				theTerminologyEndpoint);
+	@Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
+	public MeasureReport evaluateMeasure(
+			@IdParam IdType theId,
+			@OperationParam(name = "periodStart") String thePeriodStart,
+			@OperationParam(name = "periodEnd") String thePeriodEnd,
+			@OperationParam(name = "reportType") String theReportType,
+			@OperationParam(name = "patient") String thePatient,
+			@OperationParam(name = "practitioner") String thePractitioner,
+			@OperationParam(name = "lastReceivedOn") String theLastReceivedOn,
+			@OperationParam(name = "productLine") String theProductLine,
+			@OperationParam(name = "additionalData") Bundle theAdditionalData,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
+		return myDstu3MeasureProcessorFactory
+				.create(theRequestDetails)
+				.evaluateMeasure(
+						theId,
+						thePeriodStart,
+						thePeriodEnd,
+						theReportType,
+						thePatient,
+						thePractitioner,
+						theLastReceivedOn,
+						theProductLine,
+						theAdditionalData,
+						theParameters,
+						theTerminologyEndpoint);
 	}
 }

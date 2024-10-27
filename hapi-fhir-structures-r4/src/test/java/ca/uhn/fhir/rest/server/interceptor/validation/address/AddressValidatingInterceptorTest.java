@@ -3,7 +3,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator;
-import org.checkerframework.checker.units.qual.A;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Extension;
@@ -14,16 +14,14 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Properties;
 
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.ADDRESS_VALIDATION_DISABLED_HEADER;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.PROPERTY_EXTENSION_URL;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.PROPERTY_VALIDATOR_CLASS;
-import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.impl.BaseRestfulValidator.PROPERTY_SERVICE_KEY;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -33,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,11 +63,10 @@ class AddressValidatingInterceptorTest {
 
 		assertTrue(address.hasExtension());
 		assertEquals("true", address.getExtensionFirstRep().getValueAsPrimitive().getValueAsString());
-		assertEquals("E",
-			address.getExtensionByUrl(IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL).getValueAsPrimitive().getValueAsString());
+		assertEquals("E", address.getExtensionByUrl(IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL).getValueAsPrimitive().getValueAsString());
 
 		assertEquals("100 Somewhere, Burloak", address.getText());
-		assertEquals(1, address.getLine().size());
+		assertThat(address.getLine()).hasSize(1);
 		assertEquals("100 Somewhere", address.getLine().get(0).getValueAsString());
 		assertEquals("Burloak", address.getCity());
 		assertEquals("A0A0A0", address.getPostalCode());
@@ -86,8 +82,7 @@ class AddressValidatingInterceptorTest {
 		props.setProperty(PROPERTY_VALIDATOR_CLASS, "RandomService");
 		try {
 			new AddressValidatingInterceptor(props);
-			fail();
-		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 			// expected
 		}
 
@@ -101,15 +96,13 @@ class AddressValidatingInterceptorTest {
 		try {
 			myInterceptor.handleRequest(null, null);
 		} catch (Exception ex) {
-			fail();
-		}
+			fail();		}
 
 		try {
 			myInterceptor.setAddressValidator(null);
 			myInterceptor.handleRequest(null, null);
 		} catch (Exception ex) {
-			fail();
-		}
+			fail();		}
 	}
 
 	@BeforeEach
@@ -190,7 +183,7 @@ class AddressValidatingInterceptorTest {
 
 	private Extension assertValidationErrorExtension(Address theAddress) {
 		assertTrue(theAddress.hasExtension());
-		assertEquals(1, theAddress.getExtension().size());
+		assertThat(theAddress.getExtension()).hasSize(1);
 		assertEquals(IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, theAddress.getExtensionFirstRep().getUrl());
 		return theAddress.getExtensionFirstRep();
 	}

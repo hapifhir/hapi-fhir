@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5465
+title: "Several fixes to the HAPI FHIR generated OpenAPI schema have been implemented. This means that
+  the spec now validates cleanly. Thanks to Primož Delopst for the contribution!"

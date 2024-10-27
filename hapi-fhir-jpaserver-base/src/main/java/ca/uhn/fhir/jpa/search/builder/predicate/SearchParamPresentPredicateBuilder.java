@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,11 +50,11 @@ public class SearchParamPresentPredicateBuilder extends BaseJoiningPredicateBuil
 		return myColumnResourceId;
 	}
 
-
-	public Condition createPredicateParamMissingForReference(String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
-		Long hash = SearchParamPresentEntity.calculateHashPresence(myPartitionSettings, theRequestPartitionId, theResourceName, theParamName, !theMissing);
+	public Condition createPredicateParamMissingForReference(
+			String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
+		Long hash = SearchParamPresentEntity.calculateHashPresence(
+				myPartitionSettings, theRequestPartitionId, theResourceName, theParamName, !theMissing);
 		BinaryCondition predicate = BinaryCondition.equalTo(myColumnHashPresence, generatePlaceholder(hash));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
-
 }

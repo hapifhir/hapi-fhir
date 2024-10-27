@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,9 @@ public class ArbitrarySqlTask extends BaseTask {
 	private String myExecuteOnlyIfTableExists;
 	private List<TableAndColumn> myConditionalOnExistenceOf = new ArrayList<>();
 
+	/**
+	 * Constructor
+	 */
 	public ArbitrarySqlTask(VersionEnum theRelease, String theVersion, String theTableName, String theDescription) {
 		super(theRelease.toString(), theVersion);
 		myTableName = theTableName;
@@ -74,9 +77,14 @@ public class ArbitrarySqlTask extends BaseTask {
 		}
 
 		for (TableAndColumn next : myConditionalOnExistenceOf) {
-			JdbcUtils.ColumnType columnType = JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
+			JdbcUtils.ColumnType columnType =
+					JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
 			if (columnType == null) {
-				logInfo(ourLog, "Table {} does not have column {} - No action performed", next.getTable(), next.getColumn());
+				logInfo(
+						ourLog,
+						"Table {} does not have column {} - No action performed",
+						next.getTable(),
+						next.getColumn());
 				return;
 			}
 		}
@@ -84,7 +92,6 @@ public class ArbitrarySqlTask extends BaseTask {
 		for (BaseTask next : myTask) {
 			next.execute();
 		}
-
 	}
 
 	public void setBatchSize(int theBatchSize) {
@@ -148,7 +155,6 @@ public class ArbitrarySqlTask extends BaseTask {
 			myConsumer = theConsumer;
 			setDescription("Execute raw sql");
 		}
-
 
 		@Override
 		public void execute() {

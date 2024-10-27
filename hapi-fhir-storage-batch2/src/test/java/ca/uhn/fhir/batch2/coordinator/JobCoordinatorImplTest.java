@@ -26,8 +26,10 @@ import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -41,19 +43,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.messaging.MessageDeliveryException;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -73,7 +75,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 	@Mock
 	private IJobMaintenanceService myJobMaintenanceService;
-	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
+	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
 	@Captor
@@ -94,7 +96,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	public void beforeEach() {
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
-		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender);
+		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService());
 		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService);
 	}
 
@@ -144,7 +146,6 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
 		verify(myJobInstancePersister, times(1)).onWorkChunkCompletion(new WorkChunkCompletionEvent(CHUNK_ID, 50, 0));
-		verify(myBatchJobSender, times(2)).sendWorkChannelMessage(any());
 	}
 
 	private void setupMocks(JobDefinition<TestJobParameters> theJobDefinition, WorkChunk theWorkChunk) {
@@ -183,7 +184,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 			.thenReturn(Arrays.asList(existingInProgInstance));
 
 		// test
-		Batch2JobStartResponse startResponse = mySvc.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = mySvc.startInstance(new SystemRequestDetails(), startRequest);
 
 		// verify
 		assertEquals(inProgressInstanceId, startResponse.getInstanceId()); // make sure it's the completed one
@@ -192,11 +193,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		verify(myJobInstancePersister)
 			.fetchInstances(requestArgumentCaptor.capture(), anyInt(), anyInt());
 		FetchJobInstancesRequest req = requestArgumentCaptor.getValue();
-		assertEquals(2, req.getStatuses().size());
-		assertTrue(
-			req.getStatuses().contains(StatusEnum.IN_PROGRESS)
-				&& req.getStatuses().contains(StatusEnum.QUEUED)
-		);
+		assertThat(req.getStatuses()).hasSize(2);
+		assertThat(req.getStatuses().contains(StatusEnum.IN_PROGRESS)
+				&& req.getStatuses().contains(StatusEnum.QUEUED)).isTrue();
 	}
 
 	@Test
@@ -356,9 +355,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testPerformStep_FinalStep_PreventChunkWriting() {
-
 		// Setup
-
 		when(myJobInstancePersister.onWorkChunkDequeue(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_3, new TestJobStep3InputType().setData3(DATA_3_VALUE).setData4(DATA_4_VALUE))));
 		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
@@ -370,11 +367,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		mySvc.start();
 
 		// Execute
-
 		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3)));
 
 		// Verify
-
 		verify(myStep3Worker, times(1)).run(myStep3ExecutionDetailsCaptor.capture(), any());
 		verify(myJobInstancePersister, times(1)).onWorkChunkFailed(eq(CHUNK_ID), any());
 	}
@@ -467,21 +462,16 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
 		startRequest.setParameters(new TestJobParameters().setParam1(PARAM_1_VALUE).setParam2(PARAM_2_VALUE).setPassword(PASSWORD_VALUE));
-		mySvc.startInstance(startRequest);
+		mySvc.startInstance(new SystemRequestDetails(), startRequest);
 
 		// Verify
 
 		verify(myJobInstancePersister, times(1))
 			.onCreateWithFirstChunk(myJobDefinitionCaptor.capture(), myParametersJsonCaptor.capture());
-		assertSame(jobDefinition, myJobDefinitionCaptor.getValue());
+		assertThat(myJobDefinitionCaptor.getValue()).isSameAs(jobDefinition);
 		assertEquals(startRequest.getParameters(), myParametersJsonCaptor.getValue());
 
-		verify(myBatchJobSender, times(1)).sendWorkChannelMessage(myJobWorkNotificationCaptor.capture());
-		assertEquals(CHUNK_ID, myJobWorkNotificationCaptor.getAllValues().get(0).getChunkId());
-		assertEquals(JOB_DEFINITION_ID, myJobWorkNotificationCaptor.getAllValues().get(0).getJobDefinitionId());
-		assertEquals(1, myJobWorkNotificationCaptor.getAllValues().get(0).getJobDefinitionVersion());
-		assertEquals(STEP_1, myJobWorkNotificationCaptor.getAllValues().get(0).getTargetStepId());
-
+		verify(myBatchJobSender, never()).sendWorkChannelMessage(any());
 		verifyNoMoreInteractions(myJobInstancePersister);
 		verifyNoMoreInteractions(myStep1Worker);
 		verifyNoMoreInteractions(myStep2Worker);
@@ -521,7 +511,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		// Setup
 
-		IJobParametersValidator<TestJobParameters> v = p -> {
+		IJobParametersValidator<TestJobParameters> v = (theRequestDetails, p) -> {
 			if (p.getParam1().equals("bad")) {
 				return Lists.newArrayList("Bad Parameter Value", "Bad Parameter Value 2");
 			}

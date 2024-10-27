@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6203
+title: "Previously, the SubscriptionValidatingInterceptor would allow the creation/update of a REST hook subscription 
+where the endpoint URL property is not prefixed with http[s]. This issue is fixed."

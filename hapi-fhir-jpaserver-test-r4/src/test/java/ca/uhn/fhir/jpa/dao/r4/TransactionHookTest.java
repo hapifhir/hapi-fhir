@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -25,15 +26,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class TransactionHookTest extends BaseJpaR4SystemTest {
 
@@ -93,10 +90,10 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 
 		DeferredInterceptorBroadcasts broadcastsParam = hookParams.get(0).get(DeferredInterceptorBroadcasts.class);
 		ListMultimap<Pointcut, HookParams> deferredInterceptorBroadcasts = broadcastsParam.getDeferredInterceptorBroadcasts();
-		assertThat(deferredInterceptorBroadcasts.entries(), hasSize(3));
+		assertThat(deferredInterceptorBroadcasts.entries()).hasSize(3);
 
 		List<HookParams> createPointcutInvocations = deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED);
-		assertThat(createPointcutInvocations, hasSize(2));
+		assertThat(createPointcutInvocations).hasSize(2);
 
 		IBaseResource firstCreatedResource = createPointcutInvocations.get(0).get(IBaseResource.class);
 		InterceptorInvocationTimingEnum timing = createPointcutInvocations.get(0).get(InterceptorInvocationTimingEnum.class);
@@ -108,7 +105,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		assertTrue(secondCreatedResource instanceof Patient);
 		assertTrue(timing.equals(InterceptorInvocationTimingEnum.DEFERRED));
 
-		assertThat(deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED), hasSize(1));
+		assertThat(deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)).hasSize(1);
 	}
 
 	@Test
@@ -178,7 +175,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		}
 
 		rpt = myDiagnosticReportDao.read(rptId);
-		assertThat(rpt.getResult(), empty());
+		assertThat(rpt.getResult()).isEmpty();
 	}
 
 	private List<HookParams> callTransaction(Bundle b) throws InterruptedException {
@@ -255,7 +252,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 			callTransaction(b);
 			fail();
 		} catch (ResourceVersionConflictException e ) {
-			assertThat(e.getMessage(), matchesPattern(Msg.code(550) + Msg.code(515) + "Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource DiagnosticReport/[0-9]+ in path DiagnosticReport.result"));
+			assertThat(e.getMessage()).matches(Msg.code(550) + Msg.code(515) + "Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource DiagnosticReport/[0-9]+ in path DiagnosticReport.result");
 		}
 
 		myObservationDao.read(obs1id);

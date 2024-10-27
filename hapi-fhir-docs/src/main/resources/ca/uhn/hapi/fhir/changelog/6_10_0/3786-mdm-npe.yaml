@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3786
+title: "Previously, when executing an update on a resource that had to undergo MDM, a nullpointer could occur. This has been fixed."

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.delete;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -24,9 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictServiceR4Test.class);
@@ -227,7 +230,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			// good
 		}
 
-		assertEquals(1, conflicts.size());
+		assertThat(conflicts).hasSize(1);
 	}
 
 	private DeleteConflictOutcome deleteConflicts(DeleteConflictList theList) {

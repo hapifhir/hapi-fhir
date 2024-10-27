@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,30 +130,30 @@ public class TranslationQuery {
 		TranslationQuery that = (TranslationQuery) o;
 
 		return new EqualsBuilder()
-			.append(getCoding().getCode(), that.getCoding().getCode())
-			.append(getCoding().getSystem(), that.getCoding().getSystem())
-			.append(getCoding().getVersion(), that.getCoding().getVersion())
-			.append(getResourceId(), that.getResourceId())
-			.append(getUrl(), that.getUrl())
-			.append(getConceptMapVersion(), that.getConceptMapVersion())
-			.append(getSource(), that.getSource())
-			.append(getTarget(), that.getTarget())
-			.append(getTargetSystem(), that.getTargetSystem())
-			.isEquals();
+				.append(getCoding().getCode(), that.getCoding().getCode())
+				.append(getCoding().getSystem(), that.getCoding().getSystem())
+				.append(getCoding().getVersion(), that.getCoding().getVersion())
+				.append(getResourceId(), that.getResourceId())
+				.append(getUrl(), that.getUrl())
+				.append(getConceptMapVersion(), that.getConceptMapVersion())
+				.append(getSource(), that.getSource())
+				.append(getTarget(), that.getTarget())
+				.append(getTargetSystem(), that.getTargetSystem())
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(getCoding().getCode())
-			.append(getCoding().getSystem())
-			.append(getCoding().getVersion())
-			.append(getResourceId())
-			.append(getUrl())
-			.append(getConceptMapVersion())
-			.append(getSource())
-			.append(getTarget())
-			.append(getTargetSystem())
-			.toHashCode();
+				.append(getCoding().getCode())
+				.append(getCoding().getSystem())
+				.append(getCoding().getVersion())
+				.append(getResourceId())
+				.append(getUrl())
+				.append(getConceptMapVersion())
+				.append(getSource())
+				.append(getTarget())
+				.append(getTargetSystem())
+				.toHashCode();
 	}
 }

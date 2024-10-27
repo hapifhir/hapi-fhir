@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,13 @@ public class UrlPartitioner {
 	public UrlPartitioner(MatchUrlService theMatchUrlService, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myMatchUrlService = theMatchUrlService;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
-
 	}
 
 	public PartitionedUrl partitionUrl(String theUrl, RequestDetails theRequestDetails) {
 		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(theUrl);
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, resourceSearch.getResourceName(), resourceSearch.getSearchParameterMap(), null);
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+						theRequestDetails, resourceSearch.getResourceName(), resourceSearch.getSearchParameterMap());
 		PartitionedUrl retval = new PartitionedUrl();
 		retval.setUrl(theUrl);
 		retval.setRequestPartitionId(requestPartitionId);

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,14 +49,23 @@ public class PackageResourceParsingSvc {
 			return Collections.emptyList();
 		}
 		ArrayList<IBaseResource> resources = new ArrayList<>();
-		List<String> filesForType = thePkg.getFolders().get("package").getTypes().get(theType);
+		List<String> filesForType = null;
+		try {
+			filesForType = thePkg.getFolders().get("package").getTypes().get(theType);
+		} catch (IOException e) {
+			throw new InternalErrorException(
+					Msg.code(2370) + "Cannot install resource of type " + theType + ": Could not get types", e);
+		}
 		if (filesForType != null) {
 			for (String file : filesForType) {
 				try {
 					byte[] content = thePkg.getFolders().get("package").fetchFile(file);
 					resources.add(myFhirContext.newJsonParser().parseResource(new String(content)));
 				} catch (IOException e) {
-					throw new InternalErrorException(Msg.code(1289) + "Cannot install resource of type " + theType + ": Could not fetch file " + file, e);
+					throw new InternalErrorException(
+							Msg.code(1289) + "Cannot install resource of type " + theType + ": Could not fetch file "
+									+ file,
+							e);
 				}
 			}
 		}

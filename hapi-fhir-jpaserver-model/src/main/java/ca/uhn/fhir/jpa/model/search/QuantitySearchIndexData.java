@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,21 @@ public class QuantitySearchIndexData {
 	private final String mySystem;
 	private final double myValue;
 
-
 	public QuantitySearchIndexData(String theCode, String theSystem, double theValue) {
 		myCode = theCode;
 		mySystem = theSystem;
 		myValue = theValue;
 	}
 
+	public String getCode() {
+		return myCode;
+	}
 
-	public String getCode() { return myCode; }
+	public String getSystem() {
+		return mySystem;
+	}
 
-	public String getSystem() { return mySystem; }
-
-	public double getValue() { return myValue; }
+	public double getValue() {
+		return myValue;
+	}
 }

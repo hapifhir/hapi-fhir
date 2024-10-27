@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import java.util.HashMap;
  * Represents values for "handling" value as provided in the the <a href="http://hl7.org/fhir/search.html">FHIR Search Spec</a>.
  */
 public enum PreferHandlingEnum {
-
-	STRICT(Constants.HEADER_PREFER_HANDLING_STRICT), LENIENT(Constants.HEADER_PREFER_HANDLING_LENIENT);
+	STRICT(Constants.HEADER_PREFER_HANDLING_STRICT),
+	LENIENT(Constants.HEADER_PREFER_HANDLING_LENIENT);
 
 	private static HashMap<String, PreferHandlingEnum> ourValues;
 	private String myHeaderValue;
@@ -49,5 +49,4 @@ public enum PreferHandlingEnum {
 		}
 		return ourValues.get(theHeaderValue);
 	}
-
 }

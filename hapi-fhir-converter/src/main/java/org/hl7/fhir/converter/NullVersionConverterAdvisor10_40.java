@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Converter
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,13 @@
  */
 package org.hl7.fhir.converter;
 
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_40;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import javax.annotation.Nullable;
-
 public class NullVersionConverterAdvisor10_40 extends BaseAdvisor_10_40 {
-
 
 	@Nullable
 	@Override
@@ -36,7 +34,8 @@ public class NullVersionConverterAdvisor10_40 extends BaseAdvisor_10_40 {
 	}
 
 	@Override
-	public void handleCodeSystem(@Nullable CodeSystem theCodeSystem, @Nullable ValueSet theValueSet) throws FHIRException {
+	public void handleCodeSystem(@Nullable CodeSystem theCodeSystem, @Nullable ValueSet theValueSet)
+			throws FHIRException {
 		// nothing
 	}
 }

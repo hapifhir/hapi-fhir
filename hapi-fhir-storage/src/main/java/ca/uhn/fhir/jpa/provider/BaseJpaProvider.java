@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.jboss.logging.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Set;
@@ -45,8 +45,10 @@ public abstract class BaseJpaProvider {
 	public static final String REMOTE_ADDR = "req.remoteAddr";
 	public static final String REMOTE_UA = "req.userAgent";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaProvider.class);
+
 	@Autowired
 	protected JpaStorageSettings myStorageSettings;
+
 	@Autowired
 	private FhirContext myContext;
 
@@ -58,7 +60,11 @@ public abstract class BaseJpaProvider {
 		myStorageSettings = theStorageSettings;
 	}
 
-	protected ExpungeOptions createExpungeOptions(IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything) {
+	protected ExpungeOptions createExpungeOptions(
+			IPrimitiveType<? extends Integer> theLimit,
+			IPrimitiveType<? extends Boolean> theExpungeDeletedResources,
+			IPrimitiveType<? extends Boolean> theExpungeOldVersions,
+			IPrimitiveType<? extends Boolean> theExpungeEverything) {
 		ExpungeOptions options = new ExpungeOptions();
 		if (theLimit != null && theLimit.getValue() != null) {
 			options.setLimit(theLimit.getValue());
@@ -81,7 +87,8 @@ public abstract class BaseJpaProvider {
 	protected IBaseParameters createExpungeResponse(ExpungeOutcome theOutcome) {
 		IBaseParameters parameters = ParametersUtil.newInstance(getContext());
 		String value = Integer.toString(theOutcome.getDeletedCount());
-		ParametersUtil.addParameterToParameters(getContext(), parameters, JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, "integer", value);
+		ParametersUtil.addParameterToParameters(
+				getContext(), parameters, JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, "integer", value);
 		return parameters;
 	}
 
@@ -98,7 +105,8 @@ public abstract class BaseJpaProvider {
 	}
 
 	protected DateRangeParam processSinceOrAt(Date theSince, DateRangeParam theAt) {
-		boolean haveAt = theAt != null && (theAt.getLowerBoundAsInstant() != null || theAt.getUpperBoundAsInstant() != null);
+		boolean haveAt =
+				theAt != null && (theAt.getLowerBoundAsInstant() != null || theAt.getUpperBoundAsInstant() != null);
 		if (haveAt && theSince != null) {
 			String msg = getContext().getLocalizer().getMessage(BaseJpaProvider.class, "cantCombintAtAndSince");
 			throw new InvalidRequestException(Msg.code(553) + msg);
@@ -153,12 +161,9 @@ public abstract class BaseJpaProvider {
 
 		String userAgent = StringUtils.defaultString(theRequest.getHeader("user-agent"));
 		org.slf4j.MDC.put(REMOTE_UA, userAgent);
-
 	}
 
 	public static void startRequest(ServletRequestDetails theRequest) {
 		startRequest(theRequest.getServletRequest());
 	}
-
-
 }

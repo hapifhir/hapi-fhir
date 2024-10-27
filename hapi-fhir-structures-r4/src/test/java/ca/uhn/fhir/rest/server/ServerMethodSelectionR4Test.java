@@ -15,12 +15,11 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
-
 
 	/**
 	 * Server method with no _include
@@ -42,15 +41,15 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 		startServer(provider);
 
 		try {
-			myClient
+			ourServer
+				 .getFhirClient()
 				.search()
 				.forResource(Patient.class)
 				.where(Patient.NAME.matches().value("foo"))
 				.include(Patient.INCLUDE_ORGANIZATION)
 				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("this server does not know how to handle GET operation[Patient] with parameters [[_include, name]]"));
+			fail();		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage()).contains("this server does not know how to handle GET operation[Patient] with parameters [[_include, name]]");
 		}
 	}
 
@@ -73,14 +72,15 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 
 		startServer(provider);
 
-		Bundle results = myClient
+		Bundle results = ourServer
+			 .getFhirClient()
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.NAME.matches().value("foo"))
 			.include(Patient.INCLUDE_ORGANIZATION)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(1, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(1);
 	}
 
 	/**
@@ -103,15 +103,15 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 		startServer(provider);
 
 		try {
-			myClient
+			ourServer
+				 .getFhirClient()
 				.search()
 				.forResource(Patient.class)
 				.where(Patient.NAME.matches().value("foo"))
 				.revInclude(Patient.INCLUDE_ORGANIZATION)
 				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("this server does not know how to handle GET operation[Patient] with parameters [[_revinclude, name]]"));
+			fail();		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage()).contains("this server does not know how to handle GET operation[Patient] with parameters [[_revinclude, name]]");
 		}
 	}
 
@@ -134,14 +134,15 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 
 		startServer(provider);
 
-		Bundle results = myClient
+		Bundle results = ourServer
+			 .getFhirClient()
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.NAME.matches().value("foo"))
 			.revInclude(Patient.INCLUDE_ORGANIZATION)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(1, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(1);
 	}
 
 

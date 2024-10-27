@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,27 +28,27 @@ import java.util.Set;
 
 public final class SctHandlerConcept implements IZipContentsHandlerCsv {
 
-   private Set<String> myValidConceptIds;
-   private Map<String, String> myConceptIdToMostRecentDate = new HashMap<String, String>();
+	private Set<String> myValidConceptIds;
+	private Map<String, String> myConceptIdToMostRecentDate = new HashMap<String, String>();
 
-   public SctHandlerConcept(Set<String> theValidConceptIds) {
-      myValidConceptIds = theValidConceptIds;
-   }
+	public SctHandlerConcept(Set<String> theValidConceptIds) {
+		myValidConceptIds = theValidConceptIds;
+	}
 
-   @Override
-   public void accept(CSVRecord theRecord) {
-      String id = theRecord.get("id");
-      String date = theRecord.get("effectiveTime");
+	@Override
+	public void accept(CSVRecord theRecord) {
+		String id = theRecord.get("id");
+		String date = theRecord.get("effectiveTime");
 
-      if (!myConceptIdToMostRecentDate.containsKey(id) || myConceptIdToMostRecentDate.get(id).compareTo(date) < 0) {
-         boolean active = "1".equals(theRecord.get("active"));
-         if (active) {
-            myValidConceptIds.add(id);
-         } else {
-            myValidConceptIds.remove(id);
-         }
-         myConceptIdToMostRecentDate.put(id, date);
-      }
-
-   }
+		if (!myConceptIdToMostRecentDate.containsKey(id)
+				|| myConceptIdToMostRecentDate.get(id).compareTo(date) < 0) {
+			boolean active = "1".equals(theRecord.get("active"));
+			if (active) {
+				myValidConceptIds.add(id);
+			} else {
+				myValidConceptIds.remove(id);
+			}
+			myConceptIdToMostRecentDate.put(id, date);
+		}
+	}
 }

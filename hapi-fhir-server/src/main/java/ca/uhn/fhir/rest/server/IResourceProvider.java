@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,8 @@ public interface IResourceProvider {
 
 	/**
 	 * Returns the type of resource returned by this provider
-	 * 
+	 *
 	 * @return Returns the type of resource returned by this provider
 	 */
 	Class<? extends IBaseResource> getResourceType();
-
 }

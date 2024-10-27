@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,12 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.ParametersUtil;
-import joptsimple.internal.Strings;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Parameters;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +40,6 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 
 	static final String REINDEX_TERMINOLOGY = "reindex-terminology";
 
-
 	@Override
 	public String getCommandDescription() {
 		return "Recreates freetext-indexes for terminology data.";
@@ -51,7 +49,6 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 	public String getCommandName() {
 		return REINDEX_TERMINOLOGY;
 	}
-
 
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException {
@@ -66,7 +63,6 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 		invokeOperation(client);
 	}
 
-
 	private void invokeOperation(IGenericClient theClient) {
 		ourLog.info("Beginning freetext indexing - This may take a while...");
 
@@ -75,11 +71,11 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 		String errorMessage = null;
 		try {
 			response = theClient
-				.operation()
-				.onServer()
-				.named(REINDEX_TERMINOLOGY)
-				.withNoParameters(Parameters.class)
-				.execute();
+					.operation()
+					.onServer()
+					.named(REINDEX_TERMINOLOGY)
+					.withNoParameters(Parameters.class)
+					.execute();
 
 		} catch (BaseServerResponseException e) {
 			int statusCode = e.getStatusCode();
@@ -88,17 +84,17 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 			if (e.getOperationOutcome() != null) {
 				errorMessage += " : " + e.getOperationOutcome().getFormatCommentsPre();
 			}
-			throw new CommandFailureException(Msg.code(2228) + "FAILURE: Received HTTP " + statusCode + ": " + errorMessage);
-
+			throw new CommandFailureException(
+					Msg.code(2228) + "FAILURE: Received HTTP " + statusCode + ": " + errorMessage);
 		}
 
-
-		Optional<String> isSuccessResponse = ParametersUtil.getNamedParameterValueAsString(myFhirCtx, response, RESP_PARAM_SUCCESS);
-		if ( ! isSuccessResponse.isPresent() ) {
+		Optional<String> isSuccessResponse =
+				ParametersUtil.getNamedParameterValueAsString(myFhirCtx, response, RESP_PARAM_SUCCESS);
+		if (!isSuccessResponse.isPresent()) {
 			errorMessage = "Internal error. Command result unknown. Check system logs for details.";
 		} else {
-			boolean succeeded = Boolean.parseBoolean( isSuccessResponse.get() );
-			if ( ! succeeded) {
+			boolean succeeded = Boolean.parseBoolean(isSuccessResponse.get());
+			if (!succeeded) {
 				errorMessage = getResponseMessage(response);
 			}
 		}
@@ -109,16 +105,13 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 			ourLog.info("Recreation of terminology freetext indexes complete!");
 			ourLog.info("Response:{}{}", NL, getResponseMessage(response));
 		}
-
 	}
 
 	@Nonnull
 	private String getResponseMessage(IBaseParameters response) {
 		List<String> message = ParametersUtil.getNamedParameterValuesAsString(myFhirCtx, response, "message");
-		return Strings.join(message, NL);
+		return String.join(NL, message);
 	}
 
-
 	public static final String NL = System.getProperty("line.separator");
-
 }

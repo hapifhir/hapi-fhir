@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,17 +35,21 @@ public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
 
 	@Autowired
 	private FhirContext myContext;
+
 	@Autowired
 	private SearchParamMatcher mySearchParamMatcher;
 
 	@Override
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
 		try {
-			return mySearchParamMatcher.match(theSubscription.getCriteriaString(), theMsg.getNewPayload(myContext), null);
+			return mySearchParamMatcher.match(
+					theSubscription.getCriteriaString(), theMsg.getNewPayload(myContext), null);
 		} catch (Exception e) {
 			ourLog.error("Failure in in-memory matcher", e);
-			throw new InternalErrorException(Msg.code(1) + "Failure performing memory-match for resource ID[" + theMsg.getPayloadId(myContext) + "] for subscription ID[" + theSubscription.getIdElementString() + "]: " + e.getMessage(), e);
+			throw new InternalErrorException(
+					Msg.code(1) + "Failure performing memory-match for resource ID[" + theMsg.getPayloadId(myContext)
+							+ "] for subscription ID[" + theSubscription.getIdElementString() + "]: " + e.getMessage(),
+					e);
 		}
 	}
-
 }

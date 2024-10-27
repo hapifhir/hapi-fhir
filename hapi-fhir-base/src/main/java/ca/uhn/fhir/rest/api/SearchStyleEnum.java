@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package ca.uhn.fhir.rest.api;
 
 /**
  * Enumerated type to represent the various allowable syntax for a search/query
- * as described in the  
+ * as described in the
  * <a href="http://www.hl7.org/implement/standards/fhir/http.html#search">FHIR Specification Section 2.1.11</a>
  */
 public enum SearchStyleEnum {
@@ -32,7 +32,7 @@ public enum SearchStyleEnum {
 	 * <code>GET [base]/[resource type]?[params]</code>
 	 */
 	GET,
-	
+
 	/**
 	 * Performs the search using the style below. Note that this style is less commonly supported
 	 * in servers so it should not be used unless there is a specific reason for needing to.
@@ -49,5 +49,4 @@ public enum SearchStyleEnum {
 	 * and the params in a form encoded POST body.
 	 */
 	POST
-	
 }

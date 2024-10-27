@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,4 +68,10 @@ public interface IJobDataSink<OT extends IModelJson> {
 	 */
 	void recoveredError(String theMessage);
 
+	/**
+	 * Step workers may invoke this method to indicate that a warning message processor
+	 *
+	 * @param theWarningProcessor The processor for the warning.
+	 */
+	void setWarningProcessor(IWarningProcessor theWarningProcessor);
 }

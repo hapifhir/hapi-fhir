@@ -14,24 +14,17 @@ The IPS Generator uses FHIR resources stored in your repository as its input. Th
 
 # Generation Strategy
 
-A user supplied strategy class is used to determine various properties of the IPS. This class must implement the `IIpsGenerationStrategy` interface. A default implementation called `DefaultIpsGenerationStrategy` is included. You may use this default implementation, use a subclassed version of it that adds additional logic, or use en entirely new implementation.
+A user supplied strategy class is used to determine various properties of the IPS. This class must implement the `IIpsGenerationStrategy` interface. A default implementation called `DefaultJpaIpsGenerationStrategy` is included. You may use this default implementation, use a subclassed version of it that adds additional logic, or use en entirely new implementation.
 
-The generation strategy also supplies the [Section Registry](#section-registry) and [Narrative Templates](#narrative-templates) implementations, so it can be considered the central part of your IPS configuration.
+The generation strategy also supplies the [Narrative Templates](#narrative-templates) implementations, so it can be considered the central part of your IPS configuration.
 
 * JavaDoc: [IIpsGenerationStrategy](/hapi-fhir/apidocs/hapi-fhir-jpaserver-ips/ca/uhn/fhir/jpa/ips/api/IIpsGenerationStrategy.html)
 * Source Code: [IIpsGenerationStrategy.java](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/java/ca/uhn/fhir/jpa/ips/api/IIpsGenerationStrategy.java)
-* JavaDoc: [DefaultIpsGenerationStrategy](/hapi-fhir/apidocs/hapi-fhir-jpaserver-ips/ca/uhn/fhir/jpa/ips/strategy/DefaultIpsGenerationStrategy.html)
-* Source Code: [DefaultIpsGenerationStrategy.java](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/java/ca/uhn/fhir/jpa/ips/strategy/DefaultIpsGenerationStrategy.java)
 
+The default generation strategy defines the sections that will be included in your IPS. Out of the box, the standard IPS sections are all included. See the [IG homepage](http://hl7.org/fhir/uv/ips/) for a list of the standard sections.
 
-<a name="section-registry"/>
-
-# Section Registry
-
-The IPS SectionRegistry class defines the sections that will be included in your IPS. Out of the box, the standard IPS sections are all included. See the [IG homepage](http://hl7.org/fhir/uv/ips/) for a list of the standard sections.
-
-* JavaDoc: [SectionRegistry](/hapi-fhir/apidocs/hapi-fhir-jpaserver-ips/ca/uhn/fhir/jpa/ips/api/SectionRegistry.html)
-* Source Code: [SectionRegistry.java](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/java/ca/uhn/fhir/jpa/ips/api/SectionRegistry.java) 
+* JavaDoc: [DefaultJpaIpsGenerationStrategy](/hapi-fhir/apidocs/hapi-fhir-jpaserver-ips/ca/uhn/fhir/jpa/ips/jpa/DefaultJpaIpsGenerationStrategy.html)
+* Source Code: [DefaultJpaIpsGenerationStrategy.java](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/java/ca/uhn/fhir/jpa/ips/jpa/DefaultJpaIpsGenerationStrategy.java)
 
 
 <a name="narrative-templates"/>
@@ -44,11 +37,11 @@ The IPS generator uses HAPI FHIR [Narrative Generation](/hapi-fhir/docs/model/na
 
 Narrative templates for individual sections will be supplied a Bundle resource containing only the matched resources for the individual section as entries (ie. the Composition itself will not be present and no other resources will be present). So, for example, when generating the _Allergies / Intolerances_ IPS section narrative, the input to the narrative generator will be a _Bundle_ resource containing only _AllergyIntolerance_ resources.
 
-The narrative properties file should contain definitions using the profile URL of the individual section (as defined in the [section registry](#section-registry)) as the `.profile` qualifier. For example:
+The narrative properties file should contain definitions using the profile URL of the individual section (as defined in the section definition within the generation strategy) as the `.profile` qualifier. For example:
 
 ```properties
 ips-allergyintolerance.resourceType=Bundle
-ips-allergyintolerance.profile=http://hl7.org/fhir/uv/ips/StructureDefinition/AllergiesAndIntolerances-uv-ips
+ips-allergyintolerance.profile=https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAllergies
 ips-allergyintolerance.narrative=classpath:ca/uhn/fhir/jpa/ips/narrative/allergyintolerance.html
 ```
 

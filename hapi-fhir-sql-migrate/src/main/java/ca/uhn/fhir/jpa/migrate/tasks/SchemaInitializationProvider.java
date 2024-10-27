@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,13 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
+import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -50,7 +51,11 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 	 * @param theSchemaExistsIndicatorTable a table name we can use to determine if this schema has already been initialized
 	 * @param theCanInitializeSchema        this is a "root" schema initializer that creates the primary tables used by this app
 	 */
-	public SchemaInitializationProvider(String theSchemaDescription, String theSchemaFileClassPath, String theSchemaExistsIndicatorTable, boolean theCanInitializeSchema) {
+	public SchemaInitializationProvider(
+			String theSchemaDescription,
+			String theSchemaFileClassPath,
+			String theSchemaExistsIndicatorTable,
+			boolean theCanInitializeSchema) {
 		mySchemaDescription = theSchemaDescription;
 		mySchemaFileClassPath = theSchemaFileClassPath;
 		mySchemaExistsIndicatorTable = theSchemaExistsIndicatorTable;
@@ -67,15 +72,13 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 
 		String initScript = mySchemaFileClassPath + "/" + getInitScript(theDriverType);
 		try {
-			InputStream sqlFileInputStream = SchemaInitializationProvider.class.getResourceAsStream(initScript);
-			if (sqlFileInputStream == null) {
-				throw new ConfigurationException(Msg.code(49) + "Schema initialization script " + initScript + " not found on classpath");
-			}
+			InputStream sqlFileInputStream = ClasspathUtil.loadResourceAsStream(initScript);
 			// Assumes no escaped semicolons...
 			String sqlString = IOUtils.toString(sqlFileInputStream, Charsets.UTF_8);
 			parseSqlFileIntoIndividualStatements(theDriverType, retval, sqlString);
 		} catch (IOException e) {
-			throw new ConfigurationException(Msg.code(50) + "Error reading schema initialization script " + initScript, e);
+			throw new ConfigurationException(
+					Msg.code(50) + "Error reading schema initialization script " + initScript, e);
 		}
 		return retval;
 	}
@@ -83,9 +86,9 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 	@VisibleForTesting
 	void parseSqlFileIntoIndividualStatements(DriverTypeEnum theDriverType, List<String> retval, String theSqlString) {
 		String sqlString = theSqlString.replaceAll("--.*", "");
-		
+
 		String sqlStringNoComments = preProcessSqlString(theDriverType, sqlString);
-		String[] statements = sqlStringNoComments.split("\\;");
+		String[] statements = sqlStringNoComments.split(";");
 		for (String statement : statements) {
 			String cleanedStatement = preProcessSqlStatement(theDriverType, statement);
 			if (!isBlank(cleanedStatement)) {
@@ -125,8 +128,8 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(this.getClass().getSimpleName())
-			.toHashCode();
+				.append(this.getClass().getSimpleName())
+				.toHashCode();
 	}
 
 	@Override
@@ -155,4 +158,3 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 		return myCanInitializeSchema;
 	}
 }
-

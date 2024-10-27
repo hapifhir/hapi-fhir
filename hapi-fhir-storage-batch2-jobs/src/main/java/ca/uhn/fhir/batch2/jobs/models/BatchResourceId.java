@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,17 @@ package ca.uhn.fhir.batch2.jobs.models;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class BatchResourceId implements IModelJson {
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
+public class BatchResourceId implements IModelJson, Comparable<BatchResourceId> {
 
 	@JsonProperty("type")
 	private String myResourceType;
+
 	@JsonProperty("id")
 	private String myId;
 
@@ -65,12 +69,33 @@ public class BatchResourceId implements IModelJson {
 
 		BatchResourceId batchResourceId = (BatchResourceId) theO;
 
-		return new EqualsBuilder().append(myResourceType, batchResourceId.myResourceType).append(myId, batchResourceId.myId).isEquals();
+		return new EqualsBuilder()
+				.append(myResourceType, batchResourceId.myResourceType)
+				.append(myId, batchResourceId.myId)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37).append(myResourceType).append(myId).toHashCode();
+	}
+
+	/**
+	 * Returns an estimate of how long the JSON serialized (non-pretty printed) form
+	 * of this object will be.
+	 */
+	public int estimateSerializedSize() {
+		// 19 chars: {"id":"","type":""}
+		return 19 + defaultString(myId).length() + defaultString(myResourceType).length();
+	}
+
+	@Override
+	public int compareTo(@Nonnull BatchResourceId o) {
+		int retVal = o.myResourceType.compareTo(myResourceType);
+		if (retVal == 0) {
+			retVal = o.myId.compareTo(myId);
+		}
+		return retVal;
 	}
 
 	public static BatchResourceId getIdFromPID(IResourcePersistentId thePID, String theResourceType) {

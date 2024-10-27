@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -51,12 +52,10 @@ import java.util.Date;
 
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -68,7 +67,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class)
 @RequiresDocker
-public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
+public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements IValueSetExpansionIT {
 
 	protected static final String CS_URL = "http://example.com/my_code_system";
 	@Autowired
@@ -118,6 +117,41 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	@AfterEach
 	public void afterPurgeDatabase() {
 		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportJobSchedulingHelper);
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	@Override
+	public ITermDeferredStorageSvc getTerminologyDefferedStorageService() {
+		return myTerminologyDeferredStorageSvc;
+	}
+
+	@Override
+	public ITermReadSvc getTerminologyReadSvc() {
+		return myTermSvc;
+	}
+
+	@Override
+	public DaoRegistry getDaoRegistry() {
+		return myDaoRegistry;
+	}
+
+	@Override
+	public IFhirResourceDaoValueSet<ValueSet> getValueSetDao() {
+		return myValueSetDao;
+	}
+
+	@Override
+	public JpaStorageSettings getJpaStorageSettings() {
+		return myStorageSettings;
+	}
+
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
 	}
 
 	void createCodeSystem() {
@@ -191,9 +225,8 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		include.setSystem(CS_URL);
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
-		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
+			fail("");		} catch (InternalErrorException e) {
+			assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
 		}
 
 		// Increase the max so it won't exceed
@@ -202,7 +235,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
 		ValueSet outcome = myTermSvc.expandValueSet(null, vs);
-		assertEquals(109, outcome.getExpansion().getContains().size());
+		assertThat(outcome.getExpansion().getContains()).hasSize(109);
 
 	}
 
@@ -244,15 +277,18 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
 			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList());
 
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		await().atMost(10, SECONDS).until(() -> myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true));
+//		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		await().atMost(10, SECONDS).until(() -> {
+			myTerminologyDeferredStorageSvc.saveDeferred();
+			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
+		});
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		// exception is swallowed in pre-expansion process, so let's check the ValueSet was successfully expanded
 		Slice<TermValueSet> page = runInTransaction(() ->
 			myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.EXPANDED));
-		assertEquals(1, page.getContent().size());
+		assertThat(page.getContent()).hasSize(1);
 	}
 
 
@@ -334,16 +370,5 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 				propsCreated++;
 			}
 		}
-	}
-
-
-	@Override
-	protected FhirContext getFhirContext() {
-		return myFhirContext;
-	}
-
-	@Override
-	protected PlatformTransactionManager getTxManager() {
-		return myTxManager;
 	}
 }

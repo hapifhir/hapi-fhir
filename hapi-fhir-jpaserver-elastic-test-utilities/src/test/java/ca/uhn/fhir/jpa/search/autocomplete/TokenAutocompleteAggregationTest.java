@@ -7,14 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TokenAutocompleteAggregationTest {
 
@@ -30,9 +25,17 @@ class TokenAutocompleteAggregationTest {
 
 			buildAggregation();
 
-			assertThat("nested clause includes sp", myAggJson, isJson(withJsonPath("nested.path", equalTo("nsp.combo-code"))));
-			assertThat("terms field is sp", myAggJson, isJson(withJsonPath("aggs.search.aggs.group_by_token.terms.field", equalTo("nsp.combo-code.token.code-system"))));
-			assertThat("fetched piece is sp", myAggJson, isJson(withJsonPath("aggs.search.aggs.group_by_token.aggs.top_tags_hits.top_hits._source.includes[0]", equalTo("nsp.combo-code"))));
+			assertThatJson(myAggJson)
+				.inPath("nested.path")
+				.isEqualTo("nsp.combo-code");
+
+			assertThatJson(myAggJson)
+				.inPath("aggs.search.aggs.group_by_token.terms.field")
+				.isEqualTo("nsp.combo-code.token.code-system");
+
+			assertThatJson(myAggJson)
+				.inPath("aggs.search.aggs.group_by_token.aggs.top_tags_hits.top_hits._source.includes[0]")
+				.isEqualTo("nsp.combo-code");
 		}
 
 		@Test
@@ -42,7 +45,9 @@ class TokenAutocompleteAggregationTest {
 
 			buildAggregation();
 
-			assertThat("count for top n", myAggJson, isJson(withJsonPath("aggs.search.aggs.group_by_token.terms.size", equalTo(77))));
+			assertThatJson(myAggJson)
+				.inPath("aggs.search.aggs.group_by_token.terms.size")
+					.isEqualTo(77);
 		}
 
 		private void buildAggregation() {
@@ -143,8 +148,7 @@ class TokenAutocompleteAggregationTest {
 
 			List<TokenAutocompleteHit> hits = myAutocompleteAggregation.extractResults(parsedResult);
 
-			assertThat(hits, is(not(empty())));
-			assertThat(hits, (hasSize(2)));
+			assertThat(hits).hasSize(2);
 		}
 
 		@Test
@@ -157,8 +161,8 @@ class TokenAutocompleteAggregationTest {
 				.getAsJsonObject();
 
 			TokenAutocompleteHit entry = myAutocompleteAggregation.bucketToEntry(bucket);
-			assertThat(entry.mySystemCode, equalTo("http://loinc.org|59460-6"));
-			assertThat(entry.myDisplayText, equalTo("Fall risk total [Morse Fall Scale]"));
+			assertEquals("http://loinc.org|59460-6", entry.mySystemCode);
+			assertEquals("Fall risk total [Morse Fall Scale]", entry.myDisplayText);
 
 		}
 

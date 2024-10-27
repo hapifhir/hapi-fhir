@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6077
+title: "Previously, when a MDM rule tried to perform a phonetic match by HumanName (eg. Patient.name), a 
+`ClassCastException` was thrown. This has now been fixed."

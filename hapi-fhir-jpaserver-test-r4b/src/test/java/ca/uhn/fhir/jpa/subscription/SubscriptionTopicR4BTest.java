@@ -1,14 +1,16 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -22,20 +24,16 @@ import org.hl7.fhir.r4b.model.SubscriptionTopic;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicR4BTest.class);
-	public static final String SUBSCRIPTION_TOPIC_TEST_URL = "http://example.com/topic/test";
+	public static final String SUBSCRIPTION_TOPIC_TEST_URL = "https://example.com/topic/test";
 
 	@Autowired
 	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
@@ -80,11 +78,11 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	@Test
 	public void testCreate() throws Exception {
 		// WIP SR4B test update, delete, etc
-		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.FINISHED, SubscriptionTopic.InteractionTrigger.CREATE);
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
-		waitForRegisteredSubscriptionTopicCount(1);
+		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE);
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
+		waitForRegisteredSubscriptionTopicCount();
 
-		Subscription subscription = createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL);
+		Subscription subscription = createTopicSubscription();
 		waitForActivatedSubscriptionCount(1);
 
 		assertEquals(0, ourTestSystemProvider.getCount());
@@ -94,7 +92,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
-		assertEquals(2, resources.size());
+		assertThat(resources).hasSize(2);
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
 		validateSubscriptionStatus(subscription, sentEncounter, ss);
@@ -107,11 +105,11 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	@Test
 	public void testUpdate() throws Exception {
 		// WIP SR4B test update, delete, etc
-		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.FINISHED, SubscriptionTopic.InteractionTrigger.CREATE, SubscriptionTopic.InteractionTrigger.UPDATE);
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
-		waitForRegisteredSubscriptionTopicCount(1);
+		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE, SubscriptionTopic.InteractionTrigger.UPDATE);
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
+		waitForRegisteredSubscriptionTopicCount();
 
-		Subscription subscription = createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL);
+		Subscription subscription = createTopicSubscription();
 		waitForActivatedSubscriptionCount(1);
 
 		assertEquals(0, ourTestSystemProvider.getCount());
@@ -119,13 +117,13 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		assertEquals(0, ourTestSystemProvider.getCount());
 
 		sentEncounter.setStatus(Encounter.EncounterStatus.FINISHED);
-		updateEncounter(sentEncounter, true);
+		updateEncounter(sentEncounter);
 
 		assertEquals(1, ourTestSystemProvider.getCount());
 
 		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
-		assertEquals(2, resources.size());
+		assertThat(resources).hasSize(2);
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
 		validateSubscriptionStatus(subscription, sentEncounter, ss);
@@ -142,7 +140,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		assertEquals("1", ss.getEventsSinceSubscriptionStartElement().getValueAsString());
 
 		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
-		assertEquals(1, notificationEvents.size());
+		assertThat(notificationEvents).hasSize(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
 		assertEquals("1", notificationEvent.getEventNumber());
 		assertEquals(sentEncounter.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
@@ -151,8 +149,8 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		assertEquals(SUBSCRIPTION_TOPIC_TEST_URL, ss.getTopic());
 	}
 
-	private Subscription createTopicSubscription(String theTopicUrl) throws InterruptedException {
-		Subscription subscription = newSubscription(theTopicUrl, Constants.CT_FHIR_JSON_NEW);
+	private Subscription createTopicSubscription() throws InterruptedException {
+		Subscription subscription = newSubscription(SubscriptionTopicR4BTest.SUBSCRIPTION_TOPIC_TEST_URL, Constants.CT_FHIR_JSON_NEW);
 		subscription.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL);
 
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
@@ -162,20 +160,20 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		return retval;
 	}
 
-	private void waitForRegisteredSubscriptionTopicCount(int theTarget) throws Exception {
-		await().until(() -> subscriptionTopicRegistryHasSize(theTarget));
+	private void waitForRegisteredSubscriptionTopicCount() {
+		await().until(this::subscriptionTopicRegistryHasOneEntry);
 	}
 
-	private boolean subscriptionTopicRegistryHasSize(int theTarget) {
+	private boolean subscriptionTopicRegistryHasOneEntry() {
 		int size = mySubscriptionTopicRegistry.size();
-		if (size == theTarget) {
+		if (size == 1) {
 			return true;
 		}
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
-		return mySubscriptionTopicRegistry.size() == theTarget;
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
+		return mySubscriptionTopicRegistry.size() == 1;
 	}
 
-	private SubscriptionTopic createEncounterSubscriptionTopic(Encounter.EncounterStatus theFrom, Encounter.EncounterStatus theCurrent, SubscriptionTopic.InteractionTrigger... theInteractionTriggers) throws InterruptedException {
+	private void createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger... theInteractionTriggers) throws InterruptedException {
 		SubscriptionTopic retval = new SubscriptionTopic();
 		retval.setUrl(SUBSCRIPTION_TOPIC_TEST_URL);
 		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -185,13 +183,12 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 			trigger.addSupportedInteraction(interactionTrigger);
 		}
 		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria = trigger.getQueryCriteria();
-		queryCriteria.setPrevious("Encounter?status=" + theFrom.toCode());
-		queryCriteria.setCurrent("Encounter?status=" + theCurrent.toCode());
+		queryCriteria.setPrevious("Encounter?status=" + Encounter.EncounterStatus.PLANNED.toCode());
+		queryCriteria.setCurrent("Encounter?status=" + Encounter.EncounterStatus.FINISHED.toCode());
 		queryCriteria.setRequireBoth(true);
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		mySubscriptionTopicDao.create(retval, mySrd);
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
-		return retval;
 	}
 
 	private Encounter sendEncounterWithStatus(Encounter.EncounterStatus theStatus, boolean theExpectDelivery) throws InterruptedException {
@@ -211,17 +208,12 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		return encounter;
 	}
 
-	private Encounter updateEncounter(Encounter theEncounter, boolean theExpectDelivery) throws InterruptedException {
-		if (theExpectDelivery) {
-			mySubscriptionDeliveredLatch.setExpectedCount(1);
-		}
+	private void updateEncounter(Encounter theEncounter) throws InterruptedException {
+		mySubscriptionDeliveredLatch.setExpectedCount(1);
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
-		Encounter retval = (Encounter) myEncounterDao.update(theEncounter, mySrd).getResource();
+		myEncounterDao.update(theEncounter, mySrd);
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
-		if (theExpectDelivery) {
-			mySubscriptionDeliveredLatch.awaitExpected();
-		}
-		return retval;
+		mySubscriptionDeliveredLatch.awaitExpected();
 	}
 
 	static class TestSystemProvider {

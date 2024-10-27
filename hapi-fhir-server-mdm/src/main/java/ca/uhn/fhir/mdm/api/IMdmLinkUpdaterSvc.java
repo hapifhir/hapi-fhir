@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
+import ca.uhn.fhir.mdm.model.MdmUnduplicateGoldenResourceParams;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IMdmLinkUpdaterSvc {
-	IAnyResource updateLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchResultEnum theMatchResult, MdmTransactionContext theMdmContext);
-	void notDuplicateGoldenResource(IAnyResource theGoldenResource, IAnyResource theTargetGoldenResource, MdmTransactionContext theMdmContext);
+	IAnyResource updateLink(MdmCreateOrUpdateParams theParams);
+
+	void unduplicateGoldenResource(MdmUnduplicateGoldenResourceParams theParams);
 }

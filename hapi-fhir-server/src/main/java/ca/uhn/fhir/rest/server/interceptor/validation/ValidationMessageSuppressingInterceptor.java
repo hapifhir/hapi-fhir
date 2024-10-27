@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,11 +76,11 @@ public class ValidationMessageSuppressingInterceptor {
 		return this;
 	}
 
-
 	@Hook(Pointcut.VALIDATION_COMPLETED)
 	public ValidationResult handle(ValidationResult theResult) {
 
-		List<SingleValidationMessage> newMessages = new ArrayList<>(theResult.getMessages().size());
+		List<SingleValidationMessage> newMessages =
+				new ArrayList<>(theResult.getMessages().size());
 		for (SingleValidationMessage next : theResult.getMessages()) {
 
 			String nextMessage = next.getMessage();
@@ -103,5 +103,4 @@ public class ValidationMessageSuppressingInterceptor {
 
 		return new ValidationResult(theResult.getContext(), newMessages);
 	}
-
 }

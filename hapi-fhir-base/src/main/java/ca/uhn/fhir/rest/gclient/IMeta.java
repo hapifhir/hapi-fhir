@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ package ca.uhn.fhir.rest.gclient;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 
 public interface IMeta {
-	
+
 	/**
 	 * Fetch the current metadata
-	 * 
+	 *
 	 * @param theMetaType The type of the meta datatype for the given FHIR model version (should be <code>MetaDt.class</code> or <code>MetaType.class</code>)
 	 */
 	<T extends IBaseMetaType> IMetaGetUnsourced<T> get(Class<T> theMetaType);
@@ -36,8 +36,7 @@ public interface IMeta {
 	IMetaAddOrDeleteUnsourced add();
 
 	/**
-	 * Delete the elements in the given metadata to the 
+	 * Delete the elements in the given metadata to the
 	 */
 	IMetaAddOrDeleteUnsourced delete();
-
 }

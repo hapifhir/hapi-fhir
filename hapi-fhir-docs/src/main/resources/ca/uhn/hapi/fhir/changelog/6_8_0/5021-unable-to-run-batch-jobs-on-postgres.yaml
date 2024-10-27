@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5021
+title: "Previously, running batch jobs with postgresql as the db will result in SQL error. This has now been fixed."

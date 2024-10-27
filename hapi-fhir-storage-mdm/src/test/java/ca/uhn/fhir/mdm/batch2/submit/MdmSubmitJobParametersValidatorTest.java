@@ -1,10 +1,8 @@
 package ca.uhn.fhir.mdm.batch2.submit;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,10 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -48,9 +44,9 @@ class MdmSubmitJobParametersValidatorTest {
 
 		MdmSubmitJobParameters parameters = new MdmSubmitJobParameters();
 		parameters.addUrl("Practitioner?name=foo");
-		List<String> errors = myValidator.validate(parameters);
-		assertThat(errors, hasSize(1));
-		assertThat(errors.get(0), is(equalTo("Resource type Practitioner is not supported by MDM. Check your MDM settings")));
+		List<String> errors = myValidator.validate(null, parameters);
+		assertThat(errors).hasSize(1);
+		assertEquals("Resource type Practitioner is not supported by MDM. Check your MDM settings", errors.get(0));
 	}
 
 	@Test
@@ -59,9 +55,9 @@ class MdmSubmitJobParametersValidatorTest {
 		when(myMatchUrlService.translateMatchUrl(anyString(), any())).thenThrow(new InvalidRequestException("Can't find death-date!"));
 		MdmSubmitJobParameters parameters = new MdmSubmitJobParameters();
 		parameters.addUrl("Practitioner?death-date=foo");
-		List<String> errors = myValidator.validate(parameters);
-		assertThat(errors, hasSize(1));
-		assertThat(errors.get(0), is(equalTo("Invalid request detected: Can't find death-date!")));
+		List<String> errors = myValidator.validate(null, parameters);
+		assertThat(errors).hasSize(1);
+		assertEquals("Invalid request detected: Can't find death-date!", errors.get(0));
 	}
 
 }

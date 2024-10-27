@@ -3,21 +3,24 @@ package ca.uhn.fhir.jaxrs.server.util;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderDstu3;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 public class JaxRsRequestDstu3Test {
 	
@@ -69,14 +72,14 @@ public class JaxRsRequestDstu3Test {
 
 	@Test
 	public void testGetReader() {
-		assertThrows(UnsupportedOperationException.class, ()->{
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
 			details.getReader();
 		});
 	}
 
 	@Test
 	public void testGetInputStream() {
-		assertThrows(UnsupportedOperationException.class, ()->{
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
 			details.getInputStream();
 		});
 	}

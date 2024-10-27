@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.HapiToHl7OrgDstu2ValidatingSupportWrapper;
@@ -45,6 +47,15 @@ public class ValidationSupportConfig {
 		return new DefaultProfileValidationSupport(theFhirContext);
 	}
 
+	@Bean
+	public InMemoryTerminologyServerValidationSupport inMemoryTerminologyServerValidationSupport(
+			FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
+		InMemoryTerminologyServerValidationSupport retVal =
+				new InMemoryTerminologyServerValidationSupport(theFhirContext);
+		retVal.setIssueSeverityForCodeDisplayMismatch(theStorageSettings.getIssueSeverityForCodeDisplayMismatch());
+		return retVal;
+	}
+
 	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	public JpaValidationSupportChain jpaValidationSupportChain(FhirContext theFhirContext) {
 		return new JpaValidationSupportChain(theFhirContext);
@@ -56,16 +67,23 @@ public class ValidationSupportConfig {
 	}
 
 	@Bean(name = "myInstanceValidator")
-	public IInstanceValidatorModule instanceValidator(FhirContext theFhirContext, CachingValidationSupport theCachingValidationSupport, ValidationSupportChain theValidationSupportChain, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
+	public IInstanceValidatorModule instanceValidator(
+			FhirContext theFhirContext,
+			CachingValidationSupport theCachingValidationSupport,
+			ValidationSupportChain theValidationSupportChain,
+			IValidationSupport theValidationSupport,
+			DaoRegistry theDaoRegistry) {
 		if (theFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 			FhirInstanceValidator val = new FhirInstanceValidator(theCachingValidationSupport);
-			val.setValidatorResourceFetcher(jpaValidatorResourceFetcher(theFhirContext, theValidationSupport, theDaoRegistry));
+			val.setValidatorResourceFetcher(
+					jpaValidatorResourceFetcher(theFhirContext, theValidationSupport, theDaoRegistry));
 			val.setValidatorPolicyAdvisor(jpaValidatorPolicyAdvisor());
 			val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 			val.setValidationSupport(theCachingValidationSupport);
 			return val;
 		} else {
-			CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(new HapiToHl7OrgDstu2ValidatingSupportWrapper(theValidationSupportChain));
+			CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(
+					new HapiToHl7OrgDstu2ValidatingSupportWrapper(theValidationSupportChain));
 			FhirInstanceValidator retVal = new FhirInstanceValidator(cachingValidationSupport);
 			retVal.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 			return retVal;
@@ -74,7 +92,8 @@ public class ValidationSupportConfig {
 
 	@Bean
 	@Lazy
-	public ValidatorResourceFetcher jpaValidatorResourceFetcher(FhirContext theFhirContext, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
+	public ValidatorResourceFetcher jpaValidatorResourceFetcher(
+			FhirContext theFhirContext, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
 		return new ValidatorResourceFetcher(theFhirContext, theValidationSupport, theDaoRegistry);
 	}
 
@@ -83,5 +102,4 @@ public class ValidationSupportConfig {
 	public ValidatorPolicyAdvisor jpaValidatorPolicyAdvisor() {
 		return new ValidatorPolicyAdvisor();
 	}
-
 }

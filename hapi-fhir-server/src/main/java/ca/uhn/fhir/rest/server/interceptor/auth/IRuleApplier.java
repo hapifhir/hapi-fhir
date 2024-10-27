@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,27 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public interface IRuleApplier {
 
 	@Nonnull
 	Logger getTroubleshootingLog();
 
-	Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Pointcut thePointcut);
+	Verdict applyRulesAndReturnDecision(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IBaseResource theInputResource,
+			IIdType theInputResourceId,
+			IBaseResource theOutputResource,
+			Pointcut thePointcut);
 
 	@Nullable
 	IValidationSupport getValidationSupport();
@@ -45,5 +49,6 @@ public interface IRuleApplier {
 	@Nullable
 	default IAuthorizationSearchParamMatcher getSearchParamMatcher() {
 		return null;
-	};
+	}
+	;
 }

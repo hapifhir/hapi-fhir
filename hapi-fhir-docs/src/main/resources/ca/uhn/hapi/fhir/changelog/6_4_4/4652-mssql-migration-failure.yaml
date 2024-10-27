@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4652
+backport: 6.4.5
+title: "Fix for MSSQL migration failure related to Job instance UPDATE_TIME column default value not being set correctly"

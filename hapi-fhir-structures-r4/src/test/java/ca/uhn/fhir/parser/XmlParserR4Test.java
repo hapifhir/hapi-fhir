@@ -1,21 +1,18 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import java.io.IOException;
-import java.net.URL;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.test.BaseTest;
+import ca.uhn.fhir.util.ClasspathUtil;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
@@ -24,15 +21,19 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
+import java.io.IOException;
+import java.net.URL;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.test.BaseTest;
+import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds;
+import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class XmlParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(XmlParserR4Test.class);
@@ -138,7 +139,7 @@ public class XmlParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		int idx = encoded.indexOf(sectionText);
-		assertNotEquals(-1, idx);
+		assertThat(idx).isNotEqualTo(-1);
 	}
 
 	@Test
@@ -157,10 +158,10 @@ public class XmlParserR4Test extends BaseTest {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input);
 
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).contains(
 			"<fullUrl value=\"urn:uuid:0.0.0.0\"/>",
 			"<id value=\"1.1.1.1\"/>"
-		));
+		);
 
 		input = ourCtx.newXmlParser().parseResource(Bundle.class, encoded);
 		assertEquals("urn:uuid:0.0.0.0", input.getEntry().get(0).getFullUrl());
@@ -174,9 +175,22 @@ public class XmlParserR4Test extends BaseTest {
 		String text = Resources.toString(url, Charsets.UTF_8);
 
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, text);
-		
+
 		assertEquals("12346", getPatientIdValue(bundle, 0));
 		assertEquals("12345", getPatientIdValue(bundle, 1));
+	}
+
+	@Test
+	public void testParseResource_withDecimalElementHasLeadingPlus_resourceParsedCorrectly() {
+		// setup
+		String text = ClasspathUtil.loadResource("observation-decimal-element-with-leading-plus.xml");
+
+		// execute
+		Observation observation = ourCtx.newXmlParser().parseResource(Observation.class, text);
+
+		// verify
+		assertEquals("-3.0", observation.getReferenceRange().get(0).getLow().getValueElement().getValueAsString());
+		assertEquals("3.0", observation.getReferenceRange().get(0).getHigh().getValueElement().getValueAsString());
 	}
 
 	private String getPatientIdValue(Bundle input, int entry) {
@@ -192,10 +206,51 @@ public class XmlParserR4Test extends BaseTest {
 	public void testNarrativeLangAttributePreserved() throws IOException {
 		Observation obs = loadResource(ourCtx, Observation.class, "/resource-with-lang-in-narrative.xml");
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(obs);
-		assertThat(encoded, containsString("xmlns=\"http://www.w3.org/1999/xhtml\""));
-		assertThat(encoded, containsString("lang=\"en-US\""));
+		assertThat(encoded).contains("xmlns=\"http://www.w3.org/1999/xhtml\"");
+		assertThat(encoded).contains("lang=\"en-US\"");
 		ourLog.info(encoded);
 	}
+
+	@Test
+	public void testEncodeToString_PrimitiveDataType() {
+		DecimalType object = new DecimalType("123.456000");
+		String expected = "123.456000";
+		String actual = ourCtx.newXmlParser().encodeToString(object);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_Resource() {
+		Patient p = new Patient();
+		p.setId("Patient/123");
+		p.setActive(true);
+		String expected = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"123\"/><active value=\"true\"/></Patient>";
+		String actual = ourCtx.newXmlParser().encodeToString(p);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_GeneralPurposeDataType() {
+		HumanName name = new HumanName();
+		name.setFamily("Simpson").addGiven("Homer").addGiven("Jay");
+		name.addExtension("http://foo", new StringType("bar"));
+
+		String expected = "<element><extension url=\"http://foo\"><valueString value=\"bar\"/></extension><family value=\"Simpson\"/><given value=\"Homer\"/><given value=\"Jay\"/></element>";
+		String actual = ourCtx.newXmlParser().encodeToString(name);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_BackboneElement() {
+		Patient.PatientCommunicationComponent communication = new Patient().addCommunication();
+		communication.setPreferred(true);
+		communication.getLanguage().setText("English");
+
+		String expected = "<element><language><text value=\"English\"/></language><preferred value=\"true\"/></element>";
+		String actual = ourCtx.newXmlParser().encodeToString(communication);
+		assertEquals(expected, actual);
+	}
+
 
 	/**
 	 * Ensure that a contained bundle doesn't cause a crash
@@ -259,6 +314,57 @@ public class XmlParserR4Test extends BaseTest {
 		assertEquals(parameters, parameteresAsString);
 	}
 
+
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = createBundleWithCrossReferenceFullUrlsAndNoIds();
+
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(output);
+
+		assertThat(output).doesNotContain("<contained");
+		assertThat(output).doesNotContain("<id");
+		assertThat(output).containsSubsequence(
+			 "<fullUrl value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>",
+			 "<Patient xmlns=\"http://hl7.org/fhir\">",
+			 "<fullUrl value=\"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"/>",
+			 "<Observation xmlns=\"http://hl7.org/fhir\">",
+			 "<reference value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>"
+		);
+
+	}
+
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters() {
+		Parameters parameters = createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters();
+
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters);
+		ourLog.info(output);
+
+		assertThat(output).doesNotContain("\"contained\"");
+		assertThat(output).doesNotContain("\"id\"");
+		assertThat(output).containsSubsequence(
+			 "<Parameters xmlns=\"http://hl7.org/fhir\">",
+			 "<fullUrl value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>",
+			 "<Patient xmlns=\"http://hl7.org/fhir\">",
+			 "<fullUrl value=\"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"/>",
+			 "<Observation xmlns=\"http://hl7.org/fhir\">",
+			 "<reference value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>"
+		);
+
+	}
+
+	@Test
+	public void testParseBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = createBundleWithCrossReferenceFullUrlsAndNoIds();
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
+
+		Bundle parsedBundle = ourCtx.newXmlParser().parseResource(Bundle.class, encoded);
+		assertEquals("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7", parsedBundle.getEntry().get(0).getFullUrl());
+		assertEquals("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7", parsedBundle.getEntry().get(0).getResource().getId());
+		assertEquals("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb", parsedBundle.getEntry().get(1).getFullUrl());
+		assertEquals("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb", parsedBundle.getEntry().get(1).getResource().getId());
+	}
 
 
 }

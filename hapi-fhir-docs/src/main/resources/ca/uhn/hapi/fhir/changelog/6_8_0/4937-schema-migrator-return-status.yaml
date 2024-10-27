@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4937
+title: "The SQL schema migrator now returns a status flag indicating whether the schema was initialized
+   or not."

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +38,21 @@ public class DelegatingConsentService implements IConsentService {
 	}
 
 	@Override
-	public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+	public boolean shouldProcessCanSeeResource(
+			RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		return myTarget.shouldProcessCanSeeResource(theRequestDetails, theContextServices);
+	}
+
+	@Override
+	public ConsentOutcome canSeeResource(
+			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return myTarget.canSeeResource(theRequestDetails, theResource, theContextServices);
 	}
 
 	@Override
-	public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
-		return myTarget.willSeeResource(theRequestDetails, theResource ,theContextServices);
+	public ConsentOutcome willSeeResource(
+			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		return myTarget.willSeeResource(theRequestDetails, theResource, theContextServices);
 	}
 
 	@Override
@@ -53,7 +61,10 @@ public class DelegatingConsentService implements IConsentService {
 	}
 
 	@Override
-	public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+	public void completeOperationFailure(
+			RequestDetails theRequestDetails,
+			BaseServerResponseException theException,
+			IConsentContextServices theContextServices) {
 		myTarget.completeOperationFailure(theRequestDetails, theException, theContextServices);
 	}
 

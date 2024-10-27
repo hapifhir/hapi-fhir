@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5529
+title: "When using a chained SearchParameter to search within a Bundle as [described here](https://smilecdr.com/docs/fhir_storage_relational/chained_searches_and_sorts.html#document-and-message-search-parameters), if the `Bundle.entry.fullUrl` was fully qualified but the reference was not, the search did not work. This has been corrected."

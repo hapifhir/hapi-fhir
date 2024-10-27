@@ -4,42 +4,45 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ServerSearchDstu2Test {
 
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
 	private static String ourLastMethod;
 	private static StringParam ourLastRef;
 	private static ReferenceParam ourLastRef2;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerSearchDstu2Test.class);
-	private static int ourPort;
-	private static Server ourServer;
+
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		.setDefaultResponseEncoding(EncodingEnum.XML)
+		.registerProvider(new DummyPatientResourceProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(100))
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -50,7 +53,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testReferenceParamMissingFalse() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?param3:missing=false");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?param3:missing=false");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -61,7 +64,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testReferenceParamMissingTrue() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?param3:missing=true");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?param3:missing=true");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -72,7 +75,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testSearchParam1() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?param1=param1value");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?param1=param1value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -83,7 +86,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testSearchParam2() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?param2=param2value&foo=bar");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?param2=param2value&foo=bar");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -94,7 +97,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testSearchParamWithSpace() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?param2=param+value&foo=bar");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?param2=param+value&foo=bar");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -105,7 +108,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testSearchWithEncodedValue() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?param1=" + UrlUtil.escapeUrlParam("Jernelöv"));
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?param1=" + UrlUtil.escapeUrlParam("Jernelöv"));
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -116,41 +119,17 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testUnknownSearchParam() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?foo=bar");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?foo=bar");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(null, ourLastMethod);
+		assertNull(ourLastMethod);
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-
-		servlet.setPlainProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider {

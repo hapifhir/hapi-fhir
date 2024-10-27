@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import java.lang.annotation.Target;
 /**
  * Parameter annotation for the _offset parameter, which indicates to the
  * server the offset of desired results.
- * 
+ *
  * @see History
  */
-@Target(value=ElementType.PARAMETER)
+@Target(value = ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Offset {
-	//nothing
+	// nothing
 }

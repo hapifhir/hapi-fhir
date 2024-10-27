@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,6 @@
 package ca.uhn.fhir.model.dstu2.resource;
 
 import ca.uhn.fhir.i18n.Msg;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
 import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -50,6 +37,18 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.util.ElementUtil;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 public abstract class BaseResource extends BaseElement implements IResource {
 
@@ -62,16 +61,15 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	 * </p>
 	 */
 	public static final StringClientParam RES_ID = new StringClientParam(BaseResource.SP_RES_ID);
-	
+
 	/**
 	 * Search parameter constant for <b>_id</b>
 	 */
-	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="string"  )
+	@SearchParamDefinition(name = "_id", path = "", description = "The ID of the resource", type = "string")
 	public static final String SP_RES_ID = "_id";
 
 	@Child(name = "contained", order = 2, min = 0, max = 1)
 	private ContainedDt myContained;
-
 
 	private IdDt myId;
 
@@ -136,7 +134,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 			public IBaseCoding addSecurity() {
 				List<BaseCodingDt> tagList = ResourceMetadataKeyEnum.SECURITY_LABELS.get(BaseResource.this);
 				if (tagList == null) {
-					tagList = new ArrayList<BaseCodingDt>();
+					tagList = new ArrayList<>();
 					ResourceMetadataKeyEnum.SECURITY_LABELS.put(BaseResource.this, tagList);
 				}
 				CodingDt tag = new CodingDt();
@@ -187,7 +185,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 
 			@Override
 			public List<? extends IPrimitiveType<String>> getProfile() {
-				ArrayList<IPrimitiveType<String>> retVal = new ArrayList<IPrimitiveType<String>>();
+				ArrayList<IPrimitiveType<String>> retVal = new ArrayList<>();
 				List<IdDt> profilesList = ResourceMetadataKeyEnum.PROFILES.get(BaseResource.this);
 				if (profilesList == null) {
 					return Collections.emptyList();
@@ -195,20 +193,26 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				for (IdDt next : profilesList) {
 					retVal.add(next);
 				}
-				return Collections.unmodifiableList(retVal);
+				return retVal;
 			}
 
 			@Override
 			public List<? extends IBaseCoding> getSecurity() {
-				ArrayList<CodingDt> retVal = new ArrayList<CodingDt>();
+				ArrayList<CodingDt> retVal = new ArrayList<>();
 				List<BaseCodingDt> labelsList = ResourceMetadataKeyEnum.SECURITY_LABELS.get(BaseResource.this);
 				if (labelsList == null) {
 					return Collections.emptyList();
 				}
 				for (BaseCodingDt next : labelsList) {
-					retVal.add(new CodingDt(next.getSystemElement().getValue(), next.getCodeElement().getValue()).setDisplay(next.getDisplayElement().getValue()));
+					CodingDt c = new CodingDt(
+							next.getSystemElement().getValue(),
+							next.getCodeElement().getValue());
+					c.setDisplay(next.getDisplayElement().getValue());
+					c.setUserSelected(next.getUserSelectedElement());
+					c.setVersion(next.getVersionElement());
+					retVal.add(c);
 				}
-				return Collections.unmodifiableList(retVal);
+				return retVal;
 			}
 
 			@Override
@@ -223,7 +227,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 
 			@Override
 			public List<? extends IBaseCoding> getTag() {
-				ArrayList<IBaseCoding> retVal = new ArrayList<IBaseCoding>();
+				ArrayList<IBaseCoding> retVal = new ArrayList<>();
 				TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(BaseResource.this);
 				if (tagList == null) {
 					return Collections.emptyList();
@@ -231,7 +235,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				for (Tag next : tagList) {
 					retVal.add(next);
 				}
-				return Collections.unmodifiableList(retVal);
+				return retVal;
 			}
 
 			@Override
@@ -305,7 +309,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	public void setContained(ContainedDt theContained) {
 		myContained = theContained;
 	}
-	
+
 	@Override
 	public void setId(IdDt theId) {
 		myId = theId;
@@ -354,5 +358,4 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		b.append("id", getId().toUnqualified());
 		return b.toString();
 	}
-
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,9 @@ public class ResponseTerminologyTranslationInterceptor extends BaseResponseTermi
 	 *
 	 * @param theValidationSupport The validation support module
 	 */
-	public ResponseTerminologyTranslationInterceptor(IValidationSupport theValidationSupport, ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
+	public ResponseTerminologyTranslationInterceptor(
+			IValidationSupport theValidationSupport,
+			ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
 		super(theValidationSupport);
 		myResponseTerminologyTranslationSvc = theResponseTerminologyTranslationSvc;
 	}

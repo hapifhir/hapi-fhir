@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,45 +19,49 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(
-	name = "HFJ_RES_TAG",
-   indexes = {
-		@Index(name = "IDX_RES_TAG_RES_TAG", columnList = "RES_ID, TAG_ID, PARTITION_ID"),
-		@Index(name = "IDX_RES_TAG_TAG_RES", columnList = "TAG_ID, RES_ID, PARTITION_ID")
-	},
-	uniqueConstraints = { @UniqueConstraint(name = "IDX_RESTAG_TAGID", columnNames = {"RES_ID", "TAG_ID"})
-})
+		name = "HFJ_RES_TAG",
+		indexes = {
+			@Index(name = "IDX_RES_TAG_RES_TAG", columnList = "RES_ID, TAG_ID, PARTITION_ID"),
+			@Index(name = "IDX_RES_TAG_TAG_RES", columnList = "TAG_ID, RES_ID, PARTITION_ID")
+		},
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_RESTAG_TAGID",
+					columnNames = {"RES_ID", "TAG_ID"})
+		})
 public class ResourceTag extends BaseTag {
 
 	private static final long serialVersionUID = 1L;
 
-	@SequenceGenerator(name = "SEQ_RESTAG_ID", sequenceName = "SEQ_RESTAG_ID")
+	@GenericGenerator(name = "SEQ_RESTAG_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESTAG_ID")
 	@Id
 	@Column(name = "PID")
 	private Long myId;
 
-	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
+	@ManyToOne(
+			cascade = {},
+			fetch = FetchType.LAZY)
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_RESTAG_RESOURCE"))
 	private ResourceTable myResource;
 
@@ -77,7 +81,8 @@ public class ResourceTag extends BaseTag {
 	/**
 	 * Constructor
 	 */
-	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId) {
+	public ResourceTag(
+			ResourceTable theResourceTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId) {
 		setTag(theTag);
 		setResource(theResourceTable);
 		setResourceId(theResourceTable.getId());
@@ -145,5 +150,4 @@ public class ResourceTag extends BaseTag {
 		b.append("tag", getTag().getId());
 		return b.build();
 	}
-
 }

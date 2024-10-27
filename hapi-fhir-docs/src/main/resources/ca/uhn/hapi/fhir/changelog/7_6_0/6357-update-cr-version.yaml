@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6357
+title: Upgrade the Clinical Reasoning module to the latest release of 3.13.0. This update comes with several changes
+    and feature enhancements to CPG and dQM clinical-reasoning operations. Please review associated ticket and upgrade.md
+    for detailed list of changes.

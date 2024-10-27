@@ -40,8 +40,8 @@ public class ${className}ResourceProvider extends
 
 	@Search(allowUnknownParams=true)
 	public ca.uhn.fhir.rest.api.server.IBundleProvider search(
-			javax.servlet.http.HttpServletRequest theServletRequest,
-			javax.servlet.http.HttpServletResponse theServletResponse,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletResponse theServletResponse,
 
 			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
 
@@ -68,6 +68,14 @@ public class ${className}ResourceProvider extends
 			@Description(shortDefinition="Search for resources which have the given profile")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE)
 			UriAndListParam theSearchForProfile,
+
+			@Description(shortDefinition="Search the contents of the resource's data using a list")
+			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_LIST)
+			StringAndListParam theList,
+
+			@Description(shortDefinition="The language of the resource")
+			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_LANGUAGE)
+			TokenAndListParam theResourceLanguage,
 
 			@Description(shortDefinition="Search for resources which have the given source value (Resource.meta.source)")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE)
@@ -113,9 +121,12 @@ public class ${className}ResourceProvider extends
 			@RawParam
 			Map<String, List<String>> theAdditionalRawParams,
 
+	##DSTU2 is not an IAnyResource, yet supports LastUpdated, so we keep the magic SP in this case.
+	#if ( $version == 'dstu2' )
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 			@OptionalParam(name="_lastUpdated")
-			DateRangeParam theLastUpdated, 
+			DateRangeParam the_lastUpdated,
+	#end
 
 			@IncludeParam
 			Set<Include> theIncludes,
@@ -149,13 +160,23 @@ public class ${className}ResourceProvider extends
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_SECURITY, theSearchForSecurity);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE, theSearchForProfile);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE, theSearchForSource);
+			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_LIST, theList);
+			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_LANGUAGE, theResourceLanguage);
+
 			paramMap.add("_has", theHas);
-#foreach ( $param in $searchParams ) 
-			paramMap.add("${param.name}", the${param.nameCapitalized});
+#foreach ( $param in $searchParams )
+			#if( ${param.name} == "_lastUpdated")
+				## Skip Last Updated since its handled by param defined below.
+			#else
+				paramMap.add("${param.name}", the${param.nameCapitalized});
+			#end
 #end
 #if ( $version != 'dstu' )
-			paramMap.setRevIncludes(theRevIncludes);
-			paramMap.setLastUpdated(theLastUpdated);
+paramMap.setRevIncludes(theRevIncludes);
+## Note that since we have added an SearchParamDefinition on IAnyResource for this, we had to remove
+## the magic _lastUpdated that was previously hardcoded as an OperationParam. However, we still need to populate
+## This special variable in the SP map.
+			paramMap.setLastUpdated(the_lastUpdated);
 #end
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);

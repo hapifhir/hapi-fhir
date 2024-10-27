@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +86,6 @@ public class DropForeignKeyTask extends BaseTableTask {
 		Validate.isTrue(isNotBlank(myConstraintName));
 		Validate.isTrue(isNotBlank(myParentTableName));
 		setDescription("Drop foreign key " + myConstraintName + " from table " + getTableName());
-
 	}
 
 	@Override
@@ -103,7 +102,6 @@ public class DropForeignKeyTask extends BaseTableTask {
 		for (String next : sqls) {
 			executeSql(getTableName(), next);
 		}
-
 	}
 
 	@Override

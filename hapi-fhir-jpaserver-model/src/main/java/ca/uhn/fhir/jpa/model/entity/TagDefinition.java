@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,39 +19,42 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.Collection;
 
 @Entity
 @Table(
-	name = "HFJ_TAG_DEF",
-	indexes = {
-		@Index(name = "IDX_TAG_DEF_TP_CD_SYS", columnList = "TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_ID, TAG_VERSION, TAG_USER_SELECTED"),
-	}
-)
+		name = "HFJ_TAG_DEF",
+		indexes = {
+			@Index(
+					name = "IDX_TAG_DEF_TP_CD_SYS",
+					columnList = "TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_ID, TAG_VERSION, TAG_USER_SELECTED"),
+		})
 public class TagDefinition implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
 	@Column(name = "TAG_CODE", length = 200)
 	private String myCode;
 
@@ -64,10 +67,18 @@ public class TagDefinition implements Serializable {
 	@Column(name = "TAG_ID")
 	private Long myId;
 
-	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myTag")
+	// one tag definition -> many resource tags
+	@OneToMany(
+			cascade = {},
+			fetch = FetchType.LAZY,
+			mappedBy = "myTag")
 	private Collection<ResourceTag> myResources;
 
-	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myTag")
+	// one tag definition -> many history
+	@OneToMany(
+			cascade = {},
+			fetch = FetchType.LAZY,
+			mappedBy = "myTag")
 	private Collection<ResourceHistoryTag> myResourceVersions;
 
 	@Column(name = "TAG_SYSTEM", length = 200)
@@ -75,6 +86,7 @@ public class TagDefinition implements Serializable {
 
 	@Column(name = "TAG_TYPE", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
+	@JdbcTypeCode(SqlTypes.INTEGER)
 	private TagTypeEnum myTagType;
 
 	@Column(name = "TAG_VERSION", length = 30)
@@ -159,7 +171,7 @@ public class TagDefinition implements Serializable {
 
 	/**
 	 * Warning - this is nullable, while IBaseCoding getUserSelected isn't.
-	 * wipmb maybe rename?
+	 * todo maybe rename?
 	 */
 	public Boolean getUserSelected() {
 		return myUserSelected;
@@ -168,7 +180,6 @@ public class TagDefinition implements Serializable {
 	public void setUserSelected(Boolean theUserSelected) {
 		myUserSelected = theUserSelected;
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {

@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.7.1-SNAPSHOT</version>
+		<version>7.7.0-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -60,20 +60,11 @@
 					<groupId>junit</groupId>
 					<artifactId>junit</artifactId>
 				</exclusion>
-				<!-- remove xpp3 fat jar and replace it with non-bundled versions -->
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3</artifactId>
-				</exclusion>
+
 			</exclusions>
 		</dependency>
 
-		<!-- These two dependencies replaces the version of xpp3 that's bundled with Ucum with one that's Java 9+ compatible -->
-		<dependency>
-			<groupId>org.codelibs</groupId>
-			<artifactId>xpp3</artifactId>
-			<version>1.1.4c.0</version>
-		</dependency>
+
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -87,6 +78,12 @@
 			<groupId>info.debatty</groupId>
 			<artifactId>java-string-similarity</artifactId>
 			<version>1.2.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>net.jcip</groupId>
+					<artifactId>jcip-annotations</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

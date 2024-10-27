@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ViewGeneratorTest {
@@ -46,13 +47,13 @@ public class ViewGeneratorTest {
 		assertEquals("id2", nonExt.getIdentifier().get(1).getValue());
 
 		List<Extension> ext = nonExt.getExtensionsByUrl("urn:ext");
-		assertEquals(1, ext.size());
+		assertThat(ext).hasSize(1);
 		assertEquals("urn:ext", ext.get(0).getUrl());
 		assertEquals(IntegerType.class, ext.get(0).getValueAsPrimitive().getClass());
 		assertEquals("100", ext.get(0).getValueAsPrimitive().getValueAsString());
 
 		List<Extension> modExt = nonExt.getExtensionsByUrl("urn:modExt");
-		assertEquals(1, modExt.size());
+		assertThat(modExt).hasSize(1);
 		assertEquals("urn:modExt", modExt.get(0).getUrl());
 		assertEquals(IntegerType.class, modExt.get(0).getValueAsPrimitive().getClass());
 		assertEquals("200", modExt.get(0).getValueAsPrimitive().getValueAsString());
@@ -65,7 +66,7 @@ public class ViewGeneratorTest {
 		assertEquals(100, va.getExt().getValue().intValue());
 		assertEquals(200, va.getModExt().getValue().intValue());
 
-		assertEquals(0, va.getExtension().size());
+		assertThat(va.getExtension()).isEmpty();
 	}
 
 	@Test
@@ -91,13 +92,13 @@ public class ViewGeneratorTest {
 		assertEquals("id2", nonExt.getIdentifier().get(1).getValue());
 
 		List<Extension> ext = nonExt.getExtensionsByUrl("urn:ext");
-		assertEquals(1, ext.size());
+		assertThat(ext).hasSize(1);
 		assertEquals("urn:ext", ext.get(0).getUrl());
 		assertEquals(IntegerType.class, ext.get(0).getValueAsPrimitive().getClass());
 		assertEquals("100", ext.get(0).getValueAsPrimitive().getValueAsString());
 
 		List<Extension> modExt = nonExt.getExtensionsByUrl("urn:modExt");
-		assertEquals(1, modExt.size());
+		assertThat(modExt).hasSize(1);
 		assertEquals("urn:modExt", modExt.get(0).getUrl());
 		assertEquals(IntegerType.class, modExt.get(0).getValueAsPrimitive().getClass());
 		assertEquals("200", modExt.get(0).getValueAsPrimitive().getValueAsString());
@@ -110,7 +111,7 @@ public class ViewGeneratorTest {
 		assertEquals(100, va.getExt().getValue().intValue());
 		assertEquals(200, va.getModExt().getValue().intValue());
 
-		assertEquals(0, va.getExtension().size());
+		assertThat(va.getExtension()).isEmpty();
 	}
 
 }

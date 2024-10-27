@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,30 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import jakarta.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 
 public interface IValueSetConceptAccumulator {
 
 	void addMessage(String theMessage);
 
-	void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, @Nullable String theSystemVersion);
+	void includeConcept(
+			String theSystem,
+			String theCode,
+			String theDisplay,
+			Long theSourceConceptPid,
+			String theSourceConceptDirectParentPids,
+			@Nullable String theSystemVersion);
 
-	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids, @Nullable String theSystemVersion);
+	void includeConceptWithDesignations(
+			String theSystem,
+			String theCode,
+			String theDisplay,
+			@Nullable Collection<TermConceptDesignation> theDesignations,
+			Long theSourceConceptPid,
+			String theSourceConceptDirectParentPids,
+			@Nullable String theSystemVersion);
 
 	/**
 	 * @return Returns <code>true</code> if the code was actually present and was removed
@@ -67,5 +80,4 @@ public interface IValueSetConceptAccumulator {
 	default void incrementOrDecrementTotalConcepts(boolean theAdd, int theDelta) {
 		// nothing
 	}
-
 }

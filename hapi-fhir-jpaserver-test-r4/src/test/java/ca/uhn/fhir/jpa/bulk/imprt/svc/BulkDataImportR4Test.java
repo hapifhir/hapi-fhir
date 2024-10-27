@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.bulk.imprt.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -26,7 +29,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -44,7 +46,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorChannelInterceptor;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -53,11 +55,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig.BULK_IMPORT_JOB_NAME;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -144,9 +142,9 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 			HashSet<StatusEnum> failed = new HashSet<>();
 			failed.add(StatusEnum.FAILED);
 			failed.add(StatusEnum.ERRORED);
-			assertTrue(failed.contains(instance.getStatus()), instance.getStatus() + " is the actual status");
+			assertThat(failed.contains(instance.getStatus())).as(instance.getStatus() + " is the actual status").isTrue();
 			String errorMsg = instance.getErrorMessage();
-			assertThat(errorMsg, Matchers.containsString("Too many errors"));
+			assertThat(errorMsg).contains("Too many errors");
 		} finally {
 			myWorkChannel.clearInterceptorsForUnitTest();
 		}
@@ -211,9 +209,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 				.distinct()
 				.sorted()
 				.collect(Collectors.toList());
-			assertThat(tenantNames, containsInAnyOrder(
-				"TENANT0", "TENANT1", "TENANT2", "TENANT3", "TENANT4", "TENANT5", "TENANT6", "TENANT7", "TENANT8", "TENANT9"
-			));
+			assertThat(tenantNames).containsExactlyInAnyOrder("TENANT0", "TENANT1", "TENANT2", "TENANT3", "TENANT4", "TENANT5", "TENANT6", "TENANT7", "TENANT8", "TENANT9");
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
@@ -246,7 +242,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	public void testJobsAreRegisteredWithJobRegistry() {
 		Optional<JobDefinition<?>> jobDefinitionOp = myJobDefinitionRegistry.getLatestJobDefinition(BULK_IMPORT_JOB_NAME);
 
-		assertTrue(jobDefinitionOp.isPresent());
+		assertThat(jobDefinitionOp).isPresent();
 	}
 
 	@Interceptor

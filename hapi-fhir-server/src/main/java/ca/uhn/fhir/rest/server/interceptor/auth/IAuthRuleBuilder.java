@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Used by {@link AuthorizationInterceptor} in order to allow user code to define authorization
  * rules.
- * 
+ *
  * @see AuthorizationInterceptor
  */
 public interface IAuthRuleBuilder {
@@ -36,7 +36,7 @@ public interface IAuthRuleBuilder {
 
 	/**
 	 * Start a new rule to allow a given operation
-	 * 
+	 *
 	 * @param theRuleName
 	 *           The name of this rule. The rule name is used for logging and error messages,
 	 *           and could be shown to the client, but has no semantic meaning within
@@ -80,7 +80,7 @@ public interface IAuthRuleBuilder {
 
 	/**
 	 * Start a new rule to deny a given operation
-	 * 
+	 *
 	 * @param theRuleName
 	 *           The name of this rule. The rule name is used for logging and error messages,
 	 *           and could be shown to the client, but has no semantic meaning within
@@ -111,5 +111,4 @@ public interface IAuthRuleBuilder {
 	 *           HAPI FHIR.
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished denyAll(String theRuleName);
-
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,7 +31,7 @@ import java.util.Map;
 
 /**
  * Implementations of this interface represent a response back to the client from the server. It is
- * conceptually similar to {@link javax.servlet.http.HttpServletResponse} but intended to be agnostic
+ * conceptually similar to {@link jakarta.servlet.http.HttpServletResponse} but intended to be agnostic
  * of the server framework being used.
  * <p>
  * This class is a bit of an awkward abstraction given the two styles of servers it supports.
@@ -59,7 +60,8 @@ public interface IRestfulResponse {
 	 * @return Returns a {@link Writer} that can accept the response body.
 	 */
 	@Nonnull
-	Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) throws IOException;
+	Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip)
+			throws IOException;
 
 	/**
 	 * Initiate a new binary response. The OutputStream returned by this method must be finalized by
@@ -79,7 +81,8 @@ public interface IRestfulResponse {
 	 * @return Returns an {@link OutputStream} that can accept the response body.
 	 */
 	@Nonnull
-	OutputStream getResponseOutputStream(int theStatusCode, String theContentType, @Nullable Integer theContentLength) throws IOException;
+	OutputStream getResponseOutputStream(int theStatusCode, String theContentType, @Nullable Integer theContentLength)
+			throws IOException;
 
 	/**
 	 * Finalizes the response streaming using the writer that was returned by calling either
@@ -105,10 +108,8 @@ public interface IRestfulResponse {
 	 */
 	void addHeader(String headerKey, String headerValue);
 
-
 	/**
 	 * Returns the headers added to this response
 	 */
 	Map<String, List<String>> getHeaders();
-
 }

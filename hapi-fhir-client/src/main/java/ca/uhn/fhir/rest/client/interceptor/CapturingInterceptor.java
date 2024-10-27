@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class CapturingInterceptor {
 
 	@Hook(value = Pointcut.CLIENT_RESPONSE, order = InterceptorOrders.CAPTURING_INTERCEPTOR_RESPONSE)
 	public void interceptResponse(IHttpResponse theResponse) {
-		//Buffer the reponse to avoid errors when content has already been read and the entity is not repeatable
+		// Buffer the reponse to avoid errors when content has already been read and the entity is not repeatable
 		bufferResponse(theResponse);
 
 		myLastResponse = theResponse;
@@ -86,5 +86,4 @@ public class CapturingInterceptor {
 			throw new InternalErrorException(Msg.code(1404) + "Unable to buffer the entity for capturing", e);
 		}
 	}
-
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.config;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,11 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
+import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.persistence.EntityManagerFactory;
 
 @Configuration
 public class EnversAuditConfig {
@@ -39,5 +38,4 @@ public class EnversAuditConfig {
 	AuditReader auditReader() {
 		return AuditReaderFactory.get(myEntityManagerFactory.createEntityManager());
 	}
-
 }

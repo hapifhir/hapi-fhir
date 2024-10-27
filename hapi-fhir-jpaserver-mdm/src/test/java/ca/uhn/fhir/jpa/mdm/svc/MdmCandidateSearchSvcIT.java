@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
+import ca.uhn.fhir.jpa.nickname.INicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
@@ -18,13 +19,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -37,11 +36,15 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 	@Autowired
 	MatchUrlService myMatchUrlService;
 
+	@Autowired
+	INicknameSvc myNicknameSvc;
+
 	private NicknameInterceptor myNicknameInterceptor;
 
 	@BeforeEach
-	public void before() throws IOException {
-		myNicknameInterceptor = new NicknameInterceptor();
+	public void before() throws Exception {
+		super.before();
+		myNicknameInterceptor = new NicknameInterceptor(myNicknameSvc);
 		myInterceptorRegistry.registerInterceptor(myNicknameInterceptor);
 	}
 
@@ -57,7 +60,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJanePatient();
 
 		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
-		assertEquals(1, result.size());
+		assertThat(result).hasSize(1);
 	}
 
 	@Test
@@ -84,7 +87,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			nick.getNameFirstRep().addGiven("Bill");
 			nick.getNameFirstRep().setFamily("Shatner");
 			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", nick, RequestPartitionId.allPartitions());
-			assertEquals(1, result.size());
+			assertThat(result).hasSize(1);
 		}
 
 		{
@@ -93,7 +96,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			noMatch.getNameFirstRep().addGiven("Bob");
 			noMatch.getNameFirstRep().setFamily("Shatner");
 			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", noMatch, RequestPartitionId.allPartitions());
-			assertEquals(0, result.size());
+			assertThat(result).isEmpty();
 		}
 	}
 
@@ -108,7 +111,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJaneWithBirthday(today);
 
 		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
-		assertEquals(1, result.size());
+		assertThat(result).hasSize(1);
 	}
 
 	@Test
@@ -126,7 +129,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		incomingPatient.setGeneralPractitioner(Collections.singletonList(new Reference(practitionerAndUpdateLinks.getId())));
 
 		Collection<IAnyResource> patient = myMdmCandidateSearchSvc.findCandidates("Patient", incomingPatient, RequestPartitionId.allPartitions());
-		assertThat(patient, hasSize(1));
+		assertThat(patient).hasSize(1);
 	}
 
 	@Test
@@ -145,7 +148,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
 			fail();
 		} catch (TooManyCandidatesException e) {
-			assertEquals("HAPI-0762: More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching.", e.getMessage());
+			assertEquals("HAPI-0762: More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching. Updating the candidate search parameters is strongly recommended for better performance of MDM.", e.getMessage());
 		}
 	}
 

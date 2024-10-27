@@ -22,15 +22,11 @@ Below are some simplifying principles HAPI MDM follows to reduce complexity and 
 
 1. The only source resources in the system that do not have a MATCH link are those that have the 'NO-MDM' tag or those that have POSSIBLE_MATCH links pending review.
 
-1. The HAPI MDM rules define a single identifier system that holds the external enterprise id ("EID"). If a source resource has an external EID, then the Golden Resource it links to always has the same EID. If a source resource has no EID when it arrives, a unique UUID will be assigned as that source resource's EID.
-
-1. A Golden Resource can have both an internal EID (auto-created by HAPI), and an external EID (provided by an 
-external system).
+1. The HAPI MDM rules define a single identifier system that holds the external enterprise id ("EID"). If a source resource has an external EID, then the Golden Resource it links to always has the same EID.
 
 1. Two different Golden Resources cannot have the same EID.
 
 1. Source resources are only ever compared to Golden Resources via this EID.
-
 
 ## Meta Tags
 
@@ -86,13 +82,24 @@ possible that hundreds of John Doe's could be linked to the same Golden Resource
 
 When a new source resource is compared with all other resources of the same type in the repository, there are four possible outcomes:
 
-* CASE 1: No MATCH and no POSSIBLE_MATCH outcomes -> a new Golden Resource is created and linked to that source resource as MATCH. If the incoming resource has an EID, it is copied to the Golden Resource. Otherwise a new UUID is generated and used as the internal EID.
+* CASE 1: No MATCH and no POSSIBLE_MATCH outcomes -> a new Golden Resource is created and linked to that source resource as MATCH. If the incoming resource has an EID, it is copied to the Golden Resource.
 
 * CASE 2: All of the MATCH source resources are already linked to the same Golden Resource -> a new Link is created between the new source resource and that Golden Resource and is set to MATCH.
 
 * CASE 3: The MATCH source resources link to more than one Golden Resource -> Mark all links as POSSIBLE_MATCH.  All other Golden Resources are marked as POSSIBLE_DUPLICATE of this first Golden Resource. These duplicates are manually reviewed later and either merged or marked as NO_MATCH and the system will no longer consider them as a POSSIBLE_DUPLICATE going forward. POSSIBLE_DUPLICATE is the only link type that can have a Golden Resource as both the source and target of the link.
 
 * CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, new POSSIBLE_MATCH links are created and await manual reassignment to either NO_MATCH or MATCH.
+
+### MDM and Resource Deletion
+By default, when the last source resource in a `MATCH` relationship with a golden resource is deleted, the associated golden resource is permanently (hard) deleted. This prevents orphaned golden resources that remain in the database. Note that this will also delete the respective MDM link history. Here are several scenarios and their associated behaviour, we will define SR as a source resource and GR as a golden resource:
+
+* There is a 1 to 1 `MATCH` relationship between SR/1 and GR/1 -> when SR/1 is deleted, GR/1 is also deleted. 
+
+* GR/1 has a `MATCH` link with SR/1, and a `POSSIBLE_MATCH` link with SR/2 -> when SR/1 is deleted, all links are deleted and GR/1 is deleted. Additionally, SR/2 is re-submitted for matching, meaning a new GR could be created or it could match with another GR. 
+
+* GR/1 has a `MATCH` link with SR/1, a `POSSIBLE_MATCH` link with SR/2, and a `POSSIBLE_DUPLICATE` with GR/2. Additionally, GR/2 has a `MATCH` with SR/3, a `POSSIBLE_MACH` with SR/2 -> when SR/1 is deleted, all links associated with GR/1, including the `POSSIBLE_DUPLICATE` link, are deleted. SR/2 maintains its `POSSIBLE_MATCH` relation with GR/2. Finally, GR/1 is deleted.
+
+This behaviour can be changed from the default of hard deleting to soft deleting by setting [setAutoExpungeGoldenResources(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setAutoExpungeGoldenResources(boolean)) to false. Soft deleting the golden resource means the golden resource will continue to persist in the database, but the MDM link history for the affected link(s) will still be accessible, which may be useful for auditing.
 
 # HAPI MDM Technical Details
 

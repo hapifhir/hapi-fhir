@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,29 +28,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(
+		creatorVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CodeJson {
 
-    @JsonProperty(value = "codeable_concept_id", required = false)
-    private String myCodeableConceptId;
+	@JsonProperty(value = "codeable_concept_id", required = false)
+	private String myCodeableConceptId;
 
-    @JsonProperty(value = "text", required = false)
-    private String myCodeableConceptText;
+	@JsonProperty(value = "text", required = false)
+	private String myCodeableConceptText;
 
-    @JsonProperty(value = "codingcode", required = false)
-    private List<String> myCoding_code = new ArrayList<>();
+	@JsonProperty(value = "codingcode", required = false)
+	private List<String> myCoding_code = new ArrayList<>();
 
-    @JsonProperty(value = "codingcode_system_hash", required = true)
-    private List<String> myCoding_code_system_hash = new ArrayList<>();
+	@JsonProperty(value = "codingcode_system_hash", required = true)
+	private List<String> myCoding_code_system_hash = new ArrayList<>();
 
-    @JsonProperty(value = "codingdisplay", required = false)
-    private List<String> myCoding_display = new ArrayList<>();
+	@JsonProperty(value = "codingdisplay", required = false)
+	private List<String> myCoding_display = new ArrayList<>();
 
-    @JsonProperty(value = "codingsystem", required = false)
-    private List<String> myCoding_system = new ArrayList<>();
+	@JsonProperty(value = "codingsystem", required = false)
+	private List<String> myCoding_system = new ArrayList<>();
 
-    public CodeJson(){
-    }
+	public CodeJson() {}
 
 	public void setCodeableConceptId(String theCodeableConceptId) {
 		myCodeableConceptId = theCodeableConceptId;
@@ -64,30 +68,30 @@ public class CodeJson {
 	}
 
 	public String getCodeableConceptId() {
-        return myCodeableConceptId;
-    }
+		return myCodeableConceptId;
+	}
 
-    public void setCodeableConceptText(String theCodeableConceptText) {
+	public void setCodeableConceptText(String theCodeableConceptText) {
 		myCodeableConceptText = theCodeableConceptText;
-	 }
+	}
 
-	 public String getCodeableConceptText() {
-        return myCodeableConceptText;
-    }
+	public String getCodeableConceptText() {
+		return myCodeableConceptText;
+	}
 
-    public List<String> getCoding_code() {
-        return myCoding_code;
-    }
+	public List<String> getCoding_code() {
+		return myCoding_code;
+	}
 
 	public List<String> getCoding_code_system_hash() {
-        return myCoding_code_system_hash;
-    }
+		return myCoding_code_system_hash;
+	}
 
 	public List<String> getCoding_display() {
-        return myCoding_display;
-    }
+		return myCoding_display;
+	}
 
-    public List<String> getCoding_system() {
-        return myCoding_system;
-    }
+	public List<String> getCoding_system() {
+		return myCoding_system;
+	}
 }

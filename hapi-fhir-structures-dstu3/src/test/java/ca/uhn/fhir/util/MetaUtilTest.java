@@ -1,10 +1,11 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MetaUtilTest {
 	FhirContext ourFhirContext = FhirContext.forDstu3();

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.tinder;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystem;
@@ -19,9 +19,23 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ValueSetGenerator {
 
@@ -52,7 +66,6 @@ public class ValueSetGenerator {
 			addDefinedConcept(vs, system, nextChild);
 		}
 	}
-
 
 	public String getClassForValueSetIdAndMarkAsNeeded(String theId) {
 		ValueSetTm vs = myValueSets.get(theId);
@@ -94,9 +107,11 @@ public class ValueSetGenerator {
 		}
 		String vs = IOUtils.toString(is, Charset.defaultCharset());
 		if ("dstu2".equals(myVersion)) {
-			ca.uhn.fhir.model.dstu2.resource.Bundle bundle = newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, vs);
+			ca.uhn.fhir.model.dstu2.resource.Bundle bundle =
+					newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, vs);
 			for (Entry nextEntry : bundle.getEntry()) {
-				ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs = (ca.uhn.fhir.model.dstu2.resource.ValueSet) nextEntry.getResource();
+				ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs =
+						(ca.uhn.fhir.model.dstu2.resource.ValueSet) nextEntry.getResource();
 				parseValueSet(nextVs);
 			}
 		} else {
@@ -113,7 +128,8 @@ public class ValueSetGenerator {
 					ValueSet nextVs = (ValueSet) newXmlParser.parseResource(ValueSet.class, vs);
 					tm = parseValueSet(nextVs);
 				} else {
-					ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs = (ca.uhn.fhir.model.dstu2.resource.ValueSet) newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.ValueSet.class, vs);
+					ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs = (ca.uhn.fhir.model.dstu2.resource.ValueSet)
+							newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.ValueSet.class, vs);
 					tm = parseValueSet(nextVs);
 				}
 				if (tm != null) {
@@ -121,18 +137,19 @@ public class ValueSetGenerator {
 				}
 			}
 		}
-		
+
 		/*
-		 *	Purge empty valuesets 
+		 *	Purge empty valuesets
 		 */
-		for (Iterator<java.util.Map.Entry<String, ValueSetTm>> iter = myValueSets.entrySet().iterator(); iter.hasNext(); ) {
+		for (Iterator<java.util.Map.Entry<String, ValueSetTm>> iter =
+						myValueSets.entrySet().iterator();
+				iter.hasNext(); ) {
 			java.util.Map.Entry<String, ValueSetTm> next = iter.next();
 			if (next.getValue().getCodes().isEmpty()) {
 				iter.remove();
 				continue;
 			}
 		}
-		
 
 		// File[] files = new
 		// File(myResourceValueSetFiles).listFiles((FilenameFilter) new
@@ -148,7 +165,8 @@ public class ValueSetGenerator {
 
 	private ValueSetTm parseValueSet(ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs) {
 		myConceptCount += nextVs.getCodeSystem().getConcept().size();
-		ourLog.debug("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName(), myConceptCount);
+		ourLog.debug(
+				"Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName(), myConceptCount);
 		// output.addConcept(next.getCode().getValue(),
 		// next.getDisplay().getValue(), next.getDefinition());
 
@@ -167,7 +185,8 @@ public class ValueSetGenerator {
 			}
 		}
 
-		for (ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeInclude nextInclude : nextVs.getCompose().getInclude()) {
+		for (ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeInclude nextInclude :
+				nextVs.getCompose().getInclude()) {
 			String system = nextInclude.getSystemElement().getValueAsString();
 			for (ComposeIncludeConcept nextConcept : nextInclude.getConcept()) {
 				String nextCodeValue = nextConcept.getCode();
@@ -175,11 +194,11 @@ public class ValueSetGenerator {
 			}
 		}
 
-//		if (vs.getCodes().isEmpty()) {
-//			ourLog.info("ValueSet " + nextVs.getName() + " has no codes, not going to generate any code for it");
-//			return null;
-//		}
-		
+		//		if (vs.getCodes().isEmpty()) {
+		//			ourLog.info("ValueSet " + nextVs.getName() + " has no codes, not going to generate any code for it");
+		//			return null;
+		//		}
+
 		if (myValueSets.containsKey(vs.getName())) {
 			ourLog.warn("Duplicate Name: " + vs.getName());
 		} else {
@@ -211,7 +230,7 @@ public class ValueSetGenerator {
 		myTemplate = theTemplate;
 	}
 
-	public void setTemplateFile (File theTemplateFile) {
+	public void setTemplateFile(File theTemplateFile) {
 		myTemplateFile = theTemplateFile;
 	}
 
@@ -247,11 +266,14 @@ public class ValueSetGenerator {
 		return b.toString();
 	}
 
-	public void write(Collection<ValueSetTm> theValueSets, File theOutputDirectory, String thePackageBase) throws IOException {
+	public void write(Collection<ValueSetTm> theValueSets, File theOutputDirectory, String thePackageBase)
+			throws IOException {
 		write(TargetType.SOURCE, theValueSets, theOutputDirectory, thePackageBase);
 	}
 
-	public void write(TargetType theTarget, Collection<ValueSetTm> theValueSets, File theOutputDirectory, String thePackageBase) throws IOException {
+	public void write(
+			TargetType theTarget, Collection<ValueSetTm> theValueSets, File theOutputDirectory, String thePackageBase)
+			throws IOException {
 		for (ValueSetTm nextValueSetTm : theValueSets) {
 			write(theTarget, nextValueSetTm, theOutputDirectory, thePackageBase);
 		}
@@ -261,7 +283,8 @@ public class ValueSetGenerator {
 	// myValueSetName = theString;
 	// }
 
-	private void write(TargetType theTarget, ValueSetTm theValueSetTm, File theOutputDirectory, String thePackageBase) throws IOException {
+	private void write(TargetType theTarget, ValueSetTm theValueSetTm, File theOutputDirectory, String thePackageBase)
+			throws IOException {
 		if (!theOutputDirectory.exists()) {
 			theOutputDirectory.mkdirs();
 		}
@@ -310,7 +333,8 @@ public class ValueSetGenerator {
 		writeMarkedValueSets(TargetType.SOURCE, theOutputDirectory, thePackageBase);
 	}
 
-	public void writeMarkedValueSets(TargetType theTarget, File theOutputDirectory, String thePackageBase) throws MojoFailureException {
+	public void writeMarkedValueSets(TargetType theTarget, File theOutputDirectory, String thePackageBase)
+			throws MojoFailureException {
 		try {
 			write(theTarget, myMarkedValueSets, theOutputDirectory, thePackageBase);
 		} catch (IOException e) {
@@ -322,7 +346,5 @@ public class ValueSetGenerator {
 
 		ValueSetGenerator p = new ValueSetGenerator("dstu1");
 		p.parse();
-
 	}
-
 }

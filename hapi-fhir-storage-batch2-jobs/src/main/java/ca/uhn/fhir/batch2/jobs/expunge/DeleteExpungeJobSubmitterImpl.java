@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,17 @@
 package ca.uhn.fhir.batch2.jobs.expunge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -51,54 +49,69 @@ import static ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx.JOB_DELETE_EXP
 public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter {
 	@Autowired
 	IJobCoordinator myJobCoordinator;
-	@Autowired
-	FhirContext myFhirContext;
-	@Autowired
-	MatchUrlService myMatchUrlService;
+
 	@Autowired
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	@Autowired
 	JpaStorageSettings myStorageSettings;
+
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Autowired
 	UrlPartitioner myUrlPartitioner;
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
-	public String submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, RequestDetails theRequestDetails) {
+	public String submitJob(
+			Integer theBatchSize,
+			List<String> theUrlsToDeleteExpunge,
+			boolean theCascade,
+			Integer theCascadeMaxRounds,
+			RequestDetails theRequestDetails) {
 		if (theBatchSize == null) {
 			theBatchSize = myStorageSettings.getExpungeBatchSize();
 		}
 		if (!myStorageSettings.canDeleteExpunge()) {
-			throw new ForbiddenOperationException(Msg.code(820) + "Delete Expunge not allowed:  " + myStorageSettings.cannotDeleteExpungeReason());
+			throw new ForbiddenOperationException(
+					Msg.code(820) + "Delete Expunge not allowed:  " + myStorageSettings.cannotDeleteExpungeReason());
 		}
 
 		for (String url : theUrlsToDeleteExpunge) {
 			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-				.add(String.class, url);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(String.class, url);
+			CompositeInterceptorBroadcaster.doCallHooks(
+					myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
 		}
 
 		DeleteExpungeJobParameters deleteExpungeJobParameters = new DeleteExpungeJobParameters();
 		// Set partition for each url since resource type can determine partition
 		theUrlsToDeleteExpunge.stream()
-			.filter(StringUtils::isNotBlank)
-			.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
-			.forEach(deleteExpungeJobParameters::addPartitionedUrl);
+				.filter(StringUtils::isNotBlank)
+				.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
+				.forEach(deleteExpungeJobParameters::addPartitionedUrl);
 		deleteExpungeJobParameters.setBatchSize(theBatchSize);
 
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_DELETE_EXPUNGE);
-		// Also set toplevel partition in case there are no urls
-		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
-		deleteExpungeJobParameters.setRequestPartitionId(requestPartition);
+		// TODO MM: apply changes similar to ReindexProvider to compute the PartitionedUrl list using
+		// IJobPartitionProvider.
+		// so that feature https://github.com/hapifhir/hapi-fhir/issues/6008 can be implemented for this operation
+		// Also set top level partition in case there are no urls
+		if (theUrlsToDeleteExpunge.isEmpty()) { // fix for https://github.com/hapifhir/hapi-fhir/issues/6179
+			RequestPartitionId requestPartition =
+					myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+							theRequestDetails, ProviderConstants.OPERATION_DELETE_EXPUNGE);
+			deleteExpungeJobParameters.addPartitionedUrl(new PartitionedUrl().setRequestPartitionId(requestPartition));
+		}
+		deleteExpungeJobParameters.setCascade(theCascade);
+		deleteExpungeJobParameters.setCascadeMaxRounds(theCascadeMaxRounds);
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(JOB_DELETE_EXPUNGE);
 		startRequest.setParameters(deleteExpungeJobParameters);
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(theRequestDetails, startRequest);
 		return startResponse.getInstanceId();
 	}
 }

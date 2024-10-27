@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -14,12 +13,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Batch2JobInstanceRepositoryTest extends BaseJpaR4Test {
-
-	@Autowired
-	IBatch2JobInstanceRepository myBatch2JobInstanceRepository;
 
 	@ParameterizedTest
 	@CsvSource({
@@ -38,21 +34,21 @@ public class Batch2JobInstanceRepositoryTest extends BaseJpaR4Test {
 		entity.setStatus(theCurrentState);
 		entity.setCreateTime(new Date());
 		entity.setDefinitionId("definition_id");
-		myBatch2JobInstanceRepository.save(entity);
+		myJobInstanceRepository.save(entity);
 
 		// when
 		int changeCount =
 			runInTransaction(()->
-				myBatch2JobInstanceRepository.updateInstanceStatusIfIn(jobId, theTargetState, theAllowedPriorStates));
+				myJobInstanceRepository.updateInstanceStatusIfIn(jobId, theTargetState, theAllowedPriorStates));
 
 		// then
 		Batch2JobInstanceEntity readBack = runInTransaction(() ->
-			myBatch2JobInstanceRepository.findById(jobId).orElseThrow());
+			myJobInstanceRepository.findById(jobId).orElseThrow());
 		if (theExpectedSuccessFlag) {
-			assertEquals(1, changeCount, "The change happened");
+			assertThat(changeCount).as("The change happened").isEqualTo(1);
 			assertEquals(theTargetState, readBack.getStatus());
 		} else {
-			assertEquals(0, changeCount, "The change did not happened");
+			assertThat(changeCount).as("The change did not happened").isEqualTo(0);
 			assertEquals(theCurrentState, readBack.getStatus());
 		}
 

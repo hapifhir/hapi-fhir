@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,16 @@
 package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,7 +37,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -61,30 +58,77 @@ public class RuntimeSearchParam {
 	private final Map<String, String> myUpliftRefchains = new HashMap<>();
 	private final ComboSearchParamType myComboSearchParamType;
 	private final List<Component> myComponents;
+	private final IIdType myIdUnqualifiedVersionless;
 	private IPhoneticEncoder myPhoneticEncoder;
 
 	/**
 	 * Constructor
 	 */
-	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType,
-									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
-		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, null, Collections.emptyList(), theBase);
+	public RuntimeSearchParam(
+			IIdType theId,
+			String theUri,
+			String theName,
+			String theDescription,
+			String thePath,
+			RestSearchParameterTypeEnum theParamType,
+			Set<String> theProvidesMembershipInCompartments,
+			Set<String> theTargets,
+			RuntimeSearchParamStatusEnum theStatus,
+			Collection<String> theBase) {
+		this(
+				theId,
+				theUri,
+				theName,
+				theDescription,
+				thePath,
+				theParamType,
+				theProvidesMembershipInCompartments,
+				theTargets,
+				theStatus,
+				null,
+				Collections.emptyList(),
+				theBase);
 	}
 
 	/**
 	 * Copy constructor
 	 */
 	public RuntimeSearchParam(RuntimeSearchParam theSp) {
-		this(theSp.getId(), theSp.getUri(), theSp.getName(), theSp.getDescription(), theSp.getPath(), theSp.getParamType(), theSp.getProvidesMembershipInCompartments(), theSp.getTargets(), theSp.getStatus(), theSp.getComboSearchParamType(), theSp.getComponents(), theSp.getBase());
+		this(
+				theSp.getId(),
+				theSp.getUri(),
+				theSp.getName(),
+				theSp.getDescription(),
+				theSp.getPath(),
+				theSp.getParamType(),
+				theSp.getProvidesMembershipInCompartments(),
+				theSp.getTargets(),
+				theSp.getStatus(),
+				theSp.getComboSearchParamType(),
+				theSp.getComponents(),
+				theSp.getBase());
 	}
 
 	/**
 	 * Constructor
 	 */
-	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, ComboSearchParamType theComboSearchParamType, List<Component> theComponents, Collection<String> theBase) {
+	public RuntimeSearchParam(
+			IIdType theId,
+			String theUri,
+			String theName,
+			String theDescription,
+			String thePath,
+			RestSearchParameterTypeEnum theParamType,
+			Set<String> theProvidesMembershipInCompartments,
+			Set<String> theTargets,
+			RuntimeSearchParamStatusEnum theStatus,
+			ComboSearchParamType theComboSearchParamType,
+			List<Component> theComponents,
+			Collection<String> theBase) {
 		super();
 
 		myId = theId;
+		myIdUnqualifiedVersionless = theId != null ? theId.toUnqualifiedVersionless() : null;
 		myUri = theUri;
 		myName = theName;
 		myDescription = theDescription;
@@ -160,16 +204,20 @@ public class RuntimeSearchParam {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("base", myBase)
-			.append("name", myName)
-			.append("path", myPath)
-			.append("id", myId)
-			.append("uri", myUri)
-			.toString();
+				.append("base", myBase)
+				.append("name", myName)
+				.append("path", myPath)
+				.append("id", myId)
+				.append("uri", myUri)
+				.toString();
 	}
 
 	public IIdType getId() {
 		return myId;
+	}
+
+	public IIdType getIdUnqualifiedVersionless() {
+		return myIdUnqualifiedVersionless;
 	}
 
 	public String getUri() {
@@ -185,21 +233,21 @@ public class RuntimeSearchParam {
 		RuntimeSearchParam that = (RuntimeSearchParam) theO;
 
 		return new EqualsBuilder()
-			.append(getId(), that.getId())
-			.append(getName(), that.getName())
-			.append(getPath(), that.getPath())
-			.append(getUri(), that.getUri())
-			.isEquals();
+				.append(getId(), that.getId())
+				.append(getName(), that.getName())
+				.append(getPath(), that.getPath())
+				.append(getUri(), that.getUri())
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(getId())
-			.append(getName())
-			.append(getPath())
-			.append(getUri())
-			.toHashCode();
+				.append(getId())
+				.append(getName())
+				.append(getPath())
+				.append(getUri())
+				.toHashCode();
 	}
 
 	public Set<String> getBase() {
@@ -375,15 +423,14 @@ public class RuntimeSearchParam {
 		public Component(String theExpression, String theReference) {
 			myExpression = theExpression;
 			myReference = theReference;
-
 		}
 
 		@Override
 		public String toString() {
 			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("expression", myExpression)
-				.append("reference", myReference)
-				.toString();
+					.append("expression", myExpression)
+					.append("reference", myReference)
+					.toString();
 		}
 
 		public String getExpression() {
@@ -394,5 +441,4 @@ public class RuntimeSearchParam {
 			return myReference;
 		}
 	}
-
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,5 +24,4 @@ import ca.uhn.fhir.model.api.IModelJson;
 /**
  * Used as the input type for the first step
  */
-public final class VoidModel implements IModelJson {
-}
+public final class VoidModel implements IModelJson {}

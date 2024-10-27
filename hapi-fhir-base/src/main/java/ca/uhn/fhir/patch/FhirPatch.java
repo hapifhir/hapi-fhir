@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,18 +28,18 @@ import ca.uhn.fhir.parser.path.EncodeContextPath;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.IModelVisitor2;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,7 +49,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FhirPatch {
 
@@ -141,9 +140,8 @@ public class FhirPatch {
 		int lastDot = path.lastIndexOf(".");
 		String containingPath = path.substring(0, lastDot);
 		String elementName = path.substring(lastDot + 1);
-		Integer insertIndex = ParametersUtil
-			.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_INDEX)
-			.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
+		Integer insertIndex = ParametersUtil.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_INDEX)
+				.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
 
 		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 		for (IBase nextElement : containingElements) {
@@ -152,9 +150,12 @@ public class FhirPatch {
 
 			IBase newValue = getNewValue(theParameters, nextElement, childDefinition);
 
-			List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(nextElement));
+			List<IBase> existingValues =
+					new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(nextElement));
 			if (insertIndex == null || insertIndex < 0 || insertIndex > existingValues.size()) {
-				String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidInsertIndex", insertIndex, path, existingValues.size());
+				String msg = myContext
+						.getLocalizer()
+						.getMessage(FhirPatch.class, "invalidInsertIndex", insertIndex, path, existingValues.size());
 				throw new InvalidRequestException(Msg.code(1270) + msg);
 			}
 			existingValues.add(insertIndex, newValue);
@@ -177,8 +178,9 @@ public class FhirPatch {
 		if (path.endsWith(")")) {
 			// This is probably a filter, so we're probably dealing with a list
 			int filterArgsIndex = path.lastIndexOf('('); // Let's hope there aren't nested parentheses
-			int lastDotIndex = path.lastIndexOf('.', filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
-			int secondLastDotIndex = path.lastIndexOf('.', lastDotIndex-1);
+			int lastDotIndex = path.lastIndexOf(
+					'.', filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
+			int secondLastDotIndex = path.lastIndexOf('.', lastDotIndex - 1);
 			containingPath = path.substring(0, secondLastDotIndex);
 			elementName = path.substring(secondLastDotIndex + 1, lastDotIndex);
 		} else if (path.endsWith("]")) {
@@ -202,11 +204,17 @@ public class FhirPatch {
 		}
 	}
 
-	private void deleteFromList(IBaseResource theResource, IBase theContainingElement, String theListElementName, String theElementToDeletePath) {
+	private void deleteFromList(
+			IBaseResource theResource,
+			IBase theContainingElement,
+			String theListElementName,
+			String theElementToDeletePath) {
 		ChildDefinition childDefinition = findChildDefinition(theContainingElement, theListElementName);
 
-		List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(theContainingElement));
-		List<IBase> elementsToRemove = myContext.newFhirPath().evaluate(theResource, theElementToDeletePath, IBase.class);
+		List<IBase> existingValues =
+				new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(theContainingElement));
+		List<IBase> elementsToRemove =
+				myContext.newFhirPath().evaluate(theResource, theElementToDeletePath, IBase.class);
 		existingValues.removeAll(elementsToRemove);
 
 		childDefinition.getChildDef().getMutator().setValue(theContainingElement, null);
@@ -241,27 +249,37 @@ public class FhirPatch {
 		int lastDot = path.lastIndexOf(".");
 		String containingPath = path.substring(0, lastDot);
 		String elementName = path.substring(lastDot + 1);
-		Integer insertIndex = ParametersUtil
-			.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_DESTINATION)
-			.orElseThrow(() -> new InvalidRequestException("No index supplied for move operation"));
-		Integer removeIndex = ParametersUtil
-			.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_SOURCE)
-			.orElseThrow(() -> new InvalidRequestException("No index supplied for move operation"));
+		Integer insertIndex = ParametersUtil.getParameterPartValueAsInteger(
+						myContext, theParameters, PARAMETER_DESTINATION)
+				.orElseThrow(() -> new InvalidRequestException("No index supplied for move operation"));
+		Integer removeIndex = ParametersUtil.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_SOURCE)
+				.orElseThrow(() -> new InvalidRequestException("No index supplied for move operation"));
 
 		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 		for (IBase nextElement : containingElements) {
 
 			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
 
-			List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(nextElement));
+			List<IBase> existingValues =
+					new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(nextElement));
 			if (removeIndex == null || removeIndex < 0 || removeIndex >= existingValues.size()) {
-				String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveSourceIndex", removeIndex, path, existingValues.size());
+				String msg = myContext
+						.getLocalizer()
+						.getMessage(
+								FhirPatch.class, "invalidMoveSourceIndex", removeIndex, path, existingValues.size());
 				throw new InvalidRequestException(Msg.code(1268) + msg);
 			}
 			IBase newValue = existingValues.remove(removeIndex.intValue());
 
 			if (insertIndex == null || insertIndex < 0 || insertIndex > existingValues.size()) {
-				String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveDestinationIndex", insertIndex, path, existingValues.size());
+				String msg = myContext
+						.getLocalizer()
+						.getMessage(
+								FhirPatch.class,
+								"invalidMoveDestinationIndex",
+								insertIndex,
+								path,
+								existingValues.size());
 				throw new InvalidRequestException(Msg.code(1269) + msg);
 			}
 			existingValues.add(insertIndex, newValue);
@@ -282,7 +300,8 @@ public class FhirPatch {
 		if (childDef == null) {
 			childName = theElementName + "[x]";
 			childDef = elementDef.getChildByName(childName);
-			childElement = childDef.getChildByName(childDef.getValidChildNames().iterator().next());
+			childElement = childDef.getChildByName(
+					childDef.getValidChildNames().iterator().next());
 		} else {
 			childElement = childDef.getChildByName(childName);
 		}
@@ -292,30 +311,33 @@ public class FhirPatch {
 
 	private IBase getNewValue(IBase theParameters, IBase theElement, ChildDefinition theChildDefinition) {
 		Optional<IBase> valuePart = ParametersUtil.getParameterPart(myContext, theParameters, PARAMETER_VALUE);
-		Optional<IBase> valuePartValue = ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
+		Optional<IBase> valuePartValue =
+				ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
 
 		IBase newValue;
 		if (valuePartValue.isPresent()) {
 			newValue = valuePartValue.get();
 		} else {
-			newValue = theChildDefinition.getChildElement().newInstance();
+			List<IBase> partParts = valuePart.map(this::extractPartsFromPart).orElse(Collections.emptyList());
 
-			if (valuePart.isPresent()) {
-				IBase theValueElement = valuePart.get();
-				populateNewValue(theChildDefinition, newValue, theValueElement);
-			}
-
+			newValue = createAndPopulateNewElement(theChildDefinition, partParts);
 		}
 
-		if (IBaseEnumeration.class.isAssignableFrom(theChildDefinition.getChildElement().getImplementingClass()) || XhtmlNode.class.isAssignableFrom(theChildDefinition.getChildElement().getImplementingClass())) {
-			// If the compositeElementDef is an IBaseEnumeration, we will use the actual compositeElementDef definition to build one, since
+		if (IBaseEnumeration.class.isAssignableFrom(
+						theChildDefinition.getChildElement().getImplementingClass())
+				|| XhtmlNode.class.isAssignableFrom(
+						theChildDefinition.getChildElement().getImplementingClass())) {
+			// If the compositeElementDef is an IBaseEnumeration, we will use the actual compositeElementDef definition
+			// to build one, since
 			// it needs the right factory object passed to its constructor
 			IPrimitiveType<?> newValueInstance;
 			if (theChildDefinition.getChildDef().getInstanceConstructorArguments() != null) {
-				newValueInstance = (IPrimitiveType<?>) theChildDefinition.getChildElement().newInstance(
-					theChildDefinition.getChildDef().getInstanceConstructorArguments());
+				newValueInstance = (IPrimitiveType<?>) theChildDefinition
+						.getChildElement()
+						.newInstance(theChildDefinition.getChildDef().getInstanceConstructorArguments());
 			} else {
-				newValueInstance = (IPrimitiveType<?>) theChildDefinition.getChildElement().newInstance();
+				newValueInstance =
+						(IPrimitiveType<?>) theChildDefinition.getChildElement().newInstance();
 			}
 			newValueInstance.setValueAsString(((IPrimitiveType<?>) newValue).getValueAsString());
 			theChildDefinition.getChildDef().getMutator().setValue(theElement, newValueInstance);
@@ -324,44 +346,78 @@ public class FhirPatch {
 		return newValue;
 	}
 
-	private void populateNewValue(ChildDefinition theChildDefinition, IBase theNewValue, IBase theValueElement) {
-		List<IBase> valuePartParts = myContext.newTerser().getValues(theValueElement, "part");
-		for (IBase nextValuePartPart : valuePartParts) {
+	@Nonnull
+	private List<IBase> extractPartsFromPart(IBase theParametersParameterComponent) {
+		return myContext.newTerser().getValues(theParametersParameterComponent, "part");
+	}
 
-			String name = myContext.newTerser().getSingleValue(nextValuePartPart, PARAMETER_NAME, IPrimitiveType.class).map(IPrimitiveType::getValueAsString).orElse(null);
-			if (isNotBlank(name)) {
+	/**
+	 * this method will instantiate an element according to the provided Definition and it according to
+	 * the properties found in thePartParts.  a part usually represent a datatype as a name/value[X] pair.
+	 * it may also represent a complex type like an Extension.
+	 *
+	 * @param theDefinition wrapper around the runtime definition of the element to be populated
+	 * @param thePartParts list of Part to populate the element that will be created from theDefinition
+	 * @return an element that was created from theDefinition and populated with the parts
+	 */
+	private IBase createAndPopulateNewElement(ChildDefinition theDefinition, List<IBase> thePartParts) {
+		IBase newElement = theDefinition.getChildElement().newInstance();
 
-				Optional<IBase> value = myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
-				if (value.isPresent()) {
+		for (IBase nextValuePartPart : thePartParts) {
 
-					BaseRuntimeChildDefinition partChildDef = theChildDefinition.getChildElement().getChildByName(name);
-					if (partChildDef == null) {
-						name = name + "[x]";
-						partChildDef = theChildDefinition.getChildElement().getChildByName(name);
-					}
-					partChildDef.getMutator().addValue(theNewValue, value.get());
+			String name = myContext
+					.newTerser()
+					.getSingleValue(nextValuePartPart, PARAMETER_NAME, IPrimitiveType.class)
+					.map(IPrimitiveType::getValueAsString)
+					.orElse(null);
 
-				}
-
+			if (StringUtils.isBlank(name)) {
+				continue;
 			}
 
+			Optional<IBase> value = myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
+
+			if (value.isPresent()) {
+				// we have a dataType. let's extract its value and assign it.
+				BaseRuntimeChildDefinition partChildDef =
+						theDefinition.getChildElement().getChildByName(name);
+				if (partChildDef == null) {
+					name = name + "[x]";
+					partChildDef = theDefinition.getChildElement().getChildByName(name);
+				}
+				partChildDef.getMutator().addValue(newElement, value.get());
+
+				// a part represent a datatype or a complexType but not both at the same time.
+				continue;
+			}
+
+			List<IBase> part = extractPartsFromPart(nextValuePartPart);
+
+			if (!part.isEmpty()) {
+				// we have a complexType.  let's find its definition and recursively process
+				// them till all complexTypes are processed.
+				ChildDefinition childDefinition = findChildDefinition(newElement, name);
+
+				IBase childNewValue = createAndPopulateNewElement(childDefinition, part);
+
+				childDefinition.getChildDef().getMutator().setValue(newElement, childNewValue);
+			}
 		}
+
+		return newElement;
 	}
 
 	private void deleteSingleElement(IBase theElementToDelete) {
 		myContext.newTerser().visit(theElementToDelete, new IModelVisitor2() {
 			@Override
-			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+			public boolean acceptElement(
+					IBase theElement,
+					List<IBase> theContainingElementPath,
+					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
+					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
 				if (theElement instanceof IPrimitiveType) {
 					((IPrimitiveType<?>) theElement).setValueAsString(null);
 				}
-				return true;
-			}
-
-			@Override
-			public boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-				theNextExt.setUrl(null);
-				theNextExt.setValue(null);
 				return true;
 			}
 		});
@@ -380,11 +436,12 @@ public class FhirPatch {
 
 		} else {
 
-			String oldValueTypeName = myContext.getResourceDefinition(theOldValue).getName();
+			String oldValueTypeName =
+					myContext.getResourceDefinition(theOldValue).getName();
 			Validate.isTrue(oldValueTypeName.equalsIgnoreCase(newValueTypeName), "Resources must be of same type");
 
-
-			BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theOldValue).getBaseDefinition();
+			BaseRuntimeElementCompositeDefinition<?> def =
+					myContext.getResourceDefinition(theOldValue).getBaseDefinition();
 			String path = def.getName();
 
 			EncodeContextPath contextPath = new EncodeContextPath();
@@ -399,7 +456,14 @@ public class FhirPatch {
 		return retVal;
 	}
 
-	private void compare(IBaseParameters theDiff, EncodeContextPath theSourceEncodeContext, BaseRuntimeElementDefinition<?> theDef, String theSourcePath, String theTargetPath, IBase theOldField, IBase theNewField) {
+	private void compare(
+			IBaseParameters theDiff,
+			EncodeContextPath theSourceEncodeContext,
+			BaseRuntimeElementDefinition<?> theDef,
+			String theSourcePath,
+			String theTargetPath,
+			IBase theOldField,
+			IBase theNewField) {
 
 		boolean pathIsIgnored = pathIsIgnored(theSourceEncodeContext);
 		if (pathIsIgnored) {
@@ -429,14 +493,26 @@ public class FhirPatch {
 
 			List<BaseRuntimeChildDefinition> children = theDef.getChildren();
 			for (BaseRuntimeChildDefinition nextChild : children) {
-				compareField(theDiff, theSourceEncodeContext, theSourcePath, theTargetPath, theOldField, theNewField, nextChild);
+				compareField(
+						theDiff,
+						theSourceEncodeContext,
+						theSourcePath,
+						theTargetPath,
+						theOldField,
+						theNewField,
+						nextChild);
 			}
-
 		}
-
 	}
 
-	private void compareField(IBaseParameters theDiff, EncodeContextPath theSourceEncodePath, String theSourcePath, String theTargetPath, IBase theOldField, IBase theNewField, BaseRuntimeChildDefinition theChildDef) {
+	private void compareField(
+			IBaseParameters theDiff,
+			EncodeContextPath theSourceEncodePath,
+			String theSourcePath,
+			String theTargetPath,
+			IBase theOldField,
+			IBase theNewField,
+			BaseRuntimeChildDefinition theChildDef) {
 		String elementName = theChildDef.getElementName();
 		boolean repeatable = theChildDef.getMax() != 1;
 		theSourceEncodePath.pushPath(elementName, false);
@@ -477,7 +553,11 @@ public class FhirPatch {
 		while (sourceIndex < sourceValues.size()) {
 			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, PARAMETER_OPERATION);
 			ParametersUtil.addPartCode(myContext, operation, PARAMETER_TYPE, OPERATION_DELETE);
-			ParametersUtil.addPartString(myContext, operation, PARAMETER_PATH, theTargetPath + "." + elementName + (repeatable ? "[" + targetIndex + "]" : ""));
+			ParametersUtil.addPartString(
+					myContext,
+					operation,
+					PARAMETER_PATH,
+					theTargetPath + "." + elementName + (repeatable ? "[" + targetIndex + "]" : ""));
 
 			sourceIndex++;
 			targetIndex++;
@@ -486,7 +566,12 @@ public class FhirPatch {
 		theSourceEncodePath.popPath();
 	}
 
-	private void addInsertItems(IBaseParameters theDiff, List<? extends IBase> theTargetValues, int theTargetIndex, String thePath, BaseRuntimeChildDefinition theChildDefinition) {
+	private void addInsertItems(
+			IBaseParameters theDiff,
+			List<? extends IBase> theTargetValues,
+			int theTargetIndex,
+			String thePath,
+			BaseRuntimeChildDefinition theChildDefinition) {
 		IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, PARAMETER_OPERATION);
 		ParametersUtil.addPartCode(myContext, operation, PARAMETER_TYPE, OPERATION_INSERT);
 		ParametersUtil.addPartString(myContext, operation, PARAMETER_PATH, thePath);
@@ -499,7 +584,7 @@ public class FhirPatch {
 		 * If the value is a Resource or a datatype, we can put it into the part.value and that will cover
 		 * all of its children. If it's an infrastructure element though, such as Patient.contact we can't
 		 * just put it into part.value because it isn't an actual type. So we have to put all of its
-		 * childen in instead.
+		 * children in instead.
 		 */
 		if (valueDef.isStandardType()) {
 			ParametersUtil.addPart(myContext, operation, PARAMETER_VALUE, value);
@@ -508,7 +593,8 @@ public class FhirPatch {
 				List<IBase> childValues = nextChild.getAccessor().getValues(value);
 				for (int index = 0; index < childValues.size(); index++) {
 					boolean childRepeatable = theChildDefinition.getMax() != 1;
-					String elementName = nextChild.getChildNameByDatatype(childValues.get(index).getClass());
+					String elementName = nextChild.getChildNameByDatatype(
+							childValues.get(index).getClass());
 					String targetPath = thePath + (childRepeatable ? "[" + index + "]" : "") + "." + elementName;
 					addInsertItems(theDiff, childValues, index, targetPath, nextChild);
 				}
@@ -567,7 +653,8 @@ public class FhirPatch {
 		private final BaseRuntimeChildDefinition myChildDef;
 		private final BaseRuntimeElementDefinition<?> myChildElement;
 
-		public ChildDefinition(BaseRuntimeChildDefinition theChildDef, BaseRuntimeElementDefinition<?> theChildElement) {
+		public ChildDefinition(
+				BaseRuntimeChildDefinition theChildDef, BaseRuntimeElementDefinition<?> theChildElement) {
 			this.myChildDef = theChildDef;
 			this.myChildElement = theChildElement;
 		}

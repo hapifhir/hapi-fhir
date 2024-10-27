@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,9 @@ public class EnversRevision {
 		if (this == theO) return true;
 		if (theO == null || getClass() != theO.getClass()) return false;
 		final EnversRevision that = (EnversRevision) theO;
-		return myRevisionNumber == that.myRevisionNumber && myRevisionTimestamp == that.myRevisionTimestamp && myRevisionType == that.myRevisionType;
+		return myRevisionNumber == that.myRevisionNumber
+				&& myRevisionTimestamp == that.myRevisionTimestamp
+				&& myRevisionType == that.myRevisionType;
 	}
 
 	@Override
@@ -66,9 +68,9 @@ public class EnversRevision {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myRevisionType", myRevisionType)
-			.append("myRevisionNumber", myRevisionNumber)
-			.append("myRevisionTimestamp", myRevisionTimestamp)
-			.toString();
+				.append("myRevisionType", myRevisionType)
+				.append("myRevisionNumber", myRevisionNumber)
+				.append("myRevisionTimestamp", myRevisionTimestamp)
+				.toString();
 	}
 }

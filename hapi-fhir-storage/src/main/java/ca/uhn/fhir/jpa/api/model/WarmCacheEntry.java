@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,17 +46,14 @@ public class WarmCacheEntry {
 		WarmCacheEntry that = (WarmCacheEntry) theO;
 
 		return new EqualsBuilder()
-			.append(myPeriodMillis, that.myPeriodMillis)
-			.append(myUrl, that.myUrl)
-			.isEquals();
+				.append(myPeriodMillis, that.myPeriodMillis)
+				.append(myUrl, that.myUrl)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myPeriodMillis)
-			.append(myUrl)
-			.toHashCode();
+		return new HashCodeBuilder(17, 37).append(myPeriodMillis).append(myUrl).toHashCode();
 	}
 
 	public long getPeriodMillis() {
@@ -76,5 +73,4 @@ public class WarmCacheEntry {
 		myUrl = theUrl;
 		return this;
 	}
-
 }

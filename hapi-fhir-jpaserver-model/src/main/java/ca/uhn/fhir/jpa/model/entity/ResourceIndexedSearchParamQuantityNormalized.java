@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,43 +20,56 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.QuantityParam;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.fhir.ucum.Pair;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-//@formatter:off
+// @formatter:off
 @Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
-@Table(name = "HFJ_SPIDX_QUANTITY_NRML", indexes = {
-	@Index(name = "IDX_SP_QNTY_NRML_HASH_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_QNTY_NRML_HASH_UN_V2", columnList = "HASH_IDENTITY_AND_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_QNTY_NRML_HASH_SYSUN_V2", columnList = "HASH_IDENTITY_SYS_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_QNTY_NRML_RESID_V2", columnList = "RES_ID,HASH_IDENTITY,HASH_IDENTITY_SYS_UNITS,HASH_IDENTITY_AND_UNITS,SP_VALUE,PARTITION_ID")
-})
+@Table(
+		name = "HFJ_SPIDX_QUANTITY_NRML",
+		indexes = {
+			@Index(name = "IDX_SP_QNTY_NRML_HASH_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
+			@Index(
+					name = "IDX_SP_QNTY_NRML_HASH_UN_V2",
+					columnList = "HASH_IDENTITY_AND_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
+			@Index(
+					name = "IDX_SP_QNTY_NRML_HASH_SYSUN_V2",
+					columnList = "HASH_IDENTITY_SYS_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
+			@Index(
+					name = "IDX_SP_QNTY_NRML_RESID_V2",
+					columnList =
+							"RES_ID,HASH_IDENTITY,HASH_IDENTITY_SYS_UNITS,HASH_IDENTITY_AND_UNITS,SP_VALUE,PARTITION_ID")
+		})
 /**
  * Support UCUM service
  * @since 5.3.0
@@ -67,27 +80,42 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_QUANTITY_NRML", sequenceName = "SEQ_SPIDX_QUANTITY_NRML")
+	@GenericGenerator(
+			name = "SEQ_SPIDX_QUANTITY_NRML",
+			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_QUANTITY_NRML")
 	@Column(name = "SP_ID")
 	private Long myId;
 
-	// Changed to double here for storing the value after converted to the CanonicalForm due to BigDecimal maps NUMBER(19,2)
+	// Changed to double here for storing the value after converted to the CanonicalForm due to BigDecimal maps
+	// NUMBER(19,2)
 	// The precision may lost even to store 1.2cm which is 0.012m in the CanonicalForm
 	@Column(name = "SP_VALUE", nullable = true)
 	@ScaledNumberField
 	public Double myValue;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(foreignKey = @ForeignKey(name = "FK_SP_QUANTITYNM_RES"),
-		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	@ManyToOne(
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumn(
+			foreignKey = @ForeignKey(name = "FK_SP_QUANTITYNM_RES"),
+			name = "RES_ID",
+			referencedColumnName = "RES_ID",
+			nullable = false)
 	private ResourceTable myResource;
 
 	public ResourceIndexedSearchParamQuantityNormalized() {
 		super();
 	}
 
-	public ResourceIndexedSearchParamQuantityNormalized(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, double theValue, String theSystem, String theUnits) {
+	public ResourceIndexedSearchParamQuantityNormalized(
+			PartitionSettings thePartitionSettings,
+			String theResourceType,
+			String theParamName,
+			double theValue,
+			String theSystem,
+			String theUnits) {
 		this();
 		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
@@ -110,10 +138,11 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 		setHashIdentitySystemAndUnits(source.getHashIdentitySystemAndUnits());
 	}
 
-	//- myValue
+	// - myValue
 	public Double getValue() {
 		return myValue;
 	}
+
 	public ResourceIndexedSearchParamQuantityNormalized setValue(Double theValue) {
 		myValue = theValue;
 		return this;
@@ -124,11 +153,12 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 		return this;
 	}
 
-	//-- myId
+	// -- myId
 	@Override
 	public Long getId() {
 		return myId;
 	}
+
 	@Override
 	public void setId(Long theId) {
 		myId = theId;
@@ -165,14 +195,23 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 		}
 		ResourceIndexedSearchParamQuantityNormalized obj = (ResourceIndexedSearchParamQuantityNormalized) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
 		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getHashIdentityAndUnits(), obj.getHashIdentityAndUnits());
 		b.append(getHashIdentitySystemAndUnits(), obj.getHashIdentitySystemAndUnits());
 		b.append(isMissing(), obj.isMissing());
 		b.append(getValue(), obj.getValue());
 		return b.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getHashIdentity());
+		b.append(getHashIdentityAndUnits());
+		b.append(getHashIdentitySystemAndUnits());
+		b.append(isMissing());
+		b.append(getValue());
+		return b.toHashCode();
 	}
 
 	@Override
@@ -187,11 +226,10 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 		String quantitySystem = quantity.getSystem();
 		BigDecimal quantityValue = quantity.getValue();
 		Double quantityDoubleValue = null;
-		if (quantityValue != null)
-			quantityDoubleValue = quantityValue.doubleValue();
+		if (quantityValue != null) quantityDoubleValue = quantityValue.doubleValue();
 		String quantityUnits = defaultString(quantity.getUnits());
 
-		//-- convert the value/unit to the canonical form if any, otherwise store the original value/units pair
+		// -- convert the value/unit to the canonical form if any, otherwise store the original value/units pair
 		Pair canonicalForm = UcumServiceUtil.getCanonicalForm(quantitySystem, quantityValue, quantityUnits);
 		if (canonicalForm != null) {
 			quantityDoubleValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
@@ -206,19 +244,17 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 		} else {
 			String unitsString = defaultString(getUnits());
 			if (quantitySystem == null) {
-				if (unitsString.equalsIgnoreCase(quantityUnits) &&
-					Objects.equals(getValue(), quantityDoubleValue)) {
+				if (unitsString.equalsIgnoreCase(quantityUnits) && Objects.equals(getValue(), quantityDoubleValue)) {
 					retval = true;
 				}
 			} else if (isBlank(quantityUnits)) {
-				if (getSystem().equalsIgnoreCase(quantitySystem) &&
-					Objects.equals(getValue(), quantityDoubleValue)) {
+				if (getSystem().equalsIgnoreCase(quantitySystem) && Objects.equals(getValue(), quantityDoubleValue)) {
 					retval = true;
 				}
 			} else {
-				if (getSystem().equalsIgnoreCase(quantitySystem) &&
-					unitsString.equalsIgnoreCase(quantityUnits) &&
-					Objects.equals(getValue(), quantityDoubleValue)) {
+				if (getSystem().equalsIgnoreCase(quantitySystem)
+						&& unitsString.equalsIgnoreCase(quantityUnits)
+						&& Objects.equals(getValue(), quantityDoubleValue)) {
 					retval = true;
 				}
 			}

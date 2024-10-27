@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,5 +28,5 @@ public class ValidationConstants {
 	public static final String LOINC_GENERIC_VALUESET_URL_PLUS_SLASH = LOINC_GENERIC_VALUESET_URL + "/";
 
 	// not to be instantiated
-	private ValidationConstants() { }
+	private ValidationConstants() {}
 }

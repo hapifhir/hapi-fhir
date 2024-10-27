@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 /**
  * On a method which returns resource(s), a parameter of type
  * <code>Set&lt;String&gt;</code> with this annotation will be passed the
- * contents of the <code>_elements</code> parameter 
+ * contents of the <code>_elements</code> parameter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)

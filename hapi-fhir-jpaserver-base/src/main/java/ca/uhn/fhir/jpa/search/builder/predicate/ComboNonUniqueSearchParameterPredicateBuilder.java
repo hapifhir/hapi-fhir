@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,19 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
-	private final DbColumn myColumnIndexString;
+	private final DbColumn myColumnHashComplete;
 
 	/**
 	 * Constructor
@@ -35,12 +40,19 @@ public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchPar
 	public ComboNonUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMB_TOK_NU"));
 
-		myColumnIndexString = getTable().addColumn("IDX_STRING");
+		myColumnHashComplete = getTable().addColumn("HASH_COMPLETE");
 	}
 
-
-	public Condition createPredicateHashComplete(RequestPartitionId theRequestPartitionId, String theIndexString) {
-		BinaryCondition predicate = BinaryCondition.equalTo(myColumnIndexString, generatePlaceholder(theIndexString));
+	public Condition createPredicateHashComplete(
+			RequestPartitionId theRequestPartitionId, List<String> theIndexStrings) {
+		PartitionablePartitionId partitionId =
+				PartitionablePartitionId.toStoragePartition(theRequestPartitionId, getPartitionSettings());
+		List<Long> hashes = theIndexStrings.stream()
+				.map(t -> ResourceIndexedComboTokenNonUnique.calculateHashComplete(
+						getPartitionSettings(), partitionId, t))
+				.collect(Collectors.toList());
+		Condition predicate =
+				QueryParameterUtils.toEqualToOrInPredicate(myColumnHashComplete, generatePlaceholders(hashes));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 }

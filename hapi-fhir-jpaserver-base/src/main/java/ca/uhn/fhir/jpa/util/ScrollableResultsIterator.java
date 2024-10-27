@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T>
 		if (myNext == null) {
 			if (myScroll.next()) {
 				hasNext = true;
-				myNext = (T) myScroll.get(0);
+				myNext = (T) myScroll.get();
 			} else {
 				hasNext = false;
 			}
@@ -61,7 +61,6 @@ public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T>
 		return next;
 	}
 
-
 	@Override
 	public void close() {
 		if (myScroll != null) {
@@ -69,5 +68,4 @@ public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T>
 			myScroll = null;
 		}
 	}
-
 }

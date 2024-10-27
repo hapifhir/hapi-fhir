@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,9 @@ public class QuantityNormalizedPredicateBuilder extends BaseQuantityPredicateBui
 	 */
 	public QuantityNormalizedPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_QUANTITY_NRML"));
-		
+
 		myColumnHashIdentitySystemUnits = getTable().addColumn("HASH_IDENTITY_SYS_UNITS");
 		myColumnHashIdentityUnits = getTable().addColumn("HASH_IDENTITY_AND_UNITS");
 		myColumnValue = getTable().addColumn("SP_VALUE");
 	}
-
 }

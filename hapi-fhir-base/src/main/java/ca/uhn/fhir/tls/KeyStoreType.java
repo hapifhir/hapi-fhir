@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum KeyStoreType {
-
 	PKCS12("p12", "pfx"),
 	JKS("jks");
 
 	private List<String> myFileExtensions;
 
-	KeyStoreType(String... theFileExtensions){
+	KeyStoreType(String... theFileExtensions) {
 		myFileExtensions = Arrays.asList(theFileExtensions);
 	}
 
@@ -40,11 +39,11 @@ public enum KeyStoreType {
 	}
 
 	public static KeyStoreType fromFileExtension(String theFileExtension) {
-		for(KeyStoreType type : KeyStoreType.values()){
-			if(type.getFileExtensions().contains(theFileExtension.toLowerCase())){
+		for (KeyStoreType type : KeyStoreType.values()) {
+			if (type.getFileExtensions().contains(theFileExtension.toLowerCase())) {
 				return type;
 			}
 		}
-		throw new IllegalArgumentException(Msg.code(2121)+"Invalid KeyStore Type");
+		throw new IllegalArgumentException(Msg.code(2121) + "Invalid KeyStore Type");
 	}
 }

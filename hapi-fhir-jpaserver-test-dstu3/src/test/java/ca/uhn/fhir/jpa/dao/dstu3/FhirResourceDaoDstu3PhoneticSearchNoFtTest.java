@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.phonetic.ApacheEncoder;
 import ca.uhn.fhir.context.phonetic.NumericEncoder;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
@@ -8,6 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -26,12 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
 public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test {
@@ -73,10 +70,18 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 	@Test
 	public void testSoundex() {
 		Soundex soundex = new Soundex();
+
+		// The tests below depend on these assumptions:
 		assertEquals(soundex.encode(GALE), soundex.encode(GAIL));
-		assertNotEquals(soundex.encode(GALE), soundex.encode(BOB));
+		assertThat(GALE).isNotEqualTo(soundex.encode(GALE));
+		assertThat(GALE).isNotEqualTo(soundex.encode(GAIL));
+		assertThat(GAIL).isNotEqualTo(soundex.encode(GALE));
+		assertThat(GAIL).isNotEqualTo(soundex.encode(GAIL));
+		ourLog.info("Encoded Gale: {}", soundex.encode(GALE));
+		ourLog.info("Encoded Gail: {}", soundex.encode(GAIL));
+		assertThat(soundex.encode(BOB)).isNotEqualTo(soundex.encode(GALE));
 		assertEquals(soundex.encode(ADDRESS), soundex.encode(ADDRESS_CLOSE));
-		assertNotEquals(soundex.encode(ADDRESS), soundex.encode(ADDRESS_FAR));
+		assertThat(soundex.encode(ADDRESS_FAR)).isNotEqualTo(soundex.encode(ADDRESS));
 		ourLog.info("Encoded address: {}", soundex.encode(ADDRESS));
 	}
 
@@ -86,14 +91,12 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		assertEquals(PHONE, numeric.encode(PHONE_CLOSE));
 		assertEquals(PHONE, numeric.encode(PHONE));
 		assertEquals(numeric.encode(PHONE), numeric.encode(PHONE_CLOSE));
-		assertNotEquals(numeric.encode(PHONE), numeric.encode(PHONE_FAR));
+		assertThat(numeric.encode(PHONE_FAR)).isNotEqualTo(numeric.encode(PHONE));
 	}
 
 	@Test
 	public void phoneticMatch() {
-		Patient patient;
-
-		patient = new Patient();
+		Patient patient = new Patient();
 		patient.addName().addGiven(GALE);
 		patient.addAddress().addLine(ADDRESS);
 		patient.addTelecom().setValue(PHONE);
@@ -103,9 +106,9 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 
 		List<ResourceIndexedSearchParamString> stringParams = myResourceIndexedSearchParamStringDao.findAll();
 
-		assertThat(stringParams, hasSize(7));
+		assertThat(stringParams).hasSize(7);
 		List<String> stringParamNames = stringParams.stream().map(ResourceIndexedSearchParamString::getParamName).collect(Collectors.toList());
-		assertThat(stringParamNames, containsInAnyOrder(Patient.SP_NAME, Patient.SP_GIVEN, Patient.SP_PHONETIC, NAME_SOUNDEX_SP, Patient.SP_ADDRESS, ADDRESS_LINE_SOUNDEX_SP, PHONE_NUMBER_SP));
+		assertThat(stringParamNames).containsExactlyInAnyOrder(Patient.SP_NAME, Patient.SP_GIVEN, Patient.SP_PHONETIC, NAME_SOUNDEX_SP, Patient.SP_ADDRESS, ADDRESS_LINE_SOUNDEX_SP, PHONE_NUMBER_SP);
 
 		assertSearchMatch(pId, Patient.SP_PHONETIC, GALE);
 		assertSearchMatch(pId, Patient.SP_PHONETIC, GAIL);
@@ -124,18 +127,42 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		assertNoMatch(PHONE_NUMBER_SP, PHONE_FAR);
 	}
 
+	@Test
+	public void phoneticSearch() {
+		// setup
+		Patient patient = new Patient();
+		patient.addName().addGiven(GALE);
+		patient.addAddress().addLine(ADDRESS);
+		patient.addTelecom().setValue(PHONE);
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		// Search for a different name from the original value that has the same soundex value
+		map.add(NAME_SOUNDEX_SP, new StringParam(GAIL));
+
+		// execute
+		IBundleProvider result = myPatientDao.search(map, mySrd);
+
+		// verify
+		List<String> resultIds = result.getAllResourceIds();
+		assertThat(resultIds).hasSize(1);
+		assertEquals(patientId.getIdPart(), resultIds.get(0));
+	}
+
 	private void assertSearchMatch(IIdType thePId1, String theSp, String theValue) {
 		SearchParameterMap map;
 		map = new SearchParameterMap();
 		map.add(theSp, new StringParam(theValue));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(thePId1)));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(toValues(thePId1));
 	}
 
 	private void assertNoMatch(String theSp, String theValue) {
 		SearchParameterMap map;
 		map = new SearchParameterMap();
 		map.add(theSp, new StringParam(theValue));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), hasSize(0));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).hasSize(0);
 	}
 
 	private void createPhoneticSearchParameter(String theCode, PhoneticEncoderEnum theEncoder, String theFhirPath) {

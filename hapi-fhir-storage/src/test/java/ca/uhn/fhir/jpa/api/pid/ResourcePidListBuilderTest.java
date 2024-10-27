@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -46,8 +44,8 @@ class ResourcePidListBuilderTest {
 		// verify
 		assertEquals(0, emptyList.size());
 		assertTrue(emptyList.isEmpty());
-		assertThat(emptyList.getIds(), hasSize(0));
-		assertThat(emptyList.getTypedResourcePids(), hasSize(0));
+		assertThat(emptyList.getIds()).hasSize(0);
+		assertThat(emptyList.getTypedResourcePids()).hasSize(0);
 		assertNull(emptyList.getLastDate());
 		try {
 			emptyList.getResourceType(0);
@@ -61,7 +59,7 @@ class ResourcePidListBuilderTest {
 	@Test
 	public void testHomogeneousSingleChunk() {
 		// setup
-		IResourcePidList chunk = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END);
+		IResourcePidList chunk = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END, null);
 		List<IResourcePidList> chunks = List.of(chunk);
 
 		// execute
@@ -74,7 +72,7 @@ class ResourcePidListBuilderTest {
 	@Test
 	public void testHomogeneousDoubleChunk() {
 		// setup
-		IResourcePidList chunk = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END);
+		IResourcePidList chunk = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END, null);
 		List<IResourcePidList> chunks = List.of(chunk, chunk);
 
 		// execute
@@ -87,9 +85,9 @@ class ResourcePidListBuilderTest {
 	@Test
 	public void testHomogeneousDoubleChunkDift() {
 		// setup
-		IResourcePidList chunk1 = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END);
+		IResourcePidList chunk1 = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END, null);
 
-		IResourcePidList chunk2 = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_3, PID_4), END);
+		IResourcePidList chunk2 = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_3, PID_4), END, null);
 
 		List<IResourcePidList> chunks = List.of(chunk1, chunk2);
 
@@ -100,16 +98,16 @@ class ResourcePidListBuilderTest {
 		assertFalse(list.isEmpty());
 		assertEquals(END, list.getLastDate());
 		assertEquals(RESOURCE_TYPE, list.getResourceType());
-		assertThat(list.getIds(), contains(PID_1, PID_2, PID_3, PID_4));
-		assertThat(list.getTypedResourcePids(), contains(TRP_1, TRP_2, TRP_3, TRP_4));
+		assertThat(list.getIds()).containsExactly(PID_1, PID_2, PID_3, PID_4);
+		assertThat(list.getTypedResourcePids()).containsExactly(TRP_1, TRP_2, TRP_3, TRP_4);
 	}
 
 	@Test
 	public void testHomogeneousDoubleChunkDiftResourceType() {
 		// setup
-		IResourcePidList chunk1 = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END);
+		IResourcePidList chunk1 = new HomogeneousResourcePidList(RESOURCE_TYPE, List.of(PID_1, PID_2), END, null);
 
-		IResourcePidList chunk2 = new HomogeneousResourcePidList(OTHER_RESOURCE_TYPE, List.of(PID_5, PID_6), END);
+		IResourcePidList chunk2 = new HomogeneousResourcePidList(OTHER_RESOURCE_TYPE, List.of(PID_5, PID_6), END, null);
 
 		List<IResourcePidList> chunks = List.of(chunk1, chunk2);
 
@@ -123,14 +121,14 @@ class ResourcePidListBuilderTest {
 		assertEquals(RESOURCE_TYPE, list.getResourceType(1));
 		assertEquals(OTHER_RESOURCE_TYPE, list.getResourceType(2));
 		assertEquals(OTHER_RESOURCE_TYPE, list.getResourceType(3));
-		assertThat(list.getIds(), contains(PID_1, PID_2, PID_5, PID_6));
-		assertThat(list.getTypedResourcePids(), contains(TRP_1, TRP_2, TRP_5, TRP_6));
+		assertThat(list.getIds()).containsExactly(PID_1, PID_2, PID_5, PID_6);
+		assertThat(list.getTypedResourcePids()).containsExactly(TRP_1, TRP_2, TRP_5, TRP_6);
 	}
 
 	@Test
 	public void testMixedChunkDiftResourceType() {
 		// setup
-		IResourcePidList chunk = new MixedResourcePidList(List.of(RESOURCE_TYPE, OTHER_RESOURCE_TYPE), List.of(PID_1, PID_5), END);
+		IResourcePidList chunk = new MixedResourcePidList(List.of(RESOURCE_TYPE, OTHER_RESOURCE_TYPE), List.of(PID_1, PID_5), END, null);
 
 		List<IResourcePidList> chunks = List.of(chunk, chunk);
 
@@ -142,16 +140,16 @@ class ResourcePidListBuilderTest {
 		assertEquals(END, list.getLastDate());
 		assertEquals(RESOURCE_TYPE, list.getResourceType(0));
 		assertEquals(OTHER_RESOURCE_TYPE, list.getResourceType(1));
-		assertThat(list.getIds(), contains(PID_1, PID_5));
-		assertThat(list.getTypedResourcePids(), contains(TRP_1, TRP_5));
+		assertThat(list.getIds()).containsExactly(PID_1, PID_5);
+		assertThat(list.getTypedResourcePids()).containsExactly(TRP_1, TRP_5);
 	}
 
 	private void assertTwoItems(IResourcePidList list) {
 		assertFalse(list.isEmpty());
 		assertEquals(END, list.getLastDate());
 		assertEquals(RESOURCE_TYPE, list.getResourceType(0));
-		assertThat(list.getIds(), contains(PID_1, PID_2));
-		assertThat(list.getTypedResourcePids(), contains(TRP_1, TRP_2));
+		assertThat(list.getIds()).containsExactly(PID_1, PID_2);
+		assertThat(list.getTypedResourcePids()).containsExactly(TRP_1, TRP_2);
 	}
 
 

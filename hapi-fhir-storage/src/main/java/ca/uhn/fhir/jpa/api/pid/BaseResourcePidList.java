@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,38 @@
  */
 package ca.uhn.fhir.jpa.api.pid;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-abstract public class BaseResourcePidList implements IResourcePidList {
+public abstract class BaseResourcePidList implements IResourcePidList {
 
 	final List<IResourcePersistentId> myIds = new ArrayList<>();
 
 	@Nullable
 	final Date myLastDate;
 
-	BaseResourcePidList(Collection<IResourcePersistentId> theIds, Date theLastDate) {
+	private final RequestPartitionId myRequestPartitionId;
+
+	BaseResourcePidList(
+			Collection<? extends IResourcePersistentId> theIds,
+			Date theLastDate,
+			RequestPartitionId theRequestPartitionId) {
 		myIds.addAll(theIds);
 		myLastDate = theLastDate;
+		myRequestPartitionId = theRequestPartitionId;
+	}
+
+	@Override
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
 	}
 
 	@Override
@@ -80,4 +92,3 @@ abstract public class BaseResourcePidList implements IResourcePidList {
 		return myIds.toString();
 	}
 }
-

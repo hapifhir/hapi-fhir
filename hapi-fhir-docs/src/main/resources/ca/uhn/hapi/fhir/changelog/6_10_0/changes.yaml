@@ -1,0 +1,15 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+        <li>MSSQL JDBC (JPA): 9.4.1.jre8 -&gt; 12.2.0.jre11</li>
+        <li>Flexmark (All): 0.50.40 -&gt; 0.64.8</li>
+        <li>Logback (All): 1.4.4 -&gt; 1.4.7</li>
+        <li>H2 Database (JPA): 2.1.214 -&gt; 2.2.220</li>
+        <li>Thymeleaf (Testpage Overlay): 3.0.14.RELEASE -&gt; 3.1.2.RELEASE</li>
+        <li>xpp3 (All): 1.1.4c.0 -&gt; 1.1.6</li>
+        <li>HtmlUnit (All): 2.67.0 -&gt; 2.70.0</li>
+        <li>org.hl7.fhir.core (All): 6.0.22.2 -&gt; 6.1.2.2</li>
+   </ul>"

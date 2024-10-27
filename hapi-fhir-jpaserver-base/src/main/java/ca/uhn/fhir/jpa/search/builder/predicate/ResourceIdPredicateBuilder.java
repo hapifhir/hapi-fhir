@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,9 +57,13 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 		super(theSearchSqlBuilder);
 	}
 
-
 	@Nullable
-	public Condition createPredicateResourceId(@Nullable DbColumn theSourceJoinColumn, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateResourceId(
+			@Nullable DbColumn[] theSourceJoinColumn,
+			String theResourceName,
+			List<List<IQueryParameterType>> theValues,
+			SearchFilterParser.CompareOperation theOperation,
+			RequestPartitionId theRequestPartitionId) {
 
 		Set<JpaPid> allOrPids = null;
 		SearchFilterParser.CompareOperation defaultOperation = SearchFilterParser.CompareOperation.eq;
@@ -82,7 +86,8 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					haveValue = true;
 					try {
 						boolean excludeDeleted = true;
-						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, theResourceName, valueAsId.getIdPart(), excludeDeleted);
+						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
+								theRequestPartitionId, theResourceName, valueAsId.getIdPart(), excludeDeleted);
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matches
@@ -95,7 +100,6 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 						defaultOperation = SearchFilterParser.CompareOperation.ne;
 					}
 				}
-
 			}
 			if (haveValue) {
 				if (allOrPids == null) {
@@ -103,7 +107,6 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 				} else {
 					allOrPids.retainAll(orPids);
 				}
-
 			}
 		}
 
@@ -114,7 +117,8 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 		} else if (allOrPids != null) {
 
 			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, defaultOperation);
-			assert operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
+			assert operation == SearchFilterParser.CompareOperation.eq
+					|| operation == SearchFilterParser.CompareOperation.ne;
 
 			List<Long> resourceIds = JpaPid.toLongList(allOrPids);
 			if (theSourceJoinColumn == null) {
@@ -130,13 +134,33 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 						return queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 				}
 			} else {
-				return QueryParameterUtils.toEqualToOrInPredicate(theSourceJoinColumn, generatePlaceholders(resourceIds), operation == SearchFilterParser.CompareOperation.ne);
+				DbColumn resIdColumn = getResourceIdColumn(theSourceJoinColumn);
+				return QueryParameterUtils.toEqualToOrInPredicate(
+						resIdColumn,
+						generatePlaceholders(resourceIds),
+						operation == SearchFilterParser.CompareOperation.ne);
 			}
-
 		}
 
 		return null;
 	}
 
-
+	/**
+	 * This method takes 1-2 columns and returns the last one. This is useful where the input is an array of
+	 * join columns for SQL Search expressions. In partition key mode, there are 2 columns (partition id and resource id).
+	 * In non partition key mode, only the resource id column is used.
+	 */
+	@Nullable
+	public static DbColumn getResourceIdColumn(@Nullable DbColumn[] theJoinColumns) {
+		DbColumn resIdColumn;
+		if (theJoinColumns == null) {
+			return null;
+		} else if (theJoinColumns.length == 1) {
+			resIdColumn = theJoinColumns[0];
+		} else {
+			assert theJoinColumns.length == 2;
+			resIdColumn = theJoinColumns[1];
+		}
+		return resIdColumn;
+	}
 }

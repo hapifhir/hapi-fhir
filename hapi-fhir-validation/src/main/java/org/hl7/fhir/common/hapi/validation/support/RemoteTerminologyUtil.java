@@ -23,25 +23,30 @@ import java.util.Optional;
 public final class RemoteTerminologyUtil {
 	private RemoteTerminologyUtil() {}
 
-	public static IBaseParameters buildTranslateInputParameters(FhirContext fhirContext, IValidationSupport.TranslateCodeRequest theRequest) {
+	public static IBaseParameters buildTranslateInputParameters(
+			FhirContext fhirContext, IValidationSupport.TranslateCodeRequest theRequest) {
 		IBaseParameters params = ParametersUtil.newInstance(fhirContext);
 		if (!StringUtils.isEmpty(theRequest.getConceptMapUrl())) {
 			ParametersUtil.addParameterToParametersUri(fhirContext, params, "url", theRequest.getConceptMapUrl());
 		}
 		if (!StringUtils.isEmpty(theRequest.getConceptMapVersion())) {
-			ParametersUtil.addParameterToParametersString(fhirContext, params, "conceptMapVersion", theRequest.getConceptMapVersion());
+			ParametersUtil.addParameterToParametersString(
+					fhirContext, params, "conceptMapVersion", theRequest.getConceptMapVersion());
 		}
 		if (theRequest.getCodings() != null) {
 			addCodingsToTranslateParameters(fhirContext, theRequest.getCodings(), params);
 		}
 		if (!StringUtils.isEmpty(theRequest.getSourceValueSetUrl())) {
-			ParametersUtil.addParameterToParametersUri(fhirContext, params, "source", theRequest.getSourceValueSetUrl());
+			ParametersUtil.addParameterToParametersUri(
+					fhirContext, params, "source", theRequest.getSourceValueSetUrl());
 		}
 		if (!StringUtils.isEmpty(theRequest.getTargetValueSetUrl())) {
-			ParametersUtil.addParameterToParametersUri(fhirContext, params, "target", theRequest.getTargetValueSetUrl());
+			ParametersUtil.addParameterToParametersUri(
+					fhirContext, params, "target", theRequest.getTargetValueSetUrl());
 		}
 		if (!StringUtils.isEmpty(theRequest.getTargetSystemUrl())) {
-			ParametersUtil.addParameterToParametersUri(fhirContext, params, "targetsystem", theRequest.getTargetSystemUrl());
+			ParametersUtil.addParameterToParametersUri(
+					fhirContext, params, "targetsystem", theRequest.getTargetSystemUrl());
 		}
 		if (theRequest.isReverse()) {
 			ParametersUtil.addParameterToParametersBoolean(fhirContext, params, "reverse", theRequest.isReverse());
@@ -50,14 +55,19 @@ public final class RemoteTerminologyUtil {
 		return params;
 	}
 
-	public static void addCodingsToTranslateParameters(FhirContext fhirContext, List<IBaseCoding> theCodings, IBaseParameters theParams) {
-		BaseRuntimeElementCompositeDefinition<?> codeableConceptDef = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(fhirContext.getElementDefinition("CodeableConcept"));
+	public static void addCodingsToTranslateParameters(
+			FhirContext fhirContext, List<IBaseCoding> theCodings, IBaseParameters theParams) {
+		BaseRuntimeElementCompositeDefinition<?> codeableConceptDef = (BaseRuntimeElementCompositeDefinition<?>)
+				Objects.requireNonNull(fhirContext.getElementDefinition("CodeableConcept"));
 		BaseRuntimeChildDefinition codings = codeableConceptDef.getChildByName("coding");
-		BaseRuntimeElementCompositeDefinition<?> codingDef = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(fhirContext.getElementDefinition("Coding"));
+		BaseRuntimeElementCompositeDefinition<?> codingDef = (BaseRuntimeElementCompositeDefinition<?>)
+				Objects.requireNonNull(fhirContext.getElementDefinition("Coding"));
 		BaseRuntimeChildDefinition codingSystemChild = codingDef.getChildByName("system");
 		BaseRuntimeChildDefinition codingCodeChild = codingDef.getChildByName("code");
-		BaseRuntimeElementDefinition<IPrimitiveType<?>> systemDef = (RuntimePrimitiveDatatypeDefinition) fhirContext.getElementDefinition("uri");
-		BaseRuntimeElementDefinition<IPrimitiveType<?>> codeDef = (RuntimePrimitiveDatatypeDefinition) fhirContext.getElementDefinition("code");
+		BaseRuntimeElementDefinition<IPrimitiveType<?>> systemDef =
+				(RuntimePrimitiveDatatypeDefinition) fhirContext.getElementDefinition("uri");
+		BaseRuntimeElementDefinition<IPrimitiveType<?>> codeDef =
+				(RuntimePrimitiveDatatypeDefinition) fhirContext.getElementDefinition("code");
 
 		IBase codeableConcept = codeableConceptDef.newInstance();
 
@@ -94,7 +104,8 @@ public final class RemoteTerminologyUtil {
 		return retVal;
 	}
 
-	private static List<TranslateConceptResult> matchesToTranslateConceptResults(FhirContext fhirContext, List<IBase> theMatches) {
+	private static List<TranslateConceptResult> matchesToTranslateConceptResults(
+			FhirContext fhirContext, List<IBase> theMatches) {
 		List<TranslateConceptResult> resultList = new ArrayList();
 		for (IBase m : theMatches) {
 			TranslateConceptResult match = new TranslateConceptResult();

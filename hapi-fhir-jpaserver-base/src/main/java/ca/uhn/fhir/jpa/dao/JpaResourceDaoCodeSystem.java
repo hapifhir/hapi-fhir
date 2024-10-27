@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,14 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
+import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
+import ca.uhn.fhir.jpa.api.model.ReindexJobStatus;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -41,6 +46,9 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -51,29 +59,37 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoCodeSystem<T> {
+public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
+		implements IFhirResourceDaoCodeSystem<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaResourceDaoCodeSystem.class);
+
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
+
 	@Autowired
 	protected IIdHelperService myIdHelperService;
+
 	@Autowired
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
+
 	@Autowired
 	private IValidationSupport myValidationSupport;
+
 	@Autowired
 	private FhirContext myFhirContext;
+
 	private FhirTerser myTerser;
+
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
 
@@ -85,9 +101,12 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	}
 
 	@Override
-	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest) {
+	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(
+			String theCode, String theSystem, RequestDetails theRequest) {
 		List<IIdType> valueSetIds;
-		List<IResourcePersistentId> ids = searchForIds(new SearchParameterMap(org.hl7.fhir.r4.model.CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
+		List<IResourcePersistentId> ids = searchForIds(
+				new SearchParameterMap(org.hl7.fhir.r4.model.CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)),
+				theRequest);
 		valueSetIds = new ArrayList<>();
 		for (IResourcePersistentId next : ids) {
 			IIdType id = myIdHelperService.translatePidIdToForcedId(myFhirContext, "CodeSystem", next);
@@ -98,18 +117,59 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 	@Nonnull
 	@Override
-	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IBaseCoding theCoding, RequestDetails theRequestDetails) {
+	public IValidationSupport.LookupCodeResult lookupCode(
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem,
+			IBaseCoding theCoding,
+			RequestDetails theRequestDetails) {
 		return lookupCode(theCode, theSystem, theCoding, null, theRequestDetails);
 	}
 
 	@Nonnull
 	@Override
-	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IBaseCoding theCoding, IPrimitiveType<String> theDisplayLanguage, RequestDetails theRequestDetails) {
-		return doLookupCode(myFhirContext, myTerser, myValidationSupport, theCode, theSystem, theCoding, theDisplayLanguage);
+	public IValidationSupport.LookupCodeResult lookupCode(
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem,
+			IBaseCoding theCoding,
+			IPrimitiveType<String> theDisplayLanguage,
+			RequestDetails theRequestDetails) {
+		return lookupCode(
+				theCode,
+				theSystem,
+				theCoding,
+				theDisplayLanguage,
+				CollectionUtils.emptyCollection(),
+				theRequestDetails);
+	}
+
+	@Nonnull
+	@Override
+	public IValidationSupport.LookupCodeResult lookupCode(
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem,
+			IBaseCoding theCoding,
+			IPrimitiveType<String> theDisplayLanguage,
+			Collection<IPrimitiveType<String>> thePropertyNames,
+			RequestDetails theRequestDetails) {
+		return doLookupCode(
+				myFhirContext,
+				myTerser,
+				myValidationSupport,
+				theCode,
+				theSystem,
+				theCoding,
+				theDisplayLanguage,
+				thePropertyNames);
 	}
 
 	@Override
-	public SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB, RequestDetails theRequestDetails) {
+	public SubsumesResult subsumes(
+			IPrimitiveType<String> theCodeA,
+			IPrimitiveType<String> theCodeB,
+			IPrimitiveType<String> theSystem,
+			IBaseCoding theCodingA,
+			IBaseCoding theCodingB,
+			RequestDetails theRequestDetails) {
 		return myTerminologySvc.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB);
 	}
 
@@ -118,18 +178,77 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		super.preDelete(theResourceToDelete, theEntityToDelete, theRequestDetails);
 
 		myTermDeferredStorageSvc.deleteCodeSystemForResource(theEntityToDelete);
+	}
 
+	/**
+	 * If there are more code systems to process
+	 * than {@link JpaStorageSettings#getDeferIndexingForCodesystemsOfSize()},
+	 * then these codes will have their processing deferred (for a later time).
+	 *
+	 * This can result in future reindex steps *skipping* these code systems (if
+	 * they're still deferred) and thus incorrect expansions resulting.
+	 *
+	 * So we override the reindex method for CodeSystems specifically to
+	 * force reindex batch jobs to wait until all code systems are processed before
+	 * moving on.
+	 */
+	@SuppressWarnings("rawtypes")
+	@Override
+	public ReindexOutcome reindex(
+			IResourcePersistentId thePid,
+			ReindexParameters theReindexParameters,
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails) {
+		ReindexOutcome outcome = super.reindex(thePid, theReindexParameters, theRequest, theTransactionDetails);
+
+		if (outcome.getWarnings().isEmpty()) {
+			outcome.setHasPendingWork(true);
+		}
+		return outcome;
 	}
 
 	@Override
-	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
+	public ReindexJobStatus getReindexJobStatus() {
+		boolean isQueueEmpty = myTermDeferredStorageSvc.isStorageQueueEmpty(true);
+
+		ReindexJobStatus status = new ReindexJobStatus();
+		status.setHasReindexWorkPending(!isQueueEmpty);
+		if (status.isHasReindexWorkPending()) {
+			// force a run
+			myTermDeferredStorageSvc.saveDeferred();
+		}
+
+		return status;
+	}
+
+	@Override
+	public ResourceTable updateEntity(
+			RequestDetails theRequest,
+			IBaseResource theResource,
+			IBasePersistedResource theEntity,
+			Date theDeletedTimestampOrNull,
+			boolean thePerformIndexing,
+			boolean theUpdateVersion,
+			TransactionDetails theTransactionDetails,
+			boolean theForceUpdate,
+			boolean theCreateNewHistoryEntry) {
+		ResourceTable retVal = super.updateEntity(
+				theRequest,
+				theResource,
+				theEntity,
+				theDeletedTimestampOrNull,
+				thePerformIndexing,
+				theUpdateVersion,
+				theTransactionDetails,
+				theForceUpdate,
+				theCreateNewHistoryEntry);
 		if (!retVal.isUnchangedInCurrentOperation()) {
 
 			org.hl7.fhir.r4.model.CodeSystem cs = myVersionCanonicalizer.codeSystemToCanonical(theResource);
 			addPidToResource(theEntity, cs);
 
-			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(cs, (ResourceTable) theEntity, theRequest);
+			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(
+					cs, (ResourceTable) theEntity, theRequest);
 		}
 
 		return retVal;
@@ -137,10 +256,19 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 	@Nonnull
 	@Override
-	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay, IBaseCoding theCoding, IBaseDatatype theCodeableConcept, RequestDetails theRequestDetails) {
+	public CodeValidationResult validateCode(
+			IIdType theCodeSystemId,
+			IPrimitiveType<String> theCodeSystemUrl,
+			IPrimitiveType<String> theVersion,
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theDisplay,
+			IBaseCoding theCoding,
+			IBaseDatatype theCodeableConcept,
+			RequestDetails theRequestDetails) {
 
 		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
-		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
+		boolean haveCodeableConcept =
+				codeableConcept != null && codeableConcept.getCoding().size() > 0;
 
 		Coding coding = myVersionCanonicalizer.codingToCanonical(theCoding);
 		boolean haveCoding = coding != null && !coding.isEmpty();
@@ -149,10 +277,12 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		boolean haveCode = isNotBlank(code);
 
 		if (!haveCodeableConcept && !haveCoding && !haveCode) {
-			throw new InvalidRequestException(Msg.code(906) + "No code, coding, or codeableConcept provided to validate.");
+			throw new InvalidRequestException(
+					Msg.code(906) + "No code, coding, or codeableConcept provided to validate.");
 		}
 		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
-			throw new InvalidRequestException(Msg.code(907) + "$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
+			throw new InvalidRequestException(
+					Msg.code(907) + "$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
 		}
 
 		String codeSystemUrl;
@@ -162,7 +292,8 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		} else if (isNotBlank(toStringValue(theCodeSystemUrl))) {
 			codeSystemUrl = toStringValue(theCodeSystemUrl);
 		} else {
-			throw new InvalidRequestException(Msg.code(908) + "Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
+			throw new InvalidRequestException(Msg.code(908)
+					+ "Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
 		}
 
 		if (haveCodeableConcept) {
@@ -171,13 +302,15 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 				Coding nextCoding = codeableConcept.getCoding().get(i);
 				if (nextCoding.hasSystem()) {
 					if (!codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
-						throw new InvalidRequestException(Msg.code(909) + "Coding.system '" + nextCoding.getSystem() + "' does not equal with CodeSystem.url '" + codeSystemUrl + "'. Unable to validate.");
+						throw new InvalidRequestException(Msg.code(909) + "Coding.system '" + nextCoding.getSystem()
+								+ "' does not equal with CodeSystem.url '" + codeSystemUrl + "'. Unable to validate.");
 					}
 					codeSystemUrl = nextCoding.getSystem();
 				}
 				code = nextCoding.getCode();
 				String display = nextCoding.getDisplay();
-				CodeValidationResult nextValidation = codeSystemValidateCode(codeSystemUrl, toStringValue(theVersion), code, display);
+				CodeValidationResult nextValidation =
+						codeSystemValidateCode(codeSystemUrl, toStringValue(theVersion), code, display);
 				anyValidation = nextValidation;
 				if (nextValidation.isOk()) {
 					return nextValidation;
@@ -187,7 +320,8 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		} else if (haveCoding) {
 			if (coding.hasSystem()) {
 				if (!codeSystemUrl.equalsIgnoreCase(coding.getSystem())) {
-					throw new InvalidRequestException(Msg.code(910) + "Coding.system '" + coding.getSystem() + "' does not equal with CodeSystem.url '" + codeSystemUrl + "'. Unable to validate.");
+					throw new InvalidRequestException(Msg.code(910) + "Coding.system '" + coding.getSystem()
+							+ "' does not equal with CodeSystem.url '" + codeSystemUrl + "'. Unable to validate.");
 				}
 				codeSystemUrl = coding.getSystem();
 			}
@@ -198,35 +332,49 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			String display = toStringValue(theDisplay);
 			return codeSystemValidateCode(codeSystemUrl, toStringValue(theVersion), code, display);
 		}
-
 	}
 
-	private CodeValidationResult codeSystemValidateCode(String theCodeSystemUrl, String theVersion, String theCode, String theDisplay) {
+	private CodeValidationResult codeSystemValidateCode(
+			String theCodeSystemUrl, String theVersion, String theCode, String theDisplay) {
 		ValidationSupportContext context = new ValidationSupportContext(myValidationSupport);
 		ConceptValidationOptions options = new ConceptValidationOptions();
 		options.setValidateDisplay(isNotBlank(theDisplay));
 
 		String codeSystemUrl = createVersionedSystemIfVersionIsPresent(theCodeSystemUrl, theVersion);
 
-		CodeValidationResult retVal = myValidationSupport.validateCode(context, options, codeSystemUrl, theCode, theDisplay, null);
+		CodeValidationResult retVal =
+				myValidationSupport.validateCode(context, options, codeSystemUrl, theCode, theDisplay, null);
 		if (retVal == null) {
 			retVal = new CodeValidationResult();
-			retVal.setMessage("Terminology service was unable to provide validation for " + codeSystemUrl + "#" + theCode);
+			retVal.setMessage(
+					"Terminology service was unable to provide validation for " + codeSystemUrl + "#" + theCode);
 		}
 		return retVal;
 	}
 
-	public static IValidationSupport.LookupCodeResult doLookupCode(FhirContext theFhirContext, FhirTerser theFhirTerser, IValidationSupport theValidationSupport, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IBaseCoding theCoding, IPrimitiveType<String> theDisplayLanguage) {
-		boolean haveCoding = theCoding != null && isNotBlank(extractCodingSystem(theCoding)) && isNotBlank(extractCodingCode(theCoding));
+	public static IValidationSupport.LookupCodeResult doLookupCode(
+			FhirContext theFhirContext,
+			FhirTerser theFhirTerser,
+			IValidationSupport theValidationSupport,
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem,
+			IBaseCoding theCoding,
+			IPrimitiveType<String> theDisplayLanguage,
+			Collection<IPrimitiveType<String>> thePropertyNames) {
+		boolean haveCoding = theCoding != null
+				&& isNotBlank(extractCodingSystem(theCoding))
+				&& isNotBlank(extractCodingCode(theCoding));
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
 		boolean haveDisplayLanguage = theDisplayLanguage != null && theDisplayLanguage.isEmpty() == false;
 
 		if (!haveCoding && !(haveSystem && haveCode)) {
-			throw new InvalidRequestException(Msg.code(1126) + "No code, coding, or codeableConcept provided to validate");
+			throw new InvalidRequestException(
+					Msg.code(1126) + "No code, coding, or codeableConcept provided to validate");
 		}
 		if (!LogicUtil.multiXor(haveCoding, (haveSystem && haveCode)) || (haveSystem != haveCode)) {
-			throw new InvalidRequestException(Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
+			throw new InvalidRequestException(
+					Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
 		}
 
 		String code;
@@ -250,14 +398,19 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 		ourLog.info("Looking up {} / {}", system, code);
 
+		Collection<String> propertyNames = CollectionUtils.emptyIfNull(thePropertyNames).stream()
+				.map(IPrimitiveType::getValueAsString)
+				.collect(Collectors.toSet());
+
 		if (theValidationSupport.isCodeSystemSupported(new ValidationSupportContext(theValidationSupport), system)) {
 
 			ourLog.info("Code system {} is supported", system);
-			IValidationSupport.LookupCodeResult retVal = theValidationSupport.lookupCode(new ValidationSupportContext(theValidationSupport), system, code, displayLanguage);
+			IValidationSupport.LookupCodeResult retVal = theValidationSupport.lookupCode(
+					new ValidationSupportContext(theValidationSupport),
+					new LookupCodeRequest(system, code, displayLanguage, propertyNames));
 			if (retVal != null) {
 				return retVal;
 			}
-
 		}
 
 		// We didn't find it..
@@ -272,7 +425,8 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		return theCoding.getCode();
 	}
 
-	private static String extractCodingVersion(FhirContext theFhirContext, FhirTerser theFhirTerser, IBaseCoding theCoding) {
+	private static String extractCodingVersion(
+			FhirContext theFhirContext, FhirTerser theFhirTerser, IBaseCoding theCoding) {
 		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 			return null;
 		}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Android
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
 
 /**
- * This class exists in order to ensure that 
+ * This class exists in order to ensure that
  */
 public class AndroidMarker {
 
 	public static void configureContext(FhirContext theContext) {
 		theContext.setRestfulClientFactory(new OkHttpRestfulClientFactory(theContext));
 	}
-	
-	
 }

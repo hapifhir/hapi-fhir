@@ -6,8 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VersionEnumTest {
@@ -29,7 +28,7 @@ public class VersionEnumTest {
 		int minor = Integer.parseInt(parts[1]);
 		int patch = Integer.parseInt(parts[2]);
 
-		if (major >= 6 && minor >= 3) {
+		if ((major == 6 && minor >= 3) || (major >= 7)) {
 			if (minor % 2 == 1) {
 				patch = 0;
 			}
@@ -38,8 +37,7 @@ public class VersionEnumTest {
 
 		version = "V" + version.replace(".", "_");
 
-		assertThat(versions, hasItem(version));
+		assertThat(versions).contains(version);
 	}
-
 
 }

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -23,10 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PatientEverythingCompartmentExpansionTest extends BaseResourceProviderR4Test {
 
@@ -57,9 +56,9 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
-		assertThat(actual, hasItem(patientId));
-		assertThat(actual, hasItem(medicationId));
-		assertThat(actual, hasItem(medicationAdministrationId));
+		assertThat(actual).contains(patientId);
+		assertThat(actual).contains(medicationId);
+		assertThat(actual).contains(medicationAdministrationId);
 	}
 
 	@Test
@@ -83,8 +82,8 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
-		assertThat(actual, hasItem(patientId));
-		assertThat(actual, hasItem(organizationId));
+		assertThat(actual).contains(patientId);
+		assertThat(actual).contains(organizationId);
 	}
 
 	@Test
@@ -108,8 +107,8 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
-		assertThat(actual, hasItem(patientId));
-		assertThat(actual, hasItem(organizationId));
+		assertThat(actual).contains(patientId);
+		assertThat(actual).contains(organizationId);
 	}
 
 	@Test
@@ -133,8 +132,8 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
-		assertThat(actual, hasItem(patientId));
-		assertThat(actual, hasItem(practitionerId));
+		assertThat(actual).contains(patientId);
+		assertThat(actual).contains(practitionerId);
 	}
 
 	@Test
@@ -159,8 +158,8 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
-		assertThat(actual, hasItem(patientId));
-		assertThat(actual, hasItem(deviceId));
+		assertThat(actual).contains(patientId);
+		assertThat(actual).contains(deviceId);
 	}
 
 

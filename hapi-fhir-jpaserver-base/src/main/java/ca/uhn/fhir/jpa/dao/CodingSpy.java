@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,8 @@ public class CodingSpy {
 			if (o instanceof Boolean) {
 				return (Boolean) o;
 			}
-			throw new RuntimeException(Msg.code(2342) + "unsupported type :" + theValue.getClass().getName());
+			throw new RuntimeException(
+					Msg.code(2342) + "unsupported type :" + theValue.getClass().getName());
 		} catch (IllegalAccessException theException) {
 			// should never happen - all Coding models have this field.
 			throw new RuntimeException(Msg.code(2343) + "illegal access during reflection", theException);
@@ -76,5 +77,4 @@ public class CodingSpy {
 		}
 		return result;
 	}
-
 }

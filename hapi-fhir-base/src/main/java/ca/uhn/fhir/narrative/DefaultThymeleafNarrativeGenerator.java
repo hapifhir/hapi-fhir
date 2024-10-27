@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import java.util.List;
 public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
 
 	public static final String NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives.properties";
-	static final String HAPISERVER_NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives-hapiserver.properties";
+	static final String HAPISERVER_NARRATIVES_PROPERTIES =
+			"classpath:ca/uhn/fhir/narrative/narratives-hapiserver.properties";
 
 	private boolean myUseHapiServerConformanceNarrative;
 	private volatile NarrativeTemplateManifest myManifest;
@@ -66,5 +67,4 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 	public boolean isUseHapiServerConformanceNarrative() {
 		return myUseHapiServerConformanceNarrative;
 	}
-
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-
 public interface IResourceHistoryTagDao extends JpaRepository<ResourceHistoryTag, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM ResourceHistoryTag t WHERE t.myResourceHistoryPid = :historyPid")
 	void deleteByPid(@Param("historyPid") Long theResourceHistoryTablePid);
-
 }

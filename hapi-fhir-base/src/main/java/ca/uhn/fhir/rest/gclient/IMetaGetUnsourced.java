@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,9 @@ public interface IMetaGetUnsourced<T extends IBaseMetaType> {
 
 	/**
 	 * Get the meta from a resource instance by ID.
-	 * 
+	 *
 	 * @param theId
 	 *           The ID. Must contain both a resource type and an ID part
 	 */
 	IClientExecutable<IClientExecutable<?, T>, T> fromResource(IIdType theId);
-
 }

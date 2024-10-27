@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5254
+title: "Previously, when bulk export is enabled the resource list would be generated and would
+not be able to add a custom resource to that list. Now once a custom resource is added the list is 
+rebuilt.
+"

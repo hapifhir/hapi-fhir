@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,8 @@ public class CandidateSearcher {
 	private final MdmSearchParamSvc myMdmSearchParamSvc;
 
 	@Autowired
-	public CandidateSearcher(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings, MdmSearchParamSvc theMdmSearchParamSvc) {
+	public CandidateSearcher(
+			DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings, MdmSearchParamSvc theMdmSearchParamSvc) {
 		myDaoRegistry = theDaoRegistry;
 		myMdmSettings = theMdmSettings;
 		myMdmSearchParamSvc = theMdmSearchParamSvc;
@@ -56,8 +57,10 @@ public class CandidateSearcher {
 	 * @return Optional.empty() if >= IMdmSettings.getCandidateSearchLimit() candidates are found, otherwise
 	 * return the bundle provider for the search results.
 	 */
-	public Optional<IBundleProvider> search(String theResourceType, String theResourceCriteria, RequestPartitionId partitionId) {
-		SearchParameterMap searchParameterMap = myMdmSearchParamSvc.mapFromCriteria(theResourceType, theResourceCriteria);
+	public Optional<IBundleProvider> search(
+			String theResourceType, String theResourceCriteria, RequestPartitionId partitionId) {
+		SearchParameterMap searchParameterMap =
+				myMdmSearchParamSvc.mapFromCriteria(theResourceType, theResourceCriteria);
 
 		searchParameterMap.setLoadSynchronousUpTo(myMdmSettings.getCandidateSearchLimit());
 

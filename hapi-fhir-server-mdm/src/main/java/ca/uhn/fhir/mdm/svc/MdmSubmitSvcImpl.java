@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,14 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -75,22 +75,22 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 
 	private int myBufferSize = DEFAULT_BUFFER_SIZE;
 
-	public MdmSubmitSvcImpl() {
-	}
+	public MdmSubmitSvcImpl() {}
 
 	@Override
 	@Transactional
 	public long submitAllSourceTypesToMdm(@Nullable String theCriteria, @Nonnull RequestDetails theRequestDetails) {
 		long submittedCount = myMdmSettings.getMdmRules().getMdmTypes().stream()
-			.mapToLong(type -> submitSourceResourceTypeToMdm(type, theCriteria, theRequestDetails))
-			.sum();
+				.mapToLong(type -> submitSourceResourceTypeToMdm(type, theCriteria, theRequestDetails))
+				.sum();
 
 		return submittedCount;
 	}
 
 	@Override
 	@Transactional
-	public long submitSourceResourceTypeToMdm(String theSourceResourceType, @Nullable String theCriteria, @Nonnull RequestDetails theRequestDetails) {
+	public long submitSourceResourceTypeToMdm(
+			String theSourceResourceType, @Nullable String theCriteria, @Nonnull RequestDetails theRequestDetails) {
 		if (theCriteria == null) {
 			ourLog.info("Submitting all resources of type {} to MDM", theSourceResourceType);
 		} else {
@@ -98,26 +98,35 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 		}
 
 		validateSourceType(theSourceResourceType);
-		SearchParameterMap spMap = myMdmSearchParamSvc.getSearchParameterMapFromCriteria(theSourceResourceType, theCriteria);
+		SearchParameterMap spMap =
+				myMdmSearchParamSvc.getSearchParameterMapFromCriteria(theSourceResourceType, theCriteria);
 		spMap.setLoadSynchronous(true);
 		spMap.setCount(myBufferSize);
 		ISearchBuilder searchBuilder = myMdmSearchParamSvc.generateSearchBuilderForType(theSourceResourceType);
 
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, theSourceResourceType, spMap, null);
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+						theRequestDetails, theSourceResourceType, spMap);
 		return submitAllMatchingResourcesToMdmChannel(spMap, searchBuilder, requestPartitionId);
 	}
 
-	private long submitAllMatchingResourcesToMdmChannel(SearchParameterMap theSpMap, ISearchBuilder theSearchBuilder, RequestPartitionId theRequestPartitionId) {
-		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(null, UUID.randomUUID().toString());
+	private long submitAllMatchingResourcesToMdmChannel(
+			SearchParameterMap theSpMap, ISearchBuilder theSearchBuilder, RequestPartitionId theRequestPartitionId) {
+		SearchRuntimeDetails searchRuntimeDetails =
+				new SearchRuntimeDetails(null, UUID.randomUUID().toString());
 		long total = 0;
-		try (IResultIterator query = theSearchBuilder.createQuery(theSpMap, searchRuntimeDetails, null, theRequestPartitionId)) {
+		try (IResultIterator query =
+				theSearchBuilder.createQuery(theSpMap, searchRuntimeDetails, null, theRequestPartitionId)) {
 			Collection<IResourcePersistentId> pidBatch;
 			do {
 				pidBatch = query.getNextResultBatch(myBufferSize);
 				total += loadPidsAndSubmitToMdmChannel(theSearchBuilder, pidBatch);
 			} while (query.hasNext());
 		} catch (IOException theE) {
-			throw new InternalErrorException(Msg.code(749) + "Failure while attempting to query resources for " + ProviderConstants.OPERATION_MDM_SUBMIT, theE);
+			throw new InternalErrorException(
+					Msg.code(749) + "Failure while attempting to query resources for "
+							+ ProviderConstants.OPERATION_MDM_SUBMIT,
+					theE);
 		}
 		ourLog.info("MDM Submit complete.  Submitted a total of {} resources.", total);
 		return total;
@@ -132,12 +141,12 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 	 *
 	 * @return The total count of submitted resources.
 	 */
-	private long loadPidsAndSubmitToMdmChannel(ISearchBuilder theSearchBuilder, Collection<IResourcePersistentId> thePidsToSubmit) {
+	private long loadPidsAndSubmitToMdmChannel(
+			ISearchBuilder theSearchBuilder, Collection<IResourcePersistentId> thePidsToSubmit) {
 		List<IBaseResource> resourcesToSubmit = new ArrayList<>();
 		theSearchBuilder.loadResourcesByPid(thePidsToSubmit, Collections.emptyList(), resourcesToSubmit, false, null);
 		ourLog.info("Submitting {} resources to MDM", resourcesToSubmit.size());
-		resourcesToSubmit
-			.forEach(resource -> myMdmChannelSubmitterSvc.submitResourceToMdmChannel(resource));
+		resourcesToSubmit.forEach(resource -> myMdmChannelSubmitterSvc.submitResourceToMdmChannel(resource));
 		return resourcesToSubmit.size();
 	}
 
@@ -169,8 +178,9 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 	}
 
 	private void validateSourceType(String theResourceType) {
-		if(!myMdmSettings.getMdmRules().getMdmTypes().contains(theResourceType)) {
-			throw new InvalidRequestException(Msg.code(750) + ProviderConstants.OPERATION_MDM_SUBMIT + " does not support resource type: " + theResourceType);
+		if (!myMdmSettings.getMdmRules().getMdmTypes().contains(theResourceType)) {
+			throw new InvalidRequestException(Msg.code(750) + ProviderConstants.OPERATION_MDM_SUBMIT
+					+ " does not support resource type: " + theResourceType);
 		}
 	}
 

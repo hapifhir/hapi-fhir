@@ -61,14 +61,13 @@ public class ScheduledSubscriptionDeleter {
 				Date cutoff = DateUtils.addDays(new Date(), -1);
 
 				IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
-				SearchParameterMap params = SearchParameterMap
-					.newSynchronous()
-					.setCount(count);
+				SearchParameterMap params = SearchParameterMap.newSynchronous().setCount(count);
 				IBundleProvider subscriptions = subscriptionDao.search(params, new SystemRequestDetails());
 				for (IBaseResource next : subscriptions.getResources(0, count)) {
 					if (next.getMeta().getLastUpdated().before(cutoff)) {
 						ourLog.info("Auto deleting old subscription: {}", next.getIdElement());
-						subscriptionDao.delete(next.getIdElement().toUnqualifiedVersionless(), new SystemRequestDetails());
+						subscriptionDao.delete(
+								next.getIdElement().toUnqualifiedVersionless(), new SystemRequestDetails());
 					}
 				}
 			}

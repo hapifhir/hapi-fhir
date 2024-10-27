@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +47,12 @@ public interface IBinaryTarget {
 
 	@SuppressWarnings("unchecked")
 	default Optional<String> getAttachmentId() {
-		return getTarget()
-			.getExtension()
-			.stream()
-			.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
-			.filter(t -> t.getValue() instanceof IPrimitiveType)
-			.map(t -> (IPrimitiveType<String>) t.getValue())
-			.map(t -> t.getValue())
-			.filter(t -> isNotBlank(t))
-			.findFirst();
+		return getTarget().getExtension().stream()
+				.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
+				.filter(t -> t.getValue() instanceof IPrimitiveType)
+				.map(t -> (IPrimitiveType<String>) t.getValue())
+				.map(t -> t.getValue())
+				.filter(t -> isNotBlank(t))
+				.findFirst();
 	}
 }

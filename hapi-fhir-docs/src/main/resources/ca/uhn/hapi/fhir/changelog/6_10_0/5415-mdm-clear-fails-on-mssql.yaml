@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5415
+title: "Previously, `$mdm-clear` jobs would fail on MSSQL. This is now fixed."

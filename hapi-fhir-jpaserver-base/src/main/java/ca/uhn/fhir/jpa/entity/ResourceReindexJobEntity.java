@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,19 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r4.model.InstantType;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -49,6 +49,7 @@ public class ResourceReindexJobEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RES_REINDEX_JOB")
 	@Column(name = "PID")
 	private Long myId;
+
 	@Column(name = "RES_TYPE", nullable = true, length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
 	/**
@@ -57,6 +58,7 @@ public class ResourceReindexJobEntity implements Serializable {
 	@Column(name = "UPDATE_THRESHOLD_HIGH", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myThresholdHigh;
+
 	@Column(name = "JOB_DELETED", nullable = false)
 	private boolean myDeleted;
 	/**
@@ -65,9 +67,11 @@ public class ResourceReindexJobEntity implements Serializable {
 	@Column(name = "UPDATE_THRESHOLD_LOW", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myThresholdLow;
+
 	@Column(name = "SUSPENDED_UNTIL", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date mySuspendedUntil;
+
 	@Column(name = "REINDEX_COUNT", nullable = true)
 	private Integer myReindexCount;
 
@@ -147,10 +151,10 @@ public class ResourceReindexJobEntity implements Serializable {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("id", myId)
-			.append("resourceType", myResourceType)
-			.append("thresholdLow", new InstantType(myThresholdLow))
-			.append("thresholdHigh", new InstantType(myThresholdHigh));
+				.append("id", myId)
+				.append("resourceType", myResourceType)
+				.append("thresholdLow", new InstantType(myThresholdLow))
+				.append("thresholdHigh", new InstantType(myThresholdHigh));
 		if (myDeleted) {
 			b.append("deleted", myDeleted);
 		}

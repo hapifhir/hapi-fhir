@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ package ca.uhn.fhir.jaxrs.server.util;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
 import ca.uhn.fhir.util.IoUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.OutputStream;
@@ -40,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * The JaxRsResponse is a jax-rs specific implementation of the RestfulResponse.
- * 
+ *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
@@ -53,7 +53,7 @@ public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
 
 	/**
 	 * The constructor
-	 * 
+	 *
 	 * @param request the JaxRs Request
 	 */
 	public JaxRsResponse(JaxRsRequest request) {
@@ -66,7 +66,8 @@ public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
 	 */
 	@Nonnull
 	@Override
-	public Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) {
+	public Writer getResponseWriter(
+			int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) {
 		Validate.isTrue(myWriter == null, "getResponseWriter() called multiple times");
 		Validate.isTrue(myOutputStream == null, "getResponseWriter() called after getResponseOutputStream()");
 		myWriter = new StringWriter();
@@ -96,7 +97,8 @@ public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
 		ResponseBuilder builder = buildResponse(myStatusCode);
 		if (isNotBlank(myContentType)) {
 			if (myWriter != null) {
-				String charContentType = myContentType + "; charset=" + StringUtils.defaultIfBlank(myCharset, Constants.CHARSET_NAME_UTF8);
+				String charContentType = myContentType + "; charset="
+						+ StringUtils.defaultIfBlank(myCharset, Constants.CHARSET_NAME_UTF8);
 				builder.header(Constants.HEADER_CONTENT_TYPE, charContentType);
 				builder.entity(myWriter.toString());
 			} else {
@@ -122,5 +124,4 @@ public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
 		}
 		return response;
 	}
-
 }

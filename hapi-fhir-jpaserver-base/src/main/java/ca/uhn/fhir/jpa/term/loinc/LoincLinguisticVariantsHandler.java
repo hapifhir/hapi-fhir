@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -38,7 +38,7 @@ public class LoincLinguisticVariantsHandler implements IZipContentsHandlerCsv {
 
 	@Override
 	public void accept(CSVRecord theRecord) {
-		
+
 		String id = trim(theRecord.get("ID"));
 		if (isBlank(id)) {
 			return;
@@ -48,17 +48,17 @@ public class LoincLinguisticVariantsHandler implements IZipContentsHandlerCsv {
 		if (isBlank(isoLanguage)) {
 			return;
 		}
-		
+
 		String isoCountry = trim(theRecord.get("ISO_COUNTRY"));
 		if (isBlank(isoCountry)) {
 			return;
 		}
-		
+
 		String languageName = trim(theRecord.get("LANGUAGE_NAME"));
 		if (isBlank(languageName)) {
 			return;
 		}
-		
+
 		LinguisticVariant linguisticVariant = new LinguisticVariant(id, isoLanguage, isoCountry, languageName);
 		myLinguisticVariants.add(linguisticVariant);
 	}
@@ -70,7 +70,11 @@ public class LoincLinguisticVariantsHandler implements IZipContentsHandlerCsv {
 		private String myIsoCountry;
 		private String myLanguageName;
 
-		public LinguisticVariant(@Nonnull String theId, @Nonnull String theIsoLanguage, @Nonnull String theIsoCountry, @Nonnull String theLanguageName) {
+		public LinguisticVariant(
+				@Nonnull String theId,
+				@Nonnull String theIsoLanguage,
+				@Nonnull String theIsoCountry,
+				@Nonnull String theLanguageName) {
 			this.myId = theId;
 			this.myIsoLanguage = theIsoLanguage;
 			this.myIsoCountry = theIsoCountry;
@@ -84,10 +88,9 @@ public class LoincLinguisticVariantsHandler implements IZipContentsHandlerCsv {
 		public String getLanguageName() {
 			return myLanguageName;
 		}
-		
+
 		public String getLanguageCode() {
 			return myIsoLanguage + "-" + myIsoCountry;
 		}
 	}
-
 }

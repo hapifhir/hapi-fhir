@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ public enum LoincUploadPropertiesEnum {
 	/**
 	 * Sorting agnostic.
 	 */
-
 	LOINC_UPLOAD_PROPERTIES_FILE("loincupload.properties"),
 	LOINC_XML_FILE("loinc.xml"),
 
@@ -61,7 +60,8 @@ public enum LoincUploadPropertiesEnum {
 
 	// IEEE medical device codes
 	LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE("loinc.ieee.medical.device.code.mapping.table.file"),
-	LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT("AccessoryFiles/LoincIeeeMedicalDeviceCodeMappingTable/LoincIeeeMedicalDeviceCodeMappingTable.csv"),
+	LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT(
+			"AccessoryFiles/LoincIeeeMedicalDeviceCodeMappingTable/LoincIeeeMedicalDeviceCodeMappingTable.csv"),
 
 	// Imaging document codes
 	LOINC_IMAGING_DOCUMENT_CODES_FILE("loinc.imaging.document.codes.file"),
@@ -96,7 +96,8 @@ public enum LoincUploadPropertiesEnum {
 
 	// Universal lab order ValueSet
 	LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE("loinc.universal.lab.order.valueset.file"),
-	LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT("AccessoryFiles/LoincUniversalLabOrdersValueSet/LoincUniversalLabOrdersValueSet.csv"),
+	LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT(
+			"AccessoryFiles/LoincUniversalLabOrdersValueSet/LoincUniversalLabOrdersValueSet.csv"),
 
 	/*
 	 * OPTIONAL

@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4204
+jira: SMILE-4688
+backport: 6.4.2
+title: "With default configuration, Resource meta.tag properties: `userSelected` and `version`, were not stored in the database. 
+   This is now fixed."

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,32 +22,31 @@ package ca.uhn.fhir.model.dstu2.composite;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 
-@DatatypeDef(name="Money", profileOf=QuantityDt.class) 
+@DatatypeDef(name = "Money", profileOf = QuantityDt.class)
 public class MoneyDt extends QuantityDt {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor
-     */
-    public MoneyDt() {
-        // nothing
-    }
+	/**
+	 * Constructor
+	 */
+	public MoneyDt() {
+		// nothing
+	}
 
-    /**
-     * Constructor
-     */
-    @SimpleSetter
-    public MoneyDt(@SimpleSetter.Parameter(name = "theValue") double theValue) {
-        setValue(theValue);
-    }
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public MoneyDt(@SimpleSetter.Parameter(name = "theValue") double theValue) {
+		setValue(theValue);
+	}
 
-    /**
-     * Constructor
-     */
-    @SimpleSetter
-    public MoneyDt(@SimpleSetter.Parameter(name = "theValue") long theValue) {
-        setValue(theValue);
-    }
-
+	/**
+	 * Constructor
+	 */
+	@SimpleSetter
+	public MoneyDt(@SimpleSetter.Parameter(name = "theValue") long theValue) {
+		setValue(theValue);
+	}
 }

@@ -3,6 +3,8 @@ package ca.uhn.fhir.rest.server.mail;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetupTest;
+import jakarta.annotation.Nonnull;
+import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -10,14 +12,13 @@ import org.simplejavamail.MailException;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 
-import javax.annotation.Nonnull;
-import javax.mail.internet.MimeMessage;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class MailSvcIT {
 	private static final String FROM_ADDRESS = "from_address@email.com";
@@ -42,7 +43,8 @@ public class MailSvcIT {
 		// execute
 		fixture.sendMail(email);
 		// validate
-		assertTrue(ourGreenMail.waitForIncomingEmail(5000, 1));
+		boolean condition = ourGreenMail.waitForIncomingEmail(5000, 1);
+		assertTrue(condition);
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
 		assertEquals(1, receivedMessages.length);
 		assertEquals(SUBJECT, receivedMessages[0].getSubject());
@@ -84,13 +86,14 @@ public class MailSvcIT {
 	@Test
 	public void testSendMailWithInvalidToAddressExpectErrorHandler() {
 		// setup
-		final Email email = withEmail("xyz");
+		String invalidEmailAdress = "xyz";
+		final Email email = withEmail(invalidEmailAdress);
 		// execute
 		fixture.sendMail(email,
 			() -> fail("Should not execute on Success"),
 			(e) -> {
 				assertTrue(e instanceof MailException);
-				assertEquals("Invalid TO address: " + email, e.getMessage());
+				assertEquals("Invalid TO address: " + invalidEmailAdress, e.getMessage());
 			});
 		// validate
 		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 0));

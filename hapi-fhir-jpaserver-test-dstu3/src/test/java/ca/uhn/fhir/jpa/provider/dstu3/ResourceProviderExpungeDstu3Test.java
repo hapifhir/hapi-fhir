@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -7,7 +8,6 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3Test {
@@ -44,23 +44,14 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	private void assertExpunged(IIdType theId) {
 		try {
 			getDao(theId).read(theId);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
 	}
 
-	private void assertGone(IIdType theId) {
-		try {
-			getDao(theId).read(theId);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-	}
-
 	private void assertStillThere(IIdType theId) {
-		getDao(theId).read(theId);
+		assertNotGone(theId);
 	}
 
 	@Override
@@ -169,7 +160,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 			myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true), null);
-			fail();
+			fail("");
 		} catch (PreconditionFailedException e) {
 			assertEquals(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
 		}
@@ -305,7 +296,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true)
 				.setLimit(0), null);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit 0.", e.getMessage());
 		}

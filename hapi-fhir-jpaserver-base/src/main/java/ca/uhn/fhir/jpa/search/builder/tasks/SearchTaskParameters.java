@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,15 +38,15 @@ public class SearchTaskParameters {
 
 	private Integer myLoadingThrottleForUnitTests;
 
-	public SearchTaskParameters(ca.uhn.fhir.jpa.entity.Search theSearch,
-										 IDao theCallingDao,
-										 SearchParameterMap theParams,
-										 String theResourceType,
-										 RequestDetails theRequest,
-										 ca.uhn.fhir.interceptor.model.RequestPartitionId theRequestPartitionId,
-										 Consumer<String> theOnRemove,
-										 int theSyncSize
-	) {
+	public SearchTaskParameters(
+			ca.uhn.fhir.jpa.entity.Search theSearch,
+			IDao theCallingDao,
+			SearchParameterMap theParams,
+			String theResourceType,
+			RequestDetails theRequest,
+			ca.uhn.fhir.interceptor.model.RequestPartitionId theRequestPartitionId,
+			Consumer<String> theOnRemove,
+			int theSyncSize) {
 		Search = theSearch;
 		CallingDao = theCallingDao;
 		Params = theParams;

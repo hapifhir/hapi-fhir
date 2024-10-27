@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,12 @@ public class ResourceTableRoutingBinder implements RoutingBinder {
 	private static class ResourceTableBridge implements RoutingBridge<ResourceTable> {
 
 		@Override
-		public void route(DocumentRoutes theDocumentRoutes, Object theO, ResourceTable theResourceTable, RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
-			if (theResourceTable.getDeleted() == null && theResourceTable.getIndexStatus() != null ) {
+		public void route(
+				DocumentRoutes theDocumentRoutes,
+				Object theO,
+				ResourceTable theResourceTable,
+				RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
+			if (theResourceTable.getDeleted() == null && theResourceTable.getIndexStatus() != null) {
 				theDocumentRoutes.addRoute();
 			} else {
 				theDocumentRoutes.notIndexed();
@@ -45,7 +49,11 @@ public class ResourceTableRoutingBinder implements RoutingBinder {
 		}
 
 		@Override
-		public void previousRoutes(DocumentRoutes theDocumentRoutes, Object theO, ResourceTable theResourceTable, RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
+		public void previousRoutes(
+				DocumentRoutes theDocumentRoutes,
+				Object theO,
+				ResourceTable theResourceTable,
+				RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
 			theDocumentRoutes.addRoute();
 		}
 	}

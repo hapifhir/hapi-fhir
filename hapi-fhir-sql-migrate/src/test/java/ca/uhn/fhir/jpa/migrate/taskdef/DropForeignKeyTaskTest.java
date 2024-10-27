@@ -7,9 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DropForeignKeyTaskTest extends BaseTest {
 
@@ -23,7 +21,7 @@ public class DropForeignKeyTaskTest extends BaseTest {
 		executeSql("create table CHILD (PID bigint not null, PARENTREF bigint)");
 		executeSql("alter table CHILD add constraint FK_MOM foreign key (PARENTREF) references PARENT(PID)");
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD")).hasSize(1);
 
 		DropForeignKeyTask task = new DropForeignKeyTask("1", "1");
 		task.setTableName("CHILD");
@@ -33,7 +31,7 @@ public class DropForeignKeyTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), empty());
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD")).isEmpty();
 
 		// Make sure additional calls don't crash
 		getMigrator().migrate();

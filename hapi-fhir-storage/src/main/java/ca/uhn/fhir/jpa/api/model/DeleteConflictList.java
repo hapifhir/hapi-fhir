@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,11 +53,11 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 		myResourceIdsToIgnoreConflict = theParentList.myResourceIdsToIgnoreConflict;
 	}
 
-
 	public boolean isResourceIdMarkedForDeletion(IIdType theIdType) {
 		Validate.notNull(theIdType);
 		Validate.notBlank(theIdType.toUnqualifiedVersionless().getValue());
-		return myResourceIdsMarkedForDeletion.contains(theIdType.toUnqualifiedVersionless().getValue());
+		return myResourceIdsMarkedForDeletion.contains(
+				theIdType.toUnqualifiedVersionless().getValue());
 	}
 
 	public void setResourceIdMarkedForDeletion(IIdType theIdType) {
@@ -69,7 +69,8 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 	public boolean isResourceIdToIgnoreConflict(IIdType theIdType) {
 		Validate.notNull(theIdType);
 		Validate.notBlank(theIdType.toUnqualifiedVersionless().getValue());
-		return myResourceIdsToIgnoreConflict.contains(theIdType.toUnqualifiedVersionless().getValue());
+		return myResourceIdsToIgnoreConflict.contains(
+				theIdType.toUnqualifiedVersionless().getValue());
 	}
 
 	public void setResourceIdToIgnoreConflict(IIdType theIdType) {
@@ -113,7 +114,7 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 
 			@Override
 			public void remove() {
-				Assert.isTrue(myLastOperationWasNext);
+				Assert.isTrue(myLastOperationWasNext, "myLastOperationWasNext is not true");
 				myNextIndex--;
 				myList.remove(myNextIndex);
 				myLastOperationWasNext = false;

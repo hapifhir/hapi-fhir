@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,19 +25,18 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 public class SecurityInterceptors {
 
 	public void basicAuthInterceptorRealm() {
-		//START SNIPPET: basicAuthInterceptorRealm
+		// START SNIPPET: basicAuthInterceptorRealm
 		AuthenticationException ex = new AuthenticationException();
 		ex.addAuthenticateHeaderForRealm("myRealm");
 		throw ex;
-		//END SNIPPET: basicAuthInterceptorRealm
+		// END SNIPPET: basicAuthInterceptorRealm
 	}
 
 	// START SNIPPET: basicAuthInterceptorExample
@@ -49,7 +48,9 @@ public class SecurityInterceptors {
 		 * a username and password are provided in a header called Authorization.
 		 */
 		@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
-		public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+		public boolean incomingRequestPostProcessed(
+				RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse)
+				throws AuthenticationException {
 			String authHeader = theRequest.getHeader("Authorization");
 
 			// The format of the header must be:
@@ -77,9 +78,7 @@ public class SecurityInterceptors {
 			// Return true to allow the request to proceed
 			return true;
 		}
-
-
 	}
-	//END SNIPPET: basicAuthInterceptorExample
+	// END SNIPPET: basicAuthInterceptorExample
 
 }

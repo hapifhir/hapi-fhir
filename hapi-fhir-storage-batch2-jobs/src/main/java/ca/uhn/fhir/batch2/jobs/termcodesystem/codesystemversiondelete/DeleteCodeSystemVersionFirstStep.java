@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
-
-public class DeleteCodeSystemVersionFirstStep implements IFirstJobStepWorker<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
+public class DeleteCodeSystemVersionFirstStep
+		implements IFirstJobStepWorker<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
 
 	private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
 
@@ -42,9 +42,9 @@ public class DeleteCodeSystemVersionFirstStep implements IFirstJobStepWorker<Ter
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<TermCodeSystemDeleteVersionJobParameters, VoidModel> theStepExecutionDetails,
-		@Nonnull IJobDataSink<CodeSystemVersionPIDResult> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<TermCodeSystemDeleteVersionJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<CodeSystemVersionPIDResult> theDataSink)
+			throws JobExecutionFailedException {
 		long versionId = theStepExecutionDetails.getParameters().getCodeSystemVersionPid();
 
 		myTermCodeSystemSvc.deleteCodeSystemConceptsByCodeSystemVersionPid(versionId);

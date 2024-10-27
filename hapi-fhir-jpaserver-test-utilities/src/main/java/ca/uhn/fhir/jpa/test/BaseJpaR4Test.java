@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.jpa.test;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
+import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -32,19 +35,22 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
+import ca.uhn.fhir.jpa.dao.GZipUtil;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
+import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
@@ -77,6 +83,8 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
@@ -97,6 +105,7 @@ import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -107,6 +116,8 @@ import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.test.util.LogbackTestExtension;
+import jakarta.persistence.EntityManager;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -143,11 +154,13 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.ImmunizationRecommendation;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.MolecularSequence;
 import org.hl7.fhir.r4.model.NamingSystem;
@@ -175,13 +188,14 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.model.ElementDefinition;
+import org.hl7.fhir.r5.utils.validation.IMessagingServices;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
-import org.hl7.fhir.r5.utils.validation.constants.CodedContentValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -197,23 +211,24 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class})
+@ContextConfiguration(classes = {
+	TestR4Config.class
+})
 public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder {
 	public static final String MY_VALUE_SET = "my-value-set";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
@@ -236,6 +251,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	protected ISearchDao mySearchEntityDao;
+	@Autowired
+	protected IBatch2JobInstanceRepository myJobInstanceRepository;
+	@Autowired
+	private IBatch2WorkChunkRepository myWorkChunkRepository;
 
 	@Autowired
 	protected ISearchIncludeDao mySearchIncludeEntityDao;
@@ -256,8 +275,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceIndexedSearchParamQuantityNormalizedDao myResourceIndexedSearchParamQuantityNormalizedDao;
 	@Autowired
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
-	@Autowired
-	protected IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
 	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
 	@Autowired
@@ -338,6 +355,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myGroupDaoR4")
 	protected IFhirResourceDao<Group> myGroupDao;
 	@Autowired
+	@Qualifier("myListDaoR4")
+	protected IFhirResourceDao<ListResource> myListDao;
+	@Autowired
 	@Qualifier("myMolecularSequenceDaoR4")
 	protected IFhirResourceDao<MolecularSequence> myMolecularSequenceDao;
 	@Autowired
@@ -393,6 +413,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myOrganizationAffiliationDaoR4")
 	protected IFhirResourceDao<OrganizationAffiliation> myOrganizationAffiliationDao;
+
 	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
 	@Autowired
@@ -414,11 +435,14 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myExplanationOfBenefitDaoR4")
 	protected IFhirResourceDao<ExplanationOfBenefit> myExplanationOfBenefitDao;
 	@Autowired
+	@Qualifier("myMessageHeaderDaoR4")
+	protected IFhirResourceDao<MessageHeader> myMessageHeaderDao;
+	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
-	protected IForcedIdDao myForcedIdDao;
+	protected IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
 	@Autowired
 	@Qualifier("myCoverageDaoR4")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
@@ -511,11 +535,13 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
-	protected IIdHelperService myIdHelperService;
+	protected IIdHelperService<JpaPid> myIdHelperService;
 	@Autowired
 	protected ValidationSettings myValidationSettings;
 	@Autowired
 	protected IMdmLinkJpaRepository myMdmLinkDao;
+	@Autowired
+	protected IMdmLinkJpaRepository myMdmLinkHistoryDao;
 	@Autowired
 	private IValidationSupport myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
@@ -523,12 +549,32 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 	@Autowired
 	protected IResourceSearchUrlDao myResourceSearchUrlDao;
+	@Autowired
+	private IInterceptorService myInterceptorService;
+	@Autowired(required = false)
+	private MdmStorageInterceptor myMdmStorageInterceptor;
+	@Autowired
+	protected TestDaoSearch myTestDaoSearch;
+	@Autowired
+	protected IDeleteExpungeSvc<JpaPid> myDeleteExpungeSvc;
+
+	@Autowired
+	protected IJobMaintenanceService myJobMaintenanceService;
+	@Autowired
+	protected IJobCoordinator myJobCoordinator;
 
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
+	@RegisterExtension
+	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
+
 	@AfterEach()
+	@Order(0)
 	public void afterCleanupDao() {
+		// make sure there are no running jobs
+		assertFalse(myBatch2JobHelper.hasRunningJobs());
+
 		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
 		myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
@@ -543,6 +589,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
 
 		myPartitionSettings.setPartitioningEnabled(false);
+		ourLog.info("1 - " + getClass().getSimpleName() + ".afterCleanupDao");
 	}
 
 	@Override
@@ -551,6 +598,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	public void afterResetInterceptors() {
 		super.afterResetInterceptors();
 		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
+
+		ourLog.info("2 - " + getClass().getSimpleName() + ".afterResetInterceptors");
 	}
 
 	@AfterEach
@@ -561,6 +610,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
 		termDeferredStorageSvc.clearDeferred();
+
+		ourLog.info("4 - " + getClass().getSimpleName() + ".afterClearTerminologyCaches");
 	}
 
 	@BeforeEach
@@ -584,10 +635,48 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		runInTransaction(() -> {
-			myMdmLinkDao.deleteAll();
-		});
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		/*
+		 * We have to stop all scheduled jobs or they will
+		 * interfere with the database cleanup!
+		 */
+		ourLog.info("Pausing Schedulers");
+		mySchedulerService.pause();
+
+		myTerminologyDeferredStorageSvc.logQueueForUnitTest();
+		if (!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
+			ourLog.warn("There is deferred terminology storage stuff still in the queue. Please verify your tests clean up ok.");
+			if (myTermDeferredStorageSvc instanceof TermDeferredStorageSvcImpl t) {
+				t.clearDeferred();
+			}
+		}
+
+		boolean registeredStorageInterceptor = false;
+		if (myMdmStorageInterceptor != null && !myInterceptorService.getAllRegisteredInterceptors().contains(myMdmStorageInterceptor)) {
+			myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
+			registeredStorageInterceptor = true;
+		}
+		try {
+			runInTransaction(() -> {
+				myMdmLinkHistoryDao.deleteAll();
+				myMdmLinkDao.deleteAll();
+			});
+			purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+
+			myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+			runInTransaction(() -> {
+				myWorkChunkRepository.deleteAll();
+				myJobInstanceRepository.deleteAll();
+			});
+		} finally {
+			if (registeredStorageInterceptor) {
+				myInterceptorService.unregisterInterceptor(myMdmStorageInterceptor);
+			}
+		}
+
+		// restart the jobs
+		ourLog.info("Restarting the schedulers");
+		mySchedulerService.unpause();
+		ourLog.info("5 - " + getClass().getSimpleName() + ".afterPurgeDatabases");
 	}
 
 	@BeforeEach
@@ -622,13 +711,24 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		return myTxManager;
 	}
 
-	protected void validate(IBaseResource theResource) {
+	protected void relocateResourceTextToCompressedColumn(Long theResourcePid, Long theVersion) {
+		runInTransaction(()->{
+			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourcePid, theVersion);
+			byte[] contents = GZipUtil.compress(historyEntity.getResourceTextVc());
+			myResourceHistoryTableDao.updateNonInlinedContents(contents, historyEntity.getId());
+		});
+	}
+
+	protected ValidationResult validateWithResult(IBaseResource theResource) {
 		FhirValidator validatorModule = myFhirContext.newValidator();
 		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myValidationSupport);
 		instanceValidator.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
 		instanceValidator.setValidatorPolicyAdvisor(new ValidationPolicyAdvisor());
 		validatorModule.registerValidatorModule(instanceValidator);
-		ValidationResult result = validatorModule.validateWithResult(theResource);
+		return validatorModule.validateWithResult(theResource);
+	}
+	protected void validate(IBaseResource theResource) {
+		ValidationResult result = validateWithResult(theResource);
 		if (!result.isSuccessful()) {
 			fail(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		}
@@ -643,7 +743,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		dao.update(resourceParsed);
 	}
 
-	protected void assertHierarchyContains(String... theStrings) {
+	protected void assertHierarchyContainsExactly(String... theStrings) {
 		List<String> hierarchy = runInTransaction(() -> {
 			List<String> hierarchyHolder = new ArrayList<>();
 			TermCodeSystem codeSystem = myTermCodeSystemDao.findAll().iterator().next();
@@ -654,9 +754,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 			return hierarchyHolder;
 		});
 		if (theStrings.length == 0) {
-			assertThat("\n" + String.join("\n", hierarchy), hierarchy, empty());
+			assertThat(hierarchy).as("\n" + String.join("\n", hierarchy)).isEmpty();
 		} else {
-			assertThat("\n" + String.join("\n", hierarchy), hierarchy, contains(theStrings));
+			assertThat(hierarchy).as("\n" + String.join("\n", hierarchy)).containsExactly(theStrings);
 		}
 	}
 
@@ -761,6 +861,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@AfterEach
 	public void afterEachClearCaches() {
 		myJpaValidationSupportChainR4.invalidateCaches();
+		ourLog.info("3 - " + getClass().getSimpleName() + ".afterEachClearCaches");
 	}
 
 	private static void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
@@ -874,6 +975,28 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		target.setDisplay("Target Code 34567");
 		target.setEquivalence(ConceptMapEquivalence.NARROWER);
 
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL_4);
+		group.setSourceVersion("Version 1");
+		group.setTarget(CS_URL_3);
+		group.setTargetVersion("Version 1");
+
+		// This one should not show up in the results because it doesn't have a code
+		element = group.addElement();
+		element.setCode("89012");
+		element.setDisplay("Source Code 89012");
+
+		target = element.addTarget();
+		target.setEquivalence(ConceptMapEquivalence.DISJOINT);
+
+		// This one should show up in the results because unmatched targets are allowed to be codeless
+		element = group.addElement();
+		element.setCode("89123");
+		element.setDisplay("Source Code 89123");
+
+		target = element.addTarget();
+		target.setEquivalence(ConceptMapEquivalence.UNMATCHED);
+
 		return conceptMap;
 	}
 
@@ -905,12 +1028,44 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 
 		@Override
-		public CodedContentValidationPolicy policyForCodedContent(IResourceValidator iResourceValidator, Object o, String s, ElementDefinition elementDefinition, org.hl7.fhir.r5.model.StructureDefinition structureDefinition, BindingKind bindingKind, org.hl7.fhir.r5.model.ValueSet valueSet, List<String> list) {
-			return CodedContentValidationPolicy.CODE;
+		public EnumSet<ResourceValidationAction> policyForResource(IResourceValidator validator, Object appContext,
+																   org.hl7.fhir.r5.model.StructureDefinition type, String path) {
+			return EnumSet.allOf(ResourceValidationAction.class);
 		}
 
 		@Override
-		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId, Element.SpecialElement containingResourceType, String path, String url) {
+		public EnumSet<ElementValidationAction> policyForElement(IResourceValidator validator, Object appContext,
+																 org.hl7.fhir.r5.model.StructureDefinition structure, ElementDefinition element, String path) {
+			return EnumSet.allOf(ElementValidationAction.class);
+		}
+		@Override
+		public EnumSet<CodedContentValidationAction> policyForCodedContent(IResourceValidator validator,
+																		   Object appContext,
+																		   String stackPath,
+																		   ElementDefinition definition,
+																		   org.hl7.fhir.r5.model.StructureDefinition structure,
+																		   BindingKind kind,
+																		   AdditionalBindingPurpose purpose,
+																		   org.hl7.fhir.r5.model.ValueSet valueSet,
+																		   List<String> systems) {
+			return EnumSet.allOf(CodedContentValidationAction.class);
+		}
+
+		@Override
+		public List<org.hl7.fhir.r5.model.StructureDefinition> getImpliedProfilesForResource(IResourceValidator validator, Object appContext, String stackPath, ElementDefinition definition, org.hl7.fhir.r5.model.StructureDefinition structure, Element resource, boolean valid, IMessagingServices msgServices, List<ValidationMessage> messages) {
+			return List.of();
+		}
+
+		@Override
+		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator,
+																	 Object appContext,
+																	 org.hl7.fhir.r5.model.StructureDefinition structure,
+																	 ElementDefinition element,
+																	 String containerType,
+																	 String containerId,
+																	 Element.SpecialElement containingResourceType,
+																	 String path,
+																	 String url) {
 			return ContainedReferenceValidationPolicy.CHECK_VALID;
 		}
 	}

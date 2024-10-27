@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.CoverageIgnore;
 
-@DatatypeDef(name = "positiveInt", profileOf=IntegerDt.class)
+@DatatypeDef(name = "positiveInt", profileOf = IntegerDt.class)
 @CoverageIgnore
 public class PositiveIntDt extends IntegerDt {
 
@@ -45,7 +45,7 @@ public class PositiveIntDt extends IntegerDt {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theIntegerAsString
 	 *            A string representation of an integer
 	 * @throws DataFormatException
@@ -54,5 +54,4 @@ public class PositiveIntDt extends IntegerDt {
 	public PositiveIntDt(String theIntegerAsString) {
 		setValueAsString(theIntegerAsString);
 	}
-
 }

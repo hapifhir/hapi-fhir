@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +19,27 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Set;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Set;
 
 public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody {
 
 	public DeleteMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
-		super(theMethod, theContext, theProvider, Delete.class, theMethod.getAnnotation(Delete.class).type());
+		super(
+				theMethod,
+				theContext,
+				theProvider,
+				Delete.class,
+				theMethod.getAnnotation(Delete.class).type(),
+				theMethod.getAnnotation(Delete.class).typeName());
 	}
 
 	@Nonnull
@@ -62,5 +67,4 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	protected String getMatchingOperation() {
 		return null;
 	}
-
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,21 +25,20 @@ import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.Query;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.CacheMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.Query;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class SearchQueryExecutor implements ISearchQueryExecutor {
 
@@ -48,14 +47,12 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryExecutor.class);
 	private final GeneratedSql myGeneratedSql;
-	private final Integer myMaxResultsToFetch;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
+
 	private boolean myQueryInitialized;
-	private Connection myConnection;
-	private PreparedStatement myStatement;
-	private ScrollableResultsIterator<Number> myResultSet;
+	private ScrollableResultsIterator<Object> myResultSet;
 	private Long myNext;
 
 	/**
@@ -65,7 +62,6 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		Validate.notNull(theGeneratedSql, "theGeneratedSql must not be null");
 		myGeneratedSql = theGeneratedSql;
 		myQueryInitialized = false;
-		myMaxResultsToFetch = theMaxResultsToFetch;
 	}
 
 	/**
@@ -75,7 +71,6 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		assert NO_MORE != null;
 
 		myGeneratedSql = null;
-		myMaxResultsToFetch = null;
 		myNext = NO_MORE;
 	}
 
@@ -112,14 +107,13 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					 * is managed by Spring has been started before this method is called.
 					 */
 					HapiTransactionService.requireTransaction();
+					ourLog.trace("About to execute SQL: {}. Parameters: {}", sql, Arrays.toString(args));
 
 					Query nativeQuery = myEntityManager.createNativeQuery(sql);
 					org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) nativeQuery;
 					for (int i = 1; i <= args.length; i++) {
 						hibernateQuery.setParameter(i, args[i - 1]);
 					}
-
-					ourLog.trace("About to execute SQL: {}", sql);
 
 					/*
 					 * These settings help to ensure that we use a search cursor
@@ -130,12 +124,17 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					hibernateQuery.setCacheMode(CacheMode.IGNORE);
 					hibernateQuery.setReadOnly(true);
 
-					// This tells hibernate not to flush when we call scroll(), but rather to wait until the transaction commits and
-					// only flush then.  We need to do this so that any exceptions that happen in the transaction happen when
+					// This tells hibernate not to flush when we call scroll(), but rather to wait until the transaction
+					// commits and
+					// only flush then.  We need to do this so that any exceptions that happen in the transaction happen
+					// when
 					// we try to commit the transaction, and not here.
-					// See the test called testTransaction_multiThreaded (in FhirResourceDaoR4ConcurrentWriteTest) which triggers
+					// See the test called testTransaction_multiThreaded (in FhirResourceDaoR4ConcurrentWriteTest) which
+					// triggers
 					// the following exception if we don't set this flush mode:
-					// java.util.concurrent.ExecutionException: org.springframework.transaction.UnexpectedRollbackException: Transaction silently rolled back because it has been marked as rollback-only
+					// java.util.concurrent.ExecutionException:
+					// org.springframework.transaction.UnexpectedRollbackException: Transaction silently rolled back
+					// because it has been marked as rollback-only
 					hibernateQuery.setFlushMode(FlushModeType.COMMIT);
 					ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 					myResultSet = new ScrollableResultsIterator<>(scrollableResults);
@@ -145,8 +144,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 				if (myResultSet == null || !myResultSet.hasNext()) {
 					myNext = NO_MORE;
 				} else {
-					Number next = myResultSet.next();
-					myNext = next.longValue();
+					myNext = getNextPid(myResultSet);
 				}
 
 			} catch (Exception e) {
@@ -157,8 +155,41 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		}
 	}
 
+	private long getNextPid(ScrollableResultsIterator<Object> theResultSet) {
+		Object nextRow = Objects.requireNonNull(theResultSet.next());
+		// We should typically get two columns back, the first is the partition ID and the second
+		// is the resource ID. But if we're doing a count query, we'll get a single column in an array
+		// or maybe even just a single non array value depending on how the platform handles it.
+		if (nextRow instanceof Number) {
+			return ((Number) nextRow).longValue();
+		} else {
+			Object[] nextRowAsArray = (Object[]) nextRow;
+			if (nextRowAsArray.length == 1) {
+				return (Long) nextRowAsArray[0];
+			} else {
+				int i;
+				// TODO MB add a strategy object to GeneratedSql to describe the result set.
+				// or make SQE generic
+				// Comment to reviewer: this will be cleaner with the next
+				// merge from ja_20240718_pk_schema_selector
+
+				// We have some cases to distinguish:
+				// - res_id
+				// - count
+				// - partition_id, res_id
+				// - res_id, coord-dist
+				// - partition_id, res_id, coord-dist
+				// Assume res_id is first Long in row, and is in first two columns
+				if (nextRowAsArray[0] instanceof Long) {
+					return (long) nextRowAsArray[0];
+				} else {
+					return (long) nextRowAsArray[1];
+				}
+			}
+		}
+	}
+
 	public static SearchQueryExecutor emptyExecutor() {
 		return NO_VALUE_EXECUTOR;
 	}
 }
-

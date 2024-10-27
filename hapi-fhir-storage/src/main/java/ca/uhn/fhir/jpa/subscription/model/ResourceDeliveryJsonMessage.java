@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import javax.annotation.Nullable;
-
 public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> {
-	private static final ObjectMapper ourObjectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+	private static final ObjectMapper ourObjectMapper =
+			new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
 	@JsonProperty("payload")
 	private ResourceDeliveryMessage myPayload;
@@ -76,9 +76,7 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myPayload", myPayload)
-			.toString();
+		return new ToStringBuilder(this).append("myPayload", myPayload).toString();
 	}
 
 	public static ResourceDeliveryJsonMessage fromJson(String theJson) throws JsonProcessingException {

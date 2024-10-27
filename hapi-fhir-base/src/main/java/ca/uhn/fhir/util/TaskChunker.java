@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,15 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import com.google.common.collect.Streams;
+import jakarta.annotation.Nonnull;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * This utility takes an input collection, breaks it up into chunks of a
@@ -50,4 +55,13 @@ public class TaskChunker<T> {
 		}
 	}
 
+	@Nonnull
+	public <T> Stream<List<T>> chunk(Stream<T> theStream, int theChunkSize) {
+		return StreamUtil.partition(theStream, theChunkSize);
+	}
+
+	@Nonnull
+	public void chunk(Iterator<T> theIterator, int theChunkSize, Consumer<List<T>> theListConsumer) {
+		chunk(Streams.stream(theIterator), theChunkSize).forEach(theListConsumer);
+	}
 }

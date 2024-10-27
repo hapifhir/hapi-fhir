@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 /**
  * This Represents an <b>HTTP 413 Payload Too Large</b> response, which means the request body
  * was too big for the server to accept
- * 
+ *
  * <p>
  * Note that a complete list of RESTful exceptions is available in the <a href="./package-summary.html">Package
  * Summary</a>.
@@ -53,5 +53,4 @@ public class PayloadTooLargeException extends BaseServerResponseException {
 	public PayloadTooLargeException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
-
 }

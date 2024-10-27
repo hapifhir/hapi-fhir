@@ -111,9 +111,27 @@ Here is a description of how each section of this document is configured.
 
 ### candidateSearchParams
 
-These define fields which must have at least one exact match before two resources are considered for matching. This is like a list of "pre-searches" that find potential candidates for matches, to avoid the expensive operation of running a match score calculation on all resources in the system. E.g. you may only wish to consider matching two Patients if they either share at least one identifier in common or have the same birthday or the same phone number. The HAPI FHIR server executes each of these searches separately and then takes the union of the results, so you can think of these as `OR` criteria that cast a wide net for potential candidates. In some MDM systems, these "pre-searches" are called "blocking" searches (since they identify "blocks" of candidates that will be searched for matches).
+These define one or more fields which must have a match before two resources are considered for matching.
+This is like a list of "pre-searches" that find potential candidates for matches,
+to avoid the expensive operation of running a match score calculation on all resources in the system.
+`candidateSearchParams` are capable of making searches using any SearchParameter defined in the system. 
+For example, [phonetic SearchParameters](https://smilecdr.com/docs/fhir_repository/search_parameter_phonetic.html) 
+can be useful here when matchFields include phonetic matchers.
+E.g. you may only wish to consider matching two Patients if they either share at least one identifier in
+common or have the same birthday or the same phone number. The HAPI FHIR server executes each of these searches
+separately and then takes the union of the results, so you can think of these as `OR` criteria that
+cast a wide net for potential candidates. In some MDM systems, these "pre-searches" are called "blocking"
+searches (since they identify "blocks" of candidates that will be searched for matches).
 
-If a list of searchParams is specified in a given candidateSearchParams item, then these search parameters are treated as `AND` parameters. In the following candidateSearchParams definition, hapi-fhir will extract given name, family name and identifiers from the incoming Patient and perform two separate searches, first for all Patient resources that have the same given `AND` the same family name as the incoming Patient, and second for all Patient resources that share at least one identifier as the incoming Patient. Note that if the incoming Patient was missing any of these searchParam values, then that search would be skipped. E.g. if the incoming Patient had a given name but no family name, then only a search for matching identifiers would be performed.
+If a list of searchParams is specified in a given `candidateSearchParams` item,
+then these search parameters are treated as `AND` parameters.
+In the following `candidateSearchParams` definition, hapi-fhir will extract given name,
+family name and identifiers from the incoming Patient and perform two separate searches,
+first for all Patient resources that have the same given `AND` the same family name as
+the incoming Patient, and second for all Patient resources that share at least one
+identifier as the incoming Patient. Note that if the incoming Patient was missing any of these searchParam values,
+then that search would be skipped. E.g. if the incoming Patient had a given name but no family name,
+then only a search for matching identifiers would be performed.
 
 ```json
 {
@@ -613,6 +631,46 @@ The following algorithms are currently supported:
             <td>similarity</td>
             <td>
               <a href="https://github.com/tdebatty/java-string-similarity#sorensen-dice-coefficient">tdebatty Sorensen-Dice coefficient</a>          
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>NUMERIC_JARO_WINKLER</td>
+            <td>similarity</td>
+            <td>
+              Removes all non-numeric characters before applying <a href="https://github.com/tdebatty/java-string-similarity#jaro-winkler">tdebatty Jaro Winkler</a>          
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>NUMERIC_COSINE</td>
+            <td>similarity</td>
+            <td>
+              Removes all non-numeric characters before applying <a href="https://github.com/tdebatty/java-string-similarity#cosine-similarity">tdebatty Cosine Similarity</a>          
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>NUMERIC_JACCARD</td>
+            <td>similarity</td>
+            <td>
+              Removes all non-numeric characters before applying <a href="https://github.com/tdebatty/java-string-similarity#jaccard-index">tdebatty Jaccard Index</a>          
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>NUMERIC_LEVENSCHTEIN</td>
+            <td>similarity</td>
+            <td>
+              Removes all non-numeric characters before applying <a href="https://github.com/tdebatty/java-string-similarity#normalized-levenshtein">tdebatty Normalized Levenshtein</a>          
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>NUMERIC_SORENSEN_DICE</td>
+            <td>similarity</td>
+            <td>
+              Removes all non-numeric characters before applying <a href="https://github.com/tdebatty/java-string-similarity#sorensen-dice-coefficient">tdebatty Sorensen-Dice coefficient</a>          
             </td>
             <td></td>
         </tr>

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,15 +61,14 @@ public class SearchUrlJobMaintenanceSvcImpl implements ISearchUrlJobMaintenanceS
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(SearchUrlMaintenanceJob.class.getName());
 		jobDetail.setJobClass(SearchUrlMaintenanceJob.class);
-		theSchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
+		theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
 	}
 
 	private Date calculateCutoffDate() {
 		return new Date(System.currentTimeMillis() - OUR_CUTOFF_IN_MILLISECONDS);
 	}
 
-	public static class SearchUrlMaintenanceJob implements HapiJob{
-
+	public static class SearchUrlMaintenanceJob implements HapiJob {
 
 		@Autowired
 		private ISearchUrlJobMaintenanceSvc mySearchUrlJobMaintenanceSvc;
@@ -78,6 +77,5 @@ public class SearchUrlJobMaintenanceSvcImpl implements ISearchUrlJobMaintenanceS
 		public void execute(JobExecutionContext theJobExecutionContext) throws JobExecutionException {
 			mySearchUrlJobMaintenanceSvc.removeStaleEntries();
 		}
-
 	}
 }

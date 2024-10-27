@@ -1,0 +1,17 @@
+---
+type: fix
+issue: 6285
+title: "Updated the Reindex Batch2 job to allow
+        for an additional step that will check to ensure
+        that no pending 'reindex' work is needed.
+        This was done to prevent a bug in which
+        value set expansion would not return all
+        the existing CodeSystem Concepts after
+        a reindex call, due to some of the concepts
+        being deferred to future job runs.
+        
+        As such, `$reindex` operations on CodeSystems
+        will no longer result in incorrect value set
+        expansion when such an expansion is called
+        'too soon' after a $reindex operation.
+"

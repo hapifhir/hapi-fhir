@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,30 +20,36 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import javax.annotation.Nonnull;
-
 public final class ThreadPoolUtil {
-	private ThreadPoolUtil() {
-	}
-
+	private ThreadPoolUtil() {}
 
 	@Nonnull
-	public static ThreadPoolTaskExecutor newThreadPool(int theCorePoolSize, int theMaxPoolSize, String theThreadNamePrefix) {
+	public static ThreadPoolTaskExecutor newThreadPool(
+			int theCorePoolSize, int theMaxPoolSize, String theThreadNamePrefix) {
 		return newThreadPool(theCorePoolSize, theMaxPoolSize, theThreadNamePrefix, 0);
 	}
 
 	@Nonnull
-	public static ThreadPoolTaskExecutor newThreadPool(int theCorePoolSize, int theMaxPoolSize, String theThreadNamePrefix, int theQueueCapacity) {
+	public static ThreadPoolTaskExecutor newThreadPool(
+			int theCorePoolSize, int theMaxPoolSize, String theThreadNamePrefix, int theQueueCapacity) {
 		return newThreadPool(theCorePoolSize, theMaxPoolSize, theThreadNamePrefix, theQueueCapacity, null);
 	}
 
 	@Nonnull
-	public static ThreadPoolTaskExecutor newThreadPool(int theCorePoolSize, int theMaxPoolSize, String theThreadNamePrefix, int theQueueCapacity, TaskDecorator taskDecorator) {
-		Validate.isTrue(theCorePoolSize == theMaxPoolSize || theQueueCapacity == 0, "If the queue capacity is greater than 0, core pool size needs to match max pool size or the system won't grow the queue");
+	public static ThreadPoolTaskExecutor newThreadPool(
+			int theCorePoolSize,
+			int theMaxPoolSize,
+			String theThreadNamePrefix,
+			int theQueueCapacity,
+			TaskDecorator taskDecorator) {
+		Validate.isTrue(
+				theCorePoolSize == theMaxPoolSize || theQueueCapacity == 0,
+				"If the queue capacity is greater than 0, core pool size needs to match max pool size or the system won't grow the queue");
 		Validate.isTrue(theThreadNamePrefix.endsWith("-"), "Thread pool prefix name must end with a hyphen");
 		ThreadPoolTaskExecutor asyncTaskExecutor = new ThreadPoolTaskExecutor();
 		asyncTaskExecutor.setCorePoolSize(theCorePoolSize);

@@ -1,13 +1,13 @@
 package ca.uhn.fhir.tinder.model;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.WordUtils;
-import org.apache.commons.lang3.StringUtils;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParameter {
 
@@ -51,7 +51,12 @@ public class SearchParameter {
 	}
 
 	public String getConstantName() {
-		return "SP_" + myName.toUpperCase().replace("_[X]", "_X").replace("-[X]", "_X").replace('-', '_').replace("!", "");
+		return "SP_"
+				+ myName.toUpperCase()
+						.replace("_[X]", "_X")
+						.replace("-[X]", "_X")
+						.replace('-', '_')
+						.replace("!", "");
 	}
 
 	public String getDescription() {
@@ -63,7 +68,11 @@ public class SearchParameter {
 		// return myName.toUpperCase();
 		// }
 		// return myPath.toUpperCase().replace("_[X]", "_X").replace("-[X]", "_X").replace('-', '_').replace("!", "");
-		return myName.toUpperCase().replace("_[X]", "_X").replace("-[X]", "_X").replace('-', '_').replace("!", "");
+		return myName.toUpperCase()
+				.replace("_[X]", "_X")
+				.replace("-[X]", "_X")
+				.replace('-', '_')
+				.replace("!", "");
 	}
 
 	public String getName() {
@@ -71,7 +80,13 @@ public class SearchParameter {
 	}
 
 	public String getNameCapitalized() {
-		return WordUtils.capitalize(myName).replace("_[x]", "").replace("-[x]", "").replace("_[X]", "").replace("-[X]", "").replace('-', '_').replace("!", "");
+		return WordUtils.capitalize(myName)
+				.replace("_[x]", "")
+				.replace("-[x]", "")
+				.replace("_[X]", "")
+				.replace("-[X]", "")
+				.replace('-', '_')
+				.replace("!", "");
 	}
 
 	public String getPath() {
@@ -165,18 +180,13 @@ public class SearchParameter {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
 			Include other = (Include) obj;
 			if (myPath == null) {
-				if (other.myPath != null)
-					return false;
-			} else if (!myPath.equals(other.myPath))
-				return false;
+				if (other.myPath != null) return false;
+			} else if (!myPath.equals(other.myPath)) return false;
 			return true;
 		}
 
@@ -201,7 +211,5 @@ public class SearchParameter {
 			result = prime * result + ((myPath == null) ? 0 : myPath.hashCode());
 			return result;
 		}
-
 	}
-
 }

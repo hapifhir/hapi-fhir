@@ -24,7 +24,7 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 
 	@Override
 	public int[] getRequiredTokens() {
-		return new int[]{
+		return new int[] {
 			TokenTypes.LITERAL_THROW,
 		};
 	}
@@ -59,16 +59,25 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 		if (msgNode == null) {
 			log(theAst.getLineNo(), "Exception thrown that does not call Msg.code()");
 		} else {
-			DetailAST numberNode = msgNode.getParent().getNextSibling().getFirstChild().getFirstChild();
+			DetailAST numberNode =
+					msgNode.getParent().getNextSibling().getFirstChild().getFirstChild();
 			if (TokenTypes.NUM_INT == numberNode.getType()) {
 				Integer code = Integer.valueOf(numberNode.getText());
 				if (ourCache.containsKey(code)) {
-					log(theAst.getLineNo(), "Two different exception messages call Msg.code(" +
-						code + ").  \nEach thrown exception must call Msg.code() with a different code. " +
-						"\nPreviously found at: " + ourCache.get(code));
+					log(
+							theAst.getLineNo(),
+							"Two different exception messages call Msg.code(" + code
+									+ ").  \nEach thrown exception must call Msg.code() with a different code. "
+									+ "\nPreviously found at: "
+									+ ourCache.get(code));
 				} else {
-					String location = getFilePath() + ":" + instantiation.getLineNo() + ":" + instantiation.getColumnNo() + "(" + code + ")";
-					ourCache.put(code, location);
+					String location = getFilePath() + ":" + instantiation.getLineNo() + ":"
+							+ instantiation.getColumnNo() + "(" + code + ")";
+					// Ignore errors thrown in test for duplicates, as some fake implementations are throwing the same
+					// codes for test purpsoes.
+					if (!location.contains("/test/")) {
+						ourCache.put(code, location);
+					}
 				}
 			} else {
 				log(theAst.getLineNo(), "Called Msg.code() with a non-integer argument");
@@ -77,7 +86,6 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 	}
 
 	private DetailAST getMsgNodeOrNull(DetailAST theNode) {
-
 
 		if (TokenTypes.IDENT == theNode.getType() && "Msg".equals(theNode.getText())) {
 			return theNode;
@@ -109,8 +117,7 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 
 		private static final Map<Integer, String> ourCodesUsed = new HashMap<>();
 
-		ErrorCodeCache() {
-		}
+		ErrorCodeCache() {}
 
 		public boolean containsKey(Integer s) {
 			return ourCodesUsed.containsKey(s);
@@ -129,4 +136,3 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 		}
 	}
 }
-

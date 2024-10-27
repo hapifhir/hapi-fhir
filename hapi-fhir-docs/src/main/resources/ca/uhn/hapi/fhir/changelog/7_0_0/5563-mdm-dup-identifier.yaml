@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5563
+backport: 6.10.3
+title: "Previously, certain mdm configuration could lead to duplicate eid identifier
+entries in golden resources.  This has been corrected"

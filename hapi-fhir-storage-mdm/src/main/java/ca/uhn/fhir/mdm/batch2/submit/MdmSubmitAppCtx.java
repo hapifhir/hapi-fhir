@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.mdm.batch2.submit;
 
-import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
@@ -35,47 +37,57 @@ import org.springframework.context.annotation.Configuration;
 public class MdmSubmitAppCtx {
 
 	public static final String MDM_SUBMIT_JOB_BEAN_NAME = "mdmSubmitJobDefinition";
-	public static String MDM_SUBMIT_JOB= "MDM_SUBMIT";
-
-	@Bean
-	public GenerateRangeChunksStep submitGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep();
-	}
-
+	public static String MDM_SUBMIT_JOB = "MDM_SUBMIT";
 
 	@Bean(name = MDM_SUBMIT_JOB_BEAN_NAME)
-	public JobDefinition mdmSubmitJobDefinition(IBatch2DaoSvc theBatch2DaoSvc, MatchUrlService theMatchUrlService, FhirContext theFhirContext, IMdmSettings theMdmSettings) {
+	public JobDefinition<MdmSubmitJobParameters> mdmSubmitJobDefinition(
+			IBatch2DaoSvc theBatch2DaoSvc,
+			MatchUrlService theMatchUrlService,
+			FhirContext theFhirContext,
+			IMdmSettings theMdmSettings) {
 		return JobDefinition.newBuilder()
-		.setJobDefinitionId(MDM_SUBMIT_JOB)
-		.setJobDescription("MDM Batch Submission")
-		.setJobDefinitionVersion(1)
-		.setParametersType(MdmSubmitJobParameters.class)
-		.setParametersValidator(mdmSubmitJobParametersValidator(theMatchUrlService, theFhirContext, theMdmSettings))
-		.addFirstStep(
-			"generate-ranges",
-			"generate data ranges to submit to mdm",
-			PartitionedUrlChunkRangeJson.class,
-			submitGenerateRangeChunksStep())
-		.addIntermediateStep(
-			"load-ids",
-			"Load the IDs",
-			ResourceIdListWorkChunkJson.class,
-			new LoadIdsStep(theBatch2DaoSvc))
-		.addLastStep(
-			"inflate-and-submit-resources",
-			"Inflate and Submit resources",
-			mdmInflateAndSubmitResourcesStep())
-		.build();
+				.setJobDefinitionId(MDM_SUBMIT_JOB)
+				.setJobDescription("MDM Batch Submission")
+				.setJobDefinitionVersion(1)
+				.setParametersType(MdmSubmitJobParameters.class)
+				.setParametersValidator(
+						mdmSubmitJobParametersValidator(theMatchUrlService, theFhirContext, theMdmSettings))
+				.addFirstStep(
+						"generate-ranges",
+						"generate data ranges to submit to mdm",
+						ChunkRangeJson.class,
+						submitGenerateRangeChunksStep())
+				.addIntermediateStep(
+						"load-ids",
+						"Load the IDs",
+						ResourceIdListWorkChunkJson.class,
+						mdmSubmitLoadIdsStep(theBatch2DaoSvc))
+				.addLastStep(
+						"inflate-and-submit-resources",
+						"Inflate and Submit resources",
+						mdmInflateAndSubmitResourcesStep())
+				.build();
 	}
 
 	@Bean
-	public MdmSubmitJobParametersValidator mdmSubmitJobParametersValidator(MatchUrlService theMatchUrlService, FhirContext theFhirContext, IMdmSettings theMdmSettings) {
+	public MdmSubmitJobParametersValidator mdmSubmitJobParametersValidator(
+			MatchUrlService theMatchUrlService, FhirContext theFhirContext, IMdmSettings theMdmSettings) {
 		return new MdmSubmitJobParametersValidator(theMdmSettings, theMatchUrlService, theFhirContext);
 	}
 
 	@Bean
-	public MdmInflateAndSubmitResourcesStep mdmInflateAndSubmitResourcesStep() {
-		return new MdmInflateAndSubmitResourcesStep();
+	public GenerateRangeChunksStep<MdmSubmitJobParameters> submitGenerateRangeChunksStep() {
+		return new GenerateRangeChunksStep<>();
 	}
 
+	@Bean
+	public LoadIdsStep<MdmSubmitJobParameters> mdmSubmitLoadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
+		return new LoadIdsStep<>(theBatch2DaoSvc);
+	}
+
+	@Bean
+	public IJobStepWorker<MdmSubmitJobParameters, ResourceIdListWorkChunkJson, VoidModel>
+			mdmInflateAndSubmitResourcesStep() {
+		return new MdmInflateAndSubmitResourcesStep();
+	}
 }

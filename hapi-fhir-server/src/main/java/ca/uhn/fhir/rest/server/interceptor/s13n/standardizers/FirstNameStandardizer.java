@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,9 @@ public class FirstNameStandardizer extends TextStandardizer {
 		theString = replaceTranslates(theString);
 
 		return Arrays.stream(theString.split("\\s+"))
-			.map(this::standardizeNameToken)
-			.filter(s -> !StringUtils.isEmpty(s))
-			.collect(Collectors.joining(" "));
+				.map(this::standardizeNameToken)
+				.filter(s -> !StringUtils.isEmpty(s))
+				.collect(Collectors.joining(" "));
 	}
 
 	protected String capitalize(String theString) {
@@ -127,14 +127,15 @@ public class FirstNameStandardizer extends TextStandardizer {
 				buf.append(theDelimiter);
 			}
 			buf.append(s);
-
 		}
 		return buf.toString();
 	}
 
 	protected String checkForRegexp(String theExpression) {
-		if (theExpression.equals(".") || theExpression.equals("|")
-			|| theExpression.equals("(") || theExpression.equals(")")) {
+		if (theExpression.equals(".")
+				|| theExpression.equals("|")
+				|| theExpression.equals("(")
+				|| theExpression.equals(")")) {
 			return "\\".concat(theExpression);
 		}
 		return theExpression;

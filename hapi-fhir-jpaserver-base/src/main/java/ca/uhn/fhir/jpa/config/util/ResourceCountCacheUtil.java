@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.commons.lang3.time.DateUtils;
 
 public final class ResourceCountCacheUtil {
 	private ResourceCountCacheUtil() {}
+
 	public static ResourceCountCache newResourceCountCache(IFhirSystemDao<?, ?> theSystemDao) {
 		ResourceCountCache retVal = new ResourceCountCache(() -> theSystemDao.getResourceCounts());
 		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);

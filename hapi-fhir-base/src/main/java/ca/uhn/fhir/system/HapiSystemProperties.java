@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,16 +27,19 @@ public final class HapiSystemProperties {
 	/**
 	 * This is provided for testing only! Use with caution as this property may change.
 	 */
-	static final String TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = "TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS";
+	static final String TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS =
+			"TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS";
+
 	static final String UNIT_TEST_CAPTURE_STACK = "unit_test_capture_stack";
 	static final String STACKFILTER_PATTERN_PROP = "log.stackfilter.pattern";
 	static final String HAPI_CLIENT_KEEPRESPONSES = "hapi.client.keepresponses";
 	static final String TEST_MODE = "test";
 	static final String UNIT_TEST_MODE = "unit_test_mode";
 	static final long DEFAULT_TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = 10 * DateUtils.MILLIS_PER_SECOND;
+	static final String PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA =
+			"hapi.storage.prevent_invalidating_conditional_match_criteria";
 
-	private HapiSystemProperties() {
-	}
+	private HapiSystemProperties() {}
 
 	/**
 	 * This property is used by unit tests - do not rely on it in production code
@@ -65,7 +68,6 @@ public final class HapiSystemProperties {
 	 * It causes logged stack traces to skip a number of packages that are
 	 * just noise.
 	 */
-
 	public static void setStackFilterPattern(String thePattern) {
 		System.setProperty(STACKFILTER_PATTERN_PROP, thePattern);
 	}
@@ -83,7 +85,6 @@ public final class HapiSystemProperties {
 	 * Get the validation resource cache expireAfterWrite timeout in milliseconds.  If it has not been set, the default
 	 * value is 10 seconds.
 	 */
-
 	public static long getTestValidationResourceCachesMs() {
 		String property = System.getProperty(TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS);
 		if (property == null) {
@@ -104,11 +105,12 @@ public final class HapiSystemProperties {
 	}
 
 	/**
-	 * This property is used to ensure unit test behaviour is deterministic.  It is also used to add extra logging for unit tests.
+	 * This property is used to ensure unit test behaviour is deterministic.
 	 */
 	public static void enableUnitTestMode() {
 		System.setProperty(UNIT_TEST_MODE, Boolean.TRUE.toString());
 	}
+
 	public static void disableUnitTestMode() {
 		System.setProperty(UNIT_TEST_MODE, Boolean.FALSE.toString());
 	}
@@ -159,4 +161,8 @@ public final class HapiSystemProperties {
 		return Boolean.parseBoolean(System.getProperty(SUPPRESS_HAPI_FHIR_VERSION_LOG));
 	}
 
+	public static boolean isPreventInvalidatingConditionalMatchCriteria() {
+		return Boolean.parseBoolean(System.getProperty(
+				HapiSystemProperties.PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA, Boolean.FALSE.toString()));
+	}
 }

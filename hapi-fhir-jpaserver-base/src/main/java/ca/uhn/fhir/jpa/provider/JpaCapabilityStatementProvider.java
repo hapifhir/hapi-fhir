@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -39,7 +40,6 @@ import org.hl7.fhir.r4.model.CapabilityStatement.ConditionalDeleteStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement.ResourceVersionPolicy;
 import org.hl7.fhir.r4.model.Meta;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -58,7 +58,12 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	/**
 	 * Constructor
 	 */
-	public JpaCapabilityStatementProvider(@Nonnull RestfulServer theRestfulServer, @Nonnull IFhirSystemDao<?, ?> theSystemDao, @Nonnull JpaStorageSettings theStorageSettings, @Nonnull ISearchParamRegistry theSearchParamRegistry, IValidationSupport theValidationSupport) {
+	public JpaCapabilityStatementProvider(
+			@Nonnull RestfulServer theRestfulServer,
+			@Nonnull IFhirSystemDao<?, ?> theSystemDao,
+			@Nonnull JpaStorageSettings theStorageSettings,
+			@Nonnull ISearchParamRegistry theSearchParamRegistry,
+			IValidationSupport theValidationSupport) {
 		super(theRestfulServer, theSearchParamRegistry, theValidationSupport);
 
 		Validate.notNull(theRestfulServer);
@@ -87,18 +92,6 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	}
 
 	@Override
-	protected void postProcessRest(FhirTerser theTerser, IBase theRest) {
-		super.postProcessRest(theTerser, theRest);
-
-		if (myStorageSettings.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
-				ExtensionUtil.setExtension(myContext, theRest, Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL, "uri", myStorageSettings.getWebsocketContextPath());
-			}
-		}
-
-	}
-
-	@Override
 	protected void postProcessRestResource(FhirTerser theTerser, IBase theResource, String theResourceName) {
 		super.postProcessRestResource(theTerser, theResource, theResourceName);
 
@@ -116,11 +109,15 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 			if (counts != null) {
 				Long count = counts.get(theResourceName);
 				if (count != null) {
-					ExtensionUtil.setExtension(myContext, theResource, ExtensionConstants.CONF_RESOURCE_COUNT, "decimal", Long.toString(count));
+					ExtensionUtil.setExtension(
+							myContext,
+							theResource,
+							ExtensionConstants.CONF_RESOURCE_COUNT,
+							"decimal",
+							Long.toString(count));
 				}
 			}
 		}
-
 	}
 
 	public boolean isIncludeResourceCounts() {

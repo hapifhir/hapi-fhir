@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR5;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import org.hl7.fhir.r5.model.Appointment;
-import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SearchParamExtractorR5Test {
 
@@ -47,6 +46,6 @@ public class SearchParamExtractorR5Test {
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(appointment);
 
 		//We find one, and the lexer doesn't explode.
-		assertEquals(1, dates.size());
+		assertThat(dates).hasSize(1);
 	}
 }

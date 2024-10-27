@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public abstract non-sealed class AbstractXmlParserErrorHandlerTest extends AbstractParserErrorHandlerTest {
 
-	private static String PATIENT_DUPLICATE_CHOICE = 
+	private static String PATIENT_DUPLICATE_CHOICE =
 			"""
 			<Patient xmlns="http://hl7.org/fhir">
 					<deceasedBoolean value="true"></deceasedBoolean>
@@ -41,5 +41,4 @@ public abstract non-sealed class AbstractXmlParserErrorHandlerTest extends Abstr
 	protected String createResourceWithRepeatingChoice() {
 		return PATIENT_DUPLICATE_CHOICE;
 	}
-
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
@@ -36,38 +35,44 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
 import java.util.Collections;
 
-public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoPatient<T> {
+public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
+		implements IFhirResourceDaoPatient<T> {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaResourceDaoPatient.class);
 
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
-	private IBundleProvider doEverythingOperation(TokenOrListParam theIds,
-																 IPrimitiveType<Integer> theCount,
-																 IPrimitiveType<Integer> theOffset,
-																 DateRangeParam theLastUpdated,
-																 SortSpec theSort,
-																 StringAndListParam theContent,
-																 StringAndListParam theNarrative,
-																 StringAndListParam theFilter,
-																 StringAndListParam theTypes,
-																 RequestDetails theRequest) {
+	private IBundleProvider doEverythingOperation(
+			TokenOrListParam theIds,
+			IPrimitiveType<Integer> theCount,
+			IPrimitiveType<Integer> theOffset,
+			DateRangeParam theLastUpdated,
+			SortSpec theSort,
+			StringAndListParam theContent,
+			StringAndListParam theNarrative,
+			StringAndListParam theFilter,
+			StringAndListParam theTypes,
+			boolean theMdmExpand,
+			RequestDetails theRequest) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
 		}
 		if (theOffset != null) {
-			throw new IllegalArgumentException(Msg.code(1106) + "Everything operation does not support offset searching");
+			paramMap.setOffset(theOffset.getValue());
 		}
 		if (theContent != null) {
 			paramMap.add(Constants.PARAM_CONTENT, theContent);
@@ -81,15 +86,15 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 			paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 		}
 
-		paramMap.setEverythingMode(theIds != null && theIds.getValuesAsQueryTokens().size() == 1 ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
+		paramMap.setEverythingMode(
+				theIds != null && theIds.getValuesAsQueryTokens().size() == 1
+						? EverythingModeEnum.PATIENT_INSTANCE
+						: EverythingModeEnum.PATIENT_TYPE);
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
 		if (theIds != null) {
-			if (theRequest.getParameters().containsKey("_mdm")) {
-				String[] paramVal = theRequest.getParameters().get("_mdm");
-				if (Arrays.asList(paramVal).contains("true")) {
-					theIds.getValuesAsQueryTokens().stream().forEach(param -> param.setMdmExpand(true));
-				}
+			if (theMdmExpand) {
+				theIds.getValuesAsQueryTokens().forEach(param -> param.setMdmExpand(true));
 			}
 			paramMap.add("_id", theIds);
 		}
@@ -98,26 +103,81 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 			paramMap.setLoadSynchronous(true);
 		}
 
-		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), paramMap, null);
-		return mySearchCoordinatorSvc.registerSearch(this,
-			paramMap,
-			getResourceName(),
-			new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)),
-			theRequest,
-			requestPartitionId);
+		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+				theRequest, getResourceName(), paramMap);
+
+		adjustCount(theRequest, paramMap);
+
+		return mySearchCoordinatorSvc.registerSearch(
+				this,
+				paramMap,
+				getResourceName(),
+				new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)),
+				theRequest,
+				requestPartitionId);
+	}
+
+	private void adjustCount(RequestDetails theRequest, SearchParameterMap theParamMap) {
+		if (theRequest.getServer() == null) {
+			return;
+		}
+
+		if (theParamMap.getCount() == null && theRequest.getServer().getDefaultPageSize() != null) {
+			theParamMap.setCount(theRequest.getServer().getDefaultPageSize());
+			return;
+		}
+
+		Integer maxPageSize = theRequest.getServer().getMaximumPageSize();
+		if (maxPageSize != null && theParamMap.getCount() > maxPageSize) {
+			ourLog.info(
+					"Reducing {} from {} to {} which is the maximum allowable page size.",
+					Constants.PARAM_COUNT,
+					theParamMap.getCount(),
+					maxPageSize);
+			theParamMap.setCount(maxPageSize);
+		}
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, PatientEverythingParameters theQueryParams, IIdType theId) {
+	public IBundleProvider patientInstanceEverything(
+			HttpServletRequest theServletRequest,
+			RequestDetails theRequestDetails,
+			PatientEverythingParameters theQueryParams,
+			IIdType theId) {
 		TokenOrListParam id = new TokenOrListParam().add(new TokenParam(theId.getIdPart()));
-		return doEverythingOperation(id, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getFilter(), theQueryParams.getTypes(), theRequestDetails);
+		return doEverythingOperation(
+				id,
+				theQueryParams.getCount(),
+				theQueryParams.getOffset(),
+				theQueryParams.getLastUpdated(),
+				theQueryParams.getSort(),
+				theQueryParams.getContent(),
+				theQueryParams.getNarrative(),
+				theQueryParams.getFilter(),
+				theQueryParams.getTypes(),
+				theQueryParams.getMdmExpand(),
+				theRequestDetails);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, PatientEverythingParameters theQueryParams, TokenOrListParam theId) {
-		return doEverythingOperation(theId, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getFilter(), theQueryParams.getTypes(), theRequestDetails);
+	public IBundleProvider patientTypeEverything(
+			HttpServletRequest theServletRequest,
+			RequestDetails theRequestDetails,
+			PatientEverythingParameters theQueryParams,
+			TokenOrListParam theId) {
+		return doEverythingOperation(
+				theId,
+				theQueryParams.getCount(),
+				theQueryParams.getOffset(),
+				theQueryParams.getLastUpdated(),
+				theQueryParams.getSort(),
+				theQueryParams.getContent(),
+				theQueryParams.getNarrative(),
+				theQueryParams.getFilter(),
+				theQueryParams.getTypes(),
+				theQueryParams.getMdmExpand(),
+				theRequestDetails);
 	}
-
 }

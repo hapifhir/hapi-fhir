@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,11 @@ public class ViewGenerator {
 		return retVal;
 	}
 
-	private void copyChildren(BaseRuntimeElementCompositeDefinition<?> theSourceDef, IBase theSource, BaseRuntimeElementCompositeDefinition<?> theTargetDef, IBase theTarget) {
+	private void copyChildren(
+			BaseRuntimeElementCompositeDefinition<?> theSourceDef,
+			IBase theSource,
+			BaseRuntimeElementCompositeDefinition<?> theTargetDef,
+			IBase theTarget) {
 		if (!theSource.isEmpty()) {
 			List<BaseRuntimeChildDefinition> targetChildren = theTargetDef.getChildren();
 			List<RuntimeChildDeclaredExtensionDefinition> targetExts = theTargetDef.getExtensions();
@@ -77,12 +81,14 @@ public class ViewGenerator {
 					elementName = nextChild.getValidChildNames().iterator().next();
 				}
 
-				BaseRuntimeChildDefinition sourceChildEquivalent = theSourceDef.getChildByNameOrThrowDataFormatException(elementName);
+				BaseRuntimeChildDefinition sourceChildEquivalent =
+						theSourceDef.getChildByNameOrThrowDataFormatException(elementName);
 				if (sourceChildEquivalent == null) {
 					continue;
 				}
 
-				List<? extends IBase> sourceValues = sourceChildEquivalent.getAccessor().getValues(theSource);
+				List<? extends IBase> sourceValues =
+						sourceChildEquivalent.getAccessor().getValues(theSource);
 				for (IBase nextElement : sourceValues) {
 					boolean handled = false;
 					if (nextElement instanceof IBaseExtension) {
@@ -106,12 +112,15 @@ public class ViewGenerator {
 				String url = nextExt.getExtensionUrl();
 				addExtension(theSourceDef, theSource, theTarget, nextExt, url);
 			}
-
-
 		}
 	}
 
-	private void addExtension(BaseRuntimeElementCompositeDefinition<?> theSourceDef, IBase theSource, IBase theTarget, RuntimeChildDeclaredExtensionDefinition nextExt, String url) {
+	private void addExtension(
+			BaseRuntimeElementCompositeDefinition<?> theSourceDef,
+			IBase theSource,
+			IBase theTarget,
+			RuntimeChildDeclaredExtensionDefinition nextExt,
+			String url) {
 		RuntimeChildDeclaredExtensionDefinition sourceDeclaredExt = theSourceDef.getDeclaredExtension(url, "");
 		if (sourceDeclaredExt == null) {
 
@@ -136,7 +145,6 @@ public class ViewGenerator {
 			for (IBase nextElement : values) {
 				nextExt.getMutator().addValue(theTarget, nextElement);
 			}
-
 		}
 	}
 }

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5938
+title: "Generated IPS documents will now include a bundle profile declaration."

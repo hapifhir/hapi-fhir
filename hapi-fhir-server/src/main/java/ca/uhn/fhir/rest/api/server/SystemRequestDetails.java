@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,11 @@ import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.ElementsSupportEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,7 +71,10 @@ public class SystemRequestDetails extends RequestDetails {
 
 	public SystemRequestDetails(RequestDetails theDetails) {
 		super(theDetails);
-		if (nonNull(theDetails.getServer())) { myServer = theDetails.getServer(); }
+		if (nonNull(theDetails.getServer())) {
+			myServer = theDetails.getServer();
+			myFhirContext = theDetails.getFhirContext();
+		}
 	}
 
 	public RequestPartitionId getRequestPartitionId() {
@@ -120,11 +124,25 @@ public class SystemRequestDetails extends RequestDetails {
 		return headers.get(name);
 	}
 
+	@Override
 	public void addHeader(String theName, String theValue) {
-		if (myHeaders == null) {
-			myHeaders = ArrayListMultimap.create();
-		}
+		initHeaderMap();
 		myHeaders.put(theName, theValue);
+	}
+
+	@Override
+	public void setHeaders(String theName, List<String> theValues) {
+		initHeaderMap();
+		myHeaders.putAll(theName, theValues);
+	}
+
+	private void initHeaderMap() {
+		if (myHeaders == null) {
+			// Make sure we are case-insensitive on keys
+			myHeaders = MultimapBuilder.treeKeys(String.CASE_INSENSITIVE_ORDER)
+					.arrayListValues()
+					.build();
+		}
 	}
 
 	@Override
@@ -133,9 +151,7 @@ public class SystemRequestDetails extends RequestDetails {
 	}
 
 	@Override
-	public void setAttribute(String theAttributeName, Object theAttributeValue) {
-
-	}
+	public void setAttribute(String theAttributeName, Object theAttributeValue) {}
 
 	@Override
 	public InputStream getInputStream() throws IOException {
@@ -143,13 +159,17 @@ public class SystemRequestDetails extends RequestDetails {
 	}
 
 	@Override
-	public Reader getReader() throws IOException {
+	public Reader getReader() {
 		return null;
 	}
 
 	@Override
 	public IRestfulServerDefaults getServer() {
 		return myServer;
+	}
+
+	public void setServer(RestfulServer theServer) {
+		this.myServer = theServer;
 	}
 
 	@Override
@@ -232,5 +252,4 @@ public class SystemRequestDetails extends RequestDetails {
 		systemRequestDetails.setRequestPartitionId(RequestPartitionId.allPartitions());
 		return systemRequestDetails;
 	}
-
 }

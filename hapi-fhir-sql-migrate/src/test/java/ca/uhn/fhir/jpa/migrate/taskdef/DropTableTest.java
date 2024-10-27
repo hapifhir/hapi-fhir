@@ -8,12 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.core.IsNot.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DropTableTest extends BaseTest {
@@ -32,11 +27,11 @@ public class DropTableTest extends BaseTest {
 		task.setTableName("SOMETABLE");
 		getMigrator().addTask(task);
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), (hasItems("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).contains("SOMETABLE");
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItem("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).doesNotContain("SOMETABLE");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -52,11 +47,11 @@ public class DropTableTest extends BaseTest {
 		task.setTableName("SOMETABLE");
 		getMigrator().addTask(task);
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), (hasItems("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).contains("SOMETABLE");
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItem("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).doesNotContain("SOMETABLE");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -70,7 +65,7 @@ public class DropTableTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItem("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).doesNotContain("SOMETABLE");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -84,15 +79,15 @@ public class DropTableTest extends BaseTest {
 		task.setTableName("SOMETABLE");
 		getMigrator().addTask(task);
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), (hasItems("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).contains("SOMETABLE");
 
 		MigrationResult result = getMigrator().migrate();
 		assertEquals(0, result.changes);
-		assertEquals(1, result.executedStatements.size());
-		assertEquals(1, result.succeededTasks.size());
-		assertEquals(0, result.failedTasks.size());
+		assertThat(result.executedStatements).hasSize(1);
+		assertThat(result.succeededTasks).hasSize(1);
+		assertThat(result.failedTasks).isEmpty();
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItem("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).doesNotContain("SOMETABLE");
 	}
 
 

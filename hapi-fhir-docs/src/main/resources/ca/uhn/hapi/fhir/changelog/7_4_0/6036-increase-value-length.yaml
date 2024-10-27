@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6036
+jira: SMILE-8605
+title: "The maximum length of `SP_VALUE_EXACT` and `SP_VALUE_NORMALIZED` in the `HFJ_SPIDX_STRING` table has been increased from 200 to 768. This allows for longer `:contains` searches. If you have previously stored values longer than 200 characters in String search 
+parameters and want to perform a `:contains` search on the new longer maximum size, a reindex of the affected data is required."

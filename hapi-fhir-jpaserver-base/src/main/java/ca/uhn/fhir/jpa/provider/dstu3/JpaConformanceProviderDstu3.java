@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
@@ -42,9 +43,7 @@ import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.Enumerations.SearchParamType;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.dstu3.model.UriType;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +79,11 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderDstu3(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, JpaStorageSettings theStorageSettings, ISearchParamRegistry theSearchParamRegistry) {
+	public JpaConformanceProviderDstu3(
+			RestfulServer theRestfulServer,
+			IFhirSystemDao<Bundle, Meta> theSystemDao,
+			JpaStorageSettings theStorageSettings,
+			ISearchParamRegistry theSearchParamRegistry) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
@@ -113,14 +116,16 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 				nextResource.setVersioning(ResourceVersionPolicy.VERSIONEDUPDATE);
 
 				ConditionalDeleteStatus conditionalDelete = nextResource.getConditionalDelete();
-				if (conditionalDelete == ConditionalDeleteStatus.MULTIPLE && myStorageSettings.isAllowMultipleDelete() == false) {
+				if (conditionalDelete == ConditionalDeleteStatus.MULTIPLE
+						&& myStorageSettings.isAllowMultipleDelete() == false) {
 					nextResource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
 				}
 
 				// Add resource counts
 				Long count = counts.get(nextResource.getTypeElement().getValueAsString());
 				if (count != null) {
-					nextResource.addExtension(new Extension(ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalType(count)));
+					nextResource.addExtension(
+							new Extension(ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalType(count)));
 				}
 
 				nextResource.getSearchParam().clear();
@@ -161,7 +166,6 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 							// Shouldn't happen
 							break;
 					}
-
 				}
 
 				updateIncludesList(nextResource, searchParams);
@@ -171,23 +175,14 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 		massage(retVal);
 
-		if (myStorageSettings.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
-				Extension websocketExtension = new Extension();
-				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
-				websocketExtension.setValue(new UriType(myStorageSettings.getWebsocketContextPath()));
-				retVal.getRestFirstRep().addExtension(websocketExtension);
-			}
-		}
-
 		retVal.getImplementation().setDescription(myImplementationDescription);
 		myCachedValue = retVal;
 		return retVal;
 	}
 
 	private ResourceSearchParams constructCompleteSearchParamList(String theResourceName) {
-		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
-
+		// Borrowed from
+		// hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
 
 		/*
 		 * If we have an explicit registry (which will be the case in the JPA server) we use it as priority,
@@ -195,16 +190,18 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		 * global params like _lastUpdated
 		 */
 		ResourceSearchParams searchParams;
-		ResourceSearchParams serverConfigurationActiveSearchParams = myServerConfiguration.getActiveSearchParams(theResourceName);
+		ResourceSearchParams serverConfigurationActiveSearchParams =
+				myServerConfiguration.getActiveSearchParams(theResourceName);
 		if (mySearchParamRegistry != null) {
-			searchParams = mySearchParamRegistry.getActiveSearchParams(theResourceName).makeCopy();
+			searchParams =
+					mySearchParamRegistry.getActiveSearchParams(theResourceName).makeCopy();
 			if (searchParams == null) {
 				return ResourceSearchParams.empty(theResourceName);
 			}
 			for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
-				if (nextBuiltInSpName.startsWith("_") &&
-					!searchParams.containsParamName(nextBuiltInSpName) &&
-					searchParamEnabled(nextBuiltInSpName)) {
+				if (nextBuiltInSpName.startsWith("_")
+						&& !searchParams.containsParamName(nextBuiltInSpName)
+						&& searchParamEnabled(nextBuiltInSpName)) {
 					searchParams.put(nextBuiltInSpName, serverConfigurationActiveSearchParams.get(nextBuiltInSpName));
 				}
 			}
@@ -216,42 +213,43 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	}
 
 	protected boolean searchParamEnabled(String theSearchParam) {
-		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
+		// Borrowed from
+		// hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
 		return !Constants.PARAM_FILTER.equals(theSearchParam) || myStorageSettings.isFilterParameterEnabled();
 	}
 
-
-	private void updateRevIncludesList(CapabilityStatementRestResourceComponent theNextResource, ResourceSearchParams theSearchParams) {
+	private void updateRevIncludesList(
+			CapabilityStatementRestResourceComponent theNextResource, ResourceSearchParams theSearchParams) {
 		// Add RevInclude to CapabilityStatement.rest.resource
 		if (theNextResource.getSearchRevInclude().isEmpty()) {
 			String resourcename = theNextResource.getType();
-			Set<String> allResourceTypes = myServerConfiguration.collectMethodBindings().keySet();
+			Set<String> allResourceTypes =
+					myServerConfiguration.collectMethodBindings().keySet();
 			for (String otherResourceType : allResourceTypes) {
 				if (isBlank(otherResourceType)) {
 					continue;
 				}
-				ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(otherResourceType);
-				activeSearchParams.values()
-					.stream()
-					.filter(t -> isNotBlank(t.getName()))
-					.filter(t -> t.getTargets().contains(resourcename))
-					.forEach(t -> theNextResource.addSearchRevInclude(otherResourceType + ":" + t.getName()));
+				ResourceSearchParams activeSearchParams =
+						mySearchParamRegistry.getActiveSearchParams(otherResourceType);
+				activeSearchParams.values().stream()
+						.filter(t -> isNotBlank(t.getName()))
+						.filter(t -> t.getTargets().contains(resourcename))
+						.forEach(t -> theNextResource.addSearchRevInclude(otherResourceType + ":" + t.getName()));
 			}
 		}
-
-
 	}
 
-	private void updateIncludesList(CapabilityStatementRestResourceComponent theResource, ResourceSearchParams theSearchParams) {
-		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
+	private void updateIncludesList(
+			CapabilityStatementRestResourceComponent theResource, ResourceSearchParams theSearchParams) {
+		// Borrowed from
+		// hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
 		String resourceName = theResource.getType();
 		if (theResource.getSearchInclude().isEmpty()) {
-			List<String> includes = theSearchParams
-				.values()
-				.stream()
-				.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-				.map(t -> resourceName + ":" + t.getName())
-				.sorted().collect(Collectors.toList());
+			List<String> includes = theSearchParams.values().stream()
+					.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+					.map(t -> resourceName + ":" + t.getName())
+					.sorted()
+					.collect(Collectors.toList());
 			theResource.addSearchInclude("*");
 			for (String nextInclude : includes) {
 				theResource.addSearchInclude(nextInclude);

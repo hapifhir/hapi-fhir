@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,22 +28,30 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHapiFhirJpaRepository {
-	
-	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search ORDER BY r.myOrder ASC")
+
+	@Query(value = "SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search ORDER BY r.myOrder ASC")
 	Slice<Long> findWithSearchPid(@Param("search") Long theSearchPid, Pageable thePage);
 
-	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search")
+	@Query(value = "SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search")
 	List<Long> findWithSearchPidOrderIndependent(@Param("search") Long theSearchPid);
 
-	@Query(value="SELECT r.myId FROM SearchResult r WHERE r.mySearchPid = :search")
-	Slice<Long> findForSearch(Pageable thePage, @Param("search") Long theSearchPid);
+	@Modifying
+	@Query("DELETE FROM SearchResult s WHERE s.mySearchPid IN :searchIds")
+	@CanIgnoreReturnValue
+	int deleteBySearchIds(@Param("searchIds") Collection<Long> theSearchIds);
 
 	@Modifying
-	@Query("DELETE FROM SearchResult s WHERE s.myId IN :ids")
-	void deleteByIds(@Param("ids") List<Long> theContent);
+	@Query(
+			"DELETE FROM SearchResult s WHERE s.mySearchPid = :searchId and s.myOrder >= :rangeStart and s.myOrder <= :rangeEnd")
+	@CanIgnoreReturnValue
+	int deleteBySearchIdInRange(
+			@Param("searchId") Long theSearchId,
+			@Param("rangeStart") int theRangeStart,
+			@Param("rangeEnd") int theRangeEnd);
 
 	@Query("SELECT count(r) FROM SearchResult r WHERE r.mySearchPid = :search")
 	int countForSearch(@Param("search") Long theSearchPid);

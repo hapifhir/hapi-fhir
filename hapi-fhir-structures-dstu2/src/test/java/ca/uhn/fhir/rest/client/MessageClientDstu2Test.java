@@ -105,12 +105,12 @@ public class MessageClientDstu2Test {
                 .asynchronous(OperationOutcome.class)
                 .execute();
 
-        //System.out.println(response);
-        assertEquals("http://192.168.4.93:83/fhirServer/$process-message?async=true&response-url=http%3A%2F%2Fmyserver%2Ffhir&_format=json", capt.getAllValues().get(0).getURI().toASCIIString());
-        assertEquals("POST", capt.getAllValues().get(0).getRequestLine().getMethod());
-        //assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, 0));
-        //assertNotNull(response.getOperationOutcome());
-        assertEquals("FOOBAR", ((OperationOutcome) response).getIssueFirstRep().getDiagnosticsElement().getValue());
+			//System.out.println(response);
+			assertEquals("http://192.168.4.93:83/fhirServer/$process-message?async=true&response-url=http%3A%2F%2Fmyserver%2Ffhir&_format=json", capt.getAllValues().get(0).getURI().toASCIIString());
+			assertEquals("POST", capt.getAllValues().get(0).getRequestLine().getMethod());
+			//assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, 0));
+			//assertNotNull(response.getOperationOutcome());
+			assertEquals("FOOBAR", ((OperationOutcome) response).getIssueFirstRep().getDiagnosticsElement().getValue());
 
     }
 
@@ -150,12 +150,12 @@ public class MessageClientDstu2Test {
                 .synchronous(Bundle.class)
                 .execute();
 
-        //System.out.println(response);
-        assertEquals("http://192.168.4.93:83/fhirServer/$process-message?async=false&_format=json", capt.getAllValues().get(0).getURI().toASCIIString());
-        assertEquals("POST", capt.getAllValues().get(0).getRequestLine().getMethod());
-        //assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, 0));
-        //assertNotNull(response.getOperationOutcome());
-        assertEquals("MessageHeader", ((Bundle) response).getEntryFirstRep().getResource().getResourceName());
+			//System.out.println(response);
+			assertEquals("http://192.168.4.93:83/fhirServer/$process-message?async=false&_format=json", capt.getAllValues().get(0).getURI().toASCIIString());
+			assertEquals("POST", capt.getAllValues().get(0).getRequestLine().getMethod());
+			//assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, 0));
+			//assertNotNull(response.getOperationOutcome());
+			assertEquals("MessageHeader", ((Bundle) response).getEntryFirstRep().getResource().getResourceName());
 
     }
 

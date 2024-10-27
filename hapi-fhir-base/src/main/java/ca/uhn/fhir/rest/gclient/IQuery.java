@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,10 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 public interface IQuery<Y> extends IBaseQuery<IQuery<Y>>, IClientExecutable<IQuery<Y>, Y> {
 
@@ -176,6 +173,6 @@ public interface IQuery<Y> extends IBaseQuery<IQuery<Y>>, IClientExecutable<IQue
 	 */
 	IQuery<Y> withTag(String theSystem, String theCode);
 
-//	Y execute();
+	//	Y execute();
 
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,35 +19,45 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.type.SqlTypes;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "TRM_CONCEPT_PC_LINK", indexes = {
-	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
-	@Index(name = "FK_TERM_CONCEPTPC_CHILD",  columnList = "CHILD_PID", unique = false),
-	@Index(name = "FK_TERM_CONCEPTPC_PARENT",  columnList = "PARENT_PID", unique = false)
-})
+@Table(
+		name = "TRM_CONCEPT_PC_LINK",
+		indexes = {
+			// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index
+			// automatically
+			@Index(name = "FK_TERM_CONCEPTPC_CHILD", columnList = "CHILD_PID", unique = false),
+			@Index(name = "FK_TERM_CONCEPTPC_PARENT", columnList = "PARENT_PID", unique = false),
+			@Index(name = "FK_TERM_CONCEPTPC_CS", columnList = "CODESYSTEM_PID")
+		})
 public class TermConceptParentChildLink implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "CHILD_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CHILD"))
+	@JoinColumn(
+			name = "CHILD_PID",
+			nullable = false,
+			referencedColumnName = "PID",
+			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CHILD"))
 	private TermConcept myChild;
 
 	@Column(name = "CHILD_PID", insertable = false, updatable = false)
@@ -61,8 +71,14 @@ public class TermConceptParentChildLink implements Serializable {
 	@FullTextField(name = "myCodeSystemVersionPid")
 	private long myCodeSystemVersionPid;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "PARENT_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_PARENT"))
+	@ManyToOne(
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumn(
+			name = "PARENT_PID",
+			nullable = false,
+			referencedColumnName = "PID",
+			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_PARENT"))
 	private TermConcept myParent;
 
 	@Column(name = "PARENT_PID", insertable = false, updatable = false)
@@ -76,34 +92,25 @@ public class TermConceptParentChildLink implements Serializable {
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "REL_TYPE", length = 5, nullable = true)
+	@JdbcTypeCode(SqlTypes.INTEGER)
 	private RelationshipTypeEnum myRelationshipType;
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		TermConceptParentChildLink other = (TermConceptParentChildLink) obj;
 		if (myChild == null) {
-			if (other.myChild != null)
-				return false;
-		} else if (!myChild.equals(other.myChild))
-			return false;
+			if (other.myChild != null) return false;
+		} else if (!myChild.equals(other.myChild)) return false;
 		if (myCodeSystem == null) {
-			if (other.myCodeSystem != null)
-				return false;
-		} else if (!myCodeSystem.equals(other.myCodeSystem))
-			return false;
+			if (other.myCodeSystem != null) return false;
+		} else if (!myCodeSystem.equals(other.myCodeSystem)) return false;
 		if (myParent == null) {
-			if (other.myParent != null)
-				return false;
-		} else if (!myParent.equals(other.myParent))
-			return false;
-		if (myRelationshipType != other.myRelationshipType)
-			return false;
+			if (other.myParent != null) return false;
+		} else if (!myParent.equals(other.myParent)) return false;
+		if (myRelationshipType != other.myRelationshipType) return false;
 		return true;
 	}
 

@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -16,11 +15,9 @@ import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -28,7 +25,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 
@@ -74,7 +70,7 @@ class MdmSubscriptionLoaderTest {
 		Subscription subscription = new Subscription();
 		IdType id = new IdType("2401");
 		subscription.setIdElement(id);
-		when(mySubscriptionDao.read(eq(id), any())).thenThrow(new ResourceGoneException(""));
+		when(mySubscriptionDao.read(eq(id), any(RequestDetails.class))).thenThrow(new ResourceGoneException(""));
 		mySvc.updateIfNotPresent(subscription);
 		verify(mySubscriptionDao).update(eq(subscription), any(RequestDetails.class));
 	}
@@ -84,7 +80,7 @@ class MdmSubscriptionLoaderTest {
 		Subscription subscription = new Subscription();
 		IdType id = new IdType("2401");
 		subscription.setIdElement(id);
-		when(mySubscriptionDao.read(eq(id), any())).thenThrow(new ResourceNotFoundException(""));
+		when(mySubscriptionDao.read(eq(id), any(RequestDetails.class))).thenThrow(new ResourceNotFoundException(""));
 		mySvc.updateIfNotPresent(subscription);
 		verify(mySubscriptionDao).update(eq(subscription), any(RequestDetails.class));
 	}
@@ -94,7 +90,7 @@ class MdmSubscriptionLoaderTest {
 		Subscription subscription = new Subscription();
 		IdType id = new IdType("2401");
 		subscription.setIdElement(id);
-		when(mySubscriptionDao.read(eq(id), any())).thenReturn(subscription);
+		when(mySubscriptionDao.read(eq(id), any(RequestDetails.class))).thenReturn(subscription);
 		mySvc.updateIfNotPresent(subscription);
 		verify(mySubscriptionDao, never()).update(any(),  any(RequestDetails.class));
 	}
@@ -106,7 +102,7 @@ class MdmSubscriptionLoaderTest {
 		when(myMdmSettings.getMdmRules()).thenReturn(mdmRulesJson);
 		when(myChannelNamer.getChannelName(any(), any())).thenReturn("Test");
 		when(myDaoRegistry.getResourceDao(eq("Subscription"))).thenReturn(mySubscriptionDao);
-		when(mySubscriptionDao.read(any(), any())).thenThrow(new ResourceGoneException(""));
+		when(mySubscriptionDao.read(any(), any(RequestDetails.class))).thenThrow(new ResourceGoneException(""));
 
 		mySvc.daoUpdateMdmSubscriptions();
 
@@ -117,6 +113,6 @@ class MdmSubscriptionLoaderTest {
 
 		assertNotNull(extension);
 
-		assertTrue(((BooleanType)extension.getValue()).booleanValue());
+		assertTrue(((BooleanType) extension.getValue()).booleanValue());
 	}
 }

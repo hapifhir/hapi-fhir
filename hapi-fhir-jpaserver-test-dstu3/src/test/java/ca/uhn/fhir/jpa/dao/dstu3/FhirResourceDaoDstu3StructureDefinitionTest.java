@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FhirResourceDaoDstu3StructureDefinitionTest extends BaseJpaDstu3Test {
 
@@ -20,12 +20,12 @@ public class FhirResourceDaoDstu3StructureDefinitionTest extends BaseJpaDstu3Tes
 	@Test
 	public void testGenerateSnapshot() throws IOException {
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
-		assertEquals(0, sd.getSnapshot().getElement().size());
+		assertThat(sd.getSnapshot().getElement()).isEmpty();
 
 		StructureDefinition output = myStructureDefinitionDao.generateSnapshot(sd, "http://foo", null, "THE BEST PROFILE");
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(54, output.getSnapshot().getElement().size());
+		assertThat(output.getSnapshot().getElement()).hasSize(54);
 	}
 
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,16 +33,14 @@ public abstract class BaseStoreInfo {
 	private final KeyStoreType myType;
 
 	public BaseStoreInfo(String theFilePath, String theStorePass, String theAlias) {
-		if(theFilePath.startsWith(PathType.RESOURCE.getPrefix())){
+		if (theFilePath.startsWith(PathType.RESOURCE.getPrefix())) {
 			myFilePath = theFilePath.substring(PathType.RESOURCE.getPrefix().length());
 			myPathType = PathType.RESOURCE;
-		}
-		else if(theFilePath.startsWith(PathType.FILE.getPrefix())){
+		} else if (theFilePath.startsWith(PathType.FILE.getPrefix())) {
 			myFilePath = theFilePath.substring(PathType.FILE.getPrefix().length());
 			myPathType = PathType.FILE;
-		}
-		else {
-			throw new StoreInfoException(Msg.code(2117)+"Invalid path prefix");
+		} else {
+			throw new StoreInfoException(Msg.code(2117) + "Invalid path prefix");
 		}
 
 		myStorePass = toCharArray(theStorePass);
@@ -72,12 +70,13 @@ public abstract class BaseStoreInfo {
 		return myPathType;
 	}
 
-	protected char[] toCharArray(String theString){
+	protected char[] toCharArray(String theString) {
 		return isBlank(theString) ? "".toCharArray() : theString.toCharArray();
 	}
 
 	public static class StoreInfoException extends RuntimeException {
 		private static final long serialVersionUID = 1l;
+
 		public StoreInfoException(String theMessage) {
 			super(theMessage);
 		}

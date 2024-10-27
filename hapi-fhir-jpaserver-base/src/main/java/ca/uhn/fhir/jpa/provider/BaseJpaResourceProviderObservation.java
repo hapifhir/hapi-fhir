@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,43 +45,31 @@ public abstract class BaseJpaResourceProviderObservation<T extends IBaseResource
 	 */
 	@Operation(name = JpaConstants.OPERATION_LASTN, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider observationLastN(
-
-		javax.servlet.http.HttpServletRequest theServletRequest,
-		javax.servlet.http.HttpServletResponse theServletResponse,
-
-		ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
-
-		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-		@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
-			IPrimitiveType<Integer> theCount,
-
-		@Description(shortDefinition="The classification of the type of observation")
-		@OperationParam(name="category")
-			TokenAndListParam theCategory,
-
-		@Description(shortDefinition="The code of the observation type")
-		@OperationParam(name="code")
-			TokenAndListParam theCode,
-
-		@Description(shortDefinition="The effective date of the observation")
-		@OperationParam(name="date")
-			DateAndListParam theDate,
-
-		@Description(shortDefinition="The subject that the observation is about (if patient)")
-		@OperationParam(name="patient")
-			ReferenceAndListParam thePatient,
-
-		@Description(shortDefinition="The subject that the observation is about")
-		@OperationParam(name="subject" )
-			ReferenceAndListParam theSubject,
-
-		@Description(shortDefinition="The maximum number of observations to return for each observation code")
-		@OperationParam(name = "max", typeName = "integer", min = 0, max = 1)
-			IPrimitiveType<Integer> theMax,
-
-		@RawParam
-			Map<String, List<String>> theAdditionalRawParams
-		) {
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletResponse theServletResponse,
+			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
+			@Description(
+							formalDefinition =
+									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+					@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
+					IPrimitiveType<Integer> theCount,
+			@Description(shortDefinition = "The classification of the type of observation")
+					@OperationParam(name = "category")
+					TokenAndListParam theCategory,
+			@Description(shortDefinition = "The code of the observation type") @OperationParam(name = "code")
+					TokenAndListParam theCode,
+			@Description(shortDefinition = "The effective date of the observation") @OperationParam(name = "date")
+					DateAndListParam theDate,
+			@Description(shortDefinition = "The subject that the observation is about (if patient)")
+					@OperationParam(name = "patient")
+					ReferenceAndListParam thePatient,
+			@Description(shortDefinition = "The subject that the observation is about")
+					@OperationParam(name = "subject")
+					ReferenceAndListParam theSubject,
+			@Description(shortDefinition = "The maximum number of observations to return for each observation code")
+					@OperationParam(name = "max", typeName = "integer", min = 0, max = 1)
+					IPrimitiveType<Integer> theMax,
+			@RawParam Map<String, List<String>> theAdditionalRawParams) {
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
@@ -96,6 +84,13 @@ public abstract class BaseJpaResourceProviderObservation<T extends IBaseResource
 			}
 			if (theMax != null) {
 				paramMap.setLastNMax(theMax.getValue());
+
+				/**
+				 * The removal of the original raw parameter is required as every implementing class
+				 * has the "Observation" resource class defined. For this resource, the max parameter
+				 * is not supported and thus has to be removed before the use of "translateRawParameters".
+				 */
+				theAdditionalRawParams.remove("max");
 			}
 			if (theCount != null) {
 				paramMap.setCount(theCount.getValue());
@@ -103,10 +98,10 @@ public abstract class BaseJpaResourceProviderObservation<T extends IBaseResource
 
 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 
-			return ((IFhirResourceDaoObservation<?>) getDao()).observationsLastN(paramMap, theRequestDetails, theServletResponse);
+			return ((IFhirResourceDaoObservation<?>) getDao())
+					.observationsLastN(paramMap, theRequestDetails, theServletResponse);
 		} finally {
 			endRequest(theServletRequest);
 		}
 	}
-
 }

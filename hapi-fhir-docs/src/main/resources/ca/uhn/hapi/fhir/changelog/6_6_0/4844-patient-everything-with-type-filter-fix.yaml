@@ -1,0 +1,11 @@
+---
+type: fix
+issue: 4844
+title: "/Patient/{patientid}/$everything?_type={resource types}
+   would omit resources that were not directly related to the Patient
+   resource (even if those resources were specified in the _type list).
+   This was in conflict with /Patient/{patientid}/$everything operation,
+   which did return said resources.
+   This has been fixed so both return all related resources, even if
+   those resources are not directly related to the Patient resource.
+   "

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4863
+title: "Previously the SearchParameterCanonicalizer did not correctly convert DSTU2 and DSTU3 custom resources SearchParameters 
+into RuntimeSearchParam. This is now fixed."

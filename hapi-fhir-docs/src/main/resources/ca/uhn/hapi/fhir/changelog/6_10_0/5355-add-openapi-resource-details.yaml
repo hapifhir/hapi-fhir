@@ -1,0 +1,8 @@
+---
+type: add
+issue: 5355
+title: "The generated OpenAPI documentation produced by OpenApiInterceptor will now include
+   additional details in the individual resource type documentation, including the values of
+   *CapabilityStatement.rest.resource.documentation*,
+   *CapabilityStatement.rest.resource.profile*, and
+   *CapabilityStatement.rest.resource.supportedProfile*."

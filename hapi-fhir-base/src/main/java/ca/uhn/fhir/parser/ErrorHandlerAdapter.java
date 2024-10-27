@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,13 @@ public class ErrorHandlerAdapter implements IParserErrorHandler {
 	}
 
 	@Override
-	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ScalarType theExpectedScalarType, ValueType theFound, ScalarType theFoundScalarType) {
+	public void incorrectJsonType(
+			IParseLocation theLocation,
+			String theElementName,
+			ValueType theExpected,
+			ScalarType theExpectedScalarType,
+			ValueType theFound,
+			ScalarType theFoundScalarType) {
 		// NOP
 	}
 

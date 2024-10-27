@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,10 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
+import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
@@ -31,11 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 
 public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
@@ -49,6 +51,9 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegistry;
+
 	/**
 	 * Constructor
 	 */
@@ -56,8 +61,9 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 		super("Subscription");
 	}
 
+	@VisibleForTesting
 	public int doSyncSubscriptionsForUnitTest() {
-		return super.doSyncResourcessForUnitTest();
+		return super.doSyncResourcesForUnitTest();
 	}
 
 	@Override
@@ -66,9 +72,11 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 		SearchParameterMap map = new SearchParameterMap();
 
 		if (mySearchParamRegistry.getActiveSearchParam("Subscription", "status") != null) {
-			map.add(Subscription.SP_STATUS, new TokenOrListParam()
-				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
-				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
+			map.add(
+					Subscription.SP_STATUS,
+					new TokenOrListParam()
+							.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
+							.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
 		}
 		map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 		return map;
@@ -105,18 +113,22 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 		}
 
 		mySubscriptionRegistry.unregisterAllSubscriptionsNotInCollection(allIds);
-		ourLog.debug("Finished sync subscriptions - activated {} and registered {}", theResourceList.size(), registeredCount);
+		ourLog.debug(
+				"Finished sync subscriptions - activated {} and registered {}",
+				theResourceList.size(),
+				registeredCount);
 		return activatedCount;
 	}
 
 	/**
-	 * @param theSubscription
+	 * Check status of theSubscription and update to "active" if needed.
 	 * @return true if activated
 	 */
 	private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
 		boolean successfullyActivated = false;
 
-		if (SubscriptionConstants.REQUESTED_STATUS.equals(mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription))) {
+		if (SubscriptionConstants.REQUESTED_STATUS.equals(
+				mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription))) {
 			if (mySubscriptionActivatingInterceptor.isChannelTypeSupported(theSubscription)) {
 				// internally, subscriptions that cannot activate will be set to error
 				if (mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription)) {
@@ -125,9 +137,10 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 					logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
 				}
 			} else {
-				ourLog.debug("Could not activate subscription {} because channel type {} is not supported.",
-					theSubscription.getIdElement(),
-					mySubscriptionCanonicalizer.getChannelType(theSubscription));
+				ourLog.debug(
+						"Could not activate subscription {} because channel type {} is not supported.",
+						theSubscription.getIdElement(),
+						mySubscriptionCanonicalizer.getChannelType(theSubscription));
 			}
 		}
 
@@ -150,16 +163,14 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 		} else {
 			error = "";
 		}
-		ourLog.error("Subscription "
-			+ theSubscription.getIdElement().getIdPart()
-			+ " could not be activated."
-			+ " This will not prevent startup, but it could lead to undesirable outcomes! "
-			+ (StringUtils.isBlank(error) ? "" : "Error: " + error)
-		);
+		ourLog.error(
+				"Subscription {} could not be activated. "
+						+ "This will not prevent startup, but it could lead to undesirable outcomes! {}",
+				theSubscription.getIdElement().getIdPart(),
+				(StringUtils.isBlank(error) ? "" : "Error: " + error));
 	}
 
 	public void syncSubscriptions() {
 		super.syncDatabaseToCache();
 	}
 }
-

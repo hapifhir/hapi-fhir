@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -40,10 +40,19 @@ import java.util.TreeSet;
 public interface ISearchParamRegistry {
 
 	/**
+	 * Return true if this registry is initialized and ready to handle
+	 * searches and use its cache.
+	 * Return false if cache has not been initialized.
+	 */
+	default boolean isInitialized() {
+		// default initialized to not break current implementers
+		return true;
+	}
+
+	/**
 	 * @return Returns {@literal null} if no match
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
-
 
 	/**
 	 * @return Returns all active search params for the given resource
@@ -53,14 +62,12 @@ public interface ISearchParamRegistry {
 	/**
 	 * Request that the cache be refreshed now, in the current thread
 	 */
-	default void forceRefresh() {
-	}
+	default void forceRefresh() {}
 
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
-	default void requestRefresh() {
-	}
+	default void requestRefresh() {}
 
 	/**
 	 * When indexing a HumanName, if a StringEncoder is set in the context, then the "phonetic" search parameter will normalize
@@ -68,16 +75,15 @@ public interface ISearchParamRegistry {
 	 *
 	 * @since 5.1.0
 	 */
-	default void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
-	}
+	default void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {}
 
 	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 		return Collections.emptyList();
 	}
 
-
 	// TODO ND remove default implementation
-	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+	default List<RuntimeSearchParam> getActiveComboSearchParams(
+			String theResourceName, ComboSearchParamType theParamType) {
 		return Collections.emptyList();
 	}
 
@@ -130,8 +136,26 @@ public interface ISearchParamRegistry {
 			availableSearchParamDef = getActiveSearchParam("Resource", theParamName);
 		}
 		if (availableSearchParamDef == null) {
-			throw new InvalidRequestException(Msg.code(1209) + "Unknown parameter name: " + theResourceType + ':' + theParamName);
+			throw new InvalidRequestException(
+					Msg.code(1209) + "Unknown parameter name: " + theResourceType + ':' + theParamName);
 		}
 		return availableSearchParamDef;
+	}
+
+	/**
+	 * Get all the search params for a resource. First, check the resource itself, then check the top-level `Resource` resource and combine the two.
+	 *
+	 * @param theResourceType the resource type.
+	 *
+	 * @return the {@link ResourceSearchParams} that has all the search params.
+	 */
+	default ResourceSearchParams getRuntimeSearchParams(String theResourceType) {
+		ResourceSearchParams availableSearchParams =
+				getActiveSearchParams(theResourceType).makeCopy();
+		ResourceSearchParams resourceSearchParams = getActiveSearchParams("Resource");
+		resourceSearchParams
+				.getSearchParamNames()
+				.forEach(param -> availableSearchParams.addSearchParamIfAbsent(param, resourceSearchParams.get(param)));
+		return availableSearchParams;
 	}
 }

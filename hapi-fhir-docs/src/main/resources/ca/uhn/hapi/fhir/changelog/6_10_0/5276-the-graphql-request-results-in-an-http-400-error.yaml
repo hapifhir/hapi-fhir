@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5276
+title: "Previously, GraphQL queries will error when using base resource search parameters such as '_id' after search parameter rebuild.
+This has been fixed."

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,8 @@ public interface IParam {
 
 	/**
 	 * Sets the <code>:missing</code> qualifier for this parameter. Set this to <code>true</code>
-	 * to indicate that the server should return resources with this value <p>populated</p>. Set this to
-	 * <code>false</code> to indicate that the server should return resources with this value <b>missing</b>.
+	 * to indicate that the server should return resources with this value <p>missing</p>. Set this to
+	 * <code>false</code> to indicate that the server should return resources with this value <b>populated</b>.
 	 */
 	ICriterion<?> isMissing(boolean theMissing);
-	
 }

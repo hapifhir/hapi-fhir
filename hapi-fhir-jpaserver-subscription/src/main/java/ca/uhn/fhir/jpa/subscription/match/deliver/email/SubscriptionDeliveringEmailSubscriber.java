@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,13 @@
 package ca.uhn.fhir.jpa.subscription.match.deliver.email;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -41,7 +44,8 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringEmailSubscriber.class);
 
 	@Autowired
-	private StorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
+
 	@Autowired
 	private FhirContext myCtx;
 
@@ -71,12 +75,14 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		if (isNotBlank(subscription.getPayloadString())) {
 			EncodingEnum encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 			if (encoding != null) {
-				payload = theMessage.getPayloadString();
+				payload = getPayloadStringFromMessageOrEmptyString(theMessage);
 			}
 		}
 
-		String from = processEmailAddressUri(defaultString(subscription.getEmailDetails().getFrom(), myStorageSettings.getEmailFromAddress()));
-		String subjectTemplate = defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
+		String from = processEmailAddressUri(
+				defaultString(subscription.getEmailDetails().getFrom(), mySubscriptionSettings.getEmailFromAddress()));
+		String subjectTemplate =
+				defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
 
 		EmailDetails details = new EmailDetails();
 		details.setTo(destinationAddresses);
@@ -91,8 +97,8 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	private String processEmailAddressUri(String next) {
 		next = trim(defaultString(next));
 		if (next.startsWith("mailto:")) {
-         next = next.substring("mailto:".length());
-      }
+			next = next.substring("mailto:".length());
+		}
 		return next;
 	}
 
@@ -102,5 +108,30 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 
 	public void setEmailSender(IEmailSender theEmailSender) {
 		myEmailSender = theEmailSender;
+	}
+
+	@VisibleForTesting
+	public IEmailSender getEmailSender() {
+		return myEmailSender;
+	}
+
+	/**
+	 * Get the payload string, fetch it from the DB when the payload is null.
+	 */
+	private String getPayloadStringFromMessageOrEmptyString(ResourceDeliveryMessage theMessage) {
+		String payload = theMessage.getPayloadString();
+
+		if (theMessage.getPayload(myCtx) != null) {
+			return payload;
+		}
+
+		Optional<ResourceModifiedMessage> inflatedMessage =
+				inflateResourceModifiedMessageFromDeliveryMessage(theMessage);
+		if (inflatedMessage.isEmpty()) {
+			return "";
+		}
+
+		payload = inflatedMessage.get().getPayloadString();
+		return payload;
 	}
 }

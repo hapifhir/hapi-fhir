@@ -4,13 +4,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -19,7 +20,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +33,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionActivatingSubscriberTest {
@@ -55,7 +60,7 @@ public class SubscriptionActivatingSubscriberTest {
 	private SubscriptionCanonicalizer mySubscriptionCanonicallizer;
 
 	@Mock
-	private JpaStorageSettings myStorageSettings;
+	private SubscriptionSettings myStorageSettings;
 
 	@Mock
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
@@ -106,18 +111,18 @@ public class SubscriptionActivatingSubscriberTest {
 		boolean isActivated = mySubscriptionActivatingSubscriber.activateSubscriptionIfRequired(subscription);
 
 		// verify
-		Assertions.assertFalse(isActivated);
+		assertFalse(isActivated);
 		ArgumentCaptor<IBaseResource> captor = ArgumentCaptor.forClass(IBaseResource.class);
 		Mockito.verify(dao).update(captor.capture(), Mockito.any(SystemRequestDetails.class));
 		IBaseResource savedResource = captor.getValue();
-		Assertions.assertTrue(savedResource instanceof Subscription);
-		Assertions.assertEquals(Subscription.SubscriptionStatus.ERROR, ((Subscription)savedResource).getStatus());
+		assertTrue(savedResource instanceof Subscription);
+		assertEquals(Subscription.SubscriptionStatus.ERROR, ((Subscription) savedResource).getStatus());
 
 		ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myAppender, Mockito.times(totalInfoLogs))
 			.doAppend(appenderCaptor.capture());
 		List<ILoggingEvent> events = appenderCaptor.getAllValues();
-		Assertions.assertEquals(totalInfoLogs, events.size());
-		Assertions.assertTrue(events.get(0).getMessage().contains(exceptionMsg));
+		assertThat(events).hasSize(totalInfoLogs);
+		assertThat(events.get(0).getMessage()).contains(exceptionMsg);
 	}
 }

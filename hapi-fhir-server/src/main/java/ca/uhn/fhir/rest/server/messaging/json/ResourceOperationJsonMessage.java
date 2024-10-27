@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,10 @@ package ca.uhn.fhir.rest.server.messaging.json;
 
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import javax.annotation.Nullable;
-
 public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperationMessage> {
-
 
 	@JsonProperty("payload")
 	private ResourceOperationMessage myPayload;
@@ -46,11 +44,11 @@ public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperat
 		setDefaultRetryHeaders();
 	}
 
-	public ResourceOperationJsonMessage(HapiMessageHeaders theRetryMessageHeaders, ResourceOperationMessage thePayload) {
+	public ResourceOperationJsonMessage(
+			HapiMessageHeaders theRetryMessageHeaders, ResourceOperationMessage thePayload) {
 		myPayload = thePayload;
 		setHeaders(theRetryMessageHeaders);
 	}
-
 
 	@Override
 	public ResourceOperationMessage getPayload() {
@@ -63,9 +61,7 @@ public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperat
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myPayload", myPayload)
-			.toString();
+		return new ToStringBuilder(this).append("myPayload", myPayload).toString();
 	}
 
 	@Nullable

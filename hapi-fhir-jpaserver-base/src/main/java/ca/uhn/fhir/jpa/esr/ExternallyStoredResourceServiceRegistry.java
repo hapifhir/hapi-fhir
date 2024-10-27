@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.jpa.esr;
 
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +39,10 @@ public class ExternallyStoredResourceServiceRegistry {
 	 */
 	public void registerProvider(@Nonnull IExternallyStoredResourceService theProvider) {
 		String id = defaultString(theProvider.getId());
-		Validate.isTrue(id.matches(VALID_ID_PATTERN), "Invalid provider ID (must match pattern " + VALID_ID_PATTERN + "): %s", id);
+		Validate.isTrue(
+				id.matches(VALID_ID_PATTERN),
+				"Invalid provider ID (must match pattern " + VALID_ID_PATTERN + "): %s",
+				id);
 		Validate.isTrue(!myIdToProvider.containsKey(id), "Already have a provider with ID: %s", id);
 
 		myIdToProvider.put(id, theProvider);

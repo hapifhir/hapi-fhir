@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ public class SubscriptionTopicSupport {
 	private final DaoRegistry myDaoRegistry;
 	private final SearchParamMatcher mySearchParamMatcher;
 
-	public SubscriptionTopicSupport(FhirContext theFhirContext, DaoRegistry theDaoRegistry, SearchParamMatcher theSearchParamMatcher) {
+	public SubscriptionTopicSupport(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry, SearchParamMatcher theSearchParamMatcher) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		mySearchParamMatcher = theSearchParamMatcher;

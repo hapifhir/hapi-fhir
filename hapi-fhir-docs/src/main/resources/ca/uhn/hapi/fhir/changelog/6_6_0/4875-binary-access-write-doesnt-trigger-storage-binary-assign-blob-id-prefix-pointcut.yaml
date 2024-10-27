@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4875
+title: "Previously, `$binary-access-write` operation didn't trigger `STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX` Pointcut.
+   This has been fixed."

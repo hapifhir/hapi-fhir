@@ -32,10 +32,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.notNullValue;
 
 public class BlockingContentR4Test {
 
@@ -95,10 +93,10 @@ public class BlockingContentR4Test {
 			try (CloseableHttpResponse resp = client.execute(post)) {
 				ourLog.info(Arrays.asList(resp.getAllHeaders()).toString().replace(", ", "\n"));
 				ourLog.info(resp.toString());
-				await().until(()->myServerException, notNullValue());
+				await().until(()->myServerException != null);
 			}
 
-			assertThat(myServerException.toString(), containsString("Idle timeout expired"));
+			assertThat(myServerException.toString()).contains("Idle timeout expired");
 
 		}
 	}

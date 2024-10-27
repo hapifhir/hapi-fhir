@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class IndexedSearchParamExtractorTest extends BaseJpaR4Test {
 	@Autowired
@@ -36,6 +36,6 @@ public class IndexedSearchParamExtractorTest extends BaseJpaR4Test {
 
 		ResourceIndexedSearchParams result = mySrv.extractIndexedSearchParams(encounter, mySrd);
 		// red-green before the fix, the size was 1
-		assertEquals(2, result.myLinks.size());
+		assertThat(result.myLinks).hasSize(2);
 	}
 }

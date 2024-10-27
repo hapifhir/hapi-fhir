@@ -1,0 +1,16 @@
+
+migrate/ @hapifhir/data-migrations
+
+hapi-fhir-cli/**/*.java @nathandoef @tadgh @jamesagnew
+
+hapi-fhir-storage-cr/**/*.java @JPercival @tadgh
+
+hapi-fhir-jpaserver-subscription/**/*.java @fil512 @tadgh @jamesagnew
+hapi-fhir-jpaserver-mdm/**/*.java @fil512 @tadgh @ad1306
+
+
+hapi-fhir-storage-batch2/**/*.java @michaelabuckley @jamesagnew @tadgh
+hapi-fhir-storage-batch2-jobs/**/*.java @michaelabuckley @jamesagnew @tadgh
+
+hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.java @jamesagnew
+hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/consent/ConsentInterceptor.java @jamesagnew

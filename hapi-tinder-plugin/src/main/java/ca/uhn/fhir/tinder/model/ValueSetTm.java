@@ -1,13 +1,12 @@
 package ca.uhn.fhir.tinder.model;
 
+import org.codehaus.plexus.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.codehaus.plexus.util.StringUtils;
 
 public class ValueSetTm {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetTm.class);
@@ -31,12 +30,9 @@ public class ValueSetTm {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		ValueSetTm other = (ValueSetTm) obj;
 
 		String id1 = myId != null && myId.isEmpty() == false ? myId : myName;
@@ -134,7 +130,9 @@ public class ValueSetTm {
 							while (!Character.isLetterOrDigit(newValue.charAt(newValue.length() - 1))) {
 								newValue = newValue.substring(0, newValue.length() - 1);
 							}
-							ourLog.info("[{}] Replacing numeric code {} with description: {}", new Object[] { myName, retVal, newValue });
+							ourLog.info(
+									"[{}] Replacing numeric code {} with description: {}",
+									new Object[] {myName, retVal, newValue});
 							retVal = newValue;
 						}
 					}
@@ -158,7 +156,11 @@ public class ValueSetTm {
 			}
 
 			StringBuilder b = new StringBuilder();
-			for (char next : retVal.toUpperCase().replace("'", "").replace("(", "").replace(")", "").toCharArray()) {
+			for (char next : retVal.toUpperCase()
+					.replace("'", "")
+					.replace("(", "")
+					.replace(")", "")
+					.toCharArray()) {
 				if (Character.isJavaIdentifierPart(next)) {
 					b.append(next);
 				} else {
@@ -189,7 +191,5 @@ public class ValueSetTm {
 		public boolean isHasDisplay() {
 			return StringUtils.isNotBlank(myDisplay);
 		}
-
 	}
-
 }

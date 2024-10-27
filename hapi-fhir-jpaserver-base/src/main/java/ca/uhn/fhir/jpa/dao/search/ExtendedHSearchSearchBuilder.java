@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,13 @@
 package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
+import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -34,17 +35,20 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_MISSING;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_MISSING;
 
 /**
  * Search builder for HSearch for token, string, and reference parameters.
@@ -55,45 +59,89 @@ public class ExtendedHSearchSearchBuilder {
 	/**
 	 * These params have complicated semantics, or are best resolved at the JPA layer for now.
 	 */
-	public static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_meta");
+	public static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_meta", "_count");
 
 	/**
-	 * Are any of the queries supported by our indexing?
+	 * Determine if ExtendedHibernateSearchBuilder can support this parameter
+	 * @param theParamName param name
+	 * @param theActiveParamsForResourceType active search parameters for the desired resource type
+	 * @return whether or not this search parameter is supported in hibernate
 	 */
-	public boolean isSupportsSomeOf(SearchParameterMap myParams) {
-		return
-			myParams.getSort() != null ||
-			myParams.getLastUpdated() != null ||
-			myParams.entrySet().stream()
-				.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
-				// each and clause may have a different modifier, so split down to the ORs
-				.flatMap(andList -> andList.getValue().stream())
-				.flatMap(Collection::stream)
-				.anyMatch(this::isParamTypeSupported);
+	public boolean illegalForHibernateSearch(String theParamName, ResourceSearchParams theActiveParamsForResourceType) {
+		if (theActiveParamsForResourceType == null) {
+			return true;
+		}
+		if (ourUnsafeSearchParmeters.contains(theParamName)) {
+			return true;
+		}
+		if (!theActiveParamsForResourceType.containsParamName(theParamName)) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * By default, do not use Hibernate Search.
+	 * If a Search Parameter is supported by hibernate search,
+	 * Are any of the queries supported by our indexing?
+	 * -
+	 * If not, do not use hibernate, because the results will
+	 * be inaccurate and wrong.
+	 */
+	public boolean canUseHibernateSearch(
+			String theResourceType, SearchParameterMap myParams, ISearchParamRegistry theSearchParamRegistry) {
+		boolean canUseHibernate = false;
+
+		ResourceSearchParams resourceActiveSearchParams = theSearchParamRegistry.getActiveSearchParams(theResourceType);
+		for (String paramName : myParams.keySet()) {
+			// is this parameter supported?
+			if (illegalForHibernateSearch(paramName, resourceActiveSearchParams)) {
+				canUseHibernate = false;
+			} else {
+				// are the parameter values supported?
+				canUseHibernate =
+						myParams.get(paramName).stream()
+								.flatMap(Collection::stream)
+								.collect(Collectors.toList())
+								.stream()
+								.anyMatch(this::isParamTypeSupported);
+			}
+
+			// if not supported, don't use
+			if (!canUseHibernate) {
+				return false;
+			}
+		}
+
+		return canUseHibernate;
 	}
 
 	/**
 	 * Are all the queries supported by our indexing?
 	 */
 	public boolean isSupportsAllOf(SearchParameterMap myParams) {
-		return
-			CollectionUtils.isEmpty( myParams.getRevIncludes() ) && // ???
-			CollectionUtils.isEmpty( myParams.getIncludes() ) && // ???
-			myParams.getEverythingMode() == null && // ???
-			BooleanUtils.isFalse( myParams.isDeleteExpunge() ) && // ???
+		return CollectionUtils.isEmpty(myParams.getRevIncludes())
+				&& // ???
+				CollectionUtils.isEmpty(myParams.getIncludes())
+				&& // ???
+				myParams.getEverythingMode() == null
+				&& // ???
+				BooleanUtils.isFalse(myParams.isDeleteExpunge())
+				&& // ???
 
-			// not yet supported in HSearch
-			myParams.getNearDistanceParam() == null && // ???
+				// not yet supported in HSearch
+				myParams.getNearDistanceParam() == null
+				&& // ???
 
-			// not yet supported in HSearch
-			myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE && // ???
-
-			myParams.entrySet().stream()
-				.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
-				// each and clause may have a different modifier, so split down to the ORs
-				.flatMap(andList -> andList.getValue().stream())
-				.flatMap(Collection::stream)
-				.allMatch(this::isParamTypeSupported);
+				// not yet supported in HSearch
+				myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE
+				&& // ???
+				myParams.entrySet().stream()
+						.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
+						// each and clause may have a different modifier, so split down to the ORs
+						.flatMap(andList -> andList.getValue().stream())
+						.flatMap(Collection::stream)
+						.allMatch(this::isParamTypeSupported);
 	}
 
 	/**
@@ -114,7 +162,7 @@ public class ExtendedHSearchSearchBuilder {
 			}
 		} else if (param instanceof StringParam) {
 			switch (modifier) {
-				// we support string:text, string:contains, string:exact, and unmodified string.
+					// we support string:text, string:contains, string:exact, and unmodified string.
 				case Constants.PARAMQUALIFIER_STRING_TEXT:
 				case Constants.PARAMQUALIFIER_STRING_EXACT:
 				case Constants.PARAMQUALIFIER_STRING_CONTAINS:
@@ -127,7 +175,7 @@ public class ExtendedHSearchSearchBuilder {
 			return modifier.equals(EMPTY_MODIFIER);
 
 		} else if (param instanceof CompositeParam) {
-			switch(modifier) {
+			switch (modifier) {
 				case PARAMQUALIFIER_MISSING:
 					return false;
 				default:
@@ -135,7 +183,7 @@ public class ExtendedHSearchSearchBuilder {
 			}
 
 		} else if (param instanceof ReferenceParam) {
-			//We cannot search by chain.
+			// We cannot search by chain.
 			if (((ReferenceParam) param).getChain() != null) {
 				return false;
 			}
@@ -161,74 +209,92 @@ public class ExtendedHSearchSearchBuilder {
 		}
 	}
 
-	public void addAndConsumeAdvancedQueryClauses(ExtendedHSearchClauseBuilder builder, String theResourceType, SearchParameterMap theParams, ISearchParamRegistry theSearchParamRegistry) {
+	public void addAndConsumeAdvancedQueryClauses(
+			ExtendedHSearchClauseBuilder theBuilder,
+			ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams theMethodParams) {
+		SearchParameterMap searchParameterMap = theMethodParams.getSearchParameterMap();
+		String resourceType = theMethodParams.getResourceType();
+		ISearchParamRegistry searchParamRegistry = theMethodParams.getSearchParamRegistry();
+
 		// copy the keys to avoid concurrent modification error
-		ArrayList<String> paramNames = compileParamNames(theParams);
+		ArrayList<String> paramNames = compileParamNames(searchParameterMap);
+		ResourceSearchParams activeSearchParams = searchParamRegistry.getActiveSearchParams(resourceType);
 		for (String nextParam : paramNames) {
-			if (ourUnsafeSearchParmeters.contains(nextParam)) {
-				continue;
-			}
-			RuntimeSearchParam activeParam = theSearchParamRegistry.getActiveSearchParam(theResourceType, nextParam);
-			if (activeParam == null) {
+			if (illegalForHibernateSearch(nextParam, activeSearchParams)) {
 				// ignore magic params handled in JPA
 				continue;
 			}
+			RuntimeSearchParam activeParam = activeSearchParams.get(nextParam);
 
 			// NOTE - keep this in sync with isParamSupported() above.
 			switch (activeParam.getParamType()) {
 				case TOKEN:
-					List<List<IQueryParameterType>> tokenTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
-					builder.addStringTextSearch(nextParam, tokenTextAndOrTerms);
+					List<List<IQueryParameterType>> tokenTextAndOrTerms =
+							searchParameterMap.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
+					theBuilder.addStringTextSearch(nextParam, tokenTextAndOrTerms);
 
-					List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addTokenUnmodifiedSearch(nextParam, tokenUnmodifiedAndOrTerms);
+					List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms =
+							searchParameterMap.removeByNameUnmodified(nextParam);
+					theBuilder.addTokenUnmodifiedSearch(nextParam, tokenUnmodifiedAndOrTerms);
 					break;
 
 				case STRING:
-					List<List<IQueryParameterType>> stringTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
-					builder.addStringTextSearch(nextParam, stringTextAndOrTerms);
+					List<List<IQueryParameterType>> stringTextAndOrTerms =
+							searchParameterMap.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
+					theBuilder.addStringTextSearch(nextParam, stringTextAndOrTerms);
 
-					List<List<IQueryParameterType>> stringExactAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_EXACT);
-					builder.addStringExactSearch(nextParam, stringExactAndOrTerms);
+					List<List<IQueryParameterType>> stringExactAndOrTerms = searchParameterMap.removeByNameAndModifier(
+							nextParam, Constants.PARAMQUALIFIER_STRING_EXACT);
+					theBuilder.addStringExactSearch(nextParam, stringExactAndOrTerms);
 
-					List<List<IQueryParameterType>> stringContainsAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_CONTAINS);
-					builder.addStringContainsSearch(nextParam, stringContainsAndOrTerms);
+					List<List<IQueryParameterType>> stringContainsAndOrTerms =
+							searchParameterMap.removeByNameAndModifier(
+									nextParam, Constants.PARAMQUALIFIER_STRING_CONTAINS);
+					theBuilder.addStringContainsSearch(nextParam, stringContainsAndOrTerms);
 
-					List<List<IQueryParameterType>> stringAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addStringUnmodifiedSearch(nextParam, stringAndOrTerms);
+					List<List<IQueryParameterType>> stringAndOrTerms =
+							searchParameterMap.removeByNameUnmodified(nextParam);
+					theBuilder.addStringUnmodifiedSearch(nextParam, stringAndOrTerms);
 					break;
 
 				case QUANTITY:
-					List<List<IQueryParameterType>> quantityAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addQuantityUnmodifiedSearch(nextParam, quantityAndOrTerms);
+					List<List<IQueryParameterType>> quantityAndOrTerms =
+							searchParameterMap.removeByNameUnmodified(nextParam);
+					theBuilder.addQuantityUnmodifiedSearch(nextParam, quantityAndOrTerms);
 					break;
 
 				case REFERENCE:
-					List<List<IQueryParameterType>> referenceAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addReferenceUnchainedSearch(nextParam, referenceAndOrTerms);
+					List<List<IQueryParameterType>> referenceAndOrTerms =
+							searchParameterMap.removeByNameUnmodified(nextParam);
+					theBuilder.addReferenceUnchainedSearch(nextParam, referenceAndOrTerms);
 					break;
 
 				case DATE:
 					List<List<IQueryParameterType>> dateAndOrTerms = nextParam.equalsIgnoreCase("_lastupdated")
-						? getLastUpdatedAndOrList(theParams) : theParams.removeByNameUnmodified(nextParam);
-					builder.addDateUnmodifiedSearch(nextParam, dateAndOrTerms);
+							? getLastUpdatedAndOrList(searchParameterMap)
+							: searchParameterMap.removeByNameUnmodified(nextParam);
+					theBuilder.addDateUnmodifiedSearch(nextParam, dateAndOrTerms);
 					break;
 
 				case COMPOSITE:
-					List<List<IQueryParameterType>> compositeAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					// RuntimeSearchParam only points to the subs by reference.  Resolve here while we have ISearchParamRegistry
-					List<RuntimeSearchParam> subSearchParams = JpaParamUtil.resolveCompositeComponentsDeclaredOrder(theSearchParamRegistry, activeParam);
-					builder.addCompositeUnmodifiedSearch(activeParam, subSearchParams, compositeAndOrTerms);
+					List<List<IQueryParameterType>> compositeAndOrTerms =
+							searchParameterMap.removeByNameUnmodified(nextParam);
+					// RuntimeSearchParam only points to the subs by reference.  Resolve here while we have
+					// ISearchParamRegistry
+					List<RuntimeSearchParam> subSearchParams =
+							JpaParamUtil.resolveCompositeComponentsDeclaredOrder(searchParamRegistry, activeParam);
+					theBuilder.addCompositeUnmodifiedSearch(activeParam, subSearchParams, compositeAndOrTerms);
 					break;
 
 				case URI:
-					List<List<IQueryParameterType>> uriUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addUriUnmodifiedSearch(nextParam, uriUnmodifiedAndOrTerms);
+					List<List<IQueryParameterType>> uriUnmodifiedAndOrTerms =
+							searchParameterMap.removeByNameUnmodified(nextParam);
+					theBuilder.addUriUnmodifiedSearch(nextParam, uriUnmodifiedAndOrTerms);
 					break;
 
 				case NUMBER:
-					List<List<IQueryParameterType>> numberUnmodifiedAndOrTerms = theParams.remove(nextParam);
-					builder.addNumberUnmodifiedSearch(nextParam, numberUnmodifiedAndOrTerms);
+					List<List<IQueryParameterType>> numberUnmodifiedAndOrTerms = searchParameterMap.remove(nextParam);
+					theBuilder.addNumberUnmodifiedSearch(nextParam, numberUnmodifiedAndOrTerms);
 					break;
 
 				default:
@@ -237,20 +303,18 @@ public class ExtendedHSearchSearchBuilder {
 		}
 	}
 
-
 	private List<List<IQueryParameterType>> getLastUpdatedAndOrList(SearchParameterMap theParams) {
 		DateParam activeBound = theParams.getLastUpdated().getLowerBound() != null
-			? theParams.getLastUpdated().getLowerBound()
-			: theParams.getLastUpdated().getUpperBound();
+				? theParams.getLastUpdated().getLowerBound()
+				: theParams.getLastUpdated().getUpperBound();
 
-		List<List<IQueryParameterType>> result = List.of( List.of(activeBound) );
+		List<List<IQueryParameterType>> result = List.of(List.of(activeBound));
 
 		// indicate parameter was processed
 		theParams.setLastUpdated(null);
 
 		return result;
 	}
-
 
 	/**
 	 * Param name list is not only the params.keySet, but also the "special" parameters extracted from input
@@ -265,5 +329,4 @@ public class ExtendedHSearchSearchBuilder {
 
 		return nameList;
 	}
-
 }

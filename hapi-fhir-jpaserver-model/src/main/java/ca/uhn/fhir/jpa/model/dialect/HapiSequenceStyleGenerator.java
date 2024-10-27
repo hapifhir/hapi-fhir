@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,19 @@
 package ca.uhn.fhir.jpa.model.dialect;
 
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.boot.model.relational.Database;
+import org.hibernate.boot.model.relational.ExportableProducer;
 import org.hibernate.boot.model.relational.SqlStringGenerationContext;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.BulkInsertionCapableIdentifierGenerator;
 import org.hibernate.id.IdentifierGenerator;
+import org.hibernate.id.OptimizableGenerator;
 import org.hibernate.id.PersistentIdentifierGenerator;
+import org.hibernate.id.enhanced.Optimizer;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.id.enhanced.StandardOptimizerDescriptor;
 import org.hibernate.service.ServiceRegistry;
@@ -44,10 +47,14 @@ import java.util.Properties;
  * and by default will therefore work exactly as the default would, but allows for customization.
  */
 @SuppressWarnings("unused")
-public class HapiSequenceStyleGenerator implements IdentifierGenerator, PersistentIdentifierGenerator, BulkInsertionCapableIdentifierGenerator {
+public class HapiSequenceStyleGenerator
+		implements PersistentIdentifierGenerator, BulkInsertionCapableIdentifierGenerator, ExportableProducer {
+	public static final String ID_MASSAGER_TYPE_KEY = "hapi_fhir.sequence_generator_massager";
 	private final SequenceStyleGenerator myGen = new SequenceStyleGenerator();
+
 	@Autowired
 	private StorageSettings myStorageSettings;
+
 	private ISequenceValueMassager myIdMassager;
 	private boolean myConfigured;
 	private String myGeneratorName;
@@ -63,8 +70,9 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 	}
 
 	@Override
-	public Serializable generate(SharedSessionContractImplementor theSession, Object theObject) throws HibernateException {
-		Long retVal = myIdMassager.generate(myGeneratorName);
+	public Serializable generate(SharedSessionContractImplementor theSession, Object theObject)
+			throws HibernateException {
+		Long retVal = myIdMassager != null ? myIdMassager.generate(myGeneratorName) : null;
 		if (retVal == null) {
 			Long next = (Long) myGen.generate(theSession, theObject);
 			retVal = myIdMassager.massage(myGeneratorName, next);
@@ -73,12 +81,12 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 	}
 
 	@Override
-	public void configure(Type theType, Properties theParams, ServiceRegistry theServiceRegistry) throws MappingException {
+	public void configure(Type theType, Properties theParams, ServiceRegistry theServiceRegistry)
+			throws MappingException {
 
-		// Instantiate the ID massager
-		// StorageSettings should only be null when running in the DDL generation maven plugin
-		if (myStorageSettings != null) {
-			myIdMassager = ReflectionUtil.newInstance(myStorageSettings.getSequenceValueMassagerClass());
+		myIdMassager = theServiceRegistry.getService(ISequenceValueMassager.class);
+		if (myIdMassager == null) {
+			myIdMassager = new ISequenceValueMassager.NoopSequenceValueMassager();
 		}
 
 		// Create a HAPI FHIR sequence style generator
@@ -86,9 +94,10 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 		Validate.notBlank(myGeneratorName, "No generator name found");
 
 		Properties props = new Properties(theParams);
-		props.put(SequenceStyleGenerator.OPT_PARAM, StandardOptimizerDescriptor.POOLED.getExternalName());
-		props.put(SequenceStyleGenerator.INITIAL_PARAM, "1");
-		props.put(SequenceStyleGenerator.INCREMENT_PARAM, "50");
+		props.put(OptimizableGenerator.OPT_PARAM, StandardOptimizerDescriptor.POOLED.getExternalName());
+		props.put(OptimizableGenerator.INITIAL_PARAM, "1");
+		props.put(OptimizableGenerator.INCREMENT_PARAM, "50");
+		props.put(GENERATOR_NAME, myGeneratorName);
 
 		myGen.configure(theType, props, theServiceRegistry);
 
@@ -110,4 +119,8 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 		return myGen.supportsJdbcBatchInserts();
 	}
 
+	@Override
+	public Optimizer getOptimizer() {
+		return myGen.getOptimizer();
+	}
 }

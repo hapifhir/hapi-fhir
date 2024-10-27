@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5730
+title: "Previously, using the FhirTerser to process an Extension with an Enumeration would fail.
+        This has been fixed."

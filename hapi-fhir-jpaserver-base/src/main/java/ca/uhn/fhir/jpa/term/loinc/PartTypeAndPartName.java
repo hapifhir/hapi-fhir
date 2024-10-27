@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,9 @@ public class PartTypeAndPartName {
 		PartTypeAndPartName that = (PartTypeAndPartName) theO;
 
 		return new EqualsBuilder()
-			.append(myPartType, that.myPartType)
-			.append(myPartName, that.myPartName)
-			.isEquals();
+				.append(myPartType, that.myPartType)
+				.append(myPartName, that.myPartName)
+				.isEquals();
 	}
 
 	public String getPartName() {
@@ -60,17 +60,14 @@ public class PartTypeAndPartName {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myPartType)
-			.append(myPartName)
-			.toHashCode();
+		return new HashCodeBuilder(17, 37).append(myPartType).append(myPartName).toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("partType", myPartType)
-			.append("partName", myPartName)
-			.toString();
+				.append("partType", myPartType)
+				.append("partName", myPartName)
+				.toString();
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,33 +22,30 @@ package ca.uhn.fhir.rest.server.util;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
-
-import javax.annotation.Nullable;
 
 public abstract class BaseServerCapabilityStatementProvider {
 
-  private RestfulServerConfiguration myConfiguration;
+	private RestfulServerConfiguration myConfiguration;
 
-  protected BaseServerCapabilityStatementProvider() {
-    super();
-  }
+	protected BaseServerCapabilityStatementProvider() {
+		super();
+	}
 
-  protected BaseServerCapabilityStatementProvider(RestfulServerConfiguration theServerConfiguration) {
-    myConfiguration = theServerConfiguration;
-  }
+	protected BaseServerCapabilityStatementProvider(RestfulServerConfiguration theServerConfiguration) {
+		myConfiguration = theServerConfiguration;
+	}
 
-
-  protected RestfulServerConfiguration getServerConfiguration(@Nullable RequestDetails theRequestDetails) {
-    RestfulServerConfiguration retVal;
-    if (theRequestDetails != null && theRequestDetails.getServer() instanceof RestfulServer) {
-      retVal = ((RestfulServer) theRequestDetails.getServer()).createConfiguration();
-      Validate.isTrue(myConfiguration == null);
-    } else {
-      retVal = myConfiguration;
-      Validate.notNull(retVal);
-    }
-    return retVal;
-  }
-
+	protected RestfulServerConfiguration getServerConfiguration(@Nullable RequestDetails theRequestDetails) {
+		RestfulServerConfiguration retVal;
+		if (theRequestDetails != null && theRequestDetails.getServer() instanceof RestfulServer) {
+			retVal = ((RestfulServer) theRequestDetails.getServer()).createConfiguration();
+			Validate.isTrue(myConfiguration == null);
+		} else {
+			retVal = myConfiguration;
+			Validate.notNull(retVal);
+		}
+		return retVal;
+	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.util.ICallable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * THIS CLASS IS NOT THREAD SAFE
@@ -41,7 +41,8 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 	private final ICallable<ISearchBuilder> mySearchBuilderSupplier;
 	private List<IBaseResource> myResources;
 
-	public JpaPreResourceAccessDetails(List<JpaPid> theResourcePids, ICallable<ISearchBuilder> theSearchBuilderSupplier) {
+	public JpaPreResourceAccessDetails(
+			List<JpaPid> theResourcePids, ICallable<ISearchBuilder> theSearchBuilderSupplier) {
 		myResourcePids = theResourcePids;
 		myBlocked = new boolean[myResourcePids.size()];
 		mySearchBuilderSupplier = theSearchBuilderSupplier;
@@ -56,7 +57,9 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 	public IBaseResource getResource(int theIndex) {
 		if (myResources == null) {
 			myResources = new ArrayList<>(myResourcePids.size());
-			mySearchBuilderSupplier.call().loadResourcesByPid(myResourcePids, Collections.emptySet(), myResources, false, null);
+			mySearchBuilderSupplier
+					.call()
+					.loadResourcesByPid(myResourcePids, Collections.emptySet(), myResources, false, null);
 		}
 		return myResources.get(theIndex);
 	}

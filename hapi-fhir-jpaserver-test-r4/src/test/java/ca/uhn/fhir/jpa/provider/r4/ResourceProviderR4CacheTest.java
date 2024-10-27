@@ -23,16 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.core.IsNot.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
@@ -75,9 +69,9 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.cacheControl(new CacheControlDirective().setNoStore(true))
 			.execute();
-		assertEquals(1, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(1);
 		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
@@ -90,9 +84,9 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.cacheControl(new CacheControlDirective().setNoStore(true))
 			.execute();
-		assertEquals(2, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(2);
 		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 
 	}
 
@@ -112,9 +106,9 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.cacheControl(new CacheControlDirective().setNoStore(true).setMaxResults(5))
 			.execute();
-		assertEquals(5, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(5);
 		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 
 	}
 
@@ -143,9 +137,9 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		myClient.create().resource(pt1).execute();
 
 		Bundle results = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
-		assertEquals(1, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(1);
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
@@ -158,9 +152,9 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.cacheControl(new CacheControlDirective().setNoCache(true))
 			.execute();
-		assertEquals(2, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(2);
 		runInTransaction(() -> assertEquals(2, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 
 	}
 
@@ -179,20 +173,20 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		TestUtil.sleepOneClick();
 
-		assertEquals(1, results1.getEntry().size());
+		assertThat(results1.getEntry()).hasSize(1);
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 		Date results1Date = TestUtil.getTimestamp(results1).getValue();
-		assertThat(results1Date, greaterThan(beforeFirst));
-		assertThat(results1Date, lessThan(new Date()));
-		assertThat(results1.getId(), not(blankOrNullString()));
+		assertThat(results1Date).isAfter(beforeFirst);
+		assertThat(results1Date).isBefore(new Date());
+		assertThat(results1.getId()).isNotEmpty();
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
 		myClient.create().resource(pt2).execute();
 
 		Bundle results2 = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
-		assertEquals(1, results2.getEntry().size());
+		assertThat(results2.getEntry()).hasSize(1);
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 		assertEquals("HIT from " + myServerBase, myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE).get(0));
 		assertEquals(results1.getMeta().getLastUpdated(), results2.getMeta().getLastUpdated());
@@ -215,7 +209,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.where(Patient.NAME.matches().value("foo"))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(2, resp1.getEntry().size());
+		assertThat(resp1.getEntry()).hasSize(2);
 
 		myClient.delete().resourceById(new IdType(p1Id)).execute();
 
@@ -229,7 +223,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		assertEquals(resp1.getId(), resp2.getId());
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
-		assertEquals(1, resp2.getEntry().size());
+		assertThat(resp2.getEntry()).hasSize(1);
 	}
 
 	@Test
@@ -249,7 +243,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();});
 
 		// Then: We do not get a cache hit
-		assertNotEquals(Constants.STATUS_HTTP_200_OK, exception.getStatusCode());
+		assertThat(exception.getStatusCode()).isNotEqualTo(Constants.STATUS_HTTP_200_OK);
 	}
 
 	@Test

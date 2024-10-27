@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.IModelVisitor;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -38,7 +39,6 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,12 +67,14 @@ public class ResponseTerminologyTranslationSvc {
 		myFhirContext = theValidationSupport.getFhirContext();
 		Validate.notNull(myFhirContext, "The validation support must not return a null context");
 
-		BaseRuntimeElementCompositeDefinition<?> codeableConceptDef = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myFhirContext.getElementDefinition("CodeableConcept"));
+		BaseRuntimeElementCompositeDefinition<?> codeableConceptDef = (BaseRuntimeElementCompositeDefinition<?>)
+				Objects.requireNonNull(myFhirContext.getElementDefinition("CodeableConcept"));
 
 		myCodeableConceptType = codeableConceptDef.getImplementingClass();
 		myCodeableConceptCodingChild = codeableConceptDef.getChildByName("coding");
 
-		myCodingDefinition = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myFhirContext.getElementDefinition("Coding"));
+		myCodingDefinition = (BaseRuntimeElementCompositeDefinition<?>)
+				Objects.requireNonNull(myFhirContext.getElementDefinition("Coding"));
 		myCodingType = myCodingDefinition.getImplementingClass();
 		myCodingSystemChild = myCodingDefinition.getChildByName("system");
 		myCodingCodeChild = myCodingDefinition.getChildByName("code");
@@ -111,16 +113,34 @@ public class ResponseTerminologyTranslationSvc {
 	private class MappingVisitor implements IModelVisitor {
 
 		@Override
-		public void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+		public void acceptElement(
+				IBaseResource theResource,
+				IBase theElement,
+				List<String> thePathToElement,
+				BaseRuntimeChildDefinition theChildDefinition,
+				BaseRuntimeElementDefinition<?> theDefinition) {
 			if (myCodeableConceptType.isAssignableFrom(theElement.getClass())) {
 
 				// Find all existing Codings
 				Multimap<String, String> foundSystemsToCodes = ArrayListMultimap.create();
-				List<IBase> nextCodeableConceptCodings = myCodeableConceptCodingChild.getAccessor().getValues(theElement);
+				List<IBase> nextCodeableConceptCodings =
+						myCodeableConceptCodingChild.getAccessor().getValues(theElement);
 				for (IBase nextCodeableConceptCoding : nextCodeableConceptCodings) {
-					String system = myCodingSystemChild.getAccessor().getFirstValueOrNull(nextCodeableConceptCoding).map(t -> (IPrimitiveType<?>) t).map(IPrimitiveType::getValueAsString).orElse(null);
-					String code = myCodingCodeChild.getAccessor().getFirstValueOrNull(nextCodeableConceptCoding).map(t -> (IPrimitiveType<?>) t).map(IPrimitiveType::getValueAsString).orElse(null);
-					if (StringUtils.isNotBlank(system) && StringUtils.isNotBlank(code) && !foundSystemsToCodes.containsKey(system)) {
+					String system = myCodingSystemChild
+							.getAccessor()
+							.getFirstValueOrNull(nextCodeableConceptCoding)
+							.map(t -> (IPrimitiveType<?>) t)
+							.map(IPrimitiveType::getValueAsString)
+							.orElse(null);
+					String code = myCodingCodeChild
+							.getAccessor()
+							.getFirstValueOrNull(nextCodeableConceptCoding)
+							.map(t -> (IPrimitiveType<?>) t)
+							.map(IPrimitiveType::getValueAsString)
+							.orElse(null);
+					if (StringUtils.isNotBlank(system)
+							&& StringUtils.isNotBlank(code)
+							&& !foundSystemsToCodes.containsKey(system)) {
 						foundSystemsToCodes.put(system, code);
 					}
 				}
@@ -134,28 +154,28 @@ public class ResponseTerminologyTranslationSvc {
 							for (String code : foundSystemsToCodes.get(nextSourceSystem)) {
 								List<IBaseCoding> codings = new ArrayList<>();
 								codings.add(createCodingFromPrimitives(nextSourceSystem, code, null));
-								TranslateConceptResults translateConceptResults = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest(codings, wantTargetSystem));
+								TranslateConceptResults translateConceptResults = myValidationSupport.translateConcept(
+										new IValidationSupport.TranslateCodeRequest(codings, wantTargetSystem));
 								if (translateConceptResults != null) {
 									List<TranslateConceptResult> mappings = translateConceptResults.getResults();
 									for (TranslateConceptResult nextMapping : mappings) {
 
 										IBase newCoding = createCodingFromPrimitives(
-											nextMapping.getSystem(),
-											nextMapping.getCode(),
-											nextMapping.getDisplay());
+												nextMapping.getSystem(),
+												nextMapping.getCode(),
+												nextMapping.getDisplay());
 
 										// Add coding to existing CodeableConcept
-										myCodeableConceptCodingChild.getMutator().addValue(theElement, newCoding);
-
+										myCodeableConceptCodingChild
+												.getMutator()
+												.addValue(theElement, newCoding);
 									}
 								}
 							}
 						}
 					}
 				}
-
 			}
-
 		}
 
 		private IBaseCoding createCodingFromPrimitives(String system, String code, String display) {
@@ -173,6 +193,5 @@ public class ResponseTerminologyTranslationSvc {
 			}
 			return newCoding;
 		}
-
 	}
 }

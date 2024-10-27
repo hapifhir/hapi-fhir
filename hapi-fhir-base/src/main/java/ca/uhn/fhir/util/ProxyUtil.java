@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class ProxyUtil {
 	public static <T> T synchronizedProxy(Class<T> theClass, T theInstance) {
 		Validate.isTrue(theClass.isInterface(), "%s is not an interface", theClass);
 		InvocationHandler handler = new SynchronizedHandler(theInstance);
-		Object object = Proxy.newProxyInstance(theClass.getClassLoader(), new Class<?>[] { theClass }, handler);
+		Object object = Proxy.newProxyInstance(theClass.getClassLoader(), new Class<?>[] {theClass}, handler);
 		return theClass.cast(object);
 	}
 

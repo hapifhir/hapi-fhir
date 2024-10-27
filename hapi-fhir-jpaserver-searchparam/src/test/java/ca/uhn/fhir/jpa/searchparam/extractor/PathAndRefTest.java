@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PathAndRefTest {
 

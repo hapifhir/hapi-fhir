@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,5 +23,6 @@ import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 
 public interface IHapiMigrationCallback {
 	default void preExecution(BaseTask theTask) {}
+
 	default void postExecution(BaseTask theTask) {}
 }

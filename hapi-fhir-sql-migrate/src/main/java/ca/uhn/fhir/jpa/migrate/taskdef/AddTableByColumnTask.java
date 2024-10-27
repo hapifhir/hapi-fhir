@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,9 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AddTableByColumnTask extends BaseTableTask {
 
@@ -38,15 +40,26 @@ public class AddTableByColumnTask extends BaseTableTask {
 	private final List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
 	private List<String> myPkColumns;
 	private final List<ForeignKeyContainer> myFKColumns = new ArrayList<>();
+	private final Comparator<AddColumnTask> myColumnSortingRules;
 
 	public AddTableByColumnTask() {
-		this(null, null);
+		this(null);
+	}
+
+	public AddTableByColumnTask(Comparator<AddColumnTask> theColumnSortingRules) {
+		this(null, null, theColumnSortingRules);
 		setDryRun(true);
 		myCheckForExistingTables = false;
 	}
 
 	public AddTableByColumnTask(String theProductVersion, String theSchemaVersion) {
+		this(theProductVersion, theSchemaVersion, null);
+	}
+
+	public AddTableByColumnTask(
+			String theProductVersion, String theSchemaVersion, Comparator<AddColumnTask> theColumnSortingRules) {
 		super(theProductVersion, theSchemaVersion);
+		myColumnSortingRules = theColumnSortingRules;
 	}
 
 	@Override
@@ -83,7 +96,7 @@ public class AddTableByColumnTask extends BaseTableTask {
 			sb.append(" ");
 		}
 
-		for (AddColumnTask next : myAddColumnTasks) {
+		for (AddColumnTask next : getOrderedAddColumnTasks()) {
 			next.setDriverType(getDriverType());
 			next.setTableName(getTableName());
 			next.validate();
@@ -133,7 +146,7 @@ public class AddTableByColumnTask extends BaseTableTask {
 
 		// foreign keys
 		if (!myFKColumns.isEmpty()) {
-			for (int i =0; i < myFKColumns.size(); i++) {
+			for (int i = 0; i < myFKColumns.size(); i++) {
 				if (i > 0) {
 					sb.append(", ");
 				}
@@ -171,13 +184,13 @@ public class AddTableByColumnTask extends BaseTableTask {
 
 	@Override
 	public void doExecute() throws SQLException {
-		if (myCheckForExistingTables && JdbcUtils.getTableNames(getConnectionProperties()).contains(getTableName())) {
+		if (myCheckForExistingTables
+				&& JdbcUtils.getTableNames(getConnectionProperties()).contains(getTableName())) {
 			logInfo(ourLog, "Already have table named {} - No action performed", getTableName());
 			return;
 		}
 
 		executeSql(getTableName(), generateSQLCreateScript());
-
 	}
 
 	@Override
@@ -193,5 +206,13 @@ public class AddTableByColumnTask extends BaseTableTask {
 		super.generateHashCode(theBuilder);
 		theBuilder.append(myAddColumnTasks);
 		theBuilder.append(myPkColumns);
+	}
+
+	private List<AddColumnTask> getOrderedAddColumnTasks() {
+		if (myColumnSortingRules == null) {
+			return myAddColumnTasks;
+		}
+
+		return myAddColumnTasks.stream().sorted(myColumnSortingRules).collect(Collectors.toUnmodifiableList());
 	}
 }

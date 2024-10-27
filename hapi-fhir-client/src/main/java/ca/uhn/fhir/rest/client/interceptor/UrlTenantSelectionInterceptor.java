@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,11 @@ public class UrlTenantSelectionInterceptor {
 			serverBase = serverBase.substring(0, serverBase.length() - 1);
 		}
 
-		Validate.isTrue(requestUri.startsWith(serverBase), "Request URI %s does not start with server base %s", requestUri, serverBase);
+		Validate.isTrue(
+				requestUri.startsWith(serverBase),
+				"Request URI %s does not start with server base %s",
+				requestUri,
+				serverBase);
 
 		if (theRequest.getUrlSource() == UrlSourceEnum.EXPLICIT) {
 			return;
@@ -88,5 +92,4 @@ public class UrlTenantSelectionInterceptor {
 		String newUri = serverBase + "/" + tenantId + requestUri.substring(serverBase.length());
 		theRequest.setUri(newUri);
 	}
-
 }

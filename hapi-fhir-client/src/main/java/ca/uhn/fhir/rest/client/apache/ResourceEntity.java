@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import java.nio.charset.UnsupportedCharsetException;
 public class ResourceEntity extends StringEntity {
 
 	public ResourceEntity(FhirContext theContext, IBaseResource theResource) throws UnsupportedCharsetException {
-		super(theContext.newJsonParser().encodeResourceToString(theResource), ContentType.parse(Constants.CT_FHIR_JSON_NEW));
+		super(
+				theContext.newJsonParser().encodeResourceToString(theResource),
+				ContentType.parse(Constants.CT_FHIR_JSON_NEW));
 	}
 }

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5256
+title: "Added RequestDetails as part of the parameters when cleaning up possible matches to enable interceptors to 
+access it."

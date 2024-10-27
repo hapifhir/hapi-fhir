@@ -24,6 +24,4 @@ public class ResourceRequest extends HomeRequest {
 	public void setUpdateVid(String theUpdateVid) {
 		myUpdateVid = theUpdateVid;
 	}
-
-	
 }

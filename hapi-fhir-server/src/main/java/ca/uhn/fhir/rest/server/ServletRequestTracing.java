@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,23 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.rest.api.Constants;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ServletRequestTracing {
 	private static final Logger ourLog = LoggerFactory.getLogger(ServletRequestTracing.class);
-	public static final String ATTRIBUTE_REQUEST_ID = ServletRequestTracing.class.getName() + '.' + Constants.HEADER_REQUEST_ID;
+	public static final String ATTRIBUTE_REQUEST_ID =
+			ServletRequestTracing.class.getName() + '.' + Constants.HEADER_REQUEST_ID;
 
-	ServletRequestTracing() { }
-	
+	ServletRequestTracing() {}
+
 	/**
 	 * Assign a tracing id to this request, using
 	 * the X-Request-ID if present and compatible.
@@ -82,5 +82,4 @@ public class ServletRequestTracing {
 		}
 		return requestId;
 	}
-
 }

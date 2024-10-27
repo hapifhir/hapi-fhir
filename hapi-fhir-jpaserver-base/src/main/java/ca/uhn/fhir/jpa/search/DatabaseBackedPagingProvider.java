@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,8 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.Nullable;
 
 // Note: this class is not annotated with @Service because we want to
 // explicitly define it in BaseConfig.java. This is done so that
@@ -36,10 +35,13 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
+
 	@Autowired
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
@@ -82,5 +84,4 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 		String uuid = theList.getUuid();
 		return uuid;
 	}
-
 }

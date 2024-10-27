@@ -11,10 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class MdmPartitionedGoldenResourceFindingTest extends BaseMdmR4Test {
 	@Autowired
@@ -28,6 +26,7 @@ public class MdmPartitionedGoldenResourceFindingTest extends BaseMdmR4Test {
 	public void testNoMatchOnResourcesInDifferentPartition(){
 		myMdmSettings.setSearchAllPartitionForMatch(false);
 		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setUnnamedPartitionMode(false);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 
@@ -36,21 +35,22 @@ public class MdmPartitionedGoldenResourceFindingTest extends BaseMdmR4Test {
 
 		// hack the link into a NO_MATCH
 		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(jane);
-		assertThat(links, hasSize(1));
+		assertThat(links).hasSize(1);
 		Long janeOriginalGoldenResourceId = links.get(0).getGoldenResourcePersistenceId().getId();
 
 
 		List<MdmLink> links2 = myMdmLinkDaoSvc.findMdmLinksBySourceResource(jane2);
-		assertThat(links2, hasSize(1));
+		assertThat(links2).hasSize(1);
 		Long jane2GoldenResourceId = links2.get(0).getGoldenResourcePersistenceId().getId();
 
-		assertNotEquals(janeOriginalGoldenResourceId, jane2GoldenResourceId);
+		assertThat(jane2GoldenResourceId).isNotEqualTo(janeOriginalGoldenResourceId);
 	}
 
 	@Test
 	public void testMatchOnResourcesInDifferentPartitionIfSearchAllPartition(){
 		myMdmSettings.setSearchAllPartitionForMatch(true);
 		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setUnnamedPartitionMode(false);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 
@@ -59,12 +59,12 @@ public class MdmPartitionedGoldenResourceFindingTest extends BaseMdmR4Test {
 
 		// hack the link into a NO_MATCH
 		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(jane);
-		assertThat(links, hasSize(1));
+		assertThat(links).hasSize(1);
 		Long janeOriginalGoldenResourceId = links.get(0).getGoldenResourcePersistenceId().getId();
 
 
 		List<MdmLink> links2 = myMdmLinkDaoSvc.findMdmLinksBySourceResource(jane2);
-		assertThat(links2, hasSize(1));
+		assertThat(links2).hasSize(1);
 		Long jane2GoldenResourceId = links2.get(0).getGoldenResourcePersistenceId().getId();
 
 		assertEquals(janeOriginalGoldenResourceId, jane2GoldenResourceId);
