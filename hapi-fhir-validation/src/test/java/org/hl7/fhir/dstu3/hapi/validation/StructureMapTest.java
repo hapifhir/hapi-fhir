@@ -2,25 +2,35 @@ package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.DecimalType;
+import org.hl7.fhir.dstu3.model.ElementDefinition;
+import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.StructureMap;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.utils.StructureMapUtilities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class StructureMapTest {
+public class StructureMapTest extends BaseValidationTestWithInlineMocks {
 
 	/**
 	 * The logger object.
@@ -289,7 +299,7 @@ public class StructureMapTest {
 		StructureMapUtilities scu = new StructureMapUtilities(hapiContext, maps, null, null);
 		List<StructureDefinition> result = scu.analyse(null, map).getProfiles();
 
-		assertEquals(1, result.size());
+		assertThat(result).hasSize(1);
 
 		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.get(0)));
 	}

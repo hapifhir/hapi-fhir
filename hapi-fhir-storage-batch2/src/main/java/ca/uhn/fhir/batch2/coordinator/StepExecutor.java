@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobStepFailedException;
+import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
@@ -33,6 +34,10 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 public class StepExecutor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -57,6 +62,14 @@ public class StepExecutor {
 		try {
 			outcome = theStepWorker.run(theStepExecutionDetails, theDataSink);
 			Validate.notNull(outcome, "Step theWorker returned null: %s", theStepWorker.getClass());
+		} catch (RetryChunkLaterException ex) {
+			Date nextPollTime = Date.from(Instant.now().plus(ex.getNextPollDuration()));
+			ourLog.debug(
+					"Polling job encountered; will retry chunk {} after after {}s",
+					theStepExecutionDetails.getChunkId(),
+					ex.getNextPollDuration().get(ChronoUnit.SECONDS));
+			myJobPersistence.onWorkChunkPollDelay(theStepExecutionDetails.getChunkId(), nextPollTime);
+			return false;
 		} catch (JobExecutionFailedException e) {
 			ourLog.error(
 					"Unrecoverable failure executing job {} step {} chunk {}",

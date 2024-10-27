@@ -1,12 +1,16 @@
 package org.hl7.fhir.dstu3.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.time.FastDateFormat;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,16 +26,9 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.endsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class BaseDateTimeTypeDstu3Test {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -74,8 +71,7 @@ public class BaseDateTimeTypeDstu3Test {
 		DateTimeType dt = new DateTimeType();
 		try {
 			dt.setValueAsString("2013-02-03T11:22");
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(e.getMessage(), "Invalid date/time string (datatype DateTimeType does not support MINUTE precision): 2013-02-03T11:22");
 		}
 	}
@@ -86,8 +82,7 @@ public class BaseDateTimeTypeDstu3Test {
 		DateTimeType dt = new DateTimeType();
 		try {
 			dt.setValueAsString("2013-02-03T11:22Z");
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(e.getMessage(), "Invalid date/time string (datatype DateTimeType does not support MINUTE precision): 2013-02-03T11:22Z");
 		}
 	}
@@ -96,20 +91,17 @@ public class BaseDateTimeTypeDstu3Test {
 	public void testAfterNull() {
 		try {
 			assertTrue(new DateTimeType().after(new DateTimeType("2011-01-01T12:12:11Z")));
-			fail();
-		} catch (NullPointerException e) {
+			fail();		} catch (NullPointerException e) {
 			assertEquals("This BaseDateTimeType does not contain a value (getValue() returns null)", e.getMessage());
 		}
 		try {
 			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").after(new DateTimeType()));
-			fail();
-		} catch (NullPointerException e) {
+			fail();		} catch (NullPointerException e) {
 			assertEquals("The given BaseDateTimeType does not contain a value (theDateTimeType.getValue() returns null)", e.getMessage());
 		}
 		try {
 			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").after(null));
-			fail();
-		} catch (NullPointerException e) {
+			fail();		} catch (NullPointerException e) {
 			assertEquals("theDateTimeType must not be null", e.getMessage());
 		}
 	}
@@ -118,20 +110,17 @@ public class BaseDateTimeTypeDstu3Test {
 	public void testBeforeNull1() {
 		try {
 			assertTrue(new DateTimeType().before(new DateTimeType("2011-01-01T12:12:11Z")));
-			fail();
-		} catch (NullPointerException e) {
+			fail();		} catch (NullPointerException e) {
 			assertEquals("This BaseDateTimeType does not contain a value (getValue() returns null)", e.getMessage());
 		}
 		try {
 			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").before(new DateTimeType()));
-			fail();
-		} catch (NullPointerException e) {
+			fail();		} catch (NullPointerException e) {
 			assertEquals("The given BaseDateTimeType does not contain a value (theDateTimeType.getValue() returns null)", e.getMessage());
 		}
 		try {
 			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").before(null));
-			fail();
-		} catch (NullPointerException e) {
+			fail();		} catch (NullPointerException e) {
 			assertEquals("theDateTimeType must not be null", e.getMessage());
 		}
 	}
@@ -143,15 +132,13 @@ public class BaseDateTimeTypeDstu3Test {
 	public void testConstructorRejectsInvalidPrecision() {
 		try {
 			new DateType("2001-01-02T11:13:33");
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage(), containsString("precision"));
+			fail();		} catch (IllegalArgumentException e) {
+			assertThat(e.getMessage()).contains("precision");
 		}
 		try {
 			new InstantType("2001-01-02");
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage(), containsString("precision"));
+			fail();		} catch (IllegalArgumentException e) {
+			assertThat(e.getMessage()).contains("precision");
 		}
 	}
 
@@ -198,7 +185,7 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals(TemporalPrecisionEnum.SECOND, c.getStatusDateElement().getPrecision());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(c);
-		assertThat(encoded, Matchers.containsString("value=\"2001-01-02T11:13:33\""));
+		assertThat(encoded).contains("value=\"2001-01-02T11:13:33\"");
 
 		c = ourCtx.newXmlParser().parseResource(Goal.class, encoded);
 
@@ -209,7 +196,7 @@ public class BaseDateTimeTypeDstu3Test {
 		String outcomeStr = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
 		ourLog.info(outcomeStr);
 
-		assertThat(outcomeStr, containsString("date-primitive"));
+		assertThat(outcomeStr).contains("date-primitive");
 	}
 
 	@Test
@@ -265,7 +252,9 @@ public class BaseDateTimeTypeDstu3Test {
 	@Test
 	public void testEncodeOffset() throws Exception {
 		String offset = InstantType.withCurrentTime().setTimeZone(TimeZone.getTimeZone("America/Toronto")).getValueAsString();
-		assertThat(offset, either(endsWith("-05:00")).or(endsWith("-04:00")));
+		assertThat(offset).satisfiesAnyOf(
+			 s -> s.endsWith("-05:00"),
+			 s -> s.endsWith("-04:00"));
 	}
 
 	@Test
@@ -313,14 +302,14 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals(275647578L, dt.getNanos().longValue());
 
 		dt = new InstantType();
-		assertEquals(null, dt.getYear());
-		assertEquals(null, dt.getMonth());
-		assertEquals(null, dt.getDay());
-		assertEquals(null, dt.getHour());
-		assertEquals(null, dt.getMinute());
-		assertEquals(null, dt.getSecond());
-		assertEquals(null, dt.getMillis());
-		assertEquals(null, dt.getNanos());
+		assertNull(dt.getYear());
+		assertNull(dt.getMonth());
+		assertNull(dt.getDay());
+		assertNull(dt.getHour());
+		assertNull(dt.getMinute());
+		assertNull(dt.getSecond());
+		assertNull(dt.getMillis());
+		assertNull(dt.getNanos());
 	}
 
 	@Test
@@ -478,15 +467,13 @@ public class BaseDateTimeTypeDstu3Test {
 		try {
 			DateTimeType dt = new DateTimeType();
 			dt.setValueAsString("1974-12-25+10:00");
-			fail();
-		} catch (ca.uhn.fhir.parser.DataFormatException e) {
+			fail();		} catch (ca.uhn.fhir.parser.DataFormatException e) {
 			assertEquals("Invalid date/time format: \"1974-12-25+10:00\": Expected character 'T' at index 10 but found +", e.getMessage());
 		}
 		try {
 			DateTimeType dt = new DateTimeType();
 			dt.setValueAsString("1974-12-25Z");
-			fail();
-		} catch (ca.uhn.fhir.parser.DataFormatException e) {
+			fail();		} catch (ca.uhn.fhir.parser.DataFormatException e) {
 			assertEquals("Invalid date/time format: \"1974-12-25Z\"", e.getMessage());
 		}
 	}
@@ -495,8 +482,7 @@ public class BaseDateTimeTypeDstu3Test {
 	public void testParseInvalidZoneOffset() {
 		try {
 			new DateTimeType("2010-01-01T00:00:00.1234-09:00Z");
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals("Invalid date/time format: \"2010-01-01T00:00:00.1234-09:00Z\"", e.getMessage());
 		}
 	}
@@ -505,8 +491,7 @@ public class BaseDateTimeTypeDstu3Test {
 	public void testParseMalformatted() throws DataFormatException {
 		try {
 			new DateTimeType("20120102");
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals("Invalid date/time format: \"20120102\": Expected character '-' at index 4 but found 0", e.getMessage());
 		}
 	}
@@ -566,8 +551,7 @@ public class BaseDateTimeTypeDstu3Test {
 		DateTimeType dt = new DateTimeType();
 		try {
 		dt.setValueAsString("201302");
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals("Invalid date/time format: \"201302\": Expected character '-' at index 4 but found 0", e.getMessage());
 		}
 	}
@@ -740,7 +724,7 @@ public class BaseDateTimeTypeDstu3Test {
 		Patient patient = new Patient();
 		patient.setBirthDateElement(new DateType(cal.getTime(), TemporalPrecisionEnum.DAY));
 		String out = ourCtx.newXmlParser().encodeResourceToString(patient);
-		assertThat(out, containsString("<birthDate value=\"2012-01-02\"/>"));
+		assertThat(out).contains("<birthDate value=\"2012-01-02\"/>");
 	}
 
 	/**
@@ -886,8 +870,8 @@ public class BaseDateTimeTypeDstu3Test {
 		DateTimeType dt = new DateTimeType("2012-01-05T12:00:00-08:00");
 		String human = dt.toHumanDisplay();
 		ourLog.info(human);
-		assertThat(human, containsString("2012"));
-		assertThat(human, containsString("12"));
+		assertThat(human).contains("2012");
+		assertThat(human).contains("12");
 	}
 
 	private void validate(long millis, String expected) {
@@ -917,9 +901,8 @@ public class BaseDateTimeTypeDstu3Test {
 		try {
 			DateTimeType dt = new DateTimeType();
 			dt.setValueAsString(input);
-			fail();
-		} catch (ca.uhn.fhir.parser.DataFormatException e) {
-			assertThat(e.getMessage(), containsString("Invalid date/time format: \"" + input + "\""));
+			fail();		} catch (ca.uhn.fhir.parser.DataFormatException e) {
+			assertThat(e.getMessage()).contains("Invalid date/time format: \"" + input + "\"");
 		}
 	}
 

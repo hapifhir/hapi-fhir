@@ -2,7 +2,8 @@ package ca.uhn.fhir.cr.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.IResourceLoader;
-import ca.uhn.fhir.cr.dstu3.TestCrDstu3Config;
+import ca.uhn.fhir.cr.config.dstu3.ApplyOperationConfig;
+import ca.uhn.fhir.cr.config.dstu3.EvaluateOperationConfig;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -18,22 +19,20 @@ import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@ContextConfiguration(classes = {TestCrDstu3Config.class})
+@ContextConfiguration(classes = {TestCrDstu3Config.class, ApplyOperationConfig.class, EvaluateOperationConfig.class})
 public abstract class BaseCrDstu3TestServer extends BaseJpaDstu3Test implements IResourceLoader {
 
 	public static IGenericClient ourClient;
@@ -46,22 +45,12 @@ public abstract class BaseCrDstu3TestServer extends BaseJpaDstu3Test implements 
 
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
-	@Autowired
-	ApplicationContext myApplicationContext;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
-
-	@SuppressWarnings("deprecation")
-	@AfterEach
-	public void after() {
-		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
-		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-	}
 	@Autowired
 	RestfulServer ourRestfulServer;
 	@BeforeEach
 	public void beforeStartServer() throws Exception {
-
 		ourServer = new Server(0);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
@@ -97,7 +86,6 @@ public abstract class BaseCrDstu3TestServer extends BaseJpaDstu3Test implements 
 		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
 		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
-
 	}
 
 	@Override
@@ -113,7 +101,6 @@ public abstract class BaseCrDstu3TestServer extends BaseJpaDstu3Test implements 
 	public Bundle loadBundle(String theLocation) {
 		return loadBundle(Bundle.class, theLocation);
 	}
-
 
 	public Bundle makeBundle(List<? extends Resource> theResources) {
 		return makeBundle(theResources.toArray(new Resource[theResources.size()]));

@@ -23,10 +23,10 @@ INSERT INTO MPI_LINK (
    2,
    1,
    1906,
-   NULL,
+   1.0,
    1905,
    SYSDATE,
-   NULL,
+   61,
    '1',
    1906,
    1

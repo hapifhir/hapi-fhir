@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,20 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.hapi.fhir.cdshooks.api.json.*;
+import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestAuthorizationJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseLinkJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSystemActionJson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ParameterDefinition;
@@ -46,7 +55,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_DATA;
-import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_DATA_ENDPOINT;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_ENCOUNTER;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_PARAMETERS;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_PRACTITIONER;
@@ -61,10 +69,13 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 public class CdsCrServiceR4 implements ICdsCrService {
 	protected final RequestDetails myRequestDetails;
 	protected final Repository myRepository;
+	protected final ICdsConfigService myCdsConfigService;
 	protected Bundle myResponseBundle;
 	protected CdsServiceResponseJson myServiceResponse;
 
-	public CdsCrServiceR4(RequestDetails theRequestDetails, Repository theRepository) {
+	public CdsCrServiceR4(
+			RequestDetails theRequestDetails, Repository theRepository, ICdsConfigService theCdsConfigService) {
+		myCdsConfigService = theCdsConfigService;
 		myRequestDetails = theRequestDetails;
 		myRepository = theRepository;
 	}
@@ -101,17 +112,6 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		Bundle data = getPrefetchResources(theJson);
 		if (data.hasEntry()) {
 			parameters.addParameter(part(APPLY_PARAMETER_DATA, data));
-		}
-		if (theJson.getFhirServer() != null) {
-			Endpoint endpoint = new Endpoint().setAddress(theJson.getFhirServer());
-			if (theJson.getServiceRequestAuthorizationJson().getAccessToken() != null) {
-				String tokenType = getTokenType(theJson.getServiceRequestAuthorizationJson());
-				endpoint.addHeader(String.format(
-						"Authorization: %s %s",
-						tokenType, theJson.getServiceRequestAuthorizationJson().getAccessToken()));
-			}
-			endpoint.addHeader("Epic-Client-ID: 2cb5af9f-f483-4e2a-aedc-54c3a31cb153");
-			parameters.addParameter(part(APPLY_PARAMETER_DATA_ENDPOINT, endpoint));
 		}
 		return parameters;
 	}

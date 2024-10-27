@@ -16,6 +16,7 @@ INSERT INTO HFJ_RESOURCE (
    SP_STRING_PRESENT,
    SP_TOKEN_PRESENT,
    SP_URI_PRESENT,
+   SEARCH_URL_PRESENT,
    RES_TYPE,
    RES_VER
 ) VALUES (
@@ -36,6 +37,7 @@ INSERT INTO HFJ_RESOURCE (
    0,
    1,
    1,
+   0,
    'Observation',
    1
 );
@@ -52,9 +54,11 @@ INSERT INTO HFJ_RES_SEARCH_URL (
 );
 
 INSERT INTO HFJ_REVINFO (
-   REV
+   REV,
+   REVTSTMP
 ) VALUES (
-   1
+   1,
+   '2024-03-29 10:14:40.69'
 );
 
 INSERT INTO MPI_LINK_AUD (
@@ -71,7 +75,12 @@ INSERT INTO MPI_LINK_AUD (
    VERSION,
    EID_MATCH,
    NEW_PERSON,
-   SCORE
+   SCORE,
+   CREATED,
+   UPDATED,
+   VECTOR,
+   PARTITION_ID,
+   PARTITION_DATE
 ) VALUES (
    1,
    1,
@@ -86,7 +95,42 @@ INSERT INTO MPI_LINK_AUD (
    1,
    0,
    1,
-   1
+   1,
+   '2024-03-29 10:14:40.69',
+   '2024-03-29 10:14:41.70',
+   3,
+   1,
+   '2024-04-05'
 );
 
+INSERT INTO HFJ_TAG_DEF (
+   TAG_ID,
+   TAG_CODE,
+   TAG_DISPLAY,
+   TAG_SYSTEM,
+   TAG_TYPE,
+   TAG_USER_SELECTED,
+   TAG_VERSION
+) VALUES (
+   3,
+   'http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient',
+   'display',
+   'https://github.com/hapifhir/hapi-fhir/ns/jpa/profile',
+   1,
+   0,
+   'V 1.0'
+);
 
+INSERT INTO HFJ_RESOURCE_MODIFIED (
+   RES_ID,
+   RES_VER,
+   CREATED_TIME,
+   RESOURCE_TYPE,
+   SUMMARY_MESSAGE
+) VALUES (
+   '1',
+   '1',
+   '2024-03-30 10:14:41.70',
+   'Observation',
+   '{"operationType":"CREATE","attributes":{"attKey":"attValue"},"transactionId":"txId","mediaType":"json","messageKey":"messageKey","payloadId":"Observation/1","partitionId":{"allPartitions":true},"payloadVersion":"1","subscriptionId":"subId"}'
+);

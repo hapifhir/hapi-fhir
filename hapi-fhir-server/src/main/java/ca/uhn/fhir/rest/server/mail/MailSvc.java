@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,10 @@
  */
 package ca.uhn.fhir.rest.server.mail;
 
-import org.apache.commons.lang3.Validate;
+import jakarta.annotation.Nonnull;
 import org.simplejavamail.MailException;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.api.email.Recipient;
-import org.simplejavamail.api.mailer.AsyncResponse;
-import org.simplejavamail.api.mailer.AsyncResponse.ExceptionConsumer;
 import org.simplejavamail.api.mailer.Mailer;
 import org.simplejavamail.api.mailer.config.TransportStrategy;
 import org.simplejavamail.mailer.MailerBuilder;
@@ -32,8 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 public class MailSvc implements IMailSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(MailSvc.class);
@@ -42,14 +41,14 @@ public class MailSvc implements IMailSvc {
 	private final Mailer myMailer;
 
 	public MailSvc(@Nonnull MailConfig theMailConfig) {
-		Validate.notNull(theMailConfig);
+		Objects.requireNonNull(theMailConfig);
 		myMailConfig = theMailConfig;
 		myMailer = makeMailer(myMailConfig);
 	}
 
 	@Override
 	public void sendMail(@Nonnull List<Email> theEmails) {
-		Validate.notNull(theEmails);
+		Objects.requireNonNull(theEmails);
 		theEmails.forEach(theEmail -> send(theEmail, new OnSuccess(theEmail), new ErrorHandler(theEmail)));
 	}
 
@@ -60,21 +59,23 @@ public class MailSvc implements IMailSvc {
 
 	@Override
 	public void sendMail(
-			@Nonnull Email theEmail, @Nonnull Runnable theOnSuccess, @Nonnull ExceptionConsumer theErrorHandler) {
+			@Nonnull Email theEmail, @Nonnull Runnable theOnSuccess, @Nonnull Consumer<Throwable> theErrorHandler) {
 		send(theEmail, theOnSuccess, theErrorHandler);
 	}
 
 	private void send(
-			@Nonnull Email theEmail, @Nonnull Runnable theOnSuccess, @Nonnull ExceptionConsumer theErrorHandler) {
-		Validate.notNull(theEmail);
-		Validate.notNull(theOnSuccess);
-		Validate.notNull(theErrorHandler);
+			@Nonnull Email theEmail, @Nonnull Runnable theOnSuccess, @Nonnull Consumer<Throwable> theErrorHandler) {
+		Objects.requireNonNull(theEmail);
+		Objects.requireNonNull(theOnSuccess);
+		Objects.requireNonNull(theErrorHandler);
 		try {
-			final AsyncResponse asyncResponse = myMailer.sendMail(theEmail, true);
-			if (asyncResponse != null) {
-				asyncResponse.onSuccess(theOnSuccess);
-				asyncResponse.onException(theErrorHandler);
-			}
+			myMailer.sendMail(theEmail, true).whenComplete((result, ex) -> {
+				if (ex != null) {
+					theErrorHandler.accept(ex);
+				} else {
+					theOnSuccess.run();
+				}
+			});
 		} catch (MailException e) {
 			theErrorHandler.accept(e);
 		}
@@ -117,7 +118,7 @@ public class MailSvc implements IMailSvc {
 		}
 	}
 
-	private class ErrorHandler implements ExceptionConsumer {
+	private class ErrorHandler implements Consumer<Throwable> {
 		private final Email myEmail;
 
 		private ErrorHandler(@Nonnull Email theEmail) {
@@ -125,7 +126,7 @@ public class MailSvc implements IMailSvc {
 		}
 
 		@Override
-		public void accept(Exception t) {
+		public void accept(Throwable t) {
 			ourLog.error("Email not sent" + makeMessage(myEmail), t);
 		}
 	}

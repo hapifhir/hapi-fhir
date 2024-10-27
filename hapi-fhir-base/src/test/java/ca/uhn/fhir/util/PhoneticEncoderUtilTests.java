@@ -12,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -67,10 +68,9 @@ public class PhoneticEncoderUtilTests {
 		assertNull(encoder);
 		ArgumentCaptor<ILoggingEvent> loggingCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myListAppender).doAppend(loggingCaptor.capture());
-		assertEquals(1, loggingCaptor.getAllValues().size());
+		assertThat(loggingCaptor.getAllValues()).hasSize(1);
 		ILoggingEvent event = loggingCaptor.getValue();
-		assertEquals("Invalid encoder max character length: " + num,
-			event.getMessage());
+		assertEquals("Invalid encoder max character length: " + num, event.getMessage());
 	}
 
 	@Test
@@ -86,10 +86,9 @@ public class PhoneticEncoderUtilTests {
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myListAppender)
 			.doAppend(captor.capture());
-		assertEquals(1, captor.getAllValues().size());
+		assertThat(captor.getAllValues()).hasSize(1);
 		ILoggingEvent event = captor.getValue();
-		assertEquals("Invalid phonetic param string " + theString,
-			event.getMessage());
+		assertEquals("Invalid phonetic param string " + theString, event.getMessage());
 	}
 
 	@Test
@@ -142,9 +141,8 @@ public class PhoneticEncoderUtilTests {
 		assertNull(theEncoder);
 		ArgumentCaptor<ILoggingEvent> loggingCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myListAppender).doAppend(loggingCaptor.capture());
-		assertEquals(1, loggingCaptor.getAllValues().size());
+		assertThat(loggingCaptor.getAllValues()).hasSize(1);
 		ILoggingEvent event = loggingCaptor.getValue();
-		assertEquals("Invalid encoder max character length: " + theNumberParam,
-			event.getMessage());
+		assertEquals("Invalid encoder max character length: " + theNumberParam, event.getMessage());
 	}
 }

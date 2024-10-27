@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ActiveSubscriptionTopicCacheTest {
@@ -16,7 +15,7 @@ public class ActiveSubscriptionTopicCacheTest {
 		SubscriptionTopic topic1 = new SubscriptionTopic();
 		topic1.setId("1");
 		cache.add(topic1);
-		assertThat(cache.getAll(), hasSize(1));
+		assertThat(cache.getAll()).hasSize(1);
 		assertEquals(1, cache.size());
 		assertEquals("1", cache.getAll().iterator().next().getId());
 

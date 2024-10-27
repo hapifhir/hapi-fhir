@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - HFQL Driver
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
 import ca.uhn.fhir.rest.client.impl.HttpBasicAuthInterceptor;
 import ca.uhn.fhir.util.IoUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -35,7 +36,6 @@ import org.hl7.fhir.r4.model.StringType;
 
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.DEFAULT_FETCH_SIZE;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;

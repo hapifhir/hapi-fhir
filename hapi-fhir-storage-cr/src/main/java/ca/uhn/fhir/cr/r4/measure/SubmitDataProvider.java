@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -70,7 +71,7 @@ public class SubmitDataProvider {
 			shortDefinition = "$submit-data",
 			value =
 					"Implements the <a href=\"http://hl7.org/fhir/R4/measure-operation-submit-data.html\">$submit-data</a> operation found in the <a href=\"http://hl7.org/fhir/R4/clinicalreasoning-module.html\">FHIR Clinical Reasoning Module</a> per the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/datax.html#submit-data\">Da Vinci DEQM FHIR Implementation Guide</a>.")
-	@Operation(name = "$submit-data", type = Measure.class)
+	@Operation(name = ProviderConstants.CR_OPERATION_SUBMIT_DATA, type = Measure.class)
 	public Bundle submitData(
 			RequestDetails theRequestDetails,
 			@IdParam IdType theId,

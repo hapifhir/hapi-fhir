@@ -4,7 +4,7 @@ package ca.uhn.fhir.cr.dstu3.plandefinition;
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ package ca.uhn.fhir.cr.dstu3.plandefinition;
  * #L%
  */
 
-import ca.uhn.fhir.cr.dstu3.IPlanDefinitionProcessorFactory;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.cr.common.IPlanDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -37,13 +38,18 @@ import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
 
 @Component
 public class PlanDefinitionApplyProvider {
 	@Autowired
-	IPlanDefinitionProcessorFactory myDstu3PlanDefinitionProcessorFactory;
+	IPlanDefinitionProcessorFactory myPlanDefinitionProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -53,8 +59,10 @@ public class PlanDefinitionApplyProvider {
 	 * Reasoning Module</a>.
 	 *
 	 * @param theId                  The id of the PlanDefinition to apply
-	 * @param theCanonical           The canonical identifier for the PlanDefinition to apply (optionally version-specific)
 	 * @param thePlanDefinition      The PlanDefinition to be applied
+	 * @param theCanonical           The canonical url of the plan definition to be applied. If the operation is invoked at the instance level, this parameter is not allowed; if the operation is invoked at the type level, this parameter (and optionally the version), or the planDefinition parameter must be supplied.
+	 * @param theUrl             	 Canonical URL of the PlanDefinition when invoked at the resource type level. This is exclusive with the planDefinition and canonical parameters.
+	 * @param theVersion             Version of the PlanDefinition when invoked at the resource type level. This is exclusive with the planDefinition and canonical parameters.
 	 * @param theSubject             The subject(s) that is/are the target of the plan definition to be applied.
 	 * @param theEncounter           The encounter in context
 	 * @param thePractitioner        The practitioner in context
@@ -82,8 +90,10 @@ public class PlanDefinitionApplyProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
 	public IBaseResource apply(
 			@IdParam IdType theId,
-			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "planDefinition") PlanDefinition thePlanDefinition,
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "url") String theUrl,
+			@OperationParam(name = "version") String theVersion,
 			@OperationParam(name = "subject") String theSubject,
 			@OperationParam(name = "encounter") String theEncounter,
 			@OperationParam(name = "practitioner") String thePractitioner,
@@ -96,17 +106,17 @@ public class PlanDefinitionApplyProvider {
 			@OperationParam(name = "parameters") Parameters theParameters,
 			@OperationParam(name = "useServerData") BooleanType theUseServerData,
 			@OperationParam(name = "data") Bundle theData,
+			@OperationParam(name = "prefetchData") List<Parameters.ParametersParameterComponent> thePrefetchData,
 			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myDstu3PlanDefinitionProcessorFactory
+		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
+		return myPlanDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.apply(
-						theId,
-						new StringType(theCanonical),
-						thePlanDefinition,
+						Eithers.for3(canonicalType, theId, thePlanDefinition),
 						theSubject,
 						theEncounter,
 						thePractitioner,
@@ -117,9 +127,9 @@ public class PlanDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theData,
-						null,
+						thePrefetchData,
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint);
@@ -127,8 +137,10 @@ public class PlanDefinitionApplyProvider {
 
 	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
 	public IBaseResource apply(
-			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "planDefinition") PlanDefinition thePlanDefinition,
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "url") String theUrl,
+			@OperationParam(name = "version") String theVersion,
 			@OperationParam(name = "subject") String theSubject,
 			@OperationParam(name = "encounter") String theEncounter,
 			@OperationParam(name = "practitioner") String thePractitioner,
@@ -141,17 +153,17 @@ public class PlanDefinitionApplyProvider {
 			@OperationParam(name = "parameters") Parameters theParameters,
 			@OperationParam(name = "useServerData") BooleanType theUseServerData,
 			@OperationParam(name = "data") Bundle theData,
+			@OperationParam(name = "prefetchData") List<Parameters.ParametersParameterComponent> thePrefetchData,
 			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myDstu3PlanDefinitionProcessorFactory
+		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
+		return myPlanDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.apply(
-						null,
-						new StringType(theCanonical),
-						thePlanDefinition,
+						Eithers.for3(canonicalType, null, thePlanDefinition),
 						theSubject,
 						theEncounter,
 						thePractitioner,
@@ -162,9 +174,9 @@ public class PlanDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theData,
-						null,
+						thePrefetchData,
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint);

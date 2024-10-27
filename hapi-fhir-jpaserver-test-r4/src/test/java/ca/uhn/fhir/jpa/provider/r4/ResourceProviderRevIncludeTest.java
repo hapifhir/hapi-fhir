@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -28,9 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
@@ -144,7 +145,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
 		//Ensure that the revincludes are included in the query list of the sql trace.
 		//TODO GGG/KHS reduce this to something less than 6 by smarter iterating and getting the resource types earlier when needed.
-		assertEquals(5, sqlCapturingInterceptor.getQueryList().size());
+		assertThat(sqlCapturingInterceptor.getQueryList()).hasSize(5);
 		myInterceptorRegistry.unregisterInterceptor(sqlCapturingInterceptor);
 	}
 
@@ -172,7 +173,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.execute();
 
 		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
-		assertEquals(3, foundResources.size());
+		assertThat(foundResources).hasSize(3);
 		assertEquals(detectedIssueId.getIdPart(), foundResources.get(0).getIdElement().getIdPart());
 		assertEquals(practitionerId.getIdPart(), foundResources.get(1).getIdElement().getIdPart());
 		assertEquals(practitionerRoleId.getIdPart(), foundResources.get(2).getIdElement().getIdPart());
@@ -209,7 +210,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.execute();
 
 		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
-		assertEquals(4, foundResources.size());
+		assertThat(foundResources).hasSize(4);
 		assertEquals(episodeOfCareId.getIdPart(), foundResources.get(0).getIdElement().getIdPart());
 		assertEquals(encounterId.getIdPart(), foundResources.get(1).getIdElement().getIdPart());
 		assertEquals(taskId.getIdPart(), foundResources.get(2).getIdElement().getIdPart());

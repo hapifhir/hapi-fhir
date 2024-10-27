@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests the various metrics returned by IMdmMetricSvc
@@ -76,11 +76,11 @@ public interface IMdmMetricSvcTest {
 
 		Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> map = results.getMatchTypeToLinkToCountMap();
 		// See OUR_BASIC_STATE
-		assertEquals(3, map.size());
+		assertThat(map).hasSize(3);
 		for (MdmMatchResultEnum matchResult : new MdmMatchResultEnum[] {
 			MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH, MdmMatchResultEnum.POSSIBLE_MATCH
 		}) {
-			assertTrue(map.containsKey(matchResult));
+			assertThat(map).containsKey(matchResult);
 			Map<MdmLinkSourceEnum, Long> source2Count = map.get(matchResult);
 			assertNotNull(source2Count);
 			for (MdmLinkSourceEnum ls : MdmLinkSourceEnum.values()) {
@@ -119,16 +119,16 @@ public interface IMdmMetricSvcTest {
 
 		Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> actual = metrics.getMatchTypeToLinkToCountMap();
 		Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> expected = expectedMetrics.getMatchTypeToLinkToCountMap();
-		assertEquals(expected, actual, err.get());
+		assertThat(actual).as(err.get()).isEqualTo(expected);
 
 		for (MdmMatchResultEnum matchResult : MdmMatchResultEnum.values()) {
-			assertEquals(expected.containsKey(matchResult), actual.containsKey(matchResult), err.get());
+			assertThat(actual.containsKey(matchResult)).as(err.get()).isEqualTo(expected.containsKey(matchResult));
 			if (actual.containsKey(matchResult)) {
 				Map<MdmLinkSourceEnum, Long> actualMatch = actual.get(matchResult);
 				Map<MdmLinkSourceEnum, Long> expectedMatch = expected.get(matchResult);
-				assertEquals(expectedMatch, actualMatch, err.get());
+				assertThat(actualMatch).as(err.get()).isEqualTo(expectedMatch);
 				for (MdmLinkSourceEnum linkSource : MdmLinkSourceEnum.values()) {
-					assertEquals(expectedMatch.get(linkSource), actualMatch.get(linkSource), err.get());
+					assertThat(actualMatch.get(linkSource)).as(err.get()).isEqualTo(expectedMatch.get(linkSource));
 				}
 			}
 		}
@@ -149,9 +149,8 @@ public interface IMdmMetricSvcTest {
 		// verify
 		assertNotNull(results);
 		assertEquals("Patient", results.getResourceType());
-		assertEquals(
-				theParams.getExpectedResourceCount(),
-				results.getSourceResourcesCount() + results.getGoldenResourcesCount());
+		assertThat(results.getSourceResourcesCount() + results.getGoldenResourcesCount())
+				.isEqualTo(theParams.getExpectedResourceCount());
 		assertEquals(theParams.getExpectedBlockedResourceCount(), results.getExcludedResources());
 		assertEquals(theParams.getExpectedGoldenResourceCount(), results.getGoldenResourcesCount());
 	}
@@ -180,10 +179,12 @@ public interface IMdmMetricSvcTest {
 
 		Map<String, Long> actual = actualMetrics.getScoreCounts();
 		Map<String, Long> expected = expectedMetrics.getScoreCounts();
-		assertEquals(expected.size(), actual.size());
+		assertThat(actual).hasSize(expected.size());
 		for (String score : expected.keySet()) {
-			assertTrue(actual.containsKey(score), String.format("Score of %s is not in results", score));
-			assertEquals(expected.get(score), actual.get(score), score);
+			assertThat(actual.containsKey(score))
+					.as(String.format("Score of %s is not in results", score))
+					.isTrue();
+			assertThat(actual.get(score)).as(score).isEqualTo(expected.get(score));
 		}
 	}
 

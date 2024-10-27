@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
@@ -56,6 +57,10 @@ public class DropTableTask extends BaseTableTask {
 		logInfo(ourLog, "Table {} has the following indexes: {}", getTableName(), indexNames);
 
 		for (String next : foreignKeys) {
+			if (getDriverType() == DriverTypeEnum.DERBY_EMBEDDED && next.contains("-")) {
+				// Derby creates special internal indexes with GUID names that can't be deleted
+				continue;
+			}
 			List<String> sql = DropForeignKeyTask.generateSql(getTableName(), next, getDriverType());
 			for (@Language("SQL") String nextSql : sql) {
 				executeSql(getTableName(), nextSql);
@@ -69,6 +74,10 @@ public class DropTableTask extends BaseTableTask {
 				.setDriverType(getDriverType())
 				.setDryRun(isDryRun());
 		for (String nextIndex : indexNames) {
+			if (getDriverType() == DriverTypeEnum.DERBY_EMBEDDED && nextIndex.contains("-")) {
+				// Derby creates special internal indexes with GUID names that can't be deleted
+				continue;
+			}
 			theIndexTask.setIndexName(nextIndex).execute();
 		}
 

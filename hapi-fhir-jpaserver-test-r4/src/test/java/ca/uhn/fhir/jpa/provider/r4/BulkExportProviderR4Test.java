@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Parameters;
@@ -7,8 +8,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_EXPORT;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BulkExportProviderR4Test extends BaseResourceProviderR4Test {
@@ -25,7 +25,7 @@ public class BulkExportProviderR4Test extends BaseResourceProviderR4Test {
 				.execute(),
 			"$export of missing Group throws 404");
 
-		assertThat(e.getStatusCode(), equalTo(404));
+		assertEquals(404, e.getStatusCode());
 	}
 
 	@Test
@@ -41,10 +41,8 @@ public class BulkExportProviderR4Test extends BaseResourceProviderR4Test {
 				.execute(),
 			"$export of missing Patient throws 404");
 
-		assertThat(e.getStatusCode(), equalTo(404));
+		assertEquals(404, e.getStatusCode());
 	}
-
-
 	@Test
 	void testBulkExport_typePatientIdNotExists_throws404() {
 		// given no data
@@ -58,6 +56,6 @@ public class BulkExportProviderR4Test extends BaseResourceProviderR4Test {
 				.execute(),
 			"Patient/$export with missing patient throws 404");
 
-		assertThat(e.getStatusCode(), equalTo(404));
+		assertEquals(404, e.getStatusCode());
 	}
 }

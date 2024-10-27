@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,11 @@ import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PreDestroy;
+import java.util.function.Supplier;
 
 @Service
 public class MdmProviderLoader {
@@ -59,25 +60,28 @@ public class MdmProviderLoader {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	private BaseMdmProvider myMdmProvider;
-	private MdmLinkHistoryProviderDstu3Plus myMdmHistoryProvider;
+	private Supplier<Object> myMdmProviderSupplier;
+	private Supplier<Object> myMdmHistoryProviderSupplier;
 
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:
-				myResourceProviderFactory.addSupplier(() -> new MdmProviderDstu3Plus(
+			case R5:
+				// We store the supplier so that removeSupplier works properly
+				myMdmProviderSupplier = () -> new MdmProviderDstu3Plus(
 						myFhirContext,
 						myMdmControllerSvc,
 						myMdmControllerHelper,
 						myMdmSubmitSvc,
 						myInterceptorBroadcaster,
-						myMdmSettings));
+						myMdmSettings);
+				// We store the supplier so that removeSupplier works properly
+				myResourceProviderFactory.addSupplier(myMdmProviderSupplier);
 				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
-					myResourceProviderFactory.addSupplier(() -> {
-						return new MdmLinkHistoryProviderDstu3Plus(
-								myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
-					});
+					myMdmHistoryProviderSupplier = () -> new MdmLinkHistoryProviderDstu3Plus(
+							myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
+					myResourceProviderFactory.addSupplier(myMdmHistoryProviderSupplier);
 				}
 				break;
 			default:
@@ -88,11 +92,11 @@ public class MdmProviderLoader {
 
 	@PreDestroy
 	public void unloadProvider() {
-		if (myMdmProvider != null) {
-			myResourceProviderFactory.removeSupplier(() -> myMdmProvider);
+		if (myMdmProviderSupplier != null) {
+			myResourceProviderFactory.removeSupplier(myMdmProviderSupplier);
 		}
-		if (myMdmHistoryProvider != null) {
-			myResourceProviderFactory.removeSupplier(() -> myMdmHistoryProvider);
+		if (myMdmHistoryProviderSupplier != null) {
+			myResourceProviderFactory.removeSupplier(myMdmHistoryProviderSupplier);
 		}
 	}
 }

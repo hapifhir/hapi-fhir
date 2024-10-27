@@ -34,7 +34,6 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -51,6 +50,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -119,10 +119,18 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 	@SpyBean
 	private IMdmSubmitSvc myMdmSubmitSvc;
 
+
 	private MdmLinkHistoryProviderDstu3Plus myLinkHistoryProvider;
 
 	private final List<Object> myInterceptors = new ArrayList<>();
 
+	@Override
+	@AfterEach
+	public void afterPurgeDatabase() {
+		super.afterPurgeDatabase();
+	}
+
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
@@ -134,6 +142,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 		);
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		super.after();
@@ -141,8 +150,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 		myInterceptors.clear();
 	}
 
-	@Nested
-	class MdmProviderDstu3PlusTest {
 		@Test
 		public void mergeGoldenResources_withInterceptor_firesHook() {
 			// setup
@@ -203,7 +210,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				@Hook(Pointcut.MDM_POST_UPDATE_LINK)
 				void onUpdate(RequestDetails theDetails, MdmLinkEvent theEvent) {
 					called.getAndSet(true);
-					assertEquals(1, theEvent.getMdmLinks().size());
+					assertThat(theEvent.getMdmLinks()).hasSize(1);
 					MdmLinkJson link = theEvent.getMdmLinks().get(0);
 					assertEquals(toSave, link.getMatchResult());
 					assertEquals("Patient/" + p1.getIdPart(), link.getSourceId());
@@ -237,7 +244,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				@Hook(Pointcut.MDM_POST_CREATE_LINK)
 				void onCreate(RequestDetails theDetails, MdmLinkEvent theEvent) {
 					called.getAndSet(true);
-					assertEquals(1, theEvent.getMdmLinks().size());
+					assertThat(theEvent.getMdmLinks()).hasSize(1);
 					MdmLinkJson link = theEvent.getMdmLinks().get(0);
 					assertEquals(match, link.getMatchResult());
 					assertEquals("Patient/" + patient.getIdPart(), link.getSourceId());
@@ -281,7 +288,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				void call(RequestDetails theRequestDetails, MdmLinkEvent theEvent) {
 					called.getAndSet(true);
 
-					assertEquals(1, theEvent.getMdmLinks().size());
+					assertThat(theEvent.getMdmLinks()).hasSize(1);
 					MdmLinkJson link = theEvent.getMdmLinks().get(0);
 					assertEquals("Patient/" + gp2.getIdPart(), link.getSourceId());
 					assertEquals("Patient/" + gp1.getIdPart(), link.getGoldenResourceId());
@@ -335,11 +342,10 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 
 					assertNotNull(theEvent.getResourceTypes());
 					if (isNotBlank(theResourceTypes)) {
-						assertEquals(resourceTypes.size(), theEvent.getResourceTypes().size());
+						assertThat(theEvent.getResourceTypes()).hasSize(resourceTypes.size());
 
 						for (IPrimitiveType<String> resourceName : resourceTypes) {
-							assertTrue(theEvent.getResourceTypes()
-								.contains(resourceName.getValueAsString()));
+							assertThat(theEvent.getResourceTypes()).contains(resourceName.getValue());
 						}
 					} else {
 						// null or empty resource types means all
@@ -398,10 +404,9 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 					assertEquals(asyncValue[0], theEvent.isBatchJob());
 
 					String urlStr = String.join(", ", urls);
-					assertEquals(urls.size(), theEvent.getUrls().size(),
-						urlStr + " <-> " + String.join(", ", theEvent.getUrls()));
+					assertThat(theEvent.getUrls().size()).as(urlStr + " <-> " + String.join(", ", theEvent.getUrls())).isEqualTo(urls.size());
 					for (String url : urls) {
-						assertTrue(theEvent.getUrls().contains(url), "[" + urlStr + "] does not contain " + url + ".");
+						assertThat(theEvent.getUrls().contains(url)).as("[" + urlStr + "] does not contain " + url + ".").isTrue();
 					}
 					latch.call(1);
 				}
@@ -521,7 +526,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				}
 			}
 		}
-	}
+
 
 	private String createUrl(String theResourceType, StringType theCriteria) {
 		String url = theResourceType;
@@ -531,8 +536,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 		return url;
 	}
 
-	@Nested
-	class MdmLinkHistoryProviderDstu3PlusTest {
 
 		@ParameterizedTest
 		@EnumSource(LinkHistoryParameters.class)
@@ -570,15 +573,15 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 					List<String> sids = theEvent.getSourceIds();
 
 					if (theParametersToSend == LinkHistoryParameters.SOURCE_IDS) {
-						assertTrue(gids.isEmpty());
+						assertThat(gids).isEmpty();
 					} else if (theParametersToSend == LinkHistoryParameters.GOLDEN_IDS) {
-						assertTrue(sids.isEmpty());
+						assertThat(sids).isEmpty();
 					} else {
 						assertFalse(sids.isEmpty() && gids.isEmpty());
 					}
 
-					assertFalse(history.isEmpty());
-					assertEquals(2, history.size());
+					assertThat(history).isNotEmpty();
+					assertThat(history).hasSize(2);
 				}
 			};
 			myInterceptors.add(interceptor);
@@ -597,6 +600,56 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			assertTrue(called.get());
 			assertFalse(retval.isEmpty());
 		}
-	}
+
+		@Test
+		public void updateLink_NoMatch_LinkEvent_allUpdates() {
+			// When a Link is set to "NO_MATCH", it can cause other link updates.
+			// If a source record would be left unlinked to any
+			// golden record, a new link / golden record would be created.
+
+			// setup
+			String inputState = """
+				GP1, AUTO, MATCH, P1
+			""";
+			MDMState<Patient, JpaPid> state = new MDMState<>();
+			state.setInputState(inputState);
+
+			// we won't use for validation, just setup
+			myMdmLinkHelper.setup(state);
+
+			Patient patient = state.getParameter("P1");
+			Patient originalPatientGolden = state.getParameter("GP1");
+
+			AtomicBoolean called = new AtomicBoolean(false);
+
+			Object interceptor = new Object() {
+				@Hook(Pointcut.MDM_POST_UPDATE_LINK)
+				void onUpdate(RequestDetails theDetails, MdmLinkEvent theEvent) {
+					called.getAndSet(true);
+					assertThat(theEvent.getMdmLinks()).hasSize(2);
+
+					MdmLinkJson originalLink = theEvent.getMdmLinks().get(0);
+					MdmLinkJson newLink = theEvent.getMdmLinks().get(1);
+					String original_target = "Patient/" + originalPatientGolden.getIdPart();
+
+					assertThat(originalLink.getGoldenResourceId()).isEqualTo(original_target);
+					assertThat(newLink.getGoldenResourceId()).isNotEqualTo(original_target);
+				}
+			};
+			myInterceptors.add(interceptor);
+			myInterceptorService.registerInterceptor(interceptor);
+
+			// test
+			myMdmProvider.updateLink(
+				new StringType("Patient/" + originalPatientGolden.getIdPart()),
+				new StringType("Patient/" + patient.getIdPart()),
+				new StringType("NO_MATCH"),
+				new ServletRequestDetails()
+			);
+
+			// verify
+			assertTrue(called.get());
+		}
+
 
 }

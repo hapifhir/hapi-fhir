@@ -3,6 +3,7 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.test.BaseFhirVersionParameterizedTest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -10,14 +11,16 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.util.EntityUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.net.ssl.SSLHandshakeException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterizedTest {
 
@@ -47,8 +50,7 @@ public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		try{
 			HttpUriRequest request = new HttpGet(fhirVersionParams.getSecuredPatientEndpoint());
 			unauthenticatedClient.execute(request);
-			fail();
-		}
+			fail();		}
 		catch(Exception e){
 			assertEquals(SSLHandshakeException.class, e.getClass());
 		}
@@ -74,10 +76,18 @@ public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		context.setRestfulClientFactory(new ApacheRestfulClientFactory(context));
 		try {
 			context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
-			fail();
-		} catch (Exception e) {
-			assertTrue(e.getMessage().contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization"));
+			fail();		} catch (Exception e) {
+			assertThat(e.getMessage()).contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization");
 			assertEquals(SSLHandshakeException.class, e.getCause().getCause().getClass());
 		}
+	}
+
+	@Test
+	public void testConnectionTimeToLive() {
+		ApacheRestfulClientFactory clientFactory = new ApacheRestfulClientFactory();
+
+		assertEquals(IRestfulClientFactory.DEFAULT_CONNECTION_TTL, clientFactory.getConnectionTimeToLive());
+		clientFactory.setConnectionTimeToLive(25000);
+		assertEquals(25000, clientFactory.getConnectionTimeToLive());
 	}
 }

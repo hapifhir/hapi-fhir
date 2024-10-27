@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,19 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.BundleLinks;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.PreferHandlingEnum;
+import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.ElementsParameter;
@@ -43,21 +52,44 @@ import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.*;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.replace;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class RestfulServerUtils {
 	static final Pattern ACCEPT_HEADER_PATTERN =
@@ -176,20 +208,19 @@ public class RestfulServerUtils {
 	 */
 	public static String createLinkSelfWithoutGivenParameters(
 			String theServerBase, RequestDetails theRequest, List<String> excludedParameterNames) {
+		String tenantId = StringUtils.defaultString(theRequest.getTenantId());
+		String requestPath = StringUtils.defaultString(theRequest.getRequestPath());
+
 		StringBuilder b = new StringBuilder();
 		b.append(theServerBase);
+		requestPath = StringUtils.substringAfter(requestPath, tenantId);
 
-		if (isNotBlank(theRequest.getRequestPath())) {
-			b.append('/');
-			if (isNotBlank(theRequest.getTenantId())
-					&& theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
-				b.append(theRequest
-						.getRequestPath()
-						.substring(theRequest.getTenantId().length() + 1));
-			} else {
-				b.append(theRequest.getRequestPath());
-			}
+		if (isNotBlank(requestPath)) {
+			requestPath = StringUtils.prependIfMissing(requestPath, "/");
 		}
+
+		b.append(requestPath);
+
 		// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be
 		// huge
 		if (theRequest.getRequestType() == RequestTypeEnum.GET) {
@@ -211,7 +242,6 @@ public class RestfulServerUtils {
 				}
 			}
 		}
-
 		return b.toString();
 	}
 
@@ -652,12 +682,6 @@ public class RestfulServerUtils {
 	}
 
 	private static FhirContext getContextForVersion(FhirContext theContext, FhirVersionEnum theForVersion) {
-
-		// TODO: remove once we've bumped the core lib version
-		if (theContext.getVersion().getVersion() == FhirVersionEnum.R4B && theForVersion == FhirVersionEnum.R5) {
-			return theContext;
-		}
-
 		FhirContext context = theContext;
 		if (context.getVersion().getVersion() != theForVersion) {
 			context = myFhirContextMap.get(theForVersion);

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
@@ -133,9 +134,10 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 				}
 				break;
 			case ORACLE_12C:
-				String oracleNullableStmt = !alreadyCorrectNullable ? notNull : "";
-				sql = "alter table " + getTableName() + " modify ( " + getColumnName() + " " + type + oracleNullableStmt
-						+ " )";
+				String oracleNullableStmt = alreadyCorrectNullable ? "" : notNull;
+				String oracleTypeStmt = alreadyOfCorrectType ? "" : type;
+				sql = "alter table " + getTableName() + " modify ( " + getColumnName() + " " + oracleTypeStmt + " "
+						+ oracleNullableStmt + " )";
 				break;
 			case MSSQL_2012:
 				sql = "alter table " + getTableName() + " alter column " + getColumnName() + " " + type + notNull;
@@ -158,8 +160,8 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 				throw new IllegalStateException(Msg.code(67) + "Dont know how to handle " + getDriverType());
 		}
 
-		if (!isFailureAllowed() && isShrinkOnly) {
-			setFailureAllowed(true);
+		if (isShrinkOnly) {
+			addFlag(TaskFlagEnum.FAILURE_ALLOWED);
 		}
 
 		logInfo(ourLog, "Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);

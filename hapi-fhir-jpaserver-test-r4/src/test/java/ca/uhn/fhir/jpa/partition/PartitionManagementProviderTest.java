@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.partition;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,17 +29,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -121,9 +116,9 @@ public class PartitionManagementProviderTest {
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 		PartitionEntity value = entityCaptor.getValue();
 
-		assertThat(value.getName(), is(equalTo("PARTITION-123")));
-		assertThat(value.getId(), is(instanceOf(Integer.class)));
-		assertThat(value.getDescription(), is(equalTo("a description")));
+		assertEquals("PARTITION-123", value.getName());
+		assertThat(value.getId()).isInstanceOf(Integer.class);
+		assertEquals("a description", value.getDescription());
 	}
 
 	@Nonnull
@@ -311,21 +306,21 @@ public class PartitionManagementProviderTest {
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(response, "partition");
-		assertThat(list, hasSize(2));
+		assertThat(list).hasSize(2);
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertThat(part.get(0).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID));
+		assertEquals(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, part.get(0).getName());
 		assertEquals(1, ((IntegerType) part.get(0).getValue()).getValue().intValue());
-		assertThat(part.get(1).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME));
+		assertEquals(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, part.get(1).getName());
 		assertEquals("PARTITION-1", part.get(1).getValue().toString());
-		assertThat(part.get(2).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC));
+		assertEquals(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, part.get(2).getName());
 		assertEquals("a description1", part.get(2).getValue().toString());
 
 		part = list.get(1).getPart();
-		assertThat(part.get(0).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID));
+		assertEquals(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, part.get(0).getName());
 		assertEquals(2, ((IntegerType) part.get(0).getValue()).getValue().intValue());
-		assertThat(part.get(1).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME));
+		assertEquals(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, part.get(1).getName());
 		assertEquals("PARTITION-2", part.get(1).getValue().toString());
-		assertThat(part.get(2).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC));
+		assertEquals(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, part.get(2).getName());
 		assertEquals("a description2", part.get(2).getValue().toString());
 	}
 

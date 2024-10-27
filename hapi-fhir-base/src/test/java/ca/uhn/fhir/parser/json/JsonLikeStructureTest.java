@@ -44,7 +44,7 @@ public class JsonLikeStructureTest {
 		jsonStructure.load(reader);
 		
 		BaseJsonLikeObject rootObject = jsonStructure.getRootObject();
-		
+
 		assertNotNull(rootObject);
 		assertEquals(BaseJsonLikeValue.ValueType.OBJECT, rootObject.getJsonType());
 	}
@@ -75,7 +75,7 @@ public class JsonLikeStructureTest {
 		jsonStructure.load(reader);
 		
 		BaseJsonLikeObject rootObject = jsonStructure.getRootObject();
-		
+
 		assertNotNull(rootObject);
 		
 		BaseJsonLikeValue value = rootObject.get("object-value");

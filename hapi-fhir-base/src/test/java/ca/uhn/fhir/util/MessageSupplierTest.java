@@ -44,6 +44,7 @@ public class MessageSupplierTest {
 	}
 
 
+
 	@Test
 	public void testLog() {
 
@@ -51,9 +52,6 @@ public class MessageSupplierTest {
 
 		verify(myMockAppender, times(1)).doAppend(argThat((ArgumentMatcher<ILoggingEvent>) argument -> {
 			String formattedMessage = argument.getFormattedMessage();
-			System.out.flush();
-			System.out.println("** Got Message: " + formattedMessage);
-			System.out.flush();
 			return formattedMessage.equals("Hello: Goodbye");
 		}));
 

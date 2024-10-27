@@ -17,8 +17,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -107,9 +107,9 @@ public class JdbcUtilsTest {
 		Set<String> indexNames = JdbcUtils.getIndexNames(myConnectionProperties, "TEST_TABLE");
 
 		// verify
-		assertEquals(3, indexNames.size());
-		assertTrue(indexNames.contains("IDX_1"));
-		assertTrue(indexNames.contains("IDX_2"));
-		assertTrue(indexNames.contains("IDX_3"));
+		assertThat(indexNames).hasSize(3);
+		assertThat(indexNames).contains("IDX_1");
+		assertThat(indexNames).contains("IDX_2");
+		assertThat(indexNames).contains("IDX_3");
 	}
 }

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -27,10 +30,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("Duplicates")
 public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Test {
@@ -84,7 +85,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 
 		// first page
 		List<Patient> patientsFirstPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
-		assertEquals(50, patientsFirstPage.size());
+		assertThat(patientsFirstPage).hasSize(50);
 
 		String nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
 
@@ -94,7 +95,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 		assertNotNull(page2);
 		List<Patient> patientsPage2 = BundleUtil.toListOfResourcesOfType(myFhirContext, page2, Patient.class);
 
-		assertEquals(4, patientsPage2.size());
+		assertThat(patientsPage2).hasSize(4);
 	}
 
 	@ParameterizedTest
@@ -130,7 +131,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 
 			// first page
 			List<Patient> patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
-			assertEquals(defaultPageSize, patientsPage.size());
+			assertThat(patientsPage).hasSize(defaultPageSize);
 
 			for (Patient p : patientsPage) {
 				assertTrue(ids.add(p.getId()));
@@ -148,14 +149,14 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 				}
 				nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
 				if (nextUrl != null) {
-					assertEquals(defaultPageSize, patientsPage.size());
+					assertThat(patientsPage).hasSize(defaultPageSize);
 				} else {
-					assertEquals(4, patientsPage.size());
+					assertThat(patientsPage).hasSize(4);
 				}
 			} while (nextUrl != null);
 
 			// ensure we found everything
-			assertEquals(total, ids.size());
+			assertThat(ids).hasSize(total);
 		} finally {
 			// set it back, just in case
 			myStorageSettings.setSearchPreFetchThresholds(previousPrefetchThreshold);

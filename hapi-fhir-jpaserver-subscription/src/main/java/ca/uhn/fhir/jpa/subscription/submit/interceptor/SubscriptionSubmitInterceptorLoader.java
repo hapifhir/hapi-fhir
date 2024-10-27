@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,43 +20,57 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicValidatingInterceptor;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Set;
-import javax.annotation.PostConstruct;
 
 public class SubscriptionSubmitInterceptorLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionSubmitInterceptorLoader.class);
 
-	@Autowired
-	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	@Nonnull
+	private IInterceptorService myInterceptorService;
 
-	@Autowired
-	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
+	@Nonnull
+	private final SubscriptionSettings mySubscriptionSettings;
 
-	@Autowired(required = false)
-	private SubscriptionTopicValidatingInterceptor mySubscriptionTopicValidatingInterceptor;
+	@Nonnull
+	private final SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 
-	@Autowired
-	private StorageSettings myStorageSettings;
+	@Nonnull
+	private final SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
 
-	@Autowired
-	private IInterceptorService myInterceptorRegistry;
+	@Nullable
+	private final SubscriptionTopicValidatingInterceptor mySubscriptionTopicValidatingInterceptor;
 
 	private boolean mySubscriptionValidatingInterceptorRegistered;
 	private boolean mySubscriptionMatcherInterceptorRegistered;
 	private boolean mySubscriptionTopicValidatingInterceptorRegistered;
 
+	public SubscriptionSubmitInterceptorLoader(
+			@Nonnull IInterceptorService theInterceptorService,
+			@Nonnull SubscriptionSettings theSubscriptionSettings,
+			@Nonnull SubscriptionMatcherInterceptor theSubscriptionMatcherInterceptor,
+			@Nonnull SubscriptionValidatingInterceptor theSubscriptionValidatingInterceptor,
+			@Nullable SubscriptionTopicValidatingInterceptor theSubscriptionTopicValidatingInterceptor) {
+		setInterceptorService(theInterceptorService);
+		mySubscriptionSettings = theSubscriptionSettings;
+		mySubscriptionMatcherInterceptor = theSubscriptionMatcherInterceptor;
+		mySubscriptionValidatingInterceptor = theSubscriptionValidatingInterceptor;
+		mySubscriptionTopicValidatingInterceptor = theSubscriptionTopicValidatingInterceptor;
+	}
+
 	@PostConstruct
 	public void start() {
 		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes =
-				myStorageSettings.getSupportedSubscriptionTypes();
+				mySubscriptionSettings.getSupportedSubscriptionTypes();
 
 		if (supportedSubscriptionTypes.isEmpty()) {
 			ourLog.info(
@@ -64,26 +78,34 @@ public class SubscriptionSubmitInterceptorLoader {
 		} else {
 			if (!mySubscriptionMatcherInterceptorRegistered) {
 				ourLog.info("Registering subscription matcher interceptor");
-				myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
+				myInterceptorService.registerInterceptor(mySubscriptionMatcherInterceptor);
 				mySubscriptionMatcherInterceptorRegistered = true;
 			}
 		}
 
 		if (!mySubscriptionValidatingInterceptorRegistered) {
-			myInterceptorRegistry.registerInterceptor(mySubscriptionValidatingInterceptor);
+			myInterceptorService.registerInterceptor(mySubscriptionValidatingInterceptor);
 			mySubscriptionValidatingInterceptorRegistered = true;
 		}
 
 		if (mySubscriptionTopicValidatingInterceptor != null && !mySubscriptionTopicValidatingInterceptorRegistered) {
-			myInterceptorRegistry.registerInterceptor(mySubscriptionTopicValidatingInterceptor);
+			myInterceptorService.registerInterceptor(mySubscriptionTopicValidatingInterceptor);
 			mySubscriptionTopicValidatingInterceptorRegistered = true;
 		}
 	}
 
+	protected void setInterceptorService(IInterceptorService theInterceptorService) {
+		myInterceptorService = theInterceptorService;
+	}
+
+	protected IInterceptorService getInterceptorService() {
+		return myInterceptorService;
+	}
+
 	@VisibleForTesting
 	public void unregisterInterceptorsForUnitTest() {
-		myInterceptorRegistry.unregisterInterceptor(mySubscriptionMatcherInterceptor);
-		myInterceptorRegistry.unregisterInterceptor(mySubscriptionValidatingInterceptor);
+		myInterceptorService.unregisterInterceptor(mySubscriptionMatcherInterceptor);
+		myInterceptorService.unregisterInterceptor(mySubscriptionValidatingInterceptor);
 		mySubscriptionValidatingInterceptorRegistered = false;
 		mySubscriptionMatcherInterceptorRegistered = false;
 	}

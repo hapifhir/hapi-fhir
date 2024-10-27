@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5553
+title: "mdm-clear jobs are prone to failing because of deadlocks when running on SQL Server. Such job failures have  
+been mitigated to some extent by increasing the retries on deadlocks."

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class MissingParameterQueryParams {
 	/**
 	 * The column on which to join.
 	 */
-	private final DbColumn mySourceJoinColumn;
+	private final DbColumn[] mySourceJoinColumn;
 
 	/**
 	 * The partition id
@@ -76,7 +76,7 @@ public class MissingParameterQueryParams {
 			List<? extends IQueryParameterType> theList,
 			String theParamName,
 			String theResourceType,
-			DbColumn theSourceJoinColumn,
+			DbColumn[] theSourceJoinColumn,
 			RequestPartitionId theRequestPartitionId) {
 		mySqlBuilder = theSqlBuilder;
 		myParamType = theParamType;
@@ -116,7 +116,7 @@ public class MissingParameterQueryParams {
 		return myResourceType;
 	}
 
-	public DbColumn getSourceJoinColumn() {
+	public DbColumn[] getSourceJoinColumn() {
 		return mySourceJoinColumn;
 	}
 

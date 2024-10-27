@@ -22,14 +22,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
+import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,12 +92,16 @@ public class ReductionStepDataSinkTest {
 		String data = "data";
 		StepOutputData stepData = new StepOutputData(data);
 		WorkChunkData<StepOutputData> chunkData = new WorkChunkData<>(stepData);
+		@SuppressWarnings("unchecked")
+		JobDefinition<IModelJson> jobDefinition = mock(JobDefinition.class);
 
 		// when
 		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
 		instance.setStatus(StatusEnum.FINALIZE);
 		stubUpdateInstanceCallback(instance);
 		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
+		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
+		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(instance)).thenReturn(jobDefinition);
 
 		// test
 		myDataSink.accept(chunkData);
@@ -111,6 +117,8 @@ public class ReductionStepDataSinkTest {
 		String data2 = "data2";
 		WorkChunkData<StepOutputData> firstData = new WorkChunkData<>(new StepOutputData(data));
 		WorkChunkData<StepOutputData> secondData = new WorkChunkData<>(new StepOutputData(data2));
+		@SuppressWarnings("unchecked")
+		JobDefinition<IModelJson> jobDefinition = mock(JobDefinition.class);
 
 		ourLogger.setLevel(Level.ERROR);
 
@@ -118,11 +126,13 @@ public class ReductionStepDataSinkTest {
 		instance.setStatus(StatusEnum.FINALIZE);
 		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
 		stubUpdateInstanceCallback(instance);
+		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
+		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(instance)).thenReturn(jobDefinition);
 
 		// test
 		myDataSink.accept(firstData);
-		assertThrows(IllegalStateException.class, ()->
-			myDataSink.accept(secondData));
+		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() ->
+				myDataSink.accept(secondData));
 
 	}
 
@@ -136,20 +146,24 @@ public class ReductionStepDataSinkTest {
 	@Test
 	public void accept_noInstanceIdFound_throwsJobExecutionFailed() {
 		// setup
+		JobInstance jobInstance = mock(JobInstance.class);
+		@SuppressWarnings("unchecked")
+		JobDefinition<IModelJson> jobDefinition = (JobDefinition<IModelJson>) mock(JobDefinition.class);
 		String data = "data";
 		WorkChunkData<StepOutputData> chunkData = new WorkChunkData<>(new StepOutputData(data));
 		when(myJobPersistence.updateInstance(any(), any())).thenReturn(false);
 		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
+		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(jobInstance));
+		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobInstance)).thenReturn(jobDefinition);
 
 		// test
 		try {
 			myDataSink.accept(chunkData);
 			fail("Expected exception to be thrown");
 		} catch (JobExecutionFailedException ex) {
-			assertTrue(ex.getMessage().contains("No instance found with Id " + INSTANCE_ID));
+			assertThat(ex.getMessage()).contains("No instance found with Id " + INSTANCE_ID);
 		} catch (Exception anyOtherEx) {
 			fail("Unexpected exception", anyOtherEx);
 		}
 	}
-
 }

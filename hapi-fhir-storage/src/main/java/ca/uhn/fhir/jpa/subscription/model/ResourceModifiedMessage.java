@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,9 @@ import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.Objects;
 
 /**
  * Most of this class has been moved to ResourceModifiedMessage in the hapi-fhir-server project, for a reusable channel ResourceModifiedMessage
@@ -47,10 +50,24 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		super();
 	}
 
+	public ResourceModifiedMessage(IIdType theIdType, OperationTypeEnum theOperationType) {
+		super(theIdType, theOperationType);
+		setPartitionId(RequestPartitionId.defaultPartition());
+	}
+
 	public ResourceModifiedMessage(
 			FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		super(theFhirContext, theResource, theOperationType);
 		setPartitionId(RequestPartitionId.defaultPartition());
+	}
+
+	public ResourceModifiedMessage(
+			FhirContext theFhirContext,
+			IBaseResource theResource,
+			OperationTypeEnum theOperationType,
+			RequestPartitionId theRequestPartitionId) {
+		super(theFhirContext, theResource, theOperationType);
+		setPartitionId(theRequestPartitionId);
 	}
 
 	public ResourceModifiedMessage(
@@ -79,6 +96,10 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		mySubscriptionId = theSubscriptionId;
 	}
 
+	public void setPayloadToNull() {
+		myPayload = null;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
@@ -87,5 +108,19 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 				.append("payloadId", myPayloadId)
 				.append("partitionId", myPartitionId)
 				.toString();
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		if (!super.equals(theO)) return false;
+		ResourceModifiedMessage that = (ResourceModifiedMessage) theO;
+		return Objects.equals(getSubscriptionId(), that.getSubscriptionId());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), getSubscriptionId());
 	}
 }

@@ -5,6 +5,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.util.ILockable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -24,8 +26,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -52,6 +52,11 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 */
 	public PrePopulatedValidationSupport(FhirContext theContext) {
 		this(theContext, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+	}
+
+	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " Pre-populated Validation Support";
 	}
 
 	/**

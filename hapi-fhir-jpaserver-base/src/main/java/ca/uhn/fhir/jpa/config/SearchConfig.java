@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -47,6 +49,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -205,5 +208,16 @@ public class SearchConfig {
 				myPagingProvider,
 				exceptionService() // singleton
 				);
+	}
+
+	@PostConstruct
+	public void validateConfiguration() {
+		if (myStorageSettings.isIndexStorageOptimized()
+				&& myPartitionSettings.isPartitioningEnabled()
+				&& myPartitionSettings.isIncludePartitionInSearchHashes()) {
+			throw new ConfigurationException(Msg.code(2525) + "Incorrect configuration. "
+					+ "StorageSettings#isIndexStorageOptimized and PartitionSettings.isIncludePartitionInSearchHashes "
+					+ "cannot be enabled at the same time.");
+		}
 	}
 }

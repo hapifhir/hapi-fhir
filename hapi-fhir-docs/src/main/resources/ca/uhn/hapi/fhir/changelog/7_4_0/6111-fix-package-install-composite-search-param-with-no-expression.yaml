@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6111
+title: "Previously, the package installer wouldn't create a composite SearchParameter resource if the SearchParameter 
+resource didn't have an expression element at the root level. This has now been fixed by making
+SearchParameter validation in package installer consistent with the DAO level validations."

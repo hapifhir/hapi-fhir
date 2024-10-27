@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -77,7 +78,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -580,7 +580,10 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		List<IBaseResource> output =
 				fireInterceptorsAndFilterAsNeeded(Lists.newArrayList(theResource), theRequestDetails);
 		if (output.size() == 1) {
-			return theResource;
+			// do not return theResource here but return whatever the interceptor returned in the list because
+			// the interceptor might have set the resource in the list to null (if it didn't want it to be returned).
+			// ConsentInterceptor might do this for example.
+			return (T) output.get(0);
 		} else {
 			return null;
 		}

@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TextStandardizerTest {
@@ -28,7 +29,7 @@ class TextStandardizerTest {
 			if (!myStandardizer.isNoiseCharacter(i) || myStandardizer.isTranslate(i)) {
 				continue;
 			}
-			assertEquals("", myStandardizer.standardize(Character.toString((char) i)), String.format("Expected char #%s to be filtered out", i));
+			assertThat(myStandardizer.standardize(Character.toString((char) i))).as(String.format("Expected char #%s to be filtered out", i)).isEqualTo("");
 		}
 	}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.cr.r4.activitydefinition;
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package ca.uhn.fhir.cr.r4.activitydefinition;
  * #L%
  */
 
-import ca.uhn.fhir.cr.r4.IActivityDefinitionProcessorFactory;
+import ca.uhn.fhir.cr.common.IActivityDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -29,14 +29,22 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.ActivityDefinition;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ActivityDefinitionApplyProvider {
 	@Autowired
-	IActivityDefinitionProcessorFactory myR4ActivityDefinitionProcessorFactory;
+	IActivityDefinitionProcessorFactory myActivityDefinitionProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -95,12 +103,13 @@ public class ActivityDefinitionApplyProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myR4ActivityDefinitionProcessorFactory
+		return myActivityDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.apply(
-						theId,
-						new CanonicalType(theCanonical),
-						theActivityDefinition,
+						Eithers.for3(
+								theCanonical == null ? null : new CanonicalType(theCanonical),
+								theId,
+								theActivityDefinition),
 						theSubject,
 						theEncounter,
 						thePractitioner,
@@ -111,7 +120,7 @@ public class ActivityDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theData,
 						theDataEndpoint,
 						theContentEndpoint,
@@ -139,12 +148,13 @@ public class ActivityDefinitionApplyProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myR4ActivityDefinitionProcessorFactory
+		return myActivityDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.apply(
-						null,
-						new CanonicalType(theCanonical),
-						theActivityDefinition,
+						Eithers.for3(
+								theCanonical == null ? null : new CanonicalType(theCanonical),
+								null,
+								theActivityDefinition),
 						theSubject,
 						theEncounter,
 						thePractitioner,
@@ -155,7 +165,7 @@ public class ActivityDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theData,
 						theDataEndpoint,
 						theContentEndpoint,

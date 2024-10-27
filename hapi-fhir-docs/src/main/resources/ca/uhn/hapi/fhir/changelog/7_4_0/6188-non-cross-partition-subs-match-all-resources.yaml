@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6188
+jira: SMILE-8759
+title: "Previously, a Subscription not marked as a cross-partition subscription could listen to incoming resources from
+other partitions.  This issue is fixed."

@@ -1,0 +1,36 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+        <li>Jackson (Base): 2.15.3 -&gt; 2.16.1</li>
+        <li>SLF4j (Base): 2.0.3 -&gt; 2.0.9</li>
+        <li>Logback (Base): 1.4.7 -&gt; 1.4.14</li>
+        <li>Caffeine (Base): 3.1.1 -&gt; 3.1.8</li>
+        <li>Spring Framework (JPA): 5.3.27 -&gt; 6.1.1</li>
+        <li>Spring Boot (JPA-Starter): 5.3.27 -&gt; 6.2.0</li>
+        <li>Spring Data BOM (JPA): 2021.2.2 -&gt; 2023.1.0</li>
+        <li>Hibernate (JPA): 5.6.15.Final -&gt; 6.4.1.Final</li>
+        <li>Hibernate Validator (JPA): 6.1.5.Final -&gt; 8.0.0.Final</li>
+        <li>Hibernate Search (JPA): 6.1.6.Final -&gt; 7.0.0.Final</li>
+        <li>Commons-DBCP2 (JPA): 2.9.0 -&gt; 2.11.0</li>
+        <li>DataSource-Proxy (JPA): 1.9 -&gt; 1.10</li>
+        <li>Spring Boot (Boot+Starter): 2.7.12 -&gt; 3.1.4</li>
+        <li>Jetty (CLI): 10.0.14 -&gt; 12.0.3</li>
+        <li>Jansi (CLI): 2.4.0 -&gt; 2.4.1</li>
+        <li>Derby (CLI): 10.14.2.0 -&gt; 10.17.1.0</li>
+        <li>Commons-Lang3 (CLI): 3.12.0 -&gt; 3.14.0</li>
+        <li>Commons-CSV (CLI): 1.8 -&gt; 1.10.0</li>
+        <li>Phloc Schematron (Schematron Validator): 5.6.5 -&gt; 7.1.2</li>
+        <li>RestEasy (JAX-RS Server): 5.0.2.Final -&gt; 6.2.5.Final</li>
+   </ul>"
+- item:
+    type: "change"
+    title: "HAPI FHIR JPA now requires PostgreSQL 10+. Previously Postgres 9.4
+       was supported but this version has been dropped."
+- item:
+      type: "remove"
+      title: "The legacy `$lastn` support has been removed, and only the redesigned 'advanced' version is now
+        supported. The advanced version requires Elasticsearch."
+

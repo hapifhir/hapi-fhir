@@ -636,6 +636,16 @@
 				"status": "draft",
 				"experimental": false,
 				"description": "ASLP Sleep Study Order",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression",
+						"valueExpression": {
+							"language": "text/cql.identifier",
+							"expression": "Sleep Study",
+							"reference": "http://example.org/sdh/dtr/aslp/Library/ASLPDataElements"
+						}
+					}
+				],
 				"useContext": [
 					{
 						"code": {

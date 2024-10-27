@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -27,8 +28,8 @@ import ca.uhn.test.concurrency.PointcutLatch;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
@@ -44,9 +45,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -56,8 +57,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Disabled("abstract")
 public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test {
@@ -283,7 +284,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		if (size == theTarget) {
 			return true;
 		}
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
 		return mySubscriptionTopicRegistry.size() == theTarget;
 	}
 
@@ -300,7 +301,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		assertEquals(theExpectedEventNumber.toString(), ss.getEventsSinceSubscriptionStartElement().getValueAsString());
 
 		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
-		assertEquals(1, notificationEvents.size());
+		assertThat(notificationEvents).hasSize(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
 		assertEquals(theExpectedEventNumber, notificationEvent.getEventNumber());
 		assertEquals(sentResource.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());

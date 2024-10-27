@@ -29,10 +29,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ContainedTest.class);
@@ -78,7 +77,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("name", "Smith"));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id));
 	}
 	
 	@Test
@@ -114,7 +113,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map.add("subject", new ReferenceParam("name", "Smith"));
 		map.setLoadSynchronous(true);
 
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id));
 
 	}
 	
@@ -183,7 +182,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.add("general-practitioner", new ReferenceParam("family", "Smith"));
 
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), containsInAnyOrder(toValues(id)));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactlyInAnyOrder(toValues(id));
 	}
 	
 	@Test
@@ -267,7 +266,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.add("based-on", new ReferenceParam("authored", "2021-02-23"));
 
-		assertThat(toUnqualifiedVersionlessIdValues(myEncounterDao.search(map)), containsInAnyOrder(toValues(id)));
+		assertThat(toUnqualifiedVersionlessIdValues(myEncounterDao.search(map))).containsExactlyInAnyOrder(toValues(id));
 	}
 	
 	@Test

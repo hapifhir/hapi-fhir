@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5720
+jira: SMILE-8091
+title: "System-level and Type-level History operations on the JPA server (i.e. `_history`) could sometimes
+   contain duplicates or miss entries when a large number of matching resources on the server had identical
+   update timestamps. This has been corrected."

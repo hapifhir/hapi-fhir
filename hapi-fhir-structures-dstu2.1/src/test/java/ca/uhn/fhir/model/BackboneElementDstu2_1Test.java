@@ -2,6 +2,7 @@ package ca.uhn.fhir.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.hl7.fhir.dstu2016may.model.BackboneElement;
 import org.hl7.fhir.dstu2016may.model.Patient.PatientCommunicationComponent;
@@ -20,7 +21,7 @@ public class BackboneElementDstu2_1Test {
         PatientCommunicationComponent copiedPcc = pcc1.copy();
         String copiedPccID = copiedPcc.getIdElement().getIdPart();
 
-        assertTrue(copiedPcc instanceof BackboneElement); // Just making sure this assumption still holds up, otherwise this test isn't very useful
-        assertEquals("1001", copiedPccID);
+			assertTrue(copiedPcc instanceof BackboneElement); // Just making sure this assumption still holds up, otherwise this test isn't very useful
+			assertEquals("1001", copiedPccID);
     }
 }

@@ -5,42 +5,44 @@ import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IncludeAndRevincludeParameterHl7OrgTest {
 
-	private static CloseableHttpClient ourClient;
-	private static int ourPort;
-	private static Server ourServer;
-	private static FhirContext ourCtx;
+  private static final FhirContext ourCtx = FhirContext.forDstu2Hl7OrgCached();
 	private static Set<Include> ourIncludes;
 	private static Set<Include> ourReverseIncludes;
 
-	@BeforeEach
+  @RegisterExtension
+  public static RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+      .registerProvider(new DummyPatientResourceProvider())
+      .withPagingProvider(new FifoMemoryPagingProvider(100))
+      .setDefaultResponseEncoding(EncodingEnum.JSON)
+      .withServer(s->s.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE))
+      .setDefaultPrettyPrint(false);
+
+  @RegisterExtension
+  public static HttpClientExtension ourClient = new HttpClientExtension();
+
+  @BeforeEach
 	public void before() {
 		ourIncludes = null;
 		ourReverseIncludes = null;
@@ -48,56 +50,33 @@ public class IncludeAndRevincludeParameterHl7OrgTest {
 	
 	@Test
 	public void testNoIncludes() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=normalInclude");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=normalInclude");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		
-		assertThat(ourIncludes, hasSize(0));
-		assertThat(ourReverseIncludes, hasSize(0));
+
+		assertThat(ourIncludes).hasSize(0);
+		assertThat(ourReverseIncludes).hasSize(0);
 	}
 
 	@Test
 	public void testWithBoth() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=normalInclude&_include=A.a&_include=B.b&_revinclude=C.c&_revinclude=D.d");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=normalInclude&_include=A.a&_include=B.b&_revinclude=C.c&_revinclude=D.d");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		
-		assertThat(ourIncludes, hasSize(2));
-		assertThat(ourReverseIncludes, hasSize(2));
-		assertThat(ourIncludes, containsInAnyOrder(new Include("A.a"), new Include("B.b")));
-		assertThat(ourReverseIncludes, containsInAnyOrder(new Include("C.c"), new Include("D.d")));
+
+		assertThat(ourIncludes).hasSize(2);
+		assertThat(ourReverseIncludes).hasSize(2);
+		assertThat(ourIncludes).containsExactlyInAnyOrder(new Include("A.a"), new Include("B.b"));
+		assertThat(ourReverseIncludes).containsExactlyInAnyOrder(new Include("C.c"), new Include("D.d"));
 	}
 
 	@AfterAll
 	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-
-		ourCtx = FhirContext.forDstu2Hl7Org();
-		ourServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(new DummyPatientResourceProvider());
-        servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
+    TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {

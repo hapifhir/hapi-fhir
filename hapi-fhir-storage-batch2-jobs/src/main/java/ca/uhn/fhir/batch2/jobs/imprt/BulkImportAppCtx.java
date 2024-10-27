@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public class BulkImportAppCtx {
 	public static final int PARAM_MAXIMUM_BATCH_SIZE_DEFAULT = 800; // Avoid the 1000 SQL param limit
 
 	@Bean
-	public JobDefinition bulkImport2JobDefinition() {
+	public JobDefinition<BulkImportJobParameters> bulkImport2JobDefinition() {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(JOB_BULK_IMPORT_PULL)
 				.setJobDescription("FHIR Bulk Import using pull-based data source")

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
@@ -36,6 +35,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -45,9 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.Collections;
-import javax.servlet.http.HttpServletRequest;
 
 public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
 		implements IFhirResourceDaoPatient<T> {
@@ -67,14 +65,14 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 			StringAndListParam theNarrative,
 			StringAndListParam theFilter,
 			StringAndListParam theTypes,
+			boolean theMdmExpand,
 			RequestDetails theRequest) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
 		}
 		if (theOffset != null) {
-			throw new IllegalArgumentException(
-					Msg.code(1106) + "Everything operation does not support offset searching");
+			paramMap.setOffset(theOffset.getValue());
 		}
 		if (theContent != null) {
 			paramMap.add(Constants.PARAM_CONTENT, theContent);
@@ -95,11 +93,8 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
 		if (theIds != null) {
-			if (theRequest.getParameters().containsKey("_mdm")) {
-				String[] paramVal = theRequest.getParameters().get("_mdm");
-				if (Arrays.asList(paramVal).contains("true")) {
-					theIds.getValuesAsQueryTokens().forEach(param -> param.setMdmExpand(true));
-				}
+			if (theMdmExpand) {
+				theIds.getValuesAsQueryTokens().forEach(param -> param.setMdmExpand(true));
 			}
 			paramMap.add("_id", theIds);
 		}
@@ -109,7 +104,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 		}
 
 		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-				theRequest, getResourceName(), paramMap, null);
+				theRequest, getResourceName(), paramMap);
 
 		adjustCount(theRequest, paramMap);
 
@@ -161,6 +156,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 				theQueryParams.getNarrative(),
 				theQueryParams.getFilter(),
 				theQueryParams.getTypes(),
+				theQueryParams.getMdmExpand(),
 				theRequestDetails);
 	}
 
@@ -181,6 +177,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 				theQueryParams.getNarrative(),
 				theQueryParams.getFilter(),
 				theQueryParams.getTypes(),
+				theQueryParams.getMdmExpand(),
 				theRequestDetails);
 	}
 }

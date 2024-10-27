@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.FhirTerser;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -46,10 +47,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.context.FhirVersionEnum.DSTU3;
 import static ca.uhn.fhir.context.FhirVersionEnum.R4;
+import static ca.uhn.fhir.context.FhirVersionEnum.R5;
 
 @Service
 public class GoldenResourceHelper {
@@ -158,7 +159,7 @@ public class GoldenResourceHelper {
 	private void cloneMDMEidsIntoNewGoldenResource(
 			BaseRuntimeChildDefinition theGoldenResourceIdentifier,
 			IAnyResource theIncomingResource,
-			IBase theNewGoldenResource) {
+			IBaseResource theNewGoldenResource) {
 		String incomingResourceType = myFhirContext.getResourceType(theIncomingResource);
 		String mdmEIDSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(incomingResourceType);
 
@@ -181,7 +182,7 @@ public class GoldenResourceHelper {
 					ourLog.debug(
 							"Incoming resource EID System {} matches EID system in the MDM rules.  Copying to Golden Resource.",
 							incomingIdentifierSystemString);
-					ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(
+					ca.uhn.fhir.util.TerserUtil.cloneIdentifierIntoResource(
 							myFhirContext,
 							theGoldenResourceIdentifier,
 							incomingResourceIdentifier,
@@ -200,7 +201,7 @@ public class GoldenResourceHelper {
 
 	private void validateContextSupported() {
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
-		if (fhirVersion == R4 || fhirVersion == DSTU3) {
+		if (fhirVersion == R4 || fhirVersion == DSTU3 || fhirVersion == R5) {
 			return;
 		}
 		throw new UnsupportedOperationException(Msg.code(1489) + "Version not supported: "
@@ -381,7 +382,7 @@ public class GoldenResourceHelper {
 		RuntimeResourceDefinition resourceDefinition = theFhirContext.getResourceDefinition(theResourceToCloneInto);
 		// hapi has 2 metamodels: for children and types
 		BaseRuntimeChildDefinition resourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
-		ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(
+		ca.uhn.fhir.util.TerserUtil.cloneIdentifierIntoResource(
 				theFhirContext,
 				resourceIdentifier,
 				IdentifierUtil.toId(theFhirContext, theEid),

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProviderR4Test {
 
@@ -35,7 +36,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.execute();
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 		assertEquals("dhtest7", response.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 
@@ -50,7 +51,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.withParameter(Parameters.class, "definition", sd)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 	@Test
@@ -65,7 +66,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.withNoParameters(Parameters.class)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 	@Test
@@ -80,7 +81,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.withParameter(Parameters.class, "url", new StringType("http://example.com/fhir/StructureDefinition/patient-1a-extensions"))
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 	@Test

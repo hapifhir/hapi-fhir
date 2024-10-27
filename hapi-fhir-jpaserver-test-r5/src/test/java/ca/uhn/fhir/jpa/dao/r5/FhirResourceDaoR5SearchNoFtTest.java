@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.ClinicalUseDefinition;
 import org.hl7.fhir.r5.model.CodeableConcept;
@@ -39,12 +38,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
 @SuppressWarnings({"Duplicates"})
@@ -82,7 +79,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         value.addAnd(new HasOrListParam().addOr(new HasParam("PractitionerRole", "practitioner", "organization", "ORG")));
         params.add("_has", value);
         IBundleProvider outcome = myPractitionerDao.search(params);
-        assertEquals(1, outcome.getResources(0, 1).size());
+			assertThat(outcome.getResources(0, 1)).hasSize(1);
     }
 
     @Test
@@ -108,7 +105,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         value.addAnd(new HasOrListParam().addOr(new HasParam("PractitionerRole", "practitioner", "organization", "Organization/ORG")));
         params.add("_has", value);
         IBundleProvider outcome = myPractitionerDao.search(params);
-        assertEquals(1, outcome.getResources(0, 1).size());
+			assertThat(outcome.getResources(0, 1)).hasSize(1);
     }
 
     @Test
@@ -140,7 +137,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         myCaptureQueriesListener.clear();
         IBundleProvider outcome = myPractitionerDao.search(params);
         myCaptureQueriesListener.logSelectQueriesForCurrentThread(1);
-        assertEquals(1, outcome.getResources(0, 1).size());
+			assertThat(outcome.getResources(0, 1)).hasSize(1);
     }
 
     @Test
@@ -159,7 +156,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         Long id = myPatientDao.create(p).getId().getIdPartAsLong();
 
         IBundleProvider outcome = myPatientDao.search(new SearchParameterMap());
-        assertEquals(3, outcome.size().intValue());
+		assertEquals(3, outcome.size().intValue());
 
         runInTransaction(() -> {
             ResourceTable table = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
@@ -167,13 +164,13 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
             myResourceTableDao.save(table);
         });
 
-        assertEquals(2, outcome.getResources(0, 3).size());
+			assertThat(outcome.getResources(0, 3)).hasSize(2);
 
         runInTransaction(() -> {
             myResourceHistoryTableDao.deleteAll();
         });
 
-        assertEquals(0, outcome.getResources(0, 3).size());
+			assertThat(outcome.getResources(0, 3)).isEmpty();
     }
 
     @Test
@@ -196,7 +193,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
         SearchParameterMap map = SearchParameterMap.newSynchronous(ClinicalUseDefinition.SP_CONTRAINDICATION_REFERENCE, new ReferenceParam(obsId));
         List<String> outcome = toUnqualifiedVersionlessIdValues(myClinicalUseDefinitionDao.search(map, mySrd));
-        assertThat(outcome, Matchers.contains(id));
+			assertThat(outcome).containsExactly(id);
 
     }
 
@@ -220,7 +217,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
         SearchParameterMap map = SearchParameterMap.newSynchronous(ClinicalUseDefinition.SP_CONTRAINDICATION, new TokenParam("http://foo", "bar"));
         List<String> outcome = toUnqualifiedVersionlessIdValues(myClinicalUseDefinitionDao.search(map, mySrd));
-        assertThat(outcome, Matchers.contains(id));
+			assertThat(outcome).containsExactly(id);
 
     }
 
@@ -240,8 +237,8 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
                 .newSynchronous(Patient.SP_ADDRESS, new StringParam("DISTRICT123"));
         IBundleProvider outcome = myPatientDao.search(params, mySrd);
 
-        // Verify
-        assertThat(toUnqualifiedVersionlessIdValues(outcome), Matchers.contains(id));
+			// Verify
+			assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactly(id);
 
     }
 
@@ -301,9 +298,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
                     .filter(t -> t.getParamName().contains("."))
                     .map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
                     .toList();
-            assertThat(params.toString(), params, containsInAnyOrder(
-                    "composition.patient.identifier http://foo|bar"
-            ));
+					assertThat(params).as(params.toString()).containsExactlyInAnyOrder("composition.patient.identifier http://foo|bar");
         });
 
         // Test 2
@@ -312,12 +307,12 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         SearchParameterMap map = SearchParameterMap
                 .newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
         outcome = myBundleDao.search(map, mySrd);
-        assertEquals(1, outcome.size());
+		assertEquals(1, outcome.size());
 
         map = SearchParameterMap
                 .newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
         outcome = myBundleDao.search(map, mySrd);
-        assertEquals(1, outcome.size());
+		assertEquals(1, outcome.size());
     }
 
     @Test
@@ -334,9 +329,9 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
         try {
             myObservationDao.search(params, new SystemRequestDetails());
-            fail();
+			fail();
         } catch (InvalidRequestException e) {
-            assertEquals("HAPI-2305: Reference field does not exist: " + referenceFieldName, e.getMessage());
+			assertEquals("HAPI-2305: Reference field does not exist: " + referenceFieldName, e.getMessage());
         }
     }
 
@@ -350,7 +345,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
         SearchParameterMap params = SearchParameterMap.newSynchronous();
         params.add(Constants.PARAM_LANGUAGE, new TokenParam("en"));
-        assertThrows(InvalidRequestException.class, () -> myObservationDao.search(params, mySrd));
+		assertThatExceptionOfType(InvalidRequestException.class).isThrownBy(() -> myObservationDao.search(params, mySrd));
     }
 
     @Test
@@ -366,7 +361,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
         SearchParameterMap params = SearchParameterMap.newSynchronous();
         params.add(Constants.PARAM_LANGUAGE, new TokenParam("en"));
-        assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params, mySrd)), contains("Observation/A"));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params, mySrd))).containsExactly("Observation/A");
     }
 
 }

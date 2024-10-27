@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6305
+title: "Previously, when having StorageSettings#getIndexMissingFields() == IndexEnabledEnum.DISABLED (default value) 
+and attempting to search with the missing qualifier against a resource type with multiple search parameters of type reference, 
+the returned results would be incorrect. This has been fixed."

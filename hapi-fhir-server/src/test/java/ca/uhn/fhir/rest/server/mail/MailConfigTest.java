@@ -3,11 +3,11 @@ package ca.uhn.fhir.rest.server.mail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MailConfigTest {
@@ -78,13 +78,12 @@ public class MailConfigTest {
 		// setup
 		final MailConfig other = withMainConfig();
 		// execute & validate
-		assertEquals(fixture, fixture);
-		assertSame(fixture, fixture);
+		assertNotNull(fixture);
+		assertThat(fixture).isSameAs(fixture);
 		assertEquals(fixture, other);
 		assertNotSame(fixture, other);
 		assertEquals(fixture.hashCode(), other.hashCode());
-		assertNotEquals(fixture.toString(), other.toString());
-		assertNotEquals(fixture, null);
+		assertThat(other.toString()).isNotEqualTo(fixture.toString());
 	}
 
 	@Test

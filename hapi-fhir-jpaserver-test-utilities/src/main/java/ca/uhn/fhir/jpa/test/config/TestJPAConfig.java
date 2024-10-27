@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.term.TermCodeSystemDeleteJobSvcWithUniTestFailures;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
@@ -40,14 +41,13 @@ import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscrib
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.LoggingEmailSender;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
+import jakarta.persistence.EntityManagerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
-
-import javax.persistence.EntityManagerFactory;
 
 @Configuration
 @Import({
@@ -67,6 +67,11 @@ public class TestJPAConfig {
 		}
 
 		return retVal;
+	}
+
+	@Bean
+	public SubscriptionSettings subscriptionSettings() {
+		return new SubscriptionSettings();
 	}
 
 	@Bean

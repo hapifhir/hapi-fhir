@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,9 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 			List<Triple<String, String, String>> theTokens,
 			String theParamName,
 			RequestPartitionId theRequestPartitionId) {
-		addJoin(getTable(), myTagDefinitionTable, myColumnTagId, myTagDefinitionColumnTagId);
+		addJoin(getTable(), myTagDefinitionTable, new DbColumn[] {myColumnTagId}, new DbColumn[] {
+			myTagDefinitionColumnTagId
+		});
 		return createPredicateTagList(theTagType, theTokens);
 	}
 

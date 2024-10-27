@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.9.10-SNAPSHOT</version>
+		<version>7.7.0-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -131,12 +131,6 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
-					<classFolders>
-						<classFolder>${basedir}/target/classes</classFolder>
-					</classFolders>
-					<sourceFolders>
-						<sourceFolder>${basedir}/src/main/java</sourceFolder>
-					</sourceFolders>
 					<dumpOnExit>true</dumpOnExit>
 				</configuration>
 				<executions>

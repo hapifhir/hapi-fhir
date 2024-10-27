@@ -1,0 +1,4 @@
+---
+type: add
+issue: 6031
+title: "Subscriptions now support the evaluation use of FhirPath criteria and the use of the variables %current and %previous. Thanks to Jens Villadsen (@jkiddo) for the contribution!"

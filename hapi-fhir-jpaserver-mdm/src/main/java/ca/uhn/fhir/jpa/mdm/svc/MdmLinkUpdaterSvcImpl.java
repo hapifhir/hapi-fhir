@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,6 +188,12 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 			// pointcut for MDM_POST_UPDATE_LINK
 			MdmLinkEvent event = new MdmLinkEvent();
 			event.addMdmLink(myModelConverter.toJson(mdmLink));
+
+			// add any link updates from side effects
+			mdmContext.getMdmLinks().stream().forEach(link -> {
+				event.addMdmLink(myModelConverter.toJson(link));
+			});
+
 			HookParams hookParams = new HookParams();
 			hookParams.add(RequestDetails.class, theParams.getRequestDetails()).add(MdmLinkEvent.class, event);
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_POST_UPDATE_LINK, hookParams);

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,34 @@
  */
 package ca.uhn.fhir.cr.dstu3.questionnaire;
 
-import ca.uhn.fhir.cr.dstu3.IQuestionnaireProcessorFactory;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Questionnaire;
-import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
+import static ca.uhn.fhir.cr.common.IdHelper.getIdType;
 
 public class QuestionnairePackageProvider {
 	@Autowired
-	IQuestionnaireProcessorFactory myDstu3QuestionnaireProcessorFactory;
+	IQuestionnaireProcessorFactory myQuestionnaireProcessorFactory;
 
 	/**
 	 * Implements a $package operation following the <a href=
 	 * "https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
 	 *
 	 * @param theId             The id of the Questionnaire.
-	 * @param theCanonical      The canonical identifier for the questionnaire (optionally version-specific).
-	 * @Param theIsPut			 A boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
+	 * @param theCanonical      The canonical identifier for the Questionnaire (optionally version-specific).
+	 * @param theUrl            Canonical URL of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
+	 * @param theVersion        Version of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
+	 * @Param theIsPut			A boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
 	 * @param theRequestDetails The details (such as tenant) of this request. Usually
 	 *                          autopopulated by HAPI.
 	 * @return A Bundle containing the Questionnaire and all related Library, CodeSystem and ValueSet resources
@@ -50,20 +55,32 @@ public class QuestionnairePackageProvider {
 	public Bundle packageQuestionnaire(
 			@IdParam IdType theId,
 			@OperationParam(name = "canonical") String theCanonical,
-			@OperationParam(name = "usePut") String theIsPut,
+			@OperationParam(name = "url") String theUrl,
+			@OperationParam(name = "version") String theVersion,
+			@OperationParam(name = "usePut") BooleanType theIsPut,
 			RequestDetails theRequestDetails) {
-		return (Bundle) myDstu3QuestionnaireProcessorFactory
+		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
+		return (Bundle) myQuestionnaireProcessorFactory
 				.create(theRequestDetails)
-				.packageQuestionnaire(theId, new StringType(theCanonical), null, Boolean.parseBoolean(theIsPut));
+				.packageQuestionnaire(
+						Eithers.for3(canonicalType, theId, null),
+						theIsPut == null ? Boolean.FALSE : theIsPut.booleanValue());
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
 	public Bundle packageQuestionnaire(
+			@OperationParam(name = "id") String theId,
 			@OperationParam(name = "canonical") String theCanonical,
-			@OperationParam(name = "usePut") String theIsPut,
+			@OperationParam(name = "url") String theUrl,
+			@OperationParam(name = "version") String theVersion,
+			@OperationParam(name = "usePut") BooleanType theIsPut,
 			RequestDetails theRequestDetails) {
-		return (Bundle) myDstu3QuestionnaireProcessorFactory
+		IIdType id = getIdType(FhirVersionEnum.DSTU3, "Questionnaire", theId);
+		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
+		return (Bundle) myQuestionnaireProcessorFactory
 				.create(theRequestDetails)
-				.packageQuestionnaire(null, new StringType(theCanonical), null, Boolean.parseBoolean(theIsPut));
+				.packageQuestionnaire(
+						Eithers.for3(canonicalType, id, null),
+						theIsPut == null ? Boolean.FALSE : theIsPut.booleanValue());
 	}
 }

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExtensionsDstu2Test {
 
@@ -30,7 +30,7 @@ public class ExtensionsDstu2Test {
 		
 		RestSecurity sec = conf.getRest().get(0).getSecurity();
 		List<ExtensionDt> uris = sec.getUndeclaredExtensionsByUrl("http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
-		assertEquals(1, uris.size());
+		assertThat(uris).hasSize(1);
 	}
 	
 }

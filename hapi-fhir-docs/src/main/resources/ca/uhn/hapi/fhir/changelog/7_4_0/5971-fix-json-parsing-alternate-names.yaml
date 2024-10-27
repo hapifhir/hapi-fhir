@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5971
+title: "The JSON Parser failed to parse alternate names (e.g. `_family`) containing extensions if the
+  corresponding regular named element (e.g. `family`) was not present. Thanks to Stefan Lindström for
+  the pull request!"

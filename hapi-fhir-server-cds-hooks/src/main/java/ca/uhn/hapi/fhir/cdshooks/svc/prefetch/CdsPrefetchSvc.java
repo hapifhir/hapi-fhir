@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
-import ca.uhn.hapi.fhir.cdshooks.svc.CdsCrServiceMethod;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,11 +56,6 @@ public class CdsPrefetchSvc {
 
 	public void augmentRequest(CdsServiceRequestJson theCdsServiceRequestJson, ICdsServiceMethod theServiceMethod) {
 		CdsServiceJson serviceSpec = theServiceMethod.getCdsServiceJson();
-		if (theServiceMethod instanceof CdsCrServiceMethod) {
-			// CdsCrServices will retrieve data from the dao or fhir server passed in as needed,
-			// checking for missing prefetch is not necessary.
-			return;
-		}
 		Set<String> missingPrefetch = findMissingPrefetch(serviceSpec, theCdsServiceRequestJson);
 		if (missingPrefetch.isEmpty()) {
 			return;

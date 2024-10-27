@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1413,14 +1413,18 @@ class ParserState<T> {
 					myErrorHandler.invalidValue(location, value, "Attribute value must not be empty (\"\")");
 				} else {
 
-					/*
-					 * It may be possible to clean this up somewhat once the following PR is hopefully merged:
-					 * https://github.com/FasterXML/jackson-core/pull/611
-					 *
-					 * See TolerantJsonParser
-					 */
 					if ("decimal".equals(myTypeName)) {
-						if (value != null)
+						if (value != null) {
+							// remove leading plus sign from decimal value
+							if (value.startsWith("+")) {
+								value = value.substring(1);
+							}
+							/*
+							 * It may be possible to clean this up somewhat once the following PR is hopefully merged:
+							 * https://github.com/FasterXML/jackson-core/pull/611
+							 *
+							 * See TolerantJsonParser
+							 */
 							if (value.startsWith(".") && NumberUtils.isDigits(value.substring(1))) {
 								value = "0" + value;
 							} else {
@@ -1428,6 +1432,7 @@ class ParserState<T> {
 									value = value.substring(1);
 								}
 							}
+						}
 					}
 
 					try {

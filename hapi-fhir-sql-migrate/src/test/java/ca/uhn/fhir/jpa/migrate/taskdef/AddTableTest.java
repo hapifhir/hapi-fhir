@@ -7,8 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AddTableTest extends BaseTest {
 
@@ -25,7 +24,7 @@ public class AddTableTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), containsInAnyOrder("SOMETABLE"));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).containsExactlyInAnyOrder("SOMETABLE");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -34,7 +33,7 @@ public class AddTableTest extends BaseTest {
 		before(theTestDatabaseDetails);
 
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), containsInAnyOrder("SOMETABLE"));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).containsExactlyInAnyOrder("SOMETABLE");
 
 		AddTableRawSqlTask task = new AddTableRawSqlTask("1", "1");
 		task.setTableName("SOMETABLE");
@@ -42,7 +41,7 @@ public class AddTableTest extends BaseTest {
 		getMigrator().addTask(task);
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), containsInAnyOrder("SOMETABLE"));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).containsExactlyInAnyOrder("SOMETABLE");
 	}
 
 }

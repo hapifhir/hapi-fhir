@@ -105,7 +105,7 @@ class PrefetchTemplateUtilTest {
 		context.put("patientId", TEST_PATIENT_ID);
 		context.put("draftOrders", builder.getBundle());
 		String result = PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR5());
-		assertEquals(SERVICE_ID1 + "," + SERVICE_ID2 + " a " + OBSERVATION_ID +" a " + TEST_PATIENT_ID, result);
+		assertEquals(SERVICE_ID1 + "," + SERVICE_ID2 + " a " + OBSERVATION_ID + " a " + TEST_PATIENT_ID, result);
 	}
 
 	@Test

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,23 @@ import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Session;
@@ -57,44 +74,38 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.NamedEntityGraph;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PostPersist;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.Version;
+
+import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 
 @Indexed(routingBinder = @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
 @Table(
 		name = ResourceTable.HFJ_RESOURCE,
-		uniqueConstraints = {},
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = IDX_RES_TYPE_FHIR_ID,
+					columnNames = {"RES_TYPE", "FHIR_ID"})
+		},
 		indexes = {
 			// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
 			@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
+			@Index(name = "IDX_RES_FHIR_ID", columnList = "FHIR_ID"),
 			@Index(
 					name = "IDX_RES_TYPE_DEL_UPDATED",
 					columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
-			@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID,RES_UPDATED,PARTITION_ID"),
+			@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID, RES_UPDATED, PARTITION_ID")
 		})
 @NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
 	public static final int RESTYPE_LEN = 40;
 	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
 	public static final String RES_TYPE = "RES_TYPE";
+	public static final String FHIR_ID = "FHIR_ID";
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final long serialVersionUID = 1L;
+	public static final int MAX_FORCED_ID_LENGTH = 100;
+	public static final String IDX_RES_TYPE_FHIR_ID = "IDX_RES_TYPE_FHIR_ID";
+
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 * Note the extra config needed in HS6 for indexing transient props:
@@ -108,21 +119,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			searchable = Searchable.YES,
 			projectable = Projectable.YES,
 			analyzer = "standardAnalyzer")
-	@FullTextField(
-			name = "myContentTextEdgeNGram",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompleteEdgeAnalyzer")
-	@FullTextField(
-			name = "myContentTextNGram",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompleteNGramAnalyzer")
-	@FullTextField(
-			name = "myContentTextPhonetic",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myContentText;
@@ -131,12 +127,12 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private String myHashSha256;
 
-	@Column(name = "SP_HAS_LINKS")
+	@Column(name = "SP_HAS_LINKS", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myHasLinks;
 
 	@Id
-	@GenericGenerator(name = "SEQ_RESOURCE_ID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID")
 	@GenericField(projectable = Projectable.YES)
@@ -160,21 +156,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			searchable = Searchable.YES,
 			projectable = Projectable.YES,
 			analyzer = "standardAnalyzer")
-	@FullTextField(
-			name = "myNarrativeTextEdgeNGram",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompleteEdgeAnalyzer")
-	@FullTextField(
-			name = "myNarrativeTextNGram",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompleteNGramAnalyzer")
-	@FullTextField(
-			name = "myNarrativeTextPhonetic",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myNarrativeText;
@@ -192,7 +173,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
 
-	@Column(name = "SP_COORDS_PRESENT")
+	@Column(name = "SP_COORDS_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsCoordsPopulated;
 
@@ -204,7 +185,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
 
-	@Column(name = "SP_DATE_PRESENT")
+	@Column(name = "SP_DATE_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsDatePopulated;
 
@@ -216,7 +197,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
 
-	@Column(name = "SP_NUMBER_PRESENT")
+	@Column(name = "SP_NUMBER_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsNumberPopulated;
 
@@ -228,7 +209,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamQuantity> myParamsQuantity;
 
-	@Column(name = "SP_QUANTITY_PRESENT")
+	@Column(name = "SP_QUANTITY_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsQuantityPopulated;
 
@@ -249,7 +230,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * NOTE : use Boolean class instead of boolean primitive, in order to set the existing rows to null
 	 * since 5.3.0
 	 */
-	@Column(name = "SP_QUANTITY_NRML_PRESENT")
+	@Column(name = "SP_QUANTITY_NRML_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private Boolean myParamsQuantityNormalizedPopulated = Boolean.FALSE;
 
@@ -261,7 +242,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamString> myParamsString;
 
-	@Column(name = "SP_STRING_PRESENT")
+	@Column(name = "SP_STRING_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsStringPopulated;
 
@@ -273,7 +254,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamToken> myParamsToken;
 
-	@Column(name = "SP_TOKEN_PRESENT")
+	@Column(name = "SP_TOKEN_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsTokenPopulated;
 
@@ -285,7 +266,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamUri> myParamsUri;
 
-	@Column(name = "SP_URI_PRESENT")
+	@Column(name = "SP_URI_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsUriPopulated;
 
@@ -371,7 +352,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * Will be null during insert time until the first read.
 	 */
 	@Column(
-			name = "FHIR_ID",
+			name = FHIR_ID,
 			// [A-Za-z0-9\-\.]{1,64} - https://www.hl7.org/fhir/datatypes.html#id
 			length = 64,
 			// we never update this after insert, and the Generator will otherwise "dirty" the object.
@@ -393,7 +374,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private Boolean mySearchUrlPresent = false;
 
 	@Version
-	@Column(name = "RES_VER")
+	@Column(name = "RES_VER", nullable = false)
 	private long myVersion;
 
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
@@ -407,15 +388,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Transient
 	private transient boolean myVersionUpdatedInCurrentTransaction;
-
-	@OneToOne(
-			optional = true,
-			fetch = FetchType.EAGER,
-			cascade = {},
-			orphanRemoval = false,
-			mappedBy = "myResource")
-	@OptimisticLock(excluded = true)
-	private ForcedId myForcedId;
 
 	@Transient
 	private volatile String myCreatedByMatchUrl;
@@ -877,10 +849,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
-		retVal.setTransientForcedId(getTransientForcedId());
+		retVal.setTransientForcedId(getFhirId());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setResourceTable(this);
-		retVal.setForcedId(getForcedId());
 		retVal.setPartitionId(getPartitionId());
 
 		retVal.setHasTags(isHasTags());
@@ -911,6 +882,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("pid", myId);
+		b.append("fhirId", myFhirId);
 		b.append("resourceType", myResourceType);
 		b.append("version", myVersion);
 		if (getPartitionId() != null) {
@@ -959,16 +931,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	@Override
-	public ForcedId getForcedId() {
-		return myForcedId;
-	}
-
-	@Override
-	public void setForcedId(ForcedId theForcedId) {
-		myForcedId = theForcedId;
-	}
-
-	@Override
 	public IdDt getIdDt() {
 		IdDt retVal = new IdDt();
 		populateId(retVal);
@@ -982,24 +944,14 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	private void populateId(IIdType retVal) {
+		String resourceId;
 		if (myFhirId != null && !myFhirId.isEmpty()) {
-			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-		} else if (getTransientForcedId() != null) {
-			// Avoid a join query if possible
-			retVal.setValue(getResourceType()
-					+ '/'
-					+ getTransientForcedId()
-					+ '/'
-					+ Constants.PARAM_HISTORY
-					+ '/'
-					+ getVersion());
-		} else if (getForcedId() == null) {
-			Long id = this.getResourceId();
-			retVal.setValue(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			resourceId = myFhirId;
 		} else {
-			String forcedId = getForcedId().getForcedId();
-			retVal.setValue(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			Long id = this.getResourceId();
+			resourceId = Long.toString(id);
 		}
+		retVal.setValue(getResourceType() + '/' + resourceId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 	}
 
 	public String getCreatedByMatchUrl() {
@@ -1045,6 +997,10 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setFhirId(String theFhirId) {
 		myFhirId = theFhirId;
+	}
+
+	public String asTypedFhirResourceId() {
+		return getResourceType() + "/" + getFhirId();
 	}
 
 	/**

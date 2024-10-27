@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+
 class JobWorkCursorTest extends BaseBatch2Test {
 
 	private JobDefinition<TestJobParameters> myDefinition;

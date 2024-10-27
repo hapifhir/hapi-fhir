@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.config;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HapiFhirLocalContainerEntityManagerFactoryBeanTest {
 	HapiFhirLocalContainerEntityManagerFactoryBean myBean = new HapiFhirLocalContainerEntityManagerFactoryBean(new DefaultListableBeanFactory());
@@ -14,7 +14,7 @@ class HapiFhirLocalContainerEntityManagerFactoryBeanTest {
 
 		myBean.addHibernateHook("theKey", "theHookClass");
 
-		assertEquals("theHookClass", myBean.getJpaPropertyMap().get("theKey"));
+		assertThat(myBean.getJpaPropertyMap()).containsEntry("theKey", "theHookClass");
 	}
 
 	@Test
@@ -24,7 +24,7 @@ class HapiFhirLocalContainerEntityManagerFactoryBeanTest {
 
 		myBean.addHibernateHook("theKey", "theHookClass");
 
-		assertEquals("hook1,hook2,theHookClass", myBean.getJpaPropertyMap().get("theKey"));
+		assertThat(myBean.getJpaPropertyMap()).containsEntry("theKey", "hook1,hook2,theHookClass");
 	}
 
 }

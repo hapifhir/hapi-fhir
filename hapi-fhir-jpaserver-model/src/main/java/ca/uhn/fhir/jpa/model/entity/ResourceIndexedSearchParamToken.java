@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,35 +21,39 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.TokenParam;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 @Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
 		name = "HFJ_SPIDX_TOKEN",
@@ -85,15 +89,10 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	@SuppressWarnings("unused")
 	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_TOKEN", sequenceName = "SEQ_SPIDX_TOKEN")
+	@GenericGenerator(name = "SEQ_SPIDX_TOKEN", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_TOKEN")
 	@Column(name = "SP_ID")
 	private Long myId;
-	/**
-	 * @since 3.4.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
@@ -217,9 +216,11 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		}
 		ResourceIndexedSearchParamToken obj = (ResourceIndexedSearchParamToken) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getHashSystem(), obj.getHashSystem());
 		b.append(getHashValue(), obj.getHashValue());
 		b.append(getHashSystemAndValue(), obj.getHashSystemAndValue());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
 
@@ -229,10 +230,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	private void setHashSystem(Long theHashSystem) {
 		myHashSystem = theHashSystem;
-	}
-
-	private void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	public Long getHashSystemAndValue() {
@@ -283,11 +280,11 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
+		b.append(getHashIdentity());
 		b.append(getHashValue());
 		b.append(getHashSystem());
 		b.append(getHashSystemAndValue());
-
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 
@@ -299,6 +296,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("id", getId());
 		if (getPartitionId() != null) {
 			b.append("partitionId", getPartitionId().getPartitionId());
 		}
@@ -361,7 +359,8 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			String theResourceType,
 			String theParamName,
 			String theSystem) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, trim(theSystem));
+		return hashSearchParam(
+				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, trim(theSystem));
 	}
 
 	public static long calculateHashSystemAndValue(
@@ -383,7 +382,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			String theParamName,
 			String theSystem,
 			String theValue) {
-		return hash(
+		return hashSearchParam(
 				thePartitionSettings,
 				theRequestPartitionId,
 				theResourceType,
@@ -409,7 +408,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			String theParamName,
 			String theValue) {
 		String value = trim(theValue);
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
+		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 	@Override
@@ -424,11 +423,12 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return this;
 	}
 
-	@PrePersist
 	/**
 	 * We truncate the fields at the last moment because the tables have limited size.
 	 * We don't truncate earlier in the flow because the index hashes MUST be calculated on the full string.
 	 */
+	@PrePersist
+	@PreUpdate
 	public void truncateFieldsForDB() {
 		mySystem = StringUtils.truncate(mySystem, MAX_LENGTH);
 		myValue = StringUtils.truncate(myValue, MAX_LENGTH);

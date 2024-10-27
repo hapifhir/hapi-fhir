@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -285,6 +284,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			throws IOException {
 
 		switch (theChildDef.getChildType()) {
+			case EXTENSION_DECLARED:
+				break;
 			case ID_DATATYPE: {
 				IIdType value = (IIdType) theNextValue;
 				String encodedValue = "id".equals(theChildName) ? value.getIdPart() : value.getValue();
@@ -659,9 +660,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 						theEventWriter.endArray();
 					}
 					BaseRuntimeChildDefinition replacedParentDefinition = nextChild.getReplacedParentDefinition();
-					if (isMultipleCardinality(nextChild.getMax())
-							|| (replacedParentDefinition != null
-									&& isMultipleCardinality(replacedParentDefinition.getMax()))) {
+					if (nextChild.isMultipleCardinality()
+							|| (replacedParentDefinition != null && replacedParentDefinition.isMultipleCardinality())) {
 						beginArray(theEventWriter, nextChildSpecificName);
 						inArray = true;
 						encodeChildElementToStreamWriter(
@@ -728,14 +728,14 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					List<HeldExtension> heldModExts = Collections.emptyList();
 					if (extensions.size() > i
 							&& extensions.get(i) != null
-							&& extensions.get(i).isEmpty() == false) {
+							&& !extensions.get(i).isEmpty()) {
 						haveContent = true;
 						heldExts = extensions.get(i);
 					}
 
 					if (modifierExtensions.size() > i
 							&& modifierExtensions.get(i) != null
-							&& modifierExtensions.get(i).isEmpty() == false) {
+							&& !modifierExtensions.get(i).isEmpty()) {
 						haveContent = true;
 						heldModExts = modifierExtensions.get(i);
 					}
@@ -746,7 +746,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					} else {
 						nextComments = null;
 					}
-					if (nextComments != null && nextComments.isEmpty() == false) {
+					if (nextComments != null && !nextComments.isEmpty()) {
 						haveContent = true;
 					}
 
@@ -799,13 +799,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	private boolean isSupportsFhirComment() {
 		if (myIsSupportsFhirComment == null) {
-			myIsSupportsFhirComment = isFhirVersionLessThanOrEqualTo(FhirVersionEnum.DSTU2_1);
+			myIsSupportsFhirComment = !getContext().getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1);
 		}
 		return myIsSupportsFhirComment;
-	}
-
-	private boolean isMultipleCardinality(int maxCardinality) {
-		return maxCardinality > 1 || maxCardinality == Child.MAX_UNLIMITED;
 	}
 
 	private void encodeCompositeElementToStreamWriter(
@@ -842,7 +838,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					+ theResource.getStructureFhirVersionEnum());
 		}
 
-		EncodeContext encodeContext = new EncodeContext();
+		EncodeContext encodeContext = new EncodeContext(this, getContext().getParserOptions());
 		String resourceName = getContext().getResourceType(theResource);
 		encodeContext.pushPath(resourceName, true);
 		doEncodeResourceToJsonLikeWriter(theResource, theJsonLikeWriter, encodeContext);
@@ -893,12 +889,12 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			EncodeContext theEncodeContext)
 			throws IOException {
 
-		if (!super.shouldEncodeResource(theResDef.getName())) {
+		if (!super.shouldEncodeResource(theResDef.getName(), theEncodeContext)) {
 			return;
 		}
 
 		if (!theContainedResource) {
-			setContainedResources(getContext().newTerser().containResources(theResource));
+			containResourcesInReferences(theResource);
 		}
 
 		RuntimeResourceDefinition resDef = getContext().getResourceDefinition(theResource);
@@ -917,10 +913,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			// Undeclared extensions
 			extractUndeclaredExtensions(
 					theResourceId, extensions, modifierExtensions, null, null, theEncodeContext, theContainedResource);
-			boolean haveExtension = false;
-			if (!extensions.isEmpty()) {
-				haveExtension = true;
-			}
+			boolean haveExtension = !extensions.isEmpty();
 
 			if (theResourceId.hasFormatComment() || haveExtension) {
 				beginObject(theEventWriter, "_id");
@@ -982,15 +975,15 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 		List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionMetadataKeys = getExtensionMetadataKeys(resource);
 
-		if (super.shouldEncodeResourceMeta(resource)
+		if (super.shouldEncodeResourceMeta(resource, theEncodeContext)
 						&& (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false)
 				|| !extensionMetadataKeys.isEmpty()) {
 			beginObject(theEventWriter, "meta");
 
-			if (shouldEncodePath(resource, "meta.versionId")) {
+			if (shouldEncodePath(resource, "meta.versionId", theEncodeContext)) {
 				writeOptionalTagWithTextNode(theEventWriter, "versionId", versionIdPart);
 			}
-			if (shouldEncodePath(resource, "meta.lastUpdated")) {
+			if (shouldEncodePath(resource, "meta.lastUpdated", theEncodeContext)) {
 				writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", updated);
 			}
 
@@ -1368,9 +1361,17 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				String alternateName = keyIter.next();
 				if (alternateName.startsWith("_") && alternateName.length() > 1) {
 					BaseJsonLikeValue nextValue = theObject.get(alternateName);
+					String nextName = alternateName.substring(1);
+
 					if (nextValue != null) {
+						BaseJsonLikeValue nonAlternativeValue = theObject.get(nextName);
+
+						// Only alternate values with no corresponding "normal" value is unhandled from previous step.
+						if (nonAlternativeValue != null) {
+							continue;
+						}
+
 						if (nextValue.isObject()) {
-							String nextName = alternateName.substring(1);
 							if (theObject.get(nextName) == null) {
 								theState.enteringNewElement(null, nextName);
 								parseAlternates(nextValue, theState, alternateName, alternateName);

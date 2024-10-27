@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,9 @@ import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -59,9 +62,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -118,7 +118,7 @@ public class BinaryAccessProvider {
 
 			String blobId = attachmentId.get();
 
-			StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(theResourceId, blobId);
+			StoredDetails blobDetails = myBinaryStorageSvc.fetchBinaryContentDetails(theResourceId, blobId);
 			if (blobDetails == null) {
 				String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
 				throw new InvalidRequestException(Msg.code(1331) + msg);
@@ -138,7 +138,7 @@ public class BinaryAccessProvider {
 			theServletResponse.addHeader(
 					Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(blobDetails.getPublished()));
 
-			myBinaryStorageSvc.writeBlob(theResourceId, blobId, theServletResponse.getOutputStream());
+			myBinaryStorageSvc.writeBinaryContent(theResourceId, blobId, theServletResponse.getOutputStream());
 			theServletResponse.getOutputStream().close();
 
 		} else {
@@ -212,11 +212,11 @@ public class BinaryAccessProvider {
 						Msg.code(2073)
 								+ "Input stream is empty! Ensure that you are uploading data, and if so, ensure that no interceptors are in use that may be consuming the input stream");
 			}
-			if (myBinaryStorageSvc.shouldStoreBlob(size, theResourceId, requestContentType)) {
-				StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(
+			if (myBinaryStorageSvc.shouldStoreBinaryContent(size, theResourceId, requestContentType)) {
+				StoredDetails storedDetails = myBinaryStorageSvc.storeBinaryContent(
 						theResourceId, null, requestContentType, new ByteArrayInputStream(bytes), theRequestDetails);
 				size = storedDetails.getBytes();
-				blobId = storedDetails.getBlobId();
+				blobId = storedDetails.getBinaryContentId();
 				Validate.notBlank(blobId, "BinaryStorageSvc returned a null blob ID"); // should not happen
 				Validate.isTrue(size == theServletRequest.getContentLength(), "Unexpected stored size"); // Sanity check
 			}

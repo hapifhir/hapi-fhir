@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -15,10 +16,11 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class ResponseTerminologyDisplayPopulationInterceptorTest {
+public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseValidationTestWithInlineMocks {
 
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 	@Order(0)
@@ -48,7 +50,7 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
-		assertEquals(1, p.getMaritalStatus().getCoding().size());
+		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
 		assertEquals("Annulled", p.getMaritalStatus().getCoding().get(0).getDisplay());
 	}
 
@@ -61,7 +63,7 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
-		assertEquals(1, p.getMaritalStatus().getCoding().size());
+		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
 		assertNull(p.getMaritalStatus().getCoding().get(0).getDisplay());
 	}
 
@@ -74,9 +76,9 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		myClient.create().resource(p).execute();
 
 		Bundle bundle = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 		p = (Patient) bundle.getEntry().get(0).getResource();
-		assertEquals(1, p.getMaritalStatus().getCoding().size());
+		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
 		assertEquals("Annulled", p.getMaritalStatus().getCoding().get(0).getDisplay());
 	}
 
@@ -89,9 +91,9 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		myClient.create().resource(p).execute();
 
 		Bundle bundle = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 		p = (Patient) bundle.getEntry().get(0).getResource();
-		assertEquals(1, p.getMaritalStatus().getCoding().size());
+		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
 		assertNull(p.getMaritalStatus().getCoding().get(0).getDisplay());
 	}
 
@@ -104,7 +106,7 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
-		assertEquals(1, p.getMaritalStatus().getCoding().size());
+		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
 		assertEquals("FOO", p.getMaritalStatus().getCoding().get(0).getDisplay());
 	}
 
@@ -117,7 +119,7 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
-		assertEquals(1, p.getMaritalStatus().getCoding().size());
+		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
 		assertNull(p.getMaritalStatus().getCoding().get(0).getDisplay());
 	}
 
@@ -137,16 +139,6 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		@Override
 		public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 			return true;
-		}
-
-		@Override
-		public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
-			return null;
-		}
-		
-		@Override
-		public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
-			return lookupCode(theValidationSupportContext, theSystem, theCode, null);
 		}
 	}
 

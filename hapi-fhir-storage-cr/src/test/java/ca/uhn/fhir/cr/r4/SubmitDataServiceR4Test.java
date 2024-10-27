@@ -1,10 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
-
-
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.Bundle;
@@ -12,15 +9,13 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.fhir.utility.search.Searches;
-
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.search.Searches;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
 
 	@Autowired
 	ISubmitDataProcessorFactory myR4SubmitDataProcessorFactory;

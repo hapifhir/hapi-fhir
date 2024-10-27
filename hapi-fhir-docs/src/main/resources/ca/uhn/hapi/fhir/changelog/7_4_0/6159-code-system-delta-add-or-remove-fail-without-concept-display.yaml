@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 6159
+jira: SMILE-8604
+title: "Previously, `$apply-codesystem-delta-add` and `$apply-codesystem-delta-remove` operations were failing 
+with a 500 Server Error when invoked with a CodeSystem Resource payload that had a concept without a  
+`display` element. This has now been fixed so that concepts without display field is accepted, as `display` 
+element is not required."

@@ -72,12 +72,11 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu2Config.class})
@@ -271,11 +270,11 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	}
 
 	public void assertHasErrors(OperationOutcome theOperationOutcome) {
-		assertTrue(hasValidationErrors(theOperationOutcome), "Expected validation errors, found none");
+		assertThat(hasValidationErrors(theOperationOutcome)).as("Expected validation errors, found none").isTrue();
 	}
 
 	public void assertHasNoErrors(OperationOutcome theOperationOutcome) {
-		assertFalse(hasValidationErrors(theOperationOutcome), "Expected no validation errors, found some");
+		assertThat(hasValidationErrors(theOperationOutcome)).as("Expected no validation errors, found some").isFalse();
 	}
 
 	private static boolean hasValidationErrors(OperationOutcome theOperationOutcome) {

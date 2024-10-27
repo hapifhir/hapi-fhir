@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,44 +21,39 @@ package ca.uhn.fhir.cr.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.CrProcessorConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import java.util.Arrays;
 import java.util.Map;
 
 @Configuration
-@ConditionalOnBean({IRepositoryFactory.class, RestfulServer.class, EvaluationSettings.class})
+@Import(CrProcessorConfig.class)
 public class PackageOperationConfig {
-	@Bean
-	ca.uhn.fhir.cr.dstu3.IPlanDefinitionProcessorFactory dstu3PlanDefinitionProcessorFactory(
-			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.plandefinition.dstu3.PlanDefinitionProcessor(
-				theRepositoryFactory.create(rd), theEvaluationSettings);
-	}
-
 	@Bean
 	ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionPackageProvider dstu3PlanDefinitionPackageProvider() {
 		return new ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionPackageProvider();
 	}
 
 	@Bean
-	ca.uhn.fhir.cr.dstu3.IQuestionnaireProcessorFactory dstu3QuestionnaireProcessorFactory(
-			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.questionnaire.dstu3.QuestionnaireProcessor(
-				theRepositoryFactory.create(rd), theEvaluationSettings);
+	ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnairePackageProvider dstu3QuestionnairePackageProvider() {
+		return new ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnairePackageProvider();
 	}
 
 	@Bean
-	ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnairePackageProvider dstu3QuestionnairePackageProvider() {
-		return new ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnairePackageProvider();
+	ca.uhn.fhir.cr.dstu3.library.LibraryPackageProvider dstu3LibraryPackageProvider() {
+		return new ca.uhn.fhir.cr.dstu3.library.LibraryPackageProvider();
+	}
+
+	@Bean
+	ca.uhn.fhir.cr.dstu3.valueset.ValueSetPackageProvider dstu3ValueSetPackageProvider() {
+		return new ca.uhn.fhir.cr.dstu3.valueset.ValueSetPackageProvider();
 	}
 
 	@Bean(name = "packageOperationLoader")
@@ -69,8 +64,10 @@ public class PackageOperationConfig {
 				Map.of(
 						FhirVersionEnum.DSTU3,
 						Arrays.asList(
+								ca.uhn.fhir.cr.dstu3.library.LibraryPackageProvider.class,
 								ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnairePackageProvider.class,
-								ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionPackageProvider.class)));
+								ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionPackageProvider.class,
+								ca.uhn.fhir.cr.dstu3.valueset.ValueSetPackageProvider.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}

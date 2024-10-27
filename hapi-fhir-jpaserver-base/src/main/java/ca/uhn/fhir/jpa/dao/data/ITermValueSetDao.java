@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,7 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long>, IHa
 	 * The current TermValueSet is not necessarily the last uploaded anymore, but the current VS resource
 	 * is pointed by a specific ForcedId, so we locate current ValueSet as the one pointing to current VS resource
 	 */
-	@Query(
-			value =
-					"SELECT vs FROM ForcedId f, TermValueSet vs where f.myForcedId = :forcedId and vs.myResource = f.myResource")
+	@Query(value = "SELECT vs FROM TermValueSet vs where vs.myResource.myFhirId = :forcedId ")
 	Optional<TermValueSet> findTermValueSetByForcedId(@Param("forcedId") String theForcedId);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion IS NULL")

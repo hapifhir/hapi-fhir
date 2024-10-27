@@ -1,6 +1,8 @@
 package ca.uhn.fhir.to.model;
 
-import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
 import java.io.IOException;
 

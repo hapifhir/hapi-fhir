@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 	 * Loads a collection of ResourceLink entities by PID, but also  eagerly fetches
 	 * the target resources and their forced IDs
 	 */
-	@Query(
-			"SELECT t FROM ResourceLink t LEFT JOIN FETCH t.myTargetResource tr LEFT JOIN FETCH tr.myForcedId WHERE t.myId in :pids")
+	@Query("SELECT t FROM ResourceLink t LEFT JOIN FETCH t.myTargetResource tr WHERE t.myId in :pids")
 	List<ResourceLink> findByPidAndFetchTargetDetails(@Param("pids") List<Long> thePids);
 }

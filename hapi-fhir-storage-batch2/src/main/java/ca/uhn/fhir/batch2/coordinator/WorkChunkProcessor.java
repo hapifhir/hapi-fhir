@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,14 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
 import java.util.Optional;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -55,11 +56,16 @@ public class WorkChunkProcessor {
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
 	private final StepExecutor myStepExecutor;
+	private final IHapiTransactionService myHapiTransactionService;
 
-	public WorkChunkProcessor(IJobPersistence theJobPersistence, BatchJobSender theSender) {
+	public WorkChunkProcessor(
+			IJobPersistence theJobPersistence,
+			BatchJobSender theSender,
+			IHapiTransactionService theHapiTransactionService) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theSender;
 		myStepExecutor = new StepExecutor(theJobPersistence);
+		myHapiTransactionService = theHapiTransactionService;
 	}
 
 	/**
@@ -118,8 +124,13 @@ public class WorkChunkProcessor {
 			dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(
 					theJobDefinition.getJobDefinitionId(), theInstanceId, theCursor.asFinalCursor());
 		} else {
-			dataSink =
-					new JobDataSink<>(myBatchJobSender, myJobPersistence, theJobDefinition, theInstanceId, theCursor);
+			dataSink = new JobDataSink<>(
+					myBatchJobSender,
+					myJobPersistence,
+					theJobDefinition,
+					theInstanceId,
+					theCursor,
+					myHapiTransactionService);
 		}
 		return dataSink;
 	}
@@ -144,8 +155,6 @@ public class WorkChunkProcessor {
 			inputData = theWorkChunk.getData(theInputType);
 		}
 
-		String chunkId = theWorkChunk.getId();
-
-		return Optional.of(new StepExecutionDetails<>(theParameters, inputData, theInstance, chunkId));
+		return Optional.of(new StepExecutionDetails<>(theParameters, inputData, theInstance, theWorkChunk));
 	}
 }

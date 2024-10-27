@@ -15,11 +15,27 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hl7.fhir.common.hapi.validation.support.*;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.NpmPackageValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.ListResource;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -31,21 +47,32 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.*;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_AUDIT_ENTITY_TYPE;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_AUDIT_ENTITY_TYPE_1_PERSON;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_AUDIT_EVENT_TYPE;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_OBJECT_ROLE;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_OBJECT_ROLE_1_PATIENT;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_OBJECT_ROLE_24_QUERY;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_OBJECT_ROLE_4_DOMAIN_RESOURCE;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_RESTFUL_INTERACTION;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
@@ -115,7 +142,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 	private static void assertSubType(AuditEvent theAuditEvent, String theSubType) {
 		assertEquals(CS_RESTFUL_INTERACTION, theAuditEvent.getSubtypeFirstRep().getSystem());
 		assertEquals(theSubType, theAuditEvent.getSubtypeFirstRep().getCode());
-		assertEquals(1, theAuditEvent.getSubtype().size());
+		assertThat(theAuditEvent.getSubtype()).hasSize(1);
 	}
 
 	private static void assertAuditEventValidatesAgainstBalpProfile(AuditEvent auditEvent) {
@@ -142,7 +169,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 			.filter(t -> t.getRole().getCode().equals(CS_OBJECT_ROLE_4_DOMAIN_RESOURCE))
 			.map(t -> t.getWhat().getReference())
 			.toList();
-		assertThat(Arrays.asList(theResourceIds).toString(), systemObjects, containsInAnyOrder(theResourceIds));
+		assertThat(systemObjects).as(Arrays.asList(theResourceIds).toString()).containsExactlyInAnyOrder(theResourceIds);
 	}
 
 	private static void assertHasPatientEntities(AuditEvent theAuditEvent, String... theResourceIds) {
@@ -156,7 +183,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 			.map(t -> t.getWhat().getReference())
 			.map(t -> new IdType(t).toUnqualified().getValue())
 			.toList();
-		assertThat(patients.toString(), patients, containsInAnyOrder(theResourceIds));
+		assertThat(patients).as(patients.toString()).containsExactlyInAnyOrder(theResourceIds);
 	}
 
 	@BeforeAll
@@ -501,7 +528,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertEquals(2, outcome.getEntry().size());
+		assertThat(outcome.getEntry()).hasSize(2);
 
 		verify(myAuditEventSink, times(2)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -533,7 +560,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertEquals(10, outcome.getEntry().size());
+		assertThat(outcome.getEntry()).hasSize(10);
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -547,7 +574,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/Observation?subject=Patient%2FP1");
-		assertQueryDescription(auditEvent, "GET /Observation?subject=Patient%2FP1");
+		assertQueryDescription(auditEvent, "GET " + ourServer.getBaseUrl() + "/Observation?subject=Patient%2FP1");
 	}
 
 	@Test
@@ -570,7 +597,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertEquals(5, outcome.getEntry().size());
+		assertThat(outcome.getEntry()).hasSize(5);
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -584,11 +611,11 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent);
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/CodeSystem");
-		assertQueryDescription(auditEvent, "GET /CodeSystem");
+		assertQueryDescription(auditEvent, "GET " + ourServer.getBaseUrl() + "/CodeSystem");
 	}
 
 	@Test
-	public void testSearch_ResponseIncludesSinglePatientCompartment_LoadPageTwo() {
+	public void testSearch_ResponseIncludesSinglePatientCompartment_LoadPageTwo() throws ExecutionException, InterruptedException {
 		// Setup
 
 		create10Observations("Patient/P1");
@@ -609,7 +636,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertEquals(5, outcome.getEntry().size());
+		assertThat(outcome.getEntry()).hasSize(5);
 
 		verify(myAuditEventSink, times(2)).recordAuditEvent(myAuditEventCaptor.capture());
 		verifyNoMoreInteractions(myAuditEventSink);
@@ -624,7 +651,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/Observation?_count=5&subject=Patient%2FP1");
-		assertQueryDescription(auditEvent, "GET /Observation?subject=Patient%2FP1&_count=5");
+		assertQueryDescription(auditEvent, "GET " + ourServer.getBaseUrl() + "/Observation?subject=Patient%2FP1&_count=5");
 
 		auditEvent = myAuditEventCaptor.getAllValues().get(1);
 		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
@@ -655,7 +682,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertEquals(10, outcome.getEntry().size());
+		assertThat(outcome.getEntry()).hasSize(10);
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -669,7 +696,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/Observation/_search?subject=Patient%2FP1");
-		assertQueryDescription(auditEvent, "POST /Observation/_search");
+		assertQueryDescription(auditEvent, "POST " + ourServer.getBaseUrl() + "/Observation/_search");
 	}
 
 	@Test
@@ -690,7 +717,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertEquals(10, outcome.getEntry().size());
+		assertThat(outcome.getEntry()).hasSize(10);
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -704,7 +731,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/Observation/_search?subject=Patient%2FP1");
-		assertQueryDescription(auditEvent, "GET /Observation/_search?subject=Patient%2FP1");
+		assertQueryDescription(auditEvent, "GET " + ourServer.getBaseUrl() + "/Observation/_search?subject=Patient%2FP1");
 	}
 
 	@Test
@@ -867,12 +894,12 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 	private void assertQuery(AuditEvent theAuditEvent, String theQuery) {
 		List<String> queries = getQueries(theAuditEvent);
-		assertThat(queries, contains(theQuery));
+		assertThat(queries).containsExactly(theQuery);
 	}
 
 	private void assertQueryDescription(AuditEvent theAuditEvent, String theQuery) {
 		List<String> queries = getDescriptions(theAuditEvent);
-		assertThat(queries, contains(theQuery));
+		assertThat(queries).containsExactly(theQuery);
 	}
 
 	private void assertHasProfile(AuditEvent theAuditEvent, BalpProfileEnum theProfile) {
@@ -882,7 +909,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 			.stream()
 			.map(PrimitiveType::asStringValue)
 			.toList();
-		assertThat(profiles, contains(theProfile.getProfileUrl()));
+		assertThat(profiles).containsExactly(theProfile.getProfileUrl());
 	}
 
 	@Override

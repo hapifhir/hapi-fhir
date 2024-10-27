@@ -4,7 +4,7 @@ package ca.uhn.fhir.cr.dstu3.activitydefinition;
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package ca.uhn.fhir.cr.dstu3.activitydefinition;
  * #L%
  */
 
-import ca.uhn.fhir.cr.dstu3.IActivityDefinitionProcessorFactory;
+import ca.uhn.fhir.cr.common.IActivityDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -37,13 +37,14 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ActivityDefinitionApplyProvider {
 	@Autowired
-	IActivityDefinitionProcessorFactory myDstu3ActivityDefinitionProcessorFactory;
+	IActivityDefinitionProcessorFactory myActivityDefinitionProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -101,12 +102,13 @@ public class ActivityDefinitionApplyProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myDstu3ActivityDefinitionProcessorFactory
+		return myActivityDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.apply(
-						theId,
-						new StringType(theCanonical),
-						theActivityDefinition,
+						Eithers.for3(
+								theCanonical == null ? null : new StringType(theCanonical),
+								theId,
+								theActivityDefinition),
 						theSubject,
 						theEncounter,
 						thePractitioner,
@@ -117,7 +119,7 @@ public class ActivityDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theData,
 						theDataEndpoint,
 						theContentEndpoint,
@@ -145,12 +147,13 @@ public class ActivityDefinitionApplyProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myDstu3ActivityDefinitionProcessorFactory
+		return myActivityDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.apply(
-						null,
-						new StringType(theCanonical),
-						theActivityDefinition,
+						Eithers.for3(
+								theCanonical == null ? null : new StringType(theCanonical),
+								null,
+								theActivityDefinition),
 						theSubject,
 						theEncounter,
 						thePractitioner,
@@ -161,7 +164,7 @@ public class ActivityDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theData,
 						theDataEndpoint,
 						theContentEndpoint,

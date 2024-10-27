@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ICallable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +51,6 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -202,6 +202,12 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		}
 
 		myPartitionDao.delete(partition.get());
+
+		if (myInterceptorService.hasHooks(Pointcut.STORAGE_PARTITION_DELETED)) {
+			HookParams params = new HookParams()
+					.add(RequestPartitionId.class, partition.get().toRequestPartitionId());
+			myInterceptorService.callHooks(Pointcut.STORAGE_PARTITION_DELETED, params);
+		}
 
 		invalidateCaches();
 	}

@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -37,17 +41,11 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 @SuppressWarnings({"ConstantConditions"})
 public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
@@ -74,7 +72,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 			myObservationDao.create(o, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(1094) + "Resource Patient/FOO not found, specified in path: Observation.subject"));
+			assertThat(e.getMessage()).startsWith(Msg.code(1094) + "Resource Patient/FOO not found, specified in path: Observation.subject");
 		}
 	}
 
@@ -101,7 +99,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		IIdType id = myTaskDao.create(task).getId().toUnqualifiedVersionless();
 
 		task = myTaskDao.read(id);
-		assertEquals(3, task.getPartOf().size());
+		assertThat(task.getPartOf()).hasSize(3);
 		assertEquals("Task/AAA", task.getPartOf().get(0).getReference());
 		assertEquals("Task/AAA", task.getPartOf().get(1).getReference());
 		assertEquals("Task/AAA", task.getPartOf().get(2).getReference());
@@ -109,7 +107,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Task.SP_PART_OF, new ReferenceParam("Task/AAA"));
 		List<String> found = toUnqualifiedVersionlessIdValues(myTaskDao.search(params));
-		assertThat(found, contains(id.getValue()));
+		assertThat(found).containsExactly(id.getValue());
 	}
 
 	@Test
@@ -126,7 +124,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Exception ex = Assertions.assertThrows(InvalidRequestException.class, () -> {
 			myObservationDao.update(o, mySrd);
 		});
-		assertThat(ex.getMessage(), startsWith(Msg.code(1094) + "Resource Patient/FOO not found, specified in path: Observation.subject"));
+		assertThat(ex.getMessage()).startsWith(Msg.code(1094) + "Resource Patient/FOO not found, specified in path: Observation.subject");
 	}
 
 	@Test
@@ -223,7 +221,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
 		IIdType placeholderPatId = placeholderPat.getIdElement();
 		ourLog.debug("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
-		assertEquals(0, placeholderPat.getIdentifier().size());
+		assertThat(placeholderPat.getIdentifier()).isEmpty();
 		Extension extension = placeholderPat.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
 		assertNotNull(extension);
 		assertTrue(extension.hasValue());
@@ -241,7 +239,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 */
 		Patient updatedPat = myPatientDao.read(updatedPatId);
 		ourLog.debug("\nUpdated Patient:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedPat));
-		assertEquals(1, updatedPat.getIdentifier().size());
+		assertThat(updatedPat.getIdentifier()).hasSize(1);
 		extension = updatedPat.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
 		assertNull(extension);
 	}
@@ -263,7 +261,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		Patient patient = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertEquals(0, patient.getIdentifier().size());
+		assertThat(patient.getIdentifier()).isEmpty();
 	}
 
 	//	Case 1:
@@ -303,11 +301,11 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 * Should have a single identifier populated.
 		 */
 		ourLog.debug("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
-		assertEquals(1, placeholderPat.getIdentifier().size());
+		assertThat(placeholderPat.getIdentifier()).hasSize(1);
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem(), is(equalTo("http://foo")));
-		assertThat(identifier.getValue(), is(equalTo("123")));
+		assertEquals("http://foo", identifier.getSystem());
+		assertEquals("123", identifier.getValue());
 	}
 
 
@@ -348,11 +346,11 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 * Should have a single identifier populated.
 		 */
 		ourLog.debug("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
-		assertEquals(1, placeholderPat.getIdentifier().size());
+		assertThat(placeholderPat.getIdentifier()).hasSize(1);
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem(), is(equalTo("http://foo")));
-		assertThat(identifier.getValue(), is(equalTo("123")));
+		assertEquals("http://foo", identifier.getSystem());
+		assertEquals("123", identifier.getValue());
 	}
 
 
@@ -394,11 +392,11 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 * Should have a single identifier populated.
 		 */
 		ourLog.debug("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
-		assertEquals(1, placeholderPat.getIdentifier().size());
+		assertThat(placeholderPat.getIdentifier()).hasSize(1);
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem(), is(equalTo("http://bar")));
-		assertThat(identifier.getValue(), is(equalTo("321")));
+		assertEquals("http://bar", identifier.getSystem());
+		assertEquals("321", identifier.getValue());
 
 
 	}
@@ -435,14 +433,14 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertTrue(placeholderPatId.isVersionIdPartValidLong());
 
 
-			/*
-		 * Should have a single identifier populated.
-		 */
-		assertEquals(1, placeholderPat.getIdentifier().size());
+		/*
+* Should have a single identifier populated.
+ */
+		assertThat(placeholderPat.getIdentifier()).hasSize(1);
 		final List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem(), is(equalTo(system)));
-		assertThat(identifier.getValue(), is(equalTo(value)));
+		assertEquals(system, identifier.getSystem());
+		assertEquals(value, identifier.getValue());
 	}
 
 	@Test
@@ -466,10 +464,10 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		//Read the Placeholder Observation
 		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
 		final List<IBaseResource> allResources = organizationSearch.getAllResources();
-		assertEquals(1, allResources.size());
+		assertThat(allResources).hasSize(1);
 		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
-		assertTrue(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString().startsWith(ResourceType.Organization.name()));
-		assertEquals(1, organizationSearch.getAllResourceIds().size());
+		assertThat(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString()).startsWith(ResourceType.Organization.name());
+		assertThat(organizationSearch.getAllResourceIds()).hasSize(1);
 	}
 
 	//	Case 4:
@@ -513,16 +511,16 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 * Placeholder Identifiers should both be populated since they were both provided, and did not match
 		 */
 		ourLog.debug("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
-		assertEquals(2, placeholderPat.getIdentifier().size());
+		assertThat(placeholderPat.getIdentifier()).hasSize(2);
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 
 		//inline match-url identifier
-		assertThat(identifiers.get(1).getSystem(), is(equalTo("http://foo")));
-		assertThat(identifiers.get(1).getValue(), is(equalTo("123")));
+		assertEquals("http://foo", identifiers.get(1).getSystem());
+		assertEquals("123", identifiers.get(1).getValue());
 
 		//subject identifier
-		assertThat(identifiers.get(0).getSystem(), is(equalTo(system)));
-		assertThat(identifiers.get(0).getValue(), is(equalTo(value)));
+		assertEquals(system, identifiers.get(0).getSystem());
+		assertEquals(value, identifiers.get(0).getValue());
 
 
 		// Conditionally update a Patient with the same identifier
@@ -534,7 +532,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		// Read the conditionally updated Patient
 		Patient conditionalUpdatePat = myPatientDao.read(conditionalUpdatePatId);
 		ourLog.debug("\nConditionally updated Patient:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conditionalUpdatePat));
-		assertEquals(1, conditionalUpdatePat.getIdentifier().size());
+		assertThat(conditionalUpdatePat.getIdentifier()).hasSize(1);
 
 		/*
 		 * Observation should reference conditionally updated Patient
@@ -572,7 +570,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
 		IIdType placeholderPatId = placeholderPat.getIdElement();
 		ourLog.debug("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
-		assertEquals(1, placeholderPat.getIdentifier().size());
+		assertThat(placeholderPat.getIdentifier()).hasSize(1);
 		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
 
 		// Conditionally update a Patient with the same identifier
@@ -584,7 +582,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		// Read the conditionally updated Patient
 		Patient conditionalUpdatePat = myPatientDao.read(conditionalUpdatePatId);
 		ourLog.debug("\nConditionally updated Patient:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conditionalUpdatePat));
-		assertEquals(1, conditionalUpdatePat.getIdentifier().size());
+		assertThat(conditionalUpdatePat.getIdentifier()).hasSize(1);
 
 		/*
 		 * Observation should reference conditionally updated Patient
@@ -612,7 +610,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		Patient patient = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertEquals(1, patient.getIdentifier().size());
+		assertThat(patient.getIdentifier()).hasSize(1);
 		assertEquals("http://foo", patient.getIdentifier().get(0).getSystem());
 		assertEquals("123", patient.getIdentifier().get(0).getValue());
 	}
@@ -701,8 +699,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
 		assertNotNull(returned);
-		Assertions.assertTrue(returned.getActive());
-		Assertions.assertEquals(2, returned.getIdElement().getVersionIdPartAsLong());
+		assertTrue(returned.getActive());
+		assertEquals(2, returned.getIdElement().getVersionIdPartAsLong());
 
 		Observation retObservation = myObservationDao.read(obs.getIdElement());
 		assertNotNull(retObservation);
@@ -737,7 +735,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
 		assertNotNull(returned);
-		Assertions.assertEquals(2, returned.getIdElement().getVersionIdPartAsLong());
+		assertEquals(2, returned.getIdElement().getVersionIdPartAsLong());
 
 		Observation retObservation = myObservationDao.read(obs.getIdElement());
 		assertNotNull(retObservation);
@@ -766,7 +764,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		// verify links created to Patient placeholder from both Observations
 		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL));
-		assertEquals(3, outcome.getAllResources().size());
+		assertThat(outcome.getAllResources()).hasSize(3);
 	}
 
 	@Test
@@ -788,7 +786,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		// verify links created to Patient placeholder from both Observations
 		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL));
-		assertEquals(3, outcome.getAllResources().size());
+		assertThat(outcome.getAllResources()).hasSize(3);
 	}
 
 }

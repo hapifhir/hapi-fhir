@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR5Test;
@@ -9,7 +13,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.HapiExtensions;
-import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -25,32 +28,23 @@ import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.awaitility.Awaitility.await;
 
 /**
  * Test the rest-hook subscriptions
@@ -92,12 +86,12 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		assertEquals(sentObservation.getIdElement(), obs.getIdElement());
 	}
 
-	@NotNull
+	@Nonnull
 	private Observation sendObservationExpectDelivery(int theCount) throws InterruptedException {
 		return sendObservation(OBS_CODE, "SNOMED-CT", true, theCount);
 	}
 
-	@NotNull
+	@Nonnull
 	private Observation sendObservationExpectDelivery() throws InterruptedException {
 		return sendObservation(OBS_CODE, "SNOMED-CT", true, 1);
 	}
@@ -121,12 +115,12 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation, 1L);
 
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
-		Assertions.assertEquals("1", receivedObs.getIdElement().getVersionIdPart());
-		Assertions.assertEquals("1", receivedObs.getMeta().getVersionId());
-		Assertions.assertEquals(sentObservation.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
-		Assertions.assertEquals(sentObservation.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
-		Assertions.assertEquals("1", receivedObs.getIdentifierFirstRep().getValue());
+		assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+		assertEquals("1", receivedObs.getIdElement().getVersionIdPart());
+		assertEquals("1", receivedObs.getMeta().getVersionId());
+		assertEquals(sentObservation.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals(sentObservation.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("1", receivedObs.getIdentifierFirstRep().getValue());
 
 		/*
 		 * Send version 2
@@ -141,15 +135,15 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		receivedObs = assertBundleAndGetObservation(subscription, sentObservation, 2L);
 
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
-		Assertions.assertEquals("2", receivedObs.getIdElement().getVersionIdPart());
-		Assertions.assertEquals("2", receivedObs.getMeta().getVersionId());
-		Assertions.assertEquals(sentObservation.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
-		Assertions.assertEquals(sentObservation.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
-		Assertions.assertEquals("2", receivedObs.getIdentifierFirstRep().getValue());
+		assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+		assertEquals("2", receivedObs.getIdElement().getVersionIdPart());
+		assertEquals("2", receivedObs.getMeta().getVersionId());
+		assertEquals(sentObservation.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals(sentObservation.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("2", receivedObs.getIdentifierFirstRep().getValue());
 	}
 
-	@NotNull
+	@Nonnull
 	private Subscription createMatchingTopicSubscription() throws Exception {
 		Subscription subscription = createTopicSubscription(OBS_CODE);
 		waitForActivatedSubscriptionCount(1);
@@ -183,7 +177,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation, 1L);
 
-		MatcherAssert.assertThat(receivedObs.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+		assertThat(receivedObs.getSubject().getReference()).matches("Patient/[0-9]+");
 	}
 
 	@Test
@@ -211,11 +205,11 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		Observation obs = myObservationDao.read(new IdType(responseBundle.getEntry().get(0).getResponse().getLocation()), mySrd);
 
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
-		Assertions.assertEquals("1", receivedObs.getIdElement().getVersionIdPart());
-		Assertions.assertEquals("1", receivedObs.getMeta().getVersionId());
-		Assertions.assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
-		Assertions.assertEquals("1", receivedObs.getIdentifierFirstRep().getValue());
+		assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+		assertEquals("1", receivedObs.getIdElement().getVersionIdPart());
+		assertEquals("1", receivedObs.getMeta().getVersionId());
+		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("1", receivedObs.getIdentifierFirstRep().getValue());
 
 		/*
 		 * Send version 2
@@ -236,11 +230,11 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		receivedObs = assertBundleAndGetObservation(subscription, sentObservation, 2L);
 		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless(), mySrd);
 
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
-		Assertions.assertEquals("2", receivedObs.getIdElement().getVersionIdPart());
-		Assertions.assertEquals("2", receivedObs.getMeta().getVersionId());
-		Assertions.assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
-		Assertions.assertEquals("2", receivedObs.getIdentifierFirstRep().getValue());
+		assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+		assertEquals("2", receivedObs.getIdElement().getVersionIdPart());
+		assertEquals("2", receivedObs.getMeta().getVersionId());
+		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), receivedObs.getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("2", receivedObs.getIdentifierFirstRep().getValue());
 	}
 
 	@Test
@@ -277,7 +271,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		}
 	}
 
-	@NotNull
+	@Nonnull
 	private Subscription createTopicSubscription() throws InterruptedException {
 		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 
@@ -305,7 +299,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		Observation obs = assertBundleAndGetObservation(subscription, sentObservation, 1L);
 
 		// Should see 1 subscription notification
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+		assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
 
 		// Send an update with no changes
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
@@ -333,7 +327,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		Observation obs = assertBundleAndGetObservation(subscription, sentObservation1, 1L);
 
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+		assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
 
 		IdType idElement = obs.getIdElement();
 		assertEquals(sentObservation1.getIdElement().getIdPart(), idElement.getIdPart());
@@ -354,7 +348,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		Observation obs2 = assertBundleAndGetObservation(subscription, sentObservation2, 2L);
 
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
+		assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
 
 		idElement = obs2.getIdElement();
 		assertEquals(sentObservation2.getIdElement().getIdPart(), idElement.getIdPart());
@@ -463,7 +457,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		Observation receivedObs = assertBundleAndGetObservation(subscription1, sentObservation1, 1L);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, getLastSystemProviderContentType());
 
-		Assertions.assertEquals("1", receivedObs.getIdElement().getVersionIdPart());
+		assertEquals("1", receivedObs.getIdElement().getVersionIdPart());
 
 		// Update the OBS_CODE2 subscription to subscribe to OBS_CODE
 		Subscription subscriptionTemp = myClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
@@ -513,9 +507,9 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		// Should see exactly one subscription notification
 		awaitUntilReceivedTransactionCount(6);
 
-		assertNotEquals(subscription1.getId(), subscription2.getId());
-		assertFalse(sentObservation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(subscription2.getId()).isNotEqualTo(subscription1.getId());
+		assertThat(sentObservation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	private void deleteSubscription(Subscription subscription2) throws InterruptedException {
@@ -535,7 +529,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 	@Test
 	public void testRestHookSubscriptionApplicationJsonDatabase() throws Exception {
 		// Same test as above, but now run it using database matching
-		myStorageSettings.setEnableInMemorySubscriptionMatching(false);
+		mySubscriptionSettings.setEnableInMemorySubscriptionMatching(false);
 		testRestHookSubscriptionApplicationJson();
 	}
 
@@ -710,7 +704,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testInvalidProvenanceParam() {
-		assertThrows(UnprocessableEntityException.class, () -> {
+		assertThatExceptionOfType(UnprocessableEntityException.class).isThrownBy(() -> {
 			String criteriabad = "Provenance?foo=https://hl7.org/fhir/v3/DocumentCompletion%7CAU";
 			createSubscriptionTopicWithCriteria(criteriabad);
 		});
@@ -718,7 +712,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testInvalidProcedureRequestParam() {
-		assertThrows(UnprocessableEntityException.class, () -> {
+		assertThatExceptionOfType(UnprocessableEntityException.class).isThrownBy(() -> {
 			String criteriabad = "ProcedureRequest?intent=instance-order&category=Laboratory";
 			createSubscriptionTopicWithCriteria(criteriabad);
 		});
@@ -726,7 +720,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testInvalidBodySiteParam() {
-		assertThrows(UnprocessableEntityException.class, () -> {
+		assertThatExceptionOfType(UnprocessableEntityException.class).isThrownBy(() -> {
 			String criteriabad = "BodySite?accessType=Catheter";
 			createSubscriptionTopicWithCriteria(criteriabad);
 		});
@@ -756,7 +750,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 			createSubscriptionTopic(subscriptionTopic);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not process submitted SubscriptionTopic - SubscriptionTopic.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Can not process submitted SubscriptionTopic - SubscriptionTopic.status must be populated on this server");
 		}
 	}
 
@@ -823,7 +817,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 	private Observation assertBundleAndGetObservation(Subscription subscription, Observation sentObservation, Long theExpectedEventNumber) {
 		Bundle receivedBundle = getLastSystemProviderBundle();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
-		assertEquals(2, resources.size());
+		assertThat(resources).hasSize(2);
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
 		validateSubscriptionStatus(subscription, sentObservation, ss, theExpectedEventNumber);

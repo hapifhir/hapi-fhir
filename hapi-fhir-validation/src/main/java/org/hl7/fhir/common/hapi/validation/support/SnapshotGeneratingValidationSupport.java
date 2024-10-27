@@ -179,4 +179,9 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 	public FhirContext getFhirContext() {
 		return myCtx;
 	}
+
+	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " Snapshot Generating Validation Support";
+	}
 }

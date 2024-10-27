@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public interface ICdsServiceRegistry {
 	 * @param theCdsServiceRequestJson the service request
 	 * @return the service response
 	 */
-	CdsServiceResponseJson callService(String theServiceId, CdsServiceRequestJson theCdsServiceRequestJson);
+	CdsServiceResponseJson callService(String theServiceId, Object theCdsServiceRequestJson);
 
 	/**
 	 * This is the REST method available at https://example.com/cds-services/{theServiceId}/feedback
@@ -54,7 +54,7 @@ public interface ICdsServiceRegistry {
 	 * @param theCdsServiceFeedbackJson the request
 	 * @return the response
 	 */
-	String callFeedback(String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson);
+	CdsServiceFeedbackJson callFeedback(String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson);
 
 	/**
 	 * Register a new CDS Service with the endpoint.
@@ -86,4 +86,12 @@ public interface ICdsServiceRegistry {
 	 * @param theServiceId the id of the service to be removed
 	 */
 	void unregisterService(String theServiceId, String theModuleId);
+
+	/**
+	 * Get registered CDS service with service ID
+	 * @param theServiceId the id of the service to be retrieved
+	 * @return CdsServiceJson
+	 * @throws IllegalArgumentException if a CDS service with provided serviceId is not found
+	 */
+	CdsServiceJson getCdsServiceJson(String theServiceId);
 }

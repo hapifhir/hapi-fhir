@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -42,10 +43,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -58,25 +59,38 @@ public class ParametersUtil {
 	public static Optional<String> getNamedParameterValueAsString(
 			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
-		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper).stream()
+		return extractNamedParameterValues(theCtx, theParameters, theParameterName, mapper).stream()
 				.findFirst();
 	}
 
 	public static List<String> getNamedParameterValuesAsString(
 			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
-		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper);
+		return extractNamedParameterValues(theCtx, theParameters, theParameterName, mapper);
 	}
 
 	public static List<Integer> getNamedParameterValuesAsInteger(
 			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		Function<IPrimitiveType<?>, Integer> mapper = t -> (Integer) t.getValue();
-		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper);
+		return extractNamedParameterValues(theCtx, theParameters, theParameterName, mapper);
 	}
 
 	public static Optional<Integer> getNamedParameterValueAsInteger(
 			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		return getNamedParameterValuesAsInteger(theCtx, theParameters, theParameterName).stream()
+				.findFirst();
+	}
+
+	/**
+	 * Returns the resource within a parameter.
+	 * @param theCtx thr FHIR context
+	 * @param theParameters the parameters instance where to look for the resource
+	 * @param theParameterName the parameter name
+	 * @return the resource
+	 */
+	public static Optional<IBaseResource> getNamedParameterResource(
+			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		return extractNamedParameterResources(theCtx, theParameters, theParameterName).stream()
 				.findFirst();
 	}
 
@@ -153,7 +167,7 @@ public class ParametersUtil {
 				.map(t -> (Integer) t);
 	}
 
-	private static <T> List<T> extractNamedParameters(
+	private static <T> List<T> extractNamedParameterValues(
 			FhirContext theCtx,
 			IBaseParameters theParameters,
 			String theParameterName,
@@ -170,7 +184,25 @@ public class ParametersUtil {
 					.filter(t -> t instanceof IPrimitiveType<?>)
 					.map(t -> ((IPrimitiveType<?>) t))
 					.map(theMapper)
-					.filter(t -> t != null)
+					.filter(Objects::nonNull)
+					.forEach(retVal::add);
+		}
+		return retVal;
+	}
+
+	private static List<IBaseResource> extractNamedParameterResources(
+			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		List<IBaseResource> retVal = new ArrayList<>();
+
+		List<IBase> namedParameters = getNamedParameters(theCtx, theParameters, theParameterName);
+		for (IBase nextParameter : namedParameters) {
+			BaseRuntimeElementCompositeDefinition<?> nextParameterDef =
+					(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(nextParameter.getClass());
+			BaseRuntimeChildDefinition resourceChild = nextParameterDef.getChildByName("resource");
+			List<IBase> resourceValues = resourceChild.getAccessor().getValues(nextParameter);
+			resourceValues.stream()
+					.filter(IBaseResource.class::isInstance)
+					.map(t -> ((IBaseResource) t))
 					.forEach(retVal::add);
 		}
 		return retVal;
@@ -209,7 +241,7 @@ public class ParametersUtil {
 	 *
 	 * @param theContext    The FhirContext
 	 * @param theParameters The Parameters resource
-	 * @param theName       The parametr name
+	 * @param theName       The parameter name
 	 * @param theValue      The parameter value (can be a {@link IBaseResource resource} or a {@link IBaseDatatype datatype})
 	 */
 	public static void addParameterToParameters(
@@ -248,7 +280,7 @@ public class ParametersUtil {
 
 	private static IBase createParameterRepetition(
 			FhirContext theContext,
-			IBaseResource theTargetResource,
+			IBase theTargetResource,
 			BaseRuntimeChildDefinition paramChild,
 			BaseRuntimeElementCompositeDefinition<?> paramChildElem,
 			String theName) {
@@ -403,8 +435,15 @@ public class ParametersUtil {
 	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {
 		IPrimitiveType<BigDecimal> value = (IPrimitiveType<BigDecimal>)
 				theContext.getElementDefinition("decimal").newInstance();
-		value.setValue(theValue == null ? null : BigDecimal.valueOf(theValue));
-
+		if (theValue == null) {
+			value.setValue(null);
+		} else {
+			BigDecimal decimalValue = BigDecimal.valueOf(theValue);
+			if (decimalValue.scale() < 0) {
+				decimalValue = decimalValue.setScale(0);
+			}
+			value.setValue(decimalValue);
+		}
 		addPart(theContext, theParameter, theName, value);
 	}
 
@@ -426,7 +465,7 @@ public class ParametersUtil {
 		addPart(theContext, theParameter, theName, coding);
 	}
 
-	public static void addPart(FhirContext theContext, IBase theParameter, String theName, IBase theValue) {
+	public static IBase addPart(FhirContext theContext, IBase theParameter, String theName, @Nullable IBase theValue) {
 		BaseRuntimeElementCompositeDefinition<?> def =
 				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theParameter.getClass());
 		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
@@ -441,11 +480,25 @@ public class ParametersUtil {
 		name.setValue(theName);
 		partChildElem.getChildByName("name").getMutator().addValue(part, name);
 
-		if (theValue instanceof IBaseResource) {
-			partChildElem.getChildByName("resource").getMutator().addValue(part, theValue);
-		} else {
-			partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
+		if (theValue != null) {
+			if (theValue instanceof IBaseResource) {
+				partChildElem.getChildByName("resource").getMutator().addValue(part, theValue);
+			} else {
+				partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
+			}
 		}
+		return part;
+	}
+
+	public static IBase createPart(FhirContext theContext, IBase thePart, String theName) {
+		BaseRuntimeElementCompositeDefinition<?> def =
+				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(thePart.getClass());
+		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
+
+		BaseRuntimeElementCompositeDefinition<?> partChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) partChild.getChildByName("part");
+
+		return createParameterRepetition(theContext, thePart, partChild, partChildElem, theName);
 	}
 
 	public static void addPartResource(

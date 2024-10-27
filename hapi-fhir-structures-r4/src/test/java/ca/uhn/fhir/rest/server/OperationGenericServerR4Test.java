@@ -8,7 +8,8 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -16,41 +17,41 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class OperationGenericServerR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationGenericServerR4Test.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx;
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static IdType ourLastId;
 	private static String ourLastMethod;
 	private static StringType ourLastParam1;
 	private static Patient ourLastParam2;
-	private static int ourPort;
-	private static Server ourServer;
 	private static Parameters ourLastResourceParam;
+
+	@RegisterExtension
+	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new PatientProvider())
+		 .registerProvider(new PlainProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2))
+		 .setDefaultResponseEncoding(EncodingEnum.XML);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -69,7 +70,7 @@ public class OperationGenericServerR4Test {
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$OP_INSTANCE");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/123/$OP_INSTANCE");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
@@ -99,7 +100,7 @@ public class OperationGenericServerR4Test {
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/$OP_SERVER");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/$OP_SERVER");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
@@ -126,7 +127,7 @@ public class OperationGenericServerR4Test {
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$OP_TYPE");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$OP_TYPE");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
@@ -150,7 +151,7 @@ public class OperationGenericServerR4Test {
 
 	@Test
 	public void testOperationWithGetUsingParams() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$OP_TYPE?PARAM1=PARAM1val");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$OP_TYPE?PARAM1=PARAM1val");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -174,7 +175,7 @@ public class OperationGenericServerR4Test {
 
 	@Test
 	public void testSearchGetsClassifiedAppropriately() throws Exception {
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient");
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -275,35 +276,8 @@ public class OperationGenericServerR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourCtx = FhirContext.forR4();
-		ourServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2));
-
-		servlet.setFhirContext(ourCtx);
-		servlet.setResourceProviders(new PatientProvider());
-		servlet.setPlainProviders(new PlainProvider());
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
 
 }

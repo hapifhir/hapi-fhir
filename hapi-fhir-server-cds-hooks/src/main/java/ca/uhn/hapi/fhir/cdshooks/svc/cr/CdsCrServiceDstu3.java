@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,18 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.hapi.fhir.cdshooks.api.json.*;
+import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestAuthorizationJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseLinkJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSystemActionJson;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CarePlan;
-import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ParameterDefinition;
@@ -45,7 +53,6 @@ import java.util.List;
 import java.util.Map;
 
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_DATA;
-import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_DATA_ENDPOINT;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_ENCOUNTER;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_PARAMETERS;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_PRACTITIONER;
@@ -60,10 +67,13 @@ import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
 public class CdsCrServiceDstu3 implements ICdsCrService {
 	protected final RequestDetails myRequestDetails;
 	protected final Repository myRepository;
+	protected final ICdsConfigService myCdsConfigService;
 	protected CarePlan myResponse;
 	protected CdsServiceResponseJson myServiceResponse;
 
-	public CdsCrServiceDstu3(RequestDetails theRequestDetails, Repository theRepository) {
+	public CdsCrServiceDstu3(
+			RequestDetails theRequestDetails, Repository theRepository, ICdsConfigService theCdsConfigService) {
+		myCdsConfigService = theCdsConfigService;
 		myRequestDetails = theRequestDetails;
 		myRepository = theRepository;
 	}
@@ -100,16 +110,6 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		Bundle data = getPrefetchResources(theJson);
 		if (data.hasEntry()) {
 			parameters.addParameter(part(APPLY_PARAMETER_DATA, data));
-		}
-		if (theJson.getFhirServer() != null) {
-			Endpoint endpoint = new Endpoint().setAddress(theJson.getFhirServer());
-			if (theJson.getServiceRequestAuthorizationJson().getAccessToken() != null) {
-				String tokenType = getTokenType(theJson.getServiceRequestAuthorizationJson());
-				endpoint.addHeader(String.format(
-						"Authorization: %s %s",
-						tokenType, theJson.getServiceRequestAuthorizationJson().getAccessToken()));
-			}
-			parameters.addParameter(part(APPLY_PARAMETER_DATA_ENDPOINT, endpoint));
 		}
 		return parameters;
 	}

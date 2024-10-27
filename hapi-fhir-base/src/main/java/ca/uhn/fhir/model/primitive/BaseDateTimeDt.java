@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,17 +230,41 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		return Long.parseLong(retVal);
 	}
 
+	/**
+	 * Find the offset for a timestamp.  If it exists.  An offset may start either with '-', 'Z', '+', or ' '.
+	 * <p/>
+	 * There is a special case where ' ' is considered a valid offset initial character and this is because when
+	 * handling URLs with timestamps, '+' is considered an escape character for ' ', so '+' may have been replaced with
+	 * ' ' by the time execution reaches this method.  This is why this method handles both characters.
+	 *
+	 * @param theValueString A timestamp containing either a timezone offset or nothing.
+	 * @return The index of the offset portion of the timestamp, if applicable, otherwise -1
+	 */
 	private int getOffsetIndex(String theValueString) {
 		int plusIndex = theValueString.indexOf('+', 16);
+		int spaceIndex = theValueString.indexOf(' ', 16);
 		int minusIndex = theValueString.indexOf('-', 16);
 		int zIndex = theValueString.indexOf('Z', 16);
-		int retVal = Math.max(Math.max(plusIndex, minusIndex), zIndex);
-		if (retVal == -1) {
+		int maxIndexPlusAndMinus = Math.max(Math.max(plusIndex, minusIndex), zIndex);
+		int maxIndexSpaceAndMinus = Math.max(Math.max(spaceIndex, minusIndex), zIndex);
+		if (maxIndexPlusAndMinus == -1 && maxIndexSpaceAndMinus == -1) {
 			return -1;
 		}
-		if ((retVal - 2) != (plusIndex + minusIndex + zIndex)) {
-			throwBadDateFormat(theValueString);
+		int retVal = 0;
+		if (maxIndexPlusAndMinus != -1) {
+			if ((maxIndexPlusAndMinus - 2) != (plusIndex + minusIndex + zIndex)) {
+				throwBadDateFormat(theValueString);
+			}
+			retVal = maxIndexPlusAndMinus;
 		}
+
+		if (maxIndexSpaceAndMinus != -1) {
+			if ((maxIndexSpaceAndMinus - 2) != (spaceIndex + minusIndex + zIndex)) {
+				throwBadDateFormat(theValueString);
+			}
+			retVal = maxIndexSpaceAndMinus;
+		}
+
 		return retVal;
 	}
 
@@ -574,13 +598,15 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 			setTimeZoneZulu(true);
 		} else if (theValue.length() != 6) {
 			throwBadDateFormat(theWholeValue, "Timezone offset must be in the form \"Z\", \"-HH:mm\", or \"+HH:mm\"");
-		} else if (theValue.charAt(3) != ':' || !(theValue.charAt(0) == '+' || theValue.charAt(0) == '-')) {
+		} else if (theValue.charAt(3) != ':'
+				|| !(theValue.charAt(0) == '+' || theValue.charAt(0) == ' ' || theValue.charAt(0) == '-')) {
 			throwBadDateFormat(theWholeValue, "Timezone offset must be in the form \"Z\", \"-HH:mm\", or \"+HH:mm\"");
 		} else {
 			parseInt(theWholeValue, theValue.substring(1, 3), 0, 23);
 			parseInt(theWholeValue, theValue.substring(4, 6), 0, 59);
 			clearTimeZone();
-			setTimeZone(getTimeZone("GMT" + theValue));
+			final String valueToUse = theValue.startsWith(" ") ? theValue.replace(' ', '+') : theValue;
+			setTimeZone(getTimeZone("GMT" + valueToUse));
 		}
 
 		return this;

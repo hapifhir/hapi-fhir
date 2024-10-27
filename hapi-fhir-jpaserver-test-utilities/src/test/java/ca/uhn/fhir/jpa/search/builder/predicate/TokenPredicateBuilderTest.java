@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -28,9 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,6 +59,7 @@ public class TokenPredicateBuilderTest {
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(table);
 		when(mySearchQueryBuilder.getPartitionSettings()).thenReturn(new PartitionSettings());
 		myTokenPredicateBuilder = new TokenPredicateBuilder(mySearchQueryBuilder);
+		myTokenPredicateBuilder.setStorageSettingsForUnitTest(new JpaStorageSettings());
 	}
 
 	@AfterEach
@@ -82,8 +82,8 @@ public class TokenPredicateBuilderTest {
 
 		// verify
 		List<ILoggingEvent> logList = myListAppender.list;
-		assertEquals(2, logList.size());
-		assertThat(logList.get(0).getFormattedMessage(), containsString(theLongSystem));
-		assertThat(logList.get(1).getFormattedMessage(), containsString(theLongValue));
+		assertThat(logList).hasSize(2);
+		assertThat(logList.get(0).getFormattedMessage()).contains(theLongSystem);
+		assertThat(logList.get(1).getFormattedMessage()).contains(theLongValue);
 	}
 }

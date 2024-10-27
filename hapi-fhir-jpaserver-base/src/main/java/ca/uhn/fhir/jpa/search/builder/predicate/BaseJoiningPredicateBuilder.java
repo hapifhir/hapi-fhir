@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,11 @@ import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
@@ -51,8 +51,12 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
 	public abstract DbColumn getResourceIdColumn();
 
-	DbColumn getPartitionIdColumn() {
+	public DbColumn getPartitionIdColumn() {
 		return myColumnPartitionId;
+	}
+
+	public DbColumn[] getJoinColumns() {
+		return getSearchQueryBuilder().toJoinColumns(getPartitionIdColumn(), getResourceIdColumn());
 	}
 
 	public Condition combineWithRequestPartitionIdPredicate(

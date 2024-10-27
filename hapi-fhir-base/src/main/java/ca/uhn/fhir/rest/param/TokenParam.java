@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -147,18 +148,22 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	@Override
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theParameter) {
 		setModifier(null);
+		setSystem(null);
+
 		if (theQualifier != null) {
+			if (Constants.PARAMQUALIFIER_MDM.equals(theQualifier)) {
+				setMdmExpand(true);
+			}
+
 			TokenParamModifier modifier = TokenParamModifier.forValue(theQualifier);
 			setModifier(modifier);
 
 			if (modifier == TokenParamModifier.TEXT) {
-				setSystem(null);
 				setValue(ParameterUtil.unescape(theParameter));
 				return;
 			}
 		}
 
-		setSystem(null);
 		if (theParameter == null) {
 			setValue(null);
 		} else {

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +54,10 @@ import ca.uhn.fhir.util.StopWatch;
 import co.elastic.apm.api.ElasticApm;
 import co.elastic.apm.api.Span;
 import co.elastic.apm.api.Transaction;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
@@ -68,7 +68,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
@@ -302,7 +301,7 @@ public class SearchTask implements Callable<Void> {
 					// the user has a chance to know that they were in the results
 					if (mySearchRuntimeDetails.getRequestDetails() != null && !unsyncedPids.isEmpty()) {
 						JpaPreResourceAccessDetails accessDetails =
-								new JpaPreResourceAccessDetails(unsyncedPids, () -> newSearchBuilder());
+								new JpaPreResourceAccessDetails(unsyncedPids, this::newSearchBuilder);
 						HookParams params = new HookParams()
 								.add(IPreResourceAccessDetails.class, accessDetails)
 								.add(RequestDetails.class, mySearchRuntimeDetails.getRequestDetails())
@@ -447,8 +446,7 @@ public class SearchTask implements Callable<Void> {
 			myTxService
 					.withRequest(myRequest)
 					.withRequestPartitionId(myRequestPartitionId)
-					.withIsolation(Isolation.READ_COMMITTED)
-					.execute(() -> doSearch());
+					.execute(this::doSearch);
 
 			mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 			if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -29,10 +30,14 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.List;
 
@@ -65,6 +70,12 @@ public class FhirPathFilterInterceptor {
 						ParametersUtil.addPartString(ctx, resultPart, "expression", expression);
 
 						IFhirPath fhirPath = ctx.newFhirPath();
+						fhirPath.setEvaluationContext(new IFhirPathEvaluationContext() {
+							@Override
+							public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
+								return BundleUtil.getReferenceInBundle(ctx, theReference.getValue(), responseResource);
+							}
+						});
 						List<IBase> outputs;
 						try {
 							outputs = fhirPath.evaluate(responseResource, expression, IBase.class);

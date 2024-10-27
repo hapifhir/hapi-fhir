@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,9 @@ import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,9 +72,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
@@ -125,7 +125,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	 * of this class, since it's a prototype
 	 */
 	private Search mySearchEntity;
-	private String myUuid;
+	private final String myUuid;
 	private SearchCacheStatusEnum myCacheStatus;
 	private RequestPartitionId myRequestPartitionId;
 
@@ -149,6 +149,11 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@VisibleForTesting
 	public void setRequestPartitionHelperSvcForUnitTest(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+	}
+
+	@VisibleForTesting
+	public Search getSearchEntityForTesting() {
+		return getSearchEntity();
 	}
 
 	protected Search getSearchEntity() {
@@ -254,13 +259,21 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, resourceName, resourceType);
 
 		RequestPartitionId requestPartitionId = getRequestPartitionId();
-		final List<JpaPid> pidsSubList =
-				mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest, requestPartitionId);
+		// we request 1 more resource than we need
+		// this is so we can be sure of when we hit the last page
+		// (when doing offset searches)
+		final List<JpaPid> pidsSubList = mySearchCoordinatorSvc.getResources(
+				myUuid, theFromIndex, theToIndex + 1, myRequest, requestPartitionId);
+		// max list size should be either the entire list, or from - to length
+		int maxSize = Math.min(theToIndex - theFromIndex, pidsSubList.size());
+		theResponsePageBuilder.setTotalRequestedResourcesFetched(pidsSubList.size());
+
+		List<JpaPid> firstBatchOfPids = pidsSubList.subList(0, maxSize);
 		List<IBaseResource> resources = myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(requestPartitionId)
 				.execute(() -> {
-					return toResourceList(sb, pidsSubList, theResponsePageBuilder);
+					return toResourceList(sb, firstBatchOfPids, theResponsePageBuilder);
 				});
 
 		return resources;
@@ -536,8 +549,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		// this can (potentially) change the results being returned.
 		int precount = resources.size();
 		resources = ServerInterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
-		// we only care about omitted results from *this* page
-		theResponsePageBuilder.setToOmittedResourceCount(precount - resources.size());
+		// we only care about omitted results from this page
+		theResponsePageBuilder.setOmittedResourceCount(precount - resources.size());
 		theResponsePageBuilder.setResources(resources);
 		theResponsePageBuilder.setIncludedResourceCount(includedPidList.size());
 

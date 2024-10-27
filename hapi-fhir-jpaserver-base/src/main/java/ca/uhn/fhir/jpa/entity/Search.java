@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,33 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.Length;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.type.SqlTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,27 +66,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 
 import static org.apache.commons.lang3.StringUtils.left;
 
@@ -139,19 +142,27 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
+
 	/**
 	 * Note that this field may have the request partition IDs prepended to it
 	 */
-	@Lob()
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
 	private String mySearchQueryString;
+
+	/**
+	 * Note that this field may have the request partition IDs prepended to it
+	 */
+	@Column(name = "SEARCH_QUERY_STRING_VC", nullable = true, length = Length.LONG32)
+	private String mySearchQueryStringVc;
 
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
 	private Integer mySearchQueryStringHash;
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "SEARCH_TYPE", nullable = false)
+	@JdbcTypeCode(SqlTypes.INTEGER)
 	private SearchTypeEnum mySearchType;
 
 	@Enumerated(EnumType.STRING)
@@ -169,9 +180,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Column(name = "OPTLOCK_VERSION", nullable = true)
 	private Integer myVersion;
 
-	@Lob
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
+
+	@Column(name = "SEARCH_PARAM_MAP_BIN", nullable = true, length = Length.LONG32)
+	private byte[] mySearchParameterMapBin;
 
 	@Transient
 	private transient SearchParameterMap mySearchParameterMapTransient;
@@ -347,7 +361,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	 * Note that this field may have the request partition IDs prepended to it
 	 */
 	public String getSearchQueryString() {
-		return mySearchQueryString;
+		return mySearchQueryStringVc != null ? mySearchQueryStringVc : mySearchQueryString;
 	}
 
 	public void setSearchQueryString(String theSearchQueryString, RequestPartitionId theRequestPartitionId) {
@@ -359,12 +373,13 @@ public class Search implements ICachedSearchDetails, Serializable {
 			// We want this field to always have a wide distribution of values in order
 			// to avoid optimizers avoiding using it if it has lots of nulls, so in the
 			// case of null, just put a value that will never be hit
-			mySearchQueryString = UUID.randomUUID().toString();
+			mySearchQueryStringVc = UUID.randomUUID().toString();
 		} else {
-			mySearchQueryString = searchQueryString;
+			mySearchQueryStringVc = searchQueryString;
 		}
 
-		mySearchQueryStringHash = mySearchQueryString.hashCode();
+		mySearchQueryString = null;
+		mySearchQueryStringHash = mySearchQueryStringVc.hashCode();
 	}
 
 	public SearchTypeEnum getSearchType() {
@@ -463,8 +478,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 			return Optional.of(mySearchParameterMapTransient);
 		}
 		SearchParameterMap searchParameterMap = null;
-		if (mySearchParameterMap != null) {
-			searchParameterMap = SerializationUtils.deserialize(mySearchParameterMap);
+		byte[] searchParameterMapSerialized = mySearchParameterMapBin;
+		if (searchParameterMapSerialized == null) {
+			searchParameterMapSerialized = mySearchParameterMap;
+		}
+		if (searchParameterMapSerialized != null) {
+			searchParameterMap = SerializationUtils.deserialize(searchParameterMapSerialized);
 			mySearchParameterMapTransient = searchParameterMap;
 		}
 		return Optional.ofNullable(searchParameterMap);
@@ -472,7 +491,8 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	public void setSearchParameterMap(SearchParameterMap theSearchParameterMap) {
 		mySearchParameterMapTransient = theSearchParameterMap;
-		mySearchParameterMap = SerializationUtils.serialize(theSearchParameterMap);
+		mySearchParameterMapBin = SerializationUtils.serialize(theSearchParameterMap);
+		mySearchParameterMap = null;
 	}
 
 	@Override

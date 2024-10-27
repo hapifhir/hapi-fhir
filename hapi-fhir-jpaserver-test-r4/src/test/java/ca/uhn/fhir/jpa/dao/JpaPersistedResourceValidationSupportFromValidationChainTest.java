@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -26,11 +27,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.function.Predicate;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResource;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,7 +75,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithBadLibrary);
 
-		assertEquals(10, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertEquals(12, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@Test
@@ -91,7 +92,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnly );
 
-		assertEquals(8, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertEquals(10, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@Test
@@ -105,7 +106,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnlyNoLibraryReference);
 
-		assertEquals(7, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertEquals(9, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@Test

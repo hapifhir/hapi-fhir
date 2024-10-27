@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,13 +68,13 @@ public class CrDiscoveryElementDstu3 implements ICrDiscoveryElement {
 						|| p.equals("Patient?_id=Patient/{{context.patientId}}"))) {
 			String key = getKey(++itemNo);
 			service.addPrefetch(key, "Patient?_id={{context.patientId}}");
-			service.addSource(key, CdsResolutionStrategyEnum.SERVICE);
+			service.addSource(key, CdsResolutionStrategyEnum.FHIR_CLIENT);
 		}
 
 		for (String item : myPrefetchUrlList) {
 			String key = getKey(++itemNo);
 			service.addPrefetch(key, item);
-			service.addSource(key, CdsResolutionStrategyEnum.SERVICE);
+			service.addSource(key, CdsResolutionStrategyEnum.FHIR_CLIENT);
 		}
 
 		return service;

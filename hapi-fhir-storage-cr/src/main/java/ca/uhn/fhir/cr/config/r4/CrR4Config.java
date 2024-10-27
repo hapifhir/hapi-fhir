@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,26 +22,35 @@ package ca.uhn.fhir.cr.config.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.common.RepositoryFactoryForRepositoryInterface;
+import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
+import ca.uhn.fhir.cr.config.CrBaseConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
 import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
+import ca.uhn.fhir.cr.r4.ICollectDataServiceFactory;
 import ca.uhn.fhir.cr.r4.ICqlExecutionServiceFactory;
+import ca.uhn.fhir.cr.r4.IDataRequirementsServiceFactory;
 import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.cr.r4.ISubmitDataProcessorFactory;
-import ca.uhn.fhir.cr.r4.cqlexecution.CqlExecutionOperationProvider;
+import ca.uhn.fhir.cr.r4.cpg.CqlExecutionOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
+import ca.uhn.fhir.cr.r4.measure.CollectDataOperationProvider;
+import ca.uhn.fhir.cr.r4.measure.DataRequirementsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cr.cql.r4.R4CqlExecutionService;
+import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4CollectDataService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,16 +58,18 @@ import org.springframework.context.annotation.Import;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 @Configuration
-@Import({RepositoryConfig.class})
+@Import({RepositoryConfig.class, CrBaseConfig.class})
 public class CrR4Config {
 
 	@Bean
 	IMeasureServiceFactory r4MeasureServiceFactory(
-			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theEvaluationOptions) {
-		return rd -> new R4MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions);
+			RepositoryFactoryForRepositoryInterface theRepositoryFactory,
+			MeasureEvaluationOptions theEvaluationOptions,
+			MeasurePeriodValidator theMeasurePeriodValidator) {
+		return rd ->
+				new R4MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions, theMeasurePeriodValidator);
 	}
 
 	@Bean
@@ -78,22 +89,47 @@ public class CrR4Config {
 	}
 
 	@Bean
+	CollectDataOperationProvider r4CollectDataOperationProvider(
+			ICollectDataServiceFactory theR4CollectDataServiceFactory,
+			StringTimePeriodHandler theStringTimePeriodHandler) {
+		return new CollectDataOperationProvider(theR4CollectDataServiceFactory, theStringTimePeriodHandler);
+	}
+
+	@Bean
+	ICollectDataServiceFactory collectDataServiceFactory(
+			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theMeasureEvaluationOptions) {
+		return rd -> new R4CollectDataService(theRepositoryFactory.create(rd), theMeasureEvaluationOptions);
+	}
+
+	@Bean
+	DataRequirementsOperationProvider r4DataRequirementsOperationProvider() {
+		return new DataRequirementsOperationProvider();
+	}
+
+	@Bean
+	IDataRequirementsServiceFactory dataRequirementsServiceFactory(
+			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theMeasureEvaluationOptions) {
+		return rd -> new R4DataRequirementsService(theRepositoryFactory.create(rd), theMeasureEvaluationOptions);
+	}
+
+	@Bean
 	ICareGapsServiceFactory careGapsServiceFactory(
 			IRepositoryFactory theRepositoryFactory,
 			CareGapsProperties theCareGapsProperties,
 			MeasureEvaluationOptions theMeasureEvaluationOptions,
-			@Qualifier("cqlExecutor") Executor theExecutor) {
+			MeasurePeriodValidator theMeasurePeriodValidator) {
 		return rd -> new R4CareGapsService(
 				theCareGapsProperties,
 				theRepositoryFactory.create(rd),
 				theMeasureEvaluationOptions,
-				theExecutor,
-				rd.getFhirServerBase());
+				rd.getFhirServerBase(),
+				theMeasurePeriodValidator);
 	}
 
 	@Bean
-	CareGapsOperationProvider r4CareGapsOperationProvider() {
-		return new CareGapsOperationProvider();
+	CareGapsOperationProvider r4CareGapsOperationProvider(
+			ICareGapsServiceFactory theR4CareGapsProcessorFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+		return new CareGapsOperationProvider(theR4CareGapsProcessorFactory, theStringTimePeriodHandler);
 	}
 
 	@Bean
@@ -102,8 +138,9 @@ public class CrR4Config {
 	}
 
 	@Bean
-	MeasureOperationsProvider r4MeasureOperationsProvider() {
-		return new MeasureOperationsProvider();
+	MeasureOperationsProvider r4MeasureOperationsProvider(
+			IMeasureServiceFactory theR4MeasureServiceFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+		return new MeasureOperationsProvider(theR4MeasureServiceFactory, theStringTimePeriodHandler);
 	}
 
 	@Bean
@@ -118,7 +155,9 @@ public class CrR4Config {
 								MeasureOperationsProvider.class,
 								SubmitDataProvider.class,
 								CareGapsOperationProvider.class,
-								CqlExecutionOperationProvider.class)));
+								CqlExecutionOperationProvider.class,
+								CollectDataOperationProvider.class,
+								DataRequirementsOperationProvider.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}

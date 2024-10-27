@@ -14,6 +14,9 @@ INSERT INTO BT2_JOB_INSTANCE (
    PROGRESS_PCT,
    START_TIME,
    STAT,
+   TOT_ELAPSED_MILLIS,
+   ERROR_MSG,
+   PARAMS_JSON_LOB,
    WORK_CHUNKS_PURGED
 ) VALUES (
    '00161699-bcfe-428e-9ca2-caceb9645f8a',
@@ -31,6 +34,9 @@ INSERT INTO BT2_JOB_INSTANCE (
    1,
    '2023-07-06 14:24:10.875',
    'COMPLETED',
+   200,
+   'Error message',
+   83006,
    1
 );
 
@@ -46,7 +52,9 @@ INSERT INTO BT2_WORK_CHUNK (
    SEQ,
    START_TIME,
    STAT,
-   TGT_STEP_ID
+   TGT_STEP_ID,
+   ERROR_MSG,
+   CHUNK_DATA
 ) VALUES (
    '01d26875-8d1a-4e37-b554-62a3219f009b',
    '2023-07-06 15:20:20.797',
@@ -59,5 +67,7 @@ INSERT INTO BT2_WORK_CHUNK (
    0,
    '2023-07-06 15:21:11.14',
    'COMPLETED',
-   'ReadInResourcesFromFileStep'
+   'ReadInResourcesFromFileStep',
+   'Error message',
+   72995
 );

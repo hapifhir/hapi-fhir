@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -27,9 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -89,7 +86,7 @@ class ResourceChangeListenerRegistryImplTest {
 	public void addingListenerForNonResourceFails() {
 		try {
 			myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Foo", ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
-			fail();
+			fail("");
 		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1684) + "Unknown resource name \"Foo\" (this name is not known in FHIR version \"R4\")", e.getMessage());
 		}
@@ -100,7 +97,7 @@ class ResourceChangeListenerRegistryImplTest {
 		try {
 			mockInMemorySupported(InMemoryMatchResult.unsupportedFromReason("TEST REASON"));
 			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(482) + "SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: TEST REASON.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
 		}
@@ -131,13 +128,13 @@ class ResourceChangeListenerRegistryImplTest {
 		assertEquals(3, myResourceChangeListenerRegistry.size());
 
 		List<ResourceChangeListenerCache> entries = Lists.newArrayList(myResourceChangeListenerRegistry.iterator());
-		assertThat(entries, hasSize(3));
+		assertThat(entries).hasSize(3);
 
 		List<IResourceChangeListener> listeners = entries.stream().map(ResourceChangeListenerCache::getResourceChangeListener).collect(Collectors.toList());
-		assertThat(listeners, contains(listener1, listener1, listener2));
+		assertThat(listeners).containsExactly(listener1, listener1, listener2);
 
 		List<String> resourceNames = entries.stream().map(IResourceChangeListenerCache::getResourceName).collect(Collectors.toList());
-		assertThat(resourceNames, contains(PATIENT_RESOURCE_NAME, OBSERVATION_RESOURCE_NAME, PATIENT_RESOURCE_NAME));
+		assertThat(resourceNames).containsExactly(PATIENT_RESOURCE_NAME, OBSERVATION_RESOURCE_NAME, PATIENT_RESOURCE_NAME);
 
 		IResourceChangeListenerCache firstcache = entries.iterator().next();
 		// We made a copy

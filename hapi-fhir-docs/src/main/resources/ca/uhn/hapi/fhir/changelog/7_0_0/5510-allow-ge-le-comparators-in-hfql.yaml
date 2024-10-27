@@ -1,0 +1,7 @@
+---
+type: fix
+jira: SMILE-7664
+title: "The HFQL/SQL engine incorrectly parsed expressions containing a `>=` or
+   `<=` comparator in a WHERE clause. This has been corrected. Additionally, the
+   execution engine has been optimized to apply clauses against the `meta.lastUpdated`
+   path more efficiently by using the equivalent search parameter automatically."

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,7 @@ import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -61,6 +59,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
@@ -69,6 +68,9 @@ import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -82,17 +84,21 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
+import static ca.uhn.fhir.rest.api.Constants.VALID_MODIFIERS;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder implements ICanMakeMissingParamPredicate {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceLinkPredicateBuilder.class);
+	private static final Pattern MODIFIER_REPLACE_PATTERN = Pattern.compile(".*:");
 	private final DbColumn myColumnSrcType;
 	private final DbColumn myColumnSrcPath;
 	private final DbColumn myColumnTargetResourceId;
@@ -101,6 +107,9 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	private final DbColumn myColumnTargetResourceType;
 	private final QueryStack myQueryStack;
 	private final boolean myReversed;
+
+	private final DbColumn myColumnTargetPartitionId;
+	private final DbColumn myColumnSrcPartitionId;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
@@ -127,9 +136,11 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder, boolean theReversed) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
 		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
+		myColumnSrcPartitionId = getTable().addColumn("PARTITION_ID");
 		myColumnSrcType = getTable().addColumn("SOURCE_RESOURCE_TYPE");
 		myColumnSrcPath = getTable().addColumn("SRC_PATH");
 		myColumnTargetResourceId = getTable().addColumn("TARGET_RESOURCE_ID");
+		myColumnTargetPartitionId = getTable().addColumn("TARGET_RES_PARTITION_ID");
 		myColumnTargetResourceUrl = getTable().addColumn("TARGET_RESOURCE_URL");
 		myColumnTargetResourceType = getTable().addColumn("TARGET_RESOURCE_TYPE");
 
@@ -153,8 +164,34 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		return myColumnTargetResourceId;
 	}
 
+	public DbColumn getColumnTargetPartitionId() {
+		return myColumnTargetPartitionId;
+	}
+
+	public DbColumn[] getJoinColumnsForTarget() {
+		return getSearchQueryBuilder().toJoinColumns(getColumnTargetPartitionId(), getColumnTargetResourceId());
+	}
+
+	public DbColumn[] getJoinColumnsForSource() {
+		return getSearchQueryBuilder().toJoinColumns(getPartitionIdColumn(), myColumnSrcResourceId);
+	}
+
+	/**
+	 * Note that this may return the SRC_RESOURCE_ID or TGT_RESOURCE_ID depending
+	 * on whether we're building a forward or reverse link. If you need a specific
+	 * one of these, use {@link #getJoinColumnsForSource()} or {@link #getJoinColumnsForTarget()}.
+	 */
+	@Override
+	public DbColumn[] getJoinColumns() {
+		return super.getJoinColumns();
+	}
+
 	public DbColumn getColumnSrcResourceId() {
 		return myColumnSrcResourceId;
+	}
+
+	public DbColumn getColumnSrcPartitionId() {
+		return myColumnSrcPartitionId;
 	}
 
 	public DbColumn getColumnTargetResourceType() {
@@ -204,6 +241,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 							targetQualifiedUrls.add(dt.getValue());
 						}
 					} else {
+						validateModifierUse(theRequest, theResourceType, ref);
+						validateResourceTypeInReferenceParam(ref.getResourceType());
 						targetIds.add(dt);
 					}
 
@@ -253,6 +292,53 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		} else {
 			Condition retVal = createPredicateReference(inverse, pathsToMatch, targetPidList, targetQualifiedUrls);
 			return combineWithRequestPartitionIdPredicate(getRequestPartitionId(), retVal);
+		}
+	}
+
+	private void validateModifierUse(RequestDetails theRequest, String theResourceType, ReferenceParam theRef) {
+		try {
+			final String resourceTypeFromRef = theRef.getResourceType();
+			if (StringUtils.isEmpty(resourceTypeFromRef)) {
+				return;
+			}
+			// TODO: LD: unless we do this, ResourceProviderR4Test#testSearchWithSlashes will fail due to its
+			// derived-from: syntax
+			getFhirContext().getResourceDefinition(resourceTypeFromRef);
+		} catch (DataFormatException e) {
+			final List<String> nonMatching = Optional.ofNullable(theRequest)
+					.map(RequestDetails::getParameters)
+					.map(params -> params.keySet().stream()
+							.filter(mod -> mod.contains(":"))
+							.map(MODIFIER_REPLACE_PATTERN::matcher)
+							.map(pattern -> pattern.replaceAll(":"))
+							.filter(mod -> !VALID_MODIFIERS.contains(mod))
+							.distinct()
+							.collect(Collectors.toUnmodifiableList()))
+					.orElse(Collections.emptyList());
+
+			if (!nonMatching.isEmpty()) {
+				final String msg = getFhirContext()
+						.getLocalizer()
+						.getMessageSanitized(
+								SearchCoordinatorSvcImpl.class,
+								"invalidUseOfSearchIdentifier",
+								nonMatching,
+								theResourceType,
+								VALID_MODIFIERS);
+				throw new InvalidRequestException(Msg.code(2498) + msg);
+			}
+		}
+	}
+
+	private void validateResourceTypeInReferenceParam(final String theResourceType) {
+		if (StringUtils.isEmpty(theResourceType)) {
+			return;
+		}
+
+		try {
+			getFhirContext().getResourceDefinition(theResourceType);
+		} catch (DataFormatException e) {
+			throw newInvalidResourceTypeException(theResourceType);
 		}
 	}
 
@@ -315,7 +401,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					.collect(Collectors.joining(" or ")));
 		} else {
 			builder.append("If you know what you're looking for, try qualifying it using the form: '");
-			builder.append(theParamName).append(":[resourceType]");
+			builder.append(theParamName).append(":[resourceType]=[id] or ");
+			builder.append(theParamName).append("=[resourceType]/[id]");
 			builder.append("'");
 		}
 		String message = builder.toString();
@@ -355,18 +442,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		/*
 		 * Handle chain on _type
 		 */
-		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
+		if (PARAM_TYPE.equals(theReferenceParam.getChain())) {
 
 			List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName, theQualifiers);
 			Condition typeCondition = createPredicateSourcePaths(pathsToMatch);
 
 			String typeValue = theReferenceParam.getValue();
 
-			try {
-				getFhirContext().getResourceDefinition(typeValue).getImplementingClass();
-			} catch (DataFormatException e) {
-				throw newInvalidResourceTypeException(typeValue);
-			}
+			validateResourceTypeInReferenceParam(typeValue);
 			if (!resourceTypes.contains(typeValue)) {
 				throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
 			}
@@ -456,14 +539,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			List<Condition> andPredicates = new ArrayList<>();
 
 			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
-			andPredicates.add(childQueryFactory.searchForIdsWithAndOr(
-					myColumnTargetResourceId,
-					subResourceName,
-					chain,
-					chainParamValues,
-					theRequest,
-					theRequestPartitionId,
-					SearchContainedModeEnum.FALSE));
+			andPredicates.add(
+					childQueryFactory.searchForIdsWithAndOr(with().setSourceJoinColumn(getJoinColumnsForTarget())
+							.setResourceName(subResourceName)
+							.setParamName(chain)
+							.setAndOrParams(chainParamValues)
+							.setRequest(theRequest)
+							.setRequestPartitionId(theRequestPartitionId)));
 
 			orPredicates.add(QueryParameterUtils.toAndPredicate(andPredicates));
 		}
@@ -605,15 +687,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 	public List<String> createResourceLinkPaths(
 			String theResourceName, String theParamName, List<String> theParamQualifiers) {
-		int linkIndex = theParamName.indexOf('.');
-		if (linkIndex == -1) {
-
-			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
-			if (param == null) {
-				// This can happen during recursion, if not all the possible target types of one link in the chain
-				// support the next link
-				return new ArrayList<>();
-			}
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+		if (param != null) {
 			List<String> path = param.getPathsSplit();
 
 			/*
@@ -631,40 +706,48 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			}
 
 			return path;
-		} else {
+		}
+
+		boolean containsChain = theParamName.contains(".");
+		if (containsChain) {
+			int linkIndex = theParamName.indexOf('.');
 			String paramNameHead = theParamName.substring(0, linkIndex);
 			String paramNameTail = theParamName.substring(linkIndex + 1);
-			String qualifier = theParamQualifiers.get(0);
+			String qualifier = !theParamQualifiers.isEmpty() ? theParamQualifiers.get(0) : null;
+			List<String> nextQualifiersList = !theParamQualifiers.isEmpty()
+					? theParamQualifiers.subList(1, theParamQualifiers.size())
+					: List.of();
 
-			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramNameHead);
-			if (param == null) {
-				// This can happen during recursion, if not all the possible target types of one link in the chain
-				// support the next link
-				return new ArrayList<>();
+			param = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramNameHead);
+			if (param != null) {
+				Set<String> tailPaths = param.getTargets().stream()
+						.filter(t -> isBlank(qualifier) || qualifier.equals(t))
+						.map(t -> createResourceLinkPaths(t, paramNameTail, nextQualifiersList))
+						.flatMap(Collection::stream)
+						.map(t -> t.substring(t.indexOf('.') + 1))
+						.collect(Collectors.toSet());
+
+				List<String> path = param.getPathsSplit();
+
+				/*
+				 * SearchParameters can declare paths on multiple resource
+				 * types. Here we only want the ones that actually apply.
+				 * Then append all the tail paths to each of the applicable head paths
+				 */
+				return path.stream()
+						.map(String::trim)
+						.filter(t -> t.startsWith(theResourceName + "."))
+						.map(head -> tailPaths.stream()
+								.map(tail -> head + "." + tail)
+								.collect(Collectors.toSet()))
+						.flatMap(Collection::stream)
+						.collect(Collectors.toList());
 			}
-			Set<String> tailPaths = param.getTargets().stream()
-					.filter(t -> isBlank(qualifier) || qualifier.equals(t))
-					.map(t -> createResourceLinkPaths(
-							t, paramNameTail, theParamQualifiers.subList(1, theParamQualifiers.size())))
-					.flatMap(Collection::stream)
-					.map(t -> t.substring(t.indexOf('.') + 1))
-					.collect(Collectors.toSet());
-
-			List<String> path = param.getPathsSplit();
-
-			/*
-			 * SearchParameters can declare paths on multiple resource
-			 * types. Here we only want the ones that actually apply.
-			 * Then append all the tail paths to each of the applicable head paths
-			 */
-			return path.stream()
-					.map(String::trim)
-					.filter(t -> t.startsWith(theResourceName + "."))
-					.map(head ->
-							tailPaths.stream().map(tail -> head + "." + tail).collect(Collectors.toSet()))
-					.flatMap(Collection::stream)
-					.collect(Collectors.toList());
 		}
+
+		// This can happen during recursion, if not all the possible target types of one link in the chain
+		// support the next link
+		return new ArrayList<>();
 	}
 
 	private IQueryParameterType mapReferenceChainToRawParamType(
@@ -706,7 +789,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 				.getLocalizer()
 				.getMessage(
 						ResourceLinkPredicateBuilder.class, "invalidTargetTypeForChain", theTypeValue, searchParamName);
-		return new InvalidRequestException(msg);
+		return new InvalidRequestException(Msg.code(2495) + msg);
 	}
 
 	@Nonnull
@@ -748,14 +831,19 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		subquery.addCustomColumns(1);
 		subquery.addFromTable(getTable());
 
+		String resourceType = theParams.getResourceTablePredicateBuilder().getResourceType();
+		RuntimeSearchParam paramDefinition =
+				mySearchParamRegistry.getRuntimeSearchParam(resourceType, theParams.getParamName());
+		List<String> pathList = paramDefinition.getPathsSplitForResourceType(resourceType);
+
 		Condition subQueryCondition = ComboCondition.and(
 				BinaryCondition.equalTo(
 						getResourceIdColumn(),
 						theParams.getResourceTablePredicateBuilder().getResourceIdColumn()),
-				BinaryCondition.equalTo(
-						getResourceTypeColumn(),
-						generatePlaceholder(
-								theParams.getResourceTablePredicateBuilder().getResourceType())));
+				BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(resourceType)),
+				ComboCondition.or(pathList.stream()
+						.map(path -> BinaryCondition.equalTo(getColumnSourcePath(), generatePlaceholder(path)))
+						.toArray(BinaryCondition[]::new)));
 
 		subquery.addCondition(subQueryCondition);
 
@@ -765,5 +853,15 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 
 		return combineWithRequestPartitionIdPredicate(theParams.getRequestPartitionId(), unaryCondition);
+	}
+
+	@VisibleForTesting
+	void setSearchParamRegistryForUnitTest(ISearchParamRegistry theSearchParamRegistry) {
+		mySearchParamRegistry = theSearchParamRegistry;
+	}
+
+	@VisibleForTesting
+	void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
+		myIdHelperService = theIdHelperService;
 	}
 }

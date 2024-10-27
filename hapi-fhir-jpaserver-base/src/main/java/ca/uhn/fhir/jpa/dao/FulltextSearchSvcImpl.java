@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,16 @@ import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchSearchBuilder;
 import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.dao.search.LastNOperation;
+import ca.uhn.fhir.jpa.dao.search.SearchScrollQueryExecutorAdaptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteSearch;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.builder.SearchQueryExecutors;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -53,6 +56,10 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import com.google.common.collect.Ordering;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
@@ -78,10 +85,6 @@ import java.util.List;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 
 import static ca.uhn.fhir.rest.server.BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -141,17 +144,26 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@Override
-	public boolean supportsSomeOf(SearchParameterMap myParams) {
-
-		// keep this in sync with the guts of doSearch
+	public boolean canUseHibernateSearch(String theResourceType, SearchParameterMap myParams) {
 		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT)
 				|| myParams.containsKey(Constants.PARAM_TEXT)
 				|| myParams.isLastN();
+		// we have to use it - _text and _content searches only use hibernate
+		if (requiresHibernateSearchAccess) {
+			return true;
+		}
 
-		requiresHibernateSearchAccess |=
-				myStorageSettings.isAdvancedHSearchIndexing() && myAdvancedIndexQueryBuilder.isSupportsSomeOf(myParams);
+		// if the registry has not been initialized
+		// we cannot use HibernateSearch because it
+		// will, internally, trigger a new search
+		// when it refreshes the search parameters
+		// (which will cause an infinite loop)
+		if (!mySearchParamRegistry.isInitialized()) {
+			return false;
+		}
 
-		return requiresHibernateSearchAccess;
+		return myStorageSettings.isAdvancedHSearchIndexing()
+				&& myAdvancedIndexQueryBuilder.canUseHibernateSearch(theResourceType, myParams, mySearchParamRegistry);
 	}
 
 	@Override
@@ -173,7 +185,21 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return doSearch(theResourceName, theParams, null, theMaxResultsToFetch, theRequestDetails);
 	}
 
+	@Transactional
+	@Override
+	public ISearchQueryExecutor searchScrolled(
+			String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
+		validateHibernateSearchIsEnabled();
+
+		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
+				getSearchQueryOptionsStep(theResourceType, theParams, null);
+		logQuery(searchQueryOptionsStep, theRequestDetails);
+
+		return new SearchScrollQueryExecutorAdaptor(searchQueryOptionsStep.scroll(SearchBuilder.getMaximumPageSize()));
+	}
+
 	// keep this in sync with supportsSomeOf();
+	@SuppressWarnings("rawtypes")
 	private ISearchQueryExecutor doSearch(
 			String theResourceType,
 			SearchParameterMap theParams,
@@ -208,6 +234,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return DEFAULT_MAX_NON_PAGED_SIZE;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
 			String theResourceType, SearchParameterMap theParams, IResourcePersistentId theReferencingPid) {
 
@@ -230,6 +257,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return query;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private PredicateFinalStep buildWhereClause(
 			SearchPredicateFactory f,
 			String theResourceType,
@@ -271,8 +299,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			 * Handle other supported parameters
 			 */
 			if (myStorageSettings.isAdvancedHSearchIndexing() && theParams.getEverythingMode() == null) {
-				myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(
-						builder, theResourceType, theParams, mySearchParamRegistry);
+				ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams params =
+						new ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams();
+				params.setSearchParamRegistry(mySearchParamRegistry)
+						.setResourceType(theResourceType)
+						.setSearchParameterMap(theParams);
+				myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, params);
 			}
 			// DROP EARLY HERE IF BOOL IS EMPTY?
 		});
@@ -283,11 +315,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return Search.session(myEntityManager);
 	}
 
+	@SuppressWarnings("rawtypes")
 	private List<IResourcePersistentId> convertLongsToResourcePersistentIds(List<Long> theLongPids) {
 		return theLongPids.stream().map(JpaPid::fromId).collect(Collectors.toList());
 	}
 
 	@Override
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public List<IResourcePersistentId> everything(
 			String theResourceName,
 			SearchParameterMap theParams,
@@ -336,6 +370,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Transactional()
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<IResourcePersistentId> search(
 			String theResourceName, SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		validateHibernateSearchIsEnabled();
@@ -347,6 +382,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	/**
 	 * Adapt our async interface to the legacy concrete List
 	 */
+	@SuppressWarnings("rawtypes")
 	private List<IResourcePersistentId> toList(ISearchQueryExecutor theSearchResultStream, long theMaxSize) {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(theSearchResultStream, 0), false)
 				.map(JpaPid::fromId)
@@ -384,6 +420,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public List<IResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
 		ensureElastic();
 		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
@@ -495,6 +532,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public boolean supportsAllOf(SearchParameterMap theParams) {
 		return myAdvancedIndexQueryBuilder.isSupportsAllOf(theParams);
+	}
+
+	@Override
+	public boolean supportsAllSortTerms(String theResourceType, SearchParameterMap theParams) {
+		return myExtendedFulltextSortHelper.supportsAllSortTerms(theResourceType, theParams);
 	}
 
 	private void dispatchEvent(IHSearchEventListener.HSearchEventType theEventType) {

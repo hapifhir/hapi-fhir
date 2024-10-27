@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@
  * #L%
  */
 package ca.uhn.hapi.fhir.cdshooks.api;
+
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -72,4 +74,6 @@ public @interface CdsService {
 	 * An arbitrary string which will be used to store stringify JSON
 	 */
 	String extension() default "";
+
+	Class<? extends CdsHooksExtension> extensionClass() default CdsHooksExtension.class;
 }

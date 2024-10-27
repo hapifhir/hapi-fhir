@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,9 @@ import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
@@ -61,8 +62,8 @@ import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
@@ -71,6 +72,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -79,6 +81,8 @@ import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -99,6 +103,8 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -129,8 +135,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -147,6 +151,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.rest.api.Constants.HEADER_CACHE_CONTROL;
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static java.util.stream.Collectors.joining;
 import static org.awaitility.Awaitility.await;
@@ -194,7 +199,11 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected JpaStorageSettings myStorageSettings;
 	@Autowired
+	protected SubscriptionSettings mySubscriptionSettings;
+	@Autowired
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
+	@Autowired
+	protected INpmPackageVersionDao myPackageVersionDao;
 	@Autowired
 	protected IInterceptorService myInterceptorRegistry;
 	@Autowired
@@ -229,6 +238,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
 	@Autowired
 	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
+	@Autowired
+	protected IResourceIndexedComboStringUniqueDao myResourceIndexedComboStringUniqueDao;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc myFulltestSearchSvc;
 	@Autowired(required = false)
@@ -245,6 +256,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ITermConceptPropertyDao myTermConceptPropertyDao;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
+	@Autowired
+	protected ISchedulerService mySchedulerService;
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
 	@Autowired
 	private IValidationSupport myJpaPersistedValidationSupport;
@@ -257,9 +270,9 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
-	private IForcedIdDao myForcedIdDao;
+	protected DaoRegistry myDaoRegistry;
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 
 	@SuppressWarnings("BusyWait")
@@ -295,7 +308,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	@SuppressWarnings("BusyWait")
-	protected static void purgeDatabase(JpaStorageSettings theStorageSettings, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
+	public static void purgeDatabase(JpaStorageSettings theStorageSettings, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 		theBulkDataJobActivator.cancelAndPurgeAllJobs();
@@ -307,6 +320,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 		for (int count = 0; ; count++) {
 			try {
+				ourLog.info("Calling Expunge count {}", count);
 				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), new SystemRequestDetails());
 				break;
 			} catch (Exception e) {
@@ -378,6 +392,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
 		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultConfig.isIncludeHashIdentityForTokenSearches());
+		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultConfig.getMaximumIncludesToLoadPerPage());
+
 	}
 
 	@AfterEach
@@ -418,6 +435,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(mySrdInterceptorService);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
+		when(mySrd.getHeaders(eq(HEADER_CACHE_CONTROL))).thenReturn(new ArrayList<>());
 		// TODO enforce strict mocking everywhere
 		lenient().when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
 		lenient().when(mySrd.getServer().getMaximumPageSize()).thenReturn(null);
@@ -429,6 +447,11 @@ public abstract class BaseJpaTest extends BaseTest {
 		myRegisteredInterceptors.add(interceptor);
 		myInterceptorRegistry.registerAnonymousInterceptor(theLatchPointcut, Integer.MAX_VALUE, interceptor);
 		return deliveryLatch;
+	}
+
+	protected void registerInterceptor(Object theInterceptor) {
+		myRegisteredInterceptors.add(theInterceptor);
+		myInterceptorRegistry.registerInterceptor(theInterceptor);
 	}
 
 	protected void purgeHibernateSearch(EntityManager theEntityManager) {
@@ -455,6 +478,12 @@ public abstract class BaseJpaTest extends BaseTest {
 				.stream()
 				.map(t -> t.toString())
 				.collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	public void logAllPackageVersions() {
+		runInTransaction(() -> {
+			ourLog.info("Package Versions:\n * {}", myPackageVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 	}
 
@@ -512,14 +541,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected int logAllForcedIds() {
-		return runInTransaction(() -> {
-			List<ForcedId> forcedIds = myForcedIdDao.findAll();
-			ourLog.info("Resources:\n * {}", forcedIds.stream().map(ForcedId::toString).collect(Collectors.joining("\n * ")));
-			return forcedIds.size();
-		});
-	}
-
 	protected void logAllDateIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(ResourceIndexedSearchParamDate::toString).collect(Collectors.joining("\n * ")));
@@ -529,6 +550,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllNonUniqueIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Non unique indexes:\n * {}", myResourceIndexedComboTokensNonUniqueDao.findAll().stream().map(ResourceIndexedComboTokenNonUnique::toString).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllUniqueIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("Unique indexes:\n * {}", myResourceIndexedComboStringUniqueDao.findAll().stream().map(ResourceIndexedComboStringUnique::toString).collect(Collectors.joining("\n * ")));
 		});
 	}
 
@@ -602,9 +629,9 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	/**
-	 * Sleep until at least 1 ms has elapsed
+	 * Sleep until time change on the clocks
 	 */
-	public void sleepUntilTimeChanges() {
+	public void sleepUntilTimeChange() {
 		StopWatch sw = new StopWatch();
 		await().until(() -> sw.getMillis() > 0);
 	}
@@ -874,7 +901,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		try {
 			dao.read(theId, mySrd);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}

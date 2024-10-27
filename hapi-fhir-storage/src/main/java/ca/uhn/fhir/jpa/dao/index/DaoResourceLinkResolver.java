@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TerserUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -61,8 +63,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
@@ -134,7 +134,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 					type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
-				if (myStorageSettings.isEnforceReferentialIntegrityOnWrite() == false) {
+				if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
 					return null;
 				}
 
@@ -150,20 +150,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 				"Resolved resource of type {} as PID: {}",
 				resolvedResource.getResourceType(),
 				resolvedResource.getPersistentId());
-		if (!resourceType.equals(resolvedResource.getResourceType())) {
-			ourLog.error(
-					"Resource with PID {} was of type {} and wanted {}",
-					resolvedResource.getPersistentId(),
-					resourceType,
-					resolvedResource.getResourceType());
-			throw new UnprocessableEntityException(Msg.code(1095)
-					+ "Resource contains reference to unknown resource ID " + targetResourceId.getValue());
-		}
-
-		if (resolvedResource.getDeleted() != null) {
-			String resName = resolvedResource.getResourceType();
-			throw new InvalidRequestException(Msg.code(1096) + "Resource " + resName + "/" + idPart
-					+ " is deleted, specified in path: " + sourcePath);
+		if (!validateResolvedResourceOrThrow(resourceType, resolvedResource, targetResourceId, idPart, sourcePath)) {
+			return null;
 		}
 
 		if (persistentId == null) {
@@ -180,6 +168,45 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		}
 
 		return resolvedResource;
+	}
+
+	/**
+	 * Validates the resolved resource.
+	 * If 'Enforce Referential Integrity on Write' is enabled:
+	 * Throws <code>UnprocessableEntityException</code> when resource types do not match
+	 * Throws <code>InvalidRequestException</code> when the resolved resource was deleted
+	 * <p>
+	 * Otherwise, return false when resource types do not match or resource was deleted
+	 * and return true if the resolved resource is valid.
+	 */
+	private boolean validateResolvedResourceOrThrow(
+			String resourceType,
+			IResourceLookup resolvedResource,
+			IIdType targetResourceId,
+			String idPart,
+			String sourcePath) {
+		if (!resourceType.equals(resolvedResource.getResourceType())) {
+			ourLog.error(
+					"Resource with PID {} was of type {} and wanted {}",
+					resolvedResource.getPersistentId(),
+					resourceType,
+					resolvedResource.getResourceType());
+			if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
+				return false;
+			}
+			throw new UnprocessableEntityException(Msg.code(1095)
+					+ "Resource contains reference to unknown resource ID " + targetResourceId.getValue());
+		}
+
+		if (resolvedResource.getDeleted() != null) {
+			if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
+				return false;
+			}
+			String resName = resolvedResource.getResourceType();
+			throw new InvalidRequestException(Msg.code(1096) + "Resource " + resName + "/" + idPart
+					+ " is deleted, specified in path: " + sourcePath);
+		}
+		return true;
 	}
 
 	@Nullable

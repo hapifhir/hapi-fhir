@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
@@ -37,6 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.validation.IResourceLoader;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -53,7 +53,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
 @Service
 public class MdmControllerHelper {
@@ -143,13 +142,11 @@ public class MdmControllerHelper {
 	public IBaseBundle getMatchesAndPossibleMatchesForResource(
 			IAnyResource theResource, String theResourceType, RequestDetails theRequestDetails) {
 		RequestPartitionId requestPartitionId;
-		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forSearchType(theResourceType, null, null);
 		if (myMdmSettings.getSearchAllPartitionForMatch()) {
 			requestPartitionId = RequestPartitionId.allPartitions();
 		} else {
-			requestPartitionId =
-					myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+					theRequestDetails, theResourceType);
 		}
 		List<MatchedTarget> matches =
 				myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource, requestPartitionId);

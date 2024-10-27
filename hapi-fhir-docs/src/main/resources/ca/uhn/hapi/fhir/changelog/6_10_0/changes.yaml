@@ -11,5 +11,5 @@
         <li>Thymeleaf (Testpage Overlay): 3.0.14.RELEASE -&gt; 3.1.2.RELEASE</li>
         <li>xpp3 (All): 1.1.4c.0 -&gt; 1.1.6</li>
         <li>HtmlUnit (All): 2.67.0 -&gt; 2.70.0</li>
-        <li>org.hl7.fhir.core (All): 6.0.22.2 -&gt; 6.1.2</li>
+        <li>org.hl7.fhir.core (All): 6.0.22.2 -&gt; 6.1.2.2</li>
    </ul>"

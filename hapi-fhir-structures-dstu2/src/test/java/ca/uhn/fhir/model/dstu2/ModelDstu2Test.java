@@ -27,6 +27,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+
 public class ModelDstu2Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
@@ -83,8 +84,7 @@ public class ModelDstu2Test {
 		new InstantDt("2019-01-01T00:00:00.000Z");
 		try {
 			new InstantDt("2019-01-01T00:00Z");
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			// good
 		}
 	}

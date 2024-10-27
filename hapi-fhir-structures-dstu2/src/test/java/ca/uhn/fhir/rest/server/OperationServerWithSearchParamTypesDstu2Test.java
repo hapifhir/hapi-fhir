@@ -10,6 +10,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -20,50 +21,50 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class OperationServerWithSearchParamTypesDstu2Test {
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx;
+	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
 
 	private static String ourLastMethod;
 	private static List<StringOrListParam> ourLastParamValStr;
 	private static List<TokenOrListParam> ourLastParamValTok;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerWithSearchParamTypesDstu2Test.class);
-	private static int ourPort;
-	private static Server ourServer;
+
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		.setDefaultResponseEncoding(EncodingEnum.XML)
+		.registerProvider(new PatientProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2))
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -97,7 +98,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		p.addParameter().setName("valtok").setValue(new StringDt("VALTOK2A|VALTOK2B"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$andlist");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$andlist");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -106,14 +107,14 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(2, ourLastParamValStr.size());
-		assertEquals(2, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(2);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertEquals("VALSTR1A", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR1B", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue());
 		assertEquals("VALSTR2A", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR2B", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue());
-		assertEquals(2, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(2);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOK1A", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOK1B", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALTOK2A", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem());
@@ -123,7 +124,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 
 	@Test
 	public void testAndListWithUrl() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok="
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok="
 				+ UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"));
 		HttpResponse status = ourClient.execute(httpGet);
 
@@ -132,14 +133,14 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(2, ourLastParamValStr.size());
-		assertEquals(2, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(2);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertEquals("VALSTR1A", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR1B", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue());
 		assertEquals("VALSTR2A", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR2B", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue());
-		assertEquals(2, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(2);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOK1A", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOK1B", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALTOK2A", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem());
@@ -162,21 +163,21 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 		//@formatter:off
-		assertThat(conf, stringContainsInOrder(
+		assertThat(conf).containsSubsequence(
 			"<type value=\"Patient\"/>",
 			"<operation>", 
 			"<name value=\"andlist\"/>"
-		));
-		assertThat(conf, stringContainsInOrder(
+		);
+		assertThat(conf).containsSubsequence(
 				"<type value=\"Patient\"/>",
 				"<operation>", 
 				"<name value=\"nonrepeating\"/>"
-			));
-		assertThat(conf, stringContainsInOrder(
+			);
+		assertThat(conf).containsSubsequence(
 				"<type value=\"Patient\"/>",
 				"<operation>", 
 				"<name value=\"orlist\"/>"
-			));
+			);
 		//@formatter:on
 
 		/*
@@ -186,7 +187,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
-		assertThat(def, stringContainsInOrder(
+		assertThat(def).containsSubsequence(
 			"<parameter>", 
 			"<name value=\"valtok\"/>", 
 			"<use value=\"in\"/>", 
@@ -194,7 +195,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 			"<max value=\"10\"/>", 
 			"<type value=\"string\"/>", 
 			"</parameter>"
-		));
+		);
 		//@formatter:on
 
 	}
@@ -206,7 +207,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		p.addParameter().setName("valtok").setValue(new StringDt("VALTOKA|VALTOKB"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$nonrepeating");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$nonrepeating");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -215,11 +216,11 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(1, ourLastParamValStr.size());
-		assertEquals(1, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(1);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALSTR", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(1, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(1);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOKA", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOKB", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("type $nonrepeating", ourLastMethod);
@@ -227,7 +228,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 
 	@Test
 	public void testNonRepeatingWithUrl() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$nonrepeating?valstr=VALSTR&valtok=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"));
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$nonrepeating?valstr=VALSTR&valtok=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"));
 		HttpResponse status = ourClient.execute(httpGet);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -235,11 +236,11 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(1, ourLastParamValStr.size());
-		assertEquals(1, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(1);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALSTR", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(1, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(1);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOKA", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOKB", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("type $nonrepeating", ourLastMethod);
@@ -247,7 +248,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 
 	@Test
 	public void testNonRepeatingWithUrlQualified() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$nonrepeating?valstr:exact=VALSTR&valtok:not=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"));
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$nonrepeating?valstr:exact=VALSTR&valtok:not=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"));
 		HttpResponse status = ourClient.execute(httpGet);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -255,12 +256,12 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(1, ourLastParamValStr.size());
-		assertEquals(1, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(1);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALSTR", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertTrue(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).isExact());
-		assertEquals(1, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(1);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOKA", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOKB", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals(TokenParamModifier.NOT, ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getModifier());
@@ -276,7 +277,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		p.addParameter().setName("valtok").setValue(new StringDt("VALTOK2A|VALTOK2B"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$orlist");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$orlist");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -285,14 +286,14 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(2, ourLastParamValStr.size());
-		assertEquals(2, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(2);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertEquals("VALSTR1A", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR1B", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue());
 		assertEquals("VALSTR2A", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR2B", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue());
-		assertEquals(2, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(2);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOK1A", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOK1B", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALTOK2A", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem());
@@ -302,7 +303,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 
 	@Test
 	public void testOrListWithUrl() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$orlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok="
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$orlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok="
 				+ UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"));
 		HttpResponse status = ourClient.execute(httpGet);
 
@@ -311,14 +312,14 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(2, ourLastParamValStr.size());
-		assertEquals(2, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(2);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertEquals("VALSTR1A", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR1B", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue());
 		assertEquals("VALSTR2A", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR2B", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue());
-		assertEquals(2, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(2);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOK1A", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOK1B", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALTOK2A", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem());
@@ -328,33 +329,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourCtx = FhirContext.forDstu2();
-		ourServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2));
-
-		servlet.setFhirContext(ourCtx);
-		servlet.setResourceProviders(new PatientProvider());
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 	public static class PatientProvider implements IResourceProvider {

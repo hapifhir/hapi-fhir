@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5886
+title: "Previously, either updating links on, or deleting one of two patients with non-numeric IDs linked to a golden 
+        patient would result in a HAPI-0389 if there were survivorship rules.
+        This issue has been fixed for both the update links and delete cases."

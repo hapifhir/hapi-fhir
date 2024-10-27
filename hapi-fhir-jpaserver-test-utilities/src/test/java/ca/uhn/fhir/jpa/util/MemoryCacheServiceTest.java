@@ -24,10 +24,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -54,7 +53,7 @@ class MemoryCacheServiceTest {
 			type, system, code, version, userSelected);
 
 		TagDefinition retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
-		assertThat(retVal, nullValue());
+		assertNull(retVal);
 
 		TagDefinition tagDef = new TagDefinition(type, system, code, "theLabel");
 		tagDef.setVersion(version);
@@ -62,7 +61,7 @@ class MemoryCacheServiceTest {
 		mySvc.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey, tagDef);
 
 		retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
-		assertThat(retVal, equalTo(tagDef));
+		assertEquals(tagDef, retVal);
 	}
 
 	@Nested
@@ -233,7 +232,7 @@ class MemoryCacheServiceTest {
 			}
 
 			void assertNotDone() {
-				assertFalse(future.isDone(), "job " + myValue + " not done");
+				assertThat(future.isDone()).as("job " + myValue + " not done").isFalse();
 			}
 		}
 	}

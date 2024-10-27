@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5476
+title: "A new method on the IValidationSupport interface called lookupCode(LookupCodeRequest) has been added. 
+This method will replace the existing lookupCode methods, which are now deprecated."

@@ -2,13 +2,12 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,9 +26,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
@@ -41,7 +40,7 @@ public class IdHelperServiceTest {
 	private JpaStorageSettings myStorageSettings;
 
 	@Mock
-	private IForcedIdDao myForcedIdDao;
+	private IResourceTableDao myResourceTableDao;
 
 	@Mock
 	private MemoryCacheService myMemoryCacheService;
@@ -70,9 +69,9 @@ public class IdHelperServiceTest {
 			resourceType,
 			patientIdsToResolve);
 
-		Assertions.assertFalse(idToPid.isEmpty());
+		assertFalse(idToPid.isEmpty());
 		for (String pid : patientIdsToResolve) {
-			Assertions.assertTrue(idToPid.containsKey(pid));
+			assertThat(idToPid).containsKey(pid);
 		}
 	}
 
@@ -88,19 +87,23 @@ public class IdHelperServiceTest {
 			"Patient",
 			123l,
 			"RED",
-			new Date()
+			new Date(),
+			null,
+			null
 		};
 		Object[] blueView = new Object[] {
 			"Patient",
 			456l,
 			"BLUE",
-			new Date()
+			new Date(),
+			null,
+			null
 		};
 
 		// when
 		when(myStorageSettings.isDeleteEnabled())
 			.thenReturn(true);
-		when(myForcedIdDao.findAndResolveByForcedIdWithNoType(Mockito.anyString(),
+		when(myResourceTableDao.findAndResolveByForcedIdWithNoType(Mockito.anyString(),
 			Mockito.anyList(), Mockito.anyBoolean()))
 			.thenReturn(Collections.singletonList(redView))
 			.thenReturn(Collections.singletonList(blueView));
@@ -111,9 +114,9 @@ public class IdHelperServiceTest {
 			resourceType,
 			patientIdsToResolve);
 
-		Assertions.assertFalse(map.isEmpty());
+		assertFalse(map.isEmpty());
 		for (String id : patientIdsToResolve) {
-			Assertions.assertTrue(map.containsKey(id));
+			assertThat(map).containsKey(id);
 		}
 	}
 
@@ -142,12 +145,12 @@ public class IdHelperServiceTest {
 			patientIdsToResolve
 		);
 
-		Assertions.assertFalse(map.isEmpty());
+		assertFalse(map.isEmpty());
 		for (String id : patientIdsToResolve) {
-			Assertions.assertTrue(map.containsKey(id));
+			assertThat(map).containsKey(id);
 		}
-		assertEquals(red, map.get("RED"));
-		assertEquals(blue, map.get("BLUE"));
+		assertThat(map).containsEntry("RED", red);
+		assertThat(map).containsEntry("BLUE", blue);
 	}
 
 	@Test
@@ -156,15 +159,17 @@ public class IdHelperServiceTest {
 		String resourceType = "Patient";
 		String resourceForcedId = "AAA";
 
-		Object[] forcedIdView = new Object[4];
+		Object[] forcedIdView = new Object[6];
 		forcedIdView[0] = resourceType;
 		forcedIdView[1] = 1L;
 		forcedIdView[2] = resourceForcedId;
 		forcedIdView[3] = null;
+		forcedIdView[4] = null;
+		forcedIdView[5] = null;
 
 		Collection<Object[]> testForcedIdViews = new ArrayList<>();
 		testForcedIdViews.add(forcedIdView);
-		when(myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(any(), any(), any(), anyBoolean())).thenReturn(testForcedIdViews);
+		when(myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(any(), any(), any(), anyBoolean())).thenReturn(testForcedIdViews);
 
 		IResourceLookup<JpaPid> result = myHelperService.resolveResourceIdentity(partitionId, resourceType, resourceForcedId);
 		assertEquals(forcedIdView[0], result.getResourceType());
@@ -187,7 +192,7 @@ public class IdHelperServiceTest {
 			.thenReturn(resourcePersistentId3);
 		Map<String, JpaPid> result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, ids)
 			.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue()));
-		assertThat(result.keySet(), hasSize(3));
+		assertThat(result.keySet()).hasSize(3);
 		assertEquals(1L, result.get("A").getId());
 		assertEquals(2L, result.get("B").getId());
 		assertEquals(3L, result.get("C").getId());

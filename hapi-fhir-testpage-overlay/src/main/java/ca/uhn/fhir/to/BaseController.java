@@ -16,6 +16,8 @@ import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,8 +44,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.defaultString;

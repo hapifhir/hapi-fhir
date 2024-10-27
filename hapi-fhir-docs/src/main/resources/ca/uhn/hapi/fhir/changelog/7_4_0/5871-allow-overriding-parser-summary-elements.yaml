@@ -1,0 +1,7 @@
+---
+type: add
+issue: 5871
+title: "When encoding resources in summary mode, it is now possible to override the
+   built-in list of summary elements, by adding additional elements and/or by
+   removing elements from the default list. This can be done for an individual parser
+   instance, or globally using the ParserOptions object available from the FhirContext."

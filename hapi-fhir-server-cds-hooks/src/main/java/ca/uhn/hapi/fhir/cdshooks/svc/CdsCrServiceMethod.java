@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,7 @@ public class CdsCrServiceMethod extends BaseCdsCrMethod implements ICdsServiceMe
 
 	@Override
 	public boolean isAllowAutoFhirClientPrefetch() {
-		// The $apply operation will make FHIR requests for any data it needs
-		// directly against the fhirServer of the ServiceRequest.
-		return false;
+		// The $apply operation will NOT make FHIR requests for any data it needs.
+		return true;
 	}
 }

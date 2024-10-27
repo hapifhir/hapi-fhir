@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPre
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
@@ -61,10 +60,6 @@ public class SqlObjectFactory {
 
 	public DatePredicateBuilder dateIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(DatePredicateBuilder.class, theSearchSqlBuilder);
-	}
-
-	public ForcedIdPredicateBuilder newForcedIdPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(ForcedIdPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
 	public NumberPredicateBuilder numberIndexTable(SearchQueryBuilder theSearchSqlBuilder) {

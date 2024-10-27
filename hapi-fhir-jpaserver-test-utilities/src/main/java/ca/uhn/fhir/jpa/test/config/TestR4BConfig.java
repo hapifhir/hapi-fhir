@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,18 @@ package ca.uhn.fhir.jpa.test.config;
 
 import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r4b.JpaR4BConfig;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
-import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
-import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
@@ -64,6 +59,7 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.jpa.test.config.TestR5Config.SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
@@ -106,7 +102,8 @@ public class TestR4BConfig {
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
-		return new CircularQueueCaptureQueriesListener();
+		return new CircularQueueCaptureQueriesListener()
+				.setSelectQueryInclusionCriteria(SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES);
 	}
 
 	@Bean
@@ -212,8 +209,8 @@ public class TestR4BConfig {
 
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext, theStorageSettings);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4B");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());

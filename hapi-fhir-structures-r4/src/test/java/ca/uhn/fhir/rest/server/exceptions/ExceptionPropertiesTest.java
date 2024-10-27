@@ -16,10 +16,11 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ExceptionPropertiesTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionPropertiesTest.class);
@@ -53,7 +54,7 @@ public class ExceptionPropertiesTest {
 		ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
 		scanner.addIncludeFilter(new AssignableTypeFilter(BaseServerResponseException.class));
 		Set<BeanDefinition> classes = scanner.findCandidateComponents(BaseServerResponseException.class.getPackage().getName());
-		assertTrue(classes.size() > 5, classes.toString());
+		assertThat(classes.size() > 5).as(classes.toString()).isTrue();
 
 		for (BeanDefinition classInfo : classes) {
 			ourLog.info("Scanning {}", classInfo.getBeanClassName());
@@ -75,7 +76,7 @@ public class ExceptionPropertiesTest {
 				continue;
 			}
 
-			assertTrue(BaseServerResponseException.isExceptionTypeRegistered(next), "Type " + next + " is not registered");
+			assertThat(BaseServerResponseException.isExceptionTypeRegistered(next)).as("Type " + next + " is not registered").isTrue();
 
 			if (next == AuthenticationException.class) {
 				continue;

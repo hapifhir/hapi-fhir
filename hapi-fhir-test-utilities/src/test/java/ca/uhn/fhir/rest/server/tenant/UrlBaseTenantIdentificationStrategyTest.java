@@ -11,12 +11,17 @@ import ca.uhn.fhir.util.UrlPathTokenizer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,6 +72,27 @@ public class UrlBaseTenantIdentificationStrategyTest {
 
 		//then nothing should happen
 		assertEquals(BASE_URL, actual);
+	}
+
+	@CsvSource(value = {
+			"						, 							, empty input url - empty URL should be returned",
+			"TENANT1/Patient/123	, TENANT1/Patient/123		, tenant ID already exists - input URL should be returned",
+			"TENANT1/Patient/$export, TENANT1/Patient/$export	, tenant ID already exists - input URL should be returned",
+			"TENANT2/Patient/123	, TENANT2/Patient/123		, requestDetails contains different tenant ID - input URL should be returned",
+			"TENANT2/$export		, TENANT2/$export			, requestDetails contains different tenant ID - input URL should be returned",
+			"Patient/123			, TENANT1/Patient/123		, url starts with resource type - tenant ID should be added to URL",
+			"Patient/$export		, TENANT1/Patient/$export	, url starts with resource type - tenant ID should be added to URL",
+			"$export				, TENANT1/$export			, url starts with operation name - tenant ID should be added to URL",
+	})
+	@ParameterizedTest
+	void resolveRelativeUrl_returnsCorrectlyResolvedUrl(String theInputUrl, String theExpectedResolvedUrl, String theMessage) {
+		lenient().when(myRequestDetails.getTenantId()).thenReturn("TENANT1");
+		lenient().when(myFHIRContext.getResourceTypes()).thenReturn(Collections.singleton("Patient"));
+		lenient().when(myRequestDetails.getFhirContext()).thenReturn(myFHIRContext);
+
+		String actual = ourTenantStrategy.resolveRelativeUrl(theInputUrl, myRequestDetails);
+
+		assertThat(actual).as(theMessage).isEqualTo(theExpectedResolvedUrl);
 	}
 
 	@Test
@@ -156,7 +182,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 
 		//then we should see an exception thrown with HAPI-0307 in it
 		verify(myHapiLocalizer, times(1)).getMessage(RestfulServer.class, "rootRequest.multitenant");
-		assertTrue(ire.getMessage().contains("HAPI-0307"));
+		assertThat(ire.getMessage()).contains("HAPI-0307");
 	}
 
 	@Test

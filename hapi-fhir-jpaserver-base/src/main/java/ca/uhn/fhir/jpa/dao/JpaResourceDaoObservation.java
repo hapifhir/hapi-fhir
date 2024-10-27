@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
-import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -34,31 +32,26 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.servlet.http.HttpServletResponse;
 
 public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
 		implements IFhirResourceDaoObservation<T> {
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
-
-	@Autowired
-	ObservationLastNIndexPersistSvc myObservationLastNIndexPersistSvc;
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
@@ -72,7 +65,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequestDetails, getResourceName(), theSearchParameterMap, null);
+						theRequestDetails, getResourceName(), theSearchParameterMap);
 		return mySearchCoordinatorSvc.registerSearch(
 				this,
 				theSearchParameterMap,
@@ -96,64 +89,6 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 
 	private String getPatientParamName() {
 		return Observation.SP_PATIENT;
-	}
-
-	@Override
-	public ResourceTable updateEntity(
-			RequestDetails theRequest,
-			IBaseResource theResource,
-			IBasePersistedResource theEntity,
-			Date theDeletedTimestampOrNull,
-			boolean thePerformIndexing,
-			boolean theUpdateVersion,
-			TransactionDetails theTransactionDetails,
-			boolean theForceUpdate,
-			boolean theCreateNewHistoryEntry) {
-		return updateObservationEntity(
-				theRequest,
-				theResource,
-				theEntity,
-				theDeletedTimestampOrNull,
-				thePerformIndexing,
-				theUpdateVersion,
-				theTransactionDetails,
-				theForceUpdate,
-				theCreateNewHistoryEntry);
-	}
-
-	protected ResourceTable updateObservationEntity(
-			RequestDetails theRequest,
-			IBaseResource theResource,
-			IBasePersistedResource theEntity,
-			Date theDeletedTimestampOrNull,
-			boolean thePerformIndexing,
-			boolean theUpdateVersion,
-			TransactionDetails theTransactionDetails,
-			boolean theForceUpdate,
-			boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(
-				theRequest,
-				theResource,
-				theEntity,
-				theDeletedTimestampOrNull,
-				thePerformIndexing,
-				theUpdateVersion,
-				theTransactionDetails,
-				theForceUpdate,
-				theCreateNewHistoryEntry);
-
-		if (getStorageSettings().isLastNEnabled()) {
-			if (!retVal.isUnchangedInCurrentOperation()) {
-				if (retVal.getDeleted() == null) {
-					// Update indexes here for LastN operation.
-					myObservationLastNIndexPersistSvc.indexObservation(theResource);
-				} else {
-					myObservationLastNIndexPersistSvc.deleteObservationIndex(theEntity);
-				}
-			}
-		}
-
-		return retVal;
 	}
 
 	protected void updateSearchParamsForLastn(
@@ -193,7 +128,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 
 			RequestPartitionId requestPartitionId =
 					myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-							theRequestDetails, getResourceName(), theSearchParameterMap, null);
+							theRequestDetails, getResourceName(), theSearchParameterMap);
 
 			List<List<IQueryParameterType>> patientParams = new ArrayList<>();
 			if (theSearchParameterMap.get(getPatientParamName()) != null) {

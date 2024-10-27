@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5138
+title: "A match result map field has been added to the `$mdm-link-history` operation. This new field shows the rules that 
+evaluated true during matching and the corresponding initial match result when the link was created."

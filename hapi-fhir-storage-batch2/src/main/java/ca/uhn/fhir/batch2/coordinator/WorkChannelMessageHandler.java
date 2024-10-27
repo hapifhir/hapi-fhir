@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,15 @@ import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
+import org.slf4j.MDC;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
 import java.util.Optional;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
 
 /**
  * This handler receives batch work request messages and performs the batch work requested by the message
@@ -218,59 +219,89 @@ class WorkChannelMessageHandler implements MessageHandler {
 	}
 
 	private void handleWorkChannelMessage(JobWorkNotificationJsonMessage theMessage) {
-		JobWorkNotification workNotification = theMessage.getPayload();
-		ourLog.info("Received work notification for {}", workNotification);
+		try {
+			JobWorkNotification workNotification = theMessage.getPayload();
+			// Load the job instance and work chunk IDs into the logging MDC context
+			BatchJobTracingContext.setBatchJobIds(workNotification.getInstanceId(), workNotification.getChunkId());
+			ourLog.info("Received work notification for {}", workNotification);
 
-		// There are three paths through this code:
-		// 1. Normal execution.  We validate, load, update statuses, all in a tx.  Then we process the chunk.
-		// 2. Discard chunk.  If some validation fails (e.g. no chunk with that id), we log and discard the chunk.
-		//    Probably a db rollback, with a stale queue.
-		// 3. Fail and retry.  If we throw an exception out of here, Spring will put the queue message back, and
-		// redeliver later.
-		//
-		// We use Optional chaining here to simplify all the cases where we short-circuit exit.
-		// A step that returns an empty Optional means discard the chunk.
-		//
-		executeInTxRollbackWhenEmpty(() ->
-						(
-						// Use a chain of Optional flatMap to handle all the setup short-circuit exits cleanly.
-						Optional.of(new MessageProcess(workNotification))
-								// validate and load info
-								.flatMap(MessageProcess::validateChunkId)
-								// no job definition should be retried - we must be a stale process encountering a new
-								// job definition.
-								.flatMap(MessageProcess::loadJobDefinitionOrThrow)
-								.flatMap(MessageProcess::loadJobInstance)
-								// update statuses now in the db: QUEUED->IN_PROGRESS
-								.flatMap(MessageProcess::updateChunkStatusAndValidate)
-								.flatMap(MessageProcess::updateAndValidateJobStatus)
-								// ready to execute
-								.flatMap(MessageProcess::buildCursor)
-								.flatMap(MessageProcess::buildStepExecutor)))
-				.ifPresentOrElse(
-						// all the setup is happy and committed.  Do the work.
-						process -> process.myStepExector.executeStep(),
+			// There are three paths through this code:
+			// 1. Normal execution.  We validate, load, update statuses, all in a tx.  Then we process the chunk.
+			// 2. Discard chunk.  If some validation fails (e.g. no chunk with that id), we log and discard the chunk.
+			//    Probably a db rollback, with a stale queue.
+			// 3. Fail and retry.  If we throw an exception out of here, Spring will put the queue message back, and
+			// redeliver later.
+			//
+			// We use Optional chaining here to simplify all the cases where we short-circuit exit.
+			// A step that returns an empty Optional means discard the chunk.
+			//
+			Optional<MessageProcess> processingPreparation = executeInTxRollbackWhenEmpty(() ->
+
+					// Use a chain of Optional flatMap to handle all the setup short-circuit exits cleanly.
+					Optional.of(new MessageProcess(workNotification))
+							// validate and load info
+							.flatMap(MessageProcess::validateChunkId)
+							// no job definition should be retried - we must be a stale process encountering a new
+							// job definition.
+							.flatMap(MessageProcess::loadJobDefinitionOrThrow)
+							.flatMap(MessageProcess::loadJobInstance)
+							// update statuses now in the db: QUEUED->IN_PROGRESS
+							.flatMap(MessageProcess::updateChunkStatusAndValidate)
+							.flatMap(MessageProcess::updateAndValidateJobStatus)
+							// ready to execute
+							.flatMap(MessageProcess::buildCursor)
+							.flatMap(MessageProcess::buildStepExecutor));
+
+			processingPreparation.ifPresentOrElse(
+					// all the setup is happy and committed.  Do the work.
+					process -> process.myStepExector.executeStep(),
+					() -> {
 						// discard the chunk
-						() -> ourLog.debug("Discarding chunk notification {}", workNotification));
+						ourLog.debug("Discarding chunk notification {}", workNotification);
+					});
+		} finally {
+			BatchJobTracingContext.clearBatchJobsIds();
+		}
 	}
 
 	/**
 	 * Run theCallback in TX, rolling back if the supplied Optional is empty.
 	 */
 	<T> Optional<T> executeInTxRollbackWhenEmpty(Supplier<Optional<T>> theCallback) {
-		return myHapiTransactionService.withSystemRequest().execute(theTransactionStatus -> {
+		return myHapiTransactionService
+				// batch storage is not partitioned.
+				.withSystemRequestOnDefaultPartition()
+				.execute(theTransactionStatus -> {
 
-			// run the processing
-			Optional<T> setupProcessing = theCallback.get();
+					// run the processing
+					Optional<T> setupProcessing = theCallback.get();
 
-			if (setupProcessing.isEmpty()) {
-				// If any setup failed, roll back the chunk and instance status changes.
-				ourLog.debug("WorkChunk setup failed - rollback tx");
-				theTransactionStatus.setRollbackOnly();
-			}
-			// else COMMIT the work.
+					if (setupProcessing.isEmpty()) {
+						// If any setup failed, roll back the chunk and instance status changes.
+						ourLog.debug("WorkChunk setup failed - rollback tx");
+						theTransactionStatus.setRollbackOnly();
+					}
+					// else COMMIT the work.
 
-			return setupProcessing;
-		});
+					return setupProcessing;
+				});
+	}
+
+	/**
+	 * Simple wrapper around the slf4j MDC threadlocal log context.
+	 */
+	public static class BatchJobTracingContext {
+		static final String INSTANCE_ID = "instanceId";
+		static final String CHUNK_ID = "chunkId";
+
+		public static void setBatchJobIds(String theInstanceId, String theChunkId) {
+			MDC.put(INSTANCE_ID, theInstanceId);
+			MDC.put(CHUNK_ID, theChunkId);
+		}
+
+		public static void clearBatchJobsIds() {
+			MDC.remove(INSTANCE_ID);
+			MDC.remove(CHUNK_ID);
+		}
 	}
 }

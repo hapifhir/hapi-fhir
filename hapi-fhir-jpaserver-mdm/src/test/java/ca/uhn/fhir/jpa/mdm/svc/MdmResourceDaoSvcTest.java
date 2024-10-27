@@ -24,8 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,6 +36,8 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	IMdmResourceDaoSvc myResourceDaoSvc;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
+
+	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
 
 	@Override
 	@AfterEach
@@ -57,8 +58,8 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPatientDao.update(badSourcePatient);
 
 		Optional<IAnyResource> foundGoldenResource = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
-		assertTrue(foundGoldenResource.isPresent());
-		assertThat(foundGoldenResource.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
+		assertThat(foundGoldenResource).isPresent();
+		assertEquals(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue(), foundGoldenResource.get().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -70,8 +71,8 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPatientDao.update(badSourcePatient);
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
-		assertTrue(foundSourcePatient.isPresent());
-		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
+		assertThat(foundSourcePatient).isPresent();
+		assertEquals(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue(), foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -86,8 +87,8 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPatientDao.update(goodSourcePatient, systemRequestDetails);
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient", requestPartitionId);
-		assertTrue(foundSourcePatient.isPresent());
-		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
+		assertThat(foundSourcePatient).isPresent();
+		assertEquals(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue(), foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -104,9 +105,8 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
-
-		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 
 		try {
 			StringOrListParam patientIds = new StringOrListParam();
@@ -131,13 +131,13 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			assertNotNull(result);
 			assertFalse(result.isEmpty());
 			List<IBaseResource> resources = result.getAllResources();
-			assertEquals(resourceCount, resources.size());
+			assertThat(resources).hasSize(resourceCount);
 			int count = 0;
 			for (IBaseResource resource : resources) {
 				String id = idPrefaces[count++];
 				assertTrue(resource instanceof Patient);
 				Patient patient = (Patient) resource;
-				assertTrue(patient.getId().contains(id));
+				assertThat(patient.getId()).contains(id);
 			}
 
 			// ensure single id works too
@@ -149,12 +149,12 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			// verify 2
 			assertNotNull(result);
 			resources = result.getAllResources();
-			assertEquals(1, resources.size());
+			assertThat(resources).hasSize(1);
 			assertTrue(result.getAllResources().get(0) instanceof Patient);
 			Patient patient = (Patient) result.getAllResources().get(0);
-			assertTrue(patient.getId().contains(firstId.getValue()));
+			assertThat(patient.getId()).contains(firstId.getValue());
 		} finally {
-			myInterceptorRegistry.unregisterInterceptor(interceptor);
+			myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
 		}
 	}
 

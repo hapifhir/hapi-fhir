@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.api.model.ReindexJobStatus;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -42,6 +43,9 @@ import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,9 +55,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletResponse;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Note that this interface is not considered a stable interface. While it is possible to build applications
@@ -313,11 +316,23 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theResourcePersistentId The ID
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	ReindexOutcome reindex(
 			IResourcePersistentId theResourcePersistentId,
 			ReindexParameters theReindexParameters,
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails);
+
+	/**
+	 * Returns ReindexJobStatus information object that tells the caller
+	 * if a reindex job is still in progress or not.
+	 *
+	 * If the implementing DAO requires additional work during reindexing,
+	 * this is the method to override.
+	 */
+	default ReindexJobStatus getReindexJobStatus() {
+		return ReindexJobStatus.NO_WORK_NEEDED;
+	}
 
 	void removeTag(
 			IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode, RequestDetails theRequestDetails);
@@ -326,18 +341,29 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * @deprecated Use {@link #search(SearchParameterMap, RequestDetails)} instead
+	 * @throws InvalidRequestException If a SearchParameter is not known to the server
 	 */
-	IBundleProvider search(SearchParameterMap theParams);
+	IBundleProvider search(SearchParameterMap theParams) throws InvalidRequestException;
 
-	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails);
+	/**
+	 * *
+	 * @throws InvalidRequestException If a SearchParameter is not known to the server
+	 */
+	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails)
+			throws InvalidRequestException;
 
+	/**
+	 * *
+	 * @throws InvalidRequestException If a SearchParameter is not known to the server
+	 */
 	IBundleProvider search(
-			SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
+			SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse)
+			throws InvalidRequestException;
 
 	/**
 	 * Search for IDs for processing a match URLs, etc.
 	 */
-	default <T extends IResourcePersistentId> List<T> searchForIds(
+	default <PT extends IResourcePersistentId> List<PT> searchForIds(
 			SearchParameterMap theParams, RequestDetails theRequest) {
 		return searchForIds(theParams, theRequest, null);
 	}
@@ -349,11 +375,55 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                                            create/update, this is the resource being searched for
 	 * @since 5.5.0
 	 */
-	default <T extends IResourcePersistentId> List<T> searchForIds(
+	default <PT extends IResourcePersistentId> List<PT> searchForIds(
 			SearchParameterMap theParams,
 			RequestDetails theRequest,
 			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		return searchForIds(theParams, theRequest);
+	}
+
+	/**
+	 * Search results matching theParams.
+	 * This call does not currently invoke any interceptors, so should only be used for infrastructure that
+	 * will not need to participate in the consent services, or caching.
+	 * The Stream MUST be closed to avoid leaking resources.
+	 * If called within a transaction, the Stream will fail if passed outside the tx boundary.
+	 * @param theParams the search
+	 * @param theRequest for partition target info
+	 * @return a Stream that MUST only be used within the calling transaction.
+	 */
+	default <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
+			SearchParameterMap theParams,
+			RequestDetails theRequest,
+			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
+		List<PID> iResourcePersistentIds = searchForIds(theParams, theRequest);
+		return iResourcePersistentIds.stream();
+	}
+
+	/**
+	 * Return all search results matching theParams.
+	 * Will load all resources into ram, so not appropriate for large data sets.
+	 * This call invokes both preaccess and preshow interceptors.
+	 * @param theParams the search
+	 * @param theRequest for partition target info
+	 */
+	default List<T> searchForResources(SearchParameterMap theParams, RequestDetails theRequest) {
+		IBundleProvider provider = search(theParams, theRequest);
+		//noinspection unchecked
+		return (List<T>) provider.getAllResources();
+	}
+
+	/**
+	 * Return the FHIR Ids matching theParams.
+	 * This call does not currently invoke any interceptors, so should only be used for infrastructure that
+	 * will not need to participate in the consent services, or caching.
+	 * @param theParams the search
+	 * @param theRequest for partition target info
+	 */
+	default List<IIdType> searchForResourceIds(SearchParameterMap theParams, RequestDetails theRequest) {
+		return searchForResources(theParams, theRequest).stream()
+				.map(IBaseResource::getIdElement)
+				.collect(Collectors.toList());
 	}
 
 	/**

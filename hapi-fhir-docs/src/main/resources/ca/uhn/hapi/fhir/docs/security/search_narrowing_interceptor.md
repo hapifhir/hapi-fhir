@@ -25,6 +25,24 @@ An example of this interceptor follows:
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|narrowing}}
 ``` 
 
+# Narrowing Conditional URLs
+
+By default, this interceptor will narrow URLs for FHIR search operations only. The 
+interceptor can also be configured to narrow URLs on conditional operations.
+
+When this feature is enabled request URLs are also narrowed for the following FHIR operations:
+
+* Conditional Create (The `If-None-Exist` header is narrowed)
+* Conditional Update (The request URL is narrowed if it is a conditional URL)
+* Conditional Delete (The request URL is narrowed if it is a conditional URL)
+* Conditional Patch (The request URL is narrowed if it is a conditional URL)
+
+The following example shows how to enable conditional URL narrowing on the interceptor.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|narrowingConditional}}
+```
+
 <a name="constraining-by-valueset-membership"/>
 
 # Constraining by ValueSet Membership

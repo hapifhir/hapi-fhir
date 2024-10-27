@@ -10,6 +10,7 @@ import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
@@ -21,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +54,10 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 		myMdmResourceMatcherSvc.setMdmRulesJson(myMdmSettings.getMdmRules());
 	}
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
+		super.before();
 		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext,
 			myMdmControllerSvc,
 			myMdmHelper,

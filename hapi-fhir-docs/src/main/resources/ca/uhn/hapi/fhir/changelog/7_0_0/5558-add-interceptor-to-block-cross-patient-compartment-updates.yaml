@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5558
+title: "An interceptor was added to block resource updates which would cause the resource to change Patient compartment.
+    Please see [JPA Server: Block Resource Updates Changing Patient Compartment](/hapi-fhir/docs/interceptors/built_in_server_interceptors.html#jpa-server-block-resource-updates-changing-patient-compartment) 
+    for more information."

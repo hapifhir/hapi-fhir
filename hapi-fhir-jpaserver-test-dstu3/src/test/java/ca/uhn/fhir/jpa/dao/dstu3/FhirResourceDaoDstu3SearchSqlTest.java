@@ -23,9 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoDstu3SearchSqlTest.class);
@@ -82,14 +80,14 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 
 			List<IBaseResource> resources = outcome.getResources(i, i + 300);
 			ourLog.info("Batch {}-{} returned {} resources", i, i+300, resources.size());
-			assertEquals(300, resources.size());
+			assertThat(resources).hasSize(300);
 
 			List<SqlQuery> query = myCaptureQueriesListener.getSelectQueries();
 			for (SqlQuery next : query) {
 				String sql = next.getSql(false, false);
 				int paramCount = StringUtils.countMatches(sql, "?");
 				ourLog.info("SQL has {} params", paramCount);
-				assertThat("SQL has >1000 params: " + sql, paramCount, lessThan(1000));
+				assertThat(paramCount).as("SQL has >1000 params: " + sql).isLessThan(1000);
 				if (sql.contains("HASH_VALUE IN")) {
 					sql = next.getSql(true, false);
 					ourLog.info("SQL: {}", sql);

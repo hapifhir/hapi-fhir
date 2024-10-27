@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -114,6 +115,7 @@ public class Constants {
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BEARER = "Bearer ";
 	public static final String HEADER_CACHE_CONTROL = "Cache-Control";
+	public static final String HEADER_CLIENT_TIMEZONE = "Timezone";
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
@@ -199,6 +201,8 @@ public class Constants {
 	public static final String PARAM_PRETTY_VALUE_FALSE = "false";
 	public static final String PARAM_PRETTY_VALUE_TRUE = "true";
 	public static final String PARAM_PROFILE = "_profile";
+	public static final String PARAM_PID = "_pid";
+
 	public static final String PARAM_QUERY = "_query";
 	public static final String PARAM_RESPONSE_URL = "response-url"; // Used in messaging
 	public static final String PARAM_REVINCLUDE = "_revinclude";
@@ -217,21 +221,7 @@ public class Constants {
 	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_TEXT = "_text";
 	public static final String PARAM_VALIDATE = "_validate";
-
-	/**
-	 * $member-match operation
-	 */
-	public static final String PARAM_MEMBER_PATIENT = "MemberPatient";
-
-	public static final String PARAM_MEMBER_IDENTIFIER = "MemberIdentifier";
-
-	public static final String PARAM_OLD_COVERAGE = "OldCoverage";
-	public static final String PARAM_NEW_COVERAGE = "NewCoverage";
-	public static final String PARAM_CONSENT = "Consent";
-	public static final String PARAM_MEMBER_PATIENT_NAME = PARAM_MEMBER_PATIENT + " Name";
-	public static final String PARAM_MEMBER_PATIENT_BIRTHDATE = PARAM_MEMBER_PATIENT + " Birthdate";
-	public static final String PARAM_CONSENT_PATIENT_REFERENCE = PARAM_CONSENT + "'s Patient Reference";
-	public static final String PARAM_CONSENT_PERFORMER_REFERENCE = PARAM_CONSENT + "'s Performer Reference";
+	public static final String PARAM_MDM = "_mdm";
 
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
@@ -244,6 +234,8 @@ public class Constants {
 	public static final String PARAMQUALIFIER_NICKNAME = ":nickname";
 	public static final String PARAMQUALIFIER_TOKEN_OF_TYPE = ":of-type";
 	public static final String PARAMQUALIFIER_TOKEN_NOT = ":not";
+	public static final String PARAMQUALIFIER_TOKEN_IDENTIFIER = ":identifier";
+
 	public static final int STATUS_HTTP_200_OK = 200;
 	public static final int STATUS_HTTP_201_CREATED = 201;
 	public static final int STATUS_HTTP_204_NO_CONTENT = 204;
@@ -326,6 +318,17 @@ public class Constants {
 	public static final String PARAMQUALIFIER_TOKEN_NOT_IN = ":not-in";
 	public static final String PARAMQUALIFIER_TOKEN_ABOVE = ":above";
 	public static final String PARAMQUALIFIER_TOKEN_BELOW = ":below";
+
+	public static final List<String> VALID_MODIFIERS = Collections.unmodifiableList(Arrays.asList(
+			PARAMQUALIFIER_STRING_CONTAINS,
+			PARAMQUALIFIER_STRING_EXACT,
+			PARAMQUALIFIER_TOKEN_IN,
+			PARAM_INCLUDE_QUALIFIER_ITERATE,
+			PARAMQUALIFIER_MISSING,
+			PARAMQUALIFIER_TOKEN_NOT_IN,
+			PARAMQUALIFIER_TOKEN_OF_TYPE,
+			PARAM_INCLUDE_QUALIFIER_RECURSE,
+			PARAMQUALIFIER_TOKEN_TEXT));
 	/**
 	 * The number of characters in a UUID (36)
 	 */

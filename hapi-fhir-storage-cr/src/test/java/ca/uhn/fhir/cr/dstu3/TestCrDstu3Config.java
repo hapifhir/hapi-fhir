@@ -1,36 +1,36 @@
 package ca.uhn.fhir.cr.dstu3;
 
-import ca.uhn.fhir.cr.TestCqlProperties;
-import ca.uhn.fhir.cr.TestCrConfig;
-
-
+import ca.uhn.fhir.cr.TestHapiFhirCrPartitionConfig;
+import ca.uhn.fhir.cr.config.test.TestCqlProperties;
 import ca.uhn.fhir.cr.config.dstu3.CrDstu3Config;
-
-
+import ca.uhn.fhir.cr.config.test.TestCrConfig;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
-
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.utility.ValidationProfile;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 @Configuration
-@Import({TestCrConfig.class, CrDstu3Config.class})
+@Import({
+	TestHapiFhirCrPartitionConfig.class,
+	TestCrConfig.class,
+	CrDstu3Config.class
+})
 public class TestCrDstu3Config {
 
 	@Bean
@@ -43,11 +43,31 @@ public class TestCrDstu3Config {
 		}
 		return measureEvalOptions;
 	}
+	@Bean
+	public TerminologySettings terminologySettings(){
+		var termSettings = new TerminologySettings();
+		termSettings.setCodeLookupMode(TerminologySettings.CODE_LOOKUP_MODE.USE_CODESYSTEM_URL);
+		termSettings.setValuesetExpansionMode(TerminologySettings.VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+		termSettings.setValuesetMembershipMode(TerminologySettings.VALUESET_MEMBERSHIP_MODE.USE_EXPANSION);
+		termSettings.setValuesetPreExpansionMode(TerminologySettings.VALUESET_PRE_EXPANSION_MODE.USE_IF_PRESENT);
 
+		return termSettings;
+	}
+	@Bean
+	public RetrieveSettings retrieveSettings(){
+		var retrieveSettings = new RetrieveSettings();
+		retrieveSettings.setSearchParameterMode(RetrieveSettings.SEARCH_FILTER_MODE.USE_SEARCH_PARAMETERS);
+		retrieveSettings.setTerminologyParameterMode(RetrieveSettings.TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+		retrieveSettings.setProfileMode(RetrieveSettings.PROFILE_MODE.OFF);
+
+		return retrieveSettings;
+	}
 	@Bean
 	public EvaluationSettings evaluationSettings(TestCqlProperties theCqlProperties, Map<VersionedIdentifier,
 		CompiledLibrary> theGlobalLibraryCache, Map<ModelIdentifier, Model> theGlobalModelCache,
-												 Map<String, List<Code>> theGlobalValueSetCache) {
+												 Map<String, List<Code>> theGlobalValueSetCache,
+												 RetrieveSettings theRetrieveSettings,
+												 TerminologySettings theTerminologySettings) {
 		var evaluationSettings = EvaluationSettings.getDefault();
 		var cqlOptions = evaluationSettings.getCqlOptions();
 
@@ -107,11 +127,13 @@ public class TestCrDstu3Config {
 			cqlCompilerOptions.setOptions(CqlCompilerOptions.Options.DisableDefaultModelInfoLoad);
 		}
 		cqlCompilerOptions.setSignatureLevel(theCqlProperties.getCqlCompilerSignatureLevel());
-		cqlCompilerOptions.setCompatibilityLevel(theCqlProperties.getCqlCompilerCompatibilityLevel());
+		cqlCompilerOptions.setCompatibilityLevel("1.3");
 		cqlCompilerOptions.setAnalyzeDataRequirements(theCqlProperties.isCqlCompilerAnalyzeDataRequirements());
 		cqlCompilerOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
 
 		cqlOptions.setCqlCompilerOptions(cqlCompilerOptions);
+		evaluationSettings.setTerminologySettings(theTerminologySettings);
+		evaluationSettings.setRetrieveSettings(theRetrieveSettings);
 		evaluationSettings.setLibraryCache(theGlobalLibraryCache);
 		evaluationSettings.setModelCache(theGlobalModelCache);
 		evaluationSettings.setValueSetCache(theGlobalValueSetCache);

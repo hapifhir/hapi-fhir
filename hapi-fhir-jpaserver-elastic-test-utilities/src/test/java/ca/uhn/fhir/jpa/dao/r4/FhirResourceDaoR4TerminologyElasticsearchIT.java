@@ -41,8 +41,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -135,7 +134,7 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
 			.collect(Collectors.toSet());
 		ourLog.info("Codes: {}", codes);
-		assertThat(codes, containsInAnyOrder("LA2222-2", "LA1122-2"));
+		assertThat(codes).containsExactlyInAnyOrder("LA2222-2", "LA1122-2");
 	}
 
 

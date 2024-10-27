@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6122
+title: "Previously, executing the '$validate' operation on a resource instance could result in an HTTP 400 Bad Request 
+instead of an HTTP 200 OK response with a list of validation issues. This has been fixed."

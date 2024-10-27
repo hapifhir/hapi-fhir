@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,19 @@
  */
 package ca.uhn.fhir.batch2.api;
 
+import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
+import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +46,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 
 /**
  *
@@ -73,6 +79,12 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	List<JobInstance> fetchInstances(
 			String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable);
 
+	@Nonnull
+	List<BatchWorkChunkStatusDTO> fetchWorkChunkStatusForInstance(String theInstanceId);
+
+	@Nonnull
+	BatchInstanceStatusDTO fetchBatchInstanceStatus(String theInstanceId);
+
 	/**
 	 * Fetches any existing jobs matching provided request parameters
 	 *
@@ -85,6 +97,18 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 */
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	void enqueueWorkChunkForProcessing(String theChunkId, Consumer<Integer> theCallback);
+
+	/**
+	 * Updates all Work Chunks in POLL_WAITING if their nextPollTime <= now
+	 * for the given Job Instance.
+	 * @param theInstanceId the instance id
+	 * @return the number of updated chunks
+	 */
+	@Transactional
+	int updatePollWaitingChunksForJobIfReady(String theInstanceId);
 
 	/**
 	 * Fetch instances ordered by myCreateTime DESC
@@ -112,8 +136,12 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest);
 
-	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
+	/**
+	 * Returns set of all distinct states for the specified job instance id
+	 * and step id.
+	 */
+	@Transactional
+	Set<WorkChunkStatusEnum> getDistinctWorkChunkStatesForJobAndStep(String theInstanceId, String theCurrentStepId);
 
 	/**
 	 * Fetch all chunks for a given instance.
@@ -130,6 +158,16 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @return - a stream for fetching work chunks
 	 */
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
+
+	/**
+	 * Fetches an iterator that retrieves WorkChunkMetadata from the db.
+	 * @param theInstanceId instance id of job of interest
+	 * @param theStates states of interset
+	 * @return an iterator for the workchunks
+	 */
+	@Transactional(propagation = Propagation.SUPPORTS)
+	Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(
+			Pageable thePageable, String theInstanceId, Set<WorkChunkStatusEnum> theStates);
 
 	/**
 	 * Callback to update a JobInstance within a locked transaction.
@@ -256,4 +294,18 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 		return markInstanceAsStatusWhenStatusIn(
 				theJobInstanceId, StatusEnum.IN_PROGRESS, Collections.singleton(StatusEnum.QUEUED));
 	}
+
+	@VisibleForTesting
+	WorkChunk createWorkChunk(WorkChunk theWorkChunk);
+
+	/**
+	 * Atomically advance the given job to the given step and change the status of all QUEUED and GATE_WAITING chunks
+	 * in the next step to READY
+	 * @param theJobInstanceId the id of the job instance to be updated
+	 * @param theNextStepId the id of the next job step
+	 * @return whether any changes were made
+	 */
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	boolean advanceJobStepAndUpdateChunkStatus(
+			String theJobInstanceId, String theNextStepId, boolean theIsReductionStepBoolean);
 }

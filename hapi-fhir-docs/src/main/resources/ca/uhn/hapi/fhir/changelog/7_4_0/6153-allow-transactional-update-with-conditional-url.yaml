@@ -1,0 +1,11 @@
+---
+type: fix
+issue: 6153
+title: "Previously, if you created a resource with some conditional url,
+        but then submitted a transaction bundle that
+        a) updated the resource to not match the condition anymore and
+        b) create a resource with the (same) condition
+        a unique index violation would result.
+        
+        This has been fixed.
+"

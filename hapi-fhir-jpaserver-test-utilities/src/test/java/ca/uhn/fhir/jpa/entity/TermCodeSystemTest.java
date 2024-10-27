@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.entity;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class TermCodeSystemTest {
 
@@ -12,10 +12,9 @@ public class TermCodeSystemTest {
 		TermCodeSystem cs1 = new TermCodeSystem().setCodeSystemUri("http://foo");
 		TermCodeSystem cs2 = new TermCodeSystem().setCodeSystemUri("http://foo");
 		TermCodeSystem cs3 = new TermCodeSystem().setCodeSystemUri("http://foo2");
-		assertEquals(cs1, cs2);
-		assertNotEquals(cs1, cs3);
-		assertNotEquals(cs1, null);
-		assertNotEquals(cs1, "");
+		assertThat(cs2).isNotNull().isEqualTo(cs1);
+		assertThat(cs3).isNotEqualTo(cs1);
+		assertThat("").isNotEqualTo(cs1);
 	}
 
 	@Test

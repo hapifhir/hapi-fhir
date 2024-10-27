@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5890
+title: "As part of the migration from LOB, provided the capability to force persisting data to LOB columns.  The default
+behavior is to not persist in lob columns."

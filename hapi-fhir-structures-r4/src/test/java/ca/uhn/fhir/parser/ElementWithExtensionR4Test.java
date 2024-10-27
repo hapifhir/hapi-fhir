@@ -10,8 +10,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -53,9 +52,9 @@ public class ElementWithExtensionR4Test {
         ourLog.info(json);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, json);
-        assertEquals(1, patient.getName().get(0).getFamilyElement().getExtension().size());
-        assertEquals(1, patient.getExtensionsByUrl("/myExt").get(0).getValue().getExtension().size());
-        assertEquals(1, patient.getPetName().getExtension().size());
+			assertThat(patient.getName().get(0).getFamilyElement().getExtension()).hasSize(1);
+			assertThat(patient.getExtensionsByUrl("/myExt").get(0).getValue().getExtension()).hasSize(1);
+			assertThat(patient.getPetName().getExtension()).hasSize(1);
     }
 
     @Test
@@ -71,7 +70,7 @@ public class ElementWithExtensionR4Test {
         ourLog.info(json);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, json);
-        assertEquals(1, patient.getPetName().getExtension().size());
+			assertThat(patient.getPetName().getExtension()).hasSize(1);
     }
 
     @Test
@@ -100,9 +99,9 @@ public class ElementWithExtensionR4Test {
         ourLog.info(xml);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, xml);
-        assertEquals(1, patient.getName().get(0).getFamilyElement().getExtension().size());
-        assertEquals(1, patient.getExtensionsByUrl("/myExt").get(0).getValue().getExtension().size());
-        assertEquals(1, patient.getPetName().getExtension().size());
+			assertThat(patient.getName().get(0).getFamilyElement().getExtension()).hasSize(1);
+			assertThat(patient.getExtensionsByUrl("/myExt").get(0).getValue().getExtension()).hasSize(1);
+			assertThat(patient.getPetName().getExtension()).hasSize(1);
     }
 
 
@@ -120,7 +119,7 @@ public class ElementWithExtensionR4Test {
         ourLog.info(xml);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, xml);
-        assertEquals(1, patient.getPetName().getExtension().size());
+			assertThat(patient.getPetName().getExtension()).hasSize(1);
     }
 
 
@@ -135,7 +134,7 @@ public class ElementWithExtensionR4Test {
         ourLog.info(json);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, json);
-        assertEquals(1, patient.getIdElement().getExtension().size());
+			assertThat(patient.getIdElement().getExtension()).hasSize(1);
     }
 
     @Test
@@ -149,7 +148,7 @@ public class ElementWithExtensionR4Test {
         ourLog.info(xml);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, xml);
-        assertEquals(1, patient.getIdElement().getExtension().size());
+			assertThat(patient.getIdElement().getExtension()).hasSize(1);
     }
 
     @Test
@@ -164,7 +163,7 @@ public class ElementWithExtensionR4Test {
         ourLog.info(json);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, json);
-        assertEquals(1, patient.getCustomId().getExtension().size());
+			assertThat(patient.getCustomId().getExtension()).hasSize(1);
     }
 
     @Test
@@ -180,7 +179,7 @@ public class ElementWithExtensionR4Test {
         ourLog.info(xml);
 
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, xml);
-        assertEquals(1, patient.getCustomId().getExtension().size());
+			assertThat(patient.getCustomId().getExtension()).hasSize(1);
     }
 
 	@Test
@@ -192,8 +191,8 @@ public class ElementWithExtensionR4Test {
 
 		IParser parser = ourCtx.newXmlParser();
 		String encoded = parser.encodeResourceToString(p);
-		assertThat(encoded, containsString("http://foo"));
-		assertThat(encoded, containsString("FOO"));
+		assertThat(encoded).contains("http://foo");
+		assertThat(encoded).contains("FOO");
 
 		p = (Patient) parser.parseResource(encoded);
 		assertEquals("Patient/123", p.getId());
@@ -213,8 +212,8 @@ public class ElementWithExtensionR4Test {
 
 		IParser parser = ourCtx.newJsonParser();
 		String encoded = parser.encodeResourceToString(p);
-		assertThat(encoded, containsString("http://foo"));
-		assertThat(encoded, containsString("FOO"));
+		assertThat(encoded).contains("http://foo");
+		assertThat(encoded).contains("FOO");
 
 		p = (Patient) parser.parseResource(encoded);
 		assertEquals("Patient/123", p.getId());

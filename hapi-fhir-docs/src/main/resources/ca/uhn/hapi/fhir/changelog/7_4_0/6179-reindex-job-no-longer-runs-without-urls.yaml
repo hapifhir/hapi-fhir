@@ -1,0 +1,7 @@
+
+---
+type: change
+issue: 6179
+title: "The $reindex operation could potentially initiate a reindex job without any urls provided in the parameters.
+We now internally generate a list of urls out of all the supported resource types and attempt to reindex 
+found resources of each type separately. As a result, each reindex (batch2) job chunk will be always associated with a url."

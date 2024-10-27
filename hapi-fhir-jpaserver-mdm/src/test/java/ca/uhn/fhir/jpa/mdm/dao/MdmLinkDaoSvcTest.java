@@ -7,13 +7,13 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.EnversRevision;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.model.primitive.BooleanDt;
+import jakarta.annotation.Nonnull;
 import org.hibernate.envers.RevisionType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -25,11 +25,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,17 +35,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
@@ -57,22 +49,22 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testCreate() {
 		MdmLink mdmLink = createResourcesAndBuildTestMDMLink();
-		assertThat(mdmLink.getCreated(), is(nullValue()));
-		assertThat(mdmLink.getUpdated(), is(nullValue()));
+		assertNull(mdmLink.getCreated());
+		assertNull(mdmLink.getUpdated());
 		myMdmLinkDaoSvc.save(mdmLink);
-		assertThat(mdmLink.getCreated(), is(notNullValue()));
-		assertThat(mdmLink.getUpdated(), is(notNullValue()));
+		assertNotNull(mdmLink.getCreated());
+		assertNotNull(mdmLink.getUpdated());
 		assertTrue(mdmLink.getUpdated().getTime() - mdmLink.getCreated().getTime() < 1000);
 	}
 
 	@Test
 	public void testUpdate() {
 		MdmLink createdLink = myMdmLinkDaoSvc.save(createResourcesAndBuildTestMDMLink());
-		assertThat(createdLink.getLinkSource(), is(MdmLinkSourceEnum.MANUAL));
+		assertEquals(MdmLinkSourceEnum.MANUAL, createdLink.getLinkSource());
 		TestUtil.sleepOneClick();
 		createdLink.setLinkSource(MdmLinkSourceEnum.AUTO);
 		MdmLink updatedLink = myMdmLinkDaoSvc.save(createdLink);
-		assertNotEquals(updatedLink.getCreated(), updatedLink.getUpdated());
+		assertThat(updatedLink.getUpdated()).isNotEqualTo(updatedLink.getCreated());
 	}
 
 	@Test
@@ -104,12 +96,12 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		//SUT
 		List<MdmPidTuple<JpaPid>> lists = runInTransaction(() -> myMdmLinkDao.expandPidsBySourcePidAndMatchResult(JpaPid.fromId(mdmLinks.get(0).getSourcePid()), MdmMatchResultEnum.MATCH));
 
-		assertThat(lists, hasSize(10));
+		assertThat(lists).hasSize(10);
 
 		lists.stream()
 			.forEach(tuple -> {
-					assertThat(tuple.getGoldenPid().getId(), is(equalTo(myIdHelperService.getPidOrThrowException(golden).getId())));
-					assertThat(tuple.getSourcePid().getId(), is(in(expectedExpandedPids)));
+			assertEquals(myIdHelperService.getPidOrThrowException(golden).getId(), tuple.getGoldenPid().getId());
+			assertThat(tuple.getSourcePid().getId()).isIn(expectedExpandedPids);
 				});
 	}
 
@@ -242,7 +234,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
 
 		// verify
-		assertEquals(1, actualMdmLinkRevisions.size());
+		assertThat(actualMdmLinkRevisions).hasSize(1);
 		MdmLink actualMdmLink = actualMdmLinkRevisions.get(0).getMdmLink();
 		assertEquals(goldenPatientId, actualMdmLink.getGoldenResourcePersistenceId().getId().toString());
 		assertEquals(sourcePatientId, actualMdmLink.getSourcePersistenceId().getId().toString());
@@ -250,7 +242,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testHistoryForNoIdsOnly() {
-		assertThrows(IllegalArgumentException.class, () -> myMdmLinkDaoSvc.findMdmLinkHistory(new MdmHistorySearchParameters()));
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> myMdmLinkDaoSvc.findMdmLinkHistory(new MdmHistorySearchParameters()));
 	}
 
 	@Test
@@ -275,7 +267,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
 
 		// verify
-		assertEquals(2, actualMdmLinkRevisions.size(), "Both Patient/p123 and Practitioner/p123 should be returned");
+		assertThat(actualMdmLinkRevisions.size()).as("Both Patient/p123 and Practitioner/p123 should be returned").isEqualTo(2);
 	}
 
 	@ParameterizedTest
@@ -462,7 +454,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	private void assertMdmRevisionsEqual(List<MdmLinkWithRevision<MdmLink>> expectedMdmLinkRevisions, List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions) {
 		assertNotNull(actualMdmLinkRevisions);
 
-		assertEquals(expectedMdmLinkRevisions.size(), actualMdmLinkRevisions.size());
+		assertThat(actualMdmLinkRevisions).hasSize(expectedMdmLinkRevisions.size());
 
 		for (int index = 0; index < expectedMdmLinkRevisions.size(); index++) {
 			final MdmLinkWithRevision<MdmLink> expectedMdmLinkRevision = expectedMdmLinkRevisions.get(index);

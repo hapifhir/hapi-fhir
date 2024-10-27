@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package ca.uhn.fhir.parser;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 /**
  * Defines FHIR version independent tests for testing parser error handling. In version dependent
@@ -52,7 +52,7 @@ public abstract sealed class AbstractParserErrorHandlerTest
 		parser.setParserErrorHandler(errorHandler);
 
 		String resourceStr = createResourceWithRepeatingChoice();
-		assertThrows(RepeatingChoiceHandledException.class, () -> {
+		assertThatExceptionOfType(RepeatingChoiceHandledException.class).isThrownBy(() -> {
 			parser.parseResource(resourceStr);
 		});
 	}

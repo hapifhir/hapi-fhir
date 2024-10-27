@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
+
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class BaseTag extends BasePartitionable implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	// many baseTags -> one tag definition
 	@ManyToOne(cascade = {})
 	@JoinColumn(name = "TAG_ID", nullable = false)
 	private TagDefinition myTag;

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -40,7 +42,7 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
 import java.util.Collection;
-import javax.annotation.Nonnull;
+import java.util.Optional;
 
 import static ca.uhn.fhir.rest.server.messaging.BaseResourceMessage.OperationTypeEnum.DELETE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -63,6 +65,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 	@Autowired
 	private SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
+
+	@Autowired
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 
 	/**
 	 * Constructor
@@ -95,6 +100,16 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 				// ignore anything else
 				return;
+		}
+
+		if (theMsg.getPayload(myFhirContext) == null) {
+			// inflate the message and ignore any resource that cannot be found.
+			Optional<ResourceModifiedMessage> inflatedMsg =
+					myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(theMsg);
+			if (inflatedMsg.isEmpty()) {
+				return;
+			}
+			theMsg = inflatedMsg.get();
 		}
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED
@@ -136,15 +151,17 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	 */
 	private boolean processSubscription(
 			ResourceModifiedMessage theMsg, IIdType theResourceId, ActiveSubscription theActiveSubscription) {
-		// skip if the partitions don't match
+
 		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
+
 		if (subscription != null
 				&& theMsg.getPartitionId() != null
 				&& theMsg.getPartitionId().hasPartitionIds()
-				&& !subscription.getCrossPartitionEnabled()
+				&& !subscription.isCrossPartitionEnabled()
 				&& !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
 			return false;
 		}
+
 		String nextSubscriptionId = theActiveSubscription.getId();
 
 		if (isNotBlank(theMsg.getSubscriptionId())) {

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -27,9 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	public static final String SUBSCRIPTION_TOPIC_TEST_URL = "https://example.com/topic/test";
@@ -78,7 +79,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	public void testCreate() throws Exception {
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE);
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
 		waitForRegisteredSubscriptionTopicCount();
 
 		Subscription subscription = createTopicSubscription();
@@ -91,7 +92,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
-		assertEquals(2, resources.size());
+		assertThat(resources).hasSize(2);
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
 		validateSubscriptionStatus(subscription, sentEncounter, ss);
@@ -105,7 +106,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	public void testUpdate() throws Exception {
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE, SubscriptionTopic.InteractionTrigger.UPDATE);
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
 		waitForRegisteredSubscriptionTopicCount();
 
 		Subscription subscription = createTopicSubscription();
@@ -122,7 +123,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
-		assertEquals(2, resources.size());
+		assertThat(resources).hasSize(2);
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
 		validateSubscriptionStatus(subscription, sentEncounter, ss);
@@ -139,7 +140,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		assertEquals("1", ss.getEventsSinceSubscriptionStartElement().getValueAsString());
 
 		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
-		assertEquals(1, notificationEvents.size());
+		assertThat(notificationEvents).hasSize(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
 		assertEquals("1", notificationEvent.getEventNumber());
 		assertEquals(sentEncounter.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
@@ -168,7 +169,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		if (size == 1) {
 			return true;
 		}
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
 		return mySubscriptionTopicRegistry.size() == 1;
 	}
 

@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -35,6 +36,7 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,8 +60,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -121,7 +122,6 @@ public class JpaBulkExportProcessorTest {
 
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
-
 	@Mock
 	private BulkExportHelperService myBulkExportHelperService;
 
@@ -138,7 +138,7 @@ public class JpaBulkExportProcessorTest {
 	private IIdHelperService<JpaPid> myIdHelperService;
 
 	@Mock
-	private IMdmLinkDao<JpaPid,?> myMdmLinkDao;
+	private IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
 
 	@Mock
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
@@ -151,6 +151,12 @@ public class JpaBulkExportProcessorTest {
 
 	@InjectMocks
 	private JpaBulkExportProcessor myProcessor;
+
+	@BeforeEach
+	public void init() {
+		myProcessor.mySearchBuilderFactory = mySearchBuilderFactory;
+		myProcessor.myMdmLinkDao = myMdmLinkDao;
+	}
 
 	private ExportPIDIteratorParameters createExportParameters(BulkExportJobParameters.ExportStyle theExportStyle) {
 		ExportPIDIteratorParameters parameters = new ExportPIDIteratorParameters();
@@ -176,7 +182,7 @@ public class JpaBulkExportProcessorTest {
 	}
 
 	private MdmPidTuple<JpaPid> createTuple(long theGroupId, long theGoldenId) {
-		return MdmPidTuple.fromGoldenAndSource(JpaPid.fromId(theGoldenId), JpaPid.fromId(theGroupId));
+		return MdmPidTuple.fromGoldenAndSourceAndPartitionIds(JpaPid.fromId(theGoldenId), null, JpaPid.fromId(theGroupId), null);
 	}
 
 	@ParameterizedTest
@@ -261,7 +267,7 @@ public class JpaBulkExportProcessorTest {
 			myProcessor.getResourcePidIterator(parameters);
 			fail();
 		} catch (InternalErrorException ex) {
-			assertThat(ex.getMessage(), containsString("You attempted to start a Patient Bulk Export,"));
+			assertThat(ex.getMessage()).contains("You attempted to start a Patient Bulk Export,");
 		}
 	}
 
@@ -476,8 +482,8 @@ public class JpaBulkExportProcessorTest {
 		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
-		assertNotNull(pidIterator, "PID iterator null for mdm = " + theMdm);
-		assertTrue(pidIterator.hasNext(), "PID iterator empty for mdm = " + theMdm);
+		assertThat(pidIterator).as("PID iterator null for mdm = " + theMdm).isNotNull();
+		assertThat(pidIterator.hasNext()).as("PID iterator empty for mdm = " + theMdm).isTrue();
 		ArgumentCaptor<SystemRequestDetails> groupDaoReadSystemRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(groupDao).read(any(IIdType.class), groupDaoReadSystemRequestDetailsCaptor.capture());
 		validatePartitionId(thePartitioned, groupDaoReadSystemRequestDetailsCaptor.getValue().getRequestPartitionId());
@@ -537,9 +543,7 @@ public class JpaBulkExportProcessorTest {
 		int count = 0;
 		while (iterator.hasNext()) {
 			JpaPid ret = iterator.next();
-			assertTrue(
-				ret.equals(pid) || ret.equals(pid2)
-			);
+			assertTrue(ret.equals(pid) || ret.equals(pid2));
 			count++;
 		}
 		assertEquals(2, count);

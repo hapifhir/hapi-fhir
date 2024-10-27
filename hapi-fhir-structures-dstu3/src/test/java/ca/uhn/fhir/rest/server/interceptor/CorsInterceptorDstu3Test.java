@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -28,8 +30,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -49,10 +51,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CorsInterceptorDstu3Test {
 	private static String ourBaseUri;
@@ -92,7 +91,7 @@ public class CorsInterceptorDstu3Test {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 		}
 		{
 			HttpPost httpOpt = new HttpPost(ourBaseUri + "/Patient");
@@ -119,7 +118,7 @@ public class CorsInterceptorDstu3Test {
 	@Test
 	public void testDefaultConfig() {
 		CorsInterceptor def = new CorsInterceptor();
-		assertThat(def.getConfig().getAllowedOrigins(), contains("*"));
+		assertThat(def.getConfig().getAllowedOrigins()).containsExactly("*");
 	}
 
 	@Test

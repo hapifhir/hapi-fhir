@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,10 @@ public final class PatientEverythingParameters {
 					"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
 	private StringAndListParam myTypes;
 
+	@Description(
+			shortDefinition = "If set to true, trigger an MDM expansion of identifiers corresponding to the resources.")
+	private boolean myMdmExpand = false;
+
 	public IPrimitiveType<Integer> getCount() {
 		return myCount;
 	}
@@ -94,6 +98,10 @@ public final class PatientEverythingParameters {
 		return myTypes;
 	}
 
+	public boolean getMdmExpand() {
+		return myMdmExpand;
+	}
+
 	public void setCount(IPrimitiveType<Integer> theCount) {
 		this.myCount = theCount;
 	}
@@ -124,5 +132,9 @@ public final class PatientEverythingParameters {
 
 	public void setTypes(StringAndListParam theTypes) {
 		this.myTypes = theTypes;
+	}
+
+	public void setMdmExpand(Boolean myMdmExpand) {
+		this.myMdmExpand = myMdmExpand;
 	}
 }

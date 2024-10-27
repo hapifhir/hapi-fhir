@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 5838
+title: "Migration of remaining database columns still using the LOB datatypes. This change effectively cuts all ties 
+with the inefficient `pg_largeobject` table."

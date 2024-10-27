@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
@@ -93,25 +95,40 @@ public final class TerserUtil {
 
 	private static final Logger ourLog = getLogger(TerserUtil.class);
 	private static final String EQUALS_DEEP = "equalsDeep";
+	public static final String DATA_ABSENT_REASON_EXTENSION_URI =
+			"http://hl7.org/fhir/StructureDefinition/data-absent-reason";
 
 	private TerserUtil() {}
 
 	/**
-	 * Given an Child Definition of `identifier`, a R4/DSTU3 EID Identifier, and a new resource, clone the EID into that resources' identifier list.
+	 * Given an Child Definition of `identifier`, a R4/DSTU3 Identifier, and a new resource, clone the identifier into that resources' identifier list if it is not already present.
 	 */
-	public static void cloneEidIntoResource(
+	public static void cloneIdentifierIntoResource(
 			FhirContext theFhirContext,
 			BaseRuntimeChildDefinition theIdentifierDefinition,
-			IBase theEid,
-			IBase theResourceToCloneEidInto) {
+			IBase theNewIdentifier,
+			IBaseResource theResourceToCloneInto) {
 		// FHIR choice types - fields within fhir where we have a choice of ids
-		BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>)
-				theIdentifierDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
-		IBase resourceNewIdentifier = childIdentifier.newInstance();
+		BaseRuntimeElementCompositeDefinition<?> childIdentifierElementDefinition =
+				(BaseRuntimeElementCompositeDefinition<?>)
+						theIdentifierDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
+
+		List<IBase> existingIdentifiers = getValues(theFhirContext, theResourceToCloneInto, FIELD_NAME_IDENTIFIER);
+		if (existingIdentifiers != null) {
+			for (IBase existingIdentifier : existingIdentifiers) {
+				if (equals(existingIdentifier, theNewIdentifier)) {
+					ourLog.trace(
+							"Identifier {} already exists in resource {}", theNewIdentifier, theResourceToCloneInto);
+					return;
+				}
+			}
+		}
+
+		IBase newIdentifierBase = childIdentifierElementDefinition.newInstance();
 
 		FhirTerser terser = theFhirContext.newTerser();
-		terser.cloneInto(theEid, resourceNewIdentifier, true);
-		theIdentifierDefinition.getMutator().addValue(theResourceToCloneEidInto, resourceNewIdentifier);
+		terser.cloneInto(theNewIdentifier, newIdentifierBase, true);
+		theIdentifierDefinition.getMutator().addValue(theResourceToCloneInto, newIdentifierBase);
 	}
 
 	/**
@@ -253,6 +270,15 @@ public final class TerserUtil {
 		return theItems.stream().anyMatch(i -> equals(i, theItem, method));
 	}
 
+	private static boolean hasDataAbsentReason(IBase theItem) {
+		if (theItem instanceof IBaseHasExtensions) {
+			IBaseHasExtensions hasExtensions = (IBaseHasExtensions) theItem;
+			return hasExtensions.getExtension().stream()
+					.anyMatch(t -> StringUtils.equals(t.getUrl(), DATA_ABSENT_REASON_EXTENSION_URI));
+		}
+		return false;
+	}
+
 	/**
 	 * Merges all fields on the provided instance. <code>theTo</code> will contain a union of all values from <code>theFrom</code>
 	 * instance and <code>theTo</code> instance.
@@ -348,7 +374,30 @@ public final class TerserUtil {
 	public static void clearField(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
 		BaseRuntimeChildDefinition childDefinition =
 				getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
-		clear(childDefinition.getAccessor().getValues(theResource));
+		childDefinition.getMutator().setValue(theResource, null);
+	}
+
+	/**
+	 * Clears the specified field on the resource provided by the FHIRPath.  If more than one value matches
+	 * the FHIRPath, all values will be cleared.
+	 *
+	 * @param theFhirContext
+	 * @param theResource
+	 * @param theFhirPath
+	 */
+	public static void clearFieldByFhirPath(FhirContext theFhirContext, IBaseResource theResource, String theFhirPath) {
+
+		if (theFhirPath.contains(".")) {
+			String parentPath = theFhirPath.substring(0, theFhirPath.lastIndexOf("."));
+			String fieldName = theFhirPath.substring(theFhirPath.lastIndexOf(".") + 1);
+			FhirTerser terser = theFhirContext.newTerser();
+			List<IBase> parents = terser.getValues(theResource, parentPath);
+			for (IBase parent : parents) {
+				clearField(theFhirContext, fieldName, parent);
+			}
+		} else {
+			clearField(theFhirContext, theResource, theFhirPath);
+		}
 	}
 
 	/**
@@ -362,7 +411,16 @@ public final class TerserUtil {
 		BaseRuntimeElementDefinition definition = theFhirContext.getElementDefinition(theBase.getClass());
 		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
 		Validate.notNull(childDefinition);
-		clear(childDefinition.getAccessor().getValues(theBase));
+		BaseRuntimeChildDefinition.IAccessor accessor = childDefinition.getAccessor();
+		clear(accessor.getValues(theBase));
+		List<IBase> newValue = accessor.getValues(theBase);
+
+		if (newValue != null && !newValue.isEmpty()) {
+			// Our clear failed, probably because it was an immutable SingletonList returned by a FieldPlainAccessor
+			// that cannot be cleared.
+			// Let's just null it out instead.
+			childDefinition.getMutator().setValue(theBase, null);
+		}
 	}
 
 	/**
@@ -420,6 +478,21 @@ public final class TerserUtil {
 	}
 
 	/**
+	 * Sets the provided field with the given values. This method will add to the collection of existing field values
+	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, IBaseResource, String)}
+	 * to remove values before setting
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFieldName   Child field name of the resource to set
+	 * @param theResource    The resource to set the values on
+	 * @param theValue       The String value to set on the resource child field name. This value is converted to the appropriate primitive type before the value is set
+	 */
+	public static void setStringField(
+			FhirContext theFhirContext, String theFieldName, IBaseResource theResource, String theValue) {
+		setField(theFhirContext, theFieldName, theResource, theFhirContext.newPrimitiveString(theValue));
+	}
+
+	/**
 	 * Sets the specified value at the FHIR path provided.
 	 *
 	 * @param theTerser   The terser that should be used for cloning the field value.
@@ -446,6 +519,20 @@ public final class TerserUtil {
 	public static void setFieldByFhirPath(
 			FhirContext theFhirContext, String theFhirPath, IBaseResource theResource, IBase theValue) {
 		setFieldByFhirPath(theFhirContext.newTerser(), theFhirPath, theResource, theValue);
+	}
+
+	/**
+	 * Sets the specified String value at the FHIR path provided.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFhirPath    The FHIR path to set the field at
+	 * @param theResource    The resource on which the value should be set
+	 * @param theValue       The String value to set. The string is converted to the appropriate primitive type before setting the field
+	 */
+	public static void setStringFieldByFhirPath(
+			FhirContext theFhirContext, String theFhirPath, IBaseResource theResource, String theValue) {
+		setFieldByFhirPath(
+				theFhirContext.newTerser(), theFhirPath, theResource, theFhirContext.newPrimitiveString(theValue));
 	}
 
 	/**
@@ -621,24 +708,36 @@ public final class TerserUtil {
 			BaseRuntimeChildDefinition childDefinition,
 			List<IBase> theFromFieldValues,
 			List<IBase> theToFieldValues) {
-		for (IBase theFromFieldValue : theFromFieldValues) {
-			if (contains(theFromFieldValue, theToFieldValues)) {
+		if (!theFromFieldValues.isEmpty() && theToFieldValues.stream().anyMatch(TerserUtil::hasDataAbsentReason)) {
+			// If the to resource has a data absent reason, and there is potentially real data incoming
+			// in the from resource, we should clear the data absent reason because it won't be absent anymore.
+			theToFieldValues = removeDataAbsentReason(theTo, childDefinition, theToFieldValues);
+		}
+
+		for (IBase fromFieldValue : theFromFieldValues) {
+			if (contains(fromFieldValue, theToFieldValues)) {
 				continue;
 			}
 
-			IBase newFieldValue = newElement(theTerser, childDefinition, theFromFieldValue, null);
-			if (theFromFieldValue instanceof IPrimitiveType) {
+			if (hasDataAbsentReason(fromFieldValue) && !theToFieldValues.isEmpty()) {
+				// if the from field value asserts a reason the field isn't populated, but the to field is populated,
+				// we don't want to overwrite real data with the extension
+				continue;
+			}
+
+			IBase newFieldValue = newElement(theTerser, childDefinition, fromFieldValue, null);
+			if (fromFieldValue instanceof IPrimitiveType) {
 				try {
-					Method copyMethod = getMethod(theFromFieldValue, "copy");
+					Method copyMethod = getMethod(fromFieldValue, "copy");
 					if (copyMethod != null) {
-						newFieldValue = (IBase) copyMethod.invoke(theFromFieldValue, new Object[] {});
+						newFieldValue = (IBase) copyMethod.invoke(fromFieldValue, new Object[] {});
 					}
 				} catch (Throwable t) {
-					((IPrimitiveType) newFieldValue)
-							.setValueAsString(((IPrimitiveType) theFromFieldValue).getValueAsString());
+					((IPrimitiveType<?>) newFieldValue)
+							.setValueAsString(((IPrimitiveType<?>) fromFieldValue).getValueAsString());
 				}
 			} else {
-				theTerser.cloneInto(theFromFieldValue, newFieldValue, true);
+				theTerser.cloneInto(fromFieldValue, newFieldValue, true);
 			}
 
 			try {
@@ -648,6 +747,21 @@ public final class TerserUtil {
 				theToFieldValues = childDefinition.getAccessor().getValues(theTo);
 			}
 		}
+	}
+
+	private static List<IBase> removeDataAbsentReason(
+			IBaseResource theResource, BaseRuntimeChildDefinition theFieldDefinition, List<IBase> theFieldValues) {
+		for (int i = 0; i < theFieldValues.size(); i++) {
+			if (hasDataAbsentReason(theFieldValues.get(i))) {
+				try {
+					theFieldDefinition.getMutator().remove(theResource, i);
+				} catch (UnsupportedOperationException e) {
+					// the field must be single-valued, just clear it
+					theFieldDefinition.getMutator().setValue(theResource, null);
+				}
+			}
+		}
+		return theFieldDefinition.getAccessor().getValues(theResource);
 	}
 
 	/**

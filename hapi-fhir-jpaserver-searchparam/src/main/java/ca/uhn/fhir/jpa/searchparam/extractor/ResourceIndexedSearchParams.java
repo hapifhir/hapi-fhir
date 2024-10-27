@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,25 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -31,6 +47,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -41,34 +58,55 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.compare;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class ResourceIndexedSearchParams {
-	public final Collection<ResourceIndexedSearchParamString> myStringParams = new ArrayList<>();
-	public final Collection<ResourceIndexedSearchParamToken> myTokenParams = new HashSet<>();
-	public final Collection<ResourceIndexedSearchParamNumber> myNumberParams = new ArrayList<>();
-	public final Collection<ResourceIndexedSearchParamQuantity> myQuantityParams = new ArrayList<>();
-	public final Collection<ResourceIndexedSearchParamQuantityNormalized> myQuantityNormalizedParams =
-			new ArrayList<>();
-	public final Collection<ResourceIndexedSearchParamDate> myDateParams = new ArrayList<>();
-	public final Collection<ResourceIndexedSearchParamUri> myUriParams = new ArrayList<>();
-	public final Collection<ResourceIndexedSearchParamCoords> myCoordsParams = new ArrayList<>();
-
-	public final Collection<ResourceIndexedComboStringUnique> myComboStringUniques = new HashSet<>();
-	public final Collection<ResourceIndexedComboTokenNonUnique> myComboTokenNonUnique = new HashSet<>();
-	public final Collection<ResourceLink> myLinks = new HashSet<>();
-	public final Set<String> myPopulatedResourceLinkParameters = new HashSet<>();
-	public final Collection<SearchParamPresentEntity> mySearchParamPresentEntities = new HashSet<>();
-	public final Collection<ResourceIndexedSearchParamComposite> myCompositeParams = new HashSet<>();
-
 	private static final Set<String> myIgnoredParams = Set.of(Constants.PARAM_TEXT, Constants.PARAM_CONTENT);
+	public final Collection<ResourceIndexedSearchParamString> myStringParams;
+	public final Collection<ResourceIndexedSearchParamToken> myTokenParams;
+	public final Collection<ResourceIndexedSearchParamNumber> myNumberParams;
+	public final Collection<ResourceIndexedSearchParamQuantity> myQuantityParams;
+	public final Collection<ResourceIndexedSearchParamQuantityNormalized> myQuantityNormalizedParams;
+	public final Collection<ResourceIndexedSearchParamDate> myDateParams;
+	public final Collection<ResourceIndexedSearchParamUri> myUriParams;
+	public final Collection<ResourceIndexedSearchParamCoords> myCoordsParams;
+	public final Collection<ResourceIndexedComboStringUnique> myComboStringUniques;
+	public final Collection<ResourceIndexedComboTokenNonUnique> myComboTokenNonUnique;
+	public final Collection<ResourceLink> myLinks;
+	public final Collection<SearchParamPresentEntity> mySearchParamPresentEntities;
+	public final Collection<ResourceIndexedSearchParamComposite> myCompositeParams;
+	public final Set<String> myPopulatedResourceLinkParameters = new HashSet<>();
 
-	public ResourceIndexedSearchParams() {}
+	/**
+	 * TODO: Remove this - Currently used by CDR though
+	 *
+	 * @deprecated Use a factory constructor instead
+	 */
+	@Deprecated
+	public ResourceIndexedSearchParams() {
+		this(Mode.SET);
+	}
 
-	public ResourceIndexedSearchParams(ResourceTable theEntity) {
+	private ResourceIndexedSearchParams(Mode theMode) {
+		myStringParams = theMode.newCollection();
+		myTokenParams = theMode.newCollection();
+		myNumberParams = theMode.newCollection();
+		myQuantityParams = theMode.newCollection();
+		myQuantityNormalizedParams = theMode.newCollection();
+		myDateParams = theMode.newCollection();
+		myUriParams = theMode.newCollection();
+		myCoordsParams = theMode.newCollection();
+		myComboStringUniques = theMode.newCollection();
+		myComboTokenNonUnique = theMode.newCollection();
+		myLinks = theMode.newCollection();
+		mySearchParamPresentEntities = theMode.newCollection();
+		myCompositeParams = theMode.newCollection();
+	}
+
+	private ResourceIndexedSearchParams(ResourceTable theEntity, Mode theMode) {
+		this(theMode);
 		if (theEntity.isParamsStringPopulated()) {
 			myStringParams.addAll(theEntity.getParamsString());
 		}
@@ -258,7 +296,7 @@ public final class ResourceIndexedSearchParams {
 		}
 
 		for (BaseResourceIndexedSearchParam nextParam : resourceParams) {
-			if (nextParam.getParamName().equalsIgnoreCase(theParamName)) {
+			if (isMatchSearchParam(theStorageSettings, theResourceName, theParamName, nextParam)) {
 				if (nextParam.matches(value)) {
 					return true;
 				}
@@ -266,6 +304,21 @@ public final class ResourceIndexedSearchParams {
 		}
 
 		return false;
+	}
+
+	public static boolean isMatchSearchParam(
+			StorageSettings theStorageSettings,
+			String theResourceName,
+			String theParamName,
+			BaseResourceIndexedSearchParam theIndexedSearchParam) {
+
+		if (theStorageSettings.isIndexStorageOptimized()) {
+			Long hashIdentity = SearchParamHash.hashSearchParam(
+					new PartitionSettings(), RequestPartitionId.defaultPartition(), theResourceName, theParamName);
+			return theIndexedSearchParam.getHashIdentity().equals(hashIdentity);
+		} else {
+			return theIndexedSearchParam.getParamName().equalsIgnoreCase(theParamName);
+		}
 	}
 
 	/**
@@ -574,5 +627,53 @@ public final class ResourceIndexedSearchParams {
 				theQueryStringsToPopulate.add(uniqueString.toString());
 			}
 		}
+	}
+
+	/**
+	 * Create a new instance that uses Sets as the internal collection
+	 * type in order to defend against duplicates. This should be used
+	 * when calculating the set of indexes for a resource that is
+	 * about to be stored.
+	 */
+	public static ResourceIndexedSearchParams withSets() {
+		return new ResourceIndexedSearchParams(Mode.SET);
+	}
+
+	/**
+	 * Create an empty and immutable structure.
+	 */
+	public static ResourceIndexedSearchParams empty() {
+		return new ResourceIndexedSearchParams(Mode.EMPTY);
+	}
+
+	/**
+	 * Create a new instance that holds all the existing indexes
+	 * in lists so that any duplicates are preserved.
+	 */
+	public static ResourceIndexedSearchParams withLists(ResourceTable theResourceTable) {
+		return new ResourceIndexedSearchParams(theResourceTable, Mode.LIST);
+	}
+
+	private enum Mode {
+		LIST {
+			@Override
+			public <T> Collection<T> newCollection() {
+				return new ArrayList<>();
+			}
+		},
+		SET {
+			@Override
+			public <T> Collection<T> newCollection() {
+				return new HashSet<>();
+			}
+		},
+		EMPTY {
+			@Override
+			public <T> Collection<T> newCollection() {
+				return List.of();
+			}
+		};
+
+		public abstract <T> Collection<T> newCollection();
 	}
 }

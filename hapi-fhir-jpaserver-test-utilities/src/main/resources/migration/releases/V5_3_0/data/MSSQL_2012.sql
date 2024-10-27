@@ -46,23 +46,55 @@ INSERT INTO HFJ_SPIDX_QUANTITY_NRML (
    RES_TYPE,
    SP_UPDATED,
    SP_MISSING,
-   SP_NAME, SP_ID,
+   SP_NAME,
+   SP_ID,
    SP_SYSTEM,
    SP_UNITS,
    HASH_IDENTITY_AND_UNITS,
    HASH_IDENTITY_SYS_UNITS,
    HASH_IDENTITY,
-   SP_VALUE
+   SP_VALUE,
+   PARTITION_DATE,
+   PARTITION_ID
 ) VALUES (
    1702,
    'Observation',
    '2023-04-05 15:16:26.43',
-   0, 'value-quantity',
+   0,
+   'value-quantity',
    2,
    'https://unitsofmeasure.org',
    'g',
    -864931808150710347,
    6382255012744790145,
    -1901136387361512731,
-   0.012
+   0.012,
+   '2024-04-05',
+   1
+);
+
+INSERT INTO HFJ_RES_LINK (
+   PID,
+   PARTITION_DATE,
+   PARTITION_ID,
+   SRC_PATH,
+   SRC_RESOURCE_ID,
+   SOURCE_RESOURCE_TYPE,
+   TARGET_RESOURCE_ID,
+   TARGET_RESOURCE_TYPE,
+   TARGET_RESOURCE_URL,
+   TARGET_RESOURCE_VERSION,
+   SP_UPDATED
+) VALUES (
+   701,
+   '2024-04-05',
+   1,
+   'Observation.subject.where(resolve() is Patient)',
+   1702,
+   'Observation',
+   1906,
+   'Patient',
+   'http://localhost:8000/Patient/123',
+   1,
+   '2024-03-01 18:01:12.921'
 );

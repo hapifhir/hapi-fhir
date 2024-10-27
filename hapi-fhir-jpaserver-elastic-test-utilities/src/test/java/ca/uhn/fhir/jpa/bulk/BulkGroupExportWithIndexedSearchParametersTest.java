@@ -31,9 +31,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
@@ -80,7 +79,7 @@ public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest 
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		BulkExportJobResults jobResults = getBulkExportJobResults(options);
-		assertThat(jobResults.getResourceTypeToBinaryIds().keySet(), containsInAnyOrder("Patient", "Observation", "Group"));
+		assertThat(jobResults.getResourceTypeToBinaryIds().keySet()).containsExactlyInAnyOrder("Patient", "Observation", "Group");
 	}
 
 	private BulkExportJobResults getBulkExportJobResults(BulkExportJobParameters theOptions) {

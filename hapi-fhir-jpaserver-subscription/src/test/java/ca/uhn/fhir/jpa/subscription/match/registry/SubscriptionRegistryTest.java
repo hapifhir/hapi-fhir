@@ -2,15 +2,16 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Subscription;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,10 +21,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,7 +35,7 @@ public class SubscriptionRegistryTest {
 	static FhirContext ourFhirContext = FhirContext.forR4Cached();
 
 	@Spy
-	SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(ourFhirContext);
+	SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(ourFhirContext, new SubscriptionSettings());
 
 	@Spy
 	ISubscriptionDeliveryChannelNamer mySubscriptionDeliveryChannelNamer = new TestChannelNamer();
@@ -65,7 +67,7 @@ public class SubscriptionRegistryTest {
 		// verify
 		assertTrue(registered);
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		Assertions.assertNotNull(activeSubscription.getRetryConfigurationParameters());
+		assertNotNull(activeSubscription.getRetryConfigurationParameters());
 		assertEquals(channelName, activeSubscription.getChannelName());
 		assertEquals(retryCount, activeSubscription.getRetryConfigurationParameters().getRetryCount());
 	}
@@ -83,7 +85,7 @@ public class SubscriptionRegistryTest {
 		// verify
 		assertTrue(registered);
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		Assertions.assertNull(activeSubscription.getRetryConfigurationParameters());
+		assertNull(activeSubscription.getRetryConfigurationParameters());
 	}
 
 	@Test
@@ -103,7 +105,7 @@ public class SubscriptionRegistryTest {
 		// verify
 		assertTrue(registered);
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		Assertions.assertNull(activeSubscription.getRetryConfigurationParameters());
+		assertNull(activeSubscription.getRetryConfigurationParameters());
 		assertEquals(CHANNEL_NAME, activeSubscription.getChannelName());
 	}
 
@@ -119,21 +121,21 @@ public class SubscriptionRegistryTest {
 		// verify
 		assertTrue(registered);
 		List<ActiveSubscription> subscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(SubscriptionTestDataHelper.TEST_TOPIC);
-		assertThat(subscriptions, hasSize(1));
+		assertThat(subscriptions).hasSize(1);
 
 		Subscription topicSubscription2 = SubscriptionTestDataHelper.buildR4TopicSubscription();
 		topicSubscription2.setId("topicSubscription2");
 		registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(topicSubscription2);
 		assertTrue(registered);
 		subscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(SubscriptionTestDataHelper.TEST_TOPIC);
-		assertThat(subscriptions, hasSize(2));
+		assertThat(subscriptions).hasSize(2);
 
 		// Repeat registration does not register
 		Subscription topicSubscription3 = SubscriptionTestDataHelper.buildR4TopicSubscription();
 		topicSubscription3.setId("topicSubscription2");
 		registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(topicSubscription3);
 		assertFalse(registered);
-		assertThat(subscriptions, hasSize(2));
+		assertThat(subscriptions).hasSize(2);
 
 		// Now register a subscription with a different topic
 		Subscription topicSubscription4 = SubscriptionTestDataHelper.buildR4TopicSubscription();
@@ -146,11 +148,11 @@ public class SubscriptionRegistryTest {
 
 		// Still 2 subs with the first topic
 		subscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(SubscriptionTestDataHelper.TEST_TOPIC);
-		assertThat(subscriptions, hasSize(2));
+		assertThat(subscriptions).hasSize(2);
 
 		// Now also 1 sub with a different topic
 		subscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(testTopic4);
-		assertThat(subscriptions, hasSize(1));
+		assertThat(subscriptions).hasSize(1);
 		assertEquals(topicSubscription4Id, subscriptions.get(0).getId());
 	}
 

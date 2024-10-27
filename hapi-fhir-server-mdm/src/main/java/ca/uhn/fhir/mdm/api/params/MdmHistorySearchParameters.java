@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.api.params;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ package ca.uhn.fhir.mdm.api.params;
 
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -29,8 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class MdmHistorySearchParameters {
 	private List<IIdType> myGoldenResourceIds = new ArrayList<>();
@@ -89,5 +89,18 @@ public class MdmHistorySearchParameters {
 	private static IIdType extractId(String theTheGoldenResourceId) {
 		return MdmControllerUtil.extractGoldenResourceIdDtOrNull(
 				ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theTheGoldenResourceId);
+	}
+
+	public enum SearchOperatorEnum {
+		/**
+		 * Used to indicate we should perform an OR search between all IDs provided
+		 * ie. links only need at least 1 of the IDs provided in the search parameters
+		 */
+		OR,
+		/**
+		 * Used to indicate we should perform an AND search between all IDs provided
+		 * ie. links must contain all IDs provided in the search parameters
+		 */
+		AND
 	}
 }

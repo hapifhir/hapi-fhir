@@ -3,11 +3,11 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -26,13 +26,12 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class QuestionnaireValidatorDstu3Test {
+public class QuestionnaireValidatorDstu3Test extends BaseValidationTestWithInlineMocks {
 	private static final Logger ourLog = LoggerFactory.getLogger(QuestionnaireValidatorDstu3Test.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
@@ -79,8 +78,8 @@ public class QuestionnaireValidatorDstu3Test {
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages().stream().filter(t->t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList()), Matchers.empty());
+			assertEquals(true, errors.isSuccessful());
+			assertThat(errors.getMessages().stream().filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList())).isEmpty();
 		}
 
 	}
@@ -102,8 +101,8 @@ public class QuestionnaireValidatorDstu3Test {
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages(), Matchers.empty());
+			assertEquals(true, errors.isSuccessful());
+			assertThat(errors.getMessages()).isEmpty();
 		}
 		for (String extensionDomainToTest : extensionDomainsToTest) {
 			Questionnaire q = new Questionnaire();
@@ -117,8 +116,8 @@ public class QuestionnaireValidatorDstu3Test {
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages().get(0).getMessage(), containsString("and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = null#text-box)"));
+			assertThat(errors.isSuccessful()).isTrue();
+			assertThat(errors.getMessages().get(1).getMessage()).contains("and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = null#text-box)");
 		}
 	}
 
@@ -137,17 +136,17 @@ public class QuestionnaireValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(q);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.isSuccessful(), Matchers.is(true));
-		assertThat(errors.getMessages(), Matchers.hasSize(1));
+		assertEquals(true, errors.isSuccessful());
+		assertThat(errors.getMessages()).hasSize(1);
 		assertEquals(errors.getMessages().get(0).getSeverity(), ResultSeverityEnum.INFORMATION);
-		assertThat(errors.getMessages().get(0).getMessage(), Matchers.startsWith("Unknown extension " + extensionUrl));
+		assertThat(errors.getMessages().get(0).getMessage()).startsWith("Unknown extension " + extensionUrl);
 
 		myInstanceVal.setCustomExtensionDomains(Collections.singletonList(extensionUrl));
 		errors = myVal.validateWithResult(q);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.isSuccessful(), Matchers.is(true));
-		assertThat(errors.getMessages(), Matchers.empty());
+		assertEquals(true, errors.isSuccessful());
+		assertThat(errors.getMessages()).isEmpty();
 	}
 
 	@AfterAll

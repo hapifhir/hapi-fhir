@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,16 @@ package ca.uhn.fhir.mdm.interceptor;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -53,21 +57,30 @@ public class MdmSearchExpandingInterceptor {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
+	@Autowired
 	private IMdmLinkExpandSvc myMdmLinkExpandSvc;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
-	public void hook(SearchParameterMap theSearchParameterMap) {
+	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
+
 		if (myStorageSettings.isAllowMdmExpansion()) {
+			final RequestDetails requestDetailsToUse =
+					theRequestDetails == null ? new SystemRequestDetails() : theRequestDetails;
+			final RequestPartitionId requestPartitionId =
+					myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+							requestDetailsToUse, requestDetailsToUse.getResourceName(), theSearchParameterMap);
 			for (Map.Entry<String, List<List<IQueryParameterType>>> set : theSearchParameterMap.entrySet()) {
 				String paramName = set.getKey();
 				List<List<IQueryParameterType>> andList = set.getValue();
 				for (List<IQueryParameterType> orList : andList) {
 					// here we will know if it's an _id param or not
 					// from theSearchParameterMap.keySet()
-					expandAnyReferenceParameters(paramName, orList);
+					expandAnyReferenceParameters(requestPartitionId, paramName, orList);
 				}
 			}
 		}
@@ -76,7 +89,8 @@ public class MdmSearchExpandingInterceptor {
 	/**
 	 * If a Parameter is a reference parameter, and it has been set to expand MDM, perform the expansion.
 	 */
-	private void expandAnyReferenceParameters(String theParamName, List<IQueryParameterType> orList) {
+	private void expandAnyReferenceParameters(
+			RequestPartitionId theRequestPartitionId, String theParamName, List<IQueryParameterType> orList) {
 		List<IQueryParameterType> toRemove = new ArrayList<>();
 		List<IQueryParameterType> toAdd = new ArrayList<>();
 		for (IQueryParameterType iQueryParameterType : orList) {
@@ -85,13 +99,13 @@ public class MdmSearchExpandingInterceptor {
 				if (refParam.isMdmExpand()) {
 					ourLog.debug("Found a reference parameter to expand: {}", refParam);
 					// First, attempt to expand as a source resource.
-					Set<String> expandedResourceIds =
-							myMdmLinkExpandSvc.expandMdmBySourceResourceId(new IdDt(refParam.getValue()));
+					Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(
+							theRequestPartitionId, new IdDt(refParam.getValue()));
 
 					// If we failed, attempt to expand as a golden resource
 					if (expandedResourceIds.isEmpty()) {
-						expandedResourceIds =
-								myMdmLinkExpandSvc.expandMdmByGoldenResourceId(new IdDt(refParam.getValue()));
+						expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId(
+								theRequestPartitionId, new IdDt(refParam.getValue()));
 					}
 
 					// Rebuild the search param list.
@@ -105,7 +119,7 @@ public class MdmSearchExpandingInterceptor {
 					}
 				}
 			} else if (theParamName.equalsIgnoreCase("_id")) {
-				expandIdParameter(iQueryParameterType, toAdd, toRemove);
+				expandIdParameter(theRequestPartitionId, iQueryParameterType, toAdd, toRemove);
 			}
 		}
 
@@ -125,11 +139,13 @@ public class MdmSearchExpandingInterceptor {
 	 * Expands out the provided _id parameter into all the various
 	 * ids of linked resources.
 	 *
+	 * @param theRequestPartitionId
 	 * @param theIdParameter
 	 * @param theAddList
 	 * @param theRemoveList
 	 */
 	private void expandIdParameter(
+			RequestPartitionId theRequestPartitionId,
 			IQueryParameterType theIdParameter,
 			List<IQueryParameterType> theAddList,
 			List<IQueryParameterType> theRemoveList) {
@@ -157,10 +173,10 @@ public class MdmSearchExpandingInterceptor {
 		} else if (mdmExpand) {
 			ourLog.debug("_id parameter must be expanded out from: {}", id.getValue());
 
-			Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(id);
+			Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, id);
 
 			if (expandedResourceIds.isEmpty()) {
-				expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId((IdDt) id);
+				expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId(theRequestPartitionId, (IdDt) id);
 			}
 
 			// Rebuild

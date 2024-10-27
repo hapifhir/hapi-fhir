@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,12 @@ import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
 import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
+import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsConfigServiceImpl;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsHooksContextBooter;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrSettings;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsServiceInterceptor;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrService;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
@@ -56,12 +58,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 @Configuration
+@Import(CdsCrConfig.class)
 public class CdsHooksConfig {
 	private static final Logger ourLog = LoggerFactory.getLogger(CdsHooksConfig.class);
 
@@ -95,13 +99,17 @@ public class CdsHooksConfig {
 			CdsPrefetchSvc theCdsPrefetchSvc,
 			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper,
 			ICdsCrServiceFactory theCdsCrServiceFactory,
-			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory) {
+			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
+			FhirContext theFhirContext) {
+		final CdsServiceRequestJsonDeserializer cdsServiceRequestJsonDeserializer =
+				new CdsServiceRequestJsonDeserializer(theFhirContext, theObjectMapper);
 		return new CdsServiceRegistryImpl(
 				theCdsHooksContextBooter,
 				theCdsPrefetchSvc,
 				theObjectMapper,
 				theCdsCrServiceFactory,
-				theCrDiscoveryServiceFactory);
+				theCrDiscoveryServiceFactory,
+				cdsServiceRequestJsonDeserializer);
 	}
 
 	@Bean
@@ -128,8 +136,8 @@ public class CdsHooksConfig {
 			}
 			try {
 				Constructor<? extends ICdsCrService> constructor =
-						clazz.get().getConstructor(RequestDetails.class, Repository.class);
-				return constructor.newInstance(rd, repository);
+						clazz.get().getConstructor(RequestDetails.class, Repository.class, ICdsConfigService.class);
+				return constructor.newInstance(rd, repository, theCdsConfigService);
 			} catch (NoSuchMethodException
 					| InvocationTargetException
 					| InstantiationException
@@ -189,9 +197,11 @@ public class CdsHooksConfig {
 
 	@Bean
 	public ICdsConfigService cdsConfigService(
-			FhirContext theFhirContext, @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper) {
+			FhirContext theFhirContext,
+			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper,
+			CdsCrSettings theCdsCrSettings) {
 		return new CdsConfigServiceImpl(
-				theFhirContext, theObjectMapper, myDaoRegistry, myRepositoryFactory, myRestfulServer);
+				theFhirContext, theObjectMapper, theCdsCrSettings, myDaoRegistry, myRepositoryFactory, myRestfulServer);
 	}
 
 	@Bean

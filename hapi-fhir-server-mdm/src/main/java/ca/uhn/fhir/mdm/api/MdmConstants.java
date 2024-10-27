@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ public class MdmConstants {
 			"http://hl7.org/fhir/StructureDefinition/match-grade";
 
 	public static final String SYSTEM_GOLDEN_RECORD_STATUS = "http://hapifhir.io/fhir/NamingSystem/mdm-record-status";
+	public static final String SUBSCRIPTION_TOPIC_URL = "http://hapifhir.io/fhir/r5/SubscriptionTopic/mdm";
 	public static final String CODE_GOLDEN_RECORD = "GOLDEN_RECORD";
 	public static final String CODE_GOLDEN_RECORD_REDIRECTED = "REDIRECTED";
 	public static final String DISPLAY_GOLDEN_RECORD = "Golden Record";

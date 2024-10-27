@@ -25,7 +25,7 @@ jobs:
       if: ${{ github.event_name == 'pull_request' }}
 
     - name: Setup java
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
          distribution: zulu
          java-version: 17

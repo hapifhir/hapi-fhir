@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.messaging.MessagingException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -66,7 +67,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 			IBaseResource payloadResource = createDeliveryBundleForPayloadSearchCriteria(
 					theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
 			ResourceModifiedJsonMessage newWrappedMessageToSend =
-					convertDeliveryMessageToResourceModifiedMessage(theSourceMessage, payloadResource);
+					convertDeliveryMessageToResourceModifiedJsonMessage(theSourceMessage, payloadResource);
 			theWrappedMessageToSend.setPayload(newWrappedMessageToSend.getPayload());
 			payloadId =
 					payloadResource.getIdElement().toUnqualifiedVersionless().getValue();
@@ -82,7 +83,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 						.getValue());
 	}
 
-	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedMessage(
+	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedJsonMessage(
 			ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
 		ResourceModifiedMessage payload =
 				new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
@@ -96,8 +97,17 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	public void handleMessage(ResourceDeliveryMessage theMessage) throws MessagingException, URISyntaxException {
 		CanonicalSubscription subscription = theMessage.getSubscription();
 		IBaseResource payloadResource = theMessage.getPayload(myFhirContext);
+		if (payloadResource == null) {
+			Optional<ResourceModifiedMessage> inflatedMsg =
+					inflateResourceModifiedMessageFromDeliveryMessage(theMessage);
+			if (inflatedMsg.isEmpty()) {
+				return;
+			}
+			payloadResource = inflatedMsg.get().getPayload(myFhirContext);
+		}
+
 		ResourceModifiedJsonMessage messageWrapperToSend =
-				convertDeliveryMessageToResourceModifiedMessage(theMessage, payloadResource);
+				convertDeliveryMessageToResourceModifiedJsonMessage(theMessage, payloadResource);
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY
 		HookParams params = new HookParams()

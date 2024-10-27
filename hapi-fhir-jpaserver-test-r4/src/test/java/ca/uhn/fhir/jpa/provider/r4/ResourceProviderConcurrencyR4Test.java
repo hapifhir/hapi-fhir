@@ -27,12 +27,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("Duplicates")
@@ -61,7 +60,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof SearchBlockingInterceptor);
 		myExecutor.shutdown();
 
-		assertThat(myExceptions, empty());
+		assertThat(myExceptions).isEmpty();
 	}
 
 	/**
@@ -109,7 +108,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 			});
 		}
 
-		await().until(() -> searchBlockingInterceptorFamily1.getHits(), equalTo(1));
+		await().until(() -> searchBlockingInterceptorFamily1.getHits() == 1);
 
 		// Submit search 2 (should also block because it will reuse the first search - same name being searched)
 		{
@@ -156,20 +155,18 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 		}
 
 		ourLog.info("About to wait for FAMILY3 to complete");
-		await().until(() -> {
-			ourLog.info("Received names: {}", myReceivedNames);
-			return myReceivedNames;
-		}, contains("FAMILY3"));
+		await().untilAsserted(() ->  assertThat(myReceivedNames).contains("FAMILY3"));
 		ourLog.info("Got FAMILY3");
 
 		searchBlockingInterceptorFamily1.getLatch().countDown();
 
 		ourLog.info("About to wait for FAMILY1 to complete");
-		await().until(() -> myReceivedNames, contains("FAMILY3", "FAMILY1", "FAMILY1"));
+		await().untilAsserted(() -> assertThat(myReceivedNames).containsOnly("FAMILY3", "FAMILY1","FAMILY1"));
 		ourLog.info("Got FAMILY1");
 
 		assertEquals(1, searchBlockingInterceptorFamily1.getHits());
 	}
+
 
 
 	@Interceptor

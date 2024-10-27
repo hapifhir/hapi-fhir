@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,10 +73,10 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
@@ -157,7 +157,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 				Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 			}
 		);
-		assertTrue(thrown.getMessage().contains("Invalid code system version PID 0"));
+		assertThat(thrown.getMessage()).contains("Invalid code system version PID 0");
 	}
 
 
@@ -167,9 +167,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		myRequestDetails.getUserData().put(LOINC_CODESYSTEM_MAKE_CURRENT, theMakeItCurrent);
 		uploadProperties.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), Boolean.toString(theMakeItCurrent));
 
-		assertTrue(
-			theVersion == null || theVersion.equals("2.67") || theVersion.equals("2.68") || theVersion.equals("2.69"),
-			"Version supported are: 2.67, 2.68, 2.69 and null" );
+		assertThat(theVersion == null || theVersion.equals("2.67") || theVersion.equals("2.68") || theVersion.equals("2.69")).as("Version supported are: 2.67, 2.68, 2.69 and null").isTrue();
 
 		if (StringUtils.isBlank(theVersion)) {
 			uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());

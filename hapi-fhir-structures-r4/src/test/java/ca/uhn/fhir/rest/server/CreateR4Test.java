@@ -8,10 +8,12 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -20,12 +22,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
@@ -33,38 +29,36 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyOrNullString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CreateR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateR4Test.class);
 	public static OperationOutcome ourReturnOo;
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer ourServlet;
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
-	@AfterEach
-	public void after() {
-		ourServlet.setDefaultPreferReturn(RestfulServer.DEFAULT_PREFER_RETURN);
-	}
+	@RegisterExtension
+	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new PatientProviderCreate())
+		 .registerProvider(new PatientProviderRead())
+		 .registerProvider(new PatientProviderSearch())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultResponseEncoding(EncodingEnum.JSON)
+		 .withServer(s->s.setDefaultPreferReturn(RestfulServer.DEFAULT_PREFER_RETURN))
+		 .setDefaultPrettyPrint(false);
 
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
+	
 	@BeforeEach
 	public void before() {
 		ourReturnOo = null;
@@ -73,7 +67,7 @@ public class CreateR4Test {
 	@Test
 	public void testCreateIgnoresIdInResourceBody() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"id\":\"999\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -86,14 +80,14 @@ public class CreateR4Test {
 
 		assertEquals(1, status.getHeaders("Location").length);
 		assertEquals(1, status.getHeaders("Content-Location").length);
-		assertEquals("http://localhost:" + ourPort + "/Patient/1", status.getFirstHeader("Location").getValue());
+		assertEquals(ourServer.getBaseUrl() + "/Patient/1", status.getFirstHeader("Location").getValue());
 
 	}
 
 	@Test
 	public void testCreateFailsIfNoContentTypeProvided() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"id\":\"999\", \"status\":\"active\"}", (ContentType) null));
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
@@ -102,7 +96,7 @@ public class CreateR4Test {
 			ourLog.info("Response was:\n{}", responseContent);
 
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("No Content-Type header was provided in the request. This is required for \\\"CREATE\\\" operation"));
+			assertThat(responseContent).contains("No Content-Type header was provided in the request. This is required for \\\"CREATE\\\" operation");
 
 		}
 	}
@@ -113,7 +107,7 @@ public class CreateR4Test {
 	@Test
 	public void testCreateReturnsLocationHeader() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -126,7 +120,7 @@ public class CreateR4Test {
 
 		assertEquals(1, status.getHeaders("Location").length);
 		assertEquals(1, status.getHeaders("Content-Location").length);
-		assertEquals("http://localhost:" + ourPort + "/Patient/1", status.getFirstHeader("Location").getValue());
+		assertEquals(ourServer.getBaseUrl() + "/Patient/1", status.getFirstHeader("Location").getValue());
 
 	}
 
@@ -134,7 +128,7 @@ public class CreateR4Test {
 	public void testCreateReturnsOperationOutcome() throws Exception {
 		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
 		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		HttpResponse status = ourClient.execute(httpPost);
@@ -146,7 +140,7 @@ public class CreateR4Test {
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("DIAG"));
+		assertThat(responseContent).contains("DIAG");
 	}
 
 	@Test
@@ -154,7 +148,7 @@ public class CreateR4Test {
 		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
 		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"gender\":\"male\"}";
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"gender\":\"male\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -170,7 +164,7 @@ public class CreateR4Test {
 	@Test
 	public void testCreateWithIncorrectContent1() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse("application/xml+fhir; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -181,15 +175,15 @@ public class CreateR4Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString("Failed to parse request body as XML resource."));
+		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
+		assertThat(responseContent).contains("Failed to parse request body as XML resource.");
 
 	}
 
 	@Test
 	public void testCreateWithIncorrectContent2() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse("application/fhir+xml; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -200,15 +194,15 @@ public class CreateR4Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString("Failed to parse request body as XML resource."));
+		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
+		assertThat(responseContent).contains("Failed to parse request body as XML resource.");
 
 	}
 
 	@Test
 	public void testCreateWithIncorrectContent3() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -219,7 +213,7 @@ public class CreateR4Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("Failed to parse request body as JSON resource."));
+		assertThat(responseContent).contains("Failed to parse request body as JSON resource.");
 
 	}
 
@@ -229,7 +223,7 @@ public class CreateR4Test {
 	@Test
 	public void testCreateWithInvalidContent() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("FOO", ContentType.parse("application/xml+fhir; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -240,8 +234,8 @@ public class CreateR4Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString(Msg.code(450) + "Failed to parse request body as XML resource. Error was: " + Msg.code(1852) +  "com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'"));
+		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
+		assertThat(responseContent).contains(Msg.code(450) + "Failed to parse request body as XML resource. Error was: " + Msg.code(1852) + "com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'");
 
 	}
 
@@ -256,7 +250,7 @@ public class CreateR4Test {
 		String body = ourCtx.newJsonParser().encodeResourceToString(p);
 		HttpPost httpPost;
 
-		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(body, ContentType.parse("application/fhir+json; charset=utf-8")));
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
@@ -265,7 +259,7 @@ public class CreateR4Test {
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
-			assertThat(responseContent, containsString("\"resourceType\":\"Patient\""));
+			assertThat(responseContent).contains("\"resourceType\":\"Patient\"");
 		}
 
 	}
@@ -279,9 +273,9 @@ public class CreateR4Test {
 		p.setActive(true);
 		String body = ourCtx.newJsonParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(body, ContentType.parse("application/fhir+json; charset=utf-8")));
-		ourServlet.setDefaultPreferReturn(PreferReturnEnum.OPERATION_OUTCOME);
+		ourServer.getRestfulServer().setDefaultPreferReturn(PreferReturnEnum.OPERATION_OUTCOME);
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
 			assertEquals(201, status.getStatusLine().getStatusCode());
@@ -289,7 +283,7 @@ public class CreateR4Test {
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
-			assertThat(responseContent, containsString("\"resourceType\":\"OperationOutcome\""));
+			assertThat(responseContent).contains("\"resourceType\":\"OperationOutcome\"");
 		}
 
 
@@ -304,16 +298,16 @@ public class CreateR4Test {
 		p.setActive(true);
 		String body = ourCtx.newJsonParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(body, ContentType.parse("application/fhir+json; charset=utf-8")));
-		ourServlet.setDefaultPreferReturn(PreferReturnEnum.MINIMAL);
+		ourServer.getRestfulServer().setDefaultPreferReturn(PreferReturnEnum.MINIMAL);
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
 			assertEquals(201, status.getStatusLine().getStatusCode());
 			assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseContent, emptyOrNullString());
+			assertThat(responseContent).isNullOrEmpty();
 		}
 
 	}
@@ -321,7 +315,7 @@ public class CreateR4Test {
 	@Test
 	public void testSearch() throws Exception {
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=xml&_pretty=true");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=xml&_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -332,7 +326,7 @@ public class CreateR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder(
+		assertThat(responseContent).containsSubsequence(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<id value=\"0\"/>",
 			"<meta>",
@@ -341,10 +335,10 @@ public class CreateR4Test {
 			"<modifierExtension url=\"http://example.com/ext/date\">",
 			"<valueDate value=\"2011-01-01\"/>",
 			"</modifierExtension>",
-			"</Patient>"));
+			"</Patient>");
 		//@formatter:on
 
-		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
+		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
 	}
 
 	public static class PatientProviderRead implements IResourceProvider {
@@ -389,7 +383,7 @@ public class CreateR4Test {
 
 		@Search
 		public List<IBaseResource> search() {
-			ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
+			ArrayList<IBaseResource> retVal = new ArrayList<>();
 
 			MyPatientWithExtensions p0 = new MyPatientWithExtensions();
 			p0.setId(new IdType("Patient/0"));
@@ -408,33 +402,7 @@ public class CreateR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		PatientProviderCreate patientProviderCreate = new PatientProviderCreate();
-		PatientProviderRead patientProviderRead = new PatientProviderRead();
-		PatientProviderSearch patientProviderSearch = new PatientProviderSearch();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-
-		ourServlet.setResourceProviders(patientProviderCreate, patientProviderRead, patientProviderSearch);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 }

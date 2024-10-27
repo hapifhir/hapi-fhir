@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,11 @@ public interface IRestfulClientFactory {
 	 * Default value for {@link #getConnectionRequestTimeout()}
 	 */
 	public static final int DEFAULT_CONNECTION_REQUEST_TIMEOUT = 10000;
+
+	/**
+	 * Default value for {@link #getConnectionTimeToLive()}
+	 */
+	public static final int DEFAULT_CONNECTION_TTL = 5000;
 
 	/**
 	 * Default value for {@link #getServerValidationModeEnum()}
@@ -74,6 +79,16 @@ public interface IRestfulClientFactory {
 	 * </p>
 	 */
 	int getConnectTimeout();
+
+	/**
+	 * Gets the connection time to live, in milliseconds. This is the amount of time to keep connections alive for reuse.
+	 * <p>
+	 * The default value for this setting is defined by {@link #DEFAULT_CONNECTION_TTL}
+	 * </p>
+	 */
+	default int getConnectionTimeToLive() {
+		return DEFAULT_CONNECTION_TTL;
+	}
 
 	/**
 	 * Returns the HTTP client instance. This method will not return null.
@@ -178,6 +193,14 @@ public interface IRestfulClientFactory {
 	 * </p>
 	 */
 	void setConnectTimeout(int theConnectTimeout);
+
+	/**
+	 * Sets the connection time to live, in milliseconds. This is the amount of time to keep connections alive for reuse.
+	 * <p>
+	 * The default value for this setting is defined by {@link #DEFAULT_CONNECTION_TTL}
+	 * </p>
+	 */
+	default void setConnectionTimeToLive(int theConnectionTimeToLive) {}
 
 	/**
 	 * Sets the Apache HTTP client instance to be used by any new restful clients created by this factory. If set to

@@ -23,6 +23,7 @@ import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditEventSink;
 import ca.uhn.fhirtest.ScheduledSubscriptionDeleter;
 import ca.uhn.fhirtest.interceptor.AnalyticsInterceptor;
 import ca.uhn.fhirtest.joke.HolyFooCowInterceptor;
+import ca.uhn.fhirtest.migrate.FhirTestAutoMigrator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -129,6 +130,11 @@ public class CommonConfig {
 	@Bean
 	public IBalpAuditContextServices balpContextServices() {
 		return new FhirTestBalpAuditContextServices();
+	}
+
+	@Bean
+	public FhirTestAutoMigrator migrator() {
+		return new FhirTestAutoMigrator();
 	}
 
 	public static boolean isLocalTestMode() {

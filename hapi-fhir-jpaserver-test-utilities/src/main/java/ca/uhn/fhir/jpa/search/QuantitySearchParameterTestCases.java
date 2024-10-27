@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,15 +36,8 @@ import java.util.List;
 import java.util.Set;
 
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 public abstract class QuantitySearchParameterTestCases implements ITestDataBuilder.WithSupport {
 
@@ -78,21 +71,18 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 			@Test
 			public void noQuantityThrows() {
 				String invalidQtyParam = "|http://another.org";
-				DataFormatException thrown = assertThrows(
-						DataFormatException.class,
-						() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam));
 
-				assertTrue(thrown.getMessage().startsWith("HAPI-1940: Invalid"));
-				assertTrue(thrown.getMessage().contains(invalidQtyParam));
+				assertThatThrownBy(() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam))
+						.isInstanceOf(DataFormatException.class)
+						.hasMessageStartingWith("HAPI-1940: Invalid")
+						.hasMessageContaining(invalidQtyParam);
 			}
 
 			@Test
 			public void invalidPrefixThrows() {
-				DataFormatException thrown = assertThrows(
-						DataFormatException.class,
-						() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=st5.35"));
-
-				assertEquals("HAPI-1941: Invalid prefix: \"st\"", thrown.getMessage());
+				assertThatThrownBy(() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=st5.35"))
+						.isInstanceOf(DataFormatException.class)
+						.hasMessage("HAPI-1941: Invalid prefix: \"st\"");
 			}
 
 			@Test
@@ -314,45 +304,48 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				{
 					String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=60";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat(
-							"when same component with qtys 107 and 60",
-							resourceIds,
-							hasItem(equalTo(obs1Id.getIdPart())));
+					assertThat(resourceIds)
+							.as("when same component with qtys 107 and 60")
+							.contains(obs1Id.getIdPart());
 				}
 				{
 					String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=260";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat("when same component with qtys 107 and 260", resourceIds, empty());
+					assertThat(resourceIds)
+							.as("when same component with qtys 107 and 260")
+							.isEmpty();
 				}
 
 				// andAndOrClauses
 				{
 					String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=gt50,lt70";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat(
-							"when same component with qtys 107 and lt70,gt80",
-							resourceIds,
-							hasItem(equalTo(obs1Id.getIdPart())));
+					assertThat(resourceIds)
+							.as("when same component with qtys 107 and lt70,gt80")
+							.contains(obs1Id.getIdPart());
 				}
 				{
 					String theUrl = "/Observation?component-value-quantity=50,70&component-value-quantity=260";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat("when same component with qtys 50,70 and 260", resourceIds, empty());
+					assertThat(resourceIds)
+							.as("when same component with qtys 50,70 and 260")
+							.isEmpty();
 				}
 
 				// multipleAndsWithMultipleOrsEach
 				{
 					String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=105,107";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat(
-							"when same component with qtys 50,60 and 105,107",
-							resourceIds,
-							hasItem(equalTo(obs1Id.getIdPart())));
+					assertThat(resourceIds)
+							.as("when same component with qtys 50,60 and 105,107")
+							.contains(obs1Id.getIdPart());
 				}
 				{
 					String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=250,260";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat("when same component with qtys 50,60 and 250,260", resourceIds, empty());
+					assertThat(resourceIds)
+							.as("when same component with qtys 50,60 and 250,260")
+							.isEmpty();
 				}
 			}
 		}
@@ -367,7 +360,7 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				String idAlpha5 = withObservationWithValueQuantity(0.5).getIdPart();
 
 				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
-				assertThat(allIds, contains(idAlpha2, idAlpha5, idAlpha7));
+				assertThat(allIds).containsExactly(idAlpha2, idAlpha5, idAlpha7);
 			}
 		}
 
@@ -663,20 +656,24 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 						.getIdPart(); // 70_000
 
 				// this search is not freetext because there is no freetext-known parameter name
-				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
-				assertThat(allIds, contains(idAlpha2, idAlpha1, idAlpha3));
+				// search by value quantity was added here because empty search params would cause the search to go
+				// through jpa search which does not
+				// support normalized quantity sorting.
+				List<String> allIds =
+						myTestDaoSearch.searchForIds("/Observation?value-quantity=ge0&_sort=value-quantity");
+				assertThat(allIds).containsExactly(idAlpha2, idAlpha1, idAlpha3);
 			}
 		}
 	}
 
 	private void assertFind(String theMessage, String theUrl) {
 		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-		assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
+		assertThat(resourceIds).as(theMessage).contains(myResourceId.getIdPart());
 	}
 
 	private void assertNotFind(String theMessage, String theUrl) {
 		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-		assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+		assertThat(resourceIds).as(theMessage).doesNotContain(myResourceId.getIdPart());
 	}
 
 	private IIdType withObservationWithQuantity(double theValue, String theSystem, String theCode) {
@@ -695,6 +692,6 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 	private void assertFindIds(String theMessage, Collection<String> theResourceIds, String theUrl) {
 		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-		assertEquals(theResourceIds, new HashSet<>(resourceIds), theMessage);
+		assertThat(new HashSet<>(resourceIds)).as(theMessage).isEqualTo(theResourceIds);
 	}
 }

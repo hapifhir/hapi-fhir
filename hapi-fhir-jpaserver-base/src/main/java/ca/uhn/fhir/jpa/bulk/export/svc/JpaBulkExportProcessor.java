@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -58,6 +59,8 @@ import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -78,8 +81,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
@@ -109,9 +110,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
 
-	@SuppressWarnings("rawtypes")
 	@Autowired
-	private IMdmLinkDao myMdmLinkDao;
+	protected IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
 
 	@Autowired
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;

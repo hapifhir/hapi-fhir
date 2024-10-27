@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,8 @@ import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.BeanFactory;
@@ -84,8 +86,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.DEFAULT_SYNC_SIZE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -110,7 +110,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private final SearchStrategyFactory mySearchStrategyFactory;
 	private final ExceptionService myExceptionSvc;
 	private final BeanFactory myBeanFactory;
-	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 
 	private final Consumer<String> myOnRemoveSearchTask = myIdToSearchTask::remove;
 
@@ -160,6 +160,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	@VisibleForTesting
 	Set<String> getActiveSearchIds() {
 		return myIdToSearchTask.keySet();
+	}
+
+	@VisibleForTesting
+	public void setIdToSearchTaskMapForUnitTests(ConcurrentHashMap<String, SearchTask> theIdToSearchTaskMap) {
+		myIdToSearchTask = theIdToSearchTaskMap;
 	}
 
 	@VisibleForTesting
@@ -571,7 +576,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		task.call();
 
 		PersistedJpaSearchFirstPageBundleProvider retVal = myPersistedJpaBundleProviderFactory.newInstanceFirstPage(
-				theRequestDetails, theSearch, task, theSb, theRequestPartitionId);
+				theRequestDetails, task, theSb, theRequestPartitionId);
 
 		ourLog.debug("Search initial phase completed in {}ms", w.getMillis());
 		return retVal;

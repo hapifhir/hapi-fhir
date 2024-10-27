@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,8 +61,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -70,14 +72,20 @@ import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.NO_MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
 
+@SuppressWarnings("rawtypes")
 @Service
 public class MdmStorageInterceptor implements IMdmStorageInterceptor {
+
+	private static final String GOLDEN_RESOURCES_TO_DELETE = "GR_TO_DELETE";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmStorageInterceptor.class);
 
 	// Used to bypass trying to remove mdm links associated to a resource when running mdm-clear batch job, which
 	// deletes all links beforehand, and impacts performance for no action
 	private static final ThreadLocal<Boolean> ourLinksDeletedBeforehand = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
+	@Autowired
+	private IMdmClearHelperSvc<? extends IResourcePersistentId<?>> myIMdmClearHelperSvc;
 
 	@Autowired
 	private IExpungeEverythingService myExpungeEverythingService;
@@ -126,7 +134,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 		// If running in single EID mode, forbid multiple eids.
 		if (myMdmSettings.isPreventMultipleEids()) {
-			ourLog.debug("Forbidding multiple EIDs on ", theBaseResource);
+			ourLog.debug("Forbidding multiple EIDs on {}", theBaseResource);
 			forbidIfHasMultipleEids(theBaseResource);
 		}
 
@@ -159,7 +167,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 		// If running in single EID mode, forbid multiple eids.
 		if (myMdmSettings.isPreventMultipleEids()) {
-			ourLog.debug("Forbidding multiple EIDs on ", theUpdatedResource);
+			ourLog.debug("Forbidding multiple EIDs on {}", theUpdatedResource);
 			forbidIfHasMultipleEids(theUpdatedResource);
 		}
 
@@ -188,17 +196,41 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		}
 	}
 
-	@Autowired
-	private IMdmClearHelperSvc<? extends IResourcePersistentId<?>> myIMdmClearHelperSvc;
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
+	public void deletePostCommit(
+			RequestDetails theRequest, IBaseResource theResource, TransactionDetails theTransactionDetails) {
+		Set<IResourcePersistentId> goldenResourceIds = theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
 
+		if (goldenResourceIds != null) {
+			for (IResourcePersistentId goldenPid : goldenResourceIds) {
+				if (!theTransactionDetails.getDeletedResourceIds().contains(goldenPid)) {
+					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
+					deleteGoldenResource(goldenPid, dao, theRequest);
+					/*
+					 * We will add the removed id to the deleted list so that
+					 * the deletedResourceId list is accurte for what has been
+					 * deleted.
+					 *
+					 * This benefits other interceptor writers who might want
+					 * to do their own resource deletion on this same pre-commit
+					 * hook (and wouldn't be aware if we did this deletion already).
+					 */
+					theTransactionDetails.addDeletedResourceId(goldenPid);
+				}
+			}
+			theTransactionDetails.putUserData(GOLDEN_RESOURCES_TO_DELETE, null);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
-	public void deleteMdmLinks(RequestDetails theRequest, IBaseResource theResource) {
+	public void deleteMdmLinks(
+			RequestDetails theRequest, IBaseResource theResource, TransactionDetails theTransactionDetails) {
 		if (ourLinksDeletedBeforehand.get()) {
 			return;
 		}
 
 		if (myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
-
 			IIdType sourceId = theResource.getIdElement().toVersionless();
 			IResourcePersistentId sourcePid =
 					myIdHelperSvc.getPidOrThrowException(RequestPartitionId.allPartitions(), sourceId);
@@ -213,34 +245,49 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 					? linksByMatchResult.get(POSSIBLE_MATCH)
 					: new ArrayList<>();
 
-			if (isDeletingLastMatchedSourceResouce(sourcePid, matches)) {
-				// We are attempting to delete the only source resource left linked to the golden resource
-				// In this case, we should automatically delete the golden resource to prevent orphaning
-				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
+			if (isDeletingLastMatchedSourceResource(sourcePid, matches)) {
+				/*
+				 * We are attempting to delete the only source resource left linked to the golden resource.
+				 * In this case, we'll clean up remaining links and mark the orphaned
+				 * golden resource for deletion, which we'll do in STORAGE_PRECOMMIT_RESOURCE_DELETED
+				 */
 				IResourcePersistentId goldenPid = extractGoldenPid(theResource, matches.get(0));
+				if (!theTransactionDetails.getDeletedResourceIds().contains(goldenPid)) {
+					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
 
-				cleanUpPossibleMatches(possibleMatches, dao, goldenPid, theRequest);
+					cleanUpPossibleMatches(possibleMatches, dao, goldenPid, theRequest);
 
-				IAnyResource goldenResource = (IAnyResource) dao.readByPid(goldenPid);
-				myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(goldenResource);
+					IAnyResource goldenResource = (IAnyResource) dao.readByPid(goldenPid);
+					myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(goldenResource);
 
-				deleteGoldenResource(goldenPid, sourceId, dao, theRequest);
+					/*
+					 * Mark the golden resource for deletion.
+					 * We won't do it yet, because there might be additional deletes coming
+					 * that include this exact golden resource
+					 * (eg, if delete is done by a filter and multiple delete is enabled)
+					 */
+					Set<IResourcePersistentId> goldenIdsToDelete =
+							theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
+					if (goldenIdsToDelete == null) {
+						goldenIdsToDelete = new HashSet<>();
+					}
+					goldenIdsToDelete.add(goldenPid);
+					theTransactionDetails.putUserData(GOLDEN_RESOURCES_TO_DELETE, goldenIdsToDelete);
+				}
 			}
 			myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void deleteGoldenResource(
-			IResourcePersistentId goldenPid,
-			IIdType theSourceId,
-			IFhirResourceDao<?> theDao,
-			RequestDetails theRequest) {
+			IResourcePersistentId goldenPid, IFhirResourceDao<?> theDao, RequestDetails theRequest) {
 		setLinksDeletedBeforehand();
 
 		if (myMdmSettings.isAutoExpungeGoldenResources()) {
 			int numDeleted = deleteExpungeGoldenResource(goldenPid);
 			if (numDeleted > 0) {
-				ourLog.info("Removed {} golden resource(s) with references to {}", numDeleted, theSourceId);
+				ourLog.info("Removed {} golden resource(s).", numDeleted);
 			}
 		} else {
 			String url = theRequest == null ? "" : theRequest.getCompleteUrl();
@@ -289,7 +336,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		return goldenPid;
 	}
 
-	private boolean isDeletingLastMatchedSourceResouce(IResourcePersistentId theSourcePid, List<IMdmLink> theMatches) {
+	private boolean isDeletingLastMatchedSourceResource(IResourcePersistentId theSourcePid, List<IMdmLink> theMatches) {
 		return theMatches.size() == 1
 				&& theMatches.get(0).getSourcePersistenceId().equals(theSourcePid);
 	}
@@ -302,6 +349,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		return retVal;
 	}
 
+	@SuppressWarnings("unchecked")
 	private int deleteExpungeGoldenResource(IResourcePersistentId theGoldenPid) {
 		IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeSvc();
 		return deleteExpungeSvc.deleteExpunge(new ArrayList<>(Collections.singleton(theGoldenPid)), false, null);

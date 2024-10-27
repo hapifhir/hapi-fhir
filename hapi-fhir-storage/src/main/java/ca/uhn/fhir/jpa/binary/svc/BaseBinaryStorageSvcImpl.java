@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteStreams;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -50,14 +52,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	public static long DEFAULT_MAXIMUM_BINARY_SIZE = Long.MAX_VALUE - 1;
-	public static String BLOB_ID_PREFIX_APPLIED = "blob-id-prefix-applied";
+	public static String BINARY_CONTENT_ID_PREFIX_APPLIED = "binary-content-id-prefix-applied";
 
 	private final int ID_LENGTH = 100;
 	private long myMaximumBinarySize = DEFAULT_MAXIMUM_BINARY_SIZE;
@@ -95,20 +95,20 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public String newBlobId() {
+	public String newBinaryContentId() {
 		return RandomTextUtils.newSecureRandomAlphaNumericString(ID_LENGTH);
 	}
 
 	/**
-	 * Default implementation is to return true for any Blob ID.
+	 * Default implementation is to return true for any binary content ID.
 	 */
 	@Override
-	public boolean isValidBlobId(String theNewBlobId) {
+	public boolean isValidBinaryContentId(String theNewBinaryContentId) {
 		return true;
 	}
 
 	@Override
-	public boolean shouldStoreBlob(long theSize, IIdType theResourceId, String theContentType) {
+	public boolean shouldStoreBinaryContent(long theSize, IIdType theResourceId, String theContentType) {
 		return theSize >= getMinimumBinarySize();
 	}
 
@@ -139,63 +139,83 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			since =
 					"6.6.0 - Maintained for interface backwards compatibility. Note that invokes interceptor pointcut with empty parameters",
 			forRemoval = true)
-	protected String provideIdForNewBlob(String theBlobIdOrNull) {
-		return isNotBlank(theBlobIdOrNull) ? theBlobIdOrNull : newBlobId();
+	protected String provideIdForNewBinaryContent(String theBinaryContentIdOrNull) {
+		return isNotBlank(theBinaryContentIdOrNull) ? theBinaryContentIdOrNull : newBinaryContentId();
 	}
 
 	@Nonnull
-	protected String provideIdForNewBlob(
-			String theBlobIdOrNull, byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
-		String blobId = isNotBlank(theBlobIdOrNull) ? theBlobIdOrNull : newBlobId();
+	protected String provideIdForNewBinaryContent(
+			String theBinaryContentIdOrNull, byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
+		String binaryContentId = isNotBlank(theBinaryContentIdOrNull) ? theBinaryContentIdOrNull : newBinaryContentId();
 
-		// make sure another pointcut didn't already apply a prefix to the blobId
-		if (isBlobIdPrefixApplied(theRequestDetails)) {
-			return blobId;
+		// make sure another pointcut didn't already apply a prefix to the binaryContentId
+		if (isBinaryContentIdPrefixApplied(theRequestDetails)) {
+			return binaryContentId;
 		}
 
-		String blobPrefixFromHooksOrNull = callBlobIdPointcut(theBytes, theRequestDetails, theContentType);
-		String blobIdPrefixFromHooks = blobPrefixFromHooksOrNull == null ? "" : blobPrefixFromHooksOrNull;
-		return blobIdPrefixFromHooks + blobId;
+		String binaryContentIdPrefixFromHooksOrNull =
+				callBinaryContentIdPointcut(theBytes, theRequestDetails, theContentType);
+		String binaryContentIdPrefixFromHooks = StringUtils.defaultString(binaryContentIdPrefixFromHooksOrNull);
+		return binaryContentIdPrefixFromHooks + binaryContentId;
 	}
 
-	protected boolean isBlobIdPrefixApplied(RequestDetails theRequestDetails) {
-		return theRequestDetails.getUserData().get(BLOB_ID_PREFIX_APPLIED) == Boolean.TRUE;
+	protected boolean isBinaryContentIdPrefixApplied(RequestDetails theRequestDetails) {
+		return theRequestDetails.getUserData().get(BINARY_CONTENT_ID_PREFIX_APPLIED) == Boolean.TRUE;
 	}
 
-	public static void setBlobIdPrefixApplied(RequestDetails theRequestDetails) {
-		theRequestDetails.getUserData().put(BLOB_ID_PREFIX_APPLIED, true);
+	public static void setBinaryContentIdPrefixApplied(RequestDetails theRequestDetails) {
+		theRequestDetails.getUserData().put(BINARY_CONTENT_ID_PREFIX_APPLIED, true);
 	}
 
 	/**
-	 * Invokes STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX pointcut if present
-	 * @return null if pointcut is not present
+	 * This invokes the {@link Pointcut#STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX} hook and returns the prefix to use for the binary content ID, or null if there are no implementers.
+	 * @return A string, which will be used to prefix the binary content ID. May be null.
 	 */
 	@Nullable
-	private String callBlobIdPointcut(byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
-		// Interceptor call: STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX
+	private String callBinaryContentIdPointcut(
+			byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
+		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period.
+		// Deprecated in 7.2.0.
+		boolean hasStorageBinaryAssignBlobIdPrefixHooks = CompositeInterceptorBroadcaster.hasHooks(
+				Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequestDetails);
+
+		boolean hasStorageBinaryAssignBinaryContentIdPrefixHooks = CompositeInterceptorBroadcaster.hasHooks(
+				Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX, myInterceptorBroadcaster, theRequestDetails);
+
+		if (!(hasStorageBinaryAssignBlobIdPrefixHooks || hasStorageBinaryAssignBinaryContentIdPrefixHooks)) {
+			return null;
+		}
+
 		IBaseBinary binary =
 				BinaryUtil.newBinary(myFhirContext).setContent(theBytes).setContentType(theContentType);
 
 		HookParams hookParams =
 				new HookParams().add(RequestDetails.class, theRequestDetails).add(IBaseResource.class, binary);
 
-		setBlobIdPrefixApplied(theRequestDetails);
+		setBinaryContentIdPrefixApplied(theRequestDetails);
+
+		Pointcut pointcutToInvoke = Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX;
+
+		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period
+		if (hasStorageBinaryAssignBlobIdPrefixHooks) {
+			pointcutToInvoke = Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX;
+		}
 
 		return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-				myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, hookParams);
+				myInterceptorBroadcaster, theRequestDetails, pointcutToInvoke, hookParams);
 	}
 
 	@Override
-	public byte[] fetchDataBlobFromBinary(IBaseBinary theBaseBinary) throws IOException {
+	public byte[] fetchDataByteArrayFromBinary(IBaseBinary theBaseBinary) throws IOException {
 		IPrimitiveType<byte[]> dataElement = BinaryUtil.getOrCreateData(myFhirContext, theBaseBinary);
 		byte[] value = dataElement.getValue();
 		if (value == null) {
 			Optional<String> attachmentId = getAttachmentId((IBaseHasExtensions) dataElement);
 			if (attachmentId.isPresent()) {
-				value = fetchBlob(theBaseBinary.getIdElement(), attachmentId.get());
+				value = fetchBinaryContent(theBaseBinary.getIdElement(), attachmentId.get());
 			} else {
 				throw new InternalErrorException(
-						Msg.code(1344) + "Unable to load binary blob data for " + theBaseBinary.getIdElement());
+						Msg.code(1344) + "Unable to load binary content data for " + theBaseBinary.getIdElement());
 			}
 		}
 		return value;

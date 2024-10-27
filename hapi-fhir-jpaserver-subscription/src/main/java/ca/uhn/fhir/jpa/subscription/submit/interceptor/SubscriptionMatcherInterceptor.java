@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -57,7 +57,7 @@ public class SubscriptionMatcherInterceptor {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
-	private StorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
@@ -87,7 +87,7 @@ public class SubscriptionMatcherInterceptor {
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
 		boolean dontTriggerSubscriptionWhenVersionsAreTheSame =
-				!myStorageSettings.isTriggerSubscriptionsForNonVersioningChanges();
+				!mySubscriptionSettings.isTriggerSubscriptionsForNonVersioningChanges();
 		boolean resourceVersionsAreTheSame = isSameResourceVersion(theOldResource, theNewResource);
 
 		if (dontTriggerSubscriptionWhenVersionsAreTheSame && resourceVersionsAreTheSame) {
@@ -136,7 +136,7 @@ public class SubscriptionMatcherInterceptor {
 		// Even though the resource is being written, the subscription will be interacting with it by effectively
 		// "reading" it so we set the RequestPartitionId as a read request
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
-				theRequest, theNewResource.getIdElement().getResourceType(), theNewResource.getIdElement());
+				theRequest, theNewResource.getIdElement());
 		return new ResourceModifiedMessage(
 				myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);
 	}
