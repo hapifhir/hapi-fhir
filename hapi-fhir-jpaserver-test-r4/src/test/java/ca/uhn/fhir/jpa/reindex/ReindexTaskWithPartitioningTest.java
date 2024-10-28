@@ -28,7 +28,6 @@ import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ReindexTaskWithPartitioningTest extends BaseJpaR4Test {
-
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 

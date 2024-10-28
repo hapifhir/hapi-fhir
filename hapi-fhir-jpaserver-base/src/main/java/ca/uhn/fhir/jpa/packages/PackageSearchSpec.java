@@ -27,6 +27,8 @@ public class PackageSearchSpec {
 	private String myResourceUrl;
 	private CharSequence myDescription;
 	private String myFhirVersion;
+	private String myVersion;
+	private String myAuthor;
 
 	public String getFhirVersion() {
 		return myFhirVersion;
@@ -68,5 +70,21 @@ public class PackageSearchSpec {
 
 	public void setDescription(CharSequence theDescription) {
 		myDescription = theDescription;
+	}
+
+	public String getVersion() {
+		return myVersion;
+	}
+
+	public void setVersion(String theVersion) {
+		myVersion = theVersion;
+	}
+
+	public void setAuthor(String theAuthor) {
+		myAuthor = theAuthor;
+	}
+
+	public String getAuthor() {
+		return myAuthor;
 	}
 }
