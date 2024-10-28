@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6407
+backport: 7.8.0
+title: "Corrected IHE BALP AuditEvent generation pr. resource owner. Thanks to Jens Villadsen (@jkiddo) for the contribution!"
