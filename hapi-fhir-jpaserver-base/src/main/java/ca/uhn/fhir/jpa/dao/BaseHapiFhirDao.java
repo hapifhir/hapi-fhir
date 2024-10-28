@@ -144,6 +144,8 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.XMLEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -155,8 +157,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
-import javax.xml.stream.events.Characters;
-import javax.xml.stream.events.XMLEvent;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -1162,11 +1162,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
+					// set the lastUpdated dates so we can use them to search in lucene
+					entity.setUpdated(theTransactionDetails.getTransactionDate());
+					theResource.getMeta().setLastUpdated(theTransactionDetails.getTransactionDate());
 					populateFullTextFields(myContext, theResource, entity, newParams);
 				}
-
 			} else {
-
 				entity.setUpdated(theTransactionDetails.getTransactionDate());
 				entity.setIndexStatus(null);
 

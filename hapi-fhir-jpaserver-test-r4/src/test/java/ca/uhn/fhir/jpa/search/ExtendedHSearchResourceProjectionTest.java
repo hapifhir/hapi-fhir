@@ -57,8 +57,4 @@ class ExtendedHSearchResourceProjectionTest {
 			() -> new ExtendedHSearchResourceProjection(22, null, ""));
 		assertEquals(Msg.code(2130) + RESOURCE_NOT_STORED_ERROR + "22", ex.getMessage());
 	}
-
-
-	
-
 }

@@ -11,12 +11,15 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.util.DateRangeUtil;
+import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -29,11 +32,17 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.sql.DataSource;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndexTests {
 
@@ -302,6 +311,75 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndex
 			map.add(Constants.PARAM_TEXT, content);
 			List<JpaPid> found = mySearchDao.search(resourceName, map, SystemRequestDetails.newSystemRequestAllPartitions());
 			assertThat(JpaPid.toLongList(found)).isEmpty();
+		}
+	}
+
+	@Test
+	public void luceneSearch_forTagsAndLastUpdated_shouldReturn() throws InterruptedException {
+		// setup
+		String system = "http://fhir";
+		String code = "cv";
+		Date start = Date.from(Instant.now().minus(1, ChronoUnit.SECONDS).truncatedTo(ChronoUnit.SECONDS));
+		Date end = Date.from(Instant.now().plus(10, ChronoUnit.SECONDS).truncatedTo(ChronoUnit.SECONDS));
+
+		boolean advancedSearch = myStorageSettings.isAdvancedHSearchIndexing();
+		myStorageSettings.setAdvancedHSearchIndexing(true);
+
+		try {
+			// create a patient with some tag
+			Patient patient = new Patient();
+			patient.getMeta()
+				.addTag(system, code, "");
+			Long id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
+
+			// create base search map
+			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true);
+			TokenOrListParam goldenRecordStatusToken = new TokenOrListParam(system, code);
+			map.add(Constants.PARAM_TAG, goldenRecordStatusToken);
+			DateRangeParam lastUpdated = DateRangeUtil.narrowDateRange(map.getLastUpdated(), start, end);
+			map.setLastUpdated(lastUpdated);
+
+			PointcutLatch latch = new PointcutLatch("test");
+			latch.setExpectedCount(1);
+			runInTransaction(() -> {
+				Stream<JpaPid> stream;
+				List<JpaPid> list;
+				Optional<JpaPid> first;
+
+				// tag search only; should return our resource
+				map.setLastUpdated(null);
+				stream = myPatientDao.searchForIdStream(map, new SystemRequestDetails(), null);
+				list = stream.toList();
+				assertEquals(1, list.size());
+				first = list.stream().findFirst();
+				assertTrue(first.isPresent());
+				assertEquals(id, first.get().getId());
+
+				// last updated search only; should return our resource
+				map.setLastUpdated(lastUpdated);
+				map.remove(Constants.PARAM_TAG);
+				stream = myPatientDao.searchForIdStream(map, new SystemRequestDetails(), null);
+				list = stream.toList();
+				assertEquals(1, list.size());
+				first = list.stream().findFirst();
+				assertTrue(first.isPresent());
+				assertEquals(id, first.get().getId());
+
+				// both last updated and tags; should return our resource
+				map.add(Constants.PARAM_TAG, goldenRecordStatusToken);
+				stream = myPatientDao.searchForIdStream(map, new SystemRequestDetails(), null);
+				list = stream.toList();
+				assertEquals(1, list.size());
+				first = list.stream().findFirst();
+				assertTrue(first.isPresent());
+				assertEquals(id, first.get().getId());
+
+				latch.call(1);
+			});
+			latch.awaitExpected();
+		} finally {
+			// reset
+			myStorageSettings.setAdvancedHSearchIndexing(advancedSearch);
 		}
 	}
 

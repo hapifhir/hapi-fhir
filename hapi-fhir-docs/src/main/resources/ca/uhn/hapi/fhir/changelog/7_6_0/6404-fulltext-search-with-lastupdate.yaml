@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 6404
+title: "Searches using Fulltextsearch that used `_lastUpdated` date in combination
+        with any other supported Fulltextsearch filter would fail due to inconsistent
+        handling of last updated date values.
+        This has been fixed.
+"
