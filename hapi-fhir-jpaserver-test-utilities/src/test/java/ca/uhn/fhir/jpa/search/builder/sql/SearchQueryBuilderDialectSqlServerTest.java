@@ -46,7 +46,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 
 		String sql = generatedSql.getSql();
 		sql = massageSql(sql);
-		assertThat(sql.endsWith("order by @@version offset ? rows fetch next ? rows only")).as(sql).isTrue();
+		assertThat(sql.endsWith("order by RES_ID offset ? rows fetch next ? rows only")).as(sql).isTrue();
 
 		assertEquals(3, StringUtils.countMatches(sql, "?"));
 		assertThat(generatedSql.getBindVariables()).hasSize(3);
@@ -62,7 +62,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 
 		String sql = generatedSql.getSql();
 		sql = massageSql(sql);
-		assertThat(sql.endsWith("order by @@version offset 0 rows fetch first ? rows only")).as(sql).isTrue();
+		assertThat(sql.endsWith("order by RES_ID offset 0 rows fetch first ? rows only")).as(sql).isTrue();
 
 		assertEquals(2, StringUtils.countMatches(sql, "?"));
 		assertThat(generatedSql.getBindVariables()).hasSize(2);

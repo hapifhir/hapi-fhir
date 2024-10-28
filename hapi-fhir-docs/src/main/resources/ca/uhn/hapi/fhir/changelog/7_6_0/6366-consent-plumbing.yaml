@@ -1,0 +1,4 @@
+---
+type: add
+issue: 6366
+title: "Add plumbing for combining IConsentServices with different vote tally strategies"

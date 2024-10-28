@@ -89,7 +89,7 @@ public class ForceIdMigrationFixTask extends BaseTask {
 							" set fhir_id = coalesce( "
 							+
 							// case 5.
-							" trim(fhir_id), "
+							trimFhirId()
 							+
 							// case 3
 							" (select f.forced_id from hfj_forced_id f where f.resource_pid = res_id), "
@@ -106,6 +106,22 @@ public class ForceIdMigrationFixTask extends BaseTask {
 							" and res_id >= ? and res_id < ?",
 					batchStart,
 					batchEnd);
+		}
+	}
+
+	private String trimFhirId() {
+		switch (getDriverType()) {
+			case MSSQL_2012:
+				return " LTRIM(RTRIM(fhir_id)), ";
+			case H2_EMBEDDED:
+			case DERBY_EMBEDDED:
+			case MARIADB_10_1:
+			case MYSQL_5_7:
+			case POSTGRES_9_4:
+			case ORACLE_12C:
+			case COCKROACHDB_21_1:
+			default:
+				return " trim(fhir_id), ";
 		}
 	}
 

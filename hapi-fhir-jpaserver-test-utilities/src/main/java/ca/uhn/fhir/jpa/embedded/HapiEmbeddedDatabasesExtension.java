@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.util.DatabaseSupportUtil;
 import ca.uhn.fhir.test.utilities.docker.DockerRequiredCondition;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.api.extension.AfterAllCallback;
@@ -54,7 +55,7 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 			myEmbeddedDatabases.add(new H2EmbeddedDatabase());
 			myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
 			myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
-			if (OracleCondition.canUseOracle()) {
+			if (DatabaseSupportUtil.canUseOracle()) {
 				myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
 			} else {
 				String message =
@@ -136,7 +137,7 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 			arguments.add(Arguments.of(DriverTypeEnum.POSTGRES_9_4));
 			arguments.add(Arguments.of(DriverTypeEnum.MSSQL_2012));
 
-			if (OracleCondition.canUseOracle()) {
+			if (DatabaseSupportUtil.canUseOracle()) {
 				arguments.add(Arguments.of(DriverTypeEnum.ORACLE_12C));
 			}
 
