@@ -94,8 +94,13 @@ public class ExtendedHSearchSearchBuilder {
 
 		ResourceSearchParams resourceActiveSearchParams = theSearchParamRegistry.getActiveSearchParams(theResourceType);
 
+		// special SearchParam handling:
+		// _lastUpdated
 		if (theParams.getLastUpdated() != null) {
 			canUseHibernate = !illegalForHibernateSearch(Constants.PARAM_LASTUPDATED, resourceActiveSearchParams);
+			if (!canUseHibernate) {
+				return false;
+			}
 		}
 
 		for (String paramName : theParams.keySet()) {
@@ -104,7 +109,7 @@ public class ExtendedHSearchSearchBuilder {
 				canUseHibernate = false;
 			} else {
 				// are the parameter values supported?
-				canUseHibernate |=
+				canUseHibernate =
 						theParams.get(paramName).stream()
 								.flatMap(Collection::stream)
 								.collect(Collectors.toList())
