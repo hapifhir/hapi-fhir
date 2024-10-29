@@ -948,6 +948,10 @@
 			<id>Boereck</id>
 			<name>Max Bureck</name>
 		</developer>
+		<developer>
+			<id>SevcikMichal</id>
+			<name>Michal Sevcik</name>
+		</developer>
 	</developers>
 
 	<licenses>
