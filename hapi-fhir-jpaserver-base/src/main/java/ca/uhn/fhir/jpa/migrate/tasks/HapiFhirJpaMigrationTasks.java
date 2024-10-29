@@ -134,8 +134,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init800() {
-		// FIXME: change to 8.0.0 when that enum constant is available
-		Builder version = forVersion(VersionEnum.V7_6_0);
+		Builder version = forVersion(VersionEnum.V7_8_0);
 
 		version.onTable("HFJ_RES_SEARCH_URL")
 				.dropForeignKey("20241008.100", "FK_RES_SEARCH_URL_RESOURCE", "HFJ_RESOURCE");
@@ -343,6 +342,28 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addColumn("20241008.2701", "PARTITION_DATE")
 				.nullable()
 				.type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("NPM_PACKAGE_VER")
+				.addColumn("20241023.10", "PKG_AUTHOR")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 512);
+		version.onTable("NPM_PACKAGE_VER")
+				.addColumn("20241023.20", "AUTHOR_UPPER")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 512);
+		version.onTable("NPM_PACKAGE_VER")
+				.modifyColumn("20241023.30", "PKG_DESC")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 512);
+		version.onTable("NPM_PACKAGE_VER")
+				.modifyColumn("20241023.40", "DESC_UPPER")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 512);
+
+		version.onTable("NPM_PACKAGE")
+				.modifyColumn("20241023.50", "PACKAGE_DESC")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 512);
 	}
 
 	protected void init740() {
