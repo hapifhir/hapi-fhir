@@ -53,7 +53,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 
 	public static final String HFJ_IDX_CMB_TOK_NU = "HFJ_IDX_CMB_TOK_NU";
 
-	@SequenceGenerator(name = "SEQ_IDXCMBTOKNU_ID", sequenceName = "SEQ_IDXCMBTOKNU_ID")
 	@GenericGenerator(
 			name = "SEQ_IDXCMBTOKNU_ID",
 			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
