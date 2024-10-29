@@ -117,6 +117,46 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndex
 		assertEquals(id1, ids.get(0).getId());
 	}
 
+
+	@Test
+	public void searchLuceneAndJPA_withAccurateTotal_ThrowsInvalidRequest() {
+		// setup
+		int numToCreate = 2 * SearchBuilder.getMaximumPageSize() + 10;
+		String identifierToFind = "bcde";
+
+		// create patients
+		for (int i = 0; i < numToCreate; i++) {
+			Patient patient = new Patient();
+			patient.setActive(true);
+			String identifierVal = i % 2 == 0 ? identifierToFind:
+				"abcd";
+			patient.addIdentifier()
+				.setSystem("http://fhir.com")
+				.setValue(identifierVal);
+
+			patient.getText().setDivAsString(
+				"<div>FINDME</div>"
+			);
+			myPatientDao.create(patient, mySrd);
+		}
+
+		// test
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+		TokenAndListParam tokenAndListParam = new TokenAndListParam();
+		tokenAndListParam.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("true")));
+		map.add("active", tokenAndListParam);
+		map.add(Constants.PARAM_TEXT, new StringParam("FINDME"));
+		map.add("identifier", new TokenParam(null, identifierToFind));
+		IBundleProvider provider = myPatientDao.search(map, mySrd);
+
+		// verify
+		assertEquals(numToCreate/2, provider.size());
+		List<String> ids = provider.getAllResourceIds();
+		assertEquals(numToCreate/2, ids.size());
+	}
+
 	@Test
 	public void testSearchesWithAccurateCountReturnOnlyExpectedResults() {
 		// create 2 patients
