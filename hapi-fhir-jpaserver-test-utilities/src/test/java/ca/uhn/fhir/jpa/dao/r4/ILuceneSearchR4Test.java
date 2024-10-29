@@ -43,6 +43,22 @@ public interface ILuceneSearchR4Test {
 	void runInTransaction(Runnable theRunnable);
 
 	@Test
+	default void testNoOpUpdateDoesNotModifyLastUpdated() throws InterruptedException {
+		IFhirResourceDao<Patient> patientDao = getResourceDao("Patient");
+
+		Patient patient = new Patient();
+		patient.getNameFirstRep().setFamily("graham").addGiven("gary");
+
+		patient = (Patient) patientDao.create(patient).getResource();
+		Date originalLastUpdated = patient.getMeta().getLastUpdated();
+
+		patient = (Patient) patientDao.update(patient).getResource();
+		Date newLastUpdated = patient.getMeta().getLastUpdated();
+
+		assertThat(originalLastUpdated).isEqualTo(newLastUpdated);
+	}
+
+	@Test
 	default void luceneSearch_forTagsAndLastUpdated_shouldReturn() {
 		// setup
 		SystemRequestDetails requestDeatils = new SystemRequestDetails();
