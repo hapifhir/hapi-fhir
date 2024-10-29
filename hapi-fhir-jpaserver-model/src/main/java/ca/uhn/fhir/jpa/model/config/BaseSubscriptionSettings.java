@@ -55,12 +55,12 @@ public abstract class BaseSubscriptionSettings {
 	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
 	 * Reducing delay between creation of the Subscription and Activation.
 	 *
-	 * @since 7.6.0
+	 * @since 7.8.0
 	 */
 	private boolean mySubscriptionChangeQueuedImmediately = false;
 
 	/**
-	 * @since 7.6.0
+	 * @since 7.8.0
 	 *
 	 * Regex To perform validation on the endpoint URL for Subscription of type RESTHOOK.
 	 */
@@ -289,7 +289,7 @@ public abstract class BaseSubscriptionSettings {
 	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
 	 * Reducing delay between creation of the Subscription and Activation.
 	 *
-	 * @since 7.7.0
+	 * @since 7.8.0
 	 */
 	public boolean isSubscriptionChangeQueuedImmediately() {
 		return mySubscriptionChangeQueuedImmediately;
@@ -299,7 +299,7 @@ public abstract class BaseSubscriptionSettings {
 	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
 	 * Reducing delay between creation of the Subscription and Activation.
 	 *
-	 * @since 7.7.0
+	 * @since 7.8.0
 	 */
 	public void setSubscriptionChangeQueuedImmediately(boolean theSubscriptionChangeQueuedImmediately) {
 		mySubscriptionChangeQueuedImmediately = theSubscriptionChangeQueuedImmediately;
