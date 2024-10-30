@@ -73,6 +73,15 @@ public class JpaSearchParamCache {
 			Collections.emptyMap();
 	volatile Map<Long, IndexedSearchParam> myHashIdentityToIndexedSearchParams = Collections.emptyMap();
 
+	private final PartitionSettings myPartitionSettings;
+
+	/**
+	 * Constructor
+	 */
+	public JpaSearchParamCache(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 		List<RuntimeSearchParam> retval = myActiveComboSearchParams.get(theResourceName);
 		if (retval == null) {
@@ -250,7 +259,7 @@ public class JpaSearchParamCache {
 			Map<Long, IndexedSearchParam> theHashIdentityToIndexedSearchParams,
 			String theSpName) {
 		Long hashIdentity = SearchParamHash.hashSearchParam(
-				new PartitionSettings(), RequestPartitionId.defaultPartition(), theResourceName, theSpName);
+				myPartitionSettings, RequestPartitionId.defaultPartition(), theResourceName, theSpName);
 		theHashIdentityToIndexedSearchParams.put(hashIdentity, new IndexedSearchParam(theSpName, theResourceName));
 	}
 }

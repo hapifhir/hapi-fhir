@@ -1,23 +1,23 @@
-package ca.uhn.fhir.jpa.dao.r5.partitionedid;
+package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-public class PartitionSelectorInterceptor {
+public class TestPartitionSelectorInterceptor {
 	private RequestPartitionId myNextPartition;
+	private BaseRequestPartitionHelperSvc myHelperSvc = new RequestPartitionHelperSvc();
 
 	/**
 	 * Constructor
 	 */
-	public PartitionSelectorInterceptor() {
+	public TestPartitionSelectorInterceptor() {
 		super();
 	}
 
@@ -42,13 +42,11 @@ public class PartitionSelectorInterceptor {
 
 	@Nonnull
 	private RequestPartitionId selectPartition(String theResourceType) {
-		return switch (defaultString(theResourceType)) {
-			case "SearchParameter", "Organization", "Questionnaire", "CodeSystem", "ValueSet" -> RequestPartitionId.defaultPartition();
-			default -> {
-				assert myNextPartition != null;
-				yield myNextPartition;
-			}
-		};
-	}
+		if (!myHelperSvc.isResourcePartitionable(theResourceType)) {
+			return RequestPartitionId.defaultPartition();
+		}
 
+		assert myNextPartition != null;
+		return myNextPartition;
+	}
 }

@@ -88,7 +88,7 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = IDX_RES_TYPE_FHIR_ID,
-					columnNames = {"PARTITON_ID", "RES_TYPE", "FHIR_ID"})
+					columnNames = {"PARTITION_ID", "RES_TYPE", "FHIR_ID"})
 		},
 		indexes = {
 			// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
@@ -920,7 +920,8 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("part/pid", getPartitionId().getPartitionId() + "/" + getId().getId());
+		b.append("partition", getPartitionId().getPartitionId());
+		b.append("pid", getId().getId());
 		b.append("fhirId", myFhirId);
 		b.append("resourceType", myResourceType);
 		b.append("version", myVersion);

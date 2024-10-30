@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r5.partitionedid;
+package ca.uhn.fhir.jpa.dao.r5.dbpartitionmode;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Nested;
  * not configured otherwise) - Partition IDs are in use, but they aren't
  * included in primary keys or joins.
  */
-public class NonPartitionedIdPartitioningEnabledNullDefaultPartitionTest extends BasePartitionedIdJpaR5Test {
+public class DbpmDisabledPartitioningEnabledNullDefaultPartitionTest extends BaseDbpmJpaR5Test {
 
 	@Override
 	@BeforeEach
@@ -24,7 +24,7 @@ public class NonPartitionedIdPartitioningEnabledNullDefaultPartitionTest extends
 	@Nested
 	public class MyTestDefinitions extends TestDefinitions {
 		MyTestDefinitions() {
-			super(NonPartitionedIdPartitioningEnabledNullDefaultPartitionTest.this, myPartitionSelectorInterceptor, true, false);
+			super(DbpmDisabledPartitioningEnabledNullDefaultPartitionTest.this, myPartitionSelectorInterceptor, true, false);
 		}
 	}
 

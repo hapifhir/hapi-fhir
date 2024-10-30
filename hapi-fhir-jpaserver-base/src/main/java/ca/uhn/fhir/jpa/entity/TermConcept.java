@@ -94,7 +94,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_CONCEPT_CS_CODE",
-					columnNames = {"CODESYSTEM_PID", "CODEVAL"})
+					columnNames = {"PARTITION_ID", "CODESYSTEM_PID", "CODEVAL"})
 		},
 		indexes = {
 			@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS"),

@@ -58,7 +58,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = TermCodeSystemVersion.IDX_CODESYSTEM_AND_VER,
-					columnNames = {"CODESYSTEM_PID", "CS_VERSION_ID"})
+					columnNames = {"PARTITION_ID", "CODESYSTEM_PID", "CS_VERSION_ID"})
 		},
 		indexes = {
 			@Index(name = "FK_CODESYSVER_RES_ID", columnList = "RES_ID"),

@@ -54,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_CONCEPT_MAP_URL",
-					columnNames = {"URL", "VER"})
+					columnNames = {"PARTITION_ID", "URL", "VER"})
 		},
 		indexes = {
 			// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index

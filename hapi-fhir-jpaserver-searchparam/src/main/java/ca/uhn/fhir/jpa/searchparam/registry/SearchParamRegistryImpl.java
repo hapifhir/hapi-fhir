@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -79,7 +80,7 @@ public class SearchParamRegistryImpl
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 
-	private final JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
+	private JpaSearchParamCache myJpaSearchParamCache;
 
 	@Autowired
 	private StorageSettings myStorageSettings;
@@ -99,6 +100,9 @@ public class SearchParamRegistryImpl
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+
 	private IResourceChangeListenerCache myResourceChangeListenerCache;
 	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
 	private volatile IPhoneticEncoder myPhoneticEncoder;
@@ -109,6 +113,11 @@ public class SearchParamRegistryImpl
 	 */
 	public SearchParamRegistryImpl() {
 		super();
+	}
+
+	@PostConstruct
+	public void start() {
+		myJpaSearchParamCache = new JpaSearchParamCache(myPartitionSettings);
 	}
 
 	@Override

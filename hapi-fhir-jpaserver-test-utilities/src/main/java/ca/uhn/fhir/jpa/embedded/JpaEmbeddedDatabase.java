@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -108,7 +109,7 @@ public abstract class JpaEmbeddedDatabase {
 	}
 
 	public void executeSqlAsBatch(String theSql) {
-		List<String> statements = Arrays.stream(theSql.split(";")).collect(Collectors.toList());
+		List<String> statements = SqlUtil.splitSqlFileIntoStatements(theSql);
 		executeSqlAsBatch(statements);
 	}
 

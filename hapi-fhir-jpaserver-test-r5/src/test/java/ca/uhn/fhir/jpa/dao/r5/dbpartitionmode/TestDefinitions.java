@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r5.partitionedid;
+package ca.uhn.fhir.jpa.dao.r5.dbpartitionmode;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.jpa.util.TestPartitionSelectorInterceptor;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -93,8 +94,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.dao.r5.partitionedid.NonPartitionedIdPartitioningEnabledTest.PARTITION_1;
-import static ca.uhn.fhir.jpa.dao.r5.partitionedid.PartitionedIdTest.PARTITION_2;
+import static ca.uhn.fhir.jpa.dao.r5.dbpartitionmode.DbpmDisabledPartitioningEnabledTest.PARTITION_1;
+import static ca.uhn.fhir.jpa.dao.r5.dbpartitionmode.DbpmEnabledTest.PARTITION_2;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
@@ -113,7 +114,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 abstract class TestDefinitions implements ITestDataBuilder {
 
-	private final PartitionSelectorInterceptor myPartitionSelectorInterceptor;
+	private final TestPartitionSelectorInterceptor myPartitionSelectorInterceptor;
 	private final boolean myIncludePartitionIdsInSql;
 	private final BaseJpaR5Test myParentTest;
 	private final boolean myIncludePartitionIdsInPks;
@@ -173,7 +174,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 
-	public TestDefinitions(@Nonnull BaseJpaR5Test theParentTest, @Nonnull PartitionSelectorInterceptor thePartitionSelectorInterceptor, boolean theIncludePartitionIdsInSql, boolean theIncludePartitionIdsInPks) {
+	public TestDefinitions(@Nonnull BaseJpaR5Test theParentTest, @Nonnull TestPartitionSelectorInterceptor thePartitionSelectorInterceptor, boolean theIncludePartitionIdsInSql, boolean theIncludePartitionIdsInPks) {
 		myParentTest = theParentTest;
 		myPartitionSelectorInterceptor = thePartitionSelectorInterceptor;
 		myIncludePartitionIdsInSql = theIncludePartitionIdsInSql;

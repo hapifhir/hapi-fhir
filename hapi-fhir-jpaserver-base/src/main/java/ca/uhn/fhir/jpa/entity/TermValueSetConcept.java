@@ -65,10 +65,10 @@ import static org.apache.commons.lang3.StringUtils.length;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_VS_CONCEPT_CSCD",
-					columnNames = {"VALUESET_PID", "SYSTEM_URL", "CODEVAL"}),
+					columnNames = {"PARTITION_ID", "VALUESET_PID", "SYSTEM_URL", "CODEVAL"}),
 			@UniqueConstraint(
 					name = "IDX_VS_CONCEPT_ORDER",
-					columnNames = {"VALUESET_PID", "VALUESET_ORDER"})
+					columnNames = {"PARTITION_ID", "VALUESET_PID", "VALUESET_ORDER"})
 		})
 @Entity()
 @IdClass(IdAndPartitionId.class)

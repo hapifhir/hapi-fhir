@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r5.partitionedid;
+package ca.uhn.fhir.jpa.dao.r5.dbpartitionmode;
 
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;

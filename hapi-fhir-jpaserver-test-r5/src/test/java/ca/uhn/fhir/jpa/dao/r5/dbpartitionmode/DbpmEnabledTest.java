@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r5.partitionedid;
+package ca.uhn.fhir.jpa.dao.r5.dbpartitionmode;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import org.junit.jupiter.api.BeforeEach;
@@ -6,14 +6,14 @@ import org.junit.jupiter.api.Nested;
 import org.springframework.test.context.TestPropertySource;
 
 /**
- * This is a test verifying that we emit the right SQL when operating in new
- * partition mode - Partition IDs are a part of the PKs of entities, and are
+ * This is a test verifying that we emit the right SQL when operating in database
+ * partitioning mode - Partition IDs are a part of the PKs of entities, and are
  * used in joins etc.
  */
 @TestPropertySource(properties = {
 	JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + "=true"
 })
-public class PartitionedIdTest extends BasePartitionedIdJpaR5Test {
+public class DbpmEnabledTest extends BaseDbpmJpaR5Test {
 
 	@Override
 	@BeforeEach
@@ -29,7 +29,7 @@ public class PartitionedIdTest extends BasePartitionedIdJpaR5Test {
 	@Nested
 	public class MyTestDefinitions extends TestDefinitions {
 		MyTestDefinitions() {
-			super(PartitionedIdTest.this, myPartitionSelectorInterceptor, true, true);
+			super(DbpmEnabledTest.this, myPartitionSelectorInterceptor, true, true);
 		}
 	}
 

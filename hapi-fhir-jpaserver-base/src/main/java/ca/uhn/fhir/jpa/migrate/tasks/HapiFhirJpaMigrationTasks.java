@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ColumnAndNullable;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
+import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -48,7 +49,6 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
-import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
@@ -1446,11 +1446,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Postgres tuning.
 		String postgresTuningStatementsAll =
 				ClasspathUtil.loadResource("ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql");
-		List<String> postgresTuningStatements = Arrays.stream(postgresTuningStatementsAll.split("\\n"))
-				.map(StringUtils::trim)
-				.filter(StringUtils::isNotBlank)
-				.filter(t -> !t.startsWith("--"))
-				.collect(Collectors.toList());
+		List<String> postgresTuningStatements = SqlUtil.splitSqlFileIntoStatements(postgresTuningStatementsAll);
 		version.executeRawSqls("20230402.1", Map.of(DriverTypeEnum.POSTGRES_9_4, postgresTuningStatements));
 
 		// Use an unlimited length text column for RES_TEXT_VC

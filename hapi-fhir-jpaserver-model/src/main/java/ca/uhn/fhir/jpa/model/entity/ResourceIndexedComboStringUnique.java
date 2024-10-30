@@ -64,11 +64,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 		indexes = {
 			@Index(
 					name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING,
-					columnList = "IDX_STRING",
+					columnList = "PARTITION_ID,IDX_STRING",
 					unique = true),
 			@Index(
 					name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE,
-					columnList = "RES_ID",
+					columnList = "PARTITION_ID,RES_ID",
 					unique = false)
 		})
 @IdClass(IdAndPartitionId.class)
