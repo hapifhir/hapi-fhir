@@ -938,6 +938,11 @@
 			<id>plchldr</id>
 			<name>Jonas Beyer</name>
 		</developer>
+		<developer>
+			<id>iyt-trifork</id>
+			<name>Ibrahim</name>
+			<organization>Trifork A/S</organization>
+		</developer>
 	</developers>
 
 	<licenses>
