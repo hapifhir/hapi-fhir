@@ -14,7 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyLookupCodeTest;
-import org.hl7.fhir.common.hapi.validation.IValidationProviders;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;

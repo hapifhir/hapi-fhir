@@ -11,9 +11,10 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyLookupCodeTest;
-import org.hl7.fhir.common.hapi.validation.IValidationProviders;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -52,7 +53,7 @@ public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLook
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
 	private final RemoteTerminologyServiceValidationSupport mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
-	private IValidateCodeProvidersR4.MyCodeSystemProviderR4 myCodeSystemProvider;
+	private IValidationProvidersR4.MyCodeSystemProviderR4 myCodeSystemProvider;
 	private MyLookupCodeProviderR4 myLookupCodeProviderR4;
 
 	@BeforeEach
@@ -60,7 +61,7 @@ public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLook
 		String baseUrl = "http://localhost:" + ourRestfulServerExtension.getPort();
 		mySvc.setBaseUrl(baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(true));
-		myCodeSystemProvider = new IValidateCodeProvidersR4.MyCodeSystemProviderR4();
+		myCodeSystemProvider = new IValidationProvidersR4.MyCodeSystemProviderR4();
 		myLookupCodeProviderR4 = new MyLookupCodeProviderR4();
 		ourRestfulServerExtension.getRestfulServer().registerProviders(myCodeSystemProvider, myLookupCodeProviderR4);
 	}
