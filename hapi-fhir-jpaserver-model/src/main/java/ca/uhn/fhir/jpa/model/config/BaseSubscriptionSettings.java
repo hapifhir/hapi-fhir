@@ -34,6 +34,7 @@ public abstract class BaseSubscriptionSettings {
 	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
 	public static final String DEFAULT_RESTHOOK_ENDPOINTURL_VALIDATION_REGEX =
 			"((((http?|https?)://))([-%()_.!~*';/?:@&=+$,A-Za-z0-9])+)";
+	public static final long DEFAULT_SUBMISSION_INTERVAL_IN_MS = 5000;
 
 	private final Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = DEFAULT_EMAIL_FROM_ADDRESS;
@@ -42,6 +43,7 @@ public abstract class BaseSubscriptionSettings {
 	private boolean myCrossPartitionSubscriptionEnabled = true;
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myTriggerSubscriptionsForNonVersioningChanges;
+	private long mySubmissionIntervalInMs = DEFAULT_SUBMISSION_INTERVAL_IN_MS;
 
 	/**
 	 * @since 6.8.0
@@ -50,7 +52,15 @@ public abstract class BaseSubscriptionSettings {
 	private boolean myAllowOnlyInMemorySubscriptions = false;
 
 	/**
-	 * @since 7.6.0
+	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
+	 * Reducing delay between creation of the Subscription and Activation.
+	 *
+	 * @since 7.8.0
+	 */
+	private boolean mySubscriptionChangeQueuedImmediately = false;
+
+	/**
+	 * @since 7.8.0
 	 *
 	 * Regex To perform validation on the endpoint URL for Subscription of type RESTHOOK.
 	 */
@@ -273,5 +283,43 @@ public abstract class BaseSubscriptionSettings {
 	 */
 	public boolean hasRestHookEndpointUrlValidationRegex() {
 		return isNotBlank(myRestHookEndpointUrlValidationRegex);
+	}
+
+	/**
+	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
+	 * Reducing delay between creation of the Subscription and Activation.
+	 *
+	 * @since 7.8.0
+	 */
+	public boolean isSubscriptionChangeQueuedImmediately() {
+		return mySubscriptionChangeQueuedImmediately;
+	}
+
+	/**
+	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
+	 * Reducing delay between creation of the Subscription and Activation.
+	 *
+	 * @since 7.8.0
+	 */
+	public void setSubscriptionChangeQueuedImmediately(boolean theSubscriptionChangeQueuedImmediately) {
+		mySubscriptionChangeQueuedImmediately = theSubscriptionChangeQueuedImmediately;
+	}
+
+	/**
+	 * The interval in which the Resource Changes will be polled from DB. Defaults to {@literal 5000}.
+	 *
+	 * @since 7.7.0
+	 */
+	public long getSubscriptionIntervalInMs() {
+		return mySubmissionIntervalInMs;
+	}
+
+	/**
+	 * The interval in which the Resource Changes will be polled from DB. Defaults to {@literal 5000}.
+	 *
+	 * @since 7.7.0
+	 */
+	public void setSubscriptionIntervalInMs(long theSubscriptionIntervalInMs) {
+		mySubmissionIntervalInMs = theSubscriptionIntervalInMs;
 	}
 }

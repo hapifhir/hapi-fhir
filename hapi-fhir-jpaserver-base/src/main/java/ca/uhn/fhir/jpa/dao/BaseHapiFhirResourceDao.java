@@ -1043,7 +1043,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (!entityHasTag) {
 				theEntity.setHasTags(true);
 
-				TagDefinition def = getTagOrNull(
+				TagDefinition def = cacheTagDefinitionDao.getTagOrNull(
 						theTransactionDetails,
 						nextDef.getTagType(),
 						nextDef.getSystem(),

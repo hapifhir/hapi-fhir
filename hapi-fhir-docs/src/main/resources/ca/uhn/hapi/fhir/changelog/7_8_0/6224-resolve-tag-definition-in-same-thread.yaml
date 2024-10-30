@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 6224
+title: "The JPA server will no longer use a separate thread and database connection
+  to resolve tag definitions. This should improve performance in some cases, and
+  resolves compatibility issues for some environments. Thanks to Ibrahim (Trifork A/S)
+  for the pull request!"
