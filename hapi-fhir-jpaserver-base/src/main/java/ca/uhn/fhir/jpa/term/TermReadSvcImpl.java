@@ -1044,7 +1044,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					if (theExpansionOptions != null
 							&& !theExpansionOptions.isFailOnMissingCodeSystem()
 							// Code system is unknown, therefore NOT_FOUND
-							&& e.getCodeValidationIssue().getCoding() == CodeValidationIssueCoding.NOT_FOUND) {
+							&& e.getCodeValidationIssue()
+									.hasIssueDetailCode(CodeValidationIssueCoding.NOT_FOUND.getCode())) {
 						return;
 					}
 					throw new InternalErrorException(Msg.code(888) + e);
@@ -2190,10 +2191,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				.setSeverity(IssueSeverity.ERROR)
 				.setCodeSystemVersion(theCodeSystemVersion)
 				.setMessage(theMessage)
-				.addCodeValidationIssue(new CodeValidationIssue(
+				.addIssue(new CodeValidationIssue(
 						theMessage,
 						IssueSeverity.ERROR,
-						CodeValidationIssueCode.CODE_INVALID,
+						CodeValidationIssueTypeCode.CODE_INVALID,
 						CodeValidationIssueCoding.INVALID_CODE));
 	}
 

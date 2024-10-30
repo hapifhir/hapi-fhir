@@ -440,74 +440,203 @@ public interface IValidationSupport {
 		return "Unknown " + getFhirContext().getVersion().getVersion() + " Validation Support";
 	}
 
+	/**
+	 * Defines codes in system <a href="http://hl7.org/fhir/issue-severity">http://hl7.org/fhir/issue-severity</a>.
+	 */
+	/* this enum would not be needed if we design/refactor to use org.hl7.fhir.r5.terminologies.utilities.ValidationResult */
 	enum IssueSeverity {
 		/**
 		 * The issue caused the action to fail, and no further checking could be performed.
 		 */
-		FATAL,
+		FATAL("fatal"),
 		/**
 		 * The issue is sufficiently important to cause the action to fail.
 		 */
-		ERROR,
+		ERROR("error"),
 		/**
 		 * The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired.
 		 */
-		WARNING,
+		WARNING("warning"),
 		/**
 		 * The issue has no relation to the degree of success of the action.
 		 */
-		INFORMATION
+		INFORMATION("information"),
+		/**
+		 * The operation was successful.
+		 */
+		SUCCESS("success");
+		// the spec for OperationOutcome mentions that  a code from http://hl7.org/fhir/issue-severity is required
+
+		private final String myCode;
+
+		IssueSeverity(String theCode) {
+			myCode = theCode;
+		}
+		/**
+		 * Provide mapping to a code in system <a href="http://hl7.org/fhir/issue-severity">http://hl7.org/fhir/issue-severity</a>.
+		 * @return the code
+		 */
+		public String getCode() {
+			return myCode;
+		}
+		/**
+		 * Creates a {@link IssueSeverity} object from the given code.
+		 * @return the {@link IssueSeverity}
+		 */
+		public static IssueSeverity fromCode(String theCode) {
+			return Arrays.stream(values())
+					.filter(value -> value.getCode().equals(theCode))
+					.findFirst()
+					.orElse(null);
+		}
 	}
 
-	enum CodeValidationIssueCode {
-		NOT_FOUND,
-		CODE_INVALID,
-		INVALID,
-		OTHER
-	}
+	/**
+	 * Defines codes in system <a href="http://hl7.org/fhir/issue-type">http://hl7.org/fhir/issue-type</a>.
+	 */
+	/* this enum would not be needed if we design/refactor to use org.hl7.fhir.r5.terminologies.utilities.ValidationResult */
+	class CodeValidationIssueTypeCode {
+		public static final CodeValidationIssueTypeCode NOT_FOUND = new CodeValidationIssueTypeCode("not-found");
+		public static final CodeValidationIssueTypeCode CODE_INVALID = new CodeValidationIssueTypeCode("code-invalid");
+		public static final CodeValidationIssueTypeCode INVALID = new CodeValidationIssueTypeCode("invalid");
 
-	enum CodeValidationIssueCoding {
-		VS_INVALID,
-		NOT_FOUND,
-		NOT_IN_VS,
+		private final String myCode;
 
-		INVALID_CODE,
-		INVALID_DISPLAY,
-		OTHER
-	}
-
-	class CodeValidationIssue {
-
-		private final String myMessage;
-		private final IssueSeverity mySeverity;
-		private final CodeValidationIssueCode myCode;
-		private final CodeValidationIssueCoding myCoding;
-
-		public CodeValidationIssue(
-				String theMessage,
-				IssueSeverity mySeverity,
-				CodeValidationIssueCode theCode,
-				CodeValidationIssueCoding theCoding) {
-			this.myMessage = theMessage;
-			this.mySeverity = mySeverity;
-			this.myCode = theCode;
-			this.myCoding = theCoding;
+		CodeValidationIssueTypeCode(String theCode) {
+			myCode = theCode;
 		}
 
-		public String getMessage() {
-			return myMessage;
+		/**
+		 * Retrieve the corresponding code from system <a href="http://hl7.org/fhir/issue-type">http://hl7.org/fhir/issue-type</a>.
+		 * @return the code
+		 */
+		public String getCode() {
+			return myCode;
+		}
+
+		/**
+		 * Creates a {@link CodeValidationIssueTypeCode} from a code.
+		 * @return the {@link CodeValidationIssueTypeCode}
+		 */
+		public static CodeValidationIssueTypeCode fromCode(String theCode) {
+			return new CodeValidationIssueTypeCode(theCode);
+		}
+	}
+
+	class CodeValidationIssueCodeableConcept {
+		private final String myText;
+		private List<CodeValidationIssueCoding> myCodings;
+
+		public CodeValidationIssueCodeableConcept(String theText) {
+			myText = theText;
+		}
+
+		public CodeValidationIssueCodeableConcept addCoding(CodeValidationIssueCoding theCoding) {
+			if (myCodings == null) {
+				myCodings = new ArrayList<>();
+			}
+			myCodings.add(theCoding);
+			return this;
+		}
+
+		public String getText() {
+			return myText;
+		}
+
+		public List<CodeValidationIssueCoding> getCodings() {
+			return myCodings;
+		}
+	}
+
+	/**
+	 * Defines codes in system <a href="http://hl7.org/fhir/tools/CodeSystem/tx-issue-type">http://hl7.org/fhir/tools/CodeSystem/tx-issue-type</a>.
+	 */
+	class CodeValidationIssueCoding {
+		public static String TX_ISSUE_SYSTEM = "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type";
+		public static CodeValidationIssueCoding VS_INVALID =
+				new CodeValidationIssueCoding(TX_ISSUE_SYSTEM, "vs-invalid");
+		public static final CodeValidationIssueCoding NOT_FOUND =
+				new CodeValidationIssueCoding(TX_ISSUE_SYSTEM, "not-found");
+		public static final CodeValidationIssueCoding NOT_IN_VS =
+				new CodeValidationIssueCoding(TX_ISSUE_SYSTEM, "not-in-vs");
+		public static final CodeValidationIssueCoding INVALID_CODE =
+				new CodeValidationIssueCoding(TX_ISSUE_SYSTEM, "invalid-code");
+		public static final CodeValidationIssueCoding INVALID_DISPLAY =
+				new CodeValidationIssueCoding(TX_ISSUE_SYSTEM, "vs-display");
+		private final String mySystem, myCode;
+
+		public CodeValidationIssueCoding(String theSystem, String theCode) {
+			mySystem = theSystem;
+			myCode = theCode;
+		}
+
+		/**
+		 * Retrieve the corresponding code for the details of a validation issue.
+		 * @return the code
+		 */
+		public String getCode() {
+			return myCode;
+		}
+
+		/**
+		 * Retrieve the system for the details of a validation issue.
+		 * @return the system
+		 */
+		public String getSystem() {
+			return mySystem;
+		}
+	}
+
+	/**
+	 * This is a hapi-fhir internal version agnostic object holding information about a validation issue.
+	 * An alternative (which requires significant refactoring) would be to use org.hl7.fhir.r5.terminologies.utilities.ValidationResult instead.
+	 */
+	class CodeValidationIssue {
+		private final String myDiagnostics;
+		private final IssueSeverity mySeverity;
+		private final CodeValidationIssueTypeCode myCode;
+		private CodeValidationIssueCodeableConcept myDetails;
+
+		public CodeValidationIssue(
+				String theDiagnostics, IssueSeverity theSeverity, CodeValidationIssueTypeCode theType) {
+			this(theDiagnostics, theSeverity, theType, null);
+		}
+
+		public CodeValidationIssue(
+				String theDiagnostics,
+				IssueSeverity theSeverity,
+				CodeValidationIssueTypeCode theType,
+				CodeValidationIssueCoding theDetailsCoding) {
+			myDiagnostics = theDiagnostics;
+			mySeverity = theSeverity;
+			myCode = theType;
+			// reuse the diagnostics message as a detail text message
+			myDetails = new CodeValidationIssueCodeableConcept(theDiagnostics).addCoding(theDetailsCoding);
+		}
+
+		public String getDiagnostics() {
+			return myDiagnostics;
 		}
 
 		public IssueSeverity getSeverity() {
 			return mySeverity;
 		}
 
-		public CodeValidationIssueCode getCode() {
+		public CodeValidationIssueTypeCode getType() {
 			return myCode;
 		}
 
-		public CodeValidationIssueCoding getCoding() {
-			return myCoding;
+		public void setDetails(CodeValidationIssueCodeableConcept theDetails) {
+			this.myDetails = theDetails;
+		}
+
+		public CodeValidationIssueCodeableConcept getDetails() {
+			return myDetails;
+		}
+
+		public boolean hasIssueDetailCode(@Nonnull String theCode) {
+			// this method is system agnostic at the moment but it can be restricted if needed
+			return myDetails.getCodings().stream().anyMatch(coding -> theCode.equals(coding.getCode()));
 		}
 	}
 
@@ -671,6 +800,10 @@ public interface IValidationSupport {
 		}
 	}
 
+	/**
+	 * This is a hapi-fhir internal version agnostic object holding information about the validation result.
+	 * An alternative (which requires significant refactoring) would be to use org.hl7.fhir.r5.terminologies.utilities.ValidationResult.
+	 */
 	class CodeValidationResult {
 		public static final String SOURCE_DETAILS = "sourceDetails";
 		public static final String RESULT = "result";
@@ -686,7 +819,7 @@ public interface IValidationSupport {
 		private String myDisplay;
 		private String mySourceDetails;
 
-		private List<CodeValidationIssue> myCodeValidationIssues;
+		private List<CodeValidationIssue> myIssues;
 
 		public CodeValidationResult() {
 			super();
@@ -771,20 +904,20 @@ public interface IValidationSupport {
 			return this;
 		}
 
-		public List<CodeValidationIssue> getCodeValidationIssues() {
-			if (myCodeValidationIssues == null) {
-				myCodeValidationIssues = new ArrayList<>();
+		public List<CodeValidationIssue> getIssues() {
+			if (myIssues == null) {
+				myIssues = new ArrayList<>();
 			}
-			return myCodeValidationIssues;
+			return myIssues;
 		}
 
-		public CodeValidationResult setCodeValidationIssues(List<CodeValidationIssue> theCodeValidationIssues) {
-			myCodeValidationIssues = new ArrayList<>(theCodeValidationIssues);
+		public CodeValidationResult setIssues(List<CodeValidationIssue> theIssues) {
+			myIssues = new ArrayList<>(theIssues);
 			return this;
 		}
 
-		public CodeValidationResult addCodeValidationIssue(CodeValidationIssue theCodeValidationIssue) {
-			getCodeValidationIssues().add(theCodeValidationIssue);
+		public CodeValidationResult addIssue(CodeValidationIssue theCodeValidationIssue) {
+			getIssues().add(theCodeValidationIssue);
 			return this;
 		}
 
@@ -811,18 +944,9 @@ public interface IValidationSupport {
 		public String getSeverityCode() {
 			String retVal = null;
 			if (getSeverity() != null) {
-				retVal = getSeverity().name().toLowerCase();
+				retVal = getSeverity().getCode();
 			}
 			return retVal;
-		}
-
-		/**
-		 * Sets an issue severity as a string code. Value must be the name of
-		 * one of the enum values in {@link IssueSeverity}. Value is case-insensitive.
-		 */
-		public CodeValidationResult setSeverityCode(@Nonnull String theIssueSeverity) {
-			setSeverity(IssueSeverity.valueOf(theIssueSeverity.toUpperCase()));
-			return this;
 		}
 
 		public IBaseParameters toParameters(FhirContext theContext) {
@@ -838,6 +962,11 @@ public interface IValidationSupport {
 			if (isNotBlank(getSourceDetails())) {
 				ParametersUtil.addParameterToParametersString(theContext, retVal, SOURCE_DETAILS, getSourceDetails());
 			}
+			/*
+			should translate issues as well, except that is version specific code, so it requires more refactoring
+			or replace the current class with org.hl7.fhir.r5.terminologies.utilities.ValidationResult
+			@see VersionSpecificWorkerContextWrapper#getIssuesForCodeValidation
+			*/
 
 			return retVal;
 		}
