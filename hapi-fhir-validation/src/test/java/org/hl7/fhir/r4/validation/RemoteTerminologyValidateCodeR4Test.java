@@ -2,7 +2,6 @@ package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.parser.IJsonLikeParser;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
@@ -13,11 +12,12 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
+import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyValidateCodeTest;
-import org.hl7.fhir.common.hapi.validation.IValidationProviders;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -61,8 +61,8 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
-	private IValidateCodeProvidersR4.MyCodeSystemProviderR4 myCodeSystemProvider;
-	private IValidateCodeProvidersR4.MyValueSetProviderR4 myValueSetProvider;
+	private IValidationProvidersR4.MyCodeSystemProviderR4 myCodeSystemProvider;
+	private IValidationProvidersR4.MyValueSetProviderR4 myValueSetProvider;
 	private RemoteTerminologyServiceValidationSupport mySvc;
 	private String myCodeSystemError, myValueSetError;
 
@@ -77,8 +77,8 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 				ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET, IValidationProviders.CODE_SYSTEM, IValidationProviders.CODE, IValidationProviders.VALUE_SET_URL, baseUrl, IValidationProviders.ERROR_MESSAGE);
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx, baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(false).setLogRequestSummary(true).setLogResponseSummary(true));
-		myCodeSystemProvider = new IValidateCodeProvidersR4.MyCodeSystemProviderR4();
-		myValueSetProvider = new IValidateCodeProvidersR4.MyValueSetProviderR4();
+		myCodeSystemProvider = new IValidationProvidersR4.MyCodeSystemProviderR4();
+		myValueSetProvider = new IValidationProvidersR4.MyValueSetProviderR4();
 		ourRestfulServerExtension.getRestfulServer().registerProviders(myCodeSystemProvider, myValueSetProvider);
 	}
 
@@ -122,18 +122,6 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 	@Override
 	public IBaseOperationOutcome getValueSetInvalidCodeOutcome() {
 		return ClasspathUtil.loadResource(getService().getFhirContext(), OperationOutcome.class, "/terminology/OperationOutcome-ValueSet-invalid-code.json");
-	}
-
-	@Override
-	public List<IValidationSupport.CodeValidationIssue> getCodeValidationIssues(IBaseOperationOutcome theOperationOutcome) {
-		return ((OperationOutcome)theOperationOutcome).getIssue().stream()
-				.map(issueComponent -> new IValidationSupport.CodeValidationIssue(
-						issueComponent.getDetails().getText(),
-						IValidationSupport.IssueSeverity.ERROR,
-						/* assume issue type is OperationOutcome.IssueType#CODEINVALID as it is the only match */
-						IValidationSupport.CodeValidationIssueCode.INVALID,
-						IValidationSupport.CodeValidationIssueCoding.INVALID_CODE))
-				.toList();
 	}
 
 	@Test

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -16,12 +17,12 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity.ERROR;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE_SYSTEM;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE_SYSTEM_VERSION;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.DISPLAY;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.ERROR_MESSAGE;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.VALUE_SET_URL;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM_VERSION;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.DISPLAY;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.ERROR_MESSAGE;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.VALUE_SET_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -105,7 +106,7 @@ public interface IValidateCodeTest {
 		for (String message : theMessages) {
 			assertTrue(outcome.getMessage().contains(message));
 		}
-		assertFalse(outcome.getCodeValidationIssues().isEmpty());
+		assertFalse(outcome.getIssues().isEmpty());
 	}
 
 	@Test
@@ -130,7 +131,7 @@ public interface IValidateCodeTest {
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
-		assertTrue(outcome.getCodeValidationIssues().isEmpty());
+		assertTrue(outcome.getIssues().isEmpty());
 
 		assertEquals(CODE, getValueSetProvider().getCode());
 		assertEquals(DISPLAY, getValueSetProvider().getDisplay());
@@ -147,7 +148,7 @@ public interface IValidateCodeTest {
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
-		assertTrue(outcome.getCodeValidationIssues().isEmpty());
+		assertTrue(outcome.getIssues().isEmpty());
 
 		assertEquals(CODE, getCodeSystemProvider().getCode());
 	}
@@ -165,7 +166,7 @@ public interface IValidateCodeTest {
 		assertNull(outcome.getDisplay());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
-		assertTrue(outcome.getCodeValidationIssues().isEmpty());
+		assertTrue(outcome.getIssues().isEmpty());
 
 		assertEquals(CODE, getCodeSystemProvider().getCode());
 		assertEquals(CODE_SYSTEM, getCodeSystemProvider().getSystem());
@@ -184,7 +185,7 @@ public interface IValidateCodeTest {
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
-		assertTrue(outcome.getCodeValidationIssues().isEmpty());
+		assertTrue(outcome.getIssues().isEmpty());
 
 		assertEquals(CODE, getCodeSystemProvider().getCode());
 		assertEquals(DISPLAY, getCodeSystemProvider().getDisplay());
@@ -204,7 +205,7 @@ public interface IValidateCodeTest {
 		// assertEquals(CODE, outcome.getCode());
 		assertEquals(ERROR, outcome.getSeverity());
 		assertEquals(getCodeSystemError(), outcome.getMessage());
-		assertFalse(outcome.getCodeValidationIssues().isEmpty());
+		assertFalse(outcome.getIssues().isEmpty());
 		verifyIssues(invalidCodeOutcome, outcome);
 	}
 
@@ -223,10 +224,10 @@ public interface IValidateCodeTest {
 		assertNull(outcome.getDisplay());
 		assertEquals(ERROR, outcome.getSeverity());
 		assertEquals(expectedError, outcome.getMessage());
-		assertFalse(outcome.getCodeValidationIssues().isEmpty());
-		assertEquals(1, outcome.getCodeValidationIssues().size());
-		assertEquals(expectedError, outcome.getCodeValidationIssues().get(0).getMessage());
-		assertEquals(ERROR, outcome.getCodeValidationIssues().get(0).getSeverity());
+		assertFalse(outcome.getIssues().isEmpty());
+		assertEquals(1, outcome.getIssues().size());
+		assertEquals(expectedError, outcome.getIssues().get(0).getDiagnostics());
+		assertEquals(ERROR, outcome.getIssues().get(0).getSeverity());
 	}
 
 	@Test
@@ -242,7 +243,7 @@ public interface IValidateCodeTest {
 		assertNull(outcome.getDisplay());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
-		assertTrue(outcome.getCodeValidationIssues().isEmpty());
+		assertTrue(outcome.getIssues().isEmpty());
 
 		assertEquals(CODE, getValueSetProvider().getCode());
 		assertEquals(VALUE_SET_URL, getValueSetProvider().getValueSet());
@@ -261,7 +262,7 @@ public interface IValidateCodeTest {
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
-		assertTrue(outcome.getCodeValidationIssues().isEmpty());
+		assertTrue(outcome.getIssues().isEmpty());
 
 		assertEquals(CODE, getValueSetProvider().getCode());
 		assertEquals(DISPLAY, getValueSetProvider().getDisplay());
@@ -283,9 +284,9 @@ public interface IValidateCodeTest {
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertEquals(ERROR, outcome.getSeverity());
 		assertEquals(expectedError, outcome.getMessage());
-		assertEquals(1, outcome.getCodeValidationIssues().size());
-		assertEquals(expectedError, outcome.getCodeValidationIssues().get(0).getMessage());
-		assertEquals(ERROR, outcome.getCodeValidationIssues().get(0).getSeverity());
+		assertEquals(1, outcome.getIssues().size());
+		assertEquals(expectedError, outcome.getIssues().get(0).getDiagnostics());
+		assertEquals(ERROR, outcome.getIssues().get(0).getSeverity());
 
 		assertEquals(CODE, getValueSetProvider().getCode());
 		assertEquals(DISPLAY, getValueSetProvider().getDisplay());
@@ -306,7 +307,7 @@ public interface IValidateCodeTest {
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertEquals(ERROR, outcome.getSeverity());
 		assertEquals(getValueSetError(), outcome.getMessage());
-		assertFalse(outcome.getCodeValidationIssues().isEmpty());
+		assertFalse(outcome.getIssues().isEmpty());
 		verifyIssues(invalidCodeOutcome, outcome);
 
 		assertEquals(CODE, getValueSetProvider().getCode());
@@ -316,14 +317,22 @@ public interface IValidateCodeTest {
 
 	default void verifyIssues(IBaseOperationOutcome theOperationOutcome, CodeValidationResult theResult) {
 		List<IValidationSupport.CodeValidationIssue> issues = getCodeValidationIssues(theOperationOutcome);
-		assertEquals(issues.size(), theResult.getCodeValidationIssues().size());
+		assertEquals(issues.size(), theResult.getIssues().size());
 		for (int i = 0; i < issues.size(); i++) {
 			IValidationSupport.CodeValidationIssue expectedIssue = issues.get(i);
-			IValidationSupport.CodeValidationIssue actualIssue = theResult.getCodeValidationIssues().get(i);
-			assertEquals(expectedIssue.getCode(), actualIssue.getCode());
+			IValidationSupport.CodeValidationIssue actualIssue = theResult.getIssues().get(i);
+			assertEquals(expectedIssue.getType().getCode(), actualIssue.getType().getCode());
 			assertEquals(expectedIssue.getSeverity(), actualIssue.getSeverity());
-			assertEquals(expectedIssue.getCoding(), actualIssue.getCoding());
-			assertEquals(expectedIssue.getMessage(), actualIssue.getMessage());
+			assertEquals(expectedIssue.getDetails().getText(), actualIssue.getDetails().getText());
+			assertEquals(expectedIssue.getDetails().getCodings().size(), actualIssue.getDetails().getCodings().size());
+			for (int index = 0; index < expectedIssue.getDetails().getCodings().size(); index++) {
+				IValidationSupport.CodeValidationIssueCoding expectedCoding = expectedIssue.getDetails().getCodings().get(index);
+				IValidationSupport.CodeValidationIssueCoding actualCoding = actualIssue.getDetails().getCodings().get(index);
+				assertEquals(expectedCoding.getSystem(), actualCoding.getSystem());
+				assertEquals(expectedCoding.getCode(), actualCoding.getCode());
+			}
+			assertEquals(expectedIssue.getDetails().getText(), actualIssue.getDetails().getText());
+			assertEquals(expectedIssue.getDiagnostics(), actualIssue.getDiagnostics());
 		}
 	}
 

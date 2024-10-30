@@ -4,9 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
+import ca.uhn.fhir.test.utilities.validation.IValidationProvidersDstu3;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyValidateCodeTest;
-import org.hl7.fhir.common.hapi.validation.IValidationProviders;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -38,8 +39,8 @@ public class RemoteTerminologyValidateCodeDstu3Test implements IRemoteTerminolog
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
-	private IValidateCodeProvidersDstu3.MyCodeSystemProviderDstu3 myCodeSystemProvider;
-	private IValidateCodeProvidersDstu3.MyValueSetProviderDstu3 myValueSetProvider;
+	private IValidationProvidersDstu3.MyCodeSystemProviderDstu3 myCodeSystemProvider;
+	private IValidationProvidersDstu3.MyValueSetProviderDstu3 myValueSetProvider;
 	private RemoteTerminologyServiceValidationSupport mySvc;
 	private String myCodeSystemError, myValueSetError;
 
@@ -54,8 +55,8 @@ public class RemoteTerminologyValidateCodeDstu3Test implements IRemoteTerminolog
 				ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET, IValidationProviders.CODE_SYSTEM, IValidationProviders.CODE, IValidationProviders.VALUE_SET_URL, baseUrl, IValidationProviders.ERROR_MESSAGE);
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx, baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(false).setLogRequestSummary(true).setLogResponseSummary(true));
-		myCodeSystemProvider = new IValidateCodeProvidersDstu3.MyCodeSystemProviderDstu3();
-		myValueSetProvider = new IValidateCodeProvidersDstu3.MyValueSetProviderDstu3();
+		myCodeSystemProvider = new IValidationProvidersDstu3.MyCodeSystemProviderDstu3();
+		myValueSetProvider = new IValidationProvidersDstu3.MyValueSetProviderDstu3();
 		ourRestfulServerExtension.getRestfulServer().registerProviders(myCodeSystemProvider, myValueSetProvider);
 	}
 
@@ -82,12 +83,12 @@ public class RemoteTerminologyValidateCodeDstu3Test implements IRemoteTerminolog
 	}
 
 	@Override
-	public IValidateCodeProvidersDstu3.MyCodeSystemProviderDstu3 getCodeSystemProvider() {
+	public IValidationProvidersDstu3.MyCodeSystemProviderDstu3 getCodeSystemProvider() {
 		return myCodeSystemProvider;
 	}
 
 	@Override
-	public IValidateCodeProvidersDstu3.MyValueSetProviderDstu3 getValueSetProvider() {
+	public IValidationProvidersDstu3.MyValueSetProviderDstu3 getValueSetProvider() {
 		return myValueSetProvider;
 	}
 

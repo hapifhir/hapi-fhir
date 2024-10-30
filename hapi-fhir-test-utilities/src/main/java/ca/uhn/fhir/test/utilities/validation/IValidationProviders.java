@@ -1,4 +1,4 @@
-package org.hl7.fhir.common.hapi.validation;
+package ca.uhn.fhir.test.utilities.validation;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.server.IResourceProvider;
