@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.JpaConfig;
@@ -43,15 +43,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/*
+/**
  * This set of integration tests that instantiates and injects an instance of
  * {@link org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport}
  * into the ValidationSupportChain, which tests the logic of dynamically selecting the correct Remote Terminology
- * implementation. It also exercises the code found in
- * {@link org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport#invokeRemoteValidateCode}
+ * implementation. It also exercises the validateCode output translation code found in
+ * {@link org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport}
  */
-public class ValidateCodeOperationWithRemoteTerminologyR4Test extends BaseResourceProviderR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateCodeOperationWithRemoteTerminologyR4Test.class);
+public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProviderR4Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateCodeWithRemoteTerminologyR4Test.class);
 	private static final String DISPLAY = "DISPLAY";
 	private static final String DISPLAY_BODY_MASS_INDEX = "Body mass index (BMI) [Ratio]";
 	private static final String CODE_BODY_MASS_INDEX = "39156-5";
