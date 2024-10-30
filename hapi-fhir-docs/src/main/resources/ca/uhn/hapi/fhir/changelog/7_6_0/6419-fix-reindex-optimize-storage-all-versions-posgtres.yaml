@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6419
+title: "Previously, on Postgres, the `$reindex` operation with `optimizeStorage` set to `ALL_VERSIONS` would process 
+only a subset of versions if there were more than 100 versions to be processed for a resource. This has been fixed 
+so that all versions of the resource are now processed."
