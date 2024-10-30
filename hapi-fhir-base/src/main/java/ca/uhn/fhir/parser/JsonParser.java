@@ -54,6 +54,7 @@ import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
+import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
@@ -386,12 +387,14 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 			case CONTAINED_RESOURCE_LIST:
 			case CONTAINED_RESOURCES: {
-				List<IBaseResource> containedResources = getContainedResources().getContainedResources();
+				List<IBaseResource> containedResources =
+						theEncodeContext.getContainedResources().getContainedResources();
 				if (containedResources.size() > 0) {
 					beginArray(theEventWriter, theChildName);
 
 					for (IBaseResource next : containedResources) {
-						IIdType resourceId = getContainedResources().getResourceId(next);
+						IIdType resourceId =
+								theEncodeContext.getContainedResources().getResourceId(next);
 						String value = resourceId.getValue();
 						encodeResourceToJsonStreamWriter(
 								theResDef,
@@ -554,7 +557,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 				if (nextValue == null || nextValue.isEmpty()) {
 					if (nextValue instanceof BaseContainedDt) {
-						if (theContainedResource || getContainedResources().isEmpty()) {
+						if (theContainedResource
+								|| theEncodeContext.getContainedResources().isEmpty()) {
 							continue;
 						}
 					} else {
@@ -838,7 +842,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					+ theResource.getStructureFhirVersionEnum());
 		}
 
-		EncodeContext encodeContext = new EncodeContext(this, getContext().getParserOptions());
+		EncodeContext encodeContext =
+				new EncodeContext(this, getContext().getParserOptions(), new FhirTerser.ContainedResources());
 		String resourceName = getContext().getResourceType(theResource);
 		encodeContext.pushPath(resourceName, true);
 		doEncodeResourceToJsonLikeWriter(theResource, theJsonLikeWriter, encodeContext);
@@ -894,7 +899,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		if (!theContainedResource) {
-			containResourcesInReferences(theResource);
+			containResourcesInReferences(theResource, theEncodeContext);
 		}
 
 		RuntimeResourceDefinition resDef = getContext().getResourceDefinition(theResource);

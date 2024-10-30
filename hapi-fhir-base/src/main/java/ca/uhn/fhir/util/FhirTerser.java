@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -83,9 +84,22 @@ public class FhirTerser {
 
 	private static final Pattern COMPARTMENT_MATCHER_PATH =
 			Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
+
 	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED =
 			FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
+
 	private final FhirContext myContext;
+
+	/**
+	 * This comparator sorts IBaseReferences, and places any that are missing an ID at the end. Those with an ID go to the front.
+	 */
+	private static final Comparator<IBaseReference> REFERENCES_WITH_IDS_FIRST =
+			Comparator.nullsLast(Comparator.comparing(ref -> {
+				if (ref.getResource() == null) return true;
+				if (ref.getResource().getIdElement() == null) return true;
+				if (ref.getResource().getIdElement().getValue() == null) return true;
+				return false;
+			}));
 
 	public FhirTerser(FhirContext theContext) {
 		super();
@@ -1418,6 +1432,13 @@ public class FhirTerser {
 	private void containResourcesForEncoding(
 			ContainedResources theContained, IBaseResource theResource, boolean theModifyResource) {
 		List<IBaseReference> allReferences = getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
+
+		// Note that we process all contained resources that have arrived here with an ID contained resources first, so
+		// that we don't accidentally auto-assign an ID
+		// which may collide with a resource we have yet to process.
+		// See: https://github.com/hapifhir/hapi-fhir/issues/6403
+		allReferences.sort(REFERENCES_WITH_IDS_FIRST);
+
 		for (IBaseReference next : allReferences) {
 			IBaseResource resource = next.getResource();
 			if (resource == null && next.getReferenceElement().isLocal()) {
@@ -1437,11 +1458,11 @@ public class FhirTerser {
 			IBaseResource resource = next.getResource();
 			if (resource != null) {
 				if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
-					if (theContained.getResourceId(resource) != null) {
-						// Prevent infinite recursion if there are circular loops in the contained resources
+
+					IIdType id = theContained.addContained(resource);
+					if (id == null) {
 						continue;
 					}
-					IIdType id = theContained.addContained(resource);
 					if (theModifyResource) {
 						getContainedResourceList(theResource).add(resource);
 						next.setReference(id.getValue());
@@ -1769,7 +1790,6 @@ public class FhirTerser {
 
 	public static class ContainedResources {
 		private long myNextContainedId = 1;
-
 		private List<IBaseResource> myResourceList;
 		private IdentityHashMap<IBaseResource, IIdType> myResourceToIdMap;
 		private Map<String, IBaseResource> myExistingIdToContainedResourceMap;
@@ -1782,6 +1802,11 @@ public class FhirTerser {
 		}
 
 		public IIdType addContained(IBaseResource theResource) {
+			if (this.getResourceId(theResource) != null) {
+				// Prevent infinite recursion if there are circular loops in the contained resources
+				return null;
+			}
+
 			IIdType existing = getResourceToIdMap().get(theResource);
 			if (existing != null) {
 				return existing;
@@ -1796,7 +1821,10 @@ public class FhirTerser {
 				if (substring(idPart, 0, 1).equals("#")) {
 					idPart = idPart.substring(1);
 					if (StringUtils.isNumeric(idPart)) {
-						myNextContainedId = Long.parseLong(idPart) + 1;
+						// If there is a user-supplied numeric contained ID, our auto-assigned IDs should exceed the
+						// largest
+						// client-assigned contained ID.
+						myNextContainedId = Math.max(myNextContainedId, Long.parseLong(idPart) + 1);
 					}
 				}
 			}
@@ -1864,6 +1892,7 @@ public class FhirTerser {
 		}
 
 		public void assignIdsToContainedResources() {
+			// TODO JA: Dead code?
 
 			if (!getContainedResources().isEmpty()) {
 
