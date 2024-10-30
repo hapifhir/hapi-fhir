@@ -62,9 +62,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toSet;
-import static ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

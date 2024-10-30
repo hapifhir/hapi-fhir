@@ -722,15 +722,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					String diagnostics = issueComponent.getDiagnostics();
 					IssueSeverity issueSeverity =
 							IssueSeverity.fromCode(issueComponent.getSeverity().toCode());
-					CodeValidationIssueTypeCode issueCode = CodeValidationIssueTypeCode.fromCode(
-							issueComponent.getCode().toCode());
+					String issueTypeCode = issueComponent.getCode().toCode();
 					CodeableConcept details = issueComponent.getDetails();
-					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueCode);
+					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueTypeCode);
 					CodeValidationIssueCodeableConcept issueDetails =
 							new CodeValidationIssueCodeableConcept(details.getText());
-					details.getCoding()
-							.forEach(coding -> issueDetails.addCoding(
-									new CodeValidationIssueCoding(coding.getSystem(), coding.getCode())));
+					details.getCoding().forEach(coding -> issueDetails.addCoding(coding.getSystem(), coding.getCode()));
 					issue.setDetails(issueDetails);
 					return issue;
 				})
@@ -744,15 +741,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					String diagnostics = issueComponent.getDiagnostics();
 					IssueSeverity issueSeverity =
 							IssueSeverity.fromCode(issueComponent.getSeverity().toCode());
-					CodeValidationIssueTypeCode issueCode = CodeValidationIssueTypeCode.fromCode(
-							issueComponent.getCode().toCode());
+					String issueTypeCode = issueComponent.getCode().toCode();
 					org.hl7.fhir.dstu3.model.CodeableConcept details = issueComponent.getDetails();
-					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueCode);
+					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueTypeCode);
 					CodeValidationIssueCodeableConcept issueDetails =
 							new CodeValidationIssueCodeableConcept(details.getText());
-					details.getCoding()
-							.forEach(coding -> issueDetails.addCoding(
-									new CodeValidationIssueCoding(coding.getSystem(), coding.getCode())));
+					details.getCoding().forEach(coding -> issueDetails.addCoding(coding.getSystem(), coding.getCode()));
 					issue.setDetails(issueDetails);
 					return issue;
 				})

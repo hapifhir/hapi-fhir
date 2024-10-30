@@ -502,6 +502,7 @@ public interface IValidationSupport {
 
 		private final String myCode;
 
+		// this is intentionally not exposed
 		CodeValidationIssueTypeCode(String theCode) {
 			myCode = theCode;
 		}
@@ -513,14 +514,6 @@ public interface IValidationSupport {
 		public String getCode() {
 			return myCode;
 		}
-
-		/**
-		 * Creates a {@link CodeValidationIssueTypeCode} from a code.
-		 * @return the {@link CodeValidationIssueTypeCode}
-		 */
-		public static CodeValidationIssueTypeCode fromCode(String theCode) {
-			return new CodeValidationIssueTypeCode(theCode);
-		}
 	}
 
 	class CodeValidationIssueCodeableConcept {
@@ -531,11 +524,16 @@ public interface IValidationSupport {
 			myText = theText;
 		}
 
-		public CodeValidationIssueCodeableConcept addCoding(CodeValidationIssueCoding theCoding) {
+		// intentionally not exposed
+		void addCoding(CodeValidationIssueCoding theCoding) {
+			getCodings().add(theCoding);
+		}
+
+		public CodeValidationIssueCodeableConcept addCoding(String theSystem, String theCode) {
 			if (myCodings == null) {
 				myCodings = new ArrayList<>();
 			}
-			myCodings.add(theCoding);
+			myCodings.add(new CodeValidationIssueCoding(theSystem, theCode));
 			return this;
 		}
 
@@ -565,7 +563,8 @@ public interface IValidationSupport {
 				new CodeValidationIssueCoding(TX_ISSUE_SYSTEM, "vs-display");
 		private final String mySystem, myCode;
 
-		public CodeValidationIssueCoding(String theSystem, String theCode) {
+		// this is intentionally not exposed
+		CodeValidationIssueCoding(String theSystem, String theCode) {
 			mySystem = theSystem;
 			myCode = theCode;
 		}
@@ -598,8 +597,12 @@ public interface IValidationSupport {
 		private CodeValidationIssueCodeableConcept myDetails;
 
 		public CodeValidationIssue(
-				String theDiagnostics, IssueSeverity theSeverity, CodeValidationIssueTypeCode theType) {
-			this(theDiagnostics, theSeverity, theType, null);
+				String theDiagnostics, IssueSeverity theSeverity, CodeValidationIssueTypeCode theTypeCode) {
+			this(theDiagnostics, theSeverity, theTypeCode, null);
+		}
+
+		public CodeValidationIssue(String theDiagnostics, IssueSeverity theSeverity, String theTypeCode) {
+			this(theDiagnostics, theSeverity, new CodeValidationIssueTypeCode(theTypeCode), null);
 		}
 
 		public CodeValidationIssue(
@@ -611,7 +614,8 @@ public interface IValidationSupport {
 			mySeverity = theSeverity;
 			myCode = theType;
 			// reuse the diagnostics message as a detail text message
-			myDetails = new CodeValidationIssueCodeableConcept(theDiagnostics).addCoding(theDetailsCoding);
+			myDetails = new CodeValidationIssueCodeableConcept(theDiagnostics);
+			myDetails.addCoding(theDetailsCoding);
 		}
 
 		public String getDiagnostics() {
