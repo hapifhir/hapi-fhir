@@ -5,8 +5,9 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
+import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
 import ca.uhn.fhir.util.ClasspathUtil;
-import org.hl7.fhir.common.hapi.validation.IValidationProviders;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RemoteTerminologyLookupCodeWithResponseFileR4Test {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private IValidateCodeProvidersR4.MyCodeSystemProviderR4 myCodeSystemProvider;
+	private IValidationProvidersR4.MyCodeSystemProviderR4 myCodeSystemProvider;
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
@@ -36,7 +37,7 @@ public class RemoteTerminologyLookupCodeWithResponseFileR4Test {
 		String baseUrl = "http://localhost:" + ourRestfulServerExtension.getPort();
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx, baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(false).setLogRequestSummary(true).setLogResponseSummary(true));
-		myCodeSystemProvider = new IValidateCodeProvidersR4.MyCodeSystemProviderR4();
+		myCodeSystemProvider = new IValidationProvidersR4.MyCodeSystemProviderR4();
 		ourRestfulServerExtension.getRestfulServer().registerProviders(myCodeSystemProvider);
 	}
 
