@@ -121,7 +121,7 @@ public interface IResourceTableDao
 
 	@Modifying
 	@Query("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myId = :id")
-	void updateIndexStatus(@Param("id") Long theId, @Param("status") Long theIndexStatus);
+	void updateIndexStatus(@Param("id") Long theId, @Param("status") short theIndexStatus);
 
 	@Modifying
 	@Query("UPDATE ResourceTable t SET t.myUpdated = :updated WHERE t.myId = :id")

@@ -44,7 +44,7 @@ import javax.sql.DataSource;
 @Configuration
 @Import({CommonConfig.class, JpaR5Config.class, HapiJpaConfig.class})
 @EnableTransactionManagement()
-public class TestR5Config {
+public class TestR5Config extends BaseConfig {
 	public static final String FHIR_DB_USERNAME = "fhir.db.username";
 	public static final String FHIR_DB_PASSWORD = "fhir.db.password";
 	public static final String FHIR_LUCENE_LOCATION_R5 = "fhir.lucene.location.r5";
@@ -164,13 +164,7 @@ public class TestR5Config {
 		extraProperties.put("hibernate.cache.use_structured_entries", "false");
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
 
-		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		extraProperties.put(
-				BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
-				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
-		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
-		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), myFhirLuceneLocation);
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
+		configureLuceneProperties(extraProperties, myFhirLuceneLocation);
 
 		return extraProperties;
 	}

@@ -62,6 +62,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
@@ -210,6 +211,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
 	@Autowired
 	protected ISearchResultCacheSvc mySearchResultCacheSvc;
+	@Autowired
+	protected PartitionSettings myPartitionSettings;
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
@@ -389,12 +392,18 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myFhirInstanceValidator != null) {
 			myFhirInstanceValidator.invalidateCaches();
 		}
-		JpaStorageSettings defaultConfig = new JpaStorageSettings();
-		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
-		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultConfig.isIncludeHashIdentityForTokenSearches());
-		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultConfig.getMaximumIncludesToLoadPerPage());
 
+		JpaStorageSettings defaultStorageConfig = new JpaStorageSettings();
+		myStorageSettings.setAllowContainsSearches(defaultStorageConfig.isAllowContainsSearches());
+		myStorageSettings.setHibernateSearchIndexFullText(defaultStorageConfig.isHibernateSearchIndexFullText());
+		myStorageSettings.setHibernateSearchIndexSearchParams(defaultStorageConfig.isHibernateSearchIndexSearchParams());
+		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultStorageConfig.isIncludeHashIdentityForTokenSearches());
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaultStorageConfig.isMarkResourcesForReindexingUponSearchParameterChange());
+		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultStorageConfig.getMaximumIncludesToLoadPerPage());
+		myStorageSettings.setPreExpandValueSets(defaultStorageConfig.isPreExpandValueSets());
+
+		PartitionSettings defaultPartConfig = new PartitionSettings();
+		myPartitionSettings.setIncludePartitionInSearchHashes(defaultPartConfig.isIncludePartitionInSearchHashes());
 	}
 
 	@AfterEach

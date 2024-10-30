@@ -140,7 +140,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Column(name = "SP_INDEX_STATUS", nullable = true)
 	@OptimisticLock(excluded = true)
-	private Long myIndexStatus;
+	private Short myIndexStatus;
 
 	// TODO: Removed in 5.5.0. Drop in a future release.
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
@@ -464,12 +464,12 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myId = theId;
 	}
 
-	public Long getIndexStatus() {
-		return myIndexStatus;
+	public EntityIndexStatusEnum getIndexStatus() {
+		return EntityIndexStatusEnum.fromColumnValue(myIndexStatus);
 	}
 
-	public void setIndexStatus(Long theIndexStatus) {
-		myIndexStatus = theIndexStatus;
+	public void setIndexStatus(EntityIndexStatusEnum theIndexStatus) {
+		myIndexStatus = EntityIndexStatusEnum.toColumnValue(theIndexStatus);
 	}
 
 	public Collection<ResourceIndexedComboStringUnique> getParamsComboStringUnique() {

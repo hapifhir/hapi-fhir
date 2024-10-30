@@ -19,9 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingRoutingBinder;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -169,7 +168,7 @@ public class TermConcept implements Serializable {
 	private Long myId;
 
 	@Column(name = "INDEX_STATUS", nullable = true)
-	private Long myIndexStatus;
+	private Short myIndexStatus;
 
 	@Deprecated(since = "7.2.0")
 	@Lob
@@ -360,12 +359,12 @@ public class TermConcept implements Serializable {
 		return this;
 	}
 
-	public Long getIndexStatus() {
-		return myIndexStatus;
+	public EntityIndexStatusEnum getIndexStatus() {
+		return EntityIndexStatusEnum.fromColumnValue(myIndexStatus);
 	}
 
-	public TermConcept setIndexStatus(Long theIndexStatus) {
-		myIndexStatus = theIndexStatus;
+	public TermConcept setIndexStatus(EntityIndexStatusEnum theIndexStatus) {
+		myIndexStatus = EntityIndexStatusEnum.toColumnValue(theIndexStatus);
 		return this;
 	}
 
@@ -497,24 +496,6 @@ public class TermConcept implements Serializable {
 			b.append("sequence", mySequence);
 		}
 		return b.build();
-	}
-
-	public List<IValidationSupport.BaseConceptProperty> toValidationProperties() {
-		List<IValidationSupport.BaseConceptProperty> retVal = new ArrayList<>();
-		for (TermConceptProperty next : getProperties()) {
-			switch (next.getType()) {
-				case STRING:
-					retVal.add(new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue()));
-					break;
-				case CODING:
-					retVal.add(new IValidationSupport.CodingConceptProperty(
-							next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
-					break;
-				default:
-					throw new IllegalStateException(Msg.code(830) + "Don't know how to handle " + next.getType());
-			}
-		}
-		return retVal;
 	}
 
 	/**

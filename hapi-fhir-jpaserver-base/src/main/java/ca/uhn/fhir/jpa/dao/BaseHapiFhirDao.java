@@ -56,6 +56,7 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -162,8 +163,6 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStorageResourceDao<T>
 		implements IDao, IJpaDao<T>, ApplicationContextAware {
 
-	public static final long INDEX_STATUS_INDEXED = 1L;
-	public static final long INDEX_STATUS_INDEXING_FAILED = 2L;
 	public static final String NS_JPA_PROFILE = "https://github.com/hapifhir/hapi-fhir/ns/jpa/profile";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiFhirDao.class);
 	private static boolean ourValidationDisabledForUnitTest;
@@ -904,7 +903,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			entity.setUpdated(theDeletedTimestampOrNull);
 			entity.setNarrativeText(null);
 			entity.setContentText(null);
-			entity.setIndexStatus(INDEX_STATUS_INDEXED);
+			entity.setIndexStatus(getEntityIndexedStatusEnum());
 			changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 
 		} else {
@@ -978,7 +977,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						entity.setUpdated(theTransactionDetails.getTransactionDate());
 					}
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
-					entity.setIndexStatus(INDEX_STATUS_INDEXED);
+					entity.setIndexStatus(getEntityIndexedStatusEnum());
 				}
 
 				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
@@ -1112,6 +1111,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		return entity;
+	}
+
+	private EntityIndexStatusEnum getEntityIndexedStatusEnum() {
+		if (myStorageSettings.isHibernateSearchIndexFullText() && !myFulltextSearchSvc.isDisabled()) {
+			return EntityIndexStatusEnum.INDEXED_ALL;
+		} else {
+			return EntityIndexStatusEnum.INDEXED_RDBMS_ONLY;
+		}
 	}
 
 	/**
@@ -1675,9 +1682,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			theEntity.setNarrativeText(null);
 			theEntity.setContentText(null);
 		} else {
-			theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
-			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
-			if (myStorageSettings.isAdvancedHSearchIndexing()) {
+			if (myStorageSettings.isHibernateSearchIndexFullText()) {
+				theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
+				theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
+			}
+			if (myStorageSettings.isHibernateSearchIndexSearchParams()) {
 				ExtendedHSearchIndexData hSearchIndexData =
 						myFulltextSearchSvc.extractLuceneIndexData(theResource, theNewParams);
 				theEntity.setLuceneIndexData(hSearchIndexData);

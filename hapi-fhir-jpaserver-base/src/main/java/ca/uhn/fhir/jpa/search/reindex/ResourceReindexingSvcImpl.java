@@ -24,10 +24,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -79,7 +79,6 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * @see ca.uhn.fhir.jpa.reindex.job.ReindexJobConfig
  * @deprecated Use the Batch2 {@link ca.uhn.fhir.batch2.api.IJobCoordinator#startInstance(JobInstanceStartRequest)} instead.
  */
 @Deprecated
@@ -435,7 +434,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		txTemplate.execute((TransactionCallback<Void>) theStatus -> {
 			ourLog.info("Marking resource with PID {} as indexing_failed", theId);
 
-			myResourceTableDao.updateIndexStatus(theId, BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED);
+			myResourceTableDao.updateIndexStatus(theId, EntityIndexStatusEnum.INDEXING_FAILED.getColumnValue());
 
 			Query q = myEntityManager.createQuery("DELETE FROM ResourceTag t WHERE t.myResourceId = :id");
 			q.setParameter("id", theId);
