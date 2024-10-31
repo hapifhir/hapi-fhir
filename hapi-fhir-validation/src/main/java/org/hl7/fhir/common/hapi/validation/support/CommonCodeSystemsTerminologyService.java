@@ -193,7 +193,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				.setIssues(Collections.singletonList(new CodeValidationIssue(
 						theMessage,
 						IssueSeverity.ERROR,
-						CodeValidationIssueTypeCode.INVALID,
+						CodeValidationIssueCode.INVALID,
 						CodeValidationIssueCoding.INVALID_CODE)));
 	}
 

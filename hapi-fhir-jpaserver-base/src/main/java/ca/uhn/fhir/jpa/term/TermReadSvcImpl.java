@@ -2194,7 +2194,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				.addIssue(new CodeValidationIssue(
 						theMessage,
 						IssueSeverity.ERROR,
-						CodeValidationIssueTypeCode.CODE_INVALID,
+						CodeValidationIssueCode.CODE_INVALID,
 						CodeValidationIssueCoding.INVALID_CODE));
 	}
 

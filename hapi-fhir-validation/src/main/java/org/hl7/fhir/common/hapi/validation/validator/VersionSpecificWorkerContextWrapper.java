@@ -318,7 +318,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					OperationOutcome.IssueType.fromCode(issue.getType().getCode());
 			String diagnostics = issue.getDiagnostics();
 
-			IValidationSupport.CodeValidationIssueCodeableConcept details = issue.getDetails();
+			IValidationSupport.CodeValidationIssueDetails details = issue.getDetails();
 			CodeableConcept codeableConcept = new CodeableConcept().setText(details.getText());
 			details.getCodings().forEach(detailCoding -> codeableConcept
 					.addCoding()

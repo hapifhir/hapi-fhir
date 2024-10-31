@@ -495,15 +495,15 @@ public interface IValidationSupport {
 	 * Defines codes in system <a href="http://hl7.org/fhir/issue-type">http://hl7.org/fhir/issue-type</a>.
 	 */
 	/* this enum would not be needed if we design/refactor to use org.hl7.fhir.r5.terminologies.utilities.ValidationResult */
-	class CodeValidationIssueTypeCode {
-		public static final CodeValidationIssueTypeCode NOT_FOUND = new CodeValidationIssueTypeCode("not-found");
-		public static final CodeValidationIssueTypeCode CODE_INVALID = new CodeValidationIssueTypeCode("code-invalid");
-		public static final CodeValidationIssueTypeCode INVALID = new CodeValidationIssueTypeCode("invalid");
+	class CodeValidationIssueCode {
+		public static final CodeValidationIssueCode NOT_FOUND = new CodeValidationIssueCode("not-found");
+		public static final CodeValidationIssueCode CODE_INVALID = new CodeValidationIssueCode("code-invalid");
+		public static final CodeValidationIssueCode INVALID = new CodeValidationIssueCode("invalid");
 
 		private final String myCode;
 
 		// this is intentionally not exposed
-		CodeValidationIssueTypeCode(String theCode) {
+		CodeValidationIssueCode(String theCode) {
 			myCode = theCode;
 		}
 
@@ -516,11 +516,11 @@ public interface IValidationSupport {
 		}
 	}
 
-	class CodeValidationIssueCodeableConcept {
+	class CodeValidationIssueDetails {
 		private final String myText;
 		private List<CodeValidationIssueCoding> myCodings;
 
-		public CodeValidationIssueCodeableConcept(String theText) {
+		public CodeValidationIssueDetails(String theText) {
 			myText = theText;
 		}
 
@@ -529,7 +529,7 @@ public interface IValidationSupport {
 			getCodings().add(theCoding);
 		}
 
-		public CodeValidationIssueCodeableConcept addCoding(String theSystem, String theCode) {
+		public CodeValidationIssueDetails addCoding(String theSystem, String theCode) {
 			if (myCodings == null) {
 				myCodings = new ArrayList<>();
 			}
@@ -596,29 +596,37 @@ public interface IValidationSupport {
 	class CodeValidationIssue {
 		private final String myDiagnostics;
 		private final IssueSeverity mySeverity;
-		private final CodeValidationIssueTypeCode myCode;
-		private CodeValidationIssueCodeableConcept myDetails;
+		private final CodeValidationIssueCode myCode;
+		private CodeValidationIssueDetails myDetails;
 
 		public CodeValidationIssue(
-				String theDiagnostics, IssueSeverity theSeverity, CodeValidationIssueTypeCode theTypeCode) {
+				String theDiagnostics, IssueSeverity theSeverity, CodeValidationIssueCode theTypeCode) {
 			this(theDiagnostics, theSeverity, theTypeCode, null);
 		}
 
 		public CodeValidationIssue(String theDiagnostics, IssueSeverity theSeverity, String theTypeCode) {
-			this(theDiagnostics, theSeverity, new CodeValidationIssueTypeCode(theTypeCode), null);
+			this(theDiagnostics, theSeverity, new CodeValidationIssueCode(theTypeCode), null);
 		}
 
 		public CodeValidationIssue(
 				String theDiagnostics,
 				IssueSeverity theSeverity,
-				CodeValidationIssueTypeCode theType,
+				CodeValidationIssueCode theType,
 				CodeValidationIssueCoding theDetailsCoding) {
 			myDiagnostics = theDiagnostics;
 			mySeverity = theSeverity;
 			myCode = theType;
 			// reuse the diagnostics message as a detail text message
-			myDetails = new CodeValidationIssueCodeableConcept(theDiagnostics);
+			myDetails = new CodeValidationIssueDetails(theDiagnostics);
 			myDetails.addCoding(theDetailsCoding);
+		}
+
+		/**
+		 * Deprecated. Please use {@link #getDiagnostics()} instead.
+		 */
+		@Deprecated(since = "7.4.6")
+		public String getMessage() {
+			return getDiagnostics();
 		}
 
 		public String getDiagnostics() {
@@ -629,15 +637,33 @@ public interface IValidationSupport {
 			return mySeverity;
 		}
 
-		public CodeValidationIssueTypeCode getType() {
+		/**
+		 * Deprecated. Please use {@link #getType()} instead.
+		 */
+		@Deprecated(since = "7.4.6")
+		public CodeValidationIssueCode getCode() {
+			return getType();
+		}
+
+		public CodeValidationIssueCode getType() {
 			return myCode;
 		}
 
-		public void setDetails(CodeValidationIssueCodeableConcept theDetails) {
+		/**
+		 * Deprecated. Please use {@link #getDetails()} instead. That has support for multiple codings.
+		 */
+		@Deprecated(since = "7.4.6")
+		public CodeValidationIssueCoding getCoding() {
+			return myDetails != null
+					? myDetails.getCodings().stream().findFirst().orElse(null)
+					: null;
+		}
+
+		public void setDetails(CodeValidationIssueDetails theDetails) {
 			this.myDetails = theDetails;
 		}
 
-		public CodeValidationIssueCodeableConcept getDetails() {
+		public CodeValidationIssueDetails getDetails() {
 			return myDetails;
 		}
 
@@ -911,6 +937,31 @@ public interface IValidationSupport {
 			return this;
 		}
 
+		/**
+		 * Deprecated. Please use method {@link #getIssues()} instead.
+		 */
+		@Deprecated(since = "7.4.6")
+		public List<CodeValidationIssue> getCodeValidationIssues() {
+			return getIssues();
+		}
+
+		/**
+		 * Deprecated. Please use method {@link #setIssues(List)} instead.
+		 */
+		@Deprecated(since = "7.4.6")
+		public CodeValidationResult setCodeValidationIssues(List<CodeValidationIssue> theCodeValidationIssues) {
+			return setIssues(theCodeValidationIssues);
+		}
+
+		/**
+		 * Deprecated. Please use method {@link #addIssue(CodeValidationIssue)} instead.
+		 */
+		@Deprecated(since = "7.4.6")
+		public CodeValidationResult addCodeValidationIssue(CodeValidationIssue theCodeValidationIssue) {
+			getCodeValidationIssues().add(theCodeValidationIssue);
+			return this;
+		}
+
 		public List<CodeValidationIssue> getIssues() {
 			if (myIssues == null) {
 				myIssues = new ArrayList<>();
@@ -954,6 +1005,17 @@ public interface IValidationSupport {
 				retVal = getSeverity().getCode();
 			}
 			return retVal;
+		}
+
+		/**
+		 * Sets an issue severity using a severity code. Please use method {@link #setSeverity(IssueSeverity)} instead.
+		 * @param theSeverityCode the code
+		 * @return the current {@link CodeValidationResult} instance
+		 */
+		@Deprecated(since = "7.4.6")
+		public CodeValidationResult setSeverityCode(@Nonnull String theSeverityCode) {
+			setSeverity(IssueSeverity.fromCode(theSeverityCode));
+			return this;
 		}
 
 		public IBaseParameters toParameters(FhirContext theContext) {
