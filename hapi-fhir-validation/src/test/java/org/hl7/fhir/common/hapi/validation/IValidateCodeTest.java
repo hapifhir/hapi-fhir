@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity.ERROR;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_VALIDATE_CODE;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM_VERSION;
@@ -42,11 +43,11 @@ public interface IValidateCodeTest {
 	IBaseOperationOutcome getValueSetInvalidCodeOutcome();
 
 	default void createCodeSystemReturnParameters(Boolean theResult, String theDisplay, String theMessage, IBaseResource theIssuesResource) {
-		getCodeSystemProvider().setReturnParams(createParameters(theResult, theDisplay, theMessage, theIssuesResource));
+		getCodeSystemProvider().addReturnParams(OPERATION_VALIDATE_CODE, CODE_SYSTEM, CODE, createParameters(theResult, theDisplay, theMessage, theIssuesResource));
 	}
 
 	default void createValueSetReturnParameters(Boolean theResult, String theDisplay, String theMessage, IBaseResource theIssuesResource) {
-		getValueSetProvider().setReturnParams(createParameters(theResult, theDisplay, theMessage, theIssuesResource));
+		getValueSetProvider().addReturnParams(OPERATION_VALIDATE_CODE, VALUE_SET_URL, CODE, createParameters(theResult, theDisplay, theMessage, theIssuesResource));
 	}
 
 	@Test

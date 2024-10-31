@@ -5,7 +5,6 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
@@ -20,6 +19,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_LOOKUP;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,9 +55,9 @@ public class RemoteTerminologyLookupCodeWithResponseFileR4Test {
 		IBaseResource baseResource = ourCtx.newJsonParser().parseResource(paramsAsString);
 		assertTrue(baseResource instanceof Parameters);
 		Parameters resultParameters = (Parameters) baseResource;
-		myCodeSystemProvider.setReturnParams(resultParameters);
+		myCodeSystemProvider.addReturnParams(OPERATION_LOOKUP, CODE_SYSTEM, CODE, resultParameters);
 
-		LookupCodeRequest request = new LookupCodeRequest(IValidationProviders.CODE_SYSTEM, IValidationProviders.CODE, null, List.of("interfaces"));
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, null, List.of("interfaces"));
 
 		// test
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, request);

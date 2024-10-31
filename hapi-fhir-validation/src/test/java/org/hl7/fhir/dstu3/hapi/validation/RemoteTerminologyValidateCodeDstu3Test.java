@@ -114,14 +114,4 @@ public class RemoteTerminologyValidateCodeDstu3Test implements IRemoteTerminolog
 		parameters.addParameter().setName("issues").setResource((Resource) theIssuesResource);
 		return parameters;
 	}
-
-	@Override
-	public void createCodeSystemReturnParameters(Boolean theResult, String theDisplay, String theMessage, IBaseResource theIssuesResource) {
-		myCodeSystemProvider.setReturnParams(createParameters(theResult, theDisplay, theMessage, theIssuesResource));
-	}
-
-	@Override
-	public void createValueSetReturnParameters(Boolean theResult, String theDisplay, String theMessage, IBaseResource theIssuesResource) {
-		myValueSetProvider.setReturnParams(createParameters(theResult, theDisplay, theMessage, theIssuesResource));
-	}
 }
