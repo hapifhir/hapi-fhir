@@ -306,16 +306,18 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		ElasticsearchClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(
 			"http", myElasticsearchContainer.getHost() + ":" + myElasticsearchContainer.getMappedPort(9200), "", "");
+		int initialCount = elasticsearchHighLevelRestClient.cat().count().valueBody().stream().mapToInt(next -> Integer.parseInt(next.count())).sum();
 
 		// Test
 		createPatient(withFamily("SIMPSON"));
 
 		// Verify
-		int totalCount = elasticsearchHighLevelRestClient.cat().count().valueBody().stream().mapToInt(next -> Integer.parseInt(next.count())).sum();
+		int newCount = elasticsearchHighLevelRestClient.cat().count().valueBody().stream().mapToInt(next -> Integer.parseInt(next.count())).sum();
+		int added = newCount - initialCount;
 		if (theHibernateSearchIndexFullText || theHibernateSearchIndexSearchParams) {
-			assertEquals(1, totalCount);
+			assertEquals(1, added);
 		} else {
-			assertEquals(0, totalCount);
+			assertEquals(0, added);
 		}
 	}
 

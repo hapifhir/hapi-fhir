@@ -12,8 +12,6 @@ import java.util.Properties;
 public class BaseConfig {
 
 	protected void configureLuceneProperties(Properties extraProperties, String fhirLuceneLocation) {
-		//		IndexSettings.indexKey(LuceneIndexSettings.)
-
 		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 		extraProperties.put(
 				BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
@@ -22,4 +20,5 @@ public class BaseConfig {
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), fhirLuceneLocation);
 		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 	}
+
 }

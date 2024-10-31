@@ -206,7 +206,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 				// we either do this, or shutdown the completion service in an
 				// "inelegant" manner, dropping all threads (which we aren't doing)
 				ourLog.error("Failed after checking " + count + " futures");
-				errors.add(ex.getMessage());
+				errors.add(ex.toString());
 			}
 		}
 
