@@ -815,7 +815,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				.getRootValidationSupport()
 				.validateCodeInValueSet(
 						myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
-		if (result != null) {
+		if (result != null && theSystem != null) {
 			/* We got a value set result, which could be successful, or could contain errors/warnings. The code
 			might also be invalid in the code system, so we will check that as well and add those issues
 			to our result.
