@@ -92,7 +92,7 @@ public class ReindexV1Config {
 						"Load IDs of resources to reindex",
 						ResourceIdListWorkChunkJson.class,
 						myReindexLoadIdsStep)
-				.addLastStep("reindex-start", "Start the resource reindex", reindexStepV1())
+				.addLastStep("reindex", "Start the resource reindex", reindexStepV1())
 				.build();
 	}
 
