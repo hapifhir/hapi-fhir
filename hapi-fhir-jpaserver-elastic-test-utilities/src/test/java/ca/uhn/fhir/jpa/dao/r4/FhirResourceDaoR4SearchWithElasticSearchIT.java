@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -61,6 +62,9 @@ import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
 import ch.qos.logback.classic.Level;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.cat.IndicesResponse;
+import co.elastic.clients.elasticsearch.cat.count.CountRecord;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -97,6 +101,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -268,17 +273,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@BeforeEach
 	public void enableContainsAndLucene() {
 		myStorageSettings.setAllowContainsSearches(true);
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
 	}
-
-	@AfterEach
-	public void restoreContains() {
-		JpaStorageSettings defaultConfig = new JpaStorageSettings();
-		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
-		myStorageSettings.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
-	}
-
 
 
 	class ElasticPerformanceTracingInterceptor {
@@ -291,6 +288,34 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		public List<StorageProcessingMessage> getMessages() {
 			return messages;
+		}
+	}
+
+
+	@ParameterizedTest
+	@CsvSource(value = {
+		"false, false",
+		"false, true",
+		"true,  false",
+		"true,  true",
+	})
+	public void testIndexingEnabledAndDisabled(boolean theHibernateSearchIndexFullText, boolean theHibernateSearchIndexSearchParams) throws IOException {
+		// Setup
+		myStorageSettings.setHibernateSearchIndexFullText(theHibernateSearchIndexFullText);
+		myStorageSettings.setHibernateSearchIndexSearchParams(theHibernateSearchIndexSearchParams);
+
+		ElasticsearchClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(
+			"http", myElasticsearchContainer.getHost() + ":" + myElasticsearchContainer.getMappedPort(9200), "", "");
+
+		// Test
+		createPatient(withFamily("SIMPSON"));
+
+		// Verify
+		int totalCount = elasticsearchHighLevelRestClient.cat().count().valueBody().stream().mapToInt(next -> Integer.parseInt(next.count())).sum();
+		if (theHibernateSearchIndexFullText || theHibernateSearchIndexSearchParams) {
+			assertEquals(1, totalCount);
+		} else {
+			assertEquals(0, totalCount);
 		}
 	}
 

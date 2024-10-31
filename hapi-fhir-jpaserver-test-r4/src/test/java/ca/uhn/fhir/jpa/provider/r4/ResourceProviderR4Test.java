@@ -2145,6 +2145,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testFullTextSearch() throws Exception {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		IParser parser = myFhirContext.newJsonParser();
 
 		Observation obs1 = new Observation();
@@ -2178,6 +2180,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testFulltextSearchWithIdAndContent() throws IOException {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Patient p = new Patient();
 		p.setId("FOO");
 		p.addName().setFamily("FAMILY");
@@ -2200,6 +2204,43 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(myServerBase + "/Patient?_id=FOO&_content=HELLO");
 		assertThat(ids).isEmpty();
 	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"/Patient?_text=HELLO",
+		"/Patient?_content=HELLO",
+		"/Patient?_content=HELLO&_text=HELLO",
+		"/Patient?_id=FOO&_content=HELLO",
+		"/Patient/A/$everything?_content=HELLO"
+	})
+	public void testFullTextIndexingDisabled(String theUri) throws IOException {
+		// Setup
+		myStorageSettings.setHibernateSearchIndexFullText(false);
+		createPatient(withId("A"), withActiveTrue());
+
+		// Test
+		HttpGet get = new HttpGet(myServerBase + theUri);
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+
+			// Verify
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertEquals(400, response.getStatusLine().getStatusCode(), resp);
+			String expectedParams = null;
+			if (theUri.contains("_content")) {
+				expectedParams = "_content";
+			}
+			if (theUri.contains("_text")) {
+				if (expectedParams != null) {
+					expectedParams += ", _text";
+				} else {
+					expectedParams = "_text";
+				}
+			}
+			assertThat(resp).contains("Fulltext searching is not enabled on this server, can not support the parameter(s): " + expectedParams);
+		}
+
+	}
+
 
 	@Test
 	public void testGetResourceCountsOperation() throws Exception {
@@ -2720,8 +2761,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * See issue #52
-	 */
+     * See issue #52
+     */
 	@Test
 	public void testImagingStudyResources() throws Exception {
 		IGenericClient client = myClient;
@@ -2951,8 +2992,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 
 	/**
-	 * See #793
-	 */
+     * See #793
+     */
 	@Test
 	public void testIncludeCountDoesntIncludeIncludes() {
 		Organization org = new Organization();

@@ -51,6 +51,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -263,6 +264,20 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			String theResourceType,
 			SearchParameterMap theParams,
 			IResourcePersistentId theReferencingPid) {
+
+		if (theParams.containsKey(Constants.PARAM_TEXT) || theParams.containsKey(Constants.PARAM_CONTENT)) {
+			if (!myStorageSettings.isHibernateSearchIndexFullText()) {
+				String params = theParams.keySet().stream()
+						.filter(t -> t.equals(Constants.PARAM_TEXT) || t.equals(Constants.PARAM_CONTENT))
+						.sorted()
+						.collect(Collectors.joining(", "));
+				String msg = myFhirContext
+						.getLocalizer()
+						.getMessage(FulltextSearchSvcImpl.class, "fullTextSearchingNotPossible", params);
+				throw new InvalidRequestException(msg);
+			}
+		}
+
 		return f.bool(b -> {
 			ExtendedHSearchClauseBuilder builder =
 					new ExtendedHSearchClauseBuilder(myFhirContext, myStorageSettings, b, f);

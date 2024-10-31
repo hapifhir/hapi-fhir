@@ -1114,7 +1114,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	private EntityIndexStatusEnum getEntityIndexedStatusEnum() {
-		if (myStorageSettings.isHibernateSearchIndexFullText() && !myFulltextSearchSvc.isDisabled()) {
+		if (myStorageSettings.isHibernateSearchIndexFullText()
+				|| myStorageSettings.isHibernateSearchIndexSearchParams()) {
 			return EntityIndexStatusEnum.INDEXED_ALL;
 		} else {
 			return EntityIndexStatusEnum.INDEXED_RDBMS_ONLY;

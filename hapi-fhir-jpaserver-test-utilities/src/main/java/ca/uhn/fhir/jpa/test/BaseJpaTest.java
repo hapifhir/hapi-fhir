@@ -401,6 +401,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaultStorageConfig.isMarkResourcesForReindexingUponSearchParameterChange());
 		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultStorageConfig.getMaximumIncludesToLoadPerPage());
 		myStorageSettings.setPreExpandValueSets(defaultStorageConfig.isPreExpandValueSets());
+		myStorageSettings.setStoreResourceInHSearchIndex(defaultStorageConfig.isStoreResourceInHSearchIndex());
 
 		PartitionSettings defaultPartConfig = new PartitionSettings();
 		myPartitionSettings.setIncludePartitionInSearchHashes(defaultPartConfig.isIncludePartitionInSearchHashes());

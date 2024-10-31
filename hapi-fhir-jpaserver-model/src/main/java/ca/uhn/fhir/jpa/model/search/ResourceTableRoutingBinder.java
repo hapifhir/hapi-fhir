@@ -42,7 +42,8 @@ public class ResourceTableRoutingBinder implements RoutingBinder {
 				Object theO,
 				ResourceTable theResourceTable,
 				RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
-			if (theResourceTable.getDeleted() == null && theResourceTable.getIndexStatus() == EntityIndexStatusEnum.INDEXED_ALL) {
+			if (theResourceTable.getDeleted() == null
+					&& theResourceTable.getIndexStatus() == EntityIndexStatusEnum.INDEXED_ALL) {
 				theDocumentRoutes.addRoute();
 			} else {
 				theDocumentRoutes.notIndexed();

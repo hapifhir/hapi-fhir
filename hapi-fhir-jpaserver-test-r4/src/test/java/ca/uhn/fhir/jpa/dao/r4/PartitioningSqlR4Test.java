@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -120,6 +121,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@BeforeEach
 	public void beforeEach() {
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
+
+		if (myInterceptorRegistry.getAllRegisteredInterceptors().stream().noneMatch(t -> t instanceof SearchParamValidatingInterceptor)) {
+			myInterceptorRegistry.registerInterceptor(new SearchParamValidatingInterceptor());
+		}
 	}
 
 	@AfterEach
