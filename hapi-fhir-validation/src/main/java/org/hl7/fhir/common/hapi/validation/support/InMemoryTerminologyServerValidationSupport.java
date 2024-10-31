@@ -552,7 +552,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		} else {
 			IValidationSupport.IssueSeverity severity;
 			String message;
-			CodeValidationIssueTypeCode issueCode = CodeValidationIssueTypeCode.CODE_INVALID;
+			CodeValidationIssueCode issueCode = CodeValidationIssueCode.CODE_INVALID;
 			CodeValidationIssueCoding issueCoding = CodeValidationIssueCoding.INVALID_CODE;
 			if ("fragment".equals(codeSystemResourceContentMode)) {
 				severity = IValidationSupport.IssueSeverity.WARNING;
@@ -1081,7 +1081,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 						new CodeValidationIssue(
 								failureMessage,
 								IssueSeverity.ERROR,
-								CodeValidationIssueTypeCode.NOT_FOUND,
+								CodeValidationIssueCode.NOT_FOUND,
 								CodeValidationIssueCoding.NOT_FOUND));
 			}
 
@@ -1108,7 +1108,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 							new CodeValidationIssue(
 									theMessage,
 									IssueSeverity.ERROR,
-									CodeValidationIssueTypeCode.INVALID,
+									CodeValidationIssueCode.INVALID,
 									CodeValidationIssueCoding.VS_INVALID));
 				}
 				for (org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent next :
@@ -1364,7 +1364,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			codeValidationResult.setIssues(Collections.singletonList(new CodeValidationIssue(
 					message,
 					theIssueSeverityForCodeDisplayMismatch,
-					CodeValidationIssueTypeCode.INVALID,
+					CodeValidationIssueCode.INVALID,
 					CodeValidationIssueCoding.INVALID_DISPLAY)));
 		}
 

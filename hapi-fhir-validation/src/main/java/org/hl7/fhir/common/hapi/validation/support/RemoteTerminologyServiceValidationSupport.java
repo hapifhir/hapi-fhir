@@ -619,15 +619,15 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		} catch (ResourceNotFoundException | InvalidRequestException ex) {
 			ourLog.error(ex.getMessage(), ex);
 			String errorMessage = errorMessageBuilder.buildErrorMessage(ex.getMessage());
-			CodeValidationIssueTypeCode issueCode = ex instanceof ResourceNotFoundException
-					? CodeValidationIssueTypeCode.NOT_FOUND
-					: CodeValidationIssueTypeCode.CODE_INVALID;
+			CodeValidationIssueCode issueCode = ex instanceof ResourceNotFoundException
+					? CodeValidationIssueCode.NOT_FOUND
+					: CodeValidationIssueCode.CODE_INVALID;
 			return createErrorCodeValidationResult(issueCode, errorMessage);
 		}
 	}
 
 	private CodeValidationResult createErrorCodeValidationResult(
-			CodeValidationIssueTypeCode theIssueCode, String theMessage) {
+			CodeValidationIssueCode theIssueCode, String theMessage) {
 		IssueSeverity severity = IssueSeverity.ERROR;
 		return new CodeValidationResult()
 				.setSeverity(severity)
@@ -725,8 +725,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					String issueTypeCode = issueComponent.getCode().toCode();
 					CodeableConcept details = issueComponent.getDetails();
 					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueTypeCode);
-					CodeValidationIssueCodeableConcept issueDetails =
-							new CodeValidationIssueCodeableConcept(details.getText());
+					CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(details.getText());
 					details.getCoding().forEach(coding -> issueDetails.addCoding(coding.getSystem(), coding.getCode()));
 					issue.setDetails(issueDetails);
 					return issue;
@@ -744,8 +743,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					String issueTypeCode = issueComponent.getCode().toCode();
 					org.hl7.fhir.dstu3.model.CodeableConcept details = issueComponent.getDetails();
 					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueTypeCode);
-					CodeValidationIssueCodeableConcept issueDetails =
-							new CodeValidationIssueCodeableConcept(details.getText());
+					CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(details.getText());
 					details.getCoding().forEach(coding -> issueDetails.addCoding(coding.getSystem(), coding.getCode()));
 					issue.setDetails(issueDetails);
 					return issue;
@@ -757,7 +755,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return new CodeValidationIssue(
 				theMessage,
 				IssueSeverity.ERROR,
-				CodeValidationIssueTypeCode.INVALID,
+				CodeValidationIssueCode.INVALID,
 				CodeValidationIssueCoding.INVALID_CODE);
 	}
 
