@@ -181,6 +181,59 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testOptimizeStorage_AllVersions_SingleResourceWithMultipleVersion() {
+
+		// this difference of this test from testOptimizeStorage_AllVersions is that this one has only 1 resource
+		// (with multiple versions) in the db. There was a bug where if only one resource were being re-indexed, the
+		// resource wasn't processed for optimize storage.
+
+		// Setup
+		IIdType patientId = createPatient(withActiveTrue());
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId(patientId.toUnqualifiedVersionless());
+			p.setActive(true);
+			p.addIdentifier().setValue(String.valueOf(i));
+			myPatientDao.update(p, mySrd);
+		}
+
+		// Move resource text to compressed storage, which we don't write to anymore but legacy
+		// data may exist that was previously stored there, so we're simulating that.
+		List<ResourceHistoryTable> allHistoryEntities = runInTransaction(() -> myResourceHistoryTableDao.findAll());
+		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(t.getResourceId(), t.getVersion()));
+
+		runInTransaction(()->{
+			assertEquals(11, myResourceHistoryTableDao.count());
+			for (ResourceHistoryTable history : myResourceHistoryTableDao.findAll()) {
+				assertNull(history.getResourceTextVc());
+				assertNotNull(history.getResource());
+			}
+		});
+
+		// execute
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_REINDEX);
+		startRequest.setParameters(
+			new ReindexJobParameters()
+				.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS)
+				.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE)
+		);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
+		myBatch2JobHelper.awaitJobCompletion(startResponse);
+
+		// validate
+		runInTransaction(()->{
+			assertEquals(11, myResourceHistoryTableDao.count());
+			for (ResourceHistoryTable history : myResourceHistoryTableDao.findAll()) {
+				assertNotNull(history.getResourceTextVc());
+				assertNull(history.getResource());
+			}
+		});
+		Patient patient = myPatientDao.read(patientId, mySrd);
+		assertTrue(patient.getActive());
+	}
+
+	@Test
 	public void testOptimizeStorage_AllVersions_CopyProvenanceEntityData() {
 		// Setup
 		myStorageSettings.setStoreMetaSourceInformation(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);

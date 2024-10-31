@@ -133,6 +133,7 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -1693,9 +1694,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (theOptimizeStorageMode == ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS) {
 				int pageSize = 100;
 				for (int page = 0; ((long) page * pageSize) < entity.getVersion(); page++) {
+
+					// We need to sort the pages, because we are updating the same data we are paging through.
+					// If not sorted explicitly, a database like Postgres returns the same data multiple times on
+					// different pages as the underlying data gets updated.
+					PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("myId"));
 					Slice<ResourceHistoryTable> historyEntities =
 							myResourceHistoryTableDao.findForResourceIdAndReturnEntitiesAndFetchProvenance(
-									PageRequest.of(page, pageSize), entity.getId(), historyEntity.getVersion());
+									pageRequest, entity.getId(), historyEntity.getVersion());
+
 					for (ResourceHistoryTable next : historyEntities) {
 						reindexOptimizeStorageHistoryEntity(entity, next);
 					}
