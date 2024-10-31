@@ -2043,6 +2043,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEmptySearch() {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Bundle responseBundle;
 
 		responseBundle = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();

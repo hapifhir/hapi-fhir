@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.helger.commons.lang.StackTraceHelper;
@@ -50,8 +51,13 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	protected int myPartitionId3;
 	protected int myPartitionId4;
 	private boolean myHaveDroppedForcedIdUniqueConstraint;
+
 	@Autowired
 	private IPartitionLookupSvc myPartitionConfigSvc;
+	@Autowired
+	private SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
+
+	private boolean mySearchParamValidatingInterceptorAddded;
 
 	@AfterEach
 	public void after() {
@@ -68,6 +74,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
 		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().getMatchUrlCache());
+
+		if (mySearchParamValidatingInterceptorAddded) {
+			myInterceptorRegistry.unregisterInterceptor(mySearchParamValidatingInterceptor);
+		}
 	}
 
 	protected void assertNoRemainingPartitionIds() {
@@ -112,6 +122,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			myPartitionConfigSvc.getPartitionById(i);
 		}
 
+		if (myInterceptorRegistry.getAllRegisteredInterceptors().stream().noneMatch(t -> t instanceof SearchParamValidatingInterceptor)) {
+			myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
+			mySearchParamValidatingInterceptorAddded = true;
+		}
 	}
 
 	protected void registerPartitionInterceptor() {

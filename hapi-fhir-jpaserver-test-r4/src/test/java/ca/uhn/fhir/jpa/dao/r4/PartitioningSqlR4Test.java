@@ -109,9 +109,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
-	@Autowired
-	private SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
-	private boolean mySearchParamValidatingInterceptorAddded;
 
 	@BeforeEach
 	public void disableAdvanceIndexing() {
@@ -124,11 +121,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@BeforeEach
 	public void beforeEach() {
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
-
-		if (myInterceptorRegistry.getAllRegisteredInterceptors().stream().noneMatch(t -> t instanceof SearchParamValidatingInterceptor)) {
-			myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
-			mySearchParamValidatingInterceptorAddded = true;
-		}
 	}
 
 	@AfterEach
@@ -136,10 +128,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		JpaStorageSettings defaults = new JpaStorageSettings();
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaults.isMarkResourcesForReindexingUponSearchParameterChange());
 		myStorageSettings.setMatchUrlCacheEnabled(defaults.isMatchUrlCacheEnabled());
-
-		if (mySearchParamValidatingInterceptorAddded) {
-			myInterceptorRegistry.unregisterInterceptor(mySearchParamValidatingInterceptor);
-		}
 	}
 
 	@Test

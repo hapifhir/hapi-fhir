@@ -12,15 +12,14 @@ import java.util.Properties;
 public class BaseConfig {
 
 	protected void configureLuceneProperties(Properties extraProperties, String fhirLuceneLocation) {
-//		IndexSettings.indexKey(LuceneIndexSettings.)
+		//		IndexSettings.indexKey(LuceneIndexSettings.)
 
 		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 		extraProperties.put(
-			BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
-			HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
+				BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
+				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), fhirLuceneLocation);
 		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 	}
-
 }
