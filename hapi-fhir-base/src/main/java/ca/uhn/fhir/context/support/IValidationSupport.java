@@ -542,6 +542,9 @@ public interface IValidationSupport {
 		}
 
 		public List<CodeValidationIssueCoding> getCodings() {
+			if (myCodings == null) {
+				myCodings = new ArrayList<>();
+			}
 			return myCodings;
 		}
 	}
