@@ -119,10 +119,10 @@ public class ValidationWithRemoteTerminologyTest extends BaseResourceProviderR4T
 		encounter.setStatus(Encounter.EncounterStatus.PLANNED);
 
 		// preferred binding
-		/* encounter.getClass_()
+		encounter.getClass_()
 				.setSystem("http://terminology.hl7.org/CodeSystem/v3-ActCode")
 				.setCode("IMP")
-				.setDisplay("inpatient encounter");*/
+				.setDisplay("inpatient encounter");
 
 		// extensible binding
 		encounter.addIdentifier()
