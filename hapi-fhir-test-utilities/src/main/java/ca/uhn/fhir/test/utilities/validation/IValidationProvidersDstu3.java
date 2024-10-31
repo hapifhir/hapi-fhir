@@ -3,7 +3,10 @@ package ca.uhn.fhir.test.utilities.validation;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.UriParam;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -17,7 +20,11 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.getInputKey;
 
 public interface IValidationProvidersDstu3 {
 	@SuppressWarnings("unused")
@@ -26,19 +33,20 @@ public interface IValidationProvidersDstu3 {
 		private CodeType myCode;
 		private StringType myDisplay;
 		private Exception myException;
-		private Parameters myReturnParams;
+		private final Map<String, Parameters> myReturnParamMap = new HashMap<>();
+		private final Map<String, CodeSystem> myReturnCodeSystemMap = new HashMap<>();
 
 		@Operation(name = "$validate-code", idempotent = true, returnParameters = {
-				@OperationParam(name = "result", type = org.hl7.fhir.dstu3.model.BooleanType.class, min = 1),
-				@OperationParam(name = "message", type = org.hl7.fhir.dstu3.model.StringType.class),
-				@OperationParam(name = "display", type = org.hl7.fhir.dstu3.model.StringType.class)
+				@OperationParam(name = "result", type = BooleanType.class, min = 1),
+				@OperationParam(name = "message", type = StringType.class),
+				@OperationParam(name = "display", type = StringType.class)
 		})
-		public org.hl7.fhir.dstu3.model.Parameters validateCode(
+		public Parameters validateCode(
 				HttpServletRequest theServletRequest,
-				@IdParam(optional = true) org.hl7.fhir.dstu3.model.IdType theId,
-				@OperationParam(name = "url", min = 0, max = 1) org.hl7.fhir.dstu3.model.UriType theCodeSystemUrl,
-				@OperationParam(name = "code", min = 0, max = 1) org.hl7.fhir.dstu3.model.CodeType theCode,
-				@OperationParam(name = "display", min = 0, max = 1) org.hl7.fhir.dstu3.model.StringType theDisplay
+				@IdParam(optional = true) IdType theId,
+				@OperationParam(name = "url", min = 0, max = 1) UriType theCodeSystemUrl,
+				@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+				@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay
 		) throws Exception {
 			mySystemUrl = theCodeSystemUrl;
 			myCode = theCode;
@@ -46,28 +54,41 @@ public interface IValidationProvidersDstu3 {
 			if (myException != null) {
 				throw myException;
 			}
-			return myReturnParams;
+			String codeSystemUrl = theCodeSystemUrl != null ? theCodeSystemUrl.getValue() : null;
+			String code = theCode != null ? theCode.getValue() : null;
+			return myReturnParamMap.get(getInputKey("$validate-code", codeSystemUrl, code));
 		}
 
 		@Operation(name = "$lookup", idempotent = true, returnParameters= {
-				@OperationParam(name = "name", type = org.hl7.fhir.dstu3.model.StringType.class, min = 1),
-				@OperationParam(name = "version", type = org.hl7.fhir.dstu3.model.StringType.class),
-				@OperationParam(name = "display", type = org.hl7.fhir.dstu3.model.StringType.class, min = 1),
-				@OperationParam(name = "abstract", type = org.hl7.fhir.dstu3.model.BooleanType.class, min = 1),
-				@OperationParam(name = "property", type = org.hl7.fhir.dstu3.model.StringType.class, min = 0, max = OperationParam.MAX_UNLIMITED)
+				@OperationParam(name = "name", type = StringType.class, min = 1),
+				@OperationParam(name = "version", type = StringType.class),
+				@OperationParam(name = "display", type = StringType.class, min = 1),
+				@OperationParam(name = "abstract", type = BooleanType.class, min = 1),
+				@OperationParam(name = "property", type = StringType.class, min = 0, max = OperationParam.MAX_UNLIMITED)
 		})
 		public IBaseParameters lookup(
 				HttpServletRequest theServletRequest,
-				@OperationParam(name = "code", max = 1) org.hl7.fhir.dstu3.model.CodeType theCode,
-				@OperationParam(name = "system",max = 1) org.hl7.fhir.dstu3.model.UriType theSystem,
+				@OperationParam(name = "code", max = 1) CodeType theCode,
+				@OperationParam(name = "system",max = 1) UriType theSystem,
 				@OperationParam(name = "coding", max = 1) Coding theCoding,
-				@OperationParam(name = "version", max = 1) org.hl7.fhir.dstu3.model.StringType theVersion,
-				@OperationParam(name = "displayLanguage", max = 1) org.hl7.fhir.dstu3.model.CodeType theDisplayLanguage,
-				@OperationParam(name = "property", max = OperationParam.MAX_UNLIMITED) List<org.hl7.fhir.dstu3.model.CodeType> thePropertyNames,
+				@OperationParam(name = "version", max = 1) StringType theVersion,
+				@OperationParam(name = "displayLanguage", max = 1) CodeType theDisplayLanguage,
+				@OperationParam(name = "property", max = OperationParam.MAX_UNLIMITED) List<CodeType> thePropertyNames,
 				RequestDetails theRequestDetails
-		) {
+		) throws Exception {
+			mySystemUrl = theSystem;
 			myCode = theCode;
-			return myReturnParams;
+			if (myException != null) {
+				throw myException;
+			}
+			String codeSystemUrl = theSystem != null ? theSystem.getValue() : null;
+			String code = theCode != null ? theCode.getValue() : null;
+			return myReturnParamMap.get(getInputKey("$lookup", codeSystemUrl, code));
+		}
+
+		@Search
+		public List<CodeSystem> find(@RequiredParam(name = "url") UriParam theUrlParam) {
+			return !theUrlParam.isEmpty() ? List.of(myReturnCodeSystemMap.get(theUrlParam.getValue())) : List.of();
 		}
 
 		@Override
@@ -79,8 +100,11 @@ public interface IValidationProvidersDstu3 {
 			myException = theException;
 		}
 		@Override
-		public void setReturnParams(IBaseParameters theParameters) {
-			myReturnParams = (Parameters) theParameters;
+		public void addReturnParams(String theOperation, String theUrl, String theCode, IBaseParameters theParameters) {
+			myReturnParamMap.put(getInputKey(theOperation, theUrl, theCode), (Parameters) theParameters);
+		}
+		public void addReturnCodeSystem(CodeSystem theCodeSystem) {
+			myReturnCodeSystemMap.put(theCodeSystem.getUrl(), theCodeSystem);
 		}
 		@Override
 		public String getCode() {
@@ -97,26 +121,27 @@ public interface IValidationProvidersDstu3 {
 
 	@SuppressWarnings("unused")
 	class MyValueSetProviderDstu3 implements IValidationProviders.IMyValueSetProvider {
-		private Exception myException;
-		private Parameters myReturnParams;
 		private UriType mySystemUrl;
 		private UriType myValueSetUrl;
 		private CodeType myCode;
 		private StringType myDisplay;
+		private Exception myException;
+		private final Map<String, Parameters> myReturnParamMap = new HashMap<>();
+		private final Map<String, ValueSet> myReturnValueSetMap = new HashMap<>();
 
 		@Operation(name = "$validate-code", idempotent = true, returnParameters = {
 				@OperationParam(name = "result", type = BooleanType.class, min = 1),
-				@OperationParam(name = "message", type = org.hl7.fhir.dstu3.model.StringType.class),
-				@OperationParam(name = "display", type = org.hl7.fhir.dstu3.model.StringType.class)
+				@OperationParam(name = "message", type = StringType.class),
+				@OperationParam(name = "display", type = StringType.class)
 		})
 		public Parameters validateCode(
 				HttpServletRequest theServletRequest,
 				@IdParam(optional = true) IdType theId,
-				@OperationParam(name = "url", min = 0, max = 1) org.hl7.fhir.dstu3.model.UriType theValueSetUrl,
+				@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
 				@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
 				@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
 				@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
-				@OperationParam(name = "valueSet") org.hl7.fhir.dstu3.model.ValueSet theValueSet
+				@OperationParam(name = "valueSet") ValueSet theValueSet
 		) throws Exception {
 			mySystemUrl = theSystem;
 			myValueSetUrl = theValueSetUrl;
@@ -125,8 +150,16 @@ public interface IValidationProvidersDstu3 {
 			if (myException != null) {
 				throw myException;
 			}
-			return myReturnParams;
+			String valueSetUrl = theValueSetUrl != null ? theValueSetUrl.getValue() : null;
+			String code = theCode != null ? theCode.getValue() : null;
+			return myReturnParamMap.get(getInputKey("$validate-code", valueSetUrl, code));
 		}
+
+		@Search
+		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam) {
+			return !theUrlParam.isEmpty() ? List.of(myReturnValueSetMap.get(theUrlParam.getValue())) : List.of();
+		}
+
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return ValueSet.class;
@@ -135,8 +168,11 @@ public interface IValidationProvidersDstu3 {
 			myException = theException;
 		}
 		@Override
-		public void setReturnParams(IBaseParameters theParameters) {
-			myReturnParams = (Parameters) theParameters;
+		public void addReturnParams(String theOperation, String theUrl, String theCode, IBaseParameters theReturnParams) {
+			myReturnParamMap.put(getInputKey(theOperation, theUrl, theCode), (Parameters) theReturnParams);
+		}
+		public void addReturnValueSet(ValueSet theValueSet) {
+			myReturnValueSetMap.put(theValueSet.getUrl(), theValueSet);
 		}
 		@Override
 		public String getCode() {

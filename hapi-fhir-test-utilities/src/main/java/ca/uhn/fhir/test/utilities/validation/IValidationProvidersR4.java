@@ -3,7 +3,10 @@ package ca.uhn.fhir.test.utilities.validation;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.UriParam;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -17,7 +20,11 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.getInputKey;
 
 public interface IValidationProvidersR4 {
 
@@ -27,8 +34,8 @@ public interface IValidationProvidersR4 {
 		private CodeType myCode;
 		private StringType myDisplay;
 		private Exception myException;
-		private Parameters myReturnParams;
-		private List<CodeSystem> myReturnCodeSystems;
+		private final Map<String, Parameters> myReturnParamMap = new HashMap<>();
+		private final Map<String, CodeSystem> myReturnCodeSystemMap = new HashMap<>();
 
 		@Operation(name = "$validate-code", idempotent = true, returnParameters = {
 				@OperationParam(name = "result", type = BooleanType.class, min = 1),
@@ -48,7 +55,9 @@ public interface IValidationProvidersR4 {
 			if (myException != null) {
 				throw myException;
 			}
-			return myReturnParams;
+			String codeSystemUrl = theCodeSystemUrl != null ? theCodeSystemUrl.getValue() : null;
+			String code = theCode != null ? theCode.getValue() : null;
+			return myReturnParamMap.get(getInputKey("$validate-code", codeSystemUrl, code));
 		}
 
 		@Operation(name = "$lookup", idempotent = true, returnParameters= {
@@ -73,7 +82,14 @@ public interface IValidationProvidersR4 {
 			if (myException != null) {
 				throw myException;
 			}
-			return myReturnParams;
+			String codeSystemUrl = theSystem != null ? theSystem.getValue() : null;
+			String code = theCode != null ? theCode.getValue() : null;
+			return myReturnParamMap.get(getInputKey("$lookup", codeSystemUrl, code));
+		}
+
+		@Search
+		public List<CodeSystem> find(@RequiredParam(name = "url") UriParam theUrlParam) {
+			return !theUrlParam.isEmpty() ? List.of(myReturnCodeSystemMap.get(theUrlParam.getValue())) : List.of();
 		}
 
 		@Override
@@ -85,8 +101,11 @@ public interface IValidationProvidersR4 {
 			myException = theException;
 		}
 		@Override
-		public void setReturnParams(IBaseParameters theParameters) {
-			myReturnParams = (Parameters) theParameters;
+		public void addReturnParams(String theOperation, String theUrl, String theCode, IBaseParameters theParameters) {
+			myReturnParamMap.put(getInputKey(theOperation, theUrl, theCode), (Parameters) theParameters);
+		}
+		public void addReturnCodeSystem(CodeSystem theCodeSystem) {
+			myReturnCodeSystemMap.put(theCodeSystem.getUrl(), theCodeSystem);
 		}
 		@Override
 		public String getCode() {
@@ -103,12 +122,13 @@ public interface IValidationProvidersR4 {
 
 	@SuppressWarnings("unused")
 	class MyValueSetProviderR4 implements IValidationProviders.IMyValueSetProvider {
-		private Exception myException;
-		private Parameters myReturnParams;
 		private UriType mySystemUrl;
 		private UriType myValueSetUrl;
 		private CodeType myCode;
 		private StringType myDisplay;
+		private Exception myException;
+		private final Map<String, Parameters> myReturnParamMap = new HashMap<>();
+		private final Map<String, ValueSet> myReturnValueSetMap = new HashMap<>();
 
 		@Operation(name = "$validate-code", idempotent = true, returnParameters = {
 				@OperationParam(name = "result", type = BooleanType.class, min = 1),
@@ -131,7 +151,14 @@ public interface IValidationProvidersR4 {
 			if (myException != null) {
 				throw myException;
 			}
-			return myReturnParams;
+			String valueSetUrl = theValueSetUrl != null ? theValueSetUrl.getValue() : null;
+			String code = theCode != null ? theCode.getValue() : null;
+			return myReturnParamMap.get(getInputKey("$validate-code", valueSetUrl, code));
+		}
+
+		@Search
+		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam) {
+			return !theUrlParam.isEmpty() ? List.of(myReturnValueSetMap.get(theUrlParam.getValue())) : List.of();
 		}
 
 		@Override
@@ -142,8 +169,11 @@ public interface IValidationProvidersR4 {
 			myException = theException;
 		}
 		@Override
-		public void setReturnParams(IBaseParameters theParameters) {
-			myReturnParams = (Parameters) theParameters;
+		public void addReturnParams(String theOperation, String theUrl, String theCode, IBaseParameters theReturnParams) {
+			myReturnParamMap.put(getInputKey(theOperation, theUrl, theCode), (Parameters) theReturnParams);
+		}
+		public void addReturnValueSet(ValueSet theValueSet) {
+			myReturnValueSetMap.put(theValueSet.getUrl(), theValueSet);
 		}
 		@Override
 		public String getCode() {

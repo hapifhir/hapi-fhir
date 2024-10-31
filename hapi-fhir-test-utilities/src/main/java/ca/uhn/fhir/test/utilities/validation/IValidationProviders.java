@@ -14,12 +14,16 @@ public interface IValidationProviders {
 	String LANGUAGE = "en";
 	String ERROR_MESSAGE = "This is an error message";
 
+	static String getInputKey(String theOperation, String theUrl, String theCode) {
+		return theOperation + "-" + theUrl + "#" + theCode;
+	}
+
 	interface IMyCodeSystemProvider extends IResourceProvider {
 		String getCode();
 		String getSystem();
 		String getDisplay();
 		void setException(Exception theException);
-		void setReturnParams(IBaseParameters theParameters);
+		void addReturnParams(String theOperation, String theCodeSystemUrl, String theCode, IBaseParameters theParameters);
 	}
 
 	interface IMyLookupCodeProvider extends IResourceProvider {
@@ -34,6 +38,6 @@ public interface IValidationProviders {
 		String getDisplay();
 		String getValueSet();
 		void setException(Exception theException);
-		void setReturnParams(IBaseParameters theParameters);
+		void addReturnParams(String theOperation, String theValueSetUrl, String theCode, IBaseParameters theReturnParams);
 	}
 }

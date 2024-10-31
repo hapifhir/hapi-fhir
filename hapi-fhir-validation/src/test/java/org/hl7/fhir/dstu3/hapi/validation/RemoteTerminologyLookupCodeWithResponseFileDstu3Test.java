@@ -20,6 +20,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_LOOKUP;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,7 +55,7 @@ public class RemoteTerminologyLookupCodeWithResponseFileDstu3Test {
 		IBaseResource baseResource = ourCtx.newJsonParser().parseResource(paramsAsString);
 		assertTrue(baseResource instanceof Parameters);
 		Parameters resultParameters = (Parameters) baseResource;
-		myCodeSystemProvider.setReturnParams(resultParameters);
+		myCodeSystemProvider.addReturnParams(OPERATION_LOOKUP, CODE_SYSTEM, CODE, resultParameters);
 
 		LookupCodeRequest request = new LookupCodeRequest(IValidationProviders.CODE_SYSTEM, IValidationProviders.CODE, null, List.of("interfaces"));
 
