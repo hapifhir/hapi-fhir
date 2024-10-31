@@ -138,7 +138,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myStorageSettings.setMatchUrlCacheEnabled(defaults.isMatchUrlCacheEnabled());
 
 		if (mySearchParamValidatingInterceptorAddded) {
-			myInterceptorRegistry.unregisterInterceptor(mySearchParamValidatingInterceptor)
+			myInterceptorRegistry.unregisterInterceptor(mySearchParamValidatingInterceptor);
 		}
 	}
 
