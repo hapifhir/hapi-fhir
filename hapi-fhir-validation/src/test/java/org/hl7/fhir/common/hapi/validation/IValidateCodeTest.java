@@ -33,8 +33,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public interface IValidateCodeTest {
 
-	IValidationProviders.IMyCodeSystemProvider getCodeSystemProvider();
-	IValidationProviders.IMyValueSetProvider getValueSetProvider();
+	IValidationProviders.IMyValidationProvider getCodeSystemProvider();
+	IValidationProviders.IMyValidationProvider getValueSetProvider();
 	IValidationSupport getService();
 	IBaseParameters createParameters(Boolean theResult, String theDisplay, String theMessage, IBaseResource theIssuesResource);
 	String getCodeSystemError();
@@ -43,11 +43,11 @@ public interface IValidateCodeTest {
 	IBaseOperationOutcome getValueSetInvalidCodeOutcome();
 
 	default void createCodeSystemReturnParameters(Boolean theResult, String theDisplay, String theMessage, IBaseResource theIssuesResource) {
-		getCodeSystemProvider().addReturnParams(OPERATION_VALIDATE_CODE, CODE_SYSTEM, CODE, createParameters(theResult, theDisplay, theMessage, theIssuesResource));
+		getCodeSystemProvider().addTerminologyResponse(OPERATION_VALIDATE_CODE, CODE_SYSTEM, CODE, createParameters(theResult, theDisplay, theMessage, theIssuesResource));
 	}
 
 	default void createValueSetReturnParameters(Boolean theResult, String theDisplay, String theMessage, IBaseResource theIssuesResource) {
-		getValueSetProvider().addReturnParams(OPERATION_VALIDATE_CODE, VALUE_SET_URL, CODE, createParameters(theResult, theDisplay, theMessage, theIssuesResource));
+		getValueSetProvider().addTerminologyResponse(OPERATION_VALIDATE_CODE, VALUE_SET_URL, CODE, createParameters(theResult, theDisplay, theMessage, theIssuesResource));
 	}
 
 	@Test
@@ -93,8 +93,8 @@ public interface IValidateCodeTest {
 																																	String theValidationMessage,
 																																	String theCodeSystem,
 																																	String theValueSetUrl) {
-		getCodeSystemProvider().setException(theException);
-		getValueSetProvider().setException(theException);
+		getCodeSystemProvider().addException(OPERATION_VALIDATE_CODE, theCodeSystem, CODE, theException);
+		getValueSetProvider().addException(OPERATION_VALIDATE_CODE, theValueSetUrl, CODE, theException);
 		CodeValidationResult outcome = getService().validateCode(null, null, theCodeSystem, CODE, DISPLAY, theValueSetUrl);
 
 		verifyErrorResultFromException(outcome, theValidationMessage, theServerMessage);
@@ -133,10 +133,6 @@ public interface IValidateCodeTest {
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
 		assertTrue(outcome.getIssues().isEmpty());
-
-		assertEquals(CODE, getValueSetProvider().getCode());
-		assertEquals(DISPLAY, getValueSetProvider().getDisplay());
-		assertEquals(VALUE_SET_URL, getValueSetProvider().getValueSet());
 	}
 
 	@Test
@@ -150,8 +146,6 @@ public interface IValidateCodeTest {
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
 		assertTrue(outcome.getIssues().isEmpty());
-
-		assertEquals(CODE, getCodeSystemProvider().getCode());
 	}
 
 	@Test
@@ -168,9 +162,6 @@ public interface IValidateCodeTest {
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
 		assertTrue(outcome.getIssues().isEmpty());
-
-		assertEquals(CODE, getCodeSystemProvider().getCode());
-		assertEquals(CODE_SYSTEM, getCodeSystemProvider().getSystem());
 	}
 
 	@Test
@@ -187,10 +178,6 @@ public interface IValidateCodeTest {
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
 		assertTrue(outcome.getIssues().isEmpty());
-
-		assertEquals(CODE, getCodeSystemProvider().getCode());
-		assertEquals(DISPLAY, getCodeSystemProvider().getDisplay());
-		assertEquals(CODE_SYSTEM, getCodeSystemProvider().getSystem());
 	}
 
 	@Test
@@ -245,9 +232,6 @@ public interface IValidateCodeTest {
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
 		assertTrue(outcome.getIssues().isEmpty());
-
-		assertEquals(CODE, getValueSetProvider().getCode());
-		assertEquals(VALUE_SET_URL, getValueSetProvider().getValueSet());
 	}
 
 	@Test
@@ -264,10 +248,6 @@ public interface IValidateCodeTest {
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
 		assertTrue(outcome.getIssues().isEmpty());
-
-		assertEquals(CODE, getValueSetProvider().getCode());
-		assertEquals(DISPLAY, getValueSetProvider().getDisplay());
-		assertEquals(VALUE_SET_URL, getValueSetProvider().getValueSet());
 	}
 
 	@Test
@@ -288,10 +268,6 @@ public interface IValidateCodeTest {
 		assertEquals(1, outcome.getIssues().size());
 		assertEquals(expectedError, outcome.getIssues().get(0).getDiagnostics());
 		assertEquals(ERROR, outcome.getIssues().get(0).getSeverity());
-
-		assertEquals(CODE, getValueSetProvider().getCode());
-		assertEquals(DISPLAY, getValueSetProvider().getDisplay());
-		assertEquals(VALUE_SET_URL, getValueSetProvider().getValueSet());
 	}
 
 	@Test
@@ -310,10 +286,6 @@ public interface IValidateCodeTest {
 		assertEquals(getValueSetError(), outcome.getMessage());
 		assertFalse(outcome.getIssues().isEmpty());
 		verifyIssues(invalidCodeOutcome, outcome);
-
-		assertEquals(CODE, getValueSetProvider().getCode());
-		assertEquals(DISPLAY, getValueSetProvider().getDisplay());
-		assertEquals(VALUE_SET_URL, getValueSetProvider().getValueSet());
 	}
 
 	default void verifyIssues(IBaseOperationOutcome theOperationOutcome, CodeValidationResult theResult) {

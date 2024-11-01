@@ -3,6 +3,7 @@ package org.hl7.fhir.r4.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.parser.IJsonLikeParser;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -39,6 +40,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM_VERSION;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.DISPLAY;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.ERROR_MESSAGE;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.VALUE_SET_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET;
@@ -61,8 +68,8 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
-	private IValidationProvidersR4.MyCodeSystemProviderR4 myCodeSystemProvider;
-	private IValidationProvidersR4.MyValueSetProviderR4 myValueSetProvider;
+	private IValidationProviders.IMyValidationProvider myCodeSystemProvider;
+	private IValidationProviders.IMyValidationProvider myValueSetProvider;
 	private RemoteTerminologyServiceValidationSupport mySvc;
 	private String myCodeSystemError, myValueSetError;
 
@@ -71,10 +78,10 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 		String baseUrl = "http://localhost:" + ourRestfulServerExtension.getPort();
 		myCodeSystemError = ourCtx.getLocalizer().getMessage(
 				RemoteTerminologyServiceValidationSupport.class,
-				ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, IValidationProviders.CODE_SYSTEM, IValidationProviders.CODE, baseUrl, IValidationProviders.ERROR_MESSAGE);
+				ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, CODE_SYSTEM, CODE, baseUrl, ERROR_MESSAGE);
 		myValueSetError = ourCtx.getLocalizer().getMessage(
 				RemoteTerminologyServiceValidationSupport.class,
-				ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET, IValidationProviders.CODE_SYSTEM, IValidationProviders.CODE, IValidationProviders.VALUE_SET_URL, baseUrl, IValidationProviders.ERROR_MESSAGE);
+				ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET, CODE_SYSTEM, CODE, VALUE_SET_URL, baseUrl, ERROR_MESSAGE);
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx, baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(false).setLogRequestSummary(true).setLogResponseSummary(true));
 		myCodeSystemProvider = new IValidationProvidersR4.MyCodeSystemProviderR4();
@@ -95,12 +102,12 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 	}
 
 	@Override
-	public IValidationProviders.IMyCodeSystemProvider getCodeSystemProvider() {
+	public IValidationProviders.IMyValidationProvider getCodeSystemProvider() {
 		return myCodeSystemProvider;
 	}
 
 	@Override
-	public IValidationProviders.IMyValueSetProvider getValueSetProvider() {
+	public IValidationProviders.IMyValidationProvider getValueSetProvider() {
 		return myValueSetProvider;
 	}
 
@@ -126,29 +133,25 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 
 	@Test
 	void validateCodeInValueSet_success() {
-		createValueSetReturnParameters(true, IValidationProviders.DISPLAY, null, null);
+		createValueSetReturnParameters(true, DISPLAY, null, null);
 
 		ValueSet valueSet = new ValueSet();
-		valueSet.setUrl(IValidationProviders.VALUE_SET_URL);
+		valueSet.setUrl(VALUE_SET_URL);
 
-		CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), IValidationProviders.CODE_SYSTEM, IValidationProviders.CODE, IValidationProviders.DISPLAY, valueSet);
+		CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, DISPLAY, valueSet);
 		assertNotNull(outcome);
-		assertEquals(IValidationProviders.CODE, outcome.getCode());
-		assertEquals(IValidationProviders.DISPLAY, outcome.getDisplay());
+		assertEquals(CODE, outcome.getCode());
+		assertEquals(DISPLAY, outcome.getDisplay());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
-
-		assertEquals(IValidationProviders.CODE, myValueSetProvider.getCode());
-		assertEquals(IValidationProviders.DISPLAY, myValueSetProvider.getDisplay());
-		assertEquals(IValidationProviders.VALUE_SET_URL, myValueSetProvider.getValueSet());
 	}
 
 	@Override
 	public Parameters createParameters(Boolean theResult, String theDisplay, String theMessage, IBaseResource theIssuesResource) {
 		Parameters parameters = new Parameters()
-				.addParameter("code", IValidationProviders.CODE)
-				.addParameter("system", IValidationProviders.CODE_SYSTEM)
-				.addParameter("version", IValidationProviders.CODE_SYSTEM_VERSION)
+				.addParameter("code", CODE)
+				.addParameter("system", CODE_SYSTEM)
+				.addParameter("version", CODE_SYSTEM_VERSION)
 				.addParameter("display", theDisplay)
 				.addParameter("message", theMessage);
 		if (theResult != null) {
@@ -169,16 +172,16 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 
 		@Test
 		void validateCodeInValueSet_uniqueComposeInclude() {
-			createValueSetReturnParameters(true, IValidationProviders.DISPLAY, null, null);
+			createValueSetReturnParameters(true, DISPLAY, null, null);
 
 			ValueSet valueSet = new ValueSet();
-			valueSet.setUrl(IValidationProviders.VALUE_SET_URL);
+			valueSet.setUrl(VALUE_SET_URL);
 			String systemUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
 			valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
 					Collections.singletonList(new ValueSet.ConceptSetComponent().setSystem(systemUrl)) ));
 
 			CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
-					new ConceptValidationOptions().setInferSystem(true), null, IValidationProviders.CODE, IValidationProviders.DISPLAY, valueSet);
+					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
 			// validate service doesn't return error message (as when no code system is present)
 			assertNotNull(outcome);
@@ -199,16 +202,16 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 			@ParameterizedTest
 			@MethodSource(value = "getRemoteTerminologyServerExceptions")
 			void validateCodeInValueSet_systemNotPresent_returnsValidationResultWithError(Exception theException, String theServerMessage) {
-				myValueSetProvider.setException(theException);
-				createValueSetReturnParameters(true, IValidationProviders.DISPLAY, null, null);
+				getValueSetProvider().addException("$validate-code", VALUE_SET_URL, CODE, theException);
+				createValueSetReturnParameters(true, DISPLAY, null, null);
 
 				ValueSet valueSet = new ValueSet();
-				valueSet.setUrl(IValidationProviders.VALUE_SET_URL);
+				valueSet.setUrl(VALUE_SET_URL);
 				valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
 						Lists.newArrayList(new ValueSet.ConceptSetComponent(), new ValueSet.ConceptSetComponent())));
 
 				CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
-						new ConceptValidationOptions().setInferSystem(true), null, IValidationProviders.CODE, IValidationProviders.DISPLAY, valueSet);
+						new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
 				String unknownCodeForValueSetError = "Unknown code \"null#CODE\" for ValueSet with URL \"http://value.set/url\". The Remote Terminology server http://";
 				verifyErrorResultFromException(outcome, unknownCodeForValueSetError, theServerMessage);
@@ -218,11 +221,11 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 			@ParameterizedTest
 			@MethodSource(value = "getRemoteTerminologyServerExceptions")
 			void validateCodeInValueSet_systemPresentCodeNotPresent_returnsValidationResultWithError(Exception theException, String theServerMessage) {
-				myValueSetProvider.setException(theException);
-				createValueSetReturnParameters(true, IValidationProviders.DISPLAY, null, null);
+				getValueSetProvider().addException(JpaConstants.OPERATION_VALIDATE_CODE, VALUE_SET_URL, CODE, theException);
+				createValueSetReturnParameters(true, DISPLAY, null, null);
 
 				ValueSet valueSet = new ValueSet();
-				valueSet.setUrl(IValidationProviders.VALUE_SET_URL);
+				valueSet.setUrl(VALUE_SET_URL);
 				String systemUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
 				String systemUrl2 = "http://hl7.org/fhir/ValueSet/other-valueset";
 				valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
@@ -231,7 +234,7 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 								new ValueSet.ConceptSetComponent().setSystem(systemUrl2))));
 
 				CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
-						new ConceptValidationOptions().setInferSystem(true), null, IValidationProviders.CODE, IValidationProviders.DISPLAY, valueSet);
+						new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
 				String unknownCodeForValueSetError = "Unknown code \"null#CODE\" for ValueSet with URL \"http://value.set/url\". The Remote Terminology server http://";
 				verifyErrorResultFromException(outcome, unknownCodeForValueSetError, theServerMessage);
@@ -240,10 +243,10 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 
 			@Test
 			void validateCodeInValueSet_systemPresentCodePresentValidatesOKNoVersioned() {
-				createValueSetReturnParameters(true, IValidationProviders.DISPLAY, null, null);
+				createValueSetReturnParameters(true, DISPLAY, null, null);
 
 				ValueSet valueSet = new ValueSet();
-				valueSet.setUrl(IValidationProviders.VALUE_SET_URL);
+				valueSet.setUrl(VALUE_SET_URL);
 				String systemUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
 				String systemUrl2 = "http://hl7.org/fhir/ValueSet/other-valueset";
 				valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
@@ -252,14 +255,14 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 								new ValueSet.ConceptSetComponent().setSystem(systemUrl2).setConcept(
 										Lists.newArrayList(
 												new ValueSet.ConceptReferenceComponent().setCode("not-the-code"),
-												new ValueSet.ConceptReferenceComponent().setCode(IValidationProviders.CODE) )
+												new ValueSet.ConceptReferenceComponent().setCode(CODE) )
 								)) ));
 
 				TestClientInterceptor requestInterceptor = new TestClientInterceptor();
 				mySvc.addClientInterceptor(requestInterceptor);
 
 				CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
-						new ConceptValidationOptions().setInferSystem(true), null, IValidationProviders.CODE, IValidationProviders.DISPLAY, valueSet);
+						new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
 				assertNotNull(outcome);
 				assertEquals(systemUrl2, requestInterceptor.getCapturedSystemParameter());
@@ -268,10 +271,10 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 
 			@Test
 			void validateCodeInValueSet_systemPresentCodePresentValidatesOKVersioned() {
-				createValueSetReturnParameters(true, IValidationProviders.DISPLAY, null, null);
+				createValueSetReturnParameters(true, DISPLAY, null, null);
 
 				ValueSet valueSet = new ValueSet();
-				valueSet.setUrl(IValidationProviders.VALUE_SET_URL);
+				valueSet.setUrl(VALUE_SET_URL);
 				String systemUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
 				String systemVersion = "3.0.2";
 				String systemUrl2 = "http://hl7.org/fhir/ValueSet/other-valueset";
@@ -282,14 +285,14 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 								new ValueSet.ConceptSetComponent().setSystem(systemUrl2).setVersion(system2Version).setConcept(
 										Lists.newArrayList(
 												new ValueSet.ConceptReferenceComponent().setCode("not-the-code"),
-												new ValueSet.ConceptReferenceComponent().setCode(IValidationProviders.CODE) )
+												new ValueSet.ConceptReferenceComponent().setCode(CODE) )
 								)) ));
 
 				TestClientInterceptor requestInterceptor = new TestClientInterceptor();
 				mySvc.addClientInterceptor(requestInterceptor);
 
 				CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
-						new ConceptValidationOptions().setInferSystem(true), null, IValidationProviders.CODE, IValidationProviders.DISPLAY, valueSet);
+						new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
 				assertNotNull(outcome);
 				assertEquals(systemUrl2 + "|" + system2Version, requestInterceptor.getCapturedSystemParameter());

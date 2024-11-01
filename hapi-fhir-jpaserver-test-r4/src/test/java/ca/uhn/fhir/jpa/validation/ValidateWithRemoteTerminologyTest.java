@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +16,6 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -41,8 +41,8 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
-	private IValidationProvidersR4.MyCodeSystemProviderR4 myCodeSystemProvider;
-	private IValidationProvidersR4.MyValueSetProviderR4 myValueSetProvider;
+	private IValidationProviders.MyValidationProvider<CodeSystem> myCodeSystemProvider;
+	private IValidationProviders.MyValidationProvider<ValueSet> myValueSetProvider;
 
 	@BeforeEach
 	public void before() {
@@ -215,24 +215,22 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 	}
 
 	private void setupValueSetValidateCode(String theUrl, String theSystem, String theCode, String theTerminologyResponseFile) {
-		ValueSet valueSet = new ValueSet();
-		valueSet.setId(theUrl.substring(0, theUrl.lastIndexOf("/")));
-		valueSet.setUrl(theUrl);
-		valueSet.getCompose().addInclude().setSystem(theSystem);
-		myValueSetProvider.addReturnValueSet(valueSet);
+		ValueSet valueSet = myValueSetProvider.addTerminologyResource(theUrl);
+		myCodeSystemProvider.addTerminologyResource(theSystem);
+		myValueSetProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, valueSet.getUrl(), theCode, ourCtx, theTerminologyResponseFile);
 
-		Parameters validateCodeResponse = ClasspathUtil.loadResource(ourCtx, Parameters.class, theTerminologyResponseFile);
-		myValueSetProvider.addReturnParams(OPERATION_VALIDATE_CODE, valueSet.getUrl(), theCode, validateCodeResponse);
+		// we currently do this because VersionSpecificWorkerContextWrapper has logic to infer the system when missing
+		// based on the ValueSet by calling ValidationSupportUtils#extractCodeSystemForCode.
+		valueSet.getCompose().addInclude().setSystem(theSystem);
+
+		// you will notice each of these calls require also a call to setupCodeSystemValidateCode
+		// that is necessary because VersionSpecificWorkerContextWrapper#validateCodeInValueSet
+		// which also attempts a validateCode against the CodeSystem after the validateCode against the ValueSet
 	}
 
 	private void setupCodeSystemValidateCode(String theUrl, String theCode, String theTerminologyResponseFile) {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setId(theUrl.substring(0, theUrl.lastIndexOf("/")));
-		codeSystem.setUrl(theUrl);
-		myCodeSystemProvider.addReturnCodeSystem(codeSystem);
-
-		Parameters validateCodeResponse = ClasspathUtil.loadResource(ourCtx, Parameters.class, theTerminologyResponseFile);
-		myCodeSystemProvider.addReturnParams(OPERATION_VALIDATE_CODE, codeSystem.getUrl(), theCode, validateCodeResponse);
+		CodeSystem codeSystem = myCodeSystemProvider.addTerminologyResource(theUrl);
+		myCodeSystemProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, codeSystem.getUrl(), theCode, ourCtx, theTerminologyResponseFile);
 	}
 
 	private List<String> getValidationErrors(IBaseResource theResource) {
