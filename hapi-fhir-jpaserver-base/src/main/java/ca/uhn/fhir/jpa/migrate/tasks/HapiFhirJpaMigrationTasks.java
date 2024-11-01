@@ -160,6 +160,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.withType(ColumnTypeEnum.TINYINT)
 				.heavyweightSkipByDefault();
+		version.onTable("TRM_CONCEPT")
+				.modifyColumn("20241030.20", "INDEX_STATUS")
+				.nullable()
+				.withType(ColumnTypeEnum.TINYINT)
+				.heavyweightSkipByDefault();
 	}
 
 	protected void init740() {
