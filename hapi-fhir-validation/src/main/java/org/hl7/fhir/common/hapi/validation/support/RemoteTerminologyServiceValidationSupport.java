@@ -11,6 +11,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -64,6 +65,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	private String myBaseUrl;
 	private final List<Object> myClientInterceptors = new ArrayList<>();
+	private IRestfulClientFactory myRestfulClientFactory;
 
 	/**
 	 * Constructor
@@ -72,11 +74,13 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	 */
 	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext) {
 		super(theFhirContext);
+		myRestfulClientFactory = theFhirContext.getRestfulClientFactory();
 	}
 
 	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext, String theBaseUrl) {
 		super(theFhirContext);
 		myBaseUrl = theBaseUrl;
+		myRestfulClientFactory = theFhirContext.getRestfulClientFactory();
 	}
 
 	@Override
@@ -566,7 +570,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private IGenericClient provideClient() {
-		IGenericClient retVal = myCtx.newRestfulGenericClient(myBaseUrl);
+		IGenericClient retVal = myRestfulClientFactory.newGenericClient(myBaseUrl);
 		for (Object next : myClientInterceptors) {
 			retVal.registerInterceptor(next);
 		}
@@ -640,7 +644,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		final FhirContext fhirContext = getFhirContext();
 		Optional<String> resultValue = getNamedParameterValueAsString(fhirContext, theOutput, "result");
 
-		if (!resultValue.isPresent()) {
+		if (resultValue.isEmpty()) {
 			throw new IllegalArgumentException(
 					Msg.code(2560) + "Parameter `result` is missing from the $validate-code response.");
 		}
@@ -795,5 +799,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	public void addClientInterceptor(@Nonnull Object theClientInterceptor) {
 		Validate.notNull(theClientInterceptor, "theClientInterceptor must not be null");
 		myClientInterceptors.add(theClientInterceptor);
+	}
+
+	public void setRestfulClientFactory(IRestfulClientFactory theRestfulClientFactory) {
+		myRestfulClientFactory = theRestfulClientFactory;
 	}
 }
