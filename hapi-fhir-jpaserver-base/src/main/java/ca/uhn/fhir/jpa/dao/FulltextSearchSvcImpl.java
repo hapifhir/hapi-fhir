@@ -274,7 +274,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				String msg = myFhirContext
 						.getLocalizer()
 						.getMessage(FulltextSearchSvcImpl.class, "fullTextSearchingNotPossible", params);
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(2566) + msg);
 			}
 		}
 

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Properties;
 
 @Configuration
-public class BaseConfig {
+public abstract class BaseConfig {
 
 	protected void configureLuceneProperties(Properties extraProperties, String fhirLuceneLocation) {
 		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.i18n.Msg;
 import jakarta.annotation.Nullable;
 
 public enum EntityIndexStatusEnum {
@@ -36,7 +37,7 @@ public enum EntityIndexStatusEnum {
 			case 2:
 				return INDEXING_FAILED;
 			default:
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(Msg.code(2565) + "Invalid index status: " + theColumnValue);
 		}
 	}
 
