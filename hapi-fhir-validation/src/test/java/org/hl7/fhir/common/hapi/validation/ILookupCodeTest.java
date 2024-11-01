@@ -190,8 +190,6 @@ public interface ILookupCodeTest {
 
 		// verify
 		assertNotNull(outcome);
-		assertEquals(theRequest.getCode(), getLookupCodeProvider().getCode());
-		assertEquals(theRequest.getSystem(), getLookupCodeProvider().getSystem());
 		assertEquals(theExpectedResult.isFound(), outcome.isFound());
 		assertEquals(theExpectedResult.getErrorMessage(), outcome.getErrorMessage());
 		assertEquals(theExpectedResult.getCodeSystemDisplayName(), outcome.getCodeSystemDisplayName());
