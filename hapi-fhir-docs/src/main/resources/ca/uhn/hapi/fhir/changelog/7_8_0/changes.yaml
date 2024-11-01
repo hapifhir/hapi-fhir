@@ -1,0 +1,9 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+        <li>H2 (JPA): 2.2.224 -&gt; 2.3.232</li>
+        <li>Postgresql JDBC Driver (JPA): 42.7.3 -&gt; 42.7.4</li>
+   </ul>"

@@ -20,5 +20,4 @@ public class BaseConfig {
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), fhirLuceneLocation);
 		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 	}
-
 }

@@ -17,7 +17,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManagerFactory;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
