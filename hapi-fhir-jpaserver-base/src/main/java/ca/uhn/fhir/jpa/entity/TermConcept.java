@@ -167,6 +167,9 @@ public class TermConcept implements Serializable {
 	@GenericField
 	private Long myId;
 
+	/**
+	 * See {@link EntityIndexStatusEnum} for values
+	 */
 	@Column(name = "INDEX_STATUS", nullable = true)
 	private Short myIndexStatus;
 
