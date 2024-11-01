@@ -56,7 +56,12 @@ public interface IValidationProvidersDstu3 {
 			}
 			String codeSystemUrl = theCodeSystemUrl != null ? theCodeSystemUrl.getValue() : null;
 			String code = theCode != null ? theCode.getValue() : null;
-			return myReturnParamMap.get(getInputKey("$validate-code", codeSystemUrl, code));
+			String inputKey = getInputKey("$validate-code", codeSystemUrl, code);
+			Parameters params = myReturnParamMap.get(inputKey);
+			if (params == null) {
+				throw new IllegalStateException("Test setup incomplete. Missing return params for " + inputKey);
+			}
+			return params;
 		}
 
 		@Operation(name = "$lookup", idempotent = true, returnParameters= {
@@ -83,12 +88,24 @@ public interface IValidationProvidersDstu3 {
 			}
 			String codeSystemUrl = theSystem != null ? theSystem.getValue() : null;
 			String code = theCode != null ? theCode.getValue() : null;
-			return myReturnParamMap.get(getInputKey("$lookup", codeSystemUrl, code));
+			String inputKey = getInputKey("$lookup", codeSystemUrl, code);
+			Parameters params = myReturnParamMap.get(inputKey);
+			if (params == null) {
+				throw new IllegalStateException("Test setup incomplete. Missing return params for " + inputKey);
+			}
+			return params;
 		}
 
 		@Search
 		public List<CodeSystem> find(@RequiredParam(name = "url") UriParam theUrlParam) {
-			return !theUrlParam.isEmpty() ? List.of(myReturnCodeSystemMap.get(theUrlParam.getValue())) : List.of();
+			if (theUrlParam.isEmpty()) {
+				throw new IllegalStateException("CodeSystem url should not be null.");
+			}
+			String urlValue = theUrlParam.getValue();
+			if (!myReturnCodeSystemMap.containsKey(urlValue)) {
+				throw new IllegalStateException("Test setup incomplete. CodeSystem not found " + urlValue);
+			}
+			return List.of(myReturnCodeSystemMap.get(urlValue));
 		}
 
 		@Override
@@ -152,12 +169,24 @@ public interface IValidationProvidersDstu3 {
 			}
 			String valueSetUrl = theValueSetUrl != null ? theValueSetUrl.getValue() : null;
 			String code = theCode != null ? theCode.getValue() : null;
-			return myReturnParamMap.get(getInputKey("$validate-code", valueSetUrl, code));
+			String inputKey = getInputKey("$validate-code", valueSetUrl, code);
+			Parameters params = myReturnParamMap.get(inputKey);
+			if (params == null) {
+				throw new IllegalStateException("Test setup incomplete. Missing return params for " + inputKey);
+			}
+			return params;
 		}
 
 		@Search
 		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam) {
-			return !theUrlParam.isEmpty() ? List.of(myReturnValueSetMap.get(theUrlParam.getValue())) : List.of();
+			if (theUrlParam.isEmpty()) {
+				throw new IllegalStateException("ValueSet url should not be null.");
+			}
+			String urlValue = theUrlParam.getValue();
+			if (!myReturnValueSetMap.containsKey(urlValue)) {
+				throw new IllegalStateException("Test setup incomplete. ValueSet not found " + urlValue);
+			}
+			return List.of(myReturnValueSetMap.get(urlValue));
 		}
 
 		@Override

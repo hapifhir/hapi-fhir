@@ -1,0 +1,25 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "result",
+      "valueBoolean": true
+    },
+    {
+      "name": "code",
+      "valueCode": "final"
+    },
+    {
+      "name": "system",
+      "valueUri": "http://hl7.org/fhir/procedure-status"
+    },
+    {
+      "name": "version",
+      "valueString": "5.0.0-ballot"
+    },
+    {
+      "name": "display",
+      "valueString": "Final"
+    }
+  ]
+}
