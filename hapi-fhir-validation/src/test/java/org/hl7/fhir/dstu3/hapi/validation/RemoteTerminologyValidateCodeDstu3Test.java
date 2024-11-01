@@ -10,11 +10,13 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyValidateCodeTest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
@@ -23,6 +25,11 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.List;
 
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM_VERSION;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.ERROR_MESSAGE;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.VALUE_SET_URL;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET;
 
@@ -39,8 +46,8 @@ public class RemoteTerminologyValidateCodeDstu3Test implements IRemoteTerminolog
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
-	private IValidationProvidersDstu3.MyCodeSystemProviderDstu3 myCodeSystemProvider;
-	private IValidationProvidersDstu3.MyValueSetProviderDstu3 myValueSetProvider;
+	private IValidationProviders.MyValidationProvider<CodeSystem> myCodeSystemProvider;
+	private IValidationProviders.MyValidationProvider<ValueSet> myValueSetProvider;
 	private RemoteTerminologyServiceValidationSupport mySvc;
 	private String myCodeSystemError, myValueSetError;
 
@@ -49,10 +56,10 @@ public class RemoteTerminologyValidateCodeDstu3Test implements IRemoteTerminolog
 		String baseUrl = "http://localhost:" + ourRestfulServerExtension.getPort();
 		myCodeSystemError = ourCtx.getLocalizer().getMessage(
 				RemoteTerminologyServiceValidationSupport.class,
-				ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, IValidationProviders.CODE_SYSTEM, IValidationProviders.CODE, baseUrl, IValidationProviders.ERROR_MESSAGE);
+				ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, CODE_SYSTEM, CODE, baseUrl, ERROR_MESSAGE);
 		myValueSetError = ourCtx.getLocalizer().getMessage(
 				RemoteTerminologyServiceValidationSupport.class,
-				ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET, IValidationProviders.CODE_SYSTEM, IValidationProviders.CODE, IValidationProviders.VALUE_SET_URL, baseUrl, IValidationProviders.ERROR_MESSAGE);
+				ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET, CODE_SYSTEM, CODE, VALUE_SET_URL, baseUrl, ERROR_MESSAGE);
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx, baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(false).setLogRequestSummary(true).setLogResponseSummary(true));
 		myCodeSystemProvider = new IValidationProvidersDstu3.MyCodeSystemProviderDstu3();
@@ -83,12 +90,12 @@ public class RemoteTerminologyValidateCodeDstu3Test implements IRemoteTerminolog
 	}
 
 	@Override
-	public IValidationProvidersDstu3.MyCodeSystemProviderDstu3 getCodeSystemProvider() {
+	public IValidationProviders.IMyValidationProvider getCodeSystemProvider() {
 		return myCodeSystemProvider;
 	}
 
 	@Override
-	public IValidationProvidersDstu3.MyValueSetProviderDstu3 getValueSetProvider() {
+	public IValidationProviders.IMyValidationProvider getValueSetProvider() {
 		return myValueSetProvider;
 	}
 
@@ -106,9 +113,9 @@ public class RemoteTerminologyValidateCodeDstu3Test implements IRemoteTerminolog
 	public Parameters createParameters(Boolean theResult, String theDisplay, String theMessage, IBaseResource theIssuesResource) {
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName("result").setValue(new BooleanType(theResult));
-		parameters.addParameter().setName("code").setValue(new StringType(IValidationProviders.CODE));
-		parameters.addParameter().setName("system").setValue(new UriType(IValidationProviders.CODE_SYSTEM));
-		parameters.addParameter().setName("version").setValue(new StringType(IValidationProviders.CODE_SYSTEM_VERSION));
+		parameters.addParameter().setName("code").setValue(new StringType(CODE));
+		parameters.addParameter().setName("system").setValue(new UriType(CODE_SYSTEM));
+		parameters.addParameter().setName("version").setValue(new StringType(CODE_SYSTEM_VERSION));
 		parameters.addParameter().setName("display").setValue(new StringType(theDisplay));
 		parameters.addParameter().setName("message").setValue(new StringType(theMessage));
 		parameters.addParameter().setName("issues").setResource((Resource) theIssuesResource);

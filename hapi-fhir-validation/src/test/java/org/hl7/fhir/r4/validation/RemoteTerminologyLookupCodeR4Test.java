@@ -11,10 +11,10 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyLookupCodeTest;
-import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -167,8 +167,6 @@ public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLook
 
 	@SuppressWarnings("unused")
 	static class MyLookupCodeProviderR4 implements IValidationProviders.IMyLookupCodeProvider {
-		private UriType mySystemUrl;
-		private CodeType myCode;
 		private LookupCodeResult myLookupCodeResult;
 
 		@Override
@@ -193,8 +191,6 @@ public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLook
 			@OperationParam(name = "property", max = OperationParam.MAX_UNLIMITED) List<CodeType> thePropertyNames,
 			RequestDetails theRequestDetails
 		) {
-			myCode = theCode;
-			mySystemUrl = theSystem;
 			if (theSystem == null) {
 				throw new InvalidRequestException(MessageFormat.format(MESSAGE_RESPONSE_INVALID, theCode));
 			}
@@ -206,16 +202,6 @@ public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLook
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return CodeSystem.class;
-		}
-
-		@Override
-		public String getCode() {
-			return myCode != null ? myCode.getValueAsString() : null;
-		}
-
-		@Override
-		public String getSystem() {
-			return mySystemUrl != null ? mySystemUrl.getValueAsString() : null;
 		}
 	}
 }
