@@ -90,24 +90,24 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	@Override
 	public CodeValidationResult validateCode(
-		ValidationSupportContext theValidationSupportContext,
-		ConceptValidationOptions theOptions,
-		String theCodeSystem,
-		String theCode,
-		String theDisplay,
-		String theValueSetUrl) {
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
 
 		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, null);
 	}
 
 	@Override
 	public CodeValidationResult validateCodeInValueSet(
-		ValidationSupportContext theValidationSupportContext,
-		ConceptValidationOptions theOptions,
-		String theCodeSystem,
-		String theCode,
-		String theDisplay,
-		@Nonnull IBaseResource theValueSet) {
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			@Nonnull IBaseResource theValueSet) {
 
 		IBaseResource valueSet = theValueSet;
 
@@ -143,10 +143,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	private IBaseResource fetchCodeSystem(String theSystem, @Nullable SummaryEnum theSummaryParam) {
 		IGenericClient client = provideClient();
 		Class<? extends IBaseBundle> bundleType =
-			myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
+				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
 		IQuery<IBaseBundle> codeSystemQuery = client.search()
-			.forResource("CodeSystem")
-			.where(CodeSystem.URL.matches().value(theSystem));
+				.forResource("CodeSystem")
+				.where(CodeSystem.URL.matches().value(theSystem));
 
 		if (theSummaryParam != null) {
 			codeSystemQuery.summaryMode(theSummaryParam);
@@ -163,7 +163,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	@Override
 	public LookupCodeResult lookupCode(
-		ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		final String code = theLookupCodeRequest.getCode();
 		final String system = theLookupCodeRequest.getSystem();
 		final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
@@ -175,7 +175,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		if (fhirVersion.isNewerThan(FhirVersionEnum.R4) || fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
 			throw new UnsupportedOperationException(Msg.code(710) + "Unsupported FHIR version '"
-				+ fhirVersion.getFhirVersionString() + "'. Only DSTU3 and R4 are supported.");
+					+ fhirVersion.getFhirVersionString() + "'. Only DSTU3 and R4 are supported.");
 		}
 
 		IBaseParameters params = ParametersUtil.newInstance(fhirContext);
@@ -190,15 +190,15 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			ParametersUtil.addParameterToParametersCode(fhirContext, params, "property", propertyName);
 		}
 		Class<? extends IBaseResource> codeSystemClass =
-			myCtx.getResourceDefinition("CodeSystem").getImplementingClass();
+				myCtx.getResourceDefinition("CodeSystem").getImplementingClass();
 		IBaseParameters outcome;
 		try {
 			outcome = client.operation()
-				.onType(codeSystemClass)
-				.named("$lookup")
-				.withParameters(params)
-				.useHttpGet()
-				.execute();
+					.onType(codeSystemClass)
+					.named("$lookup")
+					.withParameters(params)
+					.useHttpGet()
+					.execute();
 		} catch (ResourceNotFoundException | InvalidRequestException e) {
 			// this can potentially be moved to an interceptor and be reused in other areas
 			// where we call a remote server or by the client as a custom interceptor
@@ -207,7 +207,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			ourLog.error(e.getMessage(), e);
 			LookupCodeResult result = LookupCodeResult.notFound(system, code);
 			result.setErrorMessage(getErrorMessage(
-				ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, system, code, getBaseUrl(), e.getMessage()));
+					ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, system, code, getBaseUrl(), e.getMessage()));
 			return result;
 		}
 		if (outcome != null && !outcome.isEmpty()) {
@@ -226,7 +226,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private LookupCodeResult generateLookupCodeResultDstu3(
-		String theCode, String theSystem, org.hl7.fhir.dstu3.model.Parameters outcomeDSTU3) {
+			String theCode, String theSystem, org.hl7.fhir.dstu3.model.Parameters outcomeDSTU3) {
 		// NOTE: I wanted to put all of this logic into the IValidationSupport Class, but it would've required adding
 		// several new dependencies on version-specific libraries and that is explicitly forbidden (see comment in
 		// POM).
@@ -235,7 +235,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		result.setSearchedForSystem(theSystem);
 		result.setFound(true);
 		for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent parameterComponent :
-			outcomeDSTU3.getParameter()) {
+				outcomeDSTU3.getParameter()) {
 			String parameterTypeAsString = Objects.toString(parameterComponent.getValue(), null);
 			switch (parameterComponent.getName()) {
 				case "property":
@@ -267,7 +267,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private static BaseConceptProperty createConceptPropertyDstu3(
-		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent theParameterComponent) {
+			org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent theParameterComponent) {
 		org.hl7.fhir.dstu3.model.Property property = theParameterComponent.getChildByName("part");
 
 		// The assumption here is that we may at east 2 elements in this part
@@ -277,11 +277,11 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		List<org.hl7.fhir.dstu3.model.Base> values = property.getValues();
 		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent firstPart =
-			(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(0);
+				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(0);
 		String propertyName = ((org.hl7.fhir.dstu3.model.CodeType) firstPart.getValue()).getValue();
 
 		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent secondPart =
-			(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(1);
+				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(1);
 		org.hl7.fhir.dstu3.model.Type value = secondPart.getValue();
 
 		if (value != null) {
@@ -300,7 +300,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		// there is no dedicated value for a property group as it is an aggregate
 		for (int i = 1; i < values.size(); i++) {
 			org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent nextPart =
-				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(i);
+					(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(i);
 			BaseConceptProperty subProperty = createConceptPropertyDstu3(nextPart);
 			if (subProperty != null) {
 				groupConceptProperty.addSubProperty(subProperty);
@@ -320,7 +320,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private static BaseConceptProperty createConceptPropertyDstu3(
-		final String theName, final org.hl7.fhir.dstu3.model.Type theValue) {
+			final String theName, final org.hl7.fhir.dstu3.model.Type theValue) {
 		if (theValue == null) {
 			return null;
 		}
@@ -334,9 +334,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			case IValidationSupport.TYPE_CODING:
 				org.hl7.fhir.dstu3.model.Coding coding = (org.hl7.fhir.dstu3.model.Coding) theValue;
 				conceptProperty =
-					new CodingConceptProperty(theName, coding.getSystem(), coding.getCode(), coding.getDisplay());
+						new CodingConceptProperty(theName, coding.getSystem(), coding.getCode(), coding.getDisplay());
 				break;
-			// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
+				// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
 			default:
 				// other types will not fail for Remote Terminology
 				conceptProperty = new StringConceptProperty(theName, theValue.toString());
@@ -345,10 +345,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private ConceptDesignation createConceptDesignationDstu3(
-		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent theParameterComponent) {
+			org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent theParameterComponent) {
 		ConceptDesignation conceptDesignation = new ConceptDesignation();
 		for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent designationComponent :
-			theParameterComponent.getPart()) {
+				theParameterComponent.getPart()) {
 			org.hl7.fhir.dstu3.model.Type designationComponentValue = designationComponent.getValue();
 			if (designationComponentValue == null) {
 				continue;
@@ -359,7 +359,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					break;
 				case "use":
 					org.hl7.fhir.dstu3.model.Coding coding =
-						(org.hl7.fhir.dstu3.model.Coding) designationComponentValue;
+							(org.hl7.fhir.dstu3.model.Coding) designationComponentValue;
 					conceptDesignation.setUseSystem(coding.getSystem());
 					conceptDesignation.setUseCode(coding.getCode());
 					conceptDesignation.setUseDisplay(coding.getDisplay());
@@ -463,9 +463,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			case IValidationSupport.TYPE_CODING:
 				Coding coding = (Coding) theValue;
 				conceptProperty =
-					new CodingConceptProperty(theName, coding.getSystem(), coding.getCode(), coding.getDisplay());
+						new CodingConceptProperty(theName, coding.getSystem(), coding.getCode(), coding.getDisplay());
 				break;
-			// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
+				// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
 			default:
 				// other types will not fail for Remote Terminology
 				conceptProperty = new StringConceptProperty(theName, theValue.toString());
@@ -517,11 +517,11 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	private IBaseResource fetchValueSet(String theValueSetUrl, SummaryEnum theSummaryParam) {
 		IGenericClient client = provideClient();
 		Class<? extends IBaseBundle> bundleType =
-			myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
+				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
 
 		IQuery<IBaseBundle> valueSetQuery = client.search()
-			.forResource("ValueSet")
-			.where(CodeSystem.URL.matches().value(theValueSetUrl));
+				.forResource("ValueSet")
+				.where(CodeSystem.URL.matches().value(theValueSetUrl));
 
 		if (theSummaryParam != null) {
 			valueSetQuery.summaryMode(theSummaryParam);
@@ -561,10 +561,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		IBaseParameters params = RemoteTerminologyUtil.buildTranslateInputParameters(fhirContext, theRequest);
 
 		IBaseParameters outcome = client.operation()
-			.onType("ConceptMap")
-			.named("$translate")
-			.withParameters(params)
-			.execute();
+				.onType("ConceptMap")
+				.named("$translate")
+				.withParameters(params)
+				.execute();
 
 		return RemoteTerminologyUtil.translateOutcomeToResults(fhirContext, outcome);
 	}
@@ -582,7 +582,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	protected CodeValidationResult invokeRemoteValidateCode(
-		String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, IBaseResource theValueSet) {
+			String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, IBaseResource theValueSet) {
 		if (isBlank(theCode)) {
 			return null;
 		}
@@ -593,19 +593,19 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		ValidationErrorMessageBuilder errorMessageBuilder = theServerMessage -> {
 			if (theValueSetUrl == null && theValueSet == null) {
 				return getErrorMessage(
-					ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, theCodeSystem, theCode, getBaseUrl(), theServerMessage);
+						ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, theCodeSystem, theCode, getBaseUrl(), theServerMessage);
 			}
 			return getErrorMessage(
-				ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET,
-				theCodeSystem,
-				theCode,
-				theValueSetUrl,
-				getBaseUrl(),
-				theServerMessage);
+					ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET,
+					theCodeSystem,
+					theCode,
+					theValueSetUrl,
+					getBaseUrl(),
+					theServerMessage);
 		};
 
 		IBaseParameters input =
-			buildValidateCodeInputParameters(theCodeSystem, theCode, theDisplay, theValueSetUrl, theValueSet);
+				buildValidateCodeInputParameters(theCodeSystem, theCode, theDisplay, theValueSetUrl, theValueSet);
 
 		String resourceType = "ValueSet";
 		if (theValueSet == null && theValueSetUrl == null) {
@@ -614,39 +614,39 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		try {
 			IBaseParameters output = client.operation()
-				.onType(resourceType)
-				.named("validate-code")
-				.withParameters(input)
-				.execute();
+					.onType(resourceType)
+					.named("validate-code")
+					.withParameters(input)
+					.execute();
 			return createCodeValidationResult(output, errorMessageBuilder, theCode);
 		} catch (ResourceNotFoundException | InvalidRequestException ex) {
 			ourLog.error(ex.getMessage(), ex);
 			String errorMessage = errorMessageBuilder.buildErrorMessage(ex.getMessage());
 			CodeValidationIssueCode issueCode = ex instanceof ResourceNotFoundException
-				? CodeValidationIssueCode.NOT_FOUND
-				: CodeValidationIssueCode.CODE_INVALID;
+					? CodeValidationIssueCode.NOT_FOUND
+					: CodeValidationIssueCode.CODE_INVALID;
 			return createErrorCodeValidationResult(issueCode, errorMessage);
 		}
 	}
 
 	private CodeValidationResult createErrorCodeValidationResult(
-		CodeValidationIssueCode theIssueCode, String theMessage) {
+			CodeValidationIssueCode theIssueCode, String theMessage) {
 		IssueSeverity severity = IssueSeverity.ERROR;
 		return new CodeValidationResult()
-			.setSeverity(severity)
-			.setMessage(theMessage)
-			.addCodeValidationIssue(new CodeValidationIssue(
-				theMessage, severity, theIssueCode, CodeValidationIssueCoding.INVALID_CODE));
+				.setSeverity(severity)
+				.setMessage(theMessage)
+				.addCodeValidationIssue(new CodeValidationIssue(
+						theMessage, severity, theIssueCode, CodeValidationIssueCoding.INVALID_CODE));
 	}
 
 	private CodeValidationResult createCodeValidationResult(
-		IBaseParameters theOutput, ValidationErrorMessageBuilder theMessageBuilder, String theCode) {
+			IBaseParameters theOutput, ValidationErrorMessageBuilder theMessageBuilder, String theCode) {
 		final FhirContext fhirContext = getFhirContext();
 		Optional<String> resultValue = getNamedParameterValueAsString(fhirContext, theOutput, "result");
 
 		if (!resultValue.isPresent()) {
 			throw new IllegalArgumentException(
-				Msg.code(2560) + "Parameter `result` is missing from the $validate-code response.");
+					Msg.code(2560) + "Parameter `result` is missing from the $validate-code response.");
 		}
 
 		boolean success = resultValue.get().equalsIgnoreCase("true");
@@ -682,9 +682,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		if (issuesValue.isPresent()) {
 			// it seems to be safe to cast to IBaseOperationOutcome as any other type would not reach this point
 			createCodeValidationIssues(
-				(IBaseOperationOutcome) issuesValue.get(),
-				fhirContext.getVersion().getVersion())
-				.ifPresent(i -> i.forEach(result::addCodeValidationIssue));
+							(IBaseOperationOutcome) issuesValue.get(),
+							fhirContext.getVersion().getVersion())
+					.ifPresent(i -> i.forEach(result::addCodeValidationIssue));
 		} else {
 			// create a validation issue out of the message
 			// this is a workaround to overcome an issue in the FHIR Validator library
@@ -708,39 +708,39 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	 * @return the list of {@link ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssue}
 	 */
 	public static Optional<Collection<CodeValidationIssue>> createCodeValidationIssues(
-		IBaseOperationOutcome theOperationOutcome, FhirVersionEnum theFhirVersion) {
+			IBaseOperationOutcome theOperationOutcome, FhirVersionEnum theFhirVersion) {
 		if (theFhirVersion == FhirVersionEnum.R4) {
 			return Optional.of(createCodeValidationIssuesR4((OperationOutcome) theOperationOutcome));
 		}
 		if (theFhirVersion == FhirVersionEnum.DSTU3) {
 			return Optional.of(
-				createCodeValidationIssuesDstu3((org.hl7.fhir.dstu3.model.OperationOutcome) theOperationOutcome));
+					createCodeValidationIssuesDstu3((org.hl7.fhir.dstu3.model.OperationOutcome) theOperationOutcome));
 		}
 		return Optional.empty();
 	}
 
 	private static Collection<CodeValidationIssue> createCodeValidationIssuesR4(OperationOutcome theOperationOutcome) {
 		return theOperationOutcome.getIssue().stream()
-			.map(issueComponent ->
-				createCodeValidationIssue(issueComponent.getDetails().getText()))
-			.collect(Collectors.toList());
+				.map(issueComponent ->
+						createCodeValidationIssue(issueComponent.getDetails().getText()))
+				.collect(Collectors.toList());
 	}
 
 	private static Collection<CodeValidationIssue> createCodeValidationIssuesDstu3(
-		org.hl7.fhir.dstu3.model.OperationOutcome theOperationOutcome) {
+			org.hl7.fhir.dstu3.model.OperationOutcome theOperationOutcome) {
 		return theOperationOutcome.getIssue().stream()
-			.map(issueComponent ->
-				createCodeValidationIssue(issueComponent.getDetails().getText()))
-			.collect(Collectors.toList());
+				.map(issueComponent ->
+						createCodeValidationIssue(issueComponent.getDetails().getText()))
+				.collect(Collectors.toList());
 	}
 
 	private static CodeValidationIssue createCodeValidationIssue(String theMessage) {
 		return new CodeValidationIssue(
-			theMessage,
-			// assume issue type is OperationOutcome.IssueType#CODEINVALID as it is the only match
-			IssueSeverity.ERROR,
-			CodeValidationIssueCode.INVALID,
-			CodeValidationIssueCoding.INVALID_CODE);
+				theMessage,
+				// assume issue type is OperationOutcome.IssueType#CODEINVALID as it is the only match
+				IssueSeverity.ERROR,
+				CodeValidationIssueCode.INVALID,
+				CodeValidationIssueCoding.INVALID_CODE);
 	}
 
 	public interface ValidationErrorMessageBuilder {
@@ -748,7 +748,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	protected IBaseParameters buildValidateCodeInputParameters(
-		String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, IBaseResource theValueSet) {
+			String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, IBaseResource theValueSet) {
 		final FhirContext fhirContext = getFhirContext();
 		IBaseParameters params = ParametersUtil.newInstance(fhirContext);
 
