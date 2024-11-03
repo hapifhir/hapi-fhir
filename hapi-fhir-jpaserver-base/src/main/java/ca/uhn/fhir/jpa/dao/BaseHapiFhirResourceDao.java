@@ -1652,8 +1652,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} catch (Exception e) {
 			ourLog.warn("Failure during reindex: {}", e.toString());
 			theReindexOutcome.addWarning("Failed to reindex resource " + entity.getIdDt() + ": " + e);
-			myResourceTableDao.updateIndexStatus(
-					entity.getId(), EntityIndexStatusEnum.INDEXING_FAILED.getColumnValue());
+			myResourceTableDao.updateIndexStatus(entity.getId(), EntityIndexStatusEnum.INDEXING_FAILED);
 		}
 	}
 

@@ -281,7 +281,7 @@ public class ResourceReindexingSvcImplTest {
 
 		// verify
 		assertEquals(0, count);
-		verify(myResourceTableDao, times(1)).updateIndexStatus(eq(0L), eq(EntityIndexStatusEnum.INDEXING_FAILED.getColumnValue()));
+		verify(myResourceTableDao, times(1)).updateIndexStatus(eq(0L), eq(EntityIndexStatusEnum.INDEXING_FAILED));
 	}
 
 	@Test

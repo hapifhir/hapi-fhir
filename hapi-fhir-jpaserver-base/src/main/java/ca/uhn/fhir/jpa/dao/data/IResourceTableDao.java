@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -121,7 +122,7 @@ public interface IResourceTableDao
 
 	@Modifying
 	@Query("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myId = :id")
-	void updateIndexStatus(@Param("id") Long theId, @Param("status") short theIndexStatus);
+	void updateIndexStatus(@Param("id") Long theId, @Param("status") EntityIndexStatusEnum theIndexStatus);
 
 	@Modifying
 	@Query("UPDATE ResourceTable t SET t.myUpdated = :updated WHERE t.myId = :id")

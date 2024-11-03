@@ -434,7 +434,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		txTemplate.execute((TransactionCallback<Void>) theStatus -> {
 			ourLog.info("Marking resource with PID {} as indexing_failed", theId);
 
-			myResourceTableDao.updateIndexStatus(theId, EntityIndexStatusEnum.INDEXING_FAILED.getColumnValue());
+			myResourceTableDao.updateIndexStatus(theId, EntityIndexStatusEnum.INDEXING_FAILED);
 
 			Query q = myEntityManager.createQuery("DELETE FROM ResourceTag t WHERE t.myResourceId = :id");
 			q.setParameter("id", theId);
