@@ -1113,6 +1113,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return entity;
 	}
 
+	/**
+	 * This methor returns the {@link EntityIndexStatusEnum} value that should be
+	 * used for a successfully fully indexed resource. This method will return
+	 * {@link EntityIndexStatusEnum#INDEXED_ALL} or {@link EntityIndexStatusEnum#INDEXED_RDBMS_ONLY}
+	 * depending on configuration.
+	 */
+	@Nonnull
 	private EntityIndexStatusEnum getEntityIndexedStatusEnum() {
 		if (myStorageSettings.isHibernateSearchIndexFullText()
 				|| myStorageSettings.isHibernateSearchIndexSearchParams()) {
