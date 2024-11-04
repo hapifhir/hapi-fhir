@@ -32,6 +32,23 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_VALIDATE_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Tests resource validation with Remote Terminology bindings.
+ * To create a new test, you need to do 3 things:
+ * (1) the resource profile, if any custom one is needed should be stored in the FHIR repository
+ * (2) all the CodeSystem and ValueSet terminology resources need to be added to the corresponding resource provider.
+ * At the moment only placeholder CodeSystem/ValueSet resources are returned with id and url populated. For the moment
+ * there was no need to load the full resource, but that can be done if there is logic run which requires it.
+ * This is a minimal setup.
+ * (3) the Remote Terminology operation responses that are needed for the test need to be added to the corresponding
+ * resource provider. The intention is to record and use the responses of an actual terminology server
+ * e.g. <a href="https://r4.ontoserver.csiro.au/fhir/">OntoServer</a>.
+ * This is done as a result of the fact that unit test cannot always catch bugs which are introduced as a result of
+ * changes in the OntoServer or FHIR Validator library, or both.
+ * @see #setupValueSetValidateCode
+ * @see #setupCodeSystemValidateCode
+ * The responses are in Parameters resource format where issues is an OperationOutcome resource.
+ */
 public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Test {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
