@@ -895,6 +895,6 @@ public class SearchParameterMap implements Serializable {
 		long numFulltextParams = this.keySet().stream()
 				.filter(t -> t.equals(Constants.PARAM_CONTENT) || t.equals(Constants.PARAM_TEXT))
 				.count();
-		return this.keySet().size() > numFulltextParams;
+		return numFulltextParams > 0 && this.keySet().size() > numFulltextParams;
 	}
 }
