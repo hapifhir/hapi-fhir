@@ -17,11 +17,14 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndexTests {
 
@@ -355,7 +360,6 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndex
 		// test
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 		TokenAndListParam tokenAndListParam = new TokenAndListParam();
 		tokenAndListParam.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("true")));
 		map.add("active", tokenAndListParam);
@@ -392,7 +396,6 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndex
 		// test
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 		TokenAndListParam tokenAndListParam = new TokenAndListParam();
 		tokenAndListParam.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("true")));
 		map.add("active", tokenAndListParam);
@@ -403,6 +406,29 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndex
 		// verify
 		List<String> ids = provider.getAllResourceIds();
 		assertEquals(1, ids.size());
+	}
+
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void searchFulltextAndJPA_withAccurateTotal_ThrowsInvalidRequest(boolean theShouldDoSynchronizedSearch) {
+		// setup
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(theShouldDoSynchronizedSearch);
+		map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+		TokenAndListParam tokenAndListParam = new TokenAndListParam();
+		tokenAndListParam.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("true")));
+		map.add("active", tokenAndListParam);
+		map.add(Constants.PARAM_TEXT, new StringParam("FINDME"));
+		map.add("identifier", new TokenParam(null, "bcde"));
+
+		// verify
+		try {
+			myPatientDao.search(map, mySrd);
+			fail();
+		} catch(InvalidRequestException e) {
+			assertEquals("HAPI-2567: Fulltext search combined with total=accurate is not supported.", e.getMessage());
+		}
 	}
 
 	@Test

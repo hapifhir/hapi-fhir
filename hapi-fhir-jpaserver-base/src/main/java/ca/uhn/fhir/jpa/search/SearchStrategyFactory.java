@@ -56,6 +56,10 @@ public class SearchStrategyFactory {
 		myFulltextSearchSvc = theFulltextSearchSvc;
 	}
 
+	public boolean isFullTextSearchEnabled() {
+		return myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled();
+	}
+
 	public boolean isSupportsHSearchDirect(
 			String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		return myFulltextSearchSvc != null

@@ -890,4 +890,11 @@ public class SearchParameterMap implements Serializable {
 
 		return Collections.unmodifiableList(allChainsInOrder);
 	}
+
+	public boolean isJpaAndFulltextIntersectionQuery() {
+		long numFulltextParams = this.keySet().stream()
+				.filter(t -> t.equals(Constants.PARAM_CONTENT) || t.equals(Constants.PARAM_TEXT))
+				.count();
+		return this.keySet().size() > numFulltextParams;
+	}
 }

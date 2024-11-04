@@ -435,9 +435,20 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		return retVal;
 	}
 
+	private void validateFulltextNotUsedWithAccurateTotal(SearchParameterMap theParams) {
+		if (mySearchStrategyFactory.isFullTextSearchEnabled()
+				&& theParams.isJpaAndFulltextIntersectionQuery()
+				&& theParams.getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
+			throw new InvalidRequestException(
+					Msg.code(2567) + "Fulltext search combined with total=accurate is not supported.");
+			//			 TODO JDJD update the code number
+		}
+	}
+
 	private void validateSearch(SearchParameterMap theParams) {
 		validateIncludes(theParams.getIncludes(), Constants.PARAM_INCLUDE);
 		validateIncludes(theParams.getRevIncludes(), Constants.PARAM_REVINCLUDE);
+		validateFulltextNotUsedWithAccurateTotal(theParams);
 	}
 
 	private void validateIncludes(Set<Include> includes, String name) {

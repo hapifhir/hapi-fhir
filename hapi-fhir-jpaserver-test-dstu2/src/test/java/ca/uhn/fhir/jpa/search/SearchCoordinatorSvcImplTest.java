@@ -22,10 +22,14 @@ import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -35,6 +39,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -57,6 +63,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -286,6 +293,28 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
 
+	}
+
+	@Test
+	public void searchLuceneAndJpa_searchUnfinished_ReturnsNoTotalInBundle() {
+		initSearches();
+		initAsyncSearches();
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("name", new StringParam("ANAME"));
+		params.setLoadSynchronous(false);
+		TokenAndListParam tokenAndListParam = new TokenAndListParam();
+		tokenAndListParam.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("true")));
+		params.add("active", tokenAndListParam);
+		params.add(Constants.PARAM_TEXT, new StringParam("FINDME"));
+
+		List<JpaPid> pids = createPidSequence(800);
+		ResultIterator iter = new ResultIterator(pids.iterator());
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
+		mockSearchTask();
+
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		assertNull(result.size());
 	}
 
 	private void initSearches() {

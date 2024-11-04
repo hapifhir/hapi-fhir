@@ -38,7 +38,7 @@ public interface ISearchCacheSvc {
 
 	/**
 	 * Fetch a search using its UUID. The search should be fully loaded when it is returned (i.e. includes are fetched, so that access to its
-	 * fields will not cause database errors if the current tranaction scope ends.
+	 * fields will not cause database errors if the current transaction scope ends).
 	 *
 	 * @param theUuid The search UUID
 	 * @return The search if it exists
