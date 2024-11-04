@@ -1,0 +1,7 @@
+---
+type: change
+issue: 6434
+jira: SMILE-9155
+title: "A search request with `_total=accurate` that intersects a fulltext (`_text`) and JPA search would return an 
+incorrect total in the response bundle. A search request with these parameters are actually not supported, and will
+now return `HTTP 400 - Bad Request`."
