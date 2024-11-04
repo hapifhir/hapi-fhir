@@ -484,10 +484,20 @@ public interface IValidationSupport {
 		 * @return the {@link IssueSeverity}
 		 */
 		public static IssueSeverity fromCode(String theCode) {
-			return Arrays.stream(values())
-					.filter(value -> value.getCode().equals(theCode))
-					.findFirst()
-					.orElse(null);
+			switch (theCode) {
+				case "fatal":
+					return FATAL;
+				case "error":
+					return ERROR;
+				case "warning":
+					return WARNING;
+				case "information":
+					return INFORMATION;
+				case "success":
+					return SUCCESS;
+				default:
+					return null;
+			}
 		}
 	}
 
@@ -635,7 +645,7 @@ public interface IValidationSupport {
 		}
 
 		/**
-		 * Deprecated. Please use {@link #getDiagnostics()} instead.
+		 * @deprecated Please use {@link #getDiagnostics()} instead.
 		 */
 		@Deprecated(since = "7.4.6")
 		public String getMessage() {
@@ -651,7 +661,7 @@ public interface IValidationSupport {
 		}
 
 		/**
-		 * Deprecated. Please use {@link #getType()} instead.
+		 * @deprecated Please use {@link #getType()} instead.
 		 */
 		@Deprecated(since = "7.4.6")
 		public CodeValidationIssueCode getCode() {
@@ -663,7 +673,7 @@ public interface IValidationSupport {
 		}
 
 		/**
-		 * Deprecated. Please use {@link #getDetails()} instead. That has support for multiple codings.
+		 * @deprecated Please use {@link #getDetails()} instead. That has support for multiple codings.
 		 */
 		@Deprecated(since = "7.4.6")
 		public CodeValidationIssueCoding getCoding() {
@@ -951,7 +961,7 @@ public interface IValidationSupport {
 		}
 
 		/**
-		 * Deprecated. Please use method {@link #getIssues()} instead.
+		 * @deprecated Please use method {@link #getIssues()} instead.
 		 */
 		@Deprecated(since = "7.4.6")
 		public List<CodeValidationIssue> getCodeValidationIssues() {
@@ -959,7 +969,7 @@ public interface IValidationSupport {
 		}
 
 		/**
-		 * Deprecated. Please use method {@link #setIssues(List)} instead.
+		 * @deprecated Please use method {@link #setIssues(List)} instead.
 		 */
 		@Deprecated(since = "7.4.6")
 		public CodeValidationResult setCodeValidationIssues(List<CodeValidationIssue> theCodeValidationIssues) {
@@ -967,7 +977,7 @@ public interface IValidationSupport {
 		}
 
 		/**
-		 * Deprecated. Please use method {@link #addIssue(CodeValidationIssue)} instead.
+		 * @deprecated Please use method {@link #addIssue(CodeValidationIssue)} instead.
 		 */
 		@Deprecated(since = "7.4.6")
 		public CodeValidationResult addCodeValidationIssue(CodeValidationIssue theCodeValidationIssue) {
