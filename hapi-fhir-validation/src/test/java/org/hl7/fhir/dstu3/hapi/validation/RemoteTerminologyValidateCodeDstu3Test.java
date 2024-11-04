@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import ca.uhn.fhir.test.utilities.validation.IValidationProvidersDstu3;
-import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyValidateCodeTest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -101,12 +100,17 @@ public class RemoteTerminologyValidateCodeDstu3Test implements IRemoteTerminolog
 
 	@Override
 	public IBaseOperationOutcome getCodeSystemInvalidCodeOutcome() {
-		return ClasspathUtil.loadResource(getService().getFhirContext(), OperationOutcome.class, "/terminology/OperationOutcome-CodeSystem-invalid-code.json");
+		return getCodeSystemInvalidCodeOutcome(OperationOutcome.class);
 	}
 
 	@Override
 	public IBaseOperationOutcome getValueSetInvalidCodeOutcome() {
-		return ClasspathUtil.loadResource(getService().getFhirContext(), OperationOutcome.class, "/terminology/OperationOutcome-ValueSet-invalid-code.json");
+		return getValueSetInvalidCodeOutcome(OperationOutcome.class);
+	}
+
+	@Override
+	public IBaseOperationOutcome getValueSetCustomDetailCodeOutcome() {
+		return getValueSetCustomDetailCodeOutcome(OperationOutcome.class);
 	}
 
 	@Override
