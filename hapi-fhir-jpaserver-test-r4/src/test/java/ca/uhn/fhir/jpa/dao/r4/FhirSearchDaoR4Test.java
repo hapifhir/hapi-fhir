@@ -427,7 +427,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndex
 			myPatientDao.search(map, mySrd);
 			fail();
 		} catch(InvalidRequestException e) {
-			assertEquals("HAPI-2567: Fulltext search combined with total=accurate is not supported.", e.getMessage());
+			assertEquals("HAPI-2567: The _total=accurate parameter cannot be used in fulltext searches combined with JPA query parameters.", e.getMessage());
 		}
 	}
 
