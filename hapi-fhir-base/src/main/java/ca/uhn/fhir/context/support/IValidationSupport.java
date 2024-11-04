@@ -493,6 +493,12 @@ public interface IValidationSupport {
 
 	/**
 	 * Defines codes in system <a href="http://hl7.org/fhir/issue-type">http://hl7.org/fhir/issue-type</a>.
+	 * The binding is enforced as a part of validation logic in the FHIR Core Validation library where an exception is thrown.
+	 * Only a sub-set of these codes are defined as constants because they relate to validation,
+	 * If there are additional ones that come up, for Remote Terminology they are currently supported via
+	 * {@link IValidationSupport.CodeValidationIssue#CodeValidationIssue(String, IssueSeverity, String)}
+	 * while for internal validators, more constants can be added to make things easier and consistent.
+	 * This maps to resource OperationOutcome.issue.code.
 	 */
 	/* this enum would not be needed if we design/refactor to use org.hl7.fhir.r5.terminologies.utilities.ValidationResult */
 	class CodeValidationIssueCode {
@@ -516,6 +522,11 @@ public interface IValidationSupport {
 		}
 	}
 
+	/**
+	 * Holds information about the details of a {@link CodeValidationIssue}.
+	 * This maps to resource OperationOutcome.issue.details.
+	 */
+	/* this enum would not be needed if we design/refactor to use org.hl7.fhir.r5.terminologies.utilities.ValidationResult */
 	class CodeValidationIssueDetails {
 		private final String myText;
 		private List<CodeValidationIssueCoding> myCodings;
@@ -550,7 +561,9 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Defines codes in system <a href="http://hl7.org/fhir/tools/CodeSystem/tx-issue-type">http://hl7.org/fhir/tools/CodeSystem/tx-issue-type</a>.
+	 * Defines codes that can be part of the details of an issue.
+	 * There are some constants available (pre-defined) for codes for system <a href="http://hl7.org/fhir/tools/CodeSystem/tx-issue-type">http://hl7.org/fhir/tools/CodeSystem/tx-issue-type</a>.
+	 * This maps to resource OperationOutcome.issue.details.coding[0].code.
 	 */
 	class CodeValidationIssueCoding {
 		public static String TX_ISSUE_SYSTEM = "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type";
