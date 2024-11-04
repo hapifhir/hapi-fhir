@@ -5,6 +5,8 @@ import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
+import ca.uhn.fhir.util.ClasspathUtil;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,6 +43,20 @@ public interface IValidateCodeTest {
 	String getValueSetError();
 	IBaseOperationOutcome getCodeSystemInvalidCodeOutcome();
 	IBaseOperationOutcome getValueSetInvalidCodeOutcome();
+	IBaseOperationOutcome getValueSetCustomDetailCodeOutcome();
+
+	default IBaseOperationOutcome getCodeSystemInvalidCodeOutcome(Class<? extends IBaseOperationOutcome> theResourceClass) {
+		return getOutcome(theResourceClass, "/terminology/OperationOutcome-CodeSystem-invalid-code.json");
+	}
+	default IBaseOperationOutcome getValueSetInvalidCodeOutcome(Class<? extends IBaseOperationOutcome> theResourceClass) {
+		return getOutcome(theResourceClass, "/terminology/OperationOutcome-ValueSet-invalid-code.json");
+	}
+	default IBaseOperationOutcome getValueSetCustomDetailCodeOutcome(Class<? extends IBaseOperationOutcome> theResourceClass) {
+		return getOutcome(theResourceClass, "/terminology/OperationOutcome-ValueSet-custom-issue-detail.json");
+	}
+	default IBaseOperationOutcome getOutcome(Class<? extends IBaseOperationOutcome> theResourceClass, String theFile) {
+		return ClasspathUtil.loadResource(getService().getFhirContext(), theResourceClass, theFile);
+	}
 
 	default void createCodeSystemReturnParameters(Boolean theResult, String theDisplay, String theMessage, IBaseResource theIssuesResource) {
 		getCodeSystemProvider().addTerminologyResponse(OPERATION_VALIDATE_CODE, CODE_SYSTEM, CODE, createParameters(theResult, theDisplay, theMessage, theIssuesResource));
@@ -181,7 +197,7 @@ public interface IValidateCodeTest {
 	}
 
 	@Test
-	default void validateCode_withCodeSystemError_returnsCorrectly() {
+	default void validateCode_withCodeSystemErrorWithDiagnosticsWithIssues_returnsCorrectly() {
 		IBaseOperationOutcome invalidCodeOutcome = getCodeSystemInvalidCodeOutcome();
 		createCodeSystemReturnParameters(false, null, ERROR_MESSAGE, invalidCodeOutcome);
 
@@ -198,7 +214,7 @@ public interface IValidateCodeTest {
 	}
 
 	@Test
-	default void validateCode_withCodeSystemErrorAndIssues_returnsCorrectly() {
+	default void validateCode_withCodeSystemErrorWithDiagnosticsWithoutIssues_returnsCorrectly() {
 		createCodeSystemReturnParameters(false, null, ERROR_MESSAGE, null);
 
 		CodeValidationResult outcome = getService()
@@ -215,6 +231,28 @@ public interface IValidateCodeTest {
 		assertFalse(outcome.getIssues().isEmpty());
 		assertEquals(1, outcome.getIssues().size());
 		assertEquals(expectedError, outcome.getIssues().get(0).getDiagnostics());
+		assertEquals(ERROR, outcome.getIssues().get(0).getSeverity());
+	}
+
+	@Test
+	default void validateCode_withCodeSystemErrorWithoutDiagnosticsWithIssues_returnsCorrectly() {
+		IBaseOperationOutcome invalidCodeOutcome = getCodeSystemInvalidCodeOutcome();
+		createCodeSystemReturnParameters(false, null, null, invalidCodeOutcome);
+
+		CodeValidationResult outcome = getService()
+				.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
+
+		String expectedError = getCodeSystemError();
+		assertNotNull(outcome);
+		assertEquals(CODE_SYSTEM, outcome.getCodeSystemName());
+		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
+		// assertEquals(CODE, outcome.getCode());
+		assertNull(outcome.getDisplay());
+		assertEquals(ERROR, outcome.getSeverity());
+		assertNull(outcome.getMessage());
+		assertFalse(outcome.getIssues().isEmpty());
+		assertEquals(1, outcome.getIssues().size());
+		assertNull(outcome.getIssues().get(0).getDiagnostics());
 		assertEquals(ERROR, outcome.getIssues().get(0).getSeverity());
 	}
 
