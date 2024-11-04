@@ -440,7 +440,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				&& theParams.isJpaAndFulltextIntersectionQuery()
 				&& theParams.getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
 			throw new InvalidRequestException(
-					Msg.code(2567) + "The _total=accurate parameter cannot be used in fulltext searches combined with JPA query parameters.");
+					Msg.code(2567)
+							+ "The _total=accurate parameter cannot be used in fulltext searches combined with JPA query parameters.");
 		}
 	}
 
