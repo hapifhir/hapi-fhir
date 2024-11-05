@@ -28,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -257,7 +258,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
 			CodeValidationResult codeValidationResult = new CodeValidationResult();
-			codeValidationResult.setSeverity(IssueSeverity.ERROR);
+			codeValidationResult.setSeverityCode("error");
 
 			String msg = "Failed to expand ValueSet '" + vsUrl + "' (in-memory). Could not validate code "
 					+ theCodeSystemUrlAndVersion + "#" + theCode;
@@ -266,7 +267,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 
 			codeValidationResult.setMessage(msg);
-			codeValidationResult.addIssue(e.getCodeValidationIssue());
+			codeValidationResult.addCodeValidationIssue(e.getCodeValidationIssue());
 			return codeValidationResult;
 		}
 
@@ -550,18 +551,18 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		if (valueSetResult != null) {
 			codeValidationResult = valueSetResult;
 		} else {
-			IValidationSupport.IssueSeverity severity;
+			ValidationMessage.IssueSeverity severity;
 			String message;
 			CodeValidationIssueCode issueCode = CodeValidationIssueCode.CODE_INVALID;
 			CodeValidationIssueCoding issueCoding = CodeValidationIssueCoding.INVALID_CODE;
 			if ("fragment".equals(codeSystemResourceContentMode)) {
-				severity = IValidationSupport.IssueSeverity.WARNING;
+				severity = ValidationMessage.IssueSeverity.WARNING;
 				message = "Unknown code in fragment CodeSystem '"
 						+ getFormattedCodeSystemAndCodeForMessage(
 								theCodeSystemUrlAndVersionToValidate, theCodeToValidate)
 						+ "'";
 			} else {
-				severity = IValidationSupport.IssueSeverity.ERROR;
+				severity = ValidationMessage.IssueSeverity.ERROR;
 				message = "Unknown code '"
 						+ getFormattedCodeSystemAndCodeForMessage(
 								theCodeSystemUrlAndVersionToValidate, theCodeToValidate)
@@ -573,9 +574,10 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 
 			codeValidationResult = new CodeValidationResult()
-					.setSeverity(severity)
+					.setSeverityCode(severity.toCode())
 					.setMessage(message)
-					.addIssue(new CodeValidationIssue(message, severity, issueCode, issueCoding));
+					.addCodeValidationIssue(new CodeValidationIssue(
+							message, getIssueSeverityFromCodeValidationIssue(severity), issueCode, issueCoding));
 		}
 
 		return codeValidationResult;
@@ -585,6 +587,19 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			String theCodeSystemUrlAndVersionToValidate, String theCodeToValidate) {
 		return (isNotBlank(theCodeSystemUrlAndVersionToValidate) ? theCodeSystemUrlAndVersionToValidate + "#" : "")
 				+ theCodeToValidate;
+	}
+
+	private IValidationSupport.IssueSeverity getIssueSeverityFromCodeValidationIssue(
+			ValidationMessage.IssueSeverity theSeverity) {
+		switch (theSeverity) {
+			case ERROR:
+				return IValidationSupport.IssueSeverity.ERROR;
+			case WARNING:
+				return IValidationSupport.IssueSeverity.WARNING;
+			case INFORMATION:
+				return IValidationSupport.IssueSeverity.INFORMATION;
+		}
+		return null;
 	}
 
 	private CodeValidationResult findCodeInExpansion(
@@ -1108,8 +1123,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 							new CodeValidationIssue(
 									theMessage,
 									IssueSeverity.ERROR,
-									CodeValidationIssueCode.INVALID,
-									CodeValidationIssueCoding.VS_INVALID));
+									CodeValidationIssueCode.OTHER,
+									CodeValidationIssueCoding.OTHER));
 				}
 				for (org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent next :
 						subExpansion.getExpansion().getContains()) {
@@ -1361,7 +1376,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				.setCodeSystemVersion(theCodeSystemVersion)
 				.setDisplay(theExpectedDisplay);
 		if (issueSeverity != null) {
-			codeValidationResult.setIssues(Collections.singletonList(new CodeValidationIssue(
+			codeValidationResult.setCodeValidationIssues(Collections.singletonList(new CodeValidationIssue(
 					message,
 					theIssueSeverityForCodeDisplayMismatch,
 					CodeValidationIssueCode.INVALID,

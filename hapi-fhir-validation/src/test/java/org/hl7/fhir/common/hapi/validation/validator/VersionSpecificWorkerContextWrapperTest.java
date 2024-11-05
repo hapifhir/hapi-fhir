@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.StructureDefinition.StructureDefinitionKind;
@@ -15,17 +16,16 @@ import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.jupiter.api.Test;
 import org.mockito.quality.Strictness;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
+
+import java.util.List;
 
 public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestWithInlineMocks {
 
@@ -80,7 +80,7 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 	}
 
 	@Test
-	public void validateCode_codeInValueSet_resolvesCodeSystemFromValueSet() {
+	public void validateCode_normally_resolvesCodeSystemFromValueSet() {
 		// setup
 		IValidationSupport validationSupport = mockValidationSupport();
 		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
@@ -90,7 +90,8 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 		ValueSet valueSet = new ValueSet();
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
-		when(validationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(mock(IValidationSupport.CodeValidationResult.class));
+		when(validationSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(valueSet);
+		when(validationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new IValidationSupport.CodeValidationResult());
 
 		// execute
 		wrapper.validateCode(new ValidationOptions(), "code0", valueSet);
@@ -98,26 +99,6 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 		// verify
 		verify(validationSupport, times(1)).validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
 		verify(validationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
-	}
-
-	@Test
-	public void validateCode_codeNotInValueSet_doesNotResolveSystem() {
-		// setup
-		IValidationSupport validationSupport = mockValidationSupport();
-		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
-		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
-
-		ValueSet valueSet = new ValueSet();
-		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
-		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
-
-		// execute
-		wrapper.validateCode(new ValidationOptions(), "code1", valueSet);
-
-		// verify
-		verify(validationSupport, times(1)).validateCodeInValueSet(any(), any(), eq(null), eq("code1"), any(), any());
-		verify(validationSupport, never()).validateCode(any(), any(), any(), any(), any(), any());
 	}
 
 	@Test
