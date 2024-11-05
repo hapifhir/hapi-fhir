@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.annotations.Beta;
+import com.google.common.collect.Multimap;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -244,7 +245,7 @@ public interface Repository {
 	 * @return a Bundle with the results of the search
 	 */
 	default <B extends IBaseBundle, T extends IBaseResource> B search(
-			Class<B> bundleType, Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters) {
+			Class<B> bundleType, Class<T> resourceType, Multimap<String, List<IQueryParameterType>> searchParameters) {
 		return this.search(bundleType, resourceType, searchParameters, Collections.emptyMap());
 	}
 
@@ -264,7 +265,7 @@ public interface Repository {
 	<B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> bundleType,
 			Class<T> resourceType,
-			Map<String, List<IQueryParameterType>> searchParameters,
+			Multimap<String, List<IQueryParameterType>> searchParameters,
 			Map<String, String> headers);
 
 	// Paging starts here
