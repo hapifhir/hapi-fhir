@@ -1,0 +1,48 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "result",
+      "valueBoolean": false
+    },
+    {
+      "name": "code",
+      "valueCode": "no-procedure-info"
+    },
+    {
+      "name": "system",
+      "valueUri": "http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips"
+    },
+    {
+      "name": "issues",
+      "resource": {
+        "resourceType": "OperationOutcome",
+        "issue": [
+          {
+            "severity": "error",
+            "code": "code-invalid",
+            "details": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+                  "code": "not-in-vs"
+                }
+              ],
+              "text": "The provided code 'http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips#no-procedure-info' was not found in the value set 'http://hl7.org/fhir/ValueSet/procedure-code|5.0.0-ballot'"
+            },
+            "location": [
+              "code"
+            ],
+            "expression": [
+              "code"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "message",
+      "valueString": "The provided code 'http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips#no-procedure-info' was not found in the value set 'http://hl7.org/fhir/ValueSet/procedure-code|5.0.0-ballot'"
+    }
+  ]
+}

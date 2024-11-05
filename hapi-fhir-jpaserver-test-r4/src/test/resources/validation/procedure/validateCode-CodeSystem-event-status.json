@@ -1,0 +1,59 @@
+{
+    "resourceType": "Parameters",
+    "parameter": [
+        {
+            "name": "result",
+            "valueBoolean": true
+        },
+        {
+            "name": "code",
+            "valueCode": "completed"
+        },
+        {
+            "name": "system",
+            "valueUri": "http://hl7.org/fhir/event-status"
+        },
+        {
+            "name": "version",
+            "valueString": "5.0.0-ballot"
+        },
+        {
+            "name": "display",
+            "valueString": "Completed"
+        },
+        {
+            "name": "issues",
+            "resource": {
+                "resourceType": "OperationOutcome",
+                "issue": [
+                    {
+                        "severity": "information",
+                        "code": "business-rule",
+                        "details": {
+                            "coding": [
+                                {
+                                    "system": "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+                                    "code": "status-check"
+                                }
+                            ],
+                            "text": "Reference to trial-use CodeSystem http://hl7.org/fhir/event-status|5.0.0-ballot"
+                        }
+                    },
+                    {
+                        "severity": "information",
+                        "code": "business-rule",
+                        "details": {
+                            "coding": [
+                                {
+                                    "system": "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+                                    "code": "status-check"
+                                }
+                            ],
+                            "text": "Reference to experimental CodeSystem http://hl7.org/fhir/event-status|5.0.0-ballot"
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

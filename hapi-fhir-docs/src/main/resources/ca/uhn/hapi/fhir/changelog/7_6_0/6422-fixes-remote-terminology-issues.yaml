@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6422
+title: "Previously, since 7.4.4 the validation issue detail codes were not translated correctly for Remote Terminology 
+validateCode calls. The detail code used was `invalid-code` for all use-cases which resulted in profile binding strength 
+not being applied to the issue severity as expected when validating resources against a profile. 
+This has been fixed and issue detail codes are translated correctly."
