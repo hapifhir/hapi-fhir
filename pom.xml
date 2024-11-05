@@ -1009,12 +1009,12 @@
 		<junit_version>5.10.1</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>9.4.0</flyway_version>
-		<hibernate_version>7.2.1.Final</hibernate_version>
+		<hibernate_version>6.4.10.Final</hibernate_version>
 		<logback_version>1.4.14</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
-		<hibernate_search_version>7.1.2.Final</hibernate_search_version>
+		<hibernate_search_version>7.0.1.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
-		<lucene_version>9.11.1</lucene_version>
+		<lucene_version>9.12.0</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
