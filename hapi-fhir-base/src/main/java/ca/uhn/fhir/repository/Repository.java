@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.annotations.Beta;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -259,6 +260,23 @@ public interface Repository {
 	 * @param bundleType the class of the Bundle type to return
 	 * @param resourceType the class of the Resource type to search
 	 * @param searchParameters the searchParameters for this search
+	 * @return a Bundle with the results of the search
+	 */
+	default <B extends IBaseBundle, T extends IBaseResource> B search(
+			Class<B> bundleType, Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters) {
+		return this.search(bundleType, resourceType, searchParameters, Collections.emptyMap());
+	}
+
+	/**
+	 * Searches this repository
+	 *
+	 * @see <a href="https://www.hl7.org/fhir/http.html#search">FHIR search</a>
+	 *
+	 * @param <B> a Bundle type
+	 * @param <T> a Resource type
+	 * @param bundleType the class of the Bundle type to return
+	 * @param resourceType the class of the Resource type to search
+	 * @param searchParameters the searchParameters for this search
 	 * @param headers headers for this request, typically key-value pairs of HTTP headers
 	 * @return a Bundle with the results of the search
 	 */
@@ -267,6 +285,29 @@ public interface Repository {
 			Class<T> resourceType,
 			Multimap<String, List<IQueryParameterType>> searchParameters,
 			Map<String, String> headers);
+
+	/**
+	 * Searches this repository
+	 *
+	 * @see <a href="https://www.hl7.org/fhir/http.html#search">FHIR search</a>
+	 *
+	 * @param <B> a Bundle type
+	 * @param <T> a Resource type
+	 * @param bundleType the class of the Bundle type to return
+	 * @param resourceType the class of the Resource type to search
+	 * @param searchParameters the searchParameters for this search
+	 * @param headers headers for this request, typically key-value pairs of HTTP headers
+	 * @return a Bundle with the results of the search
+	 */
+	default <B extends IBaseBundle, T extends IBaseResource> B search(
+			Class<B> bundleType,
+			Class<T> resourceType,
+			Map<String, List<IQueryParameterType>> searchParameters,
+			Map<String, String> headers) {
+		ArrayListMultimap<String, List<IQueryParameterType>> multimap = ArrayListMultimap.create();
+		searchParameters.forEach(multimap::put);
+		return this.search(bundleType, resourceType, multimap, headers);
+	}
 
 	// Paging starts here
 
