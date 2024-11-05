@@ -1,21 +1,29 @@
-package ca.uhn.fhir.jpa.validation;
+package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
-import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -25,7 +33,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_VALIDATE_CODE;
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,15 +43,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
+/*
  * This set of integration tests that instantiates and injects an instance of
  * {@link org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport}
  * into the ValidationSupportChain, which tests the logic of dynamically selecting the correct Remote Terminology
- * implementation. It also exercises the validateCode output translation code found in
- * {@link org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport}
+ * implementation. It also exercises the code found in
+ * {@link org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport#invokeRemoteValidateCode}
  */
-public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProviderR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateCodeWithRemoteTerminologyR4Test.class);
+public class ValidateCodeOperationWithRemoteTerminologyR4Test extends BaseResourceProviderR4Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateCodeOperationWithRemoteTerminologyR4Test.class);
 	private static final String DISPLAY = "DISPLAY";
 	private static final String DISPLAY_BODY_MASS_INDEX = "Body mass index (BMI) [Ratio]";
 	private static final String CODE_BODY_MASS_INDEX = "39156-5";
@@ -54,8 +64,8 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 	protected static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
 	private RemoteTerminologyServiceValidationSupport mySvc;
-	private IValidationProviders.MyValidationProvider<CodeSystem> myCodeSystemProvider;
-	private IValidationProviders.MyValidationProvider<ValueSet> myValueSetProvider;
+	private MyCodeSystemProvider myCodeSystemProvider;
+	private MyValueSetProvider myValueSetProvider;
 
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
@@ -66,8 +76,8 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 		String baseUrl = "http://localhost:" + ourRestfulServerExtension.getPort();
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx, baseUrl);
 		myValidationSupportChain.addValidationSupport(0, mySvc);
-		myCodeSystemProvider = new IValidationProvidersR4.MyCodeSystemProviderR4();
-		myValueSetProvider = new IValidationProvidersR4.MyValueSetProviderR4();
+		myCodeSystemProvider = new MyCodeSystemProvider();
+		myValueSetProvider = new MyValueSetProvider();
 		ourRestfulServerExtension.registerProvider(myCodeSystemProvider);
 		ourRestfulServerExtension.registerProvider(myValueSetProvider);
 	}
@@ -93,11 +103,11 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 
 	@Test
 	public void validateCodeOperationOnCodeSystem_byCodingAndUrl_usingBuiltInCodeSystems() {
-		final String code = "P";
-		final String system = CODE_SYSTEM_V2_0247_URI;;
-
-		Parameters params = new Parameters().addParameter("result", true).addParameter("display", DISPLAY);
-		setupCodeSystemValidateCode(system, code, params);
+		myCodeSystemProvider.myReturnCodeSystems = new ArrayList<>();
+		myCodeSystemProvider.myReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/v2-0247"));
+		myCodeSystemProvider.myReturnParams = new Parameters();
+		myCodeSystemProvider.myReturnParams.addParameter("result", true);
+		myCodeSystemProvider.myReturnParams.addParameter("display", DISPLAY);
 
 		logAllConcepts();
 
@@ -105,8 +115,8 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_VALIDATE_CODE)
-			.withParameter(Parameters.class, "coding", new Coding().setSystem(system).setCode(code))
-			.andParameter("url", new UriType(system))
+			.withParameter(Parameters.class, "coding", new Coding().setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
+			.andParameter("url", new UriType(CODE_SYSTEM_V2_0247_URI))
 			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -118,7 +128,7 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 
 	@Test
 	public void validateCodeOperationOnCodeSystem_byCodingAndUrlWhereCodeSystemIsUnknown_returnsFalse() {
-		myCodeSystemProvider.setShouldThrowExceptionForResourceNotFound(false);
+		myCodeSystemProvider.myReturnCodeSystems = new ArrayList<>();
 
 		Parameters respParam = myClient
 			.operation()
@@ -156,21 +166,21 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 
 	@Test
 	public void validateCodeOperationOnValueSet_byUrlAndSystem_usingBuiltInCodeSystems() {
-		final String code = "alerts";
-		final String system = "http://terminology.hl7.org/CodeSystem/list-example-use-codes";
-		final String valueSetUrl = "http://hl7.org/fhir/ValueSet/list-example-codes";
-
-		Parameters params = new Parameters().addParameter("result", true).addParameter("display", DISPLAY);
-		setupValueSetValidateCode(valueSetUrl, system, code, params);
-		setupCodeSystemValidateCode(system, code, params);
+		myCodeSystemProvider.myReturnCodeSystems = new ArrayList<>();
+		myCodeSystemProvider.myReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
+		myValueSetProvider.myReturnValueSets = new ArrayList<>();
+		myValueSetProvider.myReturnValueSets.add((ValueSet) new ValueSet().setId("ValueSet/list-example-codes"));
+		myValueSetProvider.myReturnParams = new Parameters();
+		myValueSetProvider.myReturnParams.addParameter("result", true);
+		myValueSetProvider.myReturnParams.addParameter("display", DISPLAY);
 
 		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named(JpaConstants.OPERATION_VALIDATE_CODE)
-			.withParameter(Parameters.class, "code", new CodeType(code))
-			.andParameter("system", new UriType(system))
-			.andParameter("url", new UriType(valueSetUrl))
+			.withParameter(Parameters.class, "code", new CodeType("alerts"))
+			.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/list-example-use-codes"))
+			.andParameter("url", new UriType("http://hl7.org/fhir/ValueSet/list-example-codes"))
 			.useHttpGet()
 			.execute();
 
@@ -183,20 +193,21 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 
 	@Test
 	public void validateCodeOperationOnValueSet_byUrlSystemAndCode() {
-		final String code = CODE_BODY_MASS_INDEX;
-		final String system = "http://terminology.hl7.org/CodeSystem/list-example-use-codes";
-		final String valueSetUrl = "http://hl7.org/fhir/ValueSet/list-example-codes";
-
-		Parameters params = new Parameters().addParameter("result", true).addParameter("display", DISPLAY_BODY_MASS_INDEX);
-		setupValueSetValidateCode(valueSetUrl, system, code, params);
+		myCodeSystemProvider.myReturnCodeSystems = new ArrayList<>();
+		myCodeSystemProvider.myReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
+		myValueSetProvider.myReturnValueSets = new ArrayList<>();
+		myValueSetProvider.myReturnValueSets.add((ValueSet) new ValueSet().setId("ValueSet/list-example-codes"));
+		myValueSetProvider.myReturnParams = new Parameters();
+		myValueSetProvider.myReturnParams.addParameter("result", true);
+		myValueSetProvider.myReturnParams.addParameter("display", DISPLAY_BODY_MASS_INDEX);
 
 		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named(JpaConstants.OPERATION_VALIDATE_CODE)
-			.withParameter(Parameters.class, "code", new CodeType(code))
-			.andParameter("url", new UriType(valueSetUrl))
-			.andParameter("system", new UriType(system))
+			.withParameter(Parameters.class, "code", new CodeType(CODE_BODY_MASS_INDEX))
+			.andParameter("url", new UriType("https://loinc.org"))
+			.andParameter("system", new UriType("http://loinc.org"))
 			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -208,7 +219,7 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 
 	@Test
 	public void validateCodeOperationOnValueSet_byCodingAndUrlWhereValueSetIsUnknown_returnsFalse() {
-		myValueSetProvider.setShouldThrowExceptionForResourceNotFound(false);
+		myValueSetProvider.myReturnValueSets = new ArrayList<>();
 
 		Parameters respParam = myClient
 			.operation()
@@ -227,18 +238,70 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 			" - Unknown or unusable ValueSet[" + UNKNOWN_VALUE_SYSTEM_URI + "]");
 	}
 
-	private void setupValueSetValidateCode(String theUrl, String theSystem, String theCode, IBaseParameters theResponseParams) {
-		ValueSet valueSet = myValueSetProvider.addTerminologyResource(theUrl);
-		myValueSetProvider.addTerminologyResource(theSystem);
-		myValueSetProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, valueSet.getUrl(), theCode, theResponseParams);
+	@SuppressWarnings("unused")
+	private static class MyCodeSystemProvider implements IResourceProvider {
+		private List<CodeSystem> myReturnCodeSystems;
+		private Parameters myReturnParams;
 
-		// we currently do this because VersionSpecificWorkerContextWrapper has logic to infer the system when missing
-		// based on the ValueSet by calling ValidationSupportUtils#extractCodeSystemForCode.
-		valueSet.getCompose().addInclude().setSystem(theSystem);
+		@Operation(name = "validate-code", idempotent = true, returnParameters = {
+			@OperationParam(name = "result", type = BooleanType.class, min = 1),
+			@OperationParam(name = "message", type = StringType.class),
+			@OperationParam(name = "display", type = StringType.class)
+		})
+		public Parameters validateCode(
+			HttpServletRequest theServletRequest,
+			@IdParam(optional = true) IdType theId,
+			@OperationParam(name = "url", min = 0, max = 1) UriType theCodeSystemUrl,
+			@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+			@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay
+		) {
+			return myReturnParams;
+		}
+
+		@Search
+		public List<CodeSystem> find(@RequiredParam(name = "url") UriParam theUrlParam) {
+			assert myReturnCodeSystems != null;
+			return myReturnCodeSystems;
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return CodeSystem.class;
+		}
 	}
 
-	private void setupCodeSystemValidateCode(String theUrl, String theCode, IBaseParameters theResponseParams) {
-		CodeSystem codeSystem = myCodeSystemProvider.addTerminologyResource(theUrl);
-		myCodeSystemProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, codeSystem.getUrl(), theCode, theResponseParams);
+	@SuppressWarnings("unused")
+	private static class MyValueSetProvider implements IResourceProvider {
+		private Parameters myReturnParams;
+		private List<ValueSet> myReturnValueSets;
+
+		@Operation(name = "validate-code", idempotent = true, returnParameters = {
+			@OperationParam(name = "result", type = BooleanType.class, min = 1),
+			@OperationParam(name = "message", type = StringType.class),
+			@OperationParam(name = "display", type = StringType.class)
+		})
+		public Parameters validateCode(
+			HttpServletRequest theServletRequest,
+			@IdParam(optional = true) IdType theId,
+			@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
+			@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+			@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
+			@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
+			@OperationParam(name = "valueSet") ValueSet theValueSet
+		) {
+			return myReturnParams;
+		}
+
+		@Search
+		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam) {
+			assert myReturnValueSets != null;
+			return myReturnValueSets;
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return ValueSet.class;
+		}
+
 	}
 }

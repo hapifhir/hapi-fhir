@@ -1,10 +1,12 @@
-package ca.uhn.fhir.test.utilities.validation;
+package org.hl7.fhir.r4.validation;
 
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.common.hapi.validation.IValidationProviders;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -19,29 +21,38 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
 
-public interface IValidationProvidersR4 {
+public interface IValidateCodeProvidersR4 {
 
 	@SuppressWarnings("unused")
-	class MyCodeSystemProviderR4 extends IValidationProviders.MyValidationProvider<CodeSystem> {
+	class MyCodeSystemProviderR4 implements IValidationProviders.IMyCodeSystemProvider {
+		private UriType mySystemUrl;
+		private CodeType myCode;
+		private StringType myDisplay;
+		private Exception myException;
+		private Parameters myReturnParams;
 
-		@Operation(name = "$validate-code", idempotent = true, returnParameters = {
+		@Operation(name = "validate-code", idempotent = true, returnParameters = {
 				@OperationParam(name = "result", type = BooleanType.class, min = 1),
 				@OperationParam(name = "message", type = StringType.class),
 				@OperationParam(name = "display", type = StringType.class)
 		})
-		public IBaseParameters validateCode(
+		public Parameters validateCode(
 				HttpServletRequest theServletRequest,
 				@IdParam(optional = true) IdType theId,
 				@OperationParam(name = "url", min = 0, max = 1) UriType theCodeSystemUrl,
 				@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
 				@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay
 		) throws Exception {
-			String url = theCodeSystemUrl != null ? theCodeSystemUrl.getValue() : null;
-			String code = theCode != null ? theCode.getValue() : null;
-			return getTerminologyResponse("$validate-code", url, code);
+			mySystemUrl = theCodeSystemUrl;
+			myCode = theCode;
+			myDisplay = theDisplay;
+			if (myException != null) {
+				throw myException;
+			}
+			return myReturnParams;
 		}
 
-		@Operation(name = "$lookup", idempotent = true, returnParameters= {
+		@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
 				@OperationParam(name = "name", type = StringType.class, min = 1),
 				@OperationParam(name = "version", type = StringType.class),
 				@OperationParam(name = "display", type = StringType.class, min = 1),
@@ -58,39 +69,54 @@ public interface IValidationProvidersR4 {
 				@OperationParam(name = "property", max = OperationParam.MAX_UNLIMITED) List<CodeType> thePropertyNames,
 				RequestDetails theRequestDetails
 		) throws Exception {
-			String url = theSystem != null ? theSystem.getValue() : null;
-			String code = theCode != null ? theCode.getValue() : null;
-			return getTerminologyResponse("$lookup", url, code);
+			mySystemUrl = theSystem;
+			myCode = theCode;
+			if (myException != null) {
+				throw myException;
+			}
+			return myReturnParams;
 		}
+
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return CodeSystem.class;
 		}
 
-		@Override
-		Class<Parameters> getParameterType() {
-			return Parameters.class;
+		public void setException(Exception theException) {
+			myException = theException;
 		}
-
 		@Override
-		public CodeSystem addTerminologyResource(String theUrl) {
-			CodeSystem codeSystem = new CodeSystem();
-			codeSystem.setId(theUrl.substring(0, theUrl.lastIndexOf("/")));
-			codeSystem.setUrl(theUrl);
-			addTerminologyResource(theUrl, codeSystem);
-			return codeSystem;
+		public void setReturnParams(IBaseParameters theParameters) {
+			myReturnParams = (Parameters) theParameters;
+		}
+		@Override
+		public String getCode() {
+			return myCode != null ? myCode.getValueAsString() : null;
+		}
+		@Override
+		public String getSystem() {
+			return mySystemUrl != null ? mySystemUrl.getValueAsString() : null;
+		}
+		public String getDisplay() {
+			return myDisplay != null ? myDisplay.getValue() : null;
 		}
 	}
 
 	@SuppressWarnings("unused")
-	class MyValueSetProviderR4 extends IValidationProviders.MyValidationProvider<ValueSet> {
+	class MyValueSetProviderR4 implements IValidationProviders.IMyValueSetProvider {
+		private Exception myException;
+		private Parameters myReturnParams;
+		private UriType mySystemUrl;
+		private UriType myValueSetUrl;
+		private CodeType myCode;
+		private StringType myDisplay;
 
-		@Operation(name = "$validate-code", idempotent = true, returnParameters = {
+		@Operation(name = "validate-code", idempotent = true, returnParameters = {
 				@OperationParam(name = "result", type = BooleanType.class, min = 1),
 				@OperationParam(name = "message", type = StringType.class),
 				@OperationParam(name = "display", type = StringType.class)
 		})
-		public IBaseParameters validateCode(
+		public Parameters validateCode(
 				HttpServletRequest theServletRequest,
 				@IdParam(optional = true) IdType theId,
 				@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
@@ -99,25 +125,41 @@ public interface IValidationProvidersR4 {
 				@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
 				@OperationParam(name = "valueSet") ValueSet theValueSet
 		) throws Exception {
-			String url = theValueSetUrl != null ? theValueSetUrl.getValue() : null;
-			String code = theCode != null ? theCode.getValue() : null;
-			return getTerminologyResponse("$validate-code", url, code);
+			mySystemUrl = theSystem;
+			myValueSetUrl = theValueSetUrl;
+			myCode = theCode;
+			myDisplay = theDisplay;
+			if (myException != null) {
+				throw myException;
+			}
+			return myReturnParams;
 		}
+
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return ValueSet.class;
 		}
-		@Override
-		Class<Parameters> getParameterType() {
-			return Parameters.class;
+		public void setException(Exception theException) {
+			myException = theException;
 		}
 		@Override
-		public ValueSet addTerminologyResource(String theUrl) {
-			ValueSet valueSet = new ValueSet();
-			valueSet.setId(theUrl.substring(0, theUrl.lastIndexOf("/")));
-			valueSet.setUrl(theUrl);
-			addTerminologyResource(theUrl, valueSet);
-			return valueSet;
+		public void setReturnParams(IBaseParameters theParameters) {
+			myReturnParams = (Parameters) theParameters;
+		}
+		@Override
+		public String getCode() {
+			return myCode != null ? myCode.getValueAsString() : null;
+		}
+		@Override
+		public String getSystem() {
+			return mySystemUrl != null ? mySystemUrl.getValueAsString() : null;
+		}
+		@Override
+		public String getValueSet() {
+			return myValueSetUrl != null ? myValueSetUrl.getValueAsString() : null;
+		}
+		public String getDisplay() {
+			return myDisplay != null ? myDisplay.getValue() : null;
 		}
 	}
 }

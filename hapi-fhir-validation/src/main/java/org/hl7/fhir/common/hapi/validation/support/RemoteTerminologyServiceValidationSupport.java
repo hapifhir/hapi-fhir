@@ -28,7 +28,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
@@ -632,7 +631,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return new CodeValidationResult()
 				.setSeverity(severity)
 				.setMessage(theMessage)
-				.addIssue(new CodeValidationIssue(
+				.addCodeValidationIssue(new CodeValidationIssue(
 						theMessage, severity, theIssueCode, CodeValidationIssueCoding.INVALID_CODE));
 	}
 
@@ -681,13 +680,13 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			createCodeValidationIssues(
 							(IBaseOperationOutcome) issuesValue.get(),
 							fhirContext.getVersion().getVersion())
-					.ifPresent(i -> i.forEach(result::addIssue));
+					.ifPresent(i -> i.forEach(result::addCodeValidationIssue));
 		} else {
 			// create a validation issue out of the message
 			// this is a workaround to overcome an issue in the FHIR Validator library
 			// where ValueSet bindings are only reading issues but not messages
 			// @see https://github.com/hapifhir/org.hl7.fhir.core/issues/1766
-			result.addIssue(createCodeValidationIssue(result.getMessage()));
+			result.addCodeValidationIssue(createCodeValidationIssue(result.getMessage()));
 		}
 		return result;
 	}
@@ -718,42 +717,23 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	private static Collection<CodeValidationIssue> createCodeValidationIssuesR4(OperationOutcome theOperationOutcome) {
 		return theOperationOutcome.getIssue().stream()
-				.map(issueComponent -> {
-					String diagnostics = issueComponent.getDiagnostics();
-					IssueSeverity issueSeverity =
-							IssueSeverity.fromCode(issueComponent.getSeverity().toCode());
-					String issueTypeCode = issueComponent.getCode().toCode();
-					CodeableConcept details = issueComponent.getDetails();
-					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueTypeCode);
-					CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(details.getText());
-					details.getCoding().forEach(coding -> issueDetails.addCoding(coding.getSystem(), coding.getCode()));
-					issue.setDetails(issueDetails);
-					return issue;
-				})
+				.map(issueComponent ->
+						createCodeValidationIssue(issueComponent.getDetails().getText()))
 				.collect(Collectors.toList());
 	}
 
 	private static Collection<CodeValidationIssue> createCodeValidationIssuesDstu3(
 			org.hl7.fhir.dstu3.model.OperationOutcome theOperationOutcome) {
 		return theOperationOutcome.getIssue().stream()
-				.map(issueComponent -> {
-					String diagnostics = issueComponent.getDiagnostics();
-					IssueSeverity issueSeverity =
-							IssueSeverity.fromCode(issueComponent.getSeverity().toCode());
-					String issueTypeCode = issueComponent.getCode().toCode();
-					org.hl7.fhir.dstu3.model.CodeableConcept details = issueComponent.getDetails();
-					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueTypeCode);
-					CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(details.getText());
-					details.getCoding().forEach(coding -> issueDetails.addCoding(coding.getSystem(), coding.getCode()));
-					issue.setDetails(issueDetails);
-					return issue;
-				})
+				.map(issueComponent ->
+						createCodeValidationIssue(issueComponent.getDetails().getText()))
 				.collect(Collectors.toList());
 	}
 
 	private static CodeValidationIssue createCodeValidationIssue(String theMessage) {
 		return new CodeValidationIssue(
 				theMessage,
+				// assume issue type is OperationOutcome.IssueType#CODEINVALID as it is the only match
 				IssueSeverity.ERROR,
 				CodeValidationIssueCode.INVALID,
 				CodeValidationIssueCoding.INVALID_CODE);

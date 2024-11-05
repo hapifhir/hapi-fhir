@@ -62,7 +62,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -297,7 +296,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					theResult.getCodeSystemVersion(),
 					conceptDefinitionComponent,
 					display,
-					getIssuesForCodeValidation(theResult.getIssues()));
+					getIssuesForCodeValidation(theResult.getCodeValidationIssues()));
 		}
 
 		if (retVal == null) {
@@ -308,36 +307,73 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	private List<OperationOutcome.OperationOutcomeIssueComponent> getIssuesForCodeValidation(
-			List<IValidationSupport.CodeValidationIssue> theIssues) {
-		List<OperationOutcome.OperationOutcomeIssueComponent> issueComponents = new ArrayList<>();
+			List<IValidationSupport.CodeValidationIssue> codeValidationIssues) {
+		List<OperationOutcome.OperationOutcomeIssueComponent> issues = new ArrayList<>();
 
-		for (IValidationSupport.CodeValidationIssue issue : theIssues) {
-			OperationOutcome.IssueSeverity severity =
-					OperationOutcome.IssueSeverity.fromCode(issue.getSeverity().getCode());
-			OperationOutcome.IssueType issueType =
-					OperationOutcome.IssueType.fromCode(issue.getType().getCode());
-			String diagnostics = issue.getDiagnostics();
+		for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeValidationIssues) {
 
-			IValidationSupport.CodeValidationIssueDetails details = issue.getDetails();
-			CodeableConcept codeableConcept = new CodeableConcept().setText(details.getText());
-			details.getCodings().forEach(detailCoding -> codeableConcept
-					.addCoding()
-					.setSystem(detailCoding.getSystem())
-					.setCode(detailCoding.getCode()));
+			CodeableConcept codeableConcept = new CodeableConcept().setText(codeValidationIssue.getMessage());
+			codeableConcept.addCoding(
+					"http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+					getIssueCodingFromCodeValidationIssue(codeValidationIssue),
+					null);
 
-			OperationOutcome.OperationOutcomeIssueComponent issueComponent =
+			OperationOutcome.OperationOutcomeIssueComponent issue =
 					new OperationOutcome.OperationOutcomeIssueComponent()
-							.setSeverity(severity)
-							.setCode(issueType)
-							.setDetails(codeableConcept)
-							.setDiagnostics(diagnostics);
-			issueComponent
-					.addExtension()
+							.setSeverity(getIssueSeverityFromCodeValidationIssue(codeValidationIssue))
+							.setCode(getIssueTypeFromCodeValidationIssue(codeValidationIssue))
+							.setDetails(codeableConcept);
+			issue.getDetails().setText(codeValidationIssue.getMessage());
+			issue.addExtension()
 					.setUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id")
 					.setValue(new StringType("Terminology_PassThrough_TX_Message"));
-			issueComponents.add(issueComponent);
+			issues.add(issue);
 		}
-		return issueComponents;
+		return issues;
+	}
+
+	private String getIssueCodingFromCodeValidationIssue(IValidationSupport.CodeValidationIssue codeValidationIssue) {
+		switch (codeValidationIssue.getCoding()) {
+			case VS_INVALID:
+				return "vs-invalid";
+			case NOT_FOUND:
+				return "not-found";
+			case NOT_IN_VS:
+				return "not-in-vs";
+			case INVALID_CODE:
+				return "invalid-code";
+			case INVALID_DISPLAY:
+				return "invalid-display";
+		}
+		return null;
+	}
+
+	private OperationOutcome.IssueType getIssueTypeFromCodeValidationIssue(
+			IValidationSupport.CodeValidationIssue codeValidationIssue) {
+		switch (codeValidationIssue.getCode()) {
+			case NOT_FOUND:
+				return OperationOutcome.IssueType.NOTFOUND;
+			case CODE_INVALID:
+				return OperationOutcome.IssueType.CODEINVALID;
+			case INVALID:
+				return OperationOutcome.IssueType.INVALID;
+		}
+		return null;
+	}
+
+	private OperationOutcome.IssueSeverity getIssueSeverityFromCodeValidationIssue(
+			IValidationSupport.CodeValidationIssue codeValidationIssue) {
+		switch (codeValidationIssue.getSeverity()) {
+			case FATAL:
+				return OperationOutcome.IssueSeverity.FATAL;
+			case ERROR:
+				return OperationOutcome.IssueSeverity.ERROR;
+			case WARNING:
+				return OperationOutcome.IssueSeverity.WARNING;
+			case INFORMATION:
+				return OperationOutcome.IssueSeverity.INFORMATION;
+		}
+		return null;
 	}
 
 	@Override
@@ -815,31 +851,30 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				.getRootValidationSupport()
 				.validateCodeInValueSet(
 						myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
-		if (result != null && theSystem != null) {
+		if (result != null) {
 			/* We got a value set result, which could be successful, or could contain errors/warnings. The code
 			might also be invalid in the code system, so we will check that as well and add those issues
 			to our result.
 			*/
 			IValidationSupport.CodeValidationResult codeSystemResult =
 					validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
-			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
-					.anyMatch(VersionSpecificWorkerContextWrapper::hasInvalidDisplayDetailCode);
+			final boolean valueSetResultContainsInvalidDisplay = result.getCodeValidationIssues().stream()
+					.anyMatch(codeValidationIssue -> codeValidationIssue.getCoding()
+							== IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY);
 			if (codeSystemResult != null) {
-				for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeSystemResult.getIssues()) {
+				for (IValidationSupport.CodeValidationIssue codeValidationIssue :
+						codeSystemResult.getCodeValidationIssues()) {
 					/* Value set validation should already have checked the display name. If we get INVALID_DISPLAY
 					issues from code system validation, they will only repeat what was already caught.
 					*/
-					if (!hasInvalidDisplayDetailCode(codeValidationIssue) || !valueSetResultContainsInvalidDisplay) {
-						result.addIssue(codeValidationIssue);
+					if (codeValidationIssue.getCoding() != IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY
+							|| !valueSetResultContainsInvalidDisplay) {
+						result.addCodeValidationIssue(codeValidationIssue);
 					}
 				}
 			}
 		}
 		return result;
-	}
-
-	private static boolean hasInvalidDisplayDetailCode(IValidationSupport.CodeValidationIssue theIssue) {
-		return theIssue.hasIssueDetailCode(INVALID_DISPLAY.getCode());
 	}
 
 	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(
