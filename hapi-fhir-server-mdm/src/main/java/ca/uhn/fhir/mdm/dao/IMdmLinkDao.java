@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.dao;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
@@ -36,6 +37,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.history.Revisions;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -109,5 +111,13 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 
 	default List<MdmLinkWithRevision<M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters) {
 		throw new UnsupportedOperationException(Msg.code(2299) + "not yet implemented");
+	}
+
+	/**
+	 * Given a collection of PIDs, resolves the associated golden resource IDs. If any of the PIDs
+	 * are golden resources, the associated non-golden resources are also fetched.
+	 */
+	default Collection<MdmPidTuple<P>> resolveGoldenResources(List<P> theSourcePids) {
+		throw new UnsupportedOperationException(Msg.code(2568) + "not yet implemented");
 	}
 }

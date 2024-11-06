@@ -149,8 +149,14 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	@Nonnull
 	List<T> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds);
 
+	/**
+	 * Values in the returned map are typed resource IDs (Patient/ABC)
+	 */
 	Optional<String> translatePidIdToForcedIdWithCache(T theResourcePersistentId);
 
+	/**
+	 * Values in the returned map are typed resource IDs (Patient/ABC)
+	 */
 	PersistentIdToForcedIdMap<T> translatePidsToForcedIds(Set<T> theResourceIds);
 
 	/**

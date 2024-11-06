@@ -539,7 +539,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected ValidationSettings myValidationSettings;
 	@Autowired
-	protected IMdmLinkJpaRepository myMdmLinkDao;
+	protected IMdmLinkJpaRepository myMdmLinkRepository;
 	@Autowired
 	protected IMdmLinkJpaRepository myMdmLinkHistoryDao;
 	@Autowired

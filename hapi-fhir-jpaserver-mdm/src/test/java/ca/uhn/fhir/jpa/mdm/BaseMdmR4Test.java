@@ -542,14 +542,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		return mdmLink;
 	}
 
-	protected void logAllLinks() {
-		ourLog.info("Logging all MDM Links:");
-		List<MdmLink> links = myMdmLinkDao.findAll();
-		for (MdmLink link : links) {
-			ourLog.info(link.toString());
-		}
-	}
-
 	protected void assertLinksMatchResult(MdmMatchResultEnum... theExpectedValues) {
 		assertFields(MdmLink::getMatchResult, theExpectedValues);
 	}
