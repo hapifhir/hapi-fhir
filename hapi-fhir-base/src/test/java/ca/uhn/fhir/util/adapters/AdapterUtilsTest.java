@@ -84,9 +84,9 @@ class AdapterUtilsTest {
 	/** class that can adapt itself to IAdaptable */
 	static class SelfAdaptableClass implements IAdaptable {
 
-		@javax.annotation.Nonnull
+		@Nonnull
 		@Override
-		public <T> Optional<T> getAdapter(@javax.annotation.Nonnull Class<T> theTargetType) {
+		public <T> Optional<T> getAdapter(@Nonnull Class<T> theTargetType) {
 			if (theTargetType.isAssignableFrom(InterfaceA.class)) {
 				T value = theTargetType.cast(buildInterfaceAWrapper(this));
 				return Optional.of(value);
