@@ -118,11 +118,9 @@
 			<artifactId>velocity-engine-core</artifactId>
 		</dependency>
 		<dependency>
-			<artifactId>commons-lang</artifactId>
-			<groupId>commons-lang</groupId>
-			<version>2.6</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
