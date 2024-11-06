@@ -127,7 +127,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		byte[] resourceBytes;
 		String resourceText;
 		ResourceEncodingEnum resourceEncoding;
-		@Nullable Collection<? extends BaseTag> tagList = Collections.emptyList();
+		@Nullable Collection<? extends BaseTag> tagList;
 		long version;
 		String provenanceSourceUri = null;
 		String provenanceRequestId = null;
@@ -202,9 +202,12 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 				case NON_VERSIONED:
 					if (resource.isHasTags()) {
 						tagList = resource.getTags();
+					} else {
+						tagList = List.of();
 					}
 					break;
 				case INLINE:
+				default:
 					tagList = null;
 					break;
 			}

@@ -565,7 +565,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				thePerformIndexing);
 
 		// Store the resource forced ID if necessary
-		JpaPid jpaPid = JpaPid.fromId(updatedEntity.getResourceId());
+		JpaPid jpaPid = updatedEntity.getPersistentId();
 
 		// Populate the resource with its actual final stored ID from the entity
 		theResource.setId(entity.getIdDt());
@@ -1005,7 +1005,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	protected ResourceTable updateEntityForDelete(
 			RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable theEntity) {
-		myResourceSearchUrlSvc.deleteByResId(JpaPid.fromId(theEntity.getId()));
+		myResourceSearchUrlSvc.deleteByResId(theEntity.getPersistentId());
 		Date updateTime = new Date();
 		return updateEntity(theRequest, null, theEntity, updateTime, true, true, theTransactionDetails, false, true);
 	}
@@ -1250,7 +1250,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
 							myResourceName,
-							JpaPid.fromId(entity.getId()),
+							entity.getPersistentId(),
 							theSince,
 							theUntil,
 							theOffset,
@@ -1737,6 +1737,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 		if (changed) {
 			myResourceHistoryTableDao.save(historyEntity);
+		} else {
+			// Nothing changed, so avoid a dirtyness check when we flush
+			myEntityManager.detach(historyEntity);
 		}
 	}
 
@@ -2468,8 +2471,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 */
 		ResourceTable entity = (ResourceTable) theEntity;
 		if (entity.isSearchUrlPresent()) {
-			myResourceSearchUrlSvc.deleteByResId(
-					JpaPid.fromId((Long) theEntity.getPersistentId().getId()));
+			myResourceSearchUrlSvc.deleteByResId(entity.getPersistentId());
 			entity.setSearchUrlPresent(false);
 		}
 

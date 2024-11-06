@@ -1174,7 +1174,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Class<? extends IBaseResource> resourceType =
 					myContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
 
-			JpaPid resourceId = JpaPid.fromId(next.getResourceId());
+			JpaPid resourceId = next.getPersistentId();
 
 			/*
 			 * If a specific version is requested via an include, we'll replace the current version
@@ -1184,8 +1184,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			 * this only applies to includes, which don't tend to be massive in numbers.
 			 */
 			if (resourcePidToVersion != null) {
-				JpaPid key = JpaPid.fromId(next.getResourceId());
-				Long version = resourcePidToVersion.get(key);
+				Long version = resourcePidToVersion.get(resourceId);
 				resourceId.setVersion(version);
 				if (version != null && !version.equals(next.getVersion())) {
 					next = myResourceHistoryTableDao.findForIdAndVersion(next.getResourceId(), version);

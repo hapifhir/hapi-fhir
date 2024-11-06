@@ -64,7 +64,7 @@ public class ResourceReindexer {
 	public void reindexResourceEntity(ResourceTable theResourceTable) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceTable.getResourceType());
 		long expectedVersion = theResourceTable.getVersion();
-		IBaseResource resource = dao.readByPid(JpaPid.fromId(theResourceTable.getId()), true);
+		IBaseResource resource = dao.readByPid(theResourceTable.getPersistentId(), true);
 
 		if (resource == null) {
 			throw new InternalErrorException(Msg.code(1171) + "Could not find resource version "
