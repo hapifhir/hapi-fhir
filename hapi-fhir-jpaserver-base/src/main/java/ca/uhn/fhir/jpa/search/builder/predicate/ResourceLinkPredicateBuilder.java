@@ -837,8 +837,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		subquery.addFromTable(getTable());
 
 		String resourceType = theParams.getResourceTablePredicateBuilder().getResourceType();
-		RuntimeSearchParam paramDefinition =
-				mySearchParamRegistry.getRuntimeSearchParam(resourceType, theParams.getParamName());
+		RuntimeSearchParam paramDefinition = mySearchParamRegistry.getRuntimeSearchParam(
+				resourceType, theParams.getParamName(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		List<String> pathList = paramDefinition.getPathsSplitForResourceType(resourceType);
 
 		Condition subQueryCondition = ComboCondition.and(
