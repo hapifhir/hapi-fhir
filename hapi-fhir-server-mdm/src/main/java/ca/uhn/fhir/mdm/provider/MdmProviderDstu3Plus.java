@@ -106,12 +106,8 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	/**
 	 * Searches for matches for the provided patient resource
 	 * @param thePatient - the patient resource
-	 * @param theOnlyCertainMatches - If there are multiple potential matches, then the match should not return the
-	 *        results with this flag set to true. When false, the server may return multiple results with each result
-	 *        graded accordingly.
-	 * @param theCount - The maximum number of records to return. If no value is provided, the server decides how many
-	 *        matches to return. Note that clients should be careful when using this, as it may prevent probable - and
-	 *        valid - matches from being returned.
+	 * @param theOnlyCertainMatches - (ignored by this implementation)
+	 * @param theCount - (ignored by this implementation)
 	 * @param theRequestDetails - the request details
 	 * @return - any matches to the provided patient resource
 	 */
