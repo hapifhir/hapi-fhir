@@ -2708,8 +2708,8 @@ public class QueryStack {
 					}
 
 				} else {
-					RuntimeSearchParam notEnabledForSearchParam =
-							mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
+					RuntimeSearchParam notEnabledForSearchParam = mySearchParamRegistry.getActiveSearchParam(
+							theResourceName, theParamName, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 					if (notEnabledForSearchParam == null) {
 						String msg = myFhirContext
 								.getLocalizer()

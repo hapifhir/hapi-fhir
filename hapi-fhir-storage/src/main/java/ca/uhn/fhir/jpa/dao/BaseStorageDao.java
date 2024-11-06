@@ -530,7 +530,9 @@ public abstract class BaseStorageDao {
 				Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(
 						getResourceName(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				RuntimeSearchParam notEnabledForSearchParam = mySearchParamRegistry.getActiveSearchParam(
-						getResourceName(), qualifiedParamName.getParamName(), ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
+						getResourceName(),
+						qualifiedParamName.getParamName(),
+						ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 				if (notEnabledForSearchParam != null) {
 					String msg = getContext()
 							.getLocalizer()
