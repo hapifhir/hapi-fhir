@@ -189,6 +189,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 		// Test
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
 		params.add(Observation.SP_SUBJECT, new ReferenceParam(mySourcePatientA2Id.getValue()));
+		params.addInclude(Observation.INCLUDE_PATIENT);
 		IBundleProvider outcome = myObservationDao.search(params, mySrd);
 
 		// Verify
