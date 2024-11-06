@@ -106,6 +106,12 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	/**
 	 * Searches for matches for the provided patient resource
 	 * @param thePatient - the patient resource
+	 * @param theOnlyCertainMatches - If there are multiple potential matches, then the match should not return the
+	 *        results with this flag set to true. When false, the server may return multiple results with each result
+	 *        graded accordingly.
+	 * @param theCount - The maximum number of records to return. If no value is provided, the server decides how many
+	 *        matches to return. Note that clients should be careful when using this, as it may prevent probable - and
+	 *        valid - matches from being returned.
 	 * @param theRequestDetails - the request details
 	 * @return - any matches to the provided patient resource
 	 */
@@ -113,6 +119,10 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseBundle match(
 			@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient")
 					IAnyResource thePatient,
+            @OperationParam(name = ProviderConstants.MDM_MATCH_ONLY_CERTAIN_MATCHES, min = 0, max = 1, typeName = "boolean")
+                    IPrimitiveType<Boolean> theOnlyCertainMatches,
+            @OperationParam(name = ProviderConstants.MDM_MATCH_COUNT, min = 0, max = 1, typeName = "integer")
+                    IPrimitiveType<Integer> theCount,
 			RequestDetails theRequestDetails) {
 		if (thePatient == null) {
 			throw new InvalidRequestException(Msg.code(1498) + "resource may not be null");
