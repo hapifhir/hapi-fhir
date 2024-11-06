@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 6440
+title: "Previously, if an `IInterceptorBroadcaster` was set in a `RequestDetails` object,
+`STORAGE_PRECHECK_FOR_CACHED_SEARCH` hooks that were registered to that `IInterceptorBroadcaster` were not
+called. Also, if an `IInterceptorBroadcaster` was set in the `RequestDetails` object, the boolean return value of the hooks
+registered to that `IInterceptorBroadcaster` were not taken into account. This second issue existed for all pointcuts 
+that returned a boolean type, not just for `STORAGE_PRECHECK_FOR_CACHED_SEARCH`. These issues have now been fixed."
