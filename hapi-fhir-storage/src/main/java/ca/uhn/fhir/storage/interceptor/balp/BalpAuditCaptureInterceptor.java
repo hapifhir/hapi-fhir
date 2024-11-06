@@ -200,8 +200,11 @@ public class BalpAuditCaptureInterceptor {
 		Set<String> compartmentOwners = determinePatientCompartmentOwnersForResources(resources, theRequestDetails);
 
 		if (!compartmentOwners.isEmpty()) {
-			AuditEvent auditEvent = createAuditEventPatientQuery(theRequestDetails, compartmentOwners);
-			myAuditEventSink.recordAuditEvent(auditEvent);
+			for (String owner : compartmentOwners) {
+				AuditEvent auditEvent = createAuditEventPatientQuery(theRequestDetails, Set.of(owner));
+				myAuditEventSink.recordAuditEvent(auditEvent);
+			}
+
 		} else {
 			AuditEvent auditEvent = createAuditEventBasicQuery(theRequestDetails);
 			myAuditEventSink.recordAuditEvent(auditEvent);

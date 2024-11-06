@@ -20,8 +20,25 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
+import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 public interface ITagDefinitionDao extends JpaRepository<TagDefinition, Long>, IHapiFhirJpaRepository {
-	// nothing
+	@Query("SELECT t FROM TagDefinition t WHERE " + "t.myTagType = :tagType AND "
+			+ "( :scheme IS NULL OR :scheme = '' OR t.mySystem = :scheme ) AND "
+			+ "t.myCode = :term AND "
+			+ "( :version IS NULL OR :version = '' OR t.myVersion = :version ) AND "
+			+ "( :userSelected IS NULL OR t.myUserSelected = :userSelected )")
+	List<TagDefinition> findByTagTypeAndSchemeAndTermAndVersionAndUserSelected(
+			@Param("tagType") TagTypeEnum tagType,
+			@Param("scheme") String scheme,
+			@Param("term") String term,
+			@Param("version") String version,
+			@Param("userSelected") Boolean userSelected,
+			Pageable pageable);
 }

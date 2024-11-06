@@ -2010,7 +2010,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(7, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(7, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
@@ -3075,7 +3075,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(6189, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(2, myCaptureQueriesListener.countCommits());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		assertThat(output.getEntry()).hasSize(input.getEntry().size());
