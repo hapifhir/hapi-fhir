@@ -135,4 +135,27 @@ class CompositeInterceptorBroadcasterTest {
 
 		assertThat(retVal).isTrue();
 	}
+
+	@Test
+	void doCallHooks_WhenNullModuleBroadcaster_And_RequestDetailsBroadcasterReturnsTrue_ThenReturnsTrue() {
+		when(myRequestDetailsMock.getInterceptorBroadcaster()).thenReturn(myReqDetailsBroadcasterMock);
+		when(myReqDetailsBroadcasterMock.callHooks(myPointcutMock, myHookParamsMock)).thenReturn(true);
+
+		boolean retVal = CompositeInterceptorBroadcaster.doCallHooks(null, myRequestDetailsMock, myPointcutMock, myHookParamsMock);
+
+		assertThat(retVal).isTrue();
+		verify(myReqDetailsBroadcasterMock).callHooks(myPointcutMock, myHookParamsMock);
+	}
+
+
+	@Test
+	void doCallHooks_WhenNullModuleBroadcaster_And_RequestDetailsBroadcasterReturnsFalse_ThenReturnsFalse() {
+		when(myRequestDetailsMock.getInterceptorBroadcaster()).thenReturn(myReqDetailsBroadcasterMock);
+		when(myReqDetailsBroadcasterMock.callHooks(myPointcutMock, myHookParamsMock)).thenReturn(false);
+
+		boolean retVal = CompositeInterceptorBroadcaster.doCallHooks(null, myRequestDetailsMock, myPointcutMock, myHookParamsMock);
+
+		assertThat(retVal).isFalse();
+		verify(myReqDetailsBroadcasterMock).callHooks(myPointcutMock, myHookParamsMock);
+	}
 }
