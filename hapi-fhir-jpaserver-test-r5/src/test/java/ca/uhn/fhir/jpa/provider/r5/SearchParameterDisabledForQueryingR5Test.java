@@ -17,6 +17,7 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
@@ -106,7 +107,7 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 				String expectedErrorMessage = "HAPI-" + theParameters.myExpectedErrorCode + ": Search parameter \"" + sp.getCode() + "\" for resource type \"Patient\" is not active for searching";
 				assertThat(e.getMessage()).contains(expectedErrorMessage);
 
-				String expectedValidParams = "Valid search parameters for this search are: [_id, _lastUpdated, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, part-agree, phone, phonetic, telecom]";
+				String expectedValidParams = "Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, part-agree, phone, phonetic, telecom]";
 				if (theParameters.mySearchParameter.getCode().equals("family")) {
 					expectedValidParams = expectedErrorMessage.replace(", family", "");
 				}
@@ -151,13 +152,13 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 		"                        , false"
 	})
 	public void testComboUniqueSearchParameter(Boolean theEnabledForSearching, boolean theUnique) {
-		myComboSearchParameterTestHelper.createBirthdateAndGenderSps(theUnique, t -> {
+		myComboSearchParameterTestHelper.createFamilyAndGenderSps(theUnique, t -> {
 			if (theEnabledForSearching != null) {
 				t.addExtension(EXT_SEARCHPARAM_ENABLED_FOR_SEARCHING, new BooleanType(theEnabledForSearching));
 			}
 		});
 
-		createPatient(withId("A"), withBirthdate("2020-01-02"), withGender("male"));
+		createPatient(withId("A"), withFamily("simpson"), withGender("male"));
 
 		logAllDateIndexes();
 		logAllTokenIndexes();
@@ -166,7 +167,7 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 		// Test
 		SearchParameterMap map = SearchParameterMap
 			.newSynchronous()
-			.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-02"))
+			.add(Patient.SP_FAMILY, new StringParam("simpson"))
 			.add(Patient.SP_GENDER, new TokenParam( "male"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myPatientDao.search(map, mySrd);

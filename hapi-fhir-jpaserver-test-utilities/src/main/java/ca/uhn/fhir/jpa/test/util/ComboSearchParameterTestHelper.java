@@ -83,7 +83,49 @@ public class ComboSearchParameterTestHelper {
 			.setDefinition("SearchParameter/patient-birthdate");
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
-			.setValue(new BooleanType(true));
+			.setValue(new BooleanType(theUnique));
+		for (var next : theSearchParamCustomizer) {
+			next.accept(sp);
+		}
+
+		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+
+		mySearchParamRegistry.forceRefresh();
+	}
+
+	public void createFamilyAndGenderSps(boolean theUnique, ISearchParamCustomizer... theSearchParamCustomizer) {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("family");
+		sp.setExpression("Patient.name.family");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
+		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-gender");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setCode("gender");
+		sp.setExpression("Patient.gender");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
+		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family-gender");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-family");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-gender");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(theUnique));
 		for (var next : theSearchParamCustomizer) {
 			next.accept(sp);
 		}
