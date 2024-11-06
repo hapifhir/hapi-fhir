@@ -51,18 +51,36 @@ public interface ISearchParamRegistry {
 	}
 
 	/**
+	 * @deprecated Use {@link #getActiveSearchParam(String, String, SearchParamLookupContextEnum)}
+	 */
+	@Deprecated(since = "8.0.0", forRemoval = true)
+	default RuntimeSearchParam getActiveSearchParam(
+		String theResourceName, String theParamName) {
+		return getActiveSearchParam(theResourceName, theParamName, SearchParamLookupContextEnum.ALL);
+	}
+
+	/**
 	 * @param theContext The context to return active search params for, or {@literal null} to return any active search params
 	 * @return Returns {@literal null} if no match
 	 */
 	RuntimeSearchParam getActiveSearchParam(
-			String theResourceName, String theParamName, @Nullable SearchParamLookupContextEnum theContext);
+		@Nonnull String theResourceName, @Nonnull String theParamName, @Nonnull SearchParamLookupContextEnum theContext);
+
+	/**
+	 * @deprecated Use {@link #getActiveSearchParam(String, String, SearchParamLookupContextEnum)}
+	 */
+	@Deprecated(since = "8.0.0", forRemoval = true)
+	default ResourceSearchParams getActiveSearchParams(
+			String theResourceName) {
+		return getActiveSearchParams(theResourceName, SearchParamLookupContextEnum.ALL);
+	}
 
 	/**
 	 * @param theContext The context to return active search params for, or {@literal null} to return any active search params
 	 * @return Returns all active search params for the given resource
 	 */
 	ResourceSearchParams getActiveSearchParams(
-			String theResourceName, @Nullable SearchParamLookupContextEnum theContext);
+		@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext);
 
 	/**
 	 * Request that the cache be refreshed now, in the current thread
@@ -86,18 +104,18 @@ public interface ISearchParamRegistry {
 	 * @param theContext The context to return active search params for, or {@literal null} to return any active search params
 	 */
 	default List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 		return Collections.emptyList();
 	}
 
 	// TODO ND remove default implementation
 	default List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, ComboSearchParamType theParamType, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceName, @Nonnull ComboSearchParamType theParamType, @Nonnull SearchParamLookupContextEnum theContext) {
 		return Collections.emptyList();
 	}
 
 	// TODO ND remove default implementation
-	default Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
+	default Optional<RuntimeSearchParam> getActiveComboSearchParamById(@Nonnull String theResourceName, @Nonnull IIdType theId) {
 		return Optional.empty();
 	}
 
@@ -105,7 +123,7 @@ public interface ISearchParamRegistry {
 	 * @param theContext The context to return active search params for, or {@literal null} to return any active search params
 	 */
 	default List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, Set<String> theParamNames, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceName, @Nonnull Set<String> theParamNames, @Nonnull SearchParamLookupContextEnum theContext) {
 		return Collections.emptyList();
 	}
 
@@ -117,7 +135,7 @@ public interface ISearchParamRegistry {
 	 * @param theContext The context to return active search params for, or {@literal null} to return any active search params
 	 */
 	default Collection<String> getValidSearchParameterNamesIncludingMeta(
-			String theResourceName, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 		TreeSet<String> retval;
 		ResourceSearchParams activeSearchParams = getActiveSearchParams(theResourceName, theContext);
 		if (activeSearchParams == null) {
@@ -137,7 +155,7 @@ public interface ISearchParamRegistry {
 	 * @return Returns <code>null</code> if it can't be found
 	 */
 	@Nullable
-	RuntimeSearchParam getActiveSearchParamByUrl(String theUrl, SearchParamLookupContextEnum theContext);
+	RuntimeSearchParam getActiveSearchParamByUrl(@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext);
 
 	/**
 	 * Find a search param for a resource. First, check the resource itself, then check the top-level `Resource` resource.
@@ -148,7 +166,7 @@ public interface ISearchParamRegistry {
 	 * @return the {@link RuntimeSearchParam} that is found.
 	 */
 	default RuntimeSearchParam getRuntimeSearchParam(
-			String theResourceType, String theParamName, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceType, @Nonnull String theParamName, @Nonnull SearchParamLookupContextEnum theContext) {
 		RuntimeSearchParam availableSearchParamDef = getActiveSearchParam(theResourceType, theParamName, theContext);
 		if (availableSearchParamDef == null) {
 			availableSearchParamDef = getActiveSearchParam("Resource", theParamName, theContext);
@@ -168,7 +186,7 @@ public interface ISearchParamRegistry {
 	 * @return the {@link ResourceSearchParams} that has all the search params.
 	 */
 	default ResourceSearchParams getRuntimeSearchParams(
-			String theResourceType, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceType,@Nonnull SearchParamLookupContextEnum theContext) {
 		ResourceSearchParams availableSearchParams =
 				getActiveSearchParams(theResourceType, theContext).makeCopy();
 		ResourceSearchParams resourceSearchParams = getActiveSearchParams("Resource", theContext);
@@ -183,7 +201,7 @@ public interface ISearchParamRegistry {
 	 * These can be thought of as filter criteria - Most search parameters generally apply to all
 	 * context, but some may be explicitly defined to only work for some.
 	 *
-	 * @since 7.6.0
+	 * @since 8.0.0
 	 */
 	enum SearchParamLookupContextEnum {
 		/**
@@ -199,7 +217,11 @@ public interface ISearchParamRegistry {
 		/**
 		 * Search parameter should be used for sorting via the {@literal _sort} parameter.
 		 */
-		SORT
+		SORT,
+		/**
+		 * Return any search parameters that are known to the system for any context
+		 */
+		ALL
 	}
 
 	static boolean isAllowedForContext(

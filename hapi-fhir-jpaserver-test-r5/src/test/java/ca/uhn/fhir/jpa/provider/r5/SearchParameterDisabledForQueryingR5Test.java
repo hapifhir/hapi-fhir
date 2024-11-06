@@ -157,7 +157,6 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 		});
 
 		createPatient(withId("A"), withBirthdate("2020-01-02"), withGender("male"));
-//		createPatient(withId("B"), withBirthdate("2020-01-02"), withGender("female"));
 
 		logAllDateIndexes();
 		logAllTokenIndexes();

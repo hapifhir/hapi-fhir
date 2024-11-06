@@ -57,12 +57,12 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(
-			String theResourceName, String theParamName, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceName, @Nonnull String theParamName, @Nonnull SearchParamLookupContextEnum theContext) {
 		return getActiveSearchParams(theResourceName, theContext).get(theParamName);
 	}
 
 	@Override
-	public ResourceSearchParams getActiveSearchParams(String theResourceName, SearchParamLookupContextEnum theContext) {
+	public ResourceSearchParams getActiveSearchParams(@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 		ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
 		RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(theResourceName);
 		for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
@@ -86,13 +86,13 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, Set<String> theParamNames, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceName, @Nonnull Set<String> theParamNames, @Nonnull SearchParamLookupContextEnum theContext) {
 		throw new UnsupportedOperationException(Msg.code(2066));
 	}
 
 	@Nullable
 	@Override
-	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl, SearchParamLookupContextEnum theContext) {
+	public RuntimeSearchParam getActiveSearchParamByUrl(@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext) {
 		// simple implementation for test support
 		return myCtx.getResourceTypes().stream()
 				.flatMap(type -> getActiveSearchParams(type, theContext).values().stream())
@@ -103,18 +103,18 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 		throw new UnsupportedOperationException(Msg.code(2068));
 	}
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, ComboSearchParamType theParamType, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceName, @Nonnull ComboSearchParamType theParamType, @Nonnull SearchParamLookupContextEnum theContext) {
 		throw new UnsupportedOperationException(Msg.code(2209));
 	}
 
 	@Override
-	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
+	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(@Nonnull String theResourceName, @Nonnull IIdType theId) {
 		throw new UnsupportedOperationException(Msg.code(2211));
 	}
 

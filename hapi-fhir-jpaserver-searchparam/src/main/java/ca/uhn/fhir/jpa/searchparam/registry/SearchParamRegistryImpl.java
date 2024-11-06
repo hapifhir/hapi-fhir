@@ -116,7 +116,7 @@ public class SearchParamRegistryImpl
 
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(
-			String theResourceName, String theParamName, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceName, @Nonnull String theParamName, @Nonnull SearchParamLookupContextEnum theContext) {
 		requiresActiveSearchParams();
 
 		// Can still be null in unit test scenarios
@@ -134,7 +134,7 @@ public class SearchParamRegistryImpl
 
 	@Nonnull
 	@Override
-	public ResourceSearchParams getActiveSearchParams(String theResourceName, SearchParamLookupContextEnum theContext) {
+	public ResourceSearchParams getActiveSearchParams(@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 		requiresActiveSearchParams();
 		return getActiveSearchParams().getSearchParamMap(theResourceName).toFilteredForContext(theContext);
 	}
@@ -148,20 +148,20 @@ public class SearchParamRegistryImpl
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 		return filteredForContext(myJpaSearchParamCache.getActiveComboSearchParams(theResourceName), theContext);
 	}
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, ComboSearchParamType theParamType, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceName, @Nonnull ComboSearchParamType theParamType, @Nonnull SearchParamLookupContextEnum theContext) {
 		return filteredForContext(
 				myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamType), theContext);
 	}
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, Set<String> theParamNames, SearchParamLookupContextEnum theContext) {
+		@Nonnull String theResourceName, @Nonnull Set<String> theParamNames, @Nonnull SearchParamLookupContextEnum theContext) {
 		return filteredForContext(
 				myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames), theContext);
 	}
@@ -173,7 +173,7 @@ public class SearchParamRegistryImpl
 
 	@Nullable
 	@Override
-	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl, SearchParamLookupContextEnum theContext) {
+	public RuntimeSearchParam getActiveSearchParamByUrl(@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext) {
 		if (myActiveSearchParams != null) {
 			RuntimeSearchParam param = myActiveSearchParams.getByUrl(theUrl);
 			if (isAllowedForContext(param, theContext)) {
@@ -184,7 +184,7 @@ public class SearchParamRegistryImpl
 	}
 
 	@Override
-	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
+	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(@Nonnull String theResourceName, @Nonnull IIdType theId) {
 		return myJpaSearchParamCache.getActiveComboSearchParamById(theResourceName, theId);
 	}
 
