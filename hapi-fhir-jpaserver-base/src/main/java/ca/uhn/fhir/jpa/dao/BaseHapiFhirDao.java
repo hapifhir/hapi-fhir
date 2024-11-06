@@ -1163,7 +1163,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled() && changed.isChanged()) {
 					// set the lastUpdated dates so we can use them to search in lucene
-					theResource.getMeta().setLastUpdated(theTransactionDetails.getTransactionDate());
+					if (theResource.getMeta().getLastUpdated() == null) {
+						theResource.getMeta().setLastUpdated(theTransactionDetails.getTransactionDate());
+					}
 					populateFullTextFields(myContext, theResource, entity, newParams);
 				}
 			} else {

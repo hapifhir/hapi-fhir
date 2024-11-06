@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -145,6 +146,8 @@ public class ExtendedHSearchSearchBuilder {
 
 				// not yet supported in HSearch
 				myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE
+				&&
+				supportsLastUpdated(myParams)
 				&& // ???
 				myParams.entrySet().stream()
 						.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
@@ -152,6 +155,17 @@ public class ExtendedHSearchSearchBuilder {
 						.flatMap(andList -> andList.getValue().stream())
 						.flatMap(Collection::stream)
 						.allMatch(this::isParamTypeSupported);
+	}
+
+	private boolean supportsLastUpdated(SearchParameterMap theMap) {
+		if (theMap.getLastUpdated() == null || theMap.getLastUpdated().isEmpty()) {
+			return true;
+		}
+
+		DateRangeParam lastUpdated = theMap.getLastUpdated();
+
+		return lastUpdated.getLowerBound() != null && isParamTypeSupported(lastUpdated.getLowerBound())
+			&& lastUpdated.getUpperBound() != null && isParamTypeSupported(lastUpdated.getUpperBound());
 	}
 
 	/**
