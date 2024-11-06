@@ -56,8 +56,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import static org.apache.commons.lang.StringUtils.defaultString;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseStructureParser {
 
