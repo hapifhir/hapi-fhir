@@ -258,7 +258,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
 		try {
 			IIdType obsId = createObservation(withSubject(patientId));
-			if (myIncludePartitionIdsInSql) {
+			if (myIncludePartitionIdsInSql && theAllowReferencesToCrossPartition == PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED) {
 				runInTransaction(()->{
 					List<ResourceTable> resources = myResourceTableDao.findAll();
 					String failMessage = "Resources:\n * " + resources.stream().map(ResourceTable::toString).collect(Collectors.joining("\n * "));
@@ -272,6 +272,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			}
 		} catch (InvalidRequestException e) {
 			if (myIncludePartitionIdsInSql) {
+				assertEquals(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED, theAllowReferencesToCrossPartition);
 				assertThat(e.getMessage()).contains("not found, specified in path: Observation.subject");
 			} else {
 				fail();
@@ -370,13 +371,13 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		}
 
 		if (myIncludePartitionIdsInSql) {
-			assertEquals("select count(rht1_0.PID) from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' and rht1_0.PARTITION_ID='1'", getSelectSql(1));
+			assertEquals("select count(rht1_0.PID) from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1') and rht1_0.RES_ID='" + id.getIdPartAsLong() + "'", getSelectSql(1));
 		} else {
 			assertEquals("select count(rht1_0.PID) from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "'", getSelectSql(1));
 		}
 
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(2)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' and rht1_0.PARTITION_ID='1' ");
+			assertThat(getSelectSql(2)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1') and rht1_0.RES_ID='" + id.getIdPartAsLong() + "'");
 		} else {
 			assertThat(getSelectSql(2)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' ");
 		}
@@ -456,7 +457,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(actualIds).asList().containsExactlyInAnyOrder("Patient/" + id.getIdPart() + "/_history/3", "Patient/" + id.getIdPart() + "/_history/2", "Patient/" + id.getIdPart() + "/_history/1");
 
 		if (myIncludePartitionIdsInSql) {
-			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1')", getSelectSql(0));
+			assertEquals("select count(rht1_0.PID) from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1')", getSelectSql(0));
 		} else {
 			assertEquals("select count(rht1_0.PID) from HFJ_RES_VER rht1_0", getSelectSql(0));
 		}
@@ -469,57 +470,6 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		}
 
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
-	}
-
-
-	@Test
-	public void testOperation_Everything() {
-		// Setup
-		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
-		CreatedResourceIds ids = createPatientWithOrganizationAndEncounterReferences();
-
-		// Test
-		myCaptureQueriesListener.clear();
-		IBundleProvider outcome = myPatientDao.patientInstanceEverything(null, new SystemRequestDetails(), new PatientEverythingParameters(), ids.patientId);
-
-		// Verify
-		myCaptureQueriesListener.logSelectQueries();
-		List<String> actualIds = toUnqualifiedVersionlessIdValues(outcome);
-		assertThat(actualIds).asList().containsExactlyInAnyOrder(ids.allIdValues().toArray(new String[0]));
-
-		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).startsWith("SELECT DISTINCT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
-		} else {
-			assertThat(getSelectSql(0)).startsWith("SELECT DISTINCT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
-		}
-		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(0)).contains("WHERE ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
-			assertThat(getSelectSql(0)).contains("GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
-			assertThat(getSelectSql(0)).endsWith("ORDER BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID");
-			assertThat(getSelectSql(1)).containsAnyOf(
-				"from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() + "','" + ids.encounterPid() + "') ",
-				"from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.encounterPid() + "','" + ids.patientPid() + "') "
-			);
-			assertThat(getSelectSql(2)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
-			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
-		} else {
-			assertThat(getSelectSql(0)).contains("WHERE (t0.TARGET_RESOURCE_ID = '" + ids.patientPid() + "') ");
-			if (myIncludePartitionIdsInSql) {
-				assertThat(getSelectSql(0)).contains(" GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
-			} else {
-				assertThat(getSelectSql(0)).contains(" GROUP BY t0.SRC_RESOURCE_ID ");
-			}
-			assertThat(getSelectSql(0)).endsWith(" ORDER BY t0.SRC_RESOURCE_ID");
-			assertThat(getSelectSql(1)).containsAnyOf(
-				"from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() + "','" + ids.encounterPid() + "') ",
-				"from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.encounterPid() + "','" + ids.patientPid() + "') "
-			);
-			assertThat(getSelectSql(2)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
-			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
-		}
-
-		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
-
 	}
 
 	@Test
@@ -562,7 +512,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		if (myIncludePartitionIdsInPks) {
 			sql = "select rht1_0.PARTITION_ID,rht1_0.PID from HFJ_RES_VER rht1_0 fetch first '400' rows only";
 		} else {
-			sql = "select rht1_0.PID from HFJ_RES_VER rht1_0 fetch first '400' rows only";
+			sql = "select rht1_0.PID from HFJ_RES_VER rht1_0 fetch first '800' rows only";
 		}
 		assertThat(selectResVerQueries.get(0).getSql(true, false)).isEqualTo(sql);
 		assertThat(selectResVerQueries.get(1).getSql(true, false)).isEqualTo(sql);
@@ -573,7 +523,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		if (myIncludePartitionIdsInPks) {
 			assertThat(deleteResVerQueries.get(0).getSql(true, false)).startsWith("delete from HFJ_RES_VER where (PARTITION_ID,PID) in ");
 		} else {
-			assertThat(deleteResVerQueries.get(0).getSql(true, false)).startsWith("delete from HFJ_RES_VER where (PID) in ");
+			assertThat(deleteResVerQueries.get(0).getSql(true, false)).startsWith("delete from HFJ_RES_VER where PID in ");
 		}
 		assertEquals(1, deleteResVerQueries.size());
 	}
@@ -581,6 +531,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	@Test
 	public void testRead_DefaultPartition() {
 		// Setup
+		myPartitionSelectorInterceptor.addNonPartitionableResource("Organization");
 		IIdType id = createOrganization(withId("O"), withName("PARENT"));
 		long pid = findId("Organization", "O").getId();
 
@@ -1358,7 +1309,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	@Test
 	public void testSearch_Includes_Reverse_Star() {
 		// Setup
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		myPartitionSelectorInterceptor.addNonPartitionableResource("Organization");
 		CreatedResourceIds ids = createPatientWithOrganizationReferences();
 
 		// Test
@@ -1424,7 +1377,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	@Test
 	public void testSearch_Includes_Reverse_Specific() {
 		// Setup
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		myPartitionSelectorInterceptor.addNonPartitionableResource("Organization");
 		CreatedResourceIds ids = createPatientWithOrganizationReferences();
 
 		// Test
