@@ -1,0 +1,49 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "profile-encounter",
+  "url": "http://example.ca/fhir/StructureDefinition/profile-encounter",
+  "version": "0.11.0",
+  "name": "EncounterProfile",
+  "title": "Encounter Profile",
+  "status": "active",
+  "date": "2022-10-15T12:00:00+00:00",
+  "publisher": "Example Organization",
+  "fhirVersion": "4.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Encounter",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Encounter",
+  "derivation": "constraint",
+  "differential": {
+    "element":  [
+		 {
+			 "id": "Encounter.identifier.type.coding",
+			 "path": "Encounter.identifier.type.coding",
+			 "min": 1,
+			 "max": "1",
+			 "mustSupport": true
+		 },
+		 {
+			 "id": "Encounter.identifier.type.coding.system",
+			 "path": "Encounter.identifier.type.coding.system",
+			 "min": 1,
+			 "fixedUri": "http://terminology.hl7.org/CodeSystem/v2-0203",
+			 "mustSupport": true
+		 },
+		 {
+			 "id": "Encounter.identifier.type.coding.code",
+			 "path": "Encounter.identifier.type.coding.code",
+			 "min": 1,
+			 "fixedCode": "VN",
+			 "mustSupport": true
+		 },
+		 {
+			 "id": "Encounter.identifier.type.coding.display",
+			 "path": "Encounter.identifier.type.coding.display",
+			 "min": 1,
+			 "fixedString": "Visit number",
+			 "mustSupport": true
+		 }
+	 ]
+  }
+}
