@@ -519,29 +519,48 @@ public abstract class BaseStorageDao {
 			return;
 		}
 
-		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(getResourceName());
+		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(
+				getResourceName(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 		Set<String> paramNames = theSource.keySet();
 		for (String nextParamName : paramNames) {
 			QualifierDetails qualifiedParamName = QualifierDetails.extractQualifiersFromParameterName(nextParamName);
 			RuntimeSearchParam param = searchParams.get(qualifiedParamName.getParamName());
 			if (param == null) {
-				Collection<String> validNames =
-						mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName());
-				String msg = getContext()
-						.getLocalizer()
-						.getMessageSanitized(
-								BaseStorageDao.class,
-								"invalidSearchParameter",
-								qualifiedParamName.getParamName(),
-								getResourceName(),
-								validNames);
-				throw new InvalidRequestException(Msg.code(524) + msg);
+				Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(
+						getResourceName(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+				RuntimeSearchParam notEnabledForSearchParam = mySearchParamRegistry.getActiveSearchParam(
+						getResourceName(),
+						qualifiedParamName.getParamName(),
+						ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
+				if (notEnabledForSearchParam != null) {
+					String msg = getContext()
+							.getLocalizer()
+							.getMessageSanitized(
+									BaseStorageDao.class,
+									"invalidSearchParameterNotEnabledForSearch",
+									qualifiedParamName.getParamName(),
+									getResourceName(),
+									validNames);
+					throw new InvalidRequestException(Msg.code(2539) + msg);
+				} else {
+					String msg = getContext()
+							.getLocalizer()
+							.getMessageSanitized(
+									BaseStorageDao.class,
+									"invalidSearchParameter",
+									qualifiedParamName.getParamName(),
+									getResourceName(),
+									validNames);
+					throw new InvalidRequestException(Msg.code(524) + msg);
+				}
 			}
 
 			// Should not be null since the check above would have caught it
-			RuntimeSearchParam paramDef =
-					mySearchParamRegistry.getActiveSearchParam(getResourceName(), qualifiedParamName.getParamName());
+			RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(
+					getResourceName(),
+					qualifiedParamName.getParamName(),
+					ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 			for (String nextValue : theSource.get(nextParamName)) {
 				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(

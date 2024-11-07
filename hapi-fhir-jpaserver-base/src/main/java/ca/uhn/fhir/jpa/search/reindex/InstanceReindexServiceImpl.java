@@ -158,7 +158,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		return myVersionCanonicalizer.parametersFromCanonical(retValCanonical);
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes"})
 	@Nonnull
 	private Parameters reindexInTransaction(RequestDetails theRequestDetails, IIdType theResourceId) {
 		StopWatch sw = new StopWatch();
@@ -441,7 +441,8 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 	private void fillInParamNames(
 			ResourceTable theEntity, Collection<SearchParamPresentEntity> theTarget, String theResourceName) {
 		Map<Long, String> hashes = new HashMap<>();
-		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(theResourceName);
+		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(
+				theResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 		for (RuntimeSearchParam next : searchParams.values()) {
 			hashes.put(
 					SearchParamPresentEntity.calculateHashPresence(
