@@ -1232,8 +1232,8 @@ public class QueryStack {
 			Condition pathPredicate = toEqualToOrInPredicate(
 					resourceLinkTableJoin.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 
-			Condition linkedPredicate = searchForIdsWithAndOr(
-					with().setSourceJoinColumn(resourceLinkTableJoin.getJoinColumnsForSource())
+			Condition linkedPredicate =
+					searchForIdsWithAndOr(with().setSourceJoinColumn(resourceLinkTableJoin.getJoinColumnsForSource())
 							.setResourceName(targetResourceType)
 							.setParamName(parameterName)
 							.setAndOrParams(Collections.singletonList(orValues))
@@ -1925,11 +1925,7 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId) {
 		ResourceIdPredicateBuilder builder = mySqlBuilder.newResourceIdBuilder();
 		return builder.createPredicateResourceId(
-				theSourceJoinColumn,
-				theResourceName,
-				theValues,
-				theOperation,
-				theRequestPartitionId);
+				theSourceJoinColumn, theResourceName, theValues, theOperation, theRequestPartitionId);
 	}
 
 	private Condition createPredicateSourceForAndList(
@@ -2374,8 +2370,8 @@ public class QueryStack {
 
 	public QueryStack newChildQueryFactoryWithFullBuilderReuse() {
 		return new QueryStack(
-			myRequestDetails,
-			mySearchParameters,
+				myRequestDetails,
+				mySearchParameters,
 				myStorageSettings,
 				myFhirContext,
 				mySqlBuilder,

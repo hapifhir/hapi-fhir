@@ -313,12 +313,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
-			Condition predicate = theQueryStack.searchForIdsWithAndOr(
-					with().setResourceName(myResourceName)
-							.setParamName(nextParamName)
-							.setAndOrParams(andOrParams)
-							.setRequest(theRequest)
-							.setRequestPartitionId(myRequestPartitionId));
+			Condition predicate = theQueryStack.searchForIdsWithAndOr(with().setResourceName(myResourceName)
+					.setParamName(nextParamName)
+					.setAndOrParams(andOrParams)
+					.setRequest(theRequest)
+					.setRequestPartitionId(myRequestPartitionId));
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
@@ -669,8 +668,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				mySqlBuilderFactory,
 				myDialectProvider,
 				theCountOnlyFlag);
-		QueryStack queryStack3 = new QueryStack(theRequest,
-				theParams, myStorageSettings, myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
+		QueryStack queryStack3 = new QueryStack(
+				theRequest,
+				theParams,
+				myStorageSettings,
+				myContext,
+				sqlBuilder,
+				mySearchParamRegistry,
+				myPartitionSettings);
 
 		if (theParams.keySet().size() > 1
 				|| theParams.getSort() != null
@@ -794,8 +799,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myDialectProvider,
 				theCountOnlyFlag);
 
-		QueryStack queryStack3 = new QueryStack(theRequest,
-				theParams, myStorageSettings, myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
+		QueryStack queryStack3 = new QueryStack(
+				theRequest,
+				theParams,
+				myStorageSettings,
+				myContext,
+				sqlBuilder,
+				mySearchParamRegistry,
+				myPartitionSettings);
 
 		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theMaximumResults);
 
