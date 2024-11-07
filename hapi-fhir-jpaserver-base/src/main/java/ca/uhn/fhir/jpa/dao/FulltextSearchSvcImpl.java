@@ -135,15 +135,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public ExtendedHSearchIndexData extractLuceneIndexData(
-			IBaseResource theResource,
-			ResourceTable theEntity,
-			ResourceIndexedSearchParams theNewParams
-	) {
+			IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(resourceType);
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
-			myStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor
-		);
+				myStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
 		return extractor.extract(theResource, theEntity, theNewParams);
 	}
 

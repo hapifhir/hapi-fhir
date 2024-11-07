@@ -146,8 +146,7 @@ public class ExtendedHSearchSearchBuilder {
 
 				// not yet supported in HSearch
 				myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE
-				&&
-				supportsLastUpdated(myParams)
+				&& supportsLastUpdated(myParams)
 				&& // ???
 				myParams.entrySet().stream()
 						.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
@@ -164,8 +163,10 @@ public class ExtendedHSearchSearchBuilder {
 
 		DateRangeParam lastUpdated = theMap.getLastUpdated();
 
-		return lastUpdated.getLowerBound() != null && isParamTypeSupported(lastUpdated.getLowerBound())
-			&& lastUpdated.getUpperBound() != null && isParamTypeSupported(lastUpdated.getUpperBound());
+		return lastUpdated.getLowerBound() != null
+				&& isParamTypeSupported(lastUpdated.getLowerBound())
+				&& lastUpdated.getUpperBound() != null
+				&& isParamTypeSupported(lastUpdated.getUpperBound());
 	}
 
 	/**

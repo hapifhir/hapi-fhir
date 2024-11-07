@@ -76,9 +76,10 @@ public class ExtendedHSearchIndexExtractor {
 		mySearchParamExtractor = theSearchParamExtractor;
 	}
 
-	public ExtendedHSearchIndexData extract(IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
-		ExtendedHSearchIndexData retVal = new ExtendedHSearchIndexData(
-			myContext, myJpaStorageSettings, theResource, theEntity);
+	public ExtendedHSearchIndexData extract(
+			IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
+		ExtendedHSearchIndexData retVal =
+				new ExtendedHSearchIndexData(myContext, myJpaStorageSettings, theResource, theEntity);
 
 		if (myJpaStorageSettings.isStoreResourceInHSearchIndex()) {
 			retVal.setRawResourceData(myContext.newJsonParser().encodeResourceToString(theResource));
@@ -147,15 +148,10 @@ public class ExtendedHSearchIndexExtractor {
 				retVal.addCompositeIndexData(nextParam.getSearchParamName(), buildCompositeIndexData(nextParam)));
 
 		if (theEntity.getUpdated() != null && !theEntity.getUpdated().isEmpty()) {
-			int ordinal = ResourceIndexedSearchParamDate.calculateOrdinalValue(
-				theEntity.getUpdatedDate())
+			int ordinal = ResourceIndexedSearchParamDate.calculateOrdinalValue(theEntity.getUpdatedDate())
 					.intValue();
 			retVal.addDateIndexData(
-					"_lastUpdated",
-					theEntity.getUpdatedDate(),
-					ordinal,
-					theEntity.getUpdatedDate(),
-					ordinal);
+					"_lastUpdated", theEntity.getUpdatedDate(), ordinal, theEntity.getUpdatedDate(), ordinal);
 		}
 
 		if (!theNewParams.myLinks.isEmpty()) {
