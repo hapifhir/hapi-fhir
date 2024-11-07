@@ -31,6 +31,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
@@ -120,5 +122,16 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	public Long getId() {
 		return myId;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		if (getPartitionId() != null) {
+			b.append("partition", getPartitionId().getPartitionId());
+		}
+		b.append("resId", getResourceId());
+		b.append("tag", getTag().getId());
+		return b.build();
 	}
 }
