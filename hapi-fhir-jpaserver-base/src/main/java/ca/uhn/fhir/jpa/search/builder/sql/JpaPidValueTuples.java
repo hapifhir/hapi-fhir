@@ -35,11 +35,11 @@ import java.util.List;
  * Outputs an SQL tuple for a collection of JpaPids, consisting of
  * ((resId,partitionId),(resId,partitionId),(resId,partitionId),...)
  */
-public class JpaPidValueTupleObject extends Expression {
+public class JpaPidValueTuples extends Expression {
 
 	private final Collection<String> myValues;
 
-	public JpaPidValueTupleObject(Collection<String> theValues) {
+	public JpaPidValueTuples(Collection<String> theValues) {
 		myValues = theValues;
 	}
 
@@ -72,16 +72,16 @@ public class JpaPidValueTupleObject extends Expression {
 		}
 	}
 
-	public static JpaPidValueTupleObject from(SearchQueryBuilder theSearchQueryBuilder, JpaPid[] thePids) {
+	public static JpaPidValueTuples from(SearchQueryBuilder theSearchQueryBuilder, JpaPid[] thePids) {
 		return from(theSearchQueryBuilder, Arrays.asList(thePids));
 	}
 
-	public static JpaPidValueTupleObject from(SearchQueryBuilder theSearchQueryBuilder, Collection<JpaPid> thePids) {
+	public static JpaPidValueTuples from(SearchQueryBuilder theSearchQueryBuilder, Collection<JpaPid> thePids) {
 		List<String> placeholders = new ArrayList<>(thePids.size() * 2);
 		for (JpaPid next : thePids) {
 			placeholders.add(theSearchQueryBuilder.generatePlaceholder(next.getPartitionId()));
 			placeholders.add(theSearchQueryBuilder.generatePlaceholder(next.getId()));
 		}
-		return new JpaPidValueTupleObject(placeholders);
+		return new JpaPidValueTuples(placeholders);
 	}
 }

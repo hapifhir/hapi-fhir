@@ -24,7 +24,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
-import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTupleObject;
+import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -140,7 +140,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 			} else {
 				if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
 					ColumnTupleObject left = new ColumnTupleObject(theSourceJoinColumn);
-					JpaPidValueTupleObject right = JpaPidValueTupleObject.from(getSearchQueryBuilder(), allOrPids);
+					JpaPidValueTuples right = JpaPidValueTuples.from(getSearchQueryBuilder(), allOrPids);
 					return QueryParameterUtils.toInPredicate(
 							left, right, operation == SearchFilterParser.CompareOperation.ne);
 				} else {
