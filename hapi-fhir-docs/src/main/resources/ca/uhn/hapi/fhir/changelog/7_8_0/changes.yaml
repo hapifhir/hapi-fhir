@@ -33,7 +33,7 @@
       <li>httpcore (Client): 4.4.13 -&gt; 4.4.16</li>
       <li>httpclient (Client): 4.5.13 -&gt; 4.5.14</li>
       <li>flyway (JPA): 9.4.0 -&gt; 10.20.1</li>
-      <li>hibernate (JPA): 6.4.1.Final -&gt; 6.6.1.Final</li>
+      <li>hibernate (JPA): 6.4.1.Final -&gt; 6.6.2.Final</li>
       <li>hibernate-search (JPA): 7.0.0.Final -&gt; 7.2.1.Final</li>
       <li>elastic-apm (JPA): 1.44.0 -&gt; 1.52.0</li>
       <li>elastic-search (JPA): 8.14.3 -&gt; 8.15.3</li>
