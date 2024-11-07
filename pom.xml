@@ -1063,6 +1063,7 @@
 		<spring_boot_version>3.3.5</spring_boot_version>
 		<spring_retry_version>2.0.10</spring_retry_version>
 		<json_path_version>2.9.0</json_path_version>
+		<jboss_logging_version>3.6.1.Final</jboss_logging_version>
 		<stax2_api_version>3.1.4</stax2_api_version>
 		<testcontainers_version>1.20.3</testcontainers_version>
 		<thymeleaf-version>3.1.2.RELEASE</thymeleaf-version>
@@ -1124,6 +1125,11 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-core</artifactId>
 				<version>${logback_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.logging</groupId>
+				<artifactId>jboss-logging</artifactId>
+				<version>${jboss_logging_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.atlassian.commonmark</groupId>
