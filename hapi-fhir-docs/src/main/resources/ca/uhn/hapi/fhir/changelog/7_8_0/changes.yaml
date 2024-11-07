@@ -15,9 +15,6 @@
       <li>jackson-databind (Base): 2.17.1 -&gt; 2.18.1</li>
       <li>opentelemetry-instrumentation-bom (Base): 2.8.0 -&gt; 2.9.0</li>
       <li>resteasy (Base): 6.2.9.Final -&gt; 6.2.10.Final</li>
-      <li>flyway (Base): 9.4.0 -&gt; 10.20.1</li>
-      <li>hibernate (Base): 6.4.1.Final -&gt; 6.6.1.Final</li>
-      <li>hibernate-search (Base): 7.0.0.Final -&gt; 7.2.1.Final</li>
       <li>logback-classic (Base): 1.4.14 -&gt; 1.5.12</li>
       <li>owasp-java-html-sanitizer (Base): 20211018.2 -&gt; 20240325.1</li>
       <li>graphql-java (Base): 21.5 -&gt; 22.3</li>
@@ -25,7 +22,6 @@
       <li>okio-jvm (Base): 3.4.0 -&gt; 3.9.1</li>
       <li>commons-cli (Base): 1.5.0 -&gt; 1.9.0</li>
       <li>org.jetbrains.annotations (Base): 23.0.0 -&gt; 26.0.1</li>
-      <li>mysql-connector-j (Base): 8.2.0 -&gt; 9.1.0</li>
       <li>springdoc-openapi-starter-webmvc-ui (Base): 2.2.0 -&gt; 2.6.0</li>
       <li>ace-builds (Base): 1.22.0 -&gt; 1.36.3</li>
       <li>bootstrap (Base): 4.5.2 -&gt; 4.6.2</li>
@@ -33,9 +29,15 @@
       <li>font-awesome (Base): 5.8.2 -&gt; 5.15.4</li>
       <li>swagger-ui (Base): 4.1.3 -&gt; 4.19.1</li>
       <li>xmlunit-core (Base): 2.4.0 -&gt; 2.10.0</li>
-      <li>elastic-apm (Base): 1.44.0 -&gt; 1.52.0</li>
-      <li>elastic-search (Base): 8.14.3 -&gt; 8.15.3</li>
-      <li>lucene (Base): 9.8.0 -&gt; 9.12.0</li>
       <li>httpcore (Base): 4.4.13 -&gt; 4.4.16</li>
       <li>httpclient (Base): 4.5.13 -&gt; 4.5.14</li>
+      <li>flyway (JPA): 9.4.0 -&gt; 10.20.1</li>
+      <li>hibernate (JPA): 6.4.1.Final -&gt; 6.6.1.Final</li>
+      <li>hibernate-search (JPA): 7.0.0.Final -&gt; 7.2.1.Final</li>
+      <li>elastic-apm (JPA): 1.44.0 -&gt; 1.52.0</li>
+      <li>elastic-search (JPA): 8.14.3 -&gt; 8.15.3</li>
+      <li>lucene (JPA): 9.8.0 -&gt; 9.12.0</li>
+      <li>postgresql (JPA): 42.7.3 -&gt; 42.7.4</li>
+      <li>mysql-connector-j (JPA): 8.2.0 -&gt; 9.1.0</li>
+      <li>ojdbc11 (JPA): 23.3.0.23.09 -&gt; 23.6.0.24.10</li>
       </ul>"

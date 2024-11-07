@@ -2034,12 +2034,12 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.3</version>
+				<version>42.7.4</version>
 			</dependency>
 			<dependency>
 				<groupId>com.oracle.database.jdbc</groupId>
 				<artifactId>ojdbc11</artifactId>
-				<version>23.3.0.23.09</version>
+				<version>23.6.0.24.10</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
