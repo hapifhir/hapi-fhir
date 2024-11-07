@@ -413,6 +413,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 		PartitionSettings defaultPartConfig = new PartitionSettings();
 		myPartitionSettings.setIncludePartitionInSearchHashes(defaultPartConfig.isIncludePartitionInSearchHashes());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultPartConfig.getAllowReferencesAcrossPartitions());
 	}
 
 	@AfterEach
