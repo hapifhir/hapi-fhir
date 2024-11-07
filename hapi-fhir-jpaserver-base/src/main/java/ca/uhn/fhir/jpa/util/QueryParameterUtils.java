@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
-import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTupleObject;
+import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -122,7 +122,7 @@ public class QueryParameterUtils {
 
 	@Nonnull
 	public static Condition toInPredicate(
-			ColumnTupleObject theColumns, JpaPidValueTupleObject theValues, boolean theInverse) {
+		ColumnTupleObject theColumns, JpaPidValueTuples theValues, boolean theInverse) {
 		return new InCondition(theColumns, theValues).setNegate(theInverse);
 	}
 

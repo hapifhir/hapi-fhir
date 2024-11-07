@@ -43,7 +43,7 @@ import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
-import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTupleObject;
+import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -812,7 +812,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			// with ids in or equal to this value
 			if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
 				Object left = ColumnTupleObject.from(getJoinColumnsForTarget());
-				JpaPidValueTupleObject right = JpaPidValueTupleObject.from(getSearchQueryBuilder(), theTargetPids);
+				JpaPidValueTuples right = JpaPidValueTuples.from(getSearchQueryBuilder(), theTargetPids);
 				condition = new InCondition(left, right);
 			} else {
 				condition = QueryParameterUtils.toEqualToOrInPredicate(
