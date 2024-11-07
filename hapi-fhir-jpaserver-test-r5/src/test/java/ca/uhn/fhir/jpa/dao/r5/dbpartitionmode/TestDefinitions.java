@@ -814,18 +814,22 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(values).asList().containsExactly(patientId.getValue());
 	}
 
-	@Test
-	public void testSearch_IdParam() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSearch_IdParam(boolean theIncludeOtherParameter) {
 		// Setup
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
 
 		IIdType id0 = createPatient(withActiveTrue()).toUnqualifiedVersionless();
-		IIdType id1 = createPatient(withId("A"), withActiveFalse()).toUnqualifiedVersionless();
+		IIdType id1 = createPatient(withId("A"), withActiveTrue()).toUnqualifiedVersionless();
 
 		// Test
 		myCaptureQueriesListener.clear();
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
+		if (theIncludeOtherParameter) {
+			params.add(Patient.SP_ACTIVE, new TokenParam("true"));
+		}
 		params.add(SP_RES_ID, new TokenOrListParam().add(id0.getValue()).add(id1.getValue()));
 		IBundleProvider outcome = myPatientDao.search(params, newRequest());
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).asList().containsExactlyInAnyOrder(id0.getValue(), id1.getValue());
