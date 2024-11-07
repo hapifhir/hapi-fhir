@@ -204,9 +204,13 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		// Query 2 - Load resource contents
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
 		assertThat(sql).contains("where rht1_0.RES_ID in (?)");
-		// Query 3 - Load tags and defintions
+		// Query 3 - Load tags and definitions
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(false, false);
-		assertThat(sql).contains("from HFJ_HISTORY_TAG rht1_0 join HFJ_TAG_DEF");
+		if (theTagStorageModeEnum == JpaStorageSettings.TagStorageModeEnum.VERSIONED) {
+			assertThat(sql).contains("from HFJ_HISTORY_TAG rht1_0 join HFJ_TAG_DEF");
+		} else {
+			assertThat(sql).contains("from HFJ_RES_TAG rt1_0 join HFJ_TAG_DEF");
+		}
 
 		assertThat(toUnqualifiedVersionlessIds(outcome)).containsExactly(id);
 
