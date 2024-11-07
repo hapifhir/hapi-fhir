@@ -74,6 +74,11 @@ public interface ILuceneSearchR4Test {
 		Patient patient = new Patient();
 		patient.getMeta()
 			.addTag(system, code, "");
+		patient.addName().addGiven("homer")
+			.setFamily("simpson");
+		patient.addAddress()
+			.setCity("springfield")
+			.addLine("742 evergreen terrace");
 		Long id = patientDao.create(patient, requestDeatils).getId().toUnqualifiedVersionless().getIdPartAsLong();
 
 		// create base search map

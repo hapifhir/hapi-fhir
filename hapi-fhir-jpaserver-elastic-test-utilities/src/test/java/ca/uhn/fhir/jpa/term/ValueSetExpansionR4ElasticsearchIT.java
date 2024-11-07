@@ -108,7 +108,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		when(mySrd.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE)).thenReturn(Boolean.TRUE);
 	}
 
-
 	@AfterEach
 	public void after() {
 		myStorageSettings.setMaximumExpansionSize(JpaStorageSettings.DEFAULT_MAX_EXPANSION_SIZE);
@@ -217,7 +216,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		}
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(CS_URL, additions);
 
-
 		// Codes available exceeds the max
 		myStorageSettings.setMaximumExpansionSize(50);
 		ValueSet vs = new ValueSet();
@@ -236,7 +234,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		include.setSystem(CS_URL);
 		ValueSet outcome = myTermSvc.expandValueSet(null, vs);
 		assertThat(outcome.getExpansion().getContains()).hasSize(109);
-
 	}
 
 	@Test
