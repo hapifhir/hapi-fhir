@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.batch2.model;
 
-import java.time.Duration;
 import java.util.Date;
 
 public class BatchWorkChunkStatusDTO {
