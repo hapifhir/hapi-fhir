@@ -34,8 +34,6 @@ import ca.uhn.fhir.util.VersionUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
@@ -66,7 +64,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -105,7 +102,8 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 		myGenerator = new GraphQLSchemaGenerator(myContext, VersionUtil.getVersion());
 
 		GsonBuilder gsonBuilder = new GsonBuilder();
-		gsonBuilder.registerTypeAdapter(Collections.emptyList().getClass(), (JsonSerializer<Object>) (src, typeOfSrc, context) -> new JsonArray());
+		gsonBuilder.registerTypeAdapter(Collections.emptyList().getClass(), (JsonSerializer<Object>)
+				(src, typeOfSrc, context) -> new JsonArray());
 		myGson = gsonBuilder.create();
 	}
 
