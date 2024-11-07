@@ -41,7 +41,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(
-		name = "HFJ_IDX_CMB_TOK_NU",
+		name = ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU,
 		indexes = {
 			// TODO: The hash index was added in 7.4.0 - In 7.6.0 we should drop the string index
 			@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
@@ -50,6 +50,8 @@ import org.hibernate.annotations.GenericGenerator;
 		})
 public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
+
+	public static final String HFJ_IDX_CMB_TOK_NU = "HFJ_IDX_CMB_TOK_NU";
 
 	@GenericGenerator(
 			name = "SEQ_IDXCMBTOKNU_ID",
