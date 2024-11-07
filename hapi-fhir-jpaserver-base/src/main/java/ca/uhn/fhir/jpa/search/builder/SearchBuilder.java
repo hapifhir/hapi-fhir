@@ -314,7 +314,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
 			Condition predicate = theQueryStack.searchForIdsWithAndOr(
-					theRequest,
 					with().setResourceName(myResourceName)
 							.setParamName(nextParamName)
 							.setAndOrParams(andOrParams)
@@ -670,7 +669,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				mySqlBuilderFactory,
 				myDialectProvider,
 				theCountOnlyFlag);
-		QueryStack queryStack3 = new QueryStack(
+		QueryStack queryStack3 = new QueryStack(theRequest,
 				theParams, myStorageSettings, myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
 		if (theParams.keySet().size() > 1
@@ -795,7 +794,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myDialectProvider,
 				theCountOnlyFlag);
 
-		QueryStack queryStack3 = new QueryStack(
+		QueryStack queryStack3 = new QueryStack(theRequest,
 				theParams, myStorageSettings, myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
 		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theMaximumResults);

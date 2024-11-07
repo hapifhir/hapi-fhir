@@ -542,7 +542,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
 			andPredicates.add(childQueryFactory.searchForIdsWithAndOr(
-					theRequest,
 					with().setSourceJoinColumn(getJoinColumnsForTarget())
 							.setResourceName(subResourceName)
 							.setParamName(chain)

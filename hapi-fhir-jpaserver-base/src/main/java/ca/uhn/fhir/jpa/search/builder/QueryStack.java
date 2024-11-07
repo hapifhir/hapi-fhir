@@ -152,6 +152,7 @@ public class QueryStack {
 	private final PartitionSettings myPartitionSettings;
 	private final JpaStorageSettings myStorageSettings;
 	private final EnumSet<PredicateBuilderTypeEnum> myReusePredicateBuilderTypes;
+	private final RequestDetails myRequestDetails;
 	private Map<PredicateBuilderCacheKey, BaseJoiningPredicateBuilder> myJoinMap;
 	private Map<String, BaseJoiningPredicateBuilder> myParamNameToPredicateBuilderMap;
 	// used for _offset queries with sort, should be removed once the fix is applied to the async path too.
@@ -162,6 +163,7 @@ public class QueryStack {
 	 * Constructor
 	 */
 	public QueryStack(
+			RequestDetails theRequestDetails,
 			SearchParameterMap theSearchParameters,
 			JpaStorageSettings theStorageSettings,
 			FhirContext theFhirContext,
@@ -169,6 +171,7 @@ public class QueryStack {
 			ISearchParamRegistry theSearchParamRegistry,
 			PartitionSettings thePartitionSettings) {
 		this(
+				theRequestDetails,
 				theSearchParameters,
 				theStorageSettings,
 				theFhirContext,
@@ -182,6 +185,7 @@ public class QueryStack {
 	 * Constructor
 	 */
 	private QueryStack(
+			RequestDetails theRequestDetails,
 			SearchParameterMap theSearchParameters,
 			JpaStorageSettings theStorageSettings,
 			FhirContext theFhirContext,
@@ -189,6 +193,7 @@ public class QueryStack {
 			ISearchParamRegistry theSearchParamRegistry,
 			PartitionSettings thePartitionSettings,
 			EnumSet<PredicateBuilderTypeEnum> theReusePredicateBuilderTypes) {
+		myRequestDetails = theRequestDetails;
 		myPartitionSettings = thePartitionSettings;
 		assert theSearchParameters != null;
 		assert theStorageSettings != null;
@@ -939,7 +944,6 @@ public class QueryStack {
 
 		if (theFilter instanceof SearchFilterParser.FilterParameter) {
 			return createPredicateFilter(
-					theRequest,
 					theQueryStack3,
 					(SearchFilterParser.FilterParameter) theFilter,
 					theResourceName,
@@ -984,7 +988,6 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateFilter(
-			RequestDetails theRequestDetails,
 			QueryStack theQueryStack3,
 			SearchFilterParser.FilterParameter theFilter,
 			String theResourceName,
@@ -998,7 +1001,6 @@ public class QueryStack {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
 				return theQueryStack3.createPredicateResourceId(
-						theRequestDetails,
 						null,
 						Collections.singletonList(Collections.singletonList(param)),
 						theResourceName,
@@ -1034,7 +1036,6 @@ public class QueryStack {
 							searchParam,
 							Collections.singletonList(new UriParam(theFilter.getValue())),
 							theFilter.getOperation(),
-							theRequest,
 							theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
 					return theQueryStack3.createPredicateString(
@@ -1232,7 +1233,6 @@ public class QueryStack {
 					resourceLinkTableJoin.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 
 			Condition linkedPredicate = searchForIdsWithAndOr(
-					theRequest,
 					with().setSourceJoinColumn(resourceLinkTableJoin.getJoinColumnsForSource())
 							.setResourceName(targetResourceType)
 							.setParamName(parameterName)
@@ -1892,7 +1892,6 @@ public class QueryStack {
 						theParamDefinition,
 						theOrValues,
 						theOperation,
-						theRequest,
 						theRequestPartitionId,
 						theSqlBuilder);
 				break;
@@ -1919,7 +1918,6 @@ public class QueryStack {
 
 	@Nullable
 	public Condition createPredicateResourceId(
-			RequestDetails theRequestDetails,
 			@Nullable DbColumn[] theSourceJoinColumn,
 			List<List<IQueryParameterType>> theValues,
 			String theResourceName,
@@ -1927,7 +1925,6 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId) {
 		ResourceIdPredicateBuilder builder = mySqlBuilder.newResourceIdBuilder();
 		return builder.createPredicateResourceId(
-				theRequestDetails,
 				theSourceJoinColumn,
 				theResourceName,
 				theValues,
@@ -2333,7 +2330,6 @@ public class QueryStack {
 			RuntimeSearchParam theSearchParam,
 			List<? extends IQueryParameterType> theList,
 			SearchFilterParser.CompareOperation theOperation,
-			RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId) {
 		return createPredicateUri(
 				theSourceJoinColumn,
@@ -2342,7 +2338,6 @@ public class QueryStack {
 				theSearchParam,
 				theList,
 				theOperation,
-				theRequestDetails,
 				theRequestPartitionId,
 				mySqlBuilder);
 	}
@@ -2354,7 +2349,6 @@ public class QueryStack {
 			RuntimeSearchParam theSearchParam,
 			List<? extends IQueryParameterType> theList,
 			SearchFilterParser.CompareOperation theOperation,
-			RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId,
 			SearchQueryBuilder theSqlBuilder) {
 
@@ -2373,14 +2367,15 @@ public class QueryStack {
 		} else {
 			UriPredicateBuilder join = theSqlBuilder.addUriPredicateBuilder(theSourceJoinColumn);
 
-			Condition predicate = join.addPredicate(theList, paramName, theOperation, theRequestDetails);
+			Condition predicate = join.addPredicate(theList, paramName, theOperation, myRequestDetails);
 			return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 		}
 	}
 
 	public QueryStack newChildQueryFactoryWithFullBuilderReuse() {
 		return new QueryStack(
-				mySearchParameters,
+			myRequestDetails,
+			mySearchParameters,
 				myStorageSettings,
 				myFhirContext,
 				mySqlBuilder,
@@ -2390,7 +2385,7 @@ public class QueryStack {
 	}
 
 	@Nullable
-	public Condition searchForIdsWithAndOr(RequestDetails theRequestDetails, SearchForIdsParams theSearchForIdsParams) {
+	public Condition searchForIdsWithAndOr(SearchForIdsParams theSearchForIdsParams) {
 
 		if (theSearchForIdsParams.myAndOrParams.isEmpty()) {
 			return null;
@@ -2399,7 +2394,6 @@ public class QueryStack {
 		switch (theSearchForIdsParams.myParamName) {
 			case IAnyResource.SP_RES_ID:
 				return createPredicateResourceId(
-						theRequestDetails,
 						theSearchForIdsParams.mySourceJoinColumn,
 						theSearchForIdsParams.myAndOrParams,
 						theSearchForIdsParams.myResourceName,
@@ -2673,7 +2667,6 @@ public class QueryStack {
 								nextParamDef,
 								nextAnd,
 								SearchFilterParser.CompareOperation.eq,
-								theRequest,
 								theRequestPartitionId));
 					}
 					break;

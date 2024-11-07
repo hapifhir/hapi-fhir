@@ -1,4 +1,4 @@
-/*-
+/*
  * #%L
  * HAPI FHIR JPA Server
  * %%
