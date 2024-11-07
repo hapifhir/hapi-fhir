@@ -600,12 +600,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 							.add(SearchParameterMap.class, theParams)
 							.add(RequestDetails.class, theRequestDetails)
 							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-					Object outcome = CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
+					boolean canUseCache = CompositeInterceptorBroadcaster.doCallHooks(
 							myInterceptorBroadcaster,
 							theRequestDetails,
 							Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH,
 							params);
-					if (Boolean.FALSE.equals(outcome)) {
+					if (!canUseCache) {
 						return null;
 					}
 
