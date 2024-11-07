@@ -73,8 +73,8 @@ public class SearchParameterDaoValidator {
 		if (myStorageSettings.isDefaultSearchParamsCanBeOverridden() == false) {
 			for (IPrimitiveType<?> nextBaseType : searchParameter.getBase()) {
 				String nextBase = nextBaseType.getValueAsString();
-				RuntimeSearchParam existingSearchParam =
-						mySearchParamRegistry.getActiveSearchParam(nextBase, searchParameter.getCode());
+				RuntimeSearchParam existingSearchParam = mySearchParamRegistry.getActiveSearchParam(
+						nextBase, searchParameter.getCode(), ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 				if (existingSearchParam != null) {
 					boolean isBuiltIn = existingSearchParam.getId() == null;
 					isBuiltIn |= existingSearchParam.getUri().startsWith("http://hl7.org/fhir/SearchParameter/");
@@ -221,7 +221,8 @@ public class SearchParameterDaoValidator {
 				.filter(SearchParameter.SearchParameterComponentComponent::hasDefinition)
 				.map(SearchParameter.SearchParameterComponentComponent::getDefinition)
 				.filter(Objects::nonNull)
-				.map(mySearchParamRegistry::getActiveSearchParamByUrl)
+				.map((String url) -> mySearchParamRegistry.getActiveSearchParamByUrl(
+						url, ISearchParamRegistry.SearchParamLookupContextEnum.ALL))
 				.filter(Objects::nonNull)
 				.forEach(theRuntimeSp -> validateComponentSpTypeAgainstWhiteList(
 						theRuntimeSp, getAllowedSearchParameterTypes(theSearchParameter)));

@@ -681,8 +681,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				|| theParams.getSort() != null
 				|| theParams.keySet().contains(Constants.PARAM_HAS)
 				|| isPotentiallyContainedReferenceParameterExistsAtRoot(theParams)) {
-			List<RuntimeSearchParam> activeComboParams =
-					mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
+			List<RuntimeSearchParam> activeComboParams = mySearchParamRegistry.getActiveComboSearchParams(
+					myResourceName, theParams.keySet(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 			if (activeComboParams.isEmpty()) {
 				sqlBuilder.setNeedResourceTableRoot(true);
 			}
@@ -953,8 +953,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			theQueryStack.addSortOnLastUpdated(ascending);
 
 		} else {
-			RuntimeSearchParam param =
-					mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
+			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
+					myResourceName, theSort.getParamName(), ISearchParamRegistry.SearchParamLookupContextEnum.SORT);
 
 			/*
 			 * If we have a sort like _sort=subject.name and we  have an
@@ -978,8 +978,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						referenceParamTargetType = referenceParam.substring(0, colonIdx);
 						referenceParam = referenceParam.substring(colonIdx + 1);
 					}
-					RuntimeSearchParam outerParam =
-							mySearchParamRegistry.getActiveSearchParam(myResourceName, referenceParam);
+					RuntimeSearchParam outerParam = mySearchParamRegistry.getActiveSearchParam(
+							myResourceName, referenceParam, ISearchParamRegistry.SearchParamLookupContextEnum.SORT);
 					if (outerParam == null) {
 						throwInvalidRequestExceptionForUnknownSortParameter(myResourceName, referenceParam);
 					} else if (outerParam.hasUpliftRefchain(targetParam)) {
@@ -987,8 +987,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							if (referenceParamTargetType != null && !referenceParamTargetType.equals(nextTargetType)) {
 								continue;
 							}
-							RuntimeSearchParam innerParam =
-									mySearchParamRegistry.getActiveSearchParam(nextTargetType, targetParam);
+							RuntimeSearchParam innerParam = mySearchParamRegistry.getActiveSearchParam(
+									nextTargetType,
+									targetParam,
+									ISearchParamRegistry.SearchParamLookupContextEnum.SORT);
 							if (innerParam != null) {
 								param = innerParam;
 								break;
@@ -1022,7 +1024,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			if (param == null) {
-				param = mySearchParamRegistry.getActiveSearchParam(myResourceName, paramName);
+				param = mySearchParamRegistry.getActiveSearchParam(
+						myResourceName, paramName, ISearchParamRegistry.SearchParamLookupContextEnum.SORT);
 			}
 
 			if (param == null) {
@@ -1101,8 +1104,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private void throwInvalidRequestExceptionForUnknownSortParameter(String theResourceName, String theParamName) {
-		Collection<String> validSearchParameterNames =
-				mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName);
+		Collection<String> validSearchParameterNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(
+				theResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SORT);
 		String msg = myContext
 				.getLocalizer()
 				.getMessageSanitized(
@@ -1629,7 +1632,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		String paramName = nextInclude.getParamName();
 		if (isNotBlank(paramName)) {
-			param = mySearchParamRegistry.getActiveSearchParam(resType, paramName);
+			param = mySearchParamRegistry.getActiveSearchParam(
+					resType, paramName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		} else {
 			param = null;
 		}
@@ -2074,7 +2078,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// in this context, so let's just assume it could be anything.
 				targetResourceTypes = possibleTypes;
 			} else {
-				for (var next : mySearchParamRegistry.getActiveSearchParams(myResourceName).values().stream()
+				for (var next : mySearchParamRegistry
+						.getActiveSearchParams(myResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
+						.values()
+						.stream()
 						.filter(t -> t.getParamType().equals(RestSearchParameterTypeEnum.REFERENCE))
 						.collect(Collectors.toList())) {
 
@@ -2215,16 +2222,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			QueryStack theQueryStack, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
 		RuntimeSearchParam comboParam = null;
 		List<String> comboParamNames = null;
-		List<RuntimeSearchParam> exactMatchParams =
-				mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
+		List<RuntimeSearchParam> exactMatchParams = mySearchParamRegistry.getActiveComboSearchParams(
+				myResourceName, theParams.keySet(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		if (!exactMatchParams.isEmpty()) {
 			comboParam = exactMatchParams.get(0);
 			comboParamNames = new ArrayList<>(theParams.keySet());
 		}
 
 		if (comboParam == null) {
-			List<RuntimeSearchParam> candidateComboParams =
-					mySearchParamRegistry.getActiveComboSearchParams(myResourceName);
+			List<RuntimeSearchParam> candidateComboParams = mySearchParamRegistry.getActiveComboSearchParams(
+					myResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 			for (RuntimeSearchParam nextCandidate : candidateComboParams) {
 				List<String> nextCandidateParamNames =
 						JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, nextCandidate).stream()
@@ -2293,8 +2300,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
 				String nextOrValue = nextOr.getValueAsQueryToken(myContext);
 
-				RuntimeSearchParam nextParamDef =
-						mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
+						myResourceName, nextParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
 					if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.STRING) {
 						nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);
@@ -2409,7 +2416,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			// Reference params are only eligible for using a composite index if they
 			// are qualified
-			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
+					myResourceName, nextParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 			if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 				ReferenceParam param = (ReferenceParam) nextValues.get(0).get(0);
 				if (isBlank(param.getResourceType())) {

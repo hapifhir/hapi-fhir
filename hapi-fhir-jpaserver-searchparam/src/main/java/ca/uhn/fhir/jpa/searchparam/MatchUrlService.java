@@ -168,8 +168,10 @@ public class MatchUrlService {
 			} else if (nextParamName.startsWith("_") && !Constants.PARAM_LANGUAGE.equals(nextParamName)) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
-				RuntimeSearchParam paramDef =
-						mySearchParamRegistry.getActiveSearchParam(theResourceDefinition.getName(), nextParamName);
+				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(
+						theResourceDefinition.getName(),
+						nextParamName,
+						ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (paramDef == null) {
 					throw throwUnrecognizedParamException(theMatchUrl, theResourceDefinition, nextParamName);
 				}
