@@ -412,7 +412,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<JpaPid> fulltextMatchIds = null;
 			int resultCount = 0;
 			if (myParams.isLastN()) {
-				fulltextMatchIds = executeLastNAgainstIndex(theRequest, theMaximumResults);
+				fulltextMatchIds = executeLastNAgainstIndex(theMaximumResults);
 				resultCount = fulltextMatchIds.size();
 			} else if (myParams.getEverythingMode() != null) {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids(theRequest);
@@ -541,7 +541,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private List<JpaPid> executeLastNAgainstIndex(RequestDetails theRequestDetails, Integer theMaximumResults) {
+	private List<JpaPid> executeLastNAgainstIndex(Integer theMaximumResults) {
 		// Can we use our hibernate search generated index on resource to support lastN?:
 		if (myStorageSettings.isAdvancedHSearchIndexing()) {
 			if (myFulltextSearchSvc == null) {
@@ -594,11 +594,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	/**
 	 * Combs through the params for any _id parameters and extracts the PIDs for them
-	 *
-	 * @param theTargetPids
 	 */
-	// FIXME: remove theRequest
-	private void extractTargetPidsFromIdParams(RequestDetails theRequest, Set<JpaPid> theTargetPids) {
+	private void extractTargetPidsFromIdParams(Set<JpaPid> theTargetPids) {
 		// get all the IQueryParameterType objects
 		// for _id -> these should all be StringParam values
 		HashSet<String> ids = new HashSet<>();
@@ -813,7 +810,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Set<JpaPid> targetPids = new HashSet<>();
 		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 
-			extractTargetPidsFromIdParams(theRequest, targetPids);
+			extractTargetPidsFromIdParams(targetPids);
 
 			// add the target pids to our executors as the first
 			// results iterator to go through
@@ -1912,7 +1909,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			EntityManager theEntityManager,
 			HashSet<JpaPid> thePidsToInclude,
 			boolean theReverse) {
-		// FIXME: what calls this? Need a keep test? Should include partition ID?
 		StringBuilder sqlBuilder;
 		CanonicalUrlTargets canonicalUrlTargets =
 				calculateIndexUriIdentityHashesForResourceTypes(theRequestDetails, null, theReverse);
