@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.model.search;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import com.google.common.collect.HashMultimap;
@@ -57,12 +58,17 @@ public class ExtendedHSearchIndexData {
 	private String myForcedId;
 	private String myResourceJSON;
 	private IBaseResource myResource;
+	private ResourceTable myEntity;
 
 	public ExtendedHSearchIndexData(
-			FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
+			FhirContext theFhirContext,
+			StorageSettings theStorageSettings,
+			IBaseResource theResource,
+			ResourceTable theEntity) {
 		this.myFhirContext = theFhirContext;
 		this.myStorageSettings = theStorageSettings;
 		myResource = theResource;
+		myEntity = theEntity;
 	}
 
 	private <V> BiConsumer<String, V> ifNotContained(BiConsumer<String, V> theIndexWriter) {

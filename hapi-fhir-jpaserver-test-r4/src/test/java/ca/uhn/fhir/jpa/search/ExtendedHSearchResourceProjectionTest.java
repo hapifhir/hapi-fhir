@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.search;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection.RESOURCE_NOT_STORED_ERROR;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ExtendedHSearchResourceProjectionTest {
@@ -57,8 +57,4 @@ class ExtendedHSearchResourceProjectionTest {
 			() -> new ExtendedHSearchResourceProjection(22, null, ""));
 		assertEquals(Msg.code(2130) + RESOURCE_NOT_STORED_ERROR + "22", ex.getMessage());
 	}
-
-
-	
-
 }
