@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.test;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.context.FhirContext;
@@ -559,6 +560,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@Autowired
 	protected IJobMaintenanceService myJobMaintenanceService;
+	@Autowired
+	protected IJobCoordinator myJobCoordinator;
 
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
@@ -1065,5 +1068,17 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 																	 String url) {
 			return ContainedReferenceValidationPolicy.CHECK_VALID;
 		}
+
+		@Override
+		public boolean isSuppressMessageId(String path, String messageId) {
+			return false;
+		}
+
+		@Override
+		public ReferenceValidationPolicy getReferencePolicy() {
+			return ReferenceValidationPolicy.IGNORE;
+		}
 	}
+
+
 }

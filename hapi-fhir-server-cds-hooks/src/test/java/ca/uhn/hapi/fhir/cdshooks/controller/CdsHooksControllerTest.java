@@ -5,6 +5,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeebackOutcomeEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
@@ -118,6 +119,7 @@ public class CdsHooksControllerTest {
 		request.setHookInstance(TEST_HOOK_INSTANCE);
 		request.setHook(HelloWorldService.TEST_HOOK);
 		request.setFhirServer(TEST_FHIR_SERVER);
+		request.setContext( withCdsServiceRequestContext());
 
 		String requestBody = myObjectMapper.writeValueAsString(request);
 
@@ -142,8 +144,9 @@ public class CdsHooksControllerTest {
 		CdsServiceRequestJson request = new CdsServiceRequestJson();
 		request.setExtension(requestExtension);
 		request.setFhirServer(TEST_FHIR_SERVER);
-		request.setHook(HelloWorldService.TEST_HOOK_UNIVERSE_ID);
-
+		request.setHook(HelloWorldService.TEST_HOOK);
+		request.setContext(withCdsServiceRequestContext());
+		request.setHookInstance(UUID.randomUUID().toString());
 
 		String requestBody = myObjectMapper.writeValueAsString(request);
 
@@ -163,6 +166,7 @@ public class CdsHooksControllerTest {
 		request.setHookInstance(TEST_HOOK_INSTANCE);
 		request.setHook(HelloWorldService.TEST_HOOK);
 		request.setFhirServer(TEST_FHIR_SERVER);
+		request.setContext(withCdsServiceRequestContext());
 
 		String requestBody = myObjectMapper.writeValueAsString(request);
 
@@ -266,6 +270,13 @@ public class CdsHooksControllerTest {
 	public static String prettyJson(String theInput) {
 		JsonNode input = JsonUtil.deserialize(theInput, JsonNode.class);
 		return JsonUtil.serialize(input, true);
+	}
+
+	@Nonnull
+	private static CdsServiceRequestContextJson withCdsServiceRequestContext() {
+		CdsServiceRequestContextJson cdsServiceRequestContextJson = new CdsServiceRequestContextJson();
+		cdsServiceRequestContextJson.put("patientId", "Patient/123");
+		return cdsServiceRequestContextJson;
 	}
 
 }

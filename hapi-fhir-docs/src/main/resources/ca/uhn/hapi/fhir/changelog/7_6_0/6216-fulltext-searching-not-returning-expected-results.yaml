@@ -1,6 +1,6 @@
 ---
 type: fix
-backport: 7.2.3
+backport: 7.2.3,7.4.2
 issue: 6216
 jira: SMILE-8806
 title: "Previously, searches combining the `_text` query parameter (using Lucene/Elasticsearch) with query parameters 

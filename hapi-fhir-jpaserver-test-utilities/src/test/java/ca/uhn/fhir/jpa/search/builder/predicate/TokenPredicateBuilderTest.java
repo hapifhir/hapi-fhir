@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -58,6 +59,7 @@ public class TokenPredicateBuilderTest {
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(table);
 		when(mySearchQueryBuilder.getPartitionSettings()).thenReturn(new PartitionSettings());
 		myTokenPredicateBuilder = new TokenPredicateBuilder(mySearchQueryBuilder);
+		myTokenPredicateBuilder.setStorageSettingsForUnitTest(new JpaStorageSettings());
 	}
 
 	@AfterEach

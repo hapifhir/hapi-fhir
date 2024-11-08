@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -19,6 +18,7 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 
+import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DuplicateIndexR5Test extends BaseJpaR5Test {
@@ -149,7 +149,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 		ReindexJobParameters parameters = new ReindexJobParameters();
 		parameters.addUrl("Patient?");
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(parameters);
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(res.getInstanceId());

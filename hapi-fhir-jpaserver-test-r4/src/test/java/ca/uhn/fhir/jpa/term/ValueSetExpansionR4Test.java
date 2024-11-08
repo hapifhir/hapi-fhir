@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
@@ -9,6 +12,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -25,7 +29,10 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
@@ -51,10 +58,16 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -74,7 +87,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 	@AfterEach
 	public void afterEach() {
-		SearchBuilder.setMaxPageSize50ForTest(false);
+		SearchBuilder.setMaxPageSizeForTest(null);
 	}
 
 	@Override
@@ -104,7 +117,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 	@Test
 	public void testValueSetUrlSP() {
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("ValueSet", "url");
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("ValueSet", "url", null);
 		assertEquals("url", sp.getName());
 	}
 
@@ -222,7 +235,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 	@Test
 	public void testExpandHugeValueSet_FilterOnDisplay_LeftMatch_SelectAll() {
-		SearchBuilder.setMaxPageSize50ForTest(true);
+		SearchBuilder.setMaxPageSizeForTest(50);
 		myStorageSettings.setPreExpandValueSets(true);
 		IIdType vsId = createConceptsCodeSystemAndValueSet(1005);
 
@@ -2081,7 +2094,172 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		outcome = myValueSetDao.validateCode(vs.getUrlElement(), null, new StringType("A"), cs.getUrlElement(), null, null, null, mySrd);
 		assertEquals(false, outcome.isOk());
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated");
-
 	}
 
+	@Test
+	public void reindexCodeSystems_withDeferredCodeSystems_reindexesAllCodeSystems() {
+		// setup
+		int deferredIndexingDefault = myStorageSettings.getDeferIndexingForCodesystemsOfSize();
+
+		try {
+			/**
+			 * The deferred count must be less than the number of
+			 * concepts we are going to be uploading.
+			 * That way, when we do the reindex, it will defer
+			 * the additional code systems for a later job run.
+			 *
+			 * See {@link TermCodeSystemStorageSvcImpl#addConceptInHierarchy(TermCodeSystemVersion, Collection, TermConcept, UploadStatistics, Map, int)}
+			 *
+			 * Our CodeSystem below only has 6 Concepts to add.
+			 * So we'll set the deferred count to 3 (so 3 will be deferred)
+			 */
+			myStorageSettings.setDeferIndexingForCodesystemsOfSize(3);
+			/*
+			 * We're also setting our retry delay to a short timeframe
+			 * so this test doesn't run too long.
+			 */
+			ReindexUtils.setRetryDelay(Duration.of(300, ChronoUnit.MILLIS));
+
+			IParser parser = myFhirContext.newJsonParser();
+
+			RequestDetails rq = new SystemRequestDetails();
+			CodeSystem cs;
+			ValueSet vs;
+			String csStr;
+			{
+				String vsStr = """
+						{
+						    "resourceType": "ValueSet",
+						    "id": "0447bffa-01fa-4405-828a-96192e74a5d8",
+						    "meta": {
+						        "versionId": "2",
+						        "lastUpdated": "2024-04-09T15:06:24.025+00:00",
+						        "source": "#f4491e490a6a2900"
+						    },
+						    "url": "https://health.gov.on.ca/idms/fhir/ValueSet/IDMS-Submission-Types",
+						    "version": "1.0.0",
+						    "name": "IDMS-SUBMISSION-TYPES",
+						    "title": "IDMS Submission Types",
+						    "status": "active",
+						    "experimental": false,
+						    "date": "2023-09-28",
+						    "publisher": "IDMS",
+						    "description": "List of Submission Types",
+						    "compose": {
+						        "include": [
+						            {
+						                "system": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Submission-Types"
+						            }
+						        ]
+						    }
+						}
+					""";
+				vs = parser.parseResource(ValueSet.class, vsStr);
+				csStr = """
+					{
+						        "resourceType": "CodeSystem",
+						        "id": "d9acd5b8-9533-4fa1-bb70-b4380957a8c3",
+						        "meta": {
+						            "versionId": "14",
+						            "lastUpdated": "2024-06-03T17:49:56.580+00:00",
+						            "source": "#261a82258b0978a8"
+						        },
+						        "url": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Submission-Types",
+						        "version": "1.0.0",
+						        "name": "IDMS-Internal-Submission-Types",
+						        "status": "active",
+						        "date": "2023-09-07",
+						        "publisher": "IDMS",
+						        "description": "This contains a lists of codes Submission Type Codes.",
+						        "content": "complete",
+						        "concept": [
+						            {
+						                "code": "SUB-BRAND-PRODUCT",
+						                "display": "New Brand Product (Non-New Chemical Entity)"
+						            },
+						            {
+						                "code": "SUB-CLASSIFICATION",
+						                "display": "Classification Change"
+						            },
+						            {
+						                "code": "SUB-CLINICIAN-LED-SUBMISSIONS",
+						                "display": "Clinician-Led Submissions"
+						            },
+						            {
+						                "code": "SUB-DELISTING",
+						                "display": "Delisting"
+						            },
+						            {
+						                "code": "SUB-DIN-CHANGE",
+						                "display": "Drug Identification Number (DIN) Change"
+						            },
+						            {
+						                "code": "SUB-DISTRIBUTOR",
+						                "display": "Distributor Change"
+						            }
+						        ]
+						    }
+					""";
+				cs = parser.parseResource(CodeSystem.class, csStr);
+			}
+
+			// create our ValueSet
+			myValueSetDao.update(vs, rq);
+
+			// and the code system
+			myCodeSystemDao.update(cs, rq);
+
+			// sanity check to make sure our code system was actually created
+			SearchParameterMap spMap = new SearchParameterMap();
+			spMap.setLoadSynchronous(true);
+			IBundleProvider bp = myCodeSystemDao.search(spMap, rq);
+			assertEquals(1, bp.getAllResources().size());
+			IBaseResource baseResource = bp.getAllResources().get(0);
+			CodeSystem cssaved;
+			if (baseResource instanceof CodeSystem saved) {
+				cssaved = saved;
+			} else {
+				fail("Should be a code system");
+				return;
+			}
+			assertEquals(cs.getConcept().size(), cssaved.getConcept().size());
+
+			// test
+			// perform the reindex (we'll only target the CodeSystem here)
+			ReindexJobParameters params = new ReindexJobParameters();
+			params.addUrl("CodeSystem?");
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(JOB_REINDEX);
+			startRequest.setParameters(params);
+
+			// and wait for it to complete
+			Batch2JobStartResponse response = myJobCoordinator.startInstance(rq, startRequest);
+			myBatch2JobHelper.awaitJobCompletion(response);
+
+			// verify by doing the value expansion
+			ValueSetExpansionOptions options = new ValueSetExpansionOptions();
+			options.setCount(200); // this is way more than exist, so it's ok
+			ValueSet expanded = myValueSetDao.expand(vs, options);
+			assertNotNull(expanded);
+
+			/*
+			 * If the reindex was performed correctly, the expanded ValueSet
+			 * should contain all the CodeSystem concepts that we originally
+			 * uploaded (and nothing else).
+			 */
+			HashSet<String> all = new HashSet<>();
+			for (CodeSystem.ConceptDefinitionComponent set : cs.getConcept()) {
+				all.add(set.getCode());
+			}
+			for (ValueSet.ValueSetExpansionContainsComponent v : expanded.getExpansion().getContains()) {
+				all.remove(v.getCode());
+			}
+			assertTrue(all.isEmpty(), String.join(", ", all));
+			assertEquals(cs.getConcept().size(), expanded.getExpansion().getTotal());
+		} finally {
+			// set back to standard values
+			myStorageSettings.setDeferIndexingForCodesystemsOfSize(deferredIndexingDefault);
+			ReindexUtils.setRetryDelay(null);
+		}
+	}
 }

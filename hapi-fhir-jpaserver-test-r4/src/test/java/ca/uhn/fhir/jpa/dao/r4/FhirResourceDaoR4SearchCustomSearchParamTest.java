@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
@@ -22,7 +21,6 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -70,6 +68,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -254,9 +253,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		// check the 2 parameters are different
 		// when fetched from the system
 		RuntimeSearchParam paramdefault = mySearchParamRegistry.getActiveSearchParam("Patient",
-			"fuzzydefault");
+			"fuzzydefault", null);
 		RuntimeSearchParam parammodified = mySearchParamRegistry.getActiveSearchParam("Patient",
-			"fuzzymodified");
+			"fuzzymodified", null);
 
 		// verify the encoders are different!
 		assertThat(parammodified).isNotEqualTo(paramdefault);
@@ -441,11 +440,11 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 
-		List<JobInstance> initialJobs = myBatch2JobHelper.findJobsByDefinition(ReindexAppCtx.JOB_REINDEX);
+		List<JobInstance> initialJobs = myBatch2JobHelper.findJobsByDefinition(JOB_REINDEX);
 
 		mySearchParameterDao.create(fooSp, mySrd);
 
-		List<JobInstance> finalJobs = myBatch2JobHelper.findJobsByDefinition(ReindexAppCtx.JOB_REINDEX);
+		List<JobInstance> finalJobs = myBatch2JobHelper.findJobsByDefinition(JOB_REINDEX);
 		List<JobInstance> newJobs = finalJobs.stream().filter(t -> !initialJobs.contains(t)).collect(Collectors.toList());
 		assertThat(newJobs.size()).as("number of jobs created").isEqualTo(1);
 	}
@@ -594,7 +593,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		mySearchParamRegistry.forceRefresh();
 
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Patient", "family");
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Patient", "family", null);
 		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, sp.getStatus());
 	}
 

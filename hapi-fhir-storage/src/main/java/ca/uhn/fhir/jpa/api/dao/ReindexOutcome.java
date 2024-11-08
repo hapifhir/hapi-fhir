@@ -29,6 +29,11 @@ public class ReindexOutcome {
 
 	private List<String> myWarnings;
 
+	/**
+	 * True if there is additional (async) work to wait on.
+	 */
+	private boolean myHasPendingWork;
+
 	public List<String> getWarnings() {
 		return defaultIfNull(myWarnings, Collections.emptyList());
 	}
@@ -38,5 +43,13 @@ public class ReindexOutcome {
 			myWarnings = new ArrayList<>();
 		}
 		myWarnings.add(theWarning);
+	}
+
+	public boolean isHasPendingWork() {
+		return myHasPendingWork;
+	}
+
+	public void setHasPendingWork(boolean theHasPendingWork) {
+		myHasPendingWork = theHasPendingWork;
 	}
 }

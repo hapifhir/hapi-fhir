@@ -727,7 +727,7 @@ public interface IValidationSupport {
 			return this;
 		}
 
-		String getCodeSystemName() {
+		public String getCodeSystemName() {
 			return myCodeSystemName;
 		}
 
