@@ -209,6 +209,12 @@ public interface ITestDataBuilder {
 		return t -> ((IBaseResource)t).getMeta().setLastUpdated(theLastUpdated);
 	}
 
+	/**
+	 * Sets a _lastUpdated value.
+	 *
+	 * This value will also be used to control the transaction time, which is what determines
+	 * what the Updated date is.
+	 */
 	default ICreationArgument withLastUpdated(String theIsoDate) {
 		return t -> ((IBaseResource)t).getMeta().setLastUpdated(new InstantType(theIsoDate).getValue());
 	}

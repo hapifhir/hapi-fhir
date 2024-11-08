@@ -1,0 +1,4 @@
+---
+type: add
+issue: 6445
+title: "Add Multimap versions of the search() methods to Repository to support queries like `Patient?_tag=a&_tag=b`"

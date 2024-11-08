@@ -87,7 +87,7 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 			result.setSeverity(null);
 			result.setMessage(null);
 		} else {
-			result.addCodeValidationIssue(new CodeValidationIssue(
+			result.addIssue(new CodeValidationIssue(
 					theMessage,
 					myNonExistentCodeSystemSeverity,
 					CodeValidationIssueCode.NOT_FOUND,

@@ -23,3 +23,8 @@ If `true`, this will return summarized subject bundle with only detectedIssue.
 
 The `subject` parameter of the `Questionnaire/$populate` operation has been changed to expect a `Reference` as specified
 in the SDC IG. 
+
+# Fulltext Search with _lastUpdated Filter
+
+Fulltext searches have been updated to support `_lastUpdated` search parameter. A reindexing of Search Parameters
+is required to migrate old data to support the `_lastUpdated` search parameter.

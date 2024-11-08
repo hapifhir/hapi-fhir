@@ -981,12 +981,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 				}
 
-				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
+				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled() && changed.isChanged()) {
 					populateFullTextFields(myContext, theResource, entity, newParams);
 				}
-
 			} else {
-
 				entity.setUpdated(theTransactionDetails.getTransactionDate());
 				entity.setIndexStatus(null);
 
@@ -1018,16 +1016,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * Save the resource itself
 		 */
 		if (entity.getId() == null) {
+			// create
 			myEntityManager.persist(entity);
 
 			postPersist(entity, (T) theResource, theRequest);
 
 		} else if (entity.getDeleted() != null) {
+			// delete
 			entity = myEntityManager.merge(entity);
 
 			postDelete(entity);
 
 		} else {
+			// update
 			entity = myEntityManager.merge(entity);
 
 			postUpdate(entity, (T) theResource, theRequest);
@@ -1679,7 +1680,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
 			if (myStorageSettings.isAdvancedHSearchIndexing()) {
 				ExtendedHSearchIndexData hSearchIndexData =
-						myFulltextSearchSvc.extractLuceneIndexData(theResource, theNewParams);
+						myFulltextSearchSvc.extractLuceneIndexData(theResource, theEntity, theNewParams);
 				theEntity.setLuceneIndexData(hSearchIndexData);
 			}
 		}

@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -89,19 +90,29 @@ public class ExtendedHSearchSearchBuilder {
 	 * be inaccurate and wrong.
 	 */
 	public boolean canUseHibernateSearch(
-			String theResourceType, SearchParameterMap myParams, ISearchParamRegistry theSearchParamRegistry) {
+			String theResourceType, SearchParameterMap theParams, ISearchParamRegistry theSearchParamRegistry) {
 		boolean canUseHibernate = false;
 
 		ResourceSearchParams resourceActiveSearchParams = theSearchParamRegistry.getActiveSearchParams(
-				theResourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
-		for (String paramName : myParams.keySet()) {
+			theResourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+
+		// special SearchParam handling:
+		// _lastUpdated
+		if (theParams.getLastUpdated() != null) {
+			canUseHibernate = !illegalForHibernateSearch(Constants.PARAM_LASTUPDATED, resourceActiveSearchParams);
+			if (!canUseHibernate) {
+				return false;
+			}
+		}
+
+		for (String paramName : theParams.keySet()) {
 			// is this parameter supported?
 			if (illegalForHibernateSearch(paramName, resourceActiveSearchParams)) {
 				canUseHibernate = false;
 			} else {
 				// are the parameter values supported?
 				canUseHibernate =
-						myParams.get(paramName).stream()
+						theParams.get(paramName).stream()
 								.flatMap(Collection::stream)
 								.collect(Collectors.toList())
 								.stream()
@@ -136,6 +147,7 @@ public class ExtendedHSearchSearchBuilder {
 
 				// not yet supported in HSearch
 				myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE
+				&& supportsLastUpdated(myParams)
 				&& // ???
 				myParams.entrySet().stream()
 						.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
@@ -143,6 +155,19 @@ public class ExtendedHSearchSearchBuilder {
 						.flatMap(andList -> andList.getValue().stream())
 						.flatMap(Collection::stream)
 						.allMatch(this::isParamTypeSupported);
+	}
+
+	private boolean supportsLastUpdated(SearchParameterMap theMap) {
+		if (theMap.getLastUpdated() == null || theMap.getLastUpdated().isEmpty()) {
+			return true;
+		}
+
+		DateRangeParam lastUpdated = theMap.getLastUpdated();
+
+		return lastUpdated.getLowerBound() != null
+				&& isParamTypeSupported(lastUpdated.getLowerBound())
+				&& lastUpdated.getUpperBound() != null
+				&& isParamTypeSupported(lastUpdated.getUpperBound());
 	}
 
 	/**

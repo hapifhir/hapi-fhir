@@ -6,7 +6,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.JsonParser;
 import com.google.common.collect.Lists;
+import org.apache.jena.base.Sys;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -47,6 +50,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -1545,23 +1550,29 @@ public class FhirTerserR4Test {
 
 	@Test
 	void copyingAndParsingCreatesDuplicateContainedResources() {
-		var input = new Library();
+		var library = new Library();
 		var params = new Parameters();
 		var id = "#expansion-parameters-ecr";
 		params.setId(id);
 		params.addParameter("system-version", new StringType("test2"));
 		var paramsExt = new Extension();
+
 		paramsExt.setUrl("test").setValue(new Reference(id));
-		input.addContained(params);
-		input.addExtension(paramsExt);
+		library.addContained(params);
+		library.addExtension(paramsExt);
+
 		final var parser = FhirContext.forR4Cached().newJsonParser();
-		var stringified = parser.encodeResourceToString(input);
+		var stringified = parser.encodeResourceToString(library);
+
+
 		var parsed = parser.parseResource(stringified);
 		var copy = ((Library) parsed).copy();
+
 		assertEquals(1, copy.getContained().size());
-		var stringifiedCopy = parser.encodeResourceToString(copy);
-		var parsedCopy = parser.parseResource(stringifiedCopy);
-		assertEquals(1, ((Library) parsedCopy).getContained().size());
+
+		String stringifiedCopy = FhirContext.forR4Cached().newJsonParser().encodeResourceToString(copy);
+		Library parsedCopy = (Library) parser.parseResource(stringifiedCopy);
+		assertEquals(1, parsedCopy.getContained().size());
 	}
 
 	/**

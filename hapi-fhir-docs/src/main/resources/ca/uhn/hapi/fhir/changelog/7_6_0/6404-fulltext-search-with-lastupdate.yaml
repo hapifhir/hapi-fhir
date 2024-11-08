@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 6404
+title: "Searches using fulltext search that combined `_lastUpdated` query parameter with
+        any other (supported) fulltext query parameter would find no matches, even
+        if matches existed.
+        This has been corrected.
+"
