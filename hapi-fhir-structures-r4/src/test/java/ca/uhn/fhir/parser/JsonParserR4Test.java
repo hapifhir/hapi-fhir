@@ -394,9 +394,8 @@ public class JsonParserR4Test extends BaseTest {
 
 		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
-		assertThat(encoded).contains("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"1\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],")
+		assertThat(encoded).contains("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"1\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],");
 		assertThat(encoded).contains("\"medicationReference\":{\"reference\":\"#}}"); //Note we dont check exact ID sine its a GUID
-
 	}
 
 	@Test
