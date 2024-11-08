@@ -756,6 +756,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		observation.getSubject().setReference(patientId.withVersion("1").getValue());
 		IIdType observationId = myObservationDao.create(observation, mySrd).getId().toUnqualified();
 
+		logAllResourceVersions();
+		logAllResourceHistoryTags();
+
 		// Search - Non-Synchronous for *
 		{
 			myCaptureQueriesListener.clear();
@@ -765,12 +768,13 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
 			assertThat(resources).hasSize(2);
 			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
-			assertEquals(patientId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
-			assertThat(getTagCodes(resources.get(1))).asList().containsExactly("1");
-			ourLog.info("Patient: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(1)));
+			IBaseResource patient = resources.get(1);
+			assertEquals(patientId.withVersion("1").getValue(), patient.getIdElement().getValue());
+			assertThat(getTagCodes(patient)).asList().containsExactly("1");
+			ourLog.info("Patient: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		}
 
-		// Search - Non Synchronous for named include
+		// Search - Non-Synchronous for named include
 		{
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(Observation.INCLUDE_PATIENT), mySrd);
 			assertEquals(2, outcome.sizeOrThrowNpe());

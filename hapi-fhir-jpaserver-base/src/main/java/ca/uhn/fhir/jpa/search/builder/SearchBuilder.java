@@ -1169,9 +1169,31 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// Load the resource bodies
-		Collection<ResourceHistoryTable> resourceSearchViewList =
+		List<ResourceHistoryTable> resourceSearchViewList =
 				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(
 						JpaPid.toLongList(versionlessPids));
+
+		/*
+		 * If we have specific versions to load, replace the history entries with the
+		 * correct ones
+		 *
+		 * TODO: this could definitely be made more efficient, probably by not loading the wrong
+		 * version entity first, and by batching the fetches. But this is a fairly infrequently
+		 * used feature, and loading history entities by PK is a very efficient query so it's
+		 * not the end of the world
+		 */
+		if (resourcePidToVersion != null) {
+			for (int i = 0; i < resourceSearchViewList.size(); i++) {
+				ResourceHistoryTable next = resourceSearchViewList.get(i);
+				JpaPid resourceId = next.getPersistentId();
+				Long version = resourcePidToVersion.get(resourceId);
+				resourceId.setVersion(version);
+				if (version != null && !version.equals(next.getVersion())) {
+					ResourceHistoryTable replacement = myResourceHistoryTableDao.findForIdAndVersion(next.getResourceId(), version);
+					resourceSearchViewList.set(i, replacement);
+				}
+			}
+		}
 
 		// -- preload all tags with tag definition if any
 		Map<JpaPid, Collection<BaseTag>> tagMap = getResourceTagMap(resourceSearchViewList);
@@ -1186,19 +1208,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			JpaPid resourceId = next.getPersistentId();
 
-			/*
-			 * If a specific version is requested via an include, we'll replace the current version
-			 * with the specific desired version. This is not the most efficient thing, given that
-			 * we're loading the current version and then turning around and throwing it away again.
-			 * This could be optimized and probably should be, but it's not critical given that
-			 * this only applies to includes, which don't tend to be massive in numbers.
-			 */
 			if (resourcePidToVersion != null) {
 				Long version = resourcePidToVersion.get(resourceId);
 				resourceId.setVersion(version);
-				if (version != null && !version.equals(next.getVersion())) {
-					next = myResourceHistoryTableDao.findForIdAndVersion(next.getResourceId(), version);
-				}
 			}
 
 			IBaseResource resource = null;
