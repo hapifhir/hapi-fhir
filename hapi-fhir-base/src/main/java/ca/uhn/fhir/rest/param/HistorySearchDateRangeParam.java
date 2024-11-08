@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.param;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class HistorySearchDateRangeParam extends DateRangeParam {
@@ -28,7 +29,7 @@ public class HistorySearchDateRangeParam extends DateRangeParam {
 	 * @since 8.0.0
 	 */
 	public HistorySearchDateRangeParam() {
-		this(Map.of(), new DateRangeParam(), null);
+		this(Collections.emptyMap(), new DateRangeParam(), null);
 	}
 
 	/**
