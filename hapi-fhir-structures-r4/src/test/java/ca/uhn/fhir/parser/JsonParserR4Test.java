@@ -318,7 +318,7 @@ public class JsonParserR4Test extends BaseTest {
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
 		String guidWithHash = med.getId();
 		String withoutHash = guidWithHash.replace("#", "");
-		assertThat(encoded).contains("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"" + withoutHash + "\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"" + guidWithHash +"\"}}"); //Note we dont check exact ID sine its a GUID
+		assertThat(encoded).contains("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"" + withoutHash + "\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"" + guidWithHash +"\"}}"); //Note we dont check exact ID since its a GUID
 	}
 
 	@Test
