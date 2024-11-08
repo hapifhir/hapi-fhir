@@ -7,6 +7,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
@@ -28,6 +29,7 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationDispense;
@@ -60,6 +62,7 @@ import jakarta.annotation.Nonnull;
 import org.testcontainers.shaded.com.trilead.ssh2.packets.PacketDisconnect;
 
 import java.io.IOException;
+import java.sql.Ref;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -298,6 +301,40 @@ public class JsonParserR4Test extends BaseTest {
 
 	}
 
+
+	@Test
+	public void testMultipleContainedProblems() {
+		//Option 1. Clone!
+		//Option 2. In and out parse on HL7 side.
+		//Option 3. Preparse option is still valid, but potentially expensive
+		//Option 4:
+		Organization org = new Organization();
+		org.setId(IdType.newRandomUuid());
+		Specimen specimen = new Specimen();
+		specimen.setStatus(Specimen.SpecimenStatus.AVAILABLE);
+
+		Reference specRef = new Reference(specimen);
+		Practitioner practitioner = new Practitioner();
+		Reference practRef = new Reference(practitioner);
+		DiagnosticReport report = new DiagnosticReport();
+		report.addSpecimen(specRef);
+		report.addPerformer(practRef);
+
+		Observation obs = new Observation();
+		obs.setSpecimen(specRef);
+
+		obs.addPerformer(practRef);
+		obs.addPerformer(new Reference(org.getId()));
+
+		Bundle bundle = new BundleBuilder(ourCtx).addTransactionCreateEntry(org)
+			 .andThen().addTransactionCreateEntry(report)
+			 .andThen().addTransactionCreateEntry(obs)
+			 .andThen().getBundleTyped();
+
+		String s = ourCtx.newJsonParser().encodeResourceToString(bundle);
+		assertThat(s).contains("\"contained\":[{\"resourceType\":\"Practitioner\",\"id\":\"1\"},{\"resourceType\":\"Specimen\",\"id\":\"2\"}]");
+
+	}
 	@Test
 	public void testAutoAssignedContainedCollisionOrderDependent() {
 		{
@@ -357,7 +394,8 @@ public class JsonParserR4Test extends BaseTest {
 
 		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
-		assertEquals("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"1\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"#1\"}}", encoded);
+		assertThat(encoded).contains("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"1\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],")
+		assertThat(encoded).contains("\"medicationReference\":{\"reference\":\"#}}"); //Note we dont check exact ID sine its a GUID
 
 	}
 

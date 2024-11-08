@@ -71,6 +71,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -1789,7 +1790,6 @@ public class FhirTerser {
 	}
 
 	public static class ContainedResources {
-		private long myNextContainedId = 1;
 		private List<IBaseResource> myResourceList;
 		private IdentityHashMap<IBaseResource, IIdType> myResourceToIdMap;
 		private Map<String, IBaseResource> myExistingIdToContainedResourceMap;
@@ -1814,19 +1814,7 @@ public class FhirTerser {
 
 			IIdType newId = theResource.getIdElement();
 			if (isBlank(newId.getValue())) {
-				newId.setValue("#" + myNextContainedId++);
-			} else {
-				// Avoid auto-assigned contained IDs colliding with pre-existing ones
-				String idPart = newId.getValue();
-				if (substring(idPart, 0, 1).equals("#")) {
-					idPart = idPart.substring(1);
-					if (StringUtils.isNumeric(idPart)) {
-						// If there is a user-supplied numeric contained ID, our auto-assigned IDs should exceed the
-						// largest
-						// client-assigned contained ID.
-						myNextContainedId = Math.max(myNextContainedId, Long.parseLong(idPart) + 1);
-					}
-				}
+				newId.setValue("#" + UUID.randomUUID());
 			}
 
 			getResourceToIdMap().put(theResource, newId);
@@ -1889,47 +1877,6 @@ public class FhirTerser {
 
 		public boolean hasExistingIdToContainedResource() {
 			return myExistingIdToContainedResourceMap != null;
-		}
-
-		public void assignIdsToContainedResources() {
-			// TODO JA: Dead code?
-
-			if (!getContainedResources().isEmpty()) {
-
-				/*
-				 * The idea with the code block below:
-				 *
-				 * We want to preserve any IDs that were user-assigned, so that if it's really
-				 * important to someone that their contained resource have the ID of #FOO
-				 * or #1 we will keep that.
-				 *
-				 * For any contained resources where no ID was assigned by the user, we
-				 * want to manually create an ID but make sure we don't reuse an existing ID.
-				 */
-
-				Set<String> ids = new HashSet<>();
-
-				// Gather any user assigned IDs
-				for (IBaseResource nextResource : getContainedResources()) {
-					if (getResourceToIdMap().get(nextResource) != null) {
-						ids.add(getResourceToIdMap().get(nextResource).getValue());
-					}
-				}
-
-				// Automatically assign IDs to the rest
-				for (IBaseResource nextResource : getContainedResources()) {
-
-					while (getResourceToIdMap().get(nextResource) == null) {
-						String nextCandidate = "#" + myNextContainedId;
-						myNextContainedId++;
-						if (!ids.add(nextCandidate)) {
-							continue;
-						}
-
-						getResourceToIdMap().put(nextResource, new IdDt(nextCandidate));
-					}
-				}
-			}
 		}
 	}
 }
