@@ -586,6 +586,8 @@ public class XmlParserDstu2Test {
 
 		String output = parser.encodeResourceToString(dr);
 		ourLog.info(output);
+		String observationUuid = UuidUtils.findFirstUUID(output);
+		assertNotNull(observationUuid);
 
 		//@formatter:off
 		assertThat(output).containsSubsequence(
@@ -595,7 +597,7 @@ public class XmlParserDstu2Test {
 			"</meta>",
 			"<contained>",
 			"<Observation xmlns=\"http://hl7.org/fhir\">",
-			"<id value=\"1\"/>",
+			"<id value=\"" + observationUuid + "\"/>",
 			"<meta>",
 			"<profile value=\"http://custom_Observation\"/>",
 			"</meta>",
@@ -604,7 +606,7 @@ public class XmlParserDstu2Test {
 			"</contained>",
 			"<status value=\"final\"/>",
 			"<result>",
-			"<reference value=\"#1\"/>",
+			"<reference value=\"#" + observationUuid + "\"/>",
 			"</result>",
 			"</DiagnosticReport>");
 		//@formatter:on
@@ -616,7 +618,7 @@ public class XmlParserDstu2Test {
 		dr = (CustomDiagnosticReportDstu2) parser.parseResource(output);
 		assertEquals(DiagnosticReportStatusEnum.FINAL, dr.getStatusElement().getValueAsEnum());
 
-		assertEquals("#1", dr.getResult().get(0).getReference().getValueAsString());
+		assertEquals("#" + observationUuid, dr.getResult().get(0).getReference().getValueAsString());
 		obs = (CustomObservationDstu2) dr.getResult().get(0).getResource();
 		assertEquals(ObservationStatusEnum.FINAL, obs.getStatusElement().getValueAsEnum());
 

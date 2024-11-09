@@ -410,8 +410,8 @@ public class JsonParserHl7OrgDstu2Test {
 		
 		String encoded = jsonParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-    String organizationUuid = UuidUtils.findFirstUUID(encoded);
-    assertNotNull(organizationUuid);
+		String organizationUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(organizationUuid);
 
 		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"" + organizationUuid + "\"", "\"identifier\"", "\"reference\": \"#" + organizationUuid + "\""));
 		
@@ -477,8 +477,8 @@ public class JsonParserHl7OrgDstu2Test {
 		// Encode the buntdle
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
-    String organizationUuid = UuidUtils.findFirstUUID(encoded);
-    assertNotNull(organizationUuid);
+		String organizationUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(organizationUuid);
 
 		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"" + organizationUuid + "\""));
 		assertThat(encoded).contains("reference\": \"#" + organizationUuid + "\"");

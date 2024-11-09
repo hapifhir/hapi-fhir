@@ -64,7 +64,7 @@ public class CustomTypeDstu2Test {
 				"<MedicationOrder xmlns=\"http://hl7.org/fhir\">", 
 				"   <contained>", 
 				"      <Medication xmlns=\"http://hl7.org/fhir\">",
-			    "         <id value=\"" + medicationUuid + "\"/>",
+				"         <id value=\"" + medicationUuid + "\"/>",
 				"         <code>", 
 				"            <text value=\"MED TEXT\"/>", 
 				"         </code>", 

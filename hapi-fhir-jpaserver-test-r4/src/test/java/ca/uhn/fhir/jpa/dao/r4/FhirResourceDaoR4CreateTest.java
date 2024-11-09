@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.test.utilities.UuidUtils;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -739,7 +740,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Input: {}", encoded);
-		assertThat(encoded).containsPattern(HASH_UUID_PATTERN);
+		String organizationUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(organizationUuid);
 
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
@@ -747,10 +749,12 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Output: {}", encoded);
-		assertThat(encoded).containsPattern(HASH_UUID_PATTERN);
+		String organizationUuidParsed = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(organizationUuidParsed);
+		assertEquals(organizationUuid, organizationUuidParsed);
 
 		Organization org = (Organization) p.getManagingOrganization().getResource();
-		assertThat(org.getId()).containsPattern(HASH_UUID_PATTERN);
+		assertEquals("#" + organizationUuid, org.getId());
 		assertThat(org.getMeta().getTag()).hasSize(1);
 
 	}
