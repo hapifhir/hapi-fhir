@@ -38,7 +38,6 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import com.google.common.collect.Lists;
@@ -79,7 +78,6 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.substring;
 
 public class FhirTerser {
 
