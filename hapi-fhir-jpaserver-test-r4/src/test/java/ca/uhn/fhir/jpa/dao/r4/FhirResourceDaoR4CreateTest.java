@@ -81,6 +81,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -738,7 +739,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Input: {}", encoded);
-		assertThat(encoded).contains("#1");
+		assertThat(encoded).containsPattern(HASH_UUID_PATTERN);
 
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
@@ -746,10 +747,10 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Output: {}", encoded);
-		assertThat(encoded).contains("#1");
+		assertThat(encoded).containsPattern(HASH_UUID_PATTERN);
 
 		Organization org = (Organization) p.getManagingOrganization().getResource();
-		assertEquals("#1", org.getId());
+		assertThat(org.getId()).containsPattern(HASH_UUID_PATTERN);
 		assertThat(org.getMeta().getTag()).hasSize(1);
 
 	}

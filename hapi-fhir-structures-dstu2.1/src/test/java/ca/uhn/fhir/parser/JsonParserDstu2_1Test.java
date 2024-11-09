@@ -11,6 +11,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent;
 import ca.uhn.fhir.parser.XmlParserDstu2_1Test.TestPatientFor327;
+import ca.uhn.fhir.test.utilities.UuidUtils;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
@@ -407,6 +408,8 @@ public class JsonParserDstu2_1Test {
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
+		String conditionUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(conditionUuid);
 
 		//@formatter:off
 		assertThat(encoded).containsSubsequence(
@@ -415,14 +418,14 @@ public class JsonParserDstu2_1Test {
 			"\"contained\": [",
 			"{",
 			"\"resourceType\": \"Condition\",",
-			"\"id\": \"1\"",
+			"\"id\": \"" + conditionUuid + "\"",
 			"}",
 			"],",
 			"\"extension\": [",
 			"{",
 			"\"url\": \"test\",",
 			"\"valueReference\": {",
-			"\"reference\": \"#1\"",
+			"\"reference\": \"#" + conditionUuid + "\"",
 			"}",
 			"}",
 			"],",
@@ -632,19 +635,21 @@ public class JsonParserDstu2_1Test {
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
+		String conditionUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(conditionUuid);
 
 		//@formatter:off
 		assertThat(encoded).containsSubsequence(
 			"\"resourceType\": \"Patient\"",
 			"\"contained\": [",
 			"\"resourceType\": \"Condition\"",
-			"\"id\": \"1\"",
+			"\"id\": \"" + conditionUuid + "\"",
 			"\"bodySite\": [",
 			"\"text\": \"BODY SITE\"",
 			"\"extension\": [",
 			"\"url\": \"testCondition\",",
 			"\"valueReference\": {",
-			"\"reference\": \"#1\"",
+			"\"reference\": \"#" + conditionUuid + "\"",
 			"\"birthDate\": \"2016-04-14\"",
 			"}"
 		);
