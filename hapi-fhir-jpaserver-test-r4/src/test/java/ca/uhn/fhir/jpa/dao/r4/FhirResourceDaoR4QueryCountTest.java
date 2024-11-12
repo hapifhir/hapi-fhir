@@ -51,6 +51,7 @@ import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -95,11 +96,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.util.comparator.ComparableComparator;
 
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -247,6 +251,77 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
 
 	}
+
+	@Test
+	public void testTransactionWithManyResourceLinks() {
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		List<IIdType> patientIds = new ArrayList<>();
+		List<IIdType> orgIds = new ArrayList<>();
+		List<IIdType> coverageIds = new ArrayList<>();
+		AtomicInteger counter = new AtomicInteger(0);
+		for (int i = 0; i < 50; i++) {
+			coverageIds.add(createResource("Coverage", withStatus("active")));
+			patientIds.add(createPatient(withId(UUID.randomUUID().toString()), withActiveTrue()));
+			orgIds.add(createOrganization(withId(UUID.randomUUID().toString()), withName("FOO")));
+		}
+
+		Supplier<ExplanationOfBenefit> creator = () -> {
+			int nextCount = counter.getAndIncrement();
+			if (nextCount == 49) {
+				counter.set(0);
+			}
+
+			ExplanationOfBenefit retVal = new ExplanationOfBenefit();
+			retVal.getMeta().addTag().setSystem("http://foo").setCode(UUID.randomUUID().toString());
+			retVal.setId(UUID.randomUUID().toString());
+			retVal.setPatient(new Reference(patientIds.get(nextCount)));
+			retVal.setInsurer(new Reference(orgIds.get(nextCount)));
+			retVal.addInsurance().setCoverage(new Reference(coverageIds.get(nextCount)));
+			return retVal;
+		};
+
+		Supplier<Bundle> transactionCreator = () -> {
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			bb.addTransactionUpdateEntry(creator.get());
+			bb.addTransactionUpdateEntry(creator.get());
+			bb.addTransactionUpdateEntry(creator.get());
+			return bb.getBundleTyped();
+		};
+//
+//		 Create one just to warm up ID caches
+//		myExplanationOfBenefitDao.update(creator.get(), mySrd);
+
+//		Supplier<Bundle> transactionCreator = () -> {
+//			try {
+//				try (FileReader fr = new FileReader("/Users/james/Downloads/tmp/bundles/eob-pharma/ExplanationOfBenefit_PHARMACY_JSON_Bundle_009e4b06-9fbc-4cb5-93d4-df78686f4806.json", StandardCharsets.UTF_8)) {
+//					String bundleText = IOUtils.toString(fr);
+//					return myFhirContext.newJsonParser().parseResource(Bundle.class, bundleText);
+//				}
+//			} catch (IOException e) {
+//				throw new RuntimeException(e);
+//			}
+//		};
+
+		// Test
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, transactionCreator.get());
+		myCaptureQueriesListener.logInsertQueries();
+
+		myCaptureQueriesListener.logInsertQueries(t->t.getSql(true, false).contains("HFJ_RES_LINK"));
+		var insertQueries = myCaptureQueriesListener.getInsertQueries(t->t.getSql(true, false).contains("HFJ_RES_LINK"));
+		assertEquals(1, insertQueries.size());
+
+		// Test again
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, transactionCreator.get());
+		myCaptureQueriesListener.logInsertQueries();
+
+		myCaptureQueriesListener.logInsertQueries(t->t.getSql(true, false).contains("HFJ_RES_LINK"));
+		insertQueries = myCaptureQueriesListener.getInsertQueries(t->t.getSql(true, false).contains("HFJ_RES_LINK"));
+		assertEquals(1, insertQueries.size());
+	}
+
 
 	/*
 	 * See the class javadoc before changing the counts in this test!

@@ -188,6 +188,13 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	}
 
 	/**
+	 * Returns all INSERT queries executed on the current thread - Index 0 is oldest
+	 */
+	public List<SqlQuery> getInsertQueries(Predicate<SqlQuery> theFilter) {
+		return getQueriesStartingWith("insert").stream().filter(theFilter).collect(Collectors.toList());
+	}
+
+	/**
 	 * Returns all UPDATE queries executed on the current thread - Index 0 is oldest
 	 */
 	public List<SqlQuery> getUpdateQueries() {

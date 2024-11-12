@@ -45,6 +45,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.PersistenceException;
@@ -55,6 +56,8 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.FlushMode;
+import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -146,15 +149,19 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			List<IBase> theEntries,
 			StopWatch theTransactionStopWatch) {
 
-		ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
-		RequestPartitionId requestPartitionId =
+		FlushModeType initialFlushMode = myEntityManager.getFlushMode();
+		try {
+			myEntityManager.setFlushMode(FlushModeType.COMMIT);
+
+			ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
+			RequestPartitionId requestPartitionId =
 				super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
 
-		if (requestPartitionId != null) {
-			preFetch(theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
-		}
+			if (requestPartitionId != null) {
+				preFetch(theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
+			}
 
-		return super.doTransactionWriteOperations(
+			return super.doTransactionWriteOperations(
 				theRequest,
 				theActionName,
 				theTransactionDetails,
@@ -165,6 +172,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				theOriginalRequestOrder,
 				theEntries,
 				theTransactionStopWatch);
+		} finally {
+			myEntityManager.setFlushMode(initialFlushMode);
+		}
 	}
 
 	private void preFetch(
