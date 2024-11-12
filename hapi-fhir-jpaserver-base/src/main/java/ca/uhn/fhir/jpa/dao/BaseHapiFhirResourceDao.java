@@ -1694,7 +1694,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			ResourceTable entity, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageMode) {
 		ResourceHistoryTable historyEntity = entity.getCurrentVersionEntity();
 		if (historyEntity != null) {
-			reindexOptimizeStorageHistoryEntity(entity, historyEntity);
+			reindexOptimizeStorageHistoryEntityThenDetachIt(entity, historyEntity);
 			if (theOptimizeStorageMode == ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS) {
 				int pageSize = 100;
 				for (int page = 0; ((long) page * pageSize) < entity.getVersion(); page++) {
@@ -1702,14 +1702,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							myResourceHistoryTableDao.findAllVersionsExceptSpecificForResourcePid(
 									PageRequest.of(page, pageSize), entity.getId(), historyEntity.getVersion());
 					for (ResourceHistoryTable next : historyEntities) {
-						reindexOptimizeStorageHistoryEntity(entity, next);
+						reindexOptimizeStorageHistoryEntityThenDetachIt(entity, next);
 					}
 				}
 			}
 		}
 	}
 
-	private void reindexOptimizeStorageHistoryEntity(ResourceTable entity, ResourceHistoryTable historyEntity) {
+	/**
+	 * Note that the entity will be detached after being saved if it has changed
+	 * in order to avoid growing the number of resources in memory to be too big
+	 */
+	private void reindexOptimizeStorageHistoryEntityThenDetachIt(ResourceTable entity, ResourceHistoryTable historyEntity) {
 		boolean changed = false;
 		if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC
 				|| historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
@@ -1737,10 +1741,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 		if (changed) {
 			myResourceHistoryTableDao.save(historyEntity);
-		} else {
-			// Nothing changed, so avoid a dirtyness check when we flush
-			myEntityManager.detach(historyEntity);
 		}
+
+		// Nothing changed, so avoid a dirtiness check when we flush
+		myEntityManager.detach(historyEntity);
+
 	}
 
 	private BaseHasResource readEntity(
