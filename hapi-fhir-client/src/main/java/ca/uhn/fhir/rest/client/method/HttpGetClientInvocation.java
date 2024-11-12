@@ -25,6 +25,8 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.client.model.AsHttpRequestParams;
+import ca.uhn.fhir.rest.client.model.CreateRequestParameters;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.StringUtils;
 
@@ -87,6 +89,18 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 			Map<String, List<String>> theExtraParams,
 			EncodingEnum theEncoding,
 			Boolean thePrettyPrint) {
+		return asHttpRequest(new AsHttpRequestParams()
+				.setUrlBase(theUrlBase)
+				.setExtraParams(theExtraParams)
+				.setPrettyPrint(thePrettyPrint)
+				.setEncodingEnum(theEncoding));
+	}
+
+	@Override
+	public IHttpRequest asHttpRequest(AsHttpRequestParams theAsHttpRequestParams) {
+		String theUrlBase = theAsHttpRequestParams.getUrlBase();
+		Map<String, List<String>> theExtraParams = theAsHttpRequestParams.getExtraParams();
+		EncodingEnum theEncoding = theAsHttpRequestParams.getEncodingEnum();
 		StringBuilder b = new StringBuilder();
 
 		if (!myUrlPath.contains("://")) {
@@ -110,7 +124,12 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 
 		appendExtraParamsWithQuestionMark(theExtraParams, b, first);
 
-		IHttpRequest retVal = super.createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.GET);
+		CreateRequestParameters createRequestParameters = new CreateRequestParameters()
+				.setRequestTypeEnum(RequestTypeEnum.GET)
+				.setEncodingEnum(theEncoding)
+				.setUrl(b.toString())
+				.setClient(theAsHttpRequestParams.getClient());
+		IHttpRequest retVal = super.createHttpRequest(createRequestParameters);
 		retVal.setUrlSource(myUrlSource);
 
 		return retVal;

@@ -64,6 +64,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -168,6 +169,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -188,6 +190,9 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -196,6 +201,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -205,6 +211,7 @@ import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -261,6 +268,73 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setAllowMultipleDelete(true);
 		myClient.registerInterceptor(myCapturingInterceptor);
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+	}
+
+	/**
+	 * We set to run last because we alter our client configs,
+	 * and we don't want to break tests that create new clients
+	 * (with an expectation of a different set of configs)
+	 * after this test.
+	 */
+	@Order(Integer.MAX_VALUE)
+	@Test
+	public void testGenericClient_preservesClientSettings() {
+		// setup
+		int socketTimeout = 700;
+		int delay = 1200;
+		String clientHeader = "client";
+
+		// we register a delaying interceptor for all requests to this server
+		Object interceptor = new Object() {
+			@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
+			public void intercept(HttpServletRequest theRequest) {
+				Instant start = Instant.now();
+				Instant endTime = Instant.now().plus(delay, ChronoUnit.MILLIS);
+
+				await()
+					.atLeast(socketTimeout, TimeUnit.MILLISECONDS)
+					.atMost(delay + socketTimeout, TimeUnit.MILLISECONDS)
+					.until(() -> {
+						return Instant.now().isAfter(endTime);
+					});
+
+				ourLog.info("Delayed {}ms for server request from {}",
+					Instant.now().toEpochMilli() - start.toEpochMilli(),
+					theRequest.getHeader(clientHeader));
+			}
+		};
+
+		try {
+			myServer.getInterceptorService().registerInterceptor(interceptor);
+
+			// get a first client with our short timeout
+			myFhirContext.getRestfulClientFactory().setSocketTimeout(socketTimeout);
+			IGenericClient client1 = myFhirContext.newRestfulGenericClient(myServerBase);
+
+			// get a second client with a longer timeout
+			myFhirContext.getRestfulClientFactory().setSocketTimeout((int)Duration.of(10, ChronoUnit.SECONDS).toMillis());
+			IGenericClient client2 = myFhirContext.newRestfulGenericClient(myServerBase);
+
+			try {
+				// should fail
+				client1.search()
+					.forResource("Patient")
+					.withAdditionalHeader(clientHeader, "client1")
+					.execute();
+				fail();
+			} catch (Exception ex) {
+				assertTrue(ex.getMessage().contains("SocketTimeoutException"));
+			}
+
+			// should not fail
+			IBaseBundle result = client2.search()
+				.forResource("Patient")
+				.withAdditionalHeader(clientHeader, "client2")
+				.execute();
+			assertNotNull(result);
+		} finally {
+			myServer.getInterceptorService().unregisterInterceptor(interceptor);
+		}
 	}
 
 	@Test

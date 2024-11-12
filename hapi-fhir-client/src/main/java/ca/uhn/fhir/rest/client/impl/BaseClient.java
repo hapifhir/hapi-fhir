@@ -51,6 +51,8 @@ import ca.uhn.fhir.rest.client.method.HttpGetClientInvocation;
 import ca.uhn.fhir.rest.client.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.client.method.IClientResponseHandlerHandlesBinary;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
+import ca.uhn.fhir.rest.client.model.AsHttpRequestParams;
+import ca.uhn.fhir.rest.client.model.InvokeClientParameters;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -88,7 +90,7 @@ public abstract class BaseClient implements IRestfulClient {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseClient.class);
 
-	private final IHttpClient myClient;
+	protected IHttpClient myClient;
 	private final RestfulClientFactory myFactory;
 	private final String myUrlBase;
 	private boolean myDontValidateConformance;
@@ -267,6 +269,32 @@ public abstract class BaseClient implements IRestfulClient {
 			CacheControlDirective theCacheControlDirective,
 			String theCustomAcceptHeader,
 			Map<String, List<String>> theCustomHeaders) {
+		return this.invokeClient(new InvokeClientParameters<T>()
+				.setContext(theContext)
+				.setBinding(binding)
+				.setClientInvocation(clientInvocation)
+				.setEncoding(theEncoding)
+				.setPrettyPrint(thePrettyPrint)
+				.setTheLogRequestAndResponse(theLogRequestAndResponse)
+				.setSummaryMode(theSummaryMode)
+				.setSubsetElements(theSubsetElements)
+				.setCacheControlDirective(theCacheControlDirective)
+				.setCustomAcceptHeader(theCustomAcceptHeader)
+				.setCustomHeaders(theCustomHeaders));
+	}
+
+	protected <T> T invokeClient(InvokeClientParameters<T> theParameters) {
+		FhirContext theContext = theParameters.getContext();
+		IClientResponseHandler<T> binding = theParameters.getBinding();
+		BaseHttpClientInvocation clientInvocation = theParameters.getClientInvocation();
+		EncodingEnum theEncoding = theParameters.getEncoding();
+		Boolean thePrettyPrint = theParameters.getPrettyPrint();
+		boolean theLogRequestAndResponse = theParameters.isTheLogRequestAndResponse();
+		SummaryEnum theSummaryMode = theParameters.getSummaryMode();
+		Set<String> theSubsetElements = theParameters.getSubsetElements();
+		CacheControlDirective theCacheControlDirective = theParameters.getCacheControlDirective();
+		String theCustomAcceptHeader = theParameters.getCustomAcceptHeader();
+		Map<String, List<String>> theCustomHeaders = theParameters.getCustomHeaders();
 
 		if (!myDontValidateConformance) {
 			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient, this);
@@ -299,7 +327,7 @@ public abstract class BaseClient implements IRestfulClient {
 				params.put(Constants.PARAM_PRETTY, Collections.singletonList(Constants.PARAM_PRETTY_VALUE_TRUE));
 			}
 
-			if (theSubsetElements != null && theSubsetElements.isEmpty() == false) {
+			if (theSubsetElements != null && !theSubsetElements.isEmpty()) {
 				params.put(
 						Constants.PARAM_ELEMENTS, Collections.singletonList(StringUtils.join(theSubsetElements, ',')));
 			}
@@ -309,7 +337,13 @@ public abstract class BaseClient implements IRestfulClient {
 				encoding = theEncoding;
 			}
 
-			httpRequest = clientInvocation.asHttpRequest(myUrlBase, params, encoding, thePrettyPrint);
+			AsHttpRequestParams asHttpRequestParams = new AsHttpRequestParams()
+					.setExtraParams(params)
+					.setUrlBase(myUrlBase)
+					.setPrettyPrint(thePrettyPrint)
+					.setEncodingEnum(encoding)
+					.setClient(myClient);
+			httpRequest = clientInvocation.asHttpRequest(asHttpRequestParams);
 
 			if (isNotBlank(theCustomAcceptHeader)) {
 				httpRequest.removeHeaders(Constants.HEADER_ACCEPT);

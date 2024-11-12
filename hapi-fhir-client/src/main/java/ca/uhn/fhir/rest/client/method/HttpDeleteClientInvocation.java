@@ -24,6 +24,8 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.client.model.AsHttpRequestParams;
+import ca.uhn.fhir.rest.client.model.CreateRequestParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.List;
@@ -31,8 +33,8 @@ import java.util.Map;
 
 public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 
-	private String myUrlPath;
-	private Map<String, List<String>> myParams;
+	private final String myUrlPath;
+	private final Map<String, List<String>> myParams;
 
 	public HttpDeleteClientInvocation(
 			FhirContext theContext, IIdType theId, Map<String, List<String>> theAdditionalParams) {
@@ -54,6 +56,20 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 			Map<String, List<String>> theExtraParams,
 			EncodingEnum theEncoding,
 			Boolean thePrettyPrint) {
+		return asHttpRequest(new AsHttpRequestParams()
+				.setUrlBase(theUrlBase)
+				.setExtraParams(theExtraParams)
+				.setEncodingEnum(theEncoding)
+				.setPrettyPrint(thePrettyPrint));
+	}
+
+	@Override
+	public IHttpRequest asHttpRequest(AsHttpRequestParams theParams) {
+		String theUrlBase = theParams.getUrlBase();
+		Map<String, List<String>> theExtraParams = theParams.getExtraParams();
+		EncodingEnum theEncoding = theParams.getEncodingEnum();
+		Boolean thePrettyPrint = theParams.getPrettyPrint();
+
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
 		if (!theUrlBase.endsWith("/")) {
@@ -64,6 +80,11 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 		appendExtraParamsWithQuestionMark(myParams, b, b.indexOf("?") == -1);
 		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 
-		return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.DELETE);
+		CreateRequestParameters requestParameters = new CreateRequestParameters();
+		requestParameters.setClient(theParams.getClient());
+		requestParameters.setRequestTypeEnum(RequestTypeEnum.DELETE);
+		requestParameters.setEncodingEnum(theEncoding);
+		requestParameters.setUrl(b.toString());
+		return createHttpRequest(requestParameters);
 	}
 }

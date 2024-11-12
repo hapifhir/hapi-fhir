@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6180
+title: "Fixed GenericClient so that the IHttpClient (and settings used
+        to create it) are preserved for the lifetime of the client.
+"

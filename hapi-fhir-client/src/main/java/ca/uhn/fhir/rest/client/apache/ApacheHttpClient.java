@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.param.HttpClientRequestParameters;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -45,6 +46,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * A Http Client based on Apache. This is an adapter around the class
@@ -67,9 +70,35 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 		this.myClient = theClient;
 	}
 
-	private HttpRequestBase constructRequestBase(HttpEntity theEntity) {
-		String url = myUrl.toString();
-		switch (myRequestType) {
+	private HttpEntity getEntityFromParameters(HttpClientRequestParameters theParameters) {
+		if (isNotBlank(theParameters.getContents())) {
+			return new ByteArrayEntity(theParameters.getContents().getBytes(Constants.CHARSET_UTF8));
+		} else if (theParameters.getByteContents() != null) {
+			return new ByteArrayEntity(theParameters.getByteContents());
+		} else if (theParameters.getFormParams() != null
+				&& !theParameters.getFormParams().isEmpty()) {
+			return entityFromFormParams(theParameters.getFormParams());
+		}
+		/*
+		 * Could be a get request.
+		 * This fallthrough is for legacy purposes; ideally we would use the request type
+		 * but legacy clients don't have it defined always.
+		 */
+		return null;
+	}
+
+	private HttpRequestBase constructRequestBase(HttpClientRequestParameters theParameters, HttpEntity theEntity) {
+		// we default to the parameters request type;
+		// but if that's not provided (as in legacy clients case)
+		// we'll use the client's request type instead.
+		// one of these will definitely be provided though.
+		RequestTypeEnum requestTypeEnum = theParameters.getRequestTypeEnum();
+		if (requestTypeEnum == null) {
+			requestTypeEnum = myRequestType;
+		}
+		assert requestTypeEnum != null : "Request type required";
+		String url = theParameters.getUrl();
+		switch (requestTypeEnum) {
 			case DELETE:
 				return new HttpDelete(url);
 			case PATCH:
@@ -92,12 +121,26 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 		}
 	}
 
+	private HttpRequestBase constructRequestBase(HttpEntity theEntity) {
+		// request type for requests with bodies is POST
+		RequestTypeEnum requestType = myRequestType == null ? RequestTypeEnum.POST : myRequestType;
+		HttpClientRequestParameters parameters = new HttpClientRequestParameters(myUrl.toString(), requestType);
+		return constructRequestBase(parameters, theEntity);
+	}
+
 	private UrlEncodedFormEntity createFormEntity(List<NameValuePair> parameters) {
 		try {
 			return new UrlEncodedFormEntity(parameters, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new InternalErrorException(Msg.code(1479) + "Server does not support UTF-8 (should not happen)", e);
 		}
+	}
+
+	@Override
+	public IHttpRequest createRequest(HttpClientRequestParameters theParameters) {
+		myUrl = new StringBuilder(theParameters.getUrl());
+		HttpRequestBase request = constructRequestBase(theParameters, getEntityFromParameters(theParameters));
+		return new ApacheHttpRequest(myClient, request);
 	}
 
 	@Override
@@ -123,6 +166,11 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 
 	@Override
 	protected IHttpRequest createHttpRequest(Map<String, List<String>> theParams) {
+		UrlEncodedFormEntity entity = entityFromFormParams(theParams);
+		return createHttpRequest(entity);
+	}
+
+	private UrlEncodedFormEntity entityFromFormParams(Map<String, List<String>> theParams) {
 		List<NameValuePair> parameters = new ArrayList<>();
 		for (Entry<String, List<String>> nextParam : theParams.entrySet()) {
 			List<String> value = nextParam.getValue();
@@ -132,7 +180,7 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 		}
 
 		UrlEncodedFormEntity entity = createFormEntity(parameters);
-		return createHttpRequest(entity);
+		return entity;
 	}
 
 	@Override
