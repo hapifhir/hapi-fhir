@@ -294,6 +294,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, transactionCreator.get());
 		myCaptureQueriesListener.logInsertQueries();
+		myCaptureQueriesListener.logSelectQueries();
 
 		myCaptureQueriesListener.logInsertQueries(t->t.getSql(true, false).contains("HFJ_RES_LINK"));
 		var insertQueries = myCaptureQueriesListener.getInsertQueries(t->t.getSql(true, false).contains("HFJ_RES_LINK"));
@@ -302,9 +303,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Test again
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, transactionCreator.get());
-		myCaptureQueriesListener.logInsertQueries();
-
-		myCaptureQueriesListener.logInsertQueries(t->t.getSql(true, false).contains("HFJ_RES_LINK"));
 		insertQueries = myCaptureQueriesListener.getInsertQueries(t->t.getSql(true, false).contains("HFJ_RES_LINK"));
 		assertEquals(1, insertQueries.size());
 	}

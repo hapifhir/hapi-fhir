@@ -149,6 +149,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		FlushModeType initialFlushMode = myEntityManager.getFlushMode();
 		try {
+			// FIXME: restore
 			myEntityManager.setFlushMode(FlushModeType.COMMIT);
 
 			ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
@@ -223,8 +224,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 		}
 		List<JpaPid> outcome =
-				myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, idsToPreResolve).stream()
-						.collect(Collectors.toList());
+			new ArrayList<>(myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, idsToPreResolve));
 		for (JpaPid next : outcome) {
 			foundIds.add(
 					next.getAssociatedResourceId().toUnqualifiedVersionless().getValue());

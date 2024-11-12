@@ -470,7 +470,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		myCodeSystemCurrentVersionCache.invalidateAll();
 	}
 
-	public void deleteValueSetForResource(ResourceTable theResourceTable) {
+	public Optional<TermValueSet> deleteValueSetForResource(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
 		Optional<TermValueSet> optionalExistingTermValueSetById =
 				myTermValueSetDao.findByResourcePid(theResourceTable.getId());
@@ -481,8 +481,19 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			ourLog.info("Deleting existing TermValueSet[{}] and its children...", existingTermValueSet.getId());
 			deletePreCalculatedValueSetContents(existingTermValueSet);
 			myTermValueSetDao.deleteById(existingTermValueSet.getId());
+
+			/*
+			 * If we're updating an existing ValueSet within a transaction, we need to make
+			 * sure to manually flush now since otherwise we'll try to create a new
+			 * TermValueSet entity and fail with a constraint error on the URL, since
+			 * this one won't be deleted yet
+			 */
+			myTermValueSetDao.flush();
+
 			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
 		}
+
+		return optionalExistingTermValueSetById;
 	}
 
 	private void deletePreCalculatedValueSetContents(TermValueSet theValueSet) {
@@ -2552,7 +2563,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
 
 		// Delete version being replaced
-		deleteValueSetForResource(theResourceTable);
+		Optional<TermValueSet> deletedTrmValueSet = deleteValueSetForResource(theResourceTable);
 
 		/*
 		 * Do the upload.
@@ -2560,11 +2571,17 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		String url = termValueSet.getUrl();
 		String version = termValueSet.getVersion();
 		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
-		if (version != null) {
+
+		if (deletedTrmValueSet.isPresent() && Objects.equals(deletedTrmValueSet.get().getUrl(), url) && Objects.equals(deletedTrmValueSet.get().getVersion(), version)) {
+			// If we just deleted the valueset marker, we don't need to check if it exists
+			// in the database
+			optionalExistingTermValueSetByUrl = Optional.empty();
+		} else if (version != null) {
 			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion(url, version);
 		} else {
 			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(url);
 		}
+
 		if (optionalExistingTermValueSetByUrl.isEmpty()) {
 
 			myTermValueSetDao.save(termValueSet);
