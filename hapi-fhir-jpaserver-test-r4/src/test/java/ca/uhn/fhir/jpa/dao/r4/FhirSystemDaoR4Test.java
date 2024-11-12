@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -3191,8 +3192,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		String id = outcome.getEntry().get(0).getResponse().getLocation();
 		patient = myPatientDao.read(new IdType(id));
 
-		assertEquals("#1", patient.getManagingOrganization().getReference());
-		assertEquals("#1", patient.getContained().get(0).getId());
+		assertThat(patient.getManagingOrganization().getReference()).containsPattern(HASH_UUID_PATTERN);
+		assertEquals(patient.getManagingOrganization().getReference(), patient.getContained().get(0).getId());
 	}
 
 	@Nonnull
