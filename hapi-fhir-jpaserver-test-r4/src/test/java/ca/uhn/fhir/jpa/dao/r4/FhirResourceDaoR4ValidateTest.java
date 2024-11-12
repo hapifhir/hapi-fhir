@@ -228,7 +228,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		encoded = encode(oo);
 		ourLog.info(encoded);
 		assertThat(oo.getIssue()).hasSize(1);
-		assertEquals("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code1' (error because this is a required binding)", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code1'", oo.getIssueFirstRep().getDiagnostics());
 		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssueFirstRep().getSeverity());
 
 		// Invalid code
