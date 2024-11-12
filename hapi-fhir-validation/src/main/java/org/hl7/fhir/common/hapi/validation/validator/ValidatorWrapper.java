@@ -129,6 +129,9 @@ class ValidatorWrapper {
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(myNoTerminologyChecks);
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
+		/* setUnknownCodeSystemsCauseErrors interacts with UnknownCodeSystemWarningValidationSupport. Until this
+		interaction is resolved, the value here should remain fixed. */
+		v.setUnknownCodeSystemsCauseErrors(true);
 		v.getExtensionDomains().addAll(myExtensionDomains);
 		v.setFetcher(myValidatorResourceFetcher);
 		v.setPolicyAdvisor(myValidationPolicyAdvisor);

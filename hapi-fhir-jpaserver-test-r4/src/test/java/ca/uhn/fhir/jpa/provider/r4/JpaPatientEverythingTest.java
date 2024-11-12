@@ -696,7 +696,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         Reference referenceToPatient = createPatient();
 
         Consent consent = new Consent();
-        Consent.provisionComponent provisionComponent = new Consent.provisionComponent();
+        Consent.ProvisionComponent provisionComponent = new Consent.ProvisionComponent();
         Consent.provisionActorComponent actorComponent = new Consent.provisionActorComponent();
         actorComponent.setReference(referenceToPatient);
         provisionComponent.setActor(List.of(actorComponent));

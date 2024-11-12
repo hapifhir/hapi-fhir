@@ -117,4 +117,14 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 			List<ValidationMessage> messages) {
 		return Arrays.asList();
 	}
+
+	@Override
+	public boolean isSuppressMessageId(String path, String messageId) {
+		return false;
+	}
+
+	@Override
+	public ReferenceValidationPolicy getReferencePolicy() {
+		return ReferenceValidationPolicy.IGNORE;
+	}
 }
