@@ -254,6 +254,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithManyResourceLinks() {
+		// Setup
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
 		List<IIdType> patientIds = new ArrayList<>();
@@ -288,20 +289,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			bb.addTransactionUpdateEntry(creator.get());
 			return bb.getBundleTyped();
 		};
-//
-//		 Create one just to warm up ID caches
-//		myExplanationOfBenefitDao.update(creator.get(), mySrd);
-
-//		Supplier<Bundle> transactionCreator = () -> {
-//			try {
-//				try (FileReader fr = new FileReader("/Users/james/Downloads/tmp/bundles/eob-pharma/ExplanationOfBenefit_PHARMACY_JSON_Bundle_009e4b06-9fbc-4cb5-93d4-df78686f4806.json", StandardCharsets.UTF_8)) {
-//					String bundleText = IOUtils.toString(fr);
-//					return myFhirContext.newJsonParser().parseResource(Bundle.class, bundleText);
-//				}
-//			} catch (IOException e) {
-//				throw new RuntimeException(e);
-//			}
-//		};
 
 		// Test
 		myCaptureQueriesListener.clear();
