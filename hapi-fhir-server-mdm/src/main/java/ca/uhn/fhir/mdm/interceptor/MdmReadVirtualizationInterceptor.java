@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR - Master Data Management
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.mdm.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -8,10 +27,10 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
-import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -20,6 +39,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -69,10 +89,10 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private MdmSettings myMdmSettings;
+	private MdmSearchExpansionSvc myMdmSearchExpansionSvc;
 
 	@Autowired
-	private MdmSearchExpansionSvc myMdmSearchExpansionSvc;
+	private HapiTransactionService myTxService;
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
@@ -86,26 +106,12 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 		ListMultimap<String, Integer> candidateResourceIds = extractRemapCandidateResources(theDetails);
 		ListMultimap<String, ResourceReferenceInfo> candidateReferences = extractRemapCandidateReferences(theDetails);
 
-		// Resolve all the resource IDs we've seen that could be MDM candidates,
-		// and look for MDM links that have these IDs as either the source or the
-		// golden resource side of the link
-		Set<IIdType> allIds = new HashSet<>();
-		candidateResourceIds.keySet().forEach(t -> allIds.add(newIdType(t)));
-		candidateReferences.keySet().forEach(t -> allIds.add(newIdType(t)));
-		List<P> sourcePids =
-				myIdHelperService.getPidsOrThrowException(RequestPartitionId.allPartitions(), List.copyOf(allIds));
-		Collection<MdmPidTuple<P>> tuples = myMdmLinkDao.resolveGoldenResources(sourcePids);
-
-		// Resolve the link PIDs into FHIR IDs
-		Set<P> allPersistentIds = new HashSet<>();
-		tuples.forEach(t -> allPersistentIds.add(t.getGoldenPid()));
-		tuples.forEach(t -> allPersistentIds.add(t.getSourcePid()));
-		PersistentIdToForcedIdMap<P> persistentIdToFhirIdMap =
-				myIdHelperService.translatePidsToForcedIds(allPersistentIds);
+		CandidateMdmLinkedResources<P> candidates =
+				findCandidateMdmLinkedResources(candidateResourceIds, candidateReferences);
 
 		// Loop through each link and figure out whether we need to remap anything
-		for (MdmPidTuple<P> tuple : tuples) {
-			Optional<String> sourceIdOpt = persistentIdToFhirIdMap.get(tuple.getSourcePid());
+		for (MdmPidTuple<P> tuple : candidates.getTuples()) {
+			Optional<String> sourceIdOpt = candidates.getFhirIdForPersistentId(tuple.getSourcePid());
 			if (sourceIdOpt.isPresent()) {
 				String sourceId = sourceIdOpt.get();
 
@@ -114,7 +120,7 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 				if (!referencesToRemap.isEmpty()) {
 					P associatedGoldenResourcePid = tuple.getGoldenPid();
 					Optional<String> associatedGoldenResourceId =
-							persistentIdToFhirIdMap.get(associatedGoldenResourcePid);
+							candidates.getFhirIdForPersistentId(associatedGoldenResourcePid);
 					if (associatedGoldenResourceId.isPresent()) {
 						for (ResourceReferenceInfo referenceInfoToRemap : referencesToRemap) {
 							IBaseReference referenceToRemap = referenceInfoToRemap.getResourceReference();
@@ -124,7 +130,7 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 				}
 
 				// Filter out source resources
-				Optional<String> targetIdOpt = persistentIdToFhirIdMap.get(tuple.getGoldenPid());
+				Optional<String> targetIdOpt = candidates.getFhirIdForPersistentId(tuple.getGoldenPid());
 				if (targetIdOpt.isPresent()) {
 					Integer filteredIndex = null;
 					for (int sourceIdResourceIndex : candidateResourceIds.get(sourceId)) {
@@ -151,6 +157,31 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 				}
 			}
 		}
+	}
+
+	@Nonnull
+	private CandidateMdmLinkedResources<P> findCandidateMdmLinkedResources(
+			ListMultimap<String, Integer> candidateResourceIds,
+			ListMultimap<String, ResourceReferenceInfo> candidateReferences) {
+		return myTxService.withSystemRequest().read(() -> {
+			// Resolve all the resource IDs we've seen that could be MDM candidates,
+			// and look for MDM links that have these IDs as either the source or the
+			// golden resource side of the link
+			Set<IIdType> allIds = new HashSet<>();
+			candidateResourceIds.keySet().forEach(t -> allIds.add(newIdType(t)));
+			candidateReferences.keySet().forEach(t -> allIds.add(newIdType(t)));
+			List<P> sourcePids =
+					myIdHelperService.getPidsOrThrowException(RequestPartitionId.allPartitions(), List.copyOf(allIds));
+			Collection<MdmPidTuple<P>> tuples = myMdmLinkDao.resolveGoldenResources(sourcePids);
+
+			// Resolve the link PIDs into FHIR IDs
+			Set<P> allPersistentIds = new HashSet<>();
+			tuples.forEach(t -> allPersistentIds.add(t.getGoldenPid()));
+			tuples.forEach(t -> allPersistentIds.add(t.getSourcePid()));
+			PersistentIdToForcedIdMap<P> persistentIdToFhirIdMap =
+					myIdHelperService.translatePidsToForcedIds(allPersistentIds);
+			return new CandidateMdmLinkedResources<>(tuples, persistentIdToFhirIdMap);
+		});
 	}
 
 	/**
@@ -211,6 +242,25 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	 * Is the given resource a candidate for virtualization?
 	 */
 	private boolean isRemapCandidate(String theResourceType) {
-		return myMdmSettings.isSupportedMdmType(theResourceType);
+		return "Patient".equals(theResourceType);
+	}
+
+	private static class CandidateMdmLinkedResources<P extends IResourcePersistentId<?>> {
+		private final Collection<MdmPidTuple<P>> myTuples;
+		private final PersistentIdToForcedIdMap<P> myPersistentIdToFhirIdMap;
+
+		public CandidateMdmLinkedResources(
+				Collection<MdmPidTuple<P>> thePidTuples, PersistentIdToForcedIdMap<P> thePersistentIdToForcedIdMap) {
+			this.myTuples = thePidTuples;
+			this.myPersistentIdToFhirIdMap = thePersistentIdToForcedIdMap;
+		}
+
+		public Collection<MdmPidTuple<P>> getTuples() {
+			return myTuples;
+		}
+
+		public Optional<String> getFhirIdForPersistentId(P theSourcePid) {
+			return myPersistentIdToFhirIdMap.get(theSourcePid);
+		}
 	}
 }

@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -31,12 +30,9 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.slf4j.LoggerFactory.getLogger;
 
 @ContextConfiguration(classes = {MdmHelperConfig.class})
 public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
-
-	private static final Logger ourLog = getLogger(MdmReadVirtualizationInterceptorTest.class);
 
 	@RegisterExtension
 	@Autowired
