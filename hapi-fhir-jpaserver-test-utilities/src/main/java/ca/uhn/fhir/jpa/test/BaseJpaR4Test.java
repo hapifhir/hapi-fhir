@@ -1068,5 +1068,17 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 																	 String url) {
 			return ContainedReferenceValidationPolicy.CHECK_VALID;
 		}
+
+		@Override
+		public boolean isSuppressMessageId(String path, String messageId) {
+			return false;
+		}
+
+		@Override
+		public ReferenceValidationPolicy getReferencePolicy() {
+			return ReferenceValidationPolicy.IGNORE;
+		}
 	}
+
+
 }
