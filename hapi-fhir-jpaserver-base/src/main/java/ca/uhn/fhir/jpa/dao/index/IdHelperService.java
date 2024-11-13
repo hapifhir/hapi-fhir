@@ -61,6 +61,8 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -103,6 +105,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class IdHelperService implements IIdHelperService<JpaPid> {
 	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
 	public static final String RESOURCE_PID = "RESOURCE_PID";
+	private static final Logger ourLog = LoggerFactory.getLogger(IdHelperService.class);
 
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
@@ -287,6 +290,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				 *  1. There are two resources with the exact same resource type and forced id
 				 *  2. The unique constraint on this column-pair has been dropped
 				 */
+				ourLog.warn("Resource ID[{}] corresponds to lookups: {} and {}", next.getKey(), previousValue, next.getValue());
 				String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
 				throw new PreconditionFailedException(Msg.code(1099) + msg);
 			}
@@ -728,8 +732,12 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (!myStorageSettings.isDeleteEnabled()) {
 			JpaResourceLookup lookup = new JpaResourceLookup(
 				theResourceType, theJpaPid.getId(), theDeletedAt, theJpaPid.getPartitionablePartitionId());
-			TypedResourcePid nextKey = new TypedResourcePid(theResourceType, theJpaPid);
-			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, nextKey, List.of(lookup));
+
+			TypedResourcePid pidKey = new TypedResourcePid(theResourceType, theJpaPid);
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, pidKey, List.of(lookup));
+
+			String fhirIdKey = theResourceType + "/" + theForcedId;
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID, fhirIdKey, List.of(lookup));
 		}
 	}
 

@@ -89,7 +89,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
 
 	// FIXME: remove
-	private static final boolean ourFixes = false;
+	private static final boolean ourFixes = true;
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
@@ -219,11 +219,19 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		FhirTerser terser = myFhirContext.newTerser();
 
+		// Key: The ID of the resource
+		// Value: True if we should fetch the existing resource details and indexes,
+		//        False if we should only fetch the identity (resource ID and deleted status)
 		Map<IIdType, Boolean> idsToPreResolve = new HashMap<>(theEntries.size() * 3);
+
 		for (IBase nextEntry : theEntries) {
 			IBaseResource resource = theVersionAdapter.getResource(nextEntry);
 			if (resource != null) {
 				String verb = theVersionAdapter.getEntryRequestVerb(myFhirContext, nextEntry);
+
+				/*
+				 * Pre-fetch any resources that are potentially being directly updated by ID
+				 */
 				if ("PUT".equals(verb) || "PATCH".equals(verb)) {
 					String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
 					if (countMatches(requestUrl, '/') == 1 && countMatches(requestUrl, '?') == 0) {
@@ -235,11 +243,16 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				}
 
 				if (ourFixes) {
+					/*
+					 * Pre-fetch any resources that are referred to directly by ID (don't replace
+					 * the TRUE flag with FALSE in case we're updating a resource but also
+					 * pointing to that resource elsewhere in the bundle)
+					 */
 					if ("PUT".equals(verb) || "POST".equals(verb)) {
 						for (ResourceReferenceInfo referenceInfo : terser.getAllResourceReferences(resource)) {
 							IIdType reference = referenceInfo.getResourceReference().getReferenceElement();
 							if (reference != null && !reference.isLocal() && !reference.isUuid() && reference.hasResourceType() && reference.hasIdPart() && !reference.getValue().contains("?")) {
-								idsToPreResolve.put(reference.toUnqualifiedVersionless(), Boolean.FALSE);
+								idsToPreResolve.putIfAbsent(reference.toUnqualifiedVersionless(), Boolean.FALSE);
 							}
 						}
 					}
