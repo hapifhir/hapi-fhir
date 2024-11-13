@@ -49,8 +49,8 @@ public class MdmCommonConfig {
 
 	@Bean
 	@Lazy
-	public MdmReadVirtualizationInterceptor mdmReadVirtualizationInterceptor() {
-		return new MdmReadVirtualizationInterceptor();
+	public MdmReadVirtualizationInterceptor<?> mdmReadVirtualizationInterceptor() {
+		return new MdmReadVirtualizationInterceptor<>();
 	}
 
 	@Bean
