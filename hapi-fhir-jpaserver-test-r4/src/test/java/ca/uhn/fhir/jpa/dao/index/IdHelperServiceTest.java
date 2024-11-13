@@ -7,7 +7,11 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Patient;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -121,7 +125,7 @@ public class IdHelperServiceTest {
 	}
 
 	@Test
-	public void resolveResourcePersistenIds_withForcedIdAndDeleteDisabled_returnsMap() {
+	public void resolveResourcePersistentIds_withForcedIdAndDeleteDisabled_returnsMap() {
 		RequestPartitionId partitionId = RequestPartitionId.allPartitions();
 		String resourceType = Patient.class.getSimpleName();
 		List<String> patientIdsToResolve = new ArrayList<>();
@@ -149,8 +153,7 @@ public class IdHelperServiceTest {
 		for (String id : patientIdsToResolve) {
 			assertThat(map).containsKey(id);
 		}
-		assertThat(map).containsEntry("RED", red);
-		assertThat(map).containsEntry("BLUE", blue);
+		assertThat(map).containsExactlyInAnyOrderEntriesOf(Map.of("RED", red, "BLUE", blue));
 	}
 
 	@Test
@@ -175,6 +178,50 @@ public class IdHelperServiceTest {
 		assertEquals(forcedIdView[0], result.getResourceType());
 		assertEquals(forcedIdView[1], result.getPersistentId().getId());
 		assertEquals(forcedIdView[3], result.getDeleted());
+	}
+
+	@Test
+	public void testResolveResourceResourceIdentity_withPersistentIdOfResourceWithForcedIdAndDefaultClientIdStrategy_returnsNotFound(){
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
+		String resourceType = "Patient";
+
+		Object[] forcedIdView = new Object[6];
+		forcedIdView[0] = "Patient";
+		forcedIdView[1] = 1L;
+		forcedIdView[2] = "AAA";
+		forcedIdView[3] = null;
+		forcedIdView[4] = null;
+		forcedIdView[5] = null;
+
+		Collection<Object[]> testForcedIdViews = new ArrayList<>();
+		testForcedIdViews.add(forcedIdView);
+		when(myResourceTableDao.findLookupFieldsByResourcePidInPartitionIds(any(), any())).thenReturn(testForcedIdViews);
+
+		try {
+			// Search by the PID of the resource that has a client assigned FHIR Id
+			myHelperService.resolveResourceIdentity(partitionId, resourceType, "1");
+			fail();
+		} catch(ResourceNotFoundException e) {
+			assertThat(e.getMessage()).isEqualTo("HAPI-2001: Resource Patient/1 is not known");
+		}
+	}
+
+	@Test
+	public void testResolveResourceResourceIdentity_withPersistentIdOfResourceWithForcedIdAndClientIdStrategyAny_returnsNotFound(){
+		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
+		String resourceType = "Patient";
+
+		Collection<Object[]> testForcedIdViews = new ArrayList<>();
+		when(myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(any(), any(), any(), anyBoolean())).thenReturn(testForcedIdViews);
+
+		try {
+			// Search by the PID of the resource that has a client assigned FHIR Id
+			myHelperService.resolveResourceIdentity(partitionId, resourceType, "1");
+			fail();
+		} catch(ResourceNotFoundException e) {
+			assertThat(e.getMessage()).isEqualTo("HAPI-2001: Resource Patient/1 is not known");
+		}
 	}
 
 	@Test

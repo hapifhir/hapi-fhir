@@ -146,6 +146,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	 * Given a forced ID, convert it to its Long value. Since you are allowed to use string IDs for resources, we need to
 	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
 	 * Optionally filters out deleted resources.
+	 * Note that when given a PID for a resource created with a forced ID (client-assigned ID), this method will throw
+	 * @ResourceNotFoundException
 	 *
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
@@ -509,10 +511,10 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	private Map<String, List<IResourceLookup<JpaPid>>> translateForcedIdToPids(
-			@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theId, boolean theExcludeDeleted) {
-		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
+			@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds, boolean theExcludeDeleted) {
+		theIds.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
-		if (theId.isEmpty()) {
+		if (theIds.isEmpty()) {
 			return new HashMap<>();
 		}
 
@@ -520,8 +522,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		RequestPartitionId requestPartitionId = replaceDefault(theRequestPartitionId);
 
 		if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY) {
-			List<Long> pids = theId.stream()
-					.filter(t -> isValidPid(t))
+			List<Long> pids = theIds.stream()
+					.filter(IdHelperService::isValidPid)
 					.map(IIdType::getIdPartAsLong)
 					.collect(Collectors.toList());
 			if (!pids.isEmpty()) {
@@ -530,7 +532,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		}
 
 		// returns a map of resourcetype->id
-		ListMultimap<String, String> typeToIds = organizeIdsByResourceType(theId);
+		ListMultimap<String, String> typeToIds = organizeIdsByResourceType(theIds);
 		for (Map.Entry<String, Collection<String>> nextEntry : typeToIds.asMap().entrySet()) {
 			String nextResourceType = nextEntry.getKey();
 			Collection<String> nextIds = nextEntry.getValue();
@@ -583,6 +585,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					JpaResourceLookup lookup = new JpaResourceLookup(
 							resourceType,
 							resourcePid,
+							forcedId,
 							deletedAt,
 							PartitionablePartitionId.with(partitionId, partitionDate));
 					retVal.computeIfAbsent(forcedId, id -> new ArrayList<>()).add(lookup);
@@ -646,14 +649,19 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					.map(t -> new JpaResourceLookup(
 							(String) t[0],
 							(Long) t[1],
-							(Date) t[2],
-							PartitionablePartitionId.with((Integer) t[3], (LocalDate) t[4])))
+							(String) t[2],
+							(Date) t[3],
+							PartitionablePartitionId.with((Integer) t[4], (LocalDate) t[5])))
 					.forEach(t -> {
 						String id = t.getPersistentId().toString();
-						if (!theTargets.containsKey(id)) {
-							theTargets.put(id, new ArrayList<>());
+						Long pid = t.getPersistentId().getId();
+						String fhirId = t.getFhirId();
+						if (!isResolvingPidOfResourceWithForcedId(thePidsToResolve, pid, fhirId)) {
+							if (!theTargets.containsKey(id)) {
+								theTargets.put(id, new ArrayList<>());
+							}
+							theTargets.get(id).add(t);
 						}
-						theTargets.get(id).add(t);
 						if (!myStorageSettings.isDeleteEnabled()) {
 							String nextKey = t.getPersistentId().toString();
 							myMemoryCacheService.putAfterCommit(
@@ -661,6 +669,14 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 						}
 					});
 		}
+	}
+
+	/**
+	 * @return true if we were given the PID of a resource that has a forced ID
+	 */
+	private boolean isResolvingPidOfResourceWithForcedId(
+			List<Long> thePidsToResolve, Long theFoundPid, String theFhirId) {
+		return thePidsToResolve.contains(theFoundPid) && !theFhirId.equals(String.valueOf(theFoundPid));
 	}
 
 	@Override
@@ -725,7 +741,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		if (!myStorageSettings.isDeleteEnabled()) {
 			JpaResourceLookup lookup = new JpaResourceLookup(
-					theResourceType, theJpaPid.getId(), theDeletedAt, theJpaPid.getPartitionablePartitionId());
+					theResourceType,
+					theJpaPid.getId(),
+					theForcedId,
+					theDeletedAt,
+					theJpaPid.getPartitionablePartitionId());
 			String nextKey = theJpaPid.toString();
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, lookup);
 		}
