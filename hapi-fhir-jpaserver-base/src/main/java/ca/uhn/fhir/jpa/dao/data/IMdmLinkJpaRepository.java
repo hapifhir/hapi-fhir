@@ -134,7 +134,8 @@ public interface IMdmLinkJpaRepository
 					+ "    lookup_link.mySourcePid IN (:pids))"
 					+ "AND lookup_link.myMatchResult = :matchResult")
 	List<MdmPidTuple> expandPidsByGoldenResourcePidsOrSourcePidsAndMatchResult(
-		@Param("pids") Collection<Long> theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+			@Param("pids") Collection<Long> theSourcePid,
+			@Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
 	@Query(
 			"SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold ORDER BY ml.myCreated DESC")

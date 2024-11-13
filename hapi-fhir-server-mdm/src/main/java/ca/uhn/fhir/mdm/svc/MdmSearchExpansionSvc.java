@@ -51,12 +51,15 @@ public class MdmSearchExpansionSvc {
 	 *                                    by this function to determine whether it should be expanded.
 	 * @since 8.0.0
 	 */
-	public void expandSearch(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap, Function<ReferenceParam, Boolean> theExpansionCandidateTester) {
+	public void expandSearch(
+			RequestDetails theRequestDetails,
+			SearchParameterMap theSearchParameterMap,
+			Function<ReferenceParam, Boolean> theExpansionCandidateTester) {
 		final RequestDetails requestDetailsToUse =
-			theRequestDetails == null ? new SystemRequestDetails() : theRequestDetails;
+				theRequestDetails == null ? new SystemRequestDetails() : theRequestDetails;
 		final RequestPartitionId requestPartitionId =
-			myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-				requestDetailsToUse, requestDetailsToUse.getResourceName(), theSearchParameterMap);
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+						requestDetailsToUse, requestDetailsToUse.getResourceName(), theSearchParameterMap);
 		for (Map.Entry<String, List<List<IQueryParameterType>>> set : theSearchParameterMap.entrySet()) {
 			String paramName = set.getKey();
 			List<List<IQueryParameterType>> andList = set.getValue();
@@ -69,7 +72,10 @@ public class MdmSearchExpansionSvc {
 	}
 
 	private void expandAnyReferenceParameters(
-		RequestPartitionId theRequestPartitionId, String theParamName, List<IQueryParameterType> orList, Function<ReferenceParam, Boolean> theExpansionCandidateTester) {
+			RequestPartitionId theRequestPartitionId,
+			String theParamName,
+			List<IQueryParameterType> orList,
+			Function<ReferenceParam, Boolean> theExpansionCandidateTester) {
 		List<IQueryParameterType> toRemove = new ArrayList<>();
 		List<IQueryParameterType> toAdd = new ArrayList<>();
 		for (IQueryParameterType iQueryParameterType : orList) {
@@ -79,12 +85,12 @@ public class MdmSearchExpansionSvc {
 					ourLog.debug("Found a reference parameter to expand: {}", refParam);
 					// First, attempt to expand as a source resource.
 					Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(
-						theRequestPartitionId, new IdDt(refParam.getValue()));
+							theRequestPartitionId, new IdDt(refParam.getValue()));
 
 					// If we failed, attempt to expand as a golden resource
 					if (expandedResourceIds.isEmpty()) {
 						expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId(
-							theRequestPartitionId, new IdDt(refParam.getValue()));
+								theRequestPartitionId, new IdDt(refParam.getValue()));
 					}
 
 					// Rebuild the search param list.
@@ -92,9 +98,9 @@ public class MdmSearchExpansionSvc {
 						ourLog.debug("Parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
 						toRemove.add(refParam);
 						expandedResourceIds.stream()
-							.map(resourceId -> addResourceTypeIfNecessary(refParam.getResourceType(), resourceId))
-							.map(ReferenceParam::new)
-							.forEach(toAdd::add);
+								.map(resourceId -> addResourceTypeIfNecessary(refParam.getResourceType(), resourceId))
+								.map(ReferenceParam::new)
+								.forEach(toAdd::add);
 					}
 				}
 			} else if (theParamName.equalsIgnoreCase("_id")) {
@@ -124,10 +130,10 @@ public class MdmSearchExpansionSvc {
 	 * @param theRemoveList
 	 */
 	private void expandIdParameter(
-		RequestPartitionId theRequestPartitionId,
-		IQueryParameterType theIdParameter,
-		List<IQueryParameterType> theAddList,
-		List<IQueryParameterType> theRemoveList) {
+			RequestPartitionId theRequestPartitionId,
+			IQueryParameterType theIdParameter,
+			List<IQueryParameterType> theAddList,
+			List<IQueryParameterType> theRemoveList) {
 		// id parameters can either be StringParam (for $everything operation)
 		// or TokenParam (for searches)
 		// either case, we want to expand it out and grab all related resources
@@ -147,8 +153,8 @@ public class MdmSearchExpansionSvc {
 		if (id == null) {
 			// in case the _id parameter type is different from the above
 			ourLog.warn(
-				"_id parameter of incorrect type. Expected StringParam or TokenParam, but got {}. No expansion will be done!",
-				theIdParameter.getClass().getSimpleName());
+					"_id parameter of incorrect type. Expected StringParam or TokenParam, but got {}. No expansion will be done!",
+					theIdParameter.getClass().getSimpleName());
 		} else if (mdmExpand) {
 			ourLog.debug("_id parameter must be expanded out from: {}", id.getValue());
 
@@ -171,5 +177,4 @@ public class MdmSearchExpansionSvc {
 		}
 		// else - no expansion required
 	}
-
 }

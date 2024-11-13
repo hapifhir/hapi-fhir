@@ -49,5 +49,4 @@ public class MdmSearchExpandingInterceptor {
 			myMdmSearchExpansionSvc.expandSearch(theRequestDetails, theSearchParameterMap, ReferenceParam::isMdmExpand);
 		}
 	}
-
 }

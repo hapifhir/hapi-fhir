@@ -31,26 +31,53 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * <b>This class is experimental and subject to change. Use with caution.</b>
+ * <p>
+ * This interceptor provided an "MDM Virtualized" endpoint, meaning that
+ * searches are expanded to include MDM-linked resources (including any
+ * linked golden resource, and also including any other resources linked
+ * to that golden resource). Searches for non-MDM resources which have
+ * a reference to an MDM resource will have their reference parameter
+ * expanded to include the golden and linked resources.
+ * </p>
+ * <p>
+ * In addition, responses are cleaned up so that only the golden resource
+ * is included in responses, and references to non-golden resources
+ * are rewritten.
+ * </p>
+ * <p>
+ * This interceptor does not modify data that is being stored/written
+ * in any way, it only modifies data that is being returned by the
+ * server.
+ * </p>
+ *
+ * @since 8.0.0
+ */
 public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>> {
 
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private IMdmLinkDao<P, ?> myMdmLinkDao;
+
 	@Autowired
 	private IIdHelperService<P> myIdHelperService;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private MdmSettings myMdmSettings;
+
 	@Autowired
 	private MdmSearchExpansionSvc myMdmSearchExpansionSvc;
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
-		myMdmSearchExpansionSvc.expandSearch(theRequestDetails, theSearchParameterMap, t->true);
+		myMdmSearchExpansionSvc.expandSearch(theRequestDetails, theSearchParameterMap, t -> true);
 	}
-
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShowResources(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
@@ -65,14 +92,16 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 		Set<IIdType> allIds = new HashSet<>();
 		candidateResourceIds.keySet().forEach(t -> allIds.add(newIdType(t)));
 		candidateReferences.keySet().forEach(t -> allIds.add(newIdType(t)));
-		List<P> sourcePids = myIdHelperService.getPidsOrThrowException(RequestPartitionId.allPartitions(), List.copyOf(allIds));
+		List<P> sourcePids =
+				myIdHelperService.getPidsOrThrowException(RequestPartitionId.allPartitions(), List.copyOf(allIds));
 		Collection<MdmPidTuple<P>> tuples = myMdmLinkDao.resolveGoldenResources(sourcePids);
 
 		// Resolve the link PIDs into FHIR IDs
 		Set<P> allPersistentIds = new HashSet<>();
 		tuples.forEach(t -> allPersistentIds.add(t.getGoldenPid()));
 		tuples.forEach(t -> allPersistentIds.add(t.getSourcePid()));
-		PersistentIdToForcedIdMap<P> persistentIdToFhirIdMap = myIdHelperService.translatePidsToForcedIds(allPersistentIds);
+		PersistentIdToForcedIdMap<P> persistentIdToFhirIdMap =
+				myIdHelperService.translatePidsToForcedIds(allPersistentIds);
 
 		// Loop through each link and figure out whether we need to remap anything
 		for (MdmPidTuple<P> tuple : tuples) {
@@ -84,13 +113,13 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 				List<ResourceReferenceInfo> referencesToRemap = candidateReferences.get(sourceId);
 				if (!referencesToRemap.isEmpty()) {
 					P associatedGoldenResourcePid = tuple.getGoldenPid();
-					Optional<String> associatedGoldenResourceId = persistentIdToFhirIdMap.get(associatedGoldenResourcePid);
+					Optional<String> associatedGoldenResourceId =
+							persistentIdToFhirIdMap.get(associatedGoldenResourcePid);
 					if (associatedGoldenResourceId.isPresent()) {
 						for (ResourceReferenceInfo referenceInfoToRemap : referencesToRemap) {
 							IBaseReference referenceToRemap = referenceInfoToRemap.getResourceReference();
 							referenceToRemap.setReference(associatedGoldenResourceId.get());
 						}
-
 					}
 				}
 
@@ -122,7 +151,6 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -130,7 +158,8 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	 * that resource within the {@link IPreResourceShowDetails}
 	 */
 	private ListMultimap<String, Integer> extractRemapCandidateResources(IPreResourceShowDetails theDetails) {
-		ListMultimap<String, Integer> retVal = MultimapBuilder.hashKeys().arrayListValues().build();
+		ListMultimap<String, Integer> retVal =
+				MultimapBuilder.hashKeys().arrayListValues().build();
 		for (int resourceIdx = 0; resourceIdx < theDetails.size(); resourceIdx++) {
 			IBaseResource resource = theDetails.getResource(resourceIdx);
 
@@ -149,8 +178,10 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	 * @return Returns a map where the keys are a typed ID (Patient/ABC) and the values are references
 	 * found in any of the resources that are referring to that ID.
 	 */
-	private ListMultimap<String, ResourceReferenceInfo> extractRemapCandidateReferences(IPreResourceShowDetails theDetails) {
-		ListMultimap<String, ResourceReferenceInfo> retVal = MultimapBuilder.hashKeys().arrayListValues().build();
+	private ListMultimap<String, ResourceReferenceInfo> extractRemapCandidateReferences(
+			IPreResourceShowDetails theDetails) {
+		ListMultimap<String, ResourceReferenceInfo> retVal =
+				MultimapBuilder.hashKeys().arrayListValues().build();
 		FhirTerser terser = myFhirContext.newTerser();
 
 		for (int resourceIdx = 0; resourceIdx < theDetails.size(); resourceIdx++) {
@@ -182,6 +213,4 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	private boolean isRemapCandidate(String theResourceType) {
 		return myMdmSettings.isSupportedMdmType(theResourceType);
 	}
-
-
 }

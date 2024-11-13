@@ -37,7 +37,6 @@ import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
@@ -155,11 +154,12 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	@Override
 	public Collection<MdmPidTuple<JpaPid>> resolveGoldenResources(List<JpaPid> theSourcePids) {
 		return myMdmLinkDao
-			.expandPidsByGoldenResourcePidsOrSourcePidsAndMatchResult(JpaPid.toLongList(theSourcePids), MdmMatchResultEnum.MATCH)
-			.stream()
-			.map(this::daoTupleToMdmTuple)
-			.distinct()
-			.collect(Collectors.toList());
+				.expandPidsByGoldenResourcePidsOrSourcePidsAndMatchResult(
+						JpaPid.toLongList(theSourcePids), MdmMatchResultEnum.MATCH)
+				.stream()
+				.map(this::daoTupleToMdmTuple)
+				.distinct()
+				.collect(Collectors.toList());
 	}
 
 	@Override
