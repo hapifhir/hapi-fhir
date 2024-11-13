@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
+import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
@@ -73,7 +74,8 @@ public class MemoryCacheService {
 				case PID_TO_FORCED_ID:
 				case FORCED_ID_TO_PID:
 				case MATCH_URL:
-				case RESOURCE_LOOKUP:
+				case RESOURCE_LOOKUP_BY_PID:
+				case RESOURCE_LOOKUP_BY_FORCED_ID:
 				case HISTORY_COUNT:
 				case TAG_DEFINITION:
 				case RESOURCE_CONDITIONAL_CREATE_VERSION:
@@ -130,7 +132,9 @@ public class MemoryCacheService {
 	}
 
 	public <K, V> void put(CacheEnum theCache, K theKey, V theValue) {
-		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass())
+				: "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache "
+						+ theCache;
 		doPut(theCache, theKey, theValue);
 	}
 
@@ -150,6 +154,9 @@ public class MemoryCacheService {
 	 * in order to avoid cache poisoning.
 	 */
 	public <K, V> void putAfterCommit(CacheEnum theCache, K theKey, V theValue) {
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass())
+				: "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache "
+						+ theCache;
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
@@ -192,7 +199,16 @@ public class MemoryCacheService {
 
 	public enum CacheEnum {
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
-		RESOURCE_LOOKUP(String.class),
+		/**
+		 * Key type: {@literal JpaPid}
+		 * Value type: {@literal JpaResourceLookup}
+		 */
+		RESOURCE_LOOKUP_BY_PID(TypedResourcePid.class),
+		/**
+		 * Key type: {@literal String} containing "resourceType/id"
+		 * Value type: {@literal JpaResourceLookup}
+		 */
+		RESOURCE_LOOKUP_BY_FORCED_ID(String.class),
 		FORCED_ID_TO_PID(String.class),
 		FHIRPATH_EXPRESSION(String.class),
 		/**

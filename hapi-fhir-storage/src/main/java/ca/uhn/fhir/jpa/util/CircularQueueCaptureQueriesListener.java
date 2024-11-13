@@ -32,9 +32,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -409,6 +411,17 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		return countQueries(getInsertQueries());
 	}
 
+	/**
+	 * This method returns a count of insert queries which were issued more than
+	 * once. If a query was issued twice with batched parameters, that does not
+	 * count as a repeated query, but if it is issued as two separate insert
+	 * statements with a single set of parameters this counts as a repeated
+	 * query.
+	 */
+	public int countInsertQueriesRepeated() {
+		return getInsertQueries(new DuplicateCheckingPredicate()).size();
+	}
+
 	public int countUpdateQueries() {
 		return countQueries(getUpdateQueries());
 	}
@@ -473,5 +486,20 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		}
 		b.append("\n");
 		return b.toString();
+	}
+
+	/**
+	 * Create a new instance of this each time you use it
+	 */
+	private static class DuplicateCheckingPredicate implements Predicate<SqlQuery> {
+		private final Set<String> mySeenSql = new HashSet<>();
+
+		@Override
+		public boolean test(SqlQuery theSqlQuery) {
+			String sql = theSqlQuery.getSql(false, false);
+			boolean retVal = !mySeenSql.add(sql);
+			ourLog.trace("SQL duplicate[{}]: {}", retVal, sql);
+			return retVal;
+		}
 	}
 }

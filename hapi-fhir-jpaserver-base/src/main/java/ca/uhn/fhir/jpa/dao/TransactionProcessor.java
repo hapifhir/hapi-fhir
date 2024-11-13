@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -68,6 +70,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -84,6 +87,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]+[?][a-z0-9-]+=[^&,]+$");
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
+
+	// FIXME: remove
+	private static final boolean ourFixes = false;
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
@@ -150,7 +156,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		FlushModeType initialFlushMode = myEntityManager.getFlushMode();
 		try {
 			// FIXME: restore
-			myEntityManager.setFlushMode(FlushModeType.COMMIT);
+			if (ourFixes) {
+				myEntityManager.setFlushMode(FlushModeType.COMMIT);
+			}
 
 			ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
 			RequestPartitionId requestPartitionId =
@@ -208,7 +216,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			RequestPartitionId theRequestPartitionId,
 			Set<String> foundIds,
 			List<Long> idsToPreFetch) {
-		List<IIdType> idsToPreResolve = new ArrayList<>();
+
+		FhirTerser terser = myFhirContext.newTerser();
+
+		Map<IIdType, Boolean> idsToPreResolve = new HashMap<>(theEntries.size() * 3);
 		for (IBase nextEntry : theEntries) {
 			IBaseResource resource = theVersionAdapter.getResource(nextEntry);
 			if (resource != null) {
@@ -218,24 +229,39 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					if (countMatches(requestUrl, '/') == 1 && countMatches(requestUrl, '?') == 0) {
 						IIdType id = myFhirContext.getVersion().newIdType();
 						id.setValue(requestUrl);
-						idsToPreResolve.add(id);
+						IIdType unqualifiedVersionless = id.toUnqualifiedVersionless();
+						idsToPreResolve.put(unqualifiedVersionless, Boolean.TRUE);
+					}
+				}
+
+				if (ourFixes) {
+					if ("PUT".equals(verb) || "POST".equals(verb)) {
+						for (ResourceReferenceInfo referenceInfo : terser.getAllResourceReferences(resource)) {
+							IIdType reference = referenceInfo.getResourceReference().getReferenceElement();
+							if (reference != null && !reference.isLocal() && !reference.isUuid() && reference.hasResourceType() && reference.hasIdPart() && !reference.getValue().contains("?")) {
+								idsToPreResolve.put(reference.toUnqualifiedVersionless(), Boolean.FALSE);
+							}
+						}
 					}
 				}
 			}
 		}
-		List<JpaPid> outcome =
-			new ArrayList<>(myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, idsToPreResolve));
-		for (JpaPid next : outcome) {
-			foundIds.add(
-					next.getAssociatedResourceId().toUnqualifiedVersionless().getValue());
-			theTransactionDetails.addResolvedResourceId(next.getAssociatedResourceId(), next);
-			if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
+
+		Map<IIdType, IResourceLookup> outcomes = myIdHelperService.resolveResourceIdentities(theRequestPartitionId, idsToPreResolve.keySet(), true);
+		for (Map.Entry<IIdType, IResourceLookup> entry : outcomes.entrySet()) {
+			JpaPid next = (JpaPid) entry.getValue().getPersistentId();
+			IIdType unqualifiedVersionlessId = entry.getKey();
+			foundIds.add(unqualifiedVersionlessId.getValue());
+			theTransactionDetails.addResolvedResourceId(unqualifiedVersionlessId, next);
+			if (idsToPreResolve.get(unqualifiedVersionlessId) == Boolean.TRUE) {
+				if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
 					|| !next.getAssociatedResourceId().isIdPartValidLong()) {
-				idsToPreFetch.add(next.getId());
+					idsToPreFetch.add(next.getId());
+				}
 			}
 		}
-		for (IIdType next : idsToPreResolve) {
-			if (!foundIds.contains(next.toUnqualifiedVersionless().getValue())) {
+		for (IIdType next : idsToPreResolve.keySet()) {
+			if (!foundIds.contains(next.getValue())) {
 				theTransactionDetails.addResolvedResourceId(next.toUnqualifiedVersionless(), null);
 			}
 		}

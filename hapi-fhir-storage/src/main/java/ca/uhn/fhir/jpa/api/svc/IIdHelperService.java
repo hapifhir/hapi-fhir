@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -130,6 +131,21 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 			String theResourceId,
 			boolean theExcludeDeleted)
 			throws ResourceNotFoundException;
+
+	/**
+	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
+	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
+	 * Optionally filters out deleted resources.
+	 *
+	 * @throws ResourceNotFoundException If the ID can not be found
+	 */
+	@Nonnull
+	default Map<IIdType, IResourceLookup> resolveResourceIdentities(
+		@Nonnull RequestPartitionId theRequestPartitionId,
+		Collection<IIdType> theIds,
+		boolean theExcludeDeleted) {
+		throw new UnsupportedOperationException();
+	}
 
 	/**
 	 * Returns true if the given resource ID should be stored in a forced ID. Under default config
