@@ -33,12 +33,13 @@ public class FetchSuppressInterceptor {
 	IIdHelperService<JpaPid> myIdHelperService;
 	@Autowired
 	HapiTransactionService myHapiTransactionService;
+
 	/**
 	 * Temporarily holds the ids to resolve.
 	 * A bridge between STORAGE_TRANSACTION_PROCESSING which has access to RequestDetails,
 	 * and STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE which has access to TransactionDetails.
 	 * */
-	ThreadLocal<List<IIdType>> myIdThreadLocalIdTunnel = new ThreadLocal<>();
+	final ThreadLocal<List<IIdType>> myIdThreadLocalIdTunnel = new ThreadLocal<>();
 
 	/**
 	 * Extract the IIdType references from the bundle entries, and store in our thread-local.
@@ -76,5 +77,4 @@ public class FetchSuppressInterceptor {
 			});
 		}
 	}
-
 }
