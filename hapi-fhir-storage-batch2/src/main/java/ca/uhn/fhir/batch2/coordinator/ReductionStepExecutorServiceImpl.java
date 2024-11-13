@@ -103,7 +103,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 	@EventListener(ContextRefreshedEvent.class)
 	public void start() {
-/*		if (myHeartbeatTimer == null) {
+		/*		if (myHeartbeatTimer == null) {
 			myHeartbeatTimer = new Timer("batch2-reducer-heartbeat");
 			myHeartbeatTimer.schedule(
 					new HeartbeatTimerTask(), DateUtils.MILLIS_PER_MINUTE, DateUtils.MILLIS_PER_MINUTE);
