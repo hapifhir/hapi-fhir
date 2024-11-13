@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
@@ -12,8 +13,11 @@ import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
+import ch.qos.logback.classic.Level;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Meta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +25,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
@@ -47,7 +53,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 	TestR4Config.class,
 	TestHSearchAddInConfig.NoFT.class,
 	DaoTestDataBuilder.Config.class,
-	TestDaoSearch.Config.class
+	TestDaoSearch.Config.class,
+	FhirResourceDaoR4QuerySandbox.FetchLoader.class
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestExecutionListeners(listeners = {
@@ -56,6 +63,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 })
 public class FhirResourceDaoR4QuerySandbox extends BaseJpaTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4QuerySandbox.class);
+
+	@Configuration
+	static class FetchLoader {
+		@Bean
+		public FetchSuppressInterceptor fetchSuppressInterceptor() {
+			return new FetchSuppressInterceptor();
+		}
+	}
 
 	@Autowired
 	PlatformTransactionManager myTxManager;
@@ -66,6 +81,10 @@ public class FhirResourceDaoR4QuerySandbox extends BaseJpaTest {
 	DaoTestDataBuilder myDataBuilder;
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
+	@Autowired
+	private IFhirSystemDao<Bundle, Meta> mySystemDaoR4;
+	@Autowired
+	FetchSuppressInterceptor myFetchSuppressInterceptor;
 
 	@Override
 	protected PlatformTransactionManager getTxManager() {
@@ -80,6 +99,8 @@ public class FhirResourceDaoR4QuerySandbox extends BaseJpaTest {
 	List<String> myCapturedQueries = new ArrayList<>();
 	@BeforeEach
 	void registerLoggingInterceptor() {
+
+		registerInterceptor(myFetchSuppressInterceptor);
 		registerInterceptor(new Object(){
 			@Hook(Pointcut.JPA_PERFTRACE_RAW_SQL)
 			public void captureSql(RequestDetails theRequestDetails, SqlQueryList theQueries) {
@@ -128,6 +149,287 @@ public class FhirResourceDaoR4QuerySandbox extends BaseJpaTest {
 
 		myTestDaoSearch.assertSearchFindsOnly("search by server assigned id", "Patient?name=smith&_pid=" + id, id);
 	}
+
+	@Test
+	void insertSlow_EOBBundle() {
+	    // given
+		Bundle linkTargetBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, """
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient1",
+        "name": [
+          {
+            "use": "official",
+            "family": "Doe",
+            "given": [
+              "John"
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient/patient1"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient2",
+        "name": [
+          {
+            "use": "official",
+            "family": "Smith",
+            "given": [
+              "Jane"
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient/patient2"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient3",
+        "name": [
+          {
+            "use": "official",
+            "family": "Brown",
+            "given": [
+              "Alex"
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient/patient3"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Organization",
+        "id": "provider1",
+        "name": "Provider One"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/provider1"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Organization",
+        "id": "provider2",
+        "name": "Provider Two"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/provider2"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Organization",
+        "id": "provider3",
+        "name": "Provider Three"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/provider3"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "coverage1",
+        "beneficiary": {
+          "reference": "Patient/patient1"
+        },
+        "payor": [
+          {
+            "reference": "Organization/provider1"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Coverage/coverage1"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "coverage2",
+        "beneficiary": {
+          "reference": "Patient/patient2"
+        },
+        "payor": [
+          {
+            "reference": "Organization/provider2"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Coverage/coverage2"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "coverage3",
+        "beneficiary": {
+          "reference": "Patient/patient3"
+        },
+        "payor": [
+          {
+            "reference": "Organization/provider3"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Coverage/coverage3"
+      }
+    }
+  ]
+}
+""");
+
+		Bundle eobBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, """
+			{
+			  "resourceType": "Bundle",
+			  "type": "transaction",
+			  "entry": [
+			    {
+			      "resource": {
+			        "resourceType": "ExplanationOfBenefit",
+			        "id": "eob1",
+			        "status": "active",
+			        "type": {
+			          "coding": [
+			            {
+			              "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+			              "code": "professional",
+			              "display": "Professional"
+			            }
+			          ]
+			        },
+			        "patient": {
+			          "reference": "Patient/patient1"
+			        },
+			        "provider": {
+			          "reference": "Organization/provider1"
+			        },
+			        "insurance": [
+			          {
+			            "coverage": {
+			              "reference": "Coverage/coverage1"
+			            }
+			          }
+			        ]
+			      },
+			      "request": {
+			        "method": "POST",
+			        "url": "ExplanationOfBenefit"
+			      }
+			    },
+			    {
+			      "resource": {
+			        "resourceType": "ExplanationOfBenefit",
+			        "id": "eob2",
+			        "status": "active",
+			        "type": {
+			          "coding": [
+			            {
+			              "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+			              "code": "institutional",
+			              "display": "Institutional"
+			            }
+			          ]
+			        },
+			        "patient": {
+			          "reference": "Patient/patient2"
+			        },
+			        "provider": {
+			          "reference": "Organization/provider2"
+			        },
+			        "insurance": [
+			          {
+			            "coverage": {
+			              "reference": "Coverage/coverage2"
+			            }
+			          }
+			        ]
+			      },
+			      "request": {
+			        "method": "POST",
+			        "url": "ExplanationOfBenefit"
+			      }
+			    },
+			    {
+			      "resource": {
+			        "resourceType": "ExplanationOfBenefit",
+			        "id": "eob3",
+			        "status": "active",
+			        "type": {
+			          "coding": [
+			            {
+			              "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+			              "code": "oral",
+			              "display": "Oral"
+			            }
+			          ]
+			        },
+			        "patient": {
+			          "reference": "Patient/patient3"
+			        },
+			        "provider": {
+			          "reference": "Organization/provider3"
+			        },
+			        "insurance": [
+			          {
+			            "coverage": {
+			              "reference": "Coverage/coverage3"
+			            }
+			          }
+			        ]
+			      },
+			      "request": {
+			        "method": "POST",
+			        "url": "ExplanationOfBenefit"
+			      }
+			    }
+			  ]
+			}
+			""");
+		myCaptureQueriesListener.clear();
+		ourLog.info("-------- target bundle ----------");
+		ch.qos.logback.classic.Logger hibernateLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.hibernate.SQL");
+		hibernateLogger.setLevel(Level.DEBUG);
+		
+		mySystemDaoR4.transaction(mySrd, linkTargetBundle);
+		//myCaptureQueriesListener.logAllQueries();
+		myCaptureQueriesListener.clear();
+
+	    // when
+		ourLog.info("-------- eob bundle ----------");
+		var result = mySystemDaoR4.transaction(mySrd, eobBundle);
+
+	    // then
+//		myCaptureQueriesListener.logAllQueries();
+	}
+
 
 	@Test
 	void testSortByPid() {
