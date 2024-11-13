@@ -140,8 +140,6 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 		assertThat(ids).asList().containsExactlyInAnyOrder(myGoldenResourcePatientAId.getValue(), myGoldenResourcePatientBId.getValue());
 	}
 
-	// FIXME: add test that puts a reference to an MDM'ed resource in a contained resource
-
 	/**
 	 * If we search for all patients and _revinclude things that point to them,
 	 * only the golden resource ones should be returned
