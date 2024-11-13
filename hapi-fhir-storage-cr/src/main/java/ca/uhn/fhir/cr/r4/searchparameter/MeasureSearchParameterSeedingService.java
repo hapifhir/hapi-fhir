@@ -29,7 +29,6 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 
-// LUKETODO:  should we simply just NOT load this from unit tests at all?
 // LUKETODO:  find a better package for this
 // LUKETODO:  javadoc
 // LUKETODO:  unit test
@@ -43,21 +42,20 @@ public class MeasureSearchParameterSeedingService {
 		myDaoRegistry = theDaoRegistry;
 		mySearchParamRegistry = theSearchParamRegistry;
 
-		// LUKETODO:  decided whether or not to do this since we get this error:
+		// LUKETODO:  this happens if we inject this into unit tests
 		/*
 			Caused by: java.lang.IllegalArgumentException: HAPI-2063: Unknown job definition ID: REINDEX
 		at ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl.lambda$startInstance$1(JobCoordinatorImpl.java:141)
 		at java.base/java.util.Optional.orElseThrow(Optional.java:403)
 		at ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl.startInstance(JobCoordinatorImpl.java:140)
 			 */
-		//		create();
+		create();
 	}
 
 	// LUKETODO:  figure out how to get THIS @PostConstruct to get called AFTER the one for Batch2JobRegisterer
-	@PostConstruct
-	public void start() {
-		create();
-	}
+//	@PostConstruct
+//	public void start() {
+//	}
 
 	public void create() {
 		final IFhirResourceDao<SearchParameter> searchParameterDao =
