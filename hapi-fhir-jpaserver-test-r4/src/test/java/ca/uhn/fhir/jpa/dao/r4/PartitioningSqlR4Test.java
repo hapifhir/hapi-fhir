@@ -1380,7 +1380,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			ourLog.info("Search SQL:\n{}", searchSql);
 
 			// Only the read columns should be used, no criteria use partition
-			assertThat(searchSql).as(searchSql).contains("PARTITION_ID IN ('1')");
+			assertThat(searchSql).as(searchSql).contains("PARTITION_ID='1'");
 			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID,")).as(searchSql).isEqualTo(1);
 			assertThat(StringUtils.countMatches(searchSql, "PARTITION_DATE")).as(searchSql).isEqualTo(1);
 		}
@@ -1436,7 +1436,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			ourLog.info("Search SQL:\n{}", searchSql);
 			assertThat(searchSql).as(searchSql).contains("FROM HFJ_RESOURCE RT1_0 WHERE");
 			assertThat(searchSql).as(searchSql).contains("PARTITION_ID='1'");
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(3);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(2);
 		}
 
 		// Read in null Partition

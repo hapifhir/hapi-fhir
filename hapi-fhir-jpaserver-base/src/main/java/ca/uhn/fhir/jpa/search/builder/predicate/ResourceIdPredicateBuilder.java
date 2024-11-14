@@ -85,13 +85,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					}
 					haveValue = true;
 					try {
-						/*
-						 * N.B. We don't exclude deleted records here because that allows cached records
-						 * to be returned. We don't want to return deleted records as a part of search
-						 * results obviously, but this isn't a risk here because we add a check for
-						 * deleted status to the outer SQL query.
-						 */
-						boolean excludeDeleted = false;
+						boolean excludeDeleted = true;
 						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
 								theRequestPartitionId, theResourceName, valueAsId.getIdPart(), excludeDeleted);
 						orPids.add(pid);
