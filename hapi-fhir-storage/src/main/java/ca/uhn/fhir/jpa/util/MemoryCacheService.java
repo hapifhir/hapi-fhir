@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
@@ -28,12 +30,14 @@ import ca.uhn.fhir.sl.cache.CacheFactory;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -205,10 +209,10 @@ public class MemoryCacheService {
 		 */
 		RESOURCE_LOOKUP_BY_PID(TypedResourcePid.class),
 		/**
-		 * Key type: {@literal String} containing "resourceType/id"
+		 * Key type: {@link ForcedIdCacheKey}
 		 * Value type: {@literal JpaResourceLookup}
 		 */
-		RESOURCE_LOOKUP_BY_FORCED_ID(String.class),
+		RESOURCE_LOOKUP_BY_FORCED_ID(ForcedIdCacheKey.class),
 		FORCED_ID_TO_PID(String.class),
 		FHIRPATH_EXPRESSION(String.class),
 		/**
@@ -331,6 +335,43 @@ public class MemoryCacheService {
 		@Override
 		public int hashCode() {
 			return myHashCode;
+		}
+	}
+
+	public static class ForcedIdCacheKey {
+
+		private final String myResourceType;
+		private final String myResourceId;
+		private final RequestPartitionId myRequestPartitionId;
+		private final int myHashCode;
+
+		public ForcedIdCacheKey(String theResourceType, String theResourceId, RequestPartitionId theRequestPartitionId) {
+			myResourceType = theResourceType;
+			myResourceId = theResourceId;
+			myRequestPartitionId = theRequestPartitionId;
+			myHashCode = Objects.hash(myResourceType, myResourceId, myRequestPartitionId);
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO){ return true;}
+			if (!(theO instanceof ForcedIdCacheKey)){ return false;}
+			ForcedIdCacheKey that = (ForcedIdCacheKey) theO;
+			return Objects.equals(myResourceType, that.myResourceType) && Objects.equals(myResourceId, that.myResourceId) && Objects.equals(myRequestPartitionId, that.myRequestPartitionId);
+		}
+
+		@Override
+		public int hashCode() {
+			return myHashCode;
+		}
+
+		/**
+		 * Creates and returns a new unqualified versionless IIdType instance
+		 */
+		public IIdType toIdType(FhirContext theFhirCtx) {
+			IIdType retVal = theFhirCtx.getVersion().newIdType();
+			retVal.setValue(myResourceType + "/" + myResourceId);
+			return retVal;
 		}
 	}
 }

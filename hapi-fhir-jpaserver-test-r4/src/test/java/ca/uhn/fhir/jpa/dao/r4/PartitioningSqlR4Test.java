@@ -1431,18 +1431,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			IIdType gotId1 = searchOutcome.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
 
-			// First SQL resolves the forced ID
+			// Performs the search
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false).toUpperCase();
 			ourLog.info("Search SQL:\n{}", searchSql);
-			assertThat(searchSql).as(searchSql).contains("PARTITION_ID IN ('1')");
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID,")).as(searchSql).isEqualTo(1);
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_DATE")).as(searchSql).isEqualTo(1);
-
-			// Second SQL performs the search
-
-			searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false).toUpperCase();
-			ourLog.info("Search SQL:\n{}", searchSql);
-			assertThat(searchSql).as(searchSql).contains("PARTITION_ID = '1'");
+			assertThat(searchSql).as(searchSql).contains("FROM HFJ_RESOURCE RT1_0 WHERE");
+			assertThat(searchSql).as(searchSql).contains("PARTITION_ID='1'");
 			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(3);
 		}
 

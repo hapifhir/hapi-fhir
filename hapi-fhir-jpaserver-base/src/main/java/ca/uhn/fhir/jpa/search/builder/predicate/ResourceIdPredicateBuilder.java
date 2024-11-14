@@ -85,7 +85,13 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					}
 					haveValue = true;
 					try {
-						boolean excludeDeleted = true;
+						/*
+						 * N.B. We don't exclude deleted records here because that allows cached records
+						 * to be returned. We don't want to return deleted records as a part of search
+						 * results obviously, but this isn't a risk here because we add a check for
+						 * deleted status to the outer SQL query.
+						 */
+						boolean excludeDeleted = false;
 						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
 								theRequestPartitionId, theResourceName, valueAsId.getIdPart(), excludeDeleted);
 						orPids.add(pid);
@@ -128,11 +134,13 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					default:
 					case eq:
 						predicate = queryRootTable.createPredicateResourceIds(false, resourceIds);
-						return queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
+						break;
 					case ne:
 						predicate = queryRootTable.createPredicateResourceIds(true, resourceIds);
-						return queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
+						break;
 				}
+				predicate = queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
+				return predicate;
 			} else {
 				DbColumn resIdColumn = getResourceIdColumn(theSourceJoinColumn);
 				return QueryParameterUtils.toEqualToOrInPredicate(

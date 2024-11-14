@@ -215,7 +215,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if ((!myStorageSettings.isDeleteEnabled() || !theExcludeDeleted) && !ids.isEmpty()) {
 			for (Iterator<IIdType> idIterator = ids.iterator(); idIterator.hasNext(); ) {
 				IIdType nextForcedId = idIterator.next();
-				String nextKey = nextForcedId.getResourceType() + "/" + nextForcedId.getIdPart();
+				MemoryCacheService.ForcedIdCacheKey nextKey = new MemoryCacheService.ForcedIdCacheKey(nextForcedId.getResourceType(), nextForcedId.getIdPart(), theRequestPartitionId);
 				if (!myStorageSettings.isDeleteEnabled() || !theExcludeDeleted) {
 					List<IResourceLookup<JpaPid>> cachedLookups = myMemoryCacheService.getIfPresent(
 						MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID, nextKey);
@@ -223,7 +223,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 						idIterator.remove();
 						for (IResourceLookup<JpaPid> cachedLookup : cachedLookups) {
 							if (!theExcludeDeleted || cachedLookup.getDeleted() == null) {
-								idToLookup.put(newIdType(nextKey), cachedLookup);
+								idToLookup.put(nextKey.toIdType(myFhirCtx), cachedLookup);
 							}
 						}
 					}
@@ -273,8 +273,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				if (resourcePid != null) {
 					JpaResourceLookup lookup = new JpaResourceLookup(resourceType, resourcePid, deletedAd, PartitionablePartitionId.with(partitionId, null));
 
-					String nextKey = resourceType + "/" + fhirId;
-					IIdType id = newIdType(nextKey);
+					MemoryCacheService.ForcedIdCacheKey nextKey = new MemoryCacheService.ForcedIdCacheKey(resourceType, fhirId, theRequestPartitionId);
+					IIdType id = nextKey.toIdType(myFhirCtx);
 					idToLookup.put(id, lookup);
 
 					List<IResourceLookup> valueToCache = idToLookup.get(id);
@@ -739,7 +739,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		TypedResourcePid pidKey = new TypedResourcePid(theResourceType, theJpaPid);
 		myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, pidKey, List.of(lookup));
 
-		String fhirIdKey = theResourceType + "/" + theForcedId;
+		MemoryCacheService.ForcedIdCacheKey fhirIdKey = new MemoryCacheService.ForcedIdCacheKey(theResourceType, theForcedId, theRequestPartitionId);
 		myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID, fhirIdKey, List.of(lookup));
 	}
 
