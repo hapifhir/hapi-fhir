@@ -219,8 +219,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		FhirTerser terser = myFhirContext.newTerser();
 
 		// Key: The ID of the resource
-		// Value: True if we should fetch the existing resource details and indexes,
-		//        False if we should only fetch the identity (resource ID and deleted status)
+		// Value: TRUE if we should prefetch the existing resource details and all stored indexes,
+		//        FALSE if we should prefetch only the identity (resource ID and deleted status)
 		Map<IIdType, Boolean> idsToPreResolve = new HashMap<>(theEntries.size() * 3);
 
 		for (IBase nextEntry : theEntries) {
@@ -263,10 +263,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					}
 				}
 			}
-		}
-
-		if (idsToPreResolve.isEmpty()) {
-			return;
 		}
 
 		boolean excludeDeleted = idsToPreResolve.values().stream().anyMatch(t -> !t);
