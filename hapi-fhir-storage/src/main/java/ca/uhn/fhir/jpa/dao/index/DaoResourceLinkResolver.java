@@ -125,7 +125,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		try {
 			if (persistentId == null) {
 				resolvedResource =
-						myIdHelperService.resolveResourceIdentity(theRequestPartitionId, resourceType, idPart);
+						myIdHelperService.resolveResourceIdentity(theRequestPartitionId, resourceType, idPart, true);
 				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
 				resolvedResource = new ResourceLookupPersistentIdWrapper(persistentId);

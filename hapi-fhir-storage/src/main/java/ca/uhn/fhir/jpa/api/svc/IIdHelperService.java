@@ -122,6 +122,12 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
 	 * Optionally filters out deleted resources.
 	 *
+	 * @param theExcludeDeleted If set to {@literal true}, deleted resources will not be returned by this method. Setting
+	 *                          this to {@literal false} means that even deleted resources will be returned, and means that
+	 *                          caching can be used more aggressively since potentially deleted results can be returned.
+	 *                          Note that when set to {@literal false}, lookups may be returned for results that have
+	 *                          been recently deleted but indicating that the resource is not deleted. This is due to
+	 *                          caching that can occur inside the service.
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
@@ -137,7 +143,13 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
 	 * Optionally filters out deleted resources.
 	 *
-	 * @throws ResourceNotFoundException If the ID can not be found
+	 * @param theExcludeDeleted If set to {@literal true}, deleted resources will not be returned by this method. Setting
+	 *                          this to {@literal false} means that even deleted resources will be returned, and means that
+	 *                          caching can be used more aggressively since potentially deleted results can be returned.
+	 *                          Note that when set to {@literal false}, lookups may be returned for results that have
+	 *                          been recently deleted but indicating that the resource is not deleted. This is due to
+	 *                          caching that can occur inside the service.
+	 * @since 8.0.0
 	 */
 	@Nonnull
 	default Map<IIdType, IResourceLookup> resolveResourceIdentities(

@@ -260,7 +260,31 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 		}
 
-		Map<IIdType, IResourceLookup> outcomes = myIdHelperService.resolveResourceIdentities(theRequestPartitionId, idsToPreResolve.keySet(), true);
+		if (idsToPreResolve.isEmpty()) {
+			return;
+		}
+
+		boolean excludeDeleted = idsToPreResolve.values().stream().anyMatch(t -> !t);
+
+		// FIXME: remove
+//		List<JpaPid> outcome =
+//			myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, new ArrayList<>(idsToPreResolve.keySet()));
+//		for (JpaPid next : outcome) {
+//			foundIds.add(
+//				next.getAssociatedResourceId().toUnqualifiedVersionless().getValue());
+//			theTransactionDetails.addResolvedResourceId(next.getAssociatedResourceId(), next);
+//			if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
+//				|| !next.getAssociatedResourceId().isIdPartValidLong()) {
+//				idsToPreFetch.add(next.getId());
+//			}
+//		}
+//		for (IIdType next : idsToPreResolve.keySet()) {
+//			if (!foundIds.contains(next.toUnqualifiedVersionless().getValue())) {
+//				theTransactionDetails.addResolvedResourceId(next.toUnqualifiedVersionless(), null);
+//			}
+//		}
+
+		Map<IIdType, IResourceLookup> outcomes = myIdHelperService.resolveResourceIdentities(theRequestPartitionId, idsToPreResolve.keySet(), excludeDeleted);
 		for (Map.Entry<IIdType, IResourceLookup> entry : outcomes.entrySet()) {
 			JpaPid next = (JpaPid) entry.getValue().getPersistentId();
 			IIdType unqualifiedVersionlessId = entry.getKey();
