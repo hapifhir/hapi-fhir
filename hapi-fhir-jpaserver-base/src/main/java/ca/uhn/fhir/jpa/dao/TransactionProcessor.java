@@ -155,7 +155,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		FlushModeType initialFlushMode = myEntityManager.getFlushMode();
 		try {
-			// FIXME: restore
 			if (ourFixes) {
 				myEntityManager.setFlushMode(FlushModeType.COMMIT);
 			}
@@ -250,8 +249,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					 */
 					if ("PUT".equals(verb) || "POST".equals(verb)) {
 						for (ResourceReferenceInfo referenceInfo : terser.getAllResourceReferences(resource)) {
-							IIdType reference = referenceInfo.getResourceReference().getReferenceElement();
-							if (reference != null && !reference.isLocal() && !reference.isUuid() && reference.hasResourceType() && reference.hasIdPart() && !reference.getValue().contains("?")) {
+							IIdType reference =
+									referenceInfo.getResourceReference().getReferenceElement();
+							if (reference != null
+									&& !reference.isLocal()
+									&& !reference.isUuid()
+									&& reference.hasResourceType()
+									&& reference.hasIdPart()
+									&& !reference.getValue().contains("?")) {
 								idsToPreResolve.putIfAbsent(reference.toUnqualifiedVersionless(), Boolean.FALSE);
 							}
 						}
@@ -266,7 +271,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		boolean excludeDeleted = idsToPreResolve.values().stream().anyMatch(t -> !t);
 
-		Map<IIdType, IResourceLookup> outcomes = myIdHelperService.resolveResourceIdentities(theRequestPartitionId, idsToPreResolve.keySet(), excludeDeleted);
+		Map<IIdType, IResourceLookup> outcomes = myIdHelperService.resolveResourceIdentities(
+				theRequestPartitionId, idsToPreResolve.keySet(), excludeDeleted);
 		for (Map.Entry<IIdType, IResourceLookup> entry : outcomes.entrySet()) {
 			JpaPid next = (JpaPid) entry.getValue().getPersistentId();
 			IIdType unqualifiedVersionlessId = entry.getKey();
@@ -274,7 +280,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			theTransactionDetails.addResolvedResourceId(unqualifiedVersionlessId, next);
 			if (idsToPreResolve.get(unqualifiedVersionlessId) == Boolean.TRUE) {
 				if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
-					|| !next.getAssociatedResourceId().isIdPartValidLong()) {
+						|| !next.getAssociatedResourceId().isIdPartValidLong()) {
 					idsToPreFetch.add(next.getId());
 				}
 			}

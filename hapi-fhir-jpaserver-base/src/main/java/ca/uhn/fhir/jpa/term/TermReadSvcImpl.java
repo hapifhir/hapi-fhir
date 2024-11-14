@@ -2572,7 +2572,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		String version = termValueSet.getVersion();
 		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
 
-		if (deletedTrmValueSet.isPresent() && Objects.equals(deletedTrmValueSet.get().getUrl(), url) && Objects.equals(deletedTrmValueSet.get().getVersion(), version)) {
+		if (deletedTrmValueSet.isPresent()
+				&& Objects.equals(deletedTrmValueSet.get().getUrl(), url)
+				&& Objects.equals(deletedTrmValueSet.get().getVersion(), version)) {
 			// If we just deleted the valueset marker, we don't need to check if it exists
 			// in the database
 			optionalExistingTermValueSetByUrl = Optional.empty();

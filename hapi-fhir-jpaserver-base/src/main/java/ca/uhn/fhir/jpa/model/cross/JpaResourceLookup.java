@@ -65,11 +65,10 @@ public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("resType", myResourceType)
-			.append("resPid", myResourcePid)
-			.append("deletedAt", myDeletedAt)
-			.append("partId", myPartitionablePartitionId)
-			.toString();
+				.append("resType", myResourceType)
+				.append("resPid", myResourcePid)
+				.append("deletedAt", myDeletedAt)
+				.append("partId", myPartitionablePartitionId)
+				.toString();
 	}
-
 }

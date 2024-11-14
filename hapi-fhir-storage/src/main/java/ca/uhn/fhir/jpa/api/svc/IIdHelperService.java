@@ -153,9 +153,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 */
 	@Nonnull
 	default Map<IIdType, IResourceLookup> resolveResourceIdentities(
-		@Nonnull RequestPartitionId theRequestPartitionId,
-		Collection<IIdType> theIds,
-		boolean theExcludeDeleted) {
+			@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds, boolean theExcludeDeleted) {
 		throw new UnsupportedOperationException();
 	}
 
