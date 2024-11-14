@@ -55,8 +55,6 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 	private ScrollableResultsIterator<Object> myResultSet;
 	private Long myNext;
 
-	private Integer myMaxResultsToFetch;
-
 	/**
 	 * Constructor
 	 */
@@ -64,7 +62,6 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		Validate.notNull(theGeneratedSql, "theGeneratedSql must not be null");
 		myGeneratedSql = theGeneratedSql;
 		myQueryInitialized = false;
-		myMaxResultsToFetch = theMaxResultsToFetch;
 	}
 
 	/**

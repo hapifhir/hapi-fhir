@@ -724,7 +724,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * if the MaxResultsToFetch is null, we are requesting "everything",
 		 * so we'll let the db do the deduplication (instead of in-memory)
 		 */
-		// todo - if the limit is not present, we should group
 		if (theOffset != null || myMaxResultsToFetch == null) {
 			queryStack3.addGrouping();
 			queryStack3.setUseAggregate(true);
@@ -2407,12 +2406,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						if (nextLong != null) {
 							JpaPid next = JpaPid.fromId(nextLong);
-							// TODO - check if it's the unlimited case
 							if (doNotSkipNextPidForEverything() && !myPidSet.contains(next)) {
 								if (myMaxResultsToFetch != null) {
 									// we only add to the map if we aren't fetching "everything";
 									// otherwise, we let the de-duplication happen in the database
-									// (see createChunkedQueryNormalSearch above)
+									// (see createChunkedQueryNormalSearch above), becuase it saves
+									// memory that way
 									myPidSet.add(next);
 								}
 								myNext = next;
@@ -2487,24 +2486,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				CompositeInterceptorBroadcaster.doCallHooks(
 						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
 			}
-		}
-
-		/**
-		 * Determine if the next value should be skipped or not.
-		 *
-		 * We skip if:
-		 * * we are in everything mode
-		 * AND
-		 * * we've already seen next (and we add it to our list of seen ids)
-		 * OR
-		 * * we've already seen the result and we're fetching everything; we
-		 * don't add it to the map in this case because we might be seeing
-		 * millions of records and don't want to actually fill up our map;
-		 * the database will do the deduplication for us.
-		 */
-		private boolean shouldSkip(JpaPid next) {
-			return !doNotSkipNextPidForEverything()
-					&& ((myMaxResultsToFetch == null && myPidSet.contains(next)) || (!myPidSet.add(next)));
 		}
 
 		private Integer calculateMaxResultsToFetch() {
