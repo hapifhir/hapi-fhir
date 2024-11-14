@@ -117,6 +117,7 @@ public class HapiFhirRepository implements Repository {
 		SearchConverter converter = new SearchConverter();
 		converter.convertParameters(theSearchParameters, fhirContext());
 		details.setParameters(converter.resultParameters);
+		details.setResourceName(myRestfulServer.getFhirContext().getResourceType(theResourceType));
 		var bundleProvider =
 				myDaoRegistry.getResourceDao(theResourceType).search(converter.searchParameterMap, details);
 
