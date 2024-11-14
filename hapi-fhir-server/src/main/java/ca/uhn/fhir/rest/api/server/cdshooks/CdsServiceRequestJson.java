@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.rest.api.server.cdshooks;
 
-import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
