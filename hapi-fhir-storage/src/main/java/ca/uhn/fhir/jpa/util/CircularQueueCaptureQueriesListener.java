@@ -361,11 +361,8 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		List<SqlQuery> insertQueries = getInsertQueries().stream()
 				.filter(t -> theInclusionPredicate == null || theInclusionPredicate.test(t))
 				.collect(Collectors.toList());
-		boolean inlineParams = true;
-		List<String> queries = insertQueries.stream()
-				.map(t -> CircularQueueCaptureQueriesListener.formatQueryAsSql(t, inlineParams, inlineParams))
-				.collect(Collectors.toList());
-		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
+		List<String> queriesStrings = renderQueriesForLogging(true, true, insertQueries);
+		ourLog.info("Insert Queries:\n{}", String.join("\n", queriesStrings));
 
 		return countQueries(insertQueries);
 	}

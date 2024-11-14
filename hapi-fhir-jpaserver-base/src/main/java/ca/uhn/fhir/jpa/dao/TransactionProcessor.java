@@ -88,7 +88,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]+[?][a-z0-9-]+=[^&,]+$");
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
 
-	// FIXME: remove
+	// TODO: REMOVE THIS BEFORE MERGING
 	private static final boolean ourFixes = true;
 
 	@Autowired
@@ -265,24 +265,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 
 		boolean excludeDeleted = idsToPreResolve.values().stream().anyMatch(t -> !t);
-
-		// FIXME: remove
-//		List<JpaPid> outcome =
-//			myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, new ArrayList<>(idsToPreResolve.keySet()));
-//		for (JpaPid next : outcome) {
-//			foundIds.add(
-//				next.getAssociatedResourceId().toUnqualifiedVersionless().getValue());
-//			theTransactionDetails.addResolvedResourceId(next.getAssociatedResourceId(), next);
-//			if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
-//				|| !next.getAssociatedResourceId().isIdPartValidLong()) {
-//				idsToPreFetch.add(next.getId());
-//			}
-//		}
-//		for (IIdType next : idsToPreResolve.keySet()) {
-//			if (!foundIds.contains(next.toUnqualifiedVersionless().getValue())) {
-//				theTransactionDetails.addResolvedResourceId(next.toUnqualifiedVersionless(), null);
-//			}
-//		}
 
 		Map<IIdType, IResourceLookup> outcomes = myIdHelperService.resolveResourceIdentities(theRequestPartitionId, idsToPreResolve.keySet(), excludeDeleted);
 		for (Map.Entry<IIdType, IResourceLookup> entry : outcomes.entrySet()) {
