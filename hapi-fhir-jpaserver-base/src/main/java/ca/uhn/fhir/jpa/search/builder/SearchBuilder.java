@@ -638,8 +638,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			boolean theCountOnlyFlag,
 			RequestDetails theRequest,
 			List<Long> thePidList,
-			List<ISearchQueryExecutor> theSearchQueryExecutors
-	) {
+			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
 				myContext,
 				myStorageSettings,
@@ -2504,9 +2503,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * the database will do the deduplication for us.
 		 */
 		private boolean shouldSkip(JpaPid next) {
-			return !doNotSkipNextPidForEverything() && (
-				(myMaxResultsToFetch == null && myPidSet.contains(next))
-				|| (!myPidSet.add(next)));
+			return !doNotSkipNextPidForEverything()
+					&& ((myMaxResultsToFetch == null && myPidSet.contains(next)) || (!myPidSet.add(next)));
 		}
 
 		private Integer calculateMaxResultsToFetch() {
