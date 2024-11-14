@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 

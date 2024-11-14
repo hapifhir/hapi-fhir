@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsService;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServiceFeedback;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServicePrefetch;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsHooksExtension;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.hapi.fhir.cdshooks.api.json;
+package ca.uhn.fhir.rest.api.server.cdshooks;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,7 +35,7 @@ import java.util.Set;
  *
  * @see <a href="https://cds-hooks.hl7.org/ballots/2020Sep/">Version 1.1 of the CDS Hooks Specification</a>
  */
-public class CdsServiceRequestJson extends BaseCdsServiceJson implements IModelJson {
+public class CdsServiceRequestJson extends BaseCdsServiceJson {
 	@JsonProperty(value = "hook", required = true)
 	String myHook;
 

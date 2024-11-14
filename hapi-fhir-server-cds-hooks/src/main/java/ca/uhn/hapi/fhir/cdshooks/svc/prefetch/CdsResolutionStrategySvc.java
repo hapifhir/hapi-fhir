@@ -22,7 +22,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 
 import java.util.HashSet;
 import java.util.Set;
