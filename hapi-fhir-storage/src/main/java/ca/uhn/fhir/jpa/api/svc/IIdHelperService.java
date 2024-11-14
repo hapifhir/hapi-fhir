@@ -150,7 +150,8 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	List<T> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds);
 
 	/**
-	 * Values in the returned map are typed resource IDs (Patient/ABC)
+	 * Value will be an empty Optional if the PID doesn't exist, or
+	 * a typed resource ID if so (Patient/ABC).
 	 */
 	Optional<String> translatePidIdToForcedIdWithCache(T theResourcePersistentId);
 

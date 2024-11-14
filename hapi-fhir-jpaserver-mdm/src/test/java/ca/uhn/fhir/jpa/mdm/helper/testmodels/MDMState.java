@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.helper.testmodels;
 
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.testcontainers.shaded.com.google.common.collect.HashMultimap;
 import org.testcontainers.shaded.com.google.common.collect.Multimap;
@@ -30,6 +31,7 @@ public class MDMState<T, P extends IResourcePersistentId> {
 	 * Eg:
 	 * PG1, MANUAL, MATCH, P1
 	 * PG1, AUTO, POSSIBLE_MATCH, P2
+	 * SERVER_ASSIGNED_GP, AUTO, POSSIBLE_MATCH, SERVER_ASSIGNED_P2
 	 */
 	private String myInputState;
 
@@ -59,14 +61,35 @@ public class MDMState<T, P extends IResourcePersistentId> {
 	 * Map of forcedId -> resource persistent id for each resource created
 	 */
 	private final Map<String, P> myForcedIdToPID = new HashMap<>();
+	private final Map<P, String> myPIDToForcedId = new HashMap<>();
+
+	private final Map<String, String> myConditionalIdPlaceholderToForcedId = new HashMap<>();
 
 	public void addPID(String theForcedId, P thePid) {
 		assert !myForcedIdToPID.containsKey(theForcedId);
 		myForcedIdToPID.put(theForcedId, thePid);
+		myPIDToForcedId.put(thePid, theForcedId);
 	}
 
 	public P getPID(String theForcedId) {
 		return myForcedIdToPID.get(theForcedId);
+	}
+
+	public String getForcedId(JpaPid thePID) {
+		String retVal = myPIDToForcedId.get(thePID);
+		if (myConditionalIdPlaceholderToForcedId.containsKey(retVal)) {
+			retVal = myConditionalIdPlaceholderToForcedId.get(retVal);
+		}
+		return retVal;
+	}
+
+	public void addConditionalIdPlaceholderToForcedId(String theConditionalIdPlaceholder, String theForcedId) {
+		assert !myConditionalIdPlaceholderToForcedId.containsKey(theConditionalIdPlaceholder);
+		myConditionalIdPlaceholderToForcedId.put(theConditionalIdPlaceholder, theForcedId);
+	}
+
+	public String getForcedIdForConditionalIdPlaceholder(String theConditionalIdPlaceholder) {
+		return myConditionalIdPlaceholderToForcedId.get(theConditionalIdPlaceholder);
 	}
 
 	public Multimap<T, MdmLink> getActualOutcomeLinks() {
@@ -111,6 +134,18 @@ public class MDMState<T, P extends IResourcePersistentId> {
 		return myInputState;
 	}
 
+	/**
+	 * Initial state for test.
+	 * Comma separated lines with:
+	 * Left param value, MdmLinkSourceEnum value, MdmMatchResultEnum value, Right param value
+	 *
+	 * Each input line represents a link state
+	 *
+	 * Eg:
+	 * PG1, MANUAL, MATCH, P1
+	 * PG1, AUTO, POSSIBLE_MATCH, P2
+	 * SERVER_ASSIGNED_GP, AUTO, POSSIBLE_MATCH, SERVER_ASSIGNED_P2
+	 */
 	public MDMState<T, P> setInputState(String theInputState) {
 		myInputState = theInputState;
 		return this;
