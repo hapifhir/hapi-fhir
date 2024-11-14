@@ -1,0 +1,8 @@
+---
+- item:
+      type: "add"
+      title: "The version of a few dependencies have been bumped to more recent versions
+      (dependent HAPI modules listed in brackets):
+      <ul>
+      <li>org.hl7.fhir.core (Base): 6.3.25 -&gt; 6.4.0</li>
+      </ul>"

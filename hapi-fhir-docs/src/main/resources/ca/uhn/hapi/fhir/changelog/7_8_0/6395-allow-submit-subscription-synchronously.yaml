@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 6395
+title: "A new configuration option has been added to `SubsciptionSubmitterConfig` which
+  causes Subscription resources to be submitted to the processing queue synchronously
+  instead of asynchronously as all other resources are. This is useful for cases where
+  subscriptions need to be activated quickly. Thanks to Michal Sevcik for the contribution!"
