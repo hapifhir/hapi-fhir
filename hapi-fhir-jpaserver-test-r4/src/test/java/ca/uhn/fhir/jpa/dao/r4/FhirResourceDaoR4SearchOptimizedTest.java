@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -33,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.BodyStructure;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -65,14 +67,18 @@ import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -554,6 +560,67 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(191, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 
+	}
+
+	/**
+	 * We want to use the db to deduplicate in the "fetch everything"
+	 * case because it's more memory efficient.
+	 */
+	@Test
+	public void search_whenPastPreFetchLimit_usesDBToDeduplicate() {
+		// setup
+		IBundleProvider results;
+		List<SqlQuery> queries;
+		List<String> ids;
+
+		create200Patients();
+
+		myCaptureQueriesListener.clear();
+		// set the prefetch thresholds low so we don't need to
+		// search for tons of resources
+		myStorageSettings.setSearchPreFetchThresholds(List.of(5, 10, -1));
+
+		// basic search map
+		SearchParameterMap map = new SearchParameterMap();
+		map.setSort(new SortSpec(BaseResource.SP_RES_LAST_UPDATED));
+
+		// test
+		results = myPatientDao.search(map, null);
+		String uuid = results.getUuid();
+		ourLog.debug("** Search returned UUID: {}", uuid);
+		assertNotNull(results);
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 9, true);
+		assertEquals(9, ids.size());
+
+		// first search was < 10 (our max pre-fetch value); so we should
+		// expect no "group by" queries (we deduplicate in memory)
+		queries = findGroupByQueries();
+		assertTrue(queries.isEmpty());
+		myCaptureQueriesListener.clear();
+
+		ids = toUnqualifiedVersionlessIdValues(results, 10, 100, true);
+		assertEquals(90, ids.size());
+
+		// we are now requesting > 10 results, meaning we should be using the
+		// database to deduplicate any values not fetched yet;
+		// so we *do* expect to see a "group by" query
+		queries = findGroupByQueries();
+		assertFalse(queries.isEmpty());
+		assertEquals(1, queries.size());
+		SqlQuery query = queries.get(0);
+		String sql = query.getSql(true, false);
+		// we expect a "GROUP BY t0.RES_ID" (but we'll be ambiguous about the table
+		// name, just in case)
+		Pattern p = Pattern.compile("GROUP BY .+\\.RES_ID");
+		Matcher m = p.matcher(sql);
+		assertTrue(m.find());
+	}
+
+	private List<SqlQuery> findGroupByQueries() {
+		List<SqlQuery> queries = myCaptureQueriesListener.getSelectQueries();
+		queries = queries.stream().filter(q -> q.getSql(true, false).toLowerCase().contains("group by"))
+			.collect(Collectors.toList());
+		return queries;
 	}
 
 	@Test
