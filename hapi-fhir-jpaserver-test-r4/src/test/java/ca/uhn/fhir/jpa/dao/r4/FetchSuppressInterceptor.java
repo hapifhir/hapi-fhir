@@ -22,7 +22,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * A hack to pre-resolve resource references.
+ * A hack to pre-resolve resource references within the bundle elements.
+ * This should speed up bundle ingestion by avoiding the pre-mature hibernate flushing
+ * caused by the resolution of resource references during resource indexing.
  */
 public class FetchSuppressInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchSuppressInterceptor.class);
@@ -60,7 +62,8 @@ public class FetchSuppressInterceptor {
 
 
 	/**
-	 * Take the IIdType references from our threadlocal, resolve them, and store the resolutions in the TransactionDetails to avoid id resolution.
+	 * Take the IIdType references from our thread-local, resolve them,
+	 * and store the resolutions in the TransactionDetails to avoid id resolution.
 	 */
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE)
 	void preResolveResourceIds(TransactionDetails theTransactionDetails) {
