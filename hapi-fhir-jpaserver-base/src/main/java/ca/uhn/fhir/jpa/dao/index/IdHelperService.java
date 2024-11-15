@@ -255,8 +255,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			Collection<IIdType> theIdsToResolve,
 			ListMultimap<IIdType, IResourceLookup> theMapToPopulate) {
 
-		// FIXME: what if there are more than 1000 IDs?
-
 		List<MemoryCacheService.TypedPidCacheKey> numericIds = null;
 		for (Iterator<IIdType> iter = theIdsToResolve.iterator(); iter.hasNext(); ) {
 			IIdType t = iter.next();

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
@@ -154,7 +155,8 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	@Nonnull
 	default Map<IIdType, IResourceLookup> resolveResourceIdentities(
 			@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds, boolean theExcludeDeleted) {
-		throw new UnsupportedOperationException();
+		// TODO: implement this in CDR for Mongo, them remove this default message
+		throw new UnsupportedOperationException(Msg.code(2571) + "Not implemented");
 	}
 
 	/**
