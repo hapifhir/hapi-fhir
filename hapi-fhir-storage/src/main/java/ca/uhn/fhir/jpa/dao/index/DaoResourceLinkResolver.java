@@ -142,8 +142,20 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 
 				RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(type);
 				String resName = missingResourceDef.getName();
-				throw new InvalidRequestException(Msg.code(1094) + "Resource " + resName + "/" + idPart
-						+ " not found, specified in path: " + sourcePath);
+
+				// Check if this was a deleted resource
+				try {
+					resolvedResource = myIdHelperService.resolveResourceIdentity(
+							theRequestPartitionId, resourceType, idPart, false);
+					handleDeletedTarget(resourceType, idPart, sourcePath);
+				} catch (ResourceNotFoundException e2) {
+					resolvedResource = null;
+				}
+
+				if (resolvedResource == null) {
+					throw new InvalidRequestException(Msg.code(1094) + "Resource " + resName + "/" + idPart
+							+ " not found, specified in path: " + sourcePath);
+				}
 			}
 			resolvedResource = createdTableOpt.get();
 		}
@@ -201,14 +213,18 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		}
 
 		if (resolvedResource.getDeleted() != null) {
-			if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
-				return false;
-			}
-			String resName = resolvedResource.getResourceType();
-			throw new InvalidRequestException(Msg.code(1096) + "Resource " + resName + "/" + idPart
-					+ " is deleted, specified in path: " + sourcePath);
+			return handleDeletedTarget(resolvedResource.getResourceType(), idPart, sourcePath);
 		}
 		return true;
+	}
+
+	private boolean handleDeletedTarget(String resType, String idPart, String sourcePath) {
+		if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
+			return false;
+		}
+		String resName = resType;
+		throw new InvalidRequestException(Msg.code(1096) + "Resource " + resName + "/" + idPart
+				+ " is deleted, specified in path: " + sourcePath);
 	}
 
 	@Nullable
