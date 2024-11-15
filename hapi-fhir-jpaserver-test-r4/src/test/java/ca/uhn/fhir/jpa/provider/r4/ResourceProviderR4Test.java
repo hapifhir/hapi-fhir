@@ -353,7 +353,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IFhirResourceDao<SearchParameter> searchParameterDao = myDaoRegistry.getResourceDao(SearchParameter.class);
 		searchParameterDao.create(searchParameter, (RequestDetails) null);
 
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile");
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile", null);
 		assertNotNull(sp);
 
 		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
@@ -2984,6 +2984,32 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testIncludeWithNullMaxIncludesToLoad() {
+		myStorageSettings.setMaximumIncludesToLoadPerPage(null);
+		Organization org = new Organization();
+		org.setName("ORG");
+		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient pt = new Patient();
+		pt.getManagingOrganization().setReference(orgId.getValue());
+		pt.addName().setFamily("FAM");
+		myPatientDao.create(pt, mySrd);
+
+		Bundle bundle = myClient
+			.search()
+			.forResource(Patient.class)
+			.include(Patient.INCLUDE_ORGANIZATION)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertThat(bundle.getEntry()).hasSize(2);
+		assertEquals("Patient", bundle.getEntry().get(0).getResource().getIdElement().getResourceType());
+		assertEquals("Organization", bundle.getEntry().get(1).getResource().getIdElement().getResourceType());
+	}
+
+	@Test
 	public void testIncludeWithExternalReferences() {
 		myStorageSettings.setAllowExternalReferences(true);
 
@@ -3924,8 +3950,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.update().resource(enc).execute().getId().toUnqualifiedVersionless();
 
 		HttpGet get = new HttpGet(myServerBase + "/Encounter?patient=P2&date=ge2017-01-01&_include:recurse=Encounter:practitioner&_lastUpdated=ge2017-11-10");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			response.getEntity().getContent().close();
@@ -3933,13 +3958,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			List<String> ids = toUnqualifiedVersionlessIdValues(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
 			assertThat(ids).containsExactlyInAnyOrder("Practitioner/PRAC", "Encounter/E2");
-		} finally {
-			response.close();
 		}
 
 		get = new HttpGet(myServerBase + "/Encounter?patient=P2&date=ge2017-01-01&_include:recurse=Encounter:practitioner&_lastUpdated=ge2099-11-10");
-		response = ourHttpClient.execute(get);
-		try {
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			response.getEntity().getContent().close();
@@ -3947,10 +3969,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			List<String> ids = toUnqualifiedVersionlessIdValues(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
 			assertThat(ids).isEmpty();
-		} finally {
-			response.close();
 		}
-
 	}
 
 	@Test

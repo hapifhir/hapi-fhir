@@ -29,7 +29,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -37,6 +36,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.GenericGenerator;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
@@ -58,7 +58,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
  */
 @Entity()
 @Table(
-		name = "HFJ_IDX_CMP_STRING_UNIQ",
+		name = ResourceIndexedComboStringUnique.HFJ_IDX_CMP_STRING_UNIQ,
 		indexes = {
 			@Index(
 					name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING,
@@ -75,8 +75,11 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	public static final int MAX_STRING_LENGTH = 500;
 	public static final String IDX_IDXCMPSTRUNIQ_STRING = "IDX_IDXCMPSTRUNIQ_STRING";
 	public static final String IDX_IDXCMPSTRUNIQ_RESOURCE = "IDX_IDXCMPSTRUNIQ_RESOURCE";
+	public static final String HFJ_IDX_CMP_STRING_UNIQ = "HFJ_IDX_CMP_STRING_UNIQ";
 
-	@SequenceGenerator(name = "SEQ_IDXCMPSTRUNIQ_ID", sequenceName = "SEQ_IDXCMPSTRUNIQ_ID")
+	@GenericGenerator(
+			name = "SEQ_IDXCMPSTRUNIQ_ID",
+			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMPSTRUNIQ_ID")
 	@Id
 	@Column(name = "PID")

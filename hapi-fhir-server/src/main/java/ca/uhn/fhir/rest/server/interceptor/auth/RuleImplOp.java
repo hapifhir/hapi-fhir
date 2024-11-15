@@ -828,29 +828,46 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 			return verdict;
 		} else if (theOutputResource != null) {
-
-			List<IBaseResource> outputResources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(
-					theOutputResource, theRequestDetails.getFhirContext());
-
-			Verdict verdict = null;
-			for (IBaseResource nextResource : outputResources) {
-				if (nextResource == null) {
-					continue;
-				}
-				Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(
-						RestOperationTypeEnum.READ, theRequestDetails, null, null, nextResource, thePointcut);
-				if (newVerdict == null) {
-					continue;
-				} else if (verdict == null) {
-					verdict = newVerdict;
-				} else if (verdict.getDecision() == PolicyEnum.ALLOW && newVerdict.getDecision() == PolicyEnum.DENY) {
-					verdict = newVerdict;
-				}
-			}
-			return verdict;
+			return applyRulesToResponseBundle(theRequestDetails, theOutputResource, theRuleApplier, thePointcut);
 		} else {
 			return null;
 		}
+	}
+
+	@Nullable
+	private static Verdict applyRulesToResponseBundle(
+			RequestDetails theRequestDetails,
+			IBaseResource theOutputResource,
+			IRuleApplier theRuleApplier,
+			Pointcut thePointcut) {
+		List<IBaseResource> outputResources =
+				AuthorizationInterceptor.toListOfResourcesAndExcludeContainerUnlessStandalone(
+						theOutputResource, theRequestDetails.getFhirContext());
+		return applyRulesToResponseResources(theRequestDetails, theRuleApplier, thePointcut, outputResources);
+	}
+
+	@Nullable
+	public static Verdict applyRulesToResponseResources(
+			RequestDetails theRequestDetails,
+			IRuleApplier theRuleApplier,
+			Pointcut thePointcut,
+			List<IBaseResource> outputResources) {
+		Verdict verdict = null;
+		for (IBaseResource nextResource : outputResources) {
+			if (nextResource == null) {
+				continue;
+			}
+			Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(
+					RestOperationTypeEnum.READ, theRequestDetails, null, null, nextResource, thePointcut);
+			if (newVerdict == null) {
+				continue;
+			} else if (verdict == null) {
+				verdict = newVerdict;
+			} else if (verdict.getDecision() == PolicyEnum.ALLOW && newVerdict.getDecision() == PolicyEnum.DENY) {
+				verdict = newVerdict;
+			}
+		}
+		return verdict;
 	}
 
 	private boolean isInvalidNestedBundleRequest(BundleEntryParts theEntry) {

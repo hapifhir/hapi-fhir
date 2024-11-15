@@ -121,9 +121,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.SingleColumnRowMapper;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -131,6 +133,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -140,7 +143,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
-import static ca.uhn.fhir.jpa.util.InClauseNormalizer.*;
+import static ca.uhn.fhir.jpa.util.InClauseNormalizer.normalizeIdListForInClause;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -161,7 +164,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	@Deprecated
 	public static final int MAXIMUM_PAGE_SIZE = SearchConstants.MAX_PAGE_SIZE;
 
-	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
 	public static final String RESOURCE_ID_ALIAS = "resource_id";
 	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
@@ -171,7 +173,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
 	private static final String MY_SOURCE_RESOURCE_TYPE = "mySourceResourceType";
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
-	public static boolean myUseMaxPageSize50ForTest = false;
+	public static Integer myMaxPageSizeForTests = null;
 	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
 	protected final IResourceTagDao myResourceTagDao;
 	private String myResourceName;
@@ -464,6 +466,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						.chunk(
 								fulltextExecutor,
 								SearchBuilder.getMaximumPageSize(),
+								// for each list of (SearchBuilder.getMaximumPageSize())
+								// we create a chunked query and add it to 'queries'
 								t -> doCreateChunkedQueries(
 										theParams, t, theOffset, sort, theCountOnlyFlag, theRequest, queries));
 			}
@@ -651,8 +655,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				|| theParams.getSort() != null
 				|| theParams.keySet().contains(Constants.PARAM_HAS)
 				|| isPotentiallyContainedReferenceParameterExistsAtRoot(theParams)) {
-			List<RuntimeSearchParam> activeComboParams =
-					mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
+			List<RuntimeSearchParam> activeComboParams = mySearchParamRegistry.getActiveComboSearchParams(
+					myResourceName, theParams.keySet(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 			if (activeComboParams.isEmpty()) {
 				sqlBuilder.setNeedResourceTableRoot(true);
 			}
@@ -799,7 +803,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			String sql = allTargetsSql.getSql();
 			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 
-			List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
+			List<Long> output = jdbcTemplate.query(sql, args, new RowMapper<Long>() {
+				@Override
+				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+					if (myPartitionSettings.isPartitioningEnabled()) {
+						return rs.getLong(2);
+					} else {
+						return rs.getLong(1);
+					}
+				}
+			});
 
 			// we add a search executor to fetch unlinked patients first
 			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
@@ -915,8 +928,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			theQueryStack.addSortOnLastUpdated(ascending);
 
 		} else {
-			RuntimeSearchParam param =
-					mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
+			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
+					myResourceName, theSort.getParamName(), ISearchParamRegistry.SearchParamLookupContextEnum.SORT);
 
 			/*
 			 * If we have a sort like _sort=subject.name and we  have an
@@ -940,8 +953,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						referenceParamTargetType = referenceParam.substring(0, colonIdx);
 						referenceParam = referenceParam.substring(colonIdx + 1);
 					}
-					RuntimeSearchParam outerParam =
-							mySearchParamRegistry.getActiveSearchParam(myResourceName, referenceParam);
+					RuntimeSearchParam outerParam = mySearchParamRegistry.getActiveSearchParam(
+							myResourceName, referenceParam, ISearchParamRegistry.SearchParamLookupContextEnum.SORT);
 					if (outerParam == null) {
 						throwInvalidRequestExceptionForUnknownSortParameter(myResourceName, referenceParam);
 					} else if (outerParam.hasUpliftRefchain(targetParam)) {
@@ -949,8 +962,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							if (referenceParamTargetType != null && !referenceParamTargetType.equals(nextTargetType)) {
 								continue;
 							}
-							RuntimeSearchParam innerParam =
-									mySearchParamRegistry.getActiveSearchParam(nextTargetType, targetParam);
+							RuntimeSearchParam innerParam = mySearchParamRegistry.getActiveSearchParam(
+									nextTargetType,
+									targetParam,
+									ISearchParamRegistry.SearchParamLookupContextEnum.SORT);
 							if (innerParam != null) {
 								param = innerParam;
 								break;
@@ -984,7 +999,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			if (param == null) {
-				param = mySearchParamRegistry.getActiveSearchParam(myResourceName, paramName);
+				param = mySearchParamRegistry.getActiveSearchParam(
+						myResourceName, paramName, ISearchParamRegistry.SearchParamLookupContextEnum.SORT);
 			}
 
 			if (param == null) {
@@ -1063,8 +1079,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private void throwInvalidRequestExceptionForUnknownSortParameter(String theResourceName, String theParamName) {
-		Collection<String> validSearchParameterNames =
-				mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName);
+		Collection<String> validSearchParameterNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(
+				theResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SORT);
 		String msg = myContext
 				.getLocalizer()
 				.getMessageSanitized(
@@ -1527,7 +1543,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		String paramName = nextInclude.getParamName();
 		if (isNotBlank(paramName)) {
-			param = mySearchParamRegistry.getActiveSearchParam(resType, paramName);
+			param = mySearchParamRegistry.getActiveSearchParam(
+					resType, paramName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		} else {
 			param = null;
 		}
@@ -1584,16 +1601,37 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			String sql = localReferenceQuery + " UNION " + canonicalQuery.getLeft();
 
+			Map<String, Object> limitParams = new HashMap<>();
+			if (maxCount != null) {
+				LinkedList<Object> bindVariables = new LinkedList<>();
+				sql = SearchQueryBuilder.applyLimitToSql(
+						myDialectProvider.getDialect(), null, maxCount, sql, null, bindVariables);
+
+				// The dialect SQL limiter uses positional params, but we're using
+				// named params here, so we need to replace the positional params
+				// with equivalent named ones
+				StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < sql.length(); i++) {
+					char nextChar = sql.charAt(i);
+					if (nextChar == '?') {
+						String nextName = "limit" + i;
+						sb.append(':').append(nextName);
+						limitParams.put(nextName, bindVariables.removeFirst());
+					} else {
+						sb.append(nextChar);
+					}
+				}
+				sql = sb.toString();
+			}
+
 			List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 			for (Collection<JpaPid> nextPartition : partitions) {
 				Query q = entityManager.createNativeQuery(sql, Tuple.class);
 				q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
 				localReferenceQueryParams.forEach(q::setParameter);
 				canonicalQuery.getRight().forEach(q::setParameter);
+				limitParams.forEach(q::setParameter);
 
-				if (maxCount != null) {
-					q.setMaxResults(maxCount);
-				}
 				@SuppressWarnings("unchecked")
 				List<Tuple> results = q.getResultList();
 				for (Tuple result : results) {
@@ -1845,7 +1883,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// in this context, so let's just assume it could be anything.
 				targetResourceTypes = possibleTypes;
 			} else {
-				for (var next : mySearchParamRegistry.getActiveSearchParams(myResourceName).values().stream()
+				for (var next : mySearchParamRegistry
+						.getActiveSearchParams(myResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
+						.values()
+						.stream()
 						.filter(t -> t.getParamType().equals(RestSearchParameterTypeEnum.REFERENCE))
 						.collect(Collectors.toList())) {
 
@@ -1928,16 +1969,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			QueryStack theQueryStack, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
 		RuntimeSearchParam comboParam = null;
 		List<String> comboParamNames = null;
-		List<RuntimeSearchParam> exactMatchParams =
-				mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
+		List<RuntimeSearchParam> exactMatchParams = mySearchParamRegistry.getActiveComboSearchParams(
+				myResourceName, theParams.keySet(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		if (!exactMatchParams.isEmpty()) {
 			comboParam = exactMatchParams.get(0);
 			comboParamNames = new ArrayList<>(theParams.keySet());
 		}
 
 		if (comboParam == null) {
-			List<RuntimeSearchParam> candidateComboParams =
-					mySearchParamRegistry.getActiveComboSearchParams(myResourceName);
+			List<RuntimeSearchParam> candidateComboParams = mySearchParamRegistry.getActiveComboSearchParams(
+					myResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 			for (RuntimeSearchParam nextCandidate : candidateComboParams) {
 				List<String> nextCandidateParamNames =
 						JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, nextCandidate).stream()
@@ -2006,8 +2047,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
 				String nextOrValue = nextOr.getValueAsQueryToken(myContext);
 
-				RuntimeSearchParam nextParamDef =
-						mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
+						myResourceName, nextParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
 					if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.STRING) {
 						nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);
@@ -2122,7 +2163,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			// Reference params are only eligible for using a composite index if they
 			// are qualified
-			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
+					myResourceName, nextParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 			if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 				ReferenceParam param = (ReferenceParam) nextValues.get(0).get(0);
 				if (isBlank(param.getResourceType())) {
@@ -2343,15 +2385,23 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				if (myNext == null) {
 					// no next means we need a new query (if one is available)
 					while (myResultsIterator.hasNext() || !myQueryList.isEmpty()) {
-						// Update iterator with next chunk if necessary.
-						if (!myResultsIterator.hasNext()) {
+						/*
+						 * Because we combine our DB searches with Lucene
+						 * sometimes we can have multiple results iterators
+						 * (with only some having data in them to extract).
+						 *
+						 * We'll iterate our results iterators until we
+						 * either run out of results iterators, or we
+						 * have one that actually has data in it.
+						 */
+						while (!myResultsIterator.hasNext() && !myQueryList.isEmpty()) {
 							retrieveNextIteratorQuery();
+						}
 
-							// if our new results iterator is also empty
+						if (!myResultsIterator.hasNext()) {
+							// we couldn't find a results iterator;
 							// we're done here
-							if (!myResultsIterator.hasNext()) {
-								break;
-							}
+							break;
 						}
 
 						Long nextLong = myResultsIterator.next();
@@ -2571,14 +2621,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	public static int getMaximumPageSize() {
-		if (myUseMaxPageSize50ForTest) {
-			return MAXIMUM_PAGE_SIZE_FOR_TESTING;
-		} else {
-			return MAXIMUM_PAGE_SIZE;
+		if (myMaxPageSizeForTests != null) {
+			return myMaxPageSizeForTests;
 		}
+		return MAXIMUM_PAGE_SIZE;
 	}
 
-	public static void setMaxPageSize50ForTest(boolean theIsTest) {
-		myUseMaxPageSize50ForTest = theIsTest;
+	public static void setMaxPageSizeForTest(Integer theTestSize) {
+		myMaxPageSizeForTests = theTestSize;
 	}
 }

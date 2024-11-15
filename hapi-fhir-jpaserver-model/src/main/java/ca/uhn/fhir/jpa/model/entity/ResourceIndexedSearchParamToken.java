@@ -39,13 +39,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
@@ -56,7 +56,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 @EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
-		name = "HFJ_SPIDX_TOKEN",
+		name = ResourceIndexedSearchParamToken.HFJ_SPIDX_TOKEN,
 		indexes = {
 			/*
 			 * Note: We previously had indexes with the following names,
@@ -78,6 +78,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	public static final int MAX_LENGTH = 200;
 
 	private static final long serialVersionUID = 1L;
+	public static final String HFJ_SPIDX_TOKEN = "HFJ_SPIDX_TOKEN";
 
 	@FullTextField
 	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
@@ -89,7 +90,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	@SuppressWarnings("unused")
 	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_TOKEN", sequenceName = "SEQ_SPIDX_TOKEN")
+	@GenericGenerator(name = "SEQ_SPIDX_TOKEN", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_TOKEN")
 	@Column(name = "SP_ID")
 	private Long myId;

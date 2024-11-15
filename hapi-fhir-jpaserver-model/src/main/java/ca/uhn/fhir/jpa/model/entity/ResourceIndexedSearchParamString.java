@@ -37,12 +37,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.GenericGenerator;
 
 import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -52,7 +52,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 @EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
-		name = "HFJ_SPIDX_STRING",
+		name = ResourceIndexedSearchParamString.HFJ_SPIDX_STRING,
 		indexes = {
 			/*
 			 * Note: We previously had indexes with the following names,
@@ -76,9 +76,10 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	public static final int MAX_LENGTH = 768;
 	public static final int HASH_PREFIX_LENGTH = 1;
 	private static final long serialVersionUID = 1L;
+	public static final String HFJ_SPIDX_STRING = "HFJ_SPIDX_STRING";
 
 	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_STRING", sequenceName = "SEQ_SPIDX_STRING")
+	@GenericGenerator(name = "SEQ_SPIDX_STRING", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_STRING")
 	@Column(name = "SP_ID")
 	private Long myId;

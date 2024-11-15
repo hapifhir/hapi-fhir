@@ -111,8 +111,50 @@ A request using `periodStart` and `periodEnd` looks like:
 ```bash
 GET fhir/Measure/<MeasureId>/$evaluate-measure?periodStart=2019-01-01&periodEnd=2019-12-31
 ```
+`periodStart` and `periodEnd` support Dates (YYYY, YYYY-MM, or YYYY-MM-DD) and DateTimes (YYYY-MM-DDThh:mm:ss).  DateTime formats of YYYY-MM-DDThh:mm:ss+zz no longer accepted.  To pass in timezones to period queries, please see the [Headers](#headers) section below:
 
-`periodStart` and `periodEnd` support Dates (YYYY, YYYY-MM, or YYYY-MM-DD) and DateTimes (YYYY-MM-DDThh:mm:ss+zz:zz)
+#### Headers
+
+The behaviour of the  `periodStart` and `periodEnd` parameters depends on the value of the `Timezone` header.  The measure report will be queried according to the period range, as denoted by that timezone, **not the server timezone**.
+
+Accepted values for this header are documented on the [Wikipedia timezones page](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+
+ex:  `Timezone`:`America/Denver` will set the timezone to Mountain Time.
+
+If the client omits this header, the timezone will default to UTC.
+
+Please consult the below table for examples of various combinations of start, end, and timezone, as well as the resulting queried periods:
+
+| Request timezone   |          Start       |           End       | Converted Start           | Converted End             |
+|--------------------| ---------------------| --------------------|---------------------------|---------------------------|
+| (unset)            | (unset)              | (unset)             | N/A                       | N/A                       |
+| (unset)            | 2020                 | 2021                | 2020-01-01T00:00:00Z      | 2021-12-31T23:59:59Z      |
+| Z                  | 2020                 | 2021                | 2020-01-01T00:00:00Z      | 2021-12-31T23:59:59Z      |
+| UTC                | 2020                 | 2021                | 2020-01-01T00:00:00Z      | 2021-12-31T23:59:59Z      |
+| America/St_Johns   | 2020                 | 2021                | 2020-01-01T00:00:00-03:30 | 2021-12-31T23:59:59-03:30 |
+| America/Toronto    | 2020                 | 2021                | 2020-01-01T00:00:00-05:00 | 2021-12-31T23:59:59-05:00 |
+| America/Denver     | 2020                 | 2021                | 2020-01-01T00:00:00-07:00 | 2021-12-31T23:59:59-07:00 |
+| (unset)            | 2022-02              | 2022-08             | 2022-02-01T00:00:00Z      | 2022-08-31T23:59:59Z      |
+| UTC                | 2022-02              | 2022-08             | 2022-02-01T00:00:00Z      | 2022-08-31T23:59:59Z      |
+| America/St_Johns   | 2022-02              | 2022-08             | 2022-02-01T00:00:00-03:30 | 2022-08-31T23:59:59-02:30 |
+| America/Toronto    | 2022-02              | 2022-08             | 2022-02-01T00:00:00-05:00 | 2022-08-31T23:59:59-04:00 |
+| America/Denver     | 2022-02              | 2022-08             | 2022-02-01T00:00:00-07:00 | 2022-08-31T23:59:59-06:00 |
+| (unset)            | 2024-02-25           | 2024-02-26          | 2024-02-25T00:00:00Z      | 2024-02-26T23:59:59Z      |
+| UTC                | 2024-02-25           | 2024-02-26          | 2024-02-25T00:00:00Z      | 2024-02-26T23:59:59Z      |
+| America/St_Johns   | 2024-02-25           | 2024-02-26          | 2024-02-25T00:00:00-03:30 | 2024-02-26T23:59:59-03:30 |
+| America/Toronto    | 2024-02-25           | 2024-02-26          | 2024-02-25T00:00:00-05:00 | 2024-02-26T23:59:59-05:00 |
+| America/Denver     | 2024-02-25           | 2024-02-26          | 2024-02-25T00:00:00-07:00 | 2024-02-26T23:59:59-07:00 |
+| (unset)            | 2024-09-25           | 2024-09-26          | 2024-09-25T00:00:00Z      | 2024-09-26T23:59:59Z      |
+| UTC                | 2024-09-25           | 2024-09-26          | 2024-09-25T00:00:00Z      | 2024-09-26T23:59:59Z      |
+| America/St_Johns   | 2024-09-25           | 2024-09-26          | 2024-09-25T00:00:00-02:30 | 2024-09-26T23:59:59-02:30 |
+| America/Toronto    | 2024-09-25           | 2024-09-26          | 2024-09-25T00:00:00-04:00 | 2024-09-26T23:59:59-04:00 |
+| America/Denver     | 2024-09-25           | 2024-09-26          | 2024-09-25T00:00:00-06:00 | 2024-09-26T23:59:59-06:00 |
+| (unset)            | 2024-09-25T12:00:00  | 2024-09-26T12:00:00 | 2024-09-25T12:00:00-06:00 | 2024-09-26T11:59:59-06:00 |
+| Z                  | 2024-09-25T12:00:00  | 2024-09-26T12:00:00 | 2024-09-25T12:00:00-06:00 | 2024-09-26T11:59:59-06:00 |
+| UTC                | 2024-09-25T12:00:00  | 2024-09-26T12:00:00 | 2024-09-25T12:00:00-06:00 | 2024-09-26T11:59:59-06:00 |
+| America/St_Johns   | 2024-09-25T12:00:00  | 2024-09-26T12:00:00 | 2024-09-25T12:00:00-02:30 | 2024-09-26T11:59:59-02:30 |
+| America/Toronto    | 2024-09-25T12:00:00  | 2024-09-26T12:00:00 | 2024-09-25T12:00:00-04:00 | 2024-09-26T11:59:59-04:00 |
+| America/Denver     | 2024-09-25T12:00:00  | 2024-09-26T12:00:00 | 2024-09-25T12:00:00-06:00 | 2024-09-26T11:59:59-06:00 |
 
 #### Report Types
 

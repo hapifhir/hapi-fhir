@@ -91,6 +91,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 	private int mySyncSize = 250;
 
 	@Override
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public IBundleProvider executeQuery(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
@@ -113,7 +114,6 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 				.withRequestPartitionId(theRequestPartitionId)
 				.readOnly()
 				.execute(() -> {
-
 					// Load the results synchronously
 					List<JpaPid> pids = new ArrayList<>();
 

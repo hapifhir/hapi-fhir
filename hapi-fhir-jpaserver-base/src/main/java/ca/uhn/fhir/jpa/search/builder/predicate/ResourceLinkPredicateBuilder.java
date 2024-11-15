@@ -108,6 +108,9 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	private final QueryStack myQueryStack;
 	private final boolean myReversed;
 
+	private final DbColumn myColumnTargetPartitionId;
+	private final DbColumn myColumnSrcPartitionId;
+
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
@@ -133,9 +136,11 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder, boolean theReversed) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
 		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
+		myColumnSrcPartitionId = getTable().addColumn("PARTITION_ID");
 		myColumnSrcType = getTable().addColumn("SOURCE_RESOURCE_TYPE");
 		myColumnSrcPath = getTable().addColumn("SRC_PATH");
 		myColumnTargetResourceId = getTable().addColumn("TARGET_RESOURCE_ID");
+		myColumnTargetPartitionId = getTable().addColumn("TARGET_RES_PARTITION_ID");
 		myColumnTargetResourceUrl = getTable().addColumn("TARGET_RESOURCE_URL");
 		myColumnTargetResourceType = getTable().addColumn("TARGET_RESOURCE_TYPE");
 
@@ -159,8 +164,34 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		return myColumnTargetResourceId;
 	}
 
+	public DbColumn getColumnTargetPartitionId() {
+		return myColumnTargetPartitionId;
+	}
+
+	public DbColumn[] getJoinColumnsForTarget() {
+		return getSearchQueryBuilder().toJoinColumns(getColumnTargetPartitionId(), getColumnTargetResourceId());
+	}
+
+	public DbColumn[] getJoinColumnsForSource() {
+		return getSearchQueryBuilder().toJoinColumns(getPartitionIdColumn(), myColumnSrcResourceId);
+	}
+
+	/**
+	 * Note that this may return the SRC_RESOURCE_ID or TGT_RESOURCE_ID depending
+	 * on whether we're building a forward or reverse link. If you need a specific
+	 * one of these, use {@link #getJoinColumnsForSource()} or {@link #getJoinColumnsForTarget()}.
+	 */
+	@Override
+	public DbColumn[] getJoinColumns() {
+		return super.getJoinColumns();
+	}
+
 	public DbColumn getColumnSrcResourceId() {
 		return myColumnSrcResourceId;
+	}
+
+	public DbColumn getColumnSrcPartitionId() {
+		return myColumnSrcPartitionId;
 	}
 
 	public DbColumn getColumnTargetResourceType() {
@@ -466,7 +497,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 			RuntimeSearchParam param = null;
 			if (!isMeta) {
-				param = mySearchParamRegistry.getActiveSearchParam(nextType, chain);
+				param = mySearchParamRegistry.getActiveSearchParam(
+						nextType, chain, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (param == null) {
 					ourLog.debug("Type {} doesn't have search param {}", nextType, param);
 					continue;
@@ -509,7 +541,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
 			andPredicates.add(
-					childQueryFactory.searchForIdsWithAndOr(with().setSourceJoinColumn(myColumnTargetResourceId)
+					childQueryFactory.searchForIdsWithAndOr(with().setSourceJoinColumn(getJoinColumnsForTarget())
 							.setResourceName(subResourceName)
 							.setParamName(chain)
 							.setAndOrParams(chainParamValues)
@@ -555,8 +587,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			resourceTypes = determineResourceTypes(Collections.singleton(theResourceName), theParamName);
 
 			if (resourceTypes.isEmpty()) {
-				RuntimeSearchParam searchParamByName =
-						mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getActiveSearchParam(
+						theResourceName, theParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (searchParamByName == null) {
 					throw new InternalErrorException(Msg.code(1244) + "Could not find parameter " + theParamName);
 				}
@@ -628,7 +660,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		if (linkIndex == -1) {
 			Set<Class<? extends IBaseResource>> resourceTypes = new HashSet<>();
 			for (String resourceName : theResourceNames) {
-				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamNameChain);
+				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
+						resourceName, theParamNameChain, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 				if (param != null && param.hasTargets()) {
 					Set<String> targetTypes = param.getTargets();
@@ -644,7 +677,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			String paramNameTail = theParamNameChain.substring(linkIndex + 1);
 			Set<String> targetResourceTypeNames = new HashSet<>();
 			for (String resourceName : theResourceNames) {
-				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(resourceName, paramNameHead);
+				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
+						resourceName, paramNameHead, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 				if (param != null && param.hasTargets()) {
 					targetResourceTypeNames.addAll(param.getTargets());
@@ -656,7 +690,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 	public List<String> createResourceLinkPaths(
 			String theResourceName, String theParamName, List<String> theParamQualifiers) {
-		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
+				theResourceName, theParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		if (param != null) {
 			List<String> path = param.getPathsSplit();
 
@@ -687,7 +722,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					? theParamQualifiers.subList(1, theParamQualifiers.size())
 					: List.of();
 
-			param = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramNameHead);
+			param = mySearchParamRegistry.getActiveSearchParam(
+					theResourceName, paramNameHead, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 			if (param != null) {
 				Set<String> tailPaths = param.getTargets().stream()
 						.filter(t -> isBlank(qualifier) || qualifier.equals(t))
@@ -801,8 +837,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		subquery.addFromTable(getTable());
 
 		String resourceType = theParams.getResourceTablePredicateBuilder().getResourceType();
-		RuntimeSearchParam paramDefinition =
-				mySearchParamRegistry.getRuntimeSearchParam(resourceType, theParams.getParamName());
+		RuntimeSearchParam paramDefinition = mySearchParamRegistry.getRuntimeSearchParam(
+				resourceType, theParams.getParamName(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		List<String> pathList = paramDefinition.getPathsSplitForResourceType(resourceType);
 
 		Condition subQueryCondition = ComboCondition.and(

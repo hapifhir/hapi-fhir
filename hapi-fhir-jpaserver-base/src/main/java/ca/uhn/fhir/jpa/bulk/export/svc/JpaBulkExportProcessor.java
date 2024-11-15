@@ -625,7 +625,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			resourceToCheck = "Patient";
 			activeSearchParamName = "organization";
 		}
-		return mySearchParamRegistry.getActiveSearchParam(resourceToCheck, activeSearchParamName);
+		return mySearchParamRegistry.getActiveSearchParam(
+				resourceToCheck, activeSearchParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 	}
 
 	/**

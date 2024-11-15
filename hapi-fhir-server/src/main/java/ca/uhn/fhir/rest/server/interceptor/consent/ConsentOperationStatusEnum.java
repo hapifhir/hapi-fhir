@@ -21,7 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
 
 import java.util.stream.Stream;
 
-public enum ConsentOperationStatusEnum {
+public enum ConsentOperationStatusEnum implements IConsentVote {
 
 	/**
 	 * The requested operation cannot proceed, and an operation outcome suitable for
@@ -59,53 +59,52 @@ public enum ConsentOperationStatusEnum {
 				return 0;
 		}
 	}
+
+	/**
+	 * Does this vote abstain from the verdict?
+	 * I.e. this == PROCEED
+	 * @return true if this vote can be ignored
+	 */
+	boolean isAbstain() {
+		return this == PROCEED;
+	}
+
+	/**
+	 * Does this vote participate from the verdict?
+	 * I.e. this != PROCEED
+	 * @return false if this vote can be ignored
+	 */
+	boolean isActiveVote() {
+		return this != PROCEED;
+	}
+
+	@Override
+	public ConsentOperationStatusEnum getStatus() {
+		return this;
+	}
+
 	/**
 	 * Evaluate verdicts in order, taking the first "decision" (i.e. first non-PROCEED) verdict.
 	 *
 	 * @return the first decisive verdict, or PROCEED when empty or all PROCEED.
 	 */
+	public static ConsentOperationStatusEnum serialReduce(Stream<ConsentOperationStatusEnum> theVoteStream) {
+		return IConsentVote.serialReduce(PROCEED, theVoteStream);
+	}
+
+	public static ConsentOperationStatusEnum parallelReduce(Stream<ConsentOperationStatusEnum> theVoteStream) {
+		return IConsentVote.parallelReduce(PROCEED, theVoteStream);
+	}
+
+	/** @deprecated for rename */
+	@Deprecated(forRemoval = true)
 	public static ConsentOperationStatusEnum serialEvaluate(Stream<ConsentOperationStatusEnum> theVoteStream) {
-		return theVoteStream.filter(verdict -> PROCEED != verdict).findFirst().orElse(PROCEED);
+		return serialReduce(theVoteStream);
 	}
 
-	/**
-	 * Evaluate verdicts in order, taking the first "decision" (i.e. first non-PROCEED) verdict.
-	 *
-	 * @param theNextVerdict the next verdict to consider
-	 * @return the combined verdict
-	 */
-	public ConsentOperationStatusEnum serialReduce(ConsentOperationStatusEnum theNextVerdict) {
-		if (this != PROCEED) {
-			return this;
-		} else {
-			return theNextVerdict;
-		}
-	}
-
-	/**
-	 * Evaluate all verdicts together, allowing any to veto (i.e. REJECT) the operation.
-	 * <ul>
-	 * <li>If any vote is REJECT, then the result is REJECT.
-	 * <li>If no vote is REJECT, and any vote is AUTHORIZED, then the result is AUTHORIZED.
-	 * <li>If no vote is REJECT or AUTHORIZED, the result is PROCEED.
-	 * </ul>
-	 *
-	 * @return REJECT if any reject, AUTHORIZED if no REJECT and some AUTHORIZED, PROCEED if empty or all PROCEED
-	 */
+	/** @deprecated for rename */
+	@Deprecated(forRemoval = true)
 	public static ConsentOperationStatusEnum parallelEvaluate(Stream<ConsentOperationStatusEnum> theVoteStream) {
-		return theVoteStream.reduce(PROCEED, ConsentOperationStatusEnum::parallelReduce);
-	}
-
-	/**
-	 * Evaluate two verdicts together, allowing either to veto (i.e. REJECT) the operation.
-	 *
-	 * @return REJECT if either reject, AUTHORIZED if no REJECT and some AUTHORIZED, PROCEED otherwise
-	 */
-	public ConsentOperationStatusEnum parallelReduce(ConsentOperationStatusEnum theNextVerdict) {
-		if (theNextVerdict.getPrecedence() > this.getPrecedence()) {
-			return theNextVerdict;
-		} else {
-			return this;
-		}
+		return parallelReduce(theVoteStream);
 	}
 }

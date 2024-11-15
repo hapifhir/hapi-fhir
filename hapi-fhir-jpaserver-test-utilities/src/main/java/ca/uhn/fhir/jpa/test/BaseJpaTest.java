@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
+import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
@@ -201,6 +202,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected SubscriptionSettings mySubscriptionSettings;
 	@Autowired
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
+	@Autowired
+	protected INpmPackageVersionDao myPackageVersionDao;
 	@Autowired
 	protected IInterceptorService myInterceptorRegistry;
 	@Autowired
@@ -389,6 +392,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
 		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultConfig.isIncludeHashIdentityForTokenSearches());
+		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultConfig.getMaximumIncludesToLoadPerPage());
+
 	}
 
 	@AfterEach
@@ -472,6 +478,12 @@ public abstract class BaseJpaTest extends BaseTest {
 				.stream()
 				.map(t -> t.toString())
 				.collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	public void logAllPackageVersions() {
+		runInTransaction(() -> {
+			ourLog.info("Package Versions:\n * {}", myPackageVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 	}
 

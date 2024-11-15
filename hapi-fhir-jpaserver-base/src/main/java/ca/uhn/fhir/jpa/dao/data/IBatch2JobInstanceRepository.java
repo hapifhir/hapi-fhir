@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import org.springframework.data.domain.Pageable;
@@ -91,4 +92,8 @@ public interface IBatch2JobInstanceRepository
 	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId")
 	List<Batch2JobInstanceEntity> findInstancesByJobDefinitionId(
 			@Param("jobDefinitionId") String theJobDefinitionId, Pageable thePageRequest);
+
+	@Query(
+			"SELECT new ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO(e.myId, e.myStatus, e.myStartTime, e.myEndTime) FROM Batch2JobInstanceEntity e WHERE e.myId = :id")
+	BatchInstanceStatusDTO fetchBatchInstanceStatus(@Param("id") String theInstanceId);
 }

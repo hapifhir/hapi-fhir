@@ -1474,7 +1474,9 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/_search?_elements=identifier%2Cname", CAPTURE_SERVLET.ourRequestUri);
+		assertThat(CAPTURE_SERVLET.ourRequestUri).isIn(
+			ourServer.getBaseUrl() + "/fhir/Patient/_search?_elements=identifier%2Cname",
+			ourServer.getBaseUrl() + "/fhir/Patient/_search?_elements=name%2Cidentifier");
 
 		//		assertThat(MY_SERVLET.ourRequestUri,
 		//				either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
@@ -1511,7 +1513,10 @@ public class GenericJaxRsClientDstu2Test {
 
 
 		assertThat(CAPTURE_SERVLET.ourRequestUri).contains(ourServer.getBaseUrl() + "/fhir/Patient/_search?");
-		assertThat(CAPTURE_SERVLET.ourRequestUri).contains("_elements=identifier%2Cname");
+		assertThat(CAPTURE_SERVLET.ourRequestUri).satisfiesAnyOf(
+			s -> assertThat(s).contains("_elements=identifier%2Cname"),
+			s -> assertThat(s).contains("_elements=name%2Cidentifier")
+		);
 
 		//		assertThat(MY_SERVLET.ourRequestUri,
 		//				either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname")));

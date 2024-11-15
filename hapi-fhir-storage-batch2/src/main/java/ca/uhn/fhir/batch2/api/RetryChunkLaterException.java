@@ -38,11 +38,18 @@ public class RetryChunkLaterException extends RuntimeException {
 	private final Duration myNextPollDuration;
 
 	public RetryChunkLaterException() {
-		this(ONE_MINUTE);
+		this("", ONE_MINUTE);
 	}
 
+	/**
+	 * For HAPI exceptions, use {@link RetryChunkLaterException#RetryChunkLaterException(String, Duration)}
+	 */
 	public RetryChunkLaterException(Duration theDuration) {
-		super();
+		this("", theDuration);
+	}
+
+	public RetryChunkLaterException(String theCode, Duration theDuration) {
+		super(theCode);
 		this.myNextPollDuration = theDuration;
 	}
 

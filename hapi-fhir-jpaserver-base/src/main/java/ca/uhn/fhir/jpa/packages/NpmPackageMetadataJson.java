@@ -115,6 +115,9 @@ public class NpmPackageMetadataJson {
 		@JsonProperty("version")
 		private String myVersion;
 
+		@JsonProperty("author")
+		private String myAuthor;
+
 		@JsonProperty("description")
 		private String myDescription;
 
@@ -124,6 +127,14 @@ public class NpmPackageMetadataJson {
 		@Schema(description = "The size of this package in bytes", example = "1000")
 		@JsonProperty("_bytes")
 		private long myBytes;
+
+		public String getAuthor() {
+			return myAuthor;
+		}
+
+		public void setAuthor(String theAuthor) {
+			myAuthor = theAuthor;
+		}
 
 		public String getName() {
 			return myName;

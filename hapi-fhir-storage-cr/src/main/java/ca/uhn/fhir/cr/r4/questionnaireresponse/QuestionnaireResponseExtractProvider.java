@@ -29,9 +29,11 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,24 +59,38 @@ public class QuestionnaireResponseExtractProvider {
 	public IBaseBundle extract(
 			@IdParam IdType theId,
 			@OperationParam(name = "questionnaire-response") QuestionnaireResponse theQuestionnaireResponse,
+			@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
 			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "useServerData") BooleanType theUseServerData,
 			@OperationParam(name = "data") Bundle theData,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myQuestionnaireResponseProcessorFactory
 				.create(theRequestDetails)
-				.extract(Eithers.for2(theId, theQuestionnaireResponse), theParameters, theData);
+				.extract(
+						Eithers.for2(theId, theQuestionnaireResponse),
+						theQuestionnaire == null ? null : Eithers.forRight(theQuestionnaire),
+						theParameters,
+						theData,
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue());
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
 	public IBaseBundle extract(
 			@OperationParam(name = "questionnaire-response") QuestionnaireResponse theQuestionnaireResponse,
+			@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
 			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "useServerData") BooleanType theUseServerData,
 			@OperationParam(name = "data") Bundle theData,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myQuestionnaireResponseProcessorFactory
 				.create(theRequestDetails)
-				.extract(Eithers.for2(null, theQuestionnaireResponse), theParameters, theData);
+				.extract(
+						Eithers.forRight(theQuestionnaireResponse),
+						theQuestionnaire == null ? null : Eithers.for2(null, theQuestionnaire),
+						theParameters,
+						theData,
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue());
 	}
 }
