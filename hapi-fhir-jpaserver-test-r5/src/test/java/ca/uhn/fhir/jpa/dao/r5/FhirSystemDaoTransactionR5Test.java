@@ -2,12 +2,19 @@ package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermConceptMap;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.ConceptMap;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Parameters;
@@ -15,6 +22,7 @@ import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Quantity;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.UriType;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +30,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
@@ -363,21 +372,21 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		myCaptureQueriesListener.logSelectQueries();
 		if (theTargetAlreadyExists) {
 			if (theResourceChanges) {
-				assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			} else {
-				assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			}
 		} else {
 			if (theResourceChanges) {
-				assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(7, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			} else {
-				assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(7, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			}
@@ -690,6 +699,142 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		Bundle outputBundle = mySystemDao.transaction(mySrd, inputBundle);
 
 		assertThat(outputBundle.getEntry().get(0).getResponse().getLocation()).matches("Patient/[0-9]+/_history/1");
+	}
+
+	/**
+	 * Make sure we can successfully handle this in a transaction, including
+	 * creating the extra table rows for this resource type
+	 */
+	@Test
+	public void testCreateCodeSystem() {
+		CodeSystem cs = newDummyCodeSystem();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(cs);
+
+		// Test
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Verify
+		runInTransaction(() -> {
+			List<TermCodeSystem> valueSets = myTermCodeSystemDao.findAll();
+			assertThat(valueSets).hasSize(1);
+		});
+	}
+
+	/**
+	 * Make sure we can successfully handle this in a transaction, including
+	 * creating the extra table rows for this resource type
+	 */
+	@Test
+	public void testCreateConceptMap() {
+		ConceptMap cm = newDummyConceptMap();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(cm);
+
+		// Test
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Verify
+		runInTransaction(() -> {
+			List<TermConceptMap> valueSets = myTermConceptMapDao.findAll();
+			assertThat(valueSets).hasSize(1);
+		});
+	}
+
+	/**
+	 * Make sure we can successfully handle this in a transaction, including
+	 * creating the extra table rows for this resource type
+	 */
+	@Test
+	public void testCreateValueSet() {
+		ValueSet vs = newDummyValueSet();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(vs);
+
+		// Test
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Verify
+		runInTransaction(() -> {
+			List<TermValueSet> valueSets = myTermValueSetDao.findAll();
+			assertThat(valueSets).hasSize(1);
+		});
+	}
+
+	/**
+	 * Two resources with the same URL in a single transaction
+	 * bundle should error gracefully
+	 */
+	@Test
+	public void testCreateDuplicateCodeSystem() {
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(newDummyCodeSystem());
+		bb.addTransactionCreateEntry(newDummyCodeSystem());
+
+		// Test
+		try {
+			mySystemDao.transaction(mySrd, bb.getBundleTyped());
+			fail();
+		} catch (UnprocessableEntityException e) {
+			// Verify
+			assertThat(e.getMessage()).contains("Can not create multiple CodeSystem resources with CodeSystem.url");
+		}
+
+	}
+
+	/**
+	 * Two resources with the same URL in a single transaction
+	 * bundle should error gracefully
+	 */
+	@Test
+	public void testCreateDuplicateValueSet() {
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(newDummyValueSet());
+		bb.addTransactionCreateEntry(newDummyValueSet());
+
+		// Test
+		try {
+			mySystemDao.transaction(mySrd, bb.getBundleTyped());
+			fail();
+		} catch (UnprocessableEntityException e) {
+			// Verify
+			assertThat(e.getMessage()).contains("Can not create multiple ValueSet resources with ValueSet.url");
+		}
+
+	}
+
+	@Nonnull
+	private static CodeSystem newDummyCodeSystem() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setVersion("1.2.3");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept().setCode("HELLO");
+		return cs;
+	}
+
+	@Nonnull
+	private static ConceptMap newDummyConceptMap() {
+		ConceptMap cm = new ConceptMap();
+		cm.setUrl("http://foo");
+		cm.setVersion("1.2.3");
+		cm.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		return cm;
+	}
+
+	@Nonnull
+	private static ValueSet newDummyValueSet() {
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://foo");
+		vs.setVersion("1.2.3");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://hl7.org/fhir/administrative-gender");
+		return vs;
 	}
 
 

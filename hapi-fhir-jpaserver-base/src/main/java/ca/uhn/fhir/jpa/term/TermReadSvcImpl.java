@@ -2538,6 +2538,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	@Override
 	@Transactional
 	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
+		// If we're in a transaction, we need to flush now so that we can correctly detect
+		// duplicates if there are multiple ValueSets in the same TX with the same URL
+		// (which is an error, but we need to catch it). It'd be better to catch this by
+		// inspecting the URLs in the bundle or something, since flushing hurts performance
+		// but it's not expected that loading valuesets is going to be a huge high frequency
+		// thing so it probably doesn't matter
+		myEntityManager.flush();
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		if (isPlaceholder(theValueSet)) {
@@ -2578,10 +2585,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			// If we just deleted the valueset marker, we don't need to check if it exists
 			// in the database
 			optionalExistingTermValueSetByUrl = Optional.empty();
-		} else if (version != null) {
-			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion(url, version);
 		} else {
-			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(url);
+			optionalExistingTermValueSetByUrl = getTermValueSet(version, url);
 		}
 
 		if (optionalExistingTermValueSetByUrl.isEmpty()) {
@@ -2619,6 +2624,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 			throw new UnprocessableEntityException(Msg.code(902) + msg);
 		}
+	}
+
+	private Optional<TermValueSet> getTermValueSet(String version, String url) {
+		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
+		if (version != null) {
+			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion(url, version);
+		} else {
+			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(url);
+		}
+		return optionalExistingTermValueSetByUrl;
 	}
 
 	@Override
