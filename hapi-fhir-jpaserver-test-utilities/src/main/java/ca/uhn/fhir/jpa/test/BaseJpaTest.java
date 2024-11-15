@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -394,7 +395,10 @@ public abstract class BaseJpaTest extends BaseTest {
 		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultConfig.isIncludeHashIdentityForTokenSearches());
 		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultConfig.getMaximumIncludesToLoadPerPage());
+		myStorageSettings.getTreatBaseUrlsAsLocal().clear();
 
+		ParserOptions defaultParserOptions = new ParserOptions();
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(defaultParserOptions.isStripVersionsFromReferences());
 	}
 
 	@AfterEach

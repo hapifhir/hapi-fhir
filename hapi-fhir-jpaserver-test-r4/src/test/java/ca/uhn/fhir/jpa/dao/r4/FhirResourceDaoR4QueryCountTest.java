@@ -1932,6 +1932,62 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	/**
+	 * Make sure that even if we're using versioned references, we still take
+	 * advantage of query pre-fetching.
+	 */
+	@Test
+	public void testTransactionPreFetchFullyQualifiedVersionedIds() {
+		// Setup
+		myStorageSettings.getTreatBaseUrlsAsLocal().add("http://localhost");
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
+
+		createPatient(withId("P0"), withActiveTrue());
+		createPatient(withId("P1"), withActiveTrue());
+		createEncounter(withId("E0"), withSubject("Patient/P0"), withStatus("planned"));
+		createObservation(withId("O0"), withSubject("Patient/P0"));
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+
+		Patient patient = new Patient();
+		patient.setId("Patient/P1");
+		patient.setActive(false);
+		input.addEntry()
+			.setResource(patient)
+			.setFullUrl("http://localhost/Patient/P1/_history/1")
+			.getRequest()
+			.setUrl("Patient/P1/_history/1")
+			.setMethod(Bundle.HTTPVerb.PUT);
+
+		Observation observation = new Observation();
+		observation.setId("Observation/O0");
+		observation.setSubject(new Reference("http://localhost/Patient/P0/_history/1"));
+		observation.setEncounter(new Reference("http://localhost/Encounter/E0/_history/1"));
+		input.addEntry()
+			.setResource(observation)
+			.setFullUrl("http://localhost/Observation/O0/_history/1")
+			.getRequest()
+			.setUrl("Observation/O0/_history/1")
+			.setMethod(Bundle.HTTPVerb.PUT);
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(5, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+
+		observation = myObservationDao.read(new IdType("Observation/O0"), mySrd);
+		ourLog.info("Observation:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(observation));
+		assertEquals("Patient/P0/_history/1", observation.getSubject().getReference());
+		assertEquals("Encounter/E0/_history/1", observation.getEncounter().getReference());
+	}
+
+	/**
 	 * See the class javadoc before changing the counts in this test!
 	 */
 	@Test

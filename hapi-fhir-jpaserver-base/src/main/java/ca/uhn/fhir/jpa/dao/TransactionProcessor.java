@@ -247,7 +247,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				 */
 				if ("PUT".equals(verb) || "PATCH".equals(verb)) {
 					String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
-					if (countMatches(requestUrl, '/') == 1 && countMatches(requestUrl, '?') == 0) {
+					if (countMatches(requestUrl, '?') == 0) {
 						IIdType id = myFhirContext.getVersion().newIdType();
 						id.setValue(requestUrl);
 						IIdType unqualifiedVersionless = id.toUnqualifiedVersionless();
