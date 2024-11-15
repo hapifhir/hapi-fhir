@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.config;
 
 import com.google.common.base.Strings;
-import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.BatchSettings;
 import org.hibernate.cfg.JdbcSettings;
 import org.hibernate.cfg.ManagedBeanSettings;
@@ -61,7 +60,7 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 
 		if (!retVal.containsKey(JdbcSettings.CONNECTION_HANDLING)) {
 			retVal.put(
-				JdbcSettings.CONNECTION_HANDLING,
+					JdbcSettings.CONNECTION_HANDLING,
 					PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION);
 		}
 
