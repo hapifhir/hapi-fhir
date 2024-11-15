@@ -297,7 +297,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			theTransactionDetails.addResolvedResourceId(unqualifiedVersionlessId, next);
 			if (idsToPreResolve.get(unqualifiedVersionlessId) == Boolean.TRUE) {
 				if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
-						|| !next.getAssociatedResourceId().isIdPartValidLong()) {
+						|| (next.getAssociatedResourceId() != null && !next.getAssociatedResourceId().isIdPartValidLong())) {
 					idsToPreFetch.add(next.getId());
 				}
 			}
