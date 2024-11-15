@@ -249,7 +249,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 				addPidToResource(theEntity, cs);
 
 				myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(
-					cs, (ResourceTable) theEntity, theRequest);
+						cs, (ResourceTable) theEntity, theRequest);
 			}
 		}
 

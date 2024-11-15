@@ -150,7 +150,7 @@ public class TermValueSet implements Serializable {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theUrl, "theUrl must not be null or empty");
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
 				theUrl, MAX_URL_LENGTH, "URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theUrl));
-			myUrl = theUrl;
+		myUrl = theUrl;
 		return this;
 	}
 
