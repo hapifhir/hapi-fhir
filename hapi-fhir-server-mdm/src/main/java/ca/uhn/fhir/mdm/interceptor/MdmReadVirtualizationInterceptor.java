@@ -76,6 +76,9 @@ import java.util.Set;
  */
 public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>> {
 
+	public static final String CURRENTLY_PROCESSING_FLAG =
+			MdmReadVirtualizationInterceptor.class.getName() + "-CURRENTLY-PROCESSING";
+
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -101,6 +104,9 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShowResources(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
+		if (theRequestDetails.getUserData().get(CURRENTLY_PROCESSING_FLAG) == Boolean.TRUE) {
+			return;
+		}
 
 		// Gather all the resource IDs we might need to remap
 		ListMultimap<String, Integer> candidateResourceIds = extractRemapCandidateResources(theDetails);
@@ -148,8 +154,14 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 							// then we'll manually add it
 							IIdType targetResourceId = newIdType(targetId);
 							IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(targetResourceId.getResourceType());
-							IBaseResource goldenResource = dao.read(targetResourceId, theRequestDetails);
 
+							theRequestDetails.getUserData().put(CURRENTLY_PROCESSING_FLAG, Boolean.TRUE);
+							IBaseResource goldenResource;
+							try {
+								goldenResource = dao.read(targetResourceId, theRequestDetails);
+							} finally {
+								theRequestDetails.getUserData().remove(CURRENTLY_PROCESSING_FLAG);
+							}
 							theDetails.setResource(filteredIndex, goldenResource);
 							candidateResourceIds.put(targetId, filteredIndex);
 						}

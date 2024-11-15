@@ -1,10 +1,5 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
-import ca.uhn.fhir.interceptor.api.IPointcut;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
@@ -12,7 +7,6 @@ import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMLinkResults;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.interceptor.MdmReadVirtualizationInterceptor;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -34,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -166,7 +159,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 		registerVirtualizationInterceptor();
 
 		// Test
-		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		SearchParameterMap params = new SearchParameterMap();
 		params.addRevInclude(IBaseResource.INCLUDE_ALL);
 		IBundleProvider outcome = myPatientDao.search(params, mySrd);
 
