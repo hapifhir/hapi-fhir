@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.mdm.helper;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMLinkResults;
@@ -21,7 +20,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,12 +43,18 @@ public class MdmLinkHelper {
 		RHS // right hand side; practically speaking, this is the SourceResource of the link
 	}
 
-	@Autowired
-   private IMdmLinkDao<JpaPid, MdmLink> myMdmLinkRepo;
-	@Autowired
-	private IFhirResourceDao<Patient> myPatientDao;
-	@Autowired
-	private MdmLinkDaoSvc<JpaPid, MdmLink> myMdmLinkDaoSvc;
+	private final IMdmLinkDao<JpaPid, MdmLink> myMdmLinkRepo;
+	private final IFhirResourceDao<Patient> myPatientDao;
+	private final MdmLinkDaoSvc<JpaPid, MdmLink> myMdmLinkDaoSvc;
+
+	/**
+	 * Constructor
+	 */
+	public MdmLinkHelper(IMdmLinkDao<JpaPid, MdmLink> theMdmLinkRepo, IFhirResourceDao<Patient> thePatientDao, MdmLinkDaoSvc<JpaPid, MdmLink> theMdmLinkDaoSvc) {
+		myMdmLinkRepo = theMdmLinkRepo;
+		myPatientDao = thePatientDao;
+		myMdmLinkDaoSvc = theMdmLinkDaoSvc;
+	}
 
 	@Transactional
 	public void logMdmLinks() {
