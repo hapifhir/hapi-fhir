@@ -84,6 +84,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -439,36 +441,19 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-	@Test
-	public void testCreateWithIllegalReference() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testCreateWithIllegalReference_WrongTypeForId(boolean theClientAssignedId) {
+		IIdType id1;
+
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReference(id1);
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
+		if (theClientAssignedId) {
+			o1.setId("A");
+			id1 = myObservationDao.update(o1, mySrd).getId().toUnqualifiedVersionless();
+		} else {
+			id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
 		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReference(new IdDt("Organization", id1.getIdPart()));
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1095) + "Resource contains reference to unknown resource ID Organization/" + id1.getIdPart(), e.getMessage());
-		}
-
-		// Now with a forced ID
-
-		o1 = new Observation();
-		o1.setId("testCreateWithIllegalReference");
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		id1 = myObservationDao.update(o1, mySrd).getId().toUnqualifiedVersionless();
 
 		try {
 			Patient p = new Patient();
@@ -485,7 +470,31 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			myPatientDao.create(p, mySrd);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1094) + "Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
+			assertEquals(Msg.code(1094) + "Resource Organization/" + id1.getIdPart() + " not found, specified in path: Patient.managingOrganization", e.getMessage());
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testCreateWithIllegalReference_InvalidTypeForElement(boolean theClientAssignedId) {
+
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
+		IIdType id1;
+		if (theClientAssignedId) {
+			o1.setId("testCreateWithIllegalReference");
+			id1 = myObservationDao.update(o1, mySrd).getId().toUnqualifiedVersionless();
+		} else {
+			id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		try {
+			Patient p = new Patient();
+			p.getManagingOrganization().setReference(id1);
+			myPatientDao.create(p, mySrd);
+			fail("");
+		} catch (UnprocessableEntityException e) {
+			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
 		}
 
 	}
@@ -677,8 +686,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	/**
-	 * See #773
-	 */
+     * See #773
+     */
 	@Test
 	public void testDeleteResourceWithOutboundDeletedResources() {
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
@@ -1387,8 +1396,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	/**
-	 * See #196
-	 */
+     * See #196
+     */
 	@Test
 	public void testInvalidChainNames() {
 		ReferenceParam param = null;

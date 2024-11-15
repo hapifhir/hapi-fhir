@@ -166,7 +166,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				resolveResourceIdentities(theRequestPartitionId, ids, theExcludeDeleted);
 
 		// We only pass 1 input in so only 0..1 will come back
-		if (outcome.isEmpty()) {
+		if (!outcome.containsKey(id)) {
 			throw new ResourceNotFoundException(Msg.code(2001) + "Resource " + id + " is not known");
 		}
 

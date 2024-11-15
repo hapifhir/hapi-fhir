@@ -289,5 +289,5 @@ public class IdHelperServiceTest {
 		assertEquals(2L, result.get("B").getId());
 		assertEquals(3L, result.get("C").getId());
 	}
-	
+
 }
