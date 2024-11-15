@@ -889,7 +889,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.res_type='observation'")).as(selectQuery).isEqualTo(1);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.fhir_id in ('a')")).as(selectQuery).isEqualTo(1);
+			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.fhir_id='a'")).as(selectQuery).isEqualTo(1);
 
 			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t1.res_id from hfj_resource t1")).as(selectQuery).isEqualTo(1);
@@ -931,7 +931,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(1);
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.res_type='observation'")).as(selectQuery).isEqualTo(1);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.fhir_id in ('a')")).as(selectQuery).isEqualTo(1);
+			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.fhir_id='a'")).as(selectQuery).isEqualTo(1);
 		}
 
 		// Search by ID where at least one ID is a numeric ID
@@ -1248,7 +1248,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myPatientDao.update(p).getId().toUnqualifiedVersionless();
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
