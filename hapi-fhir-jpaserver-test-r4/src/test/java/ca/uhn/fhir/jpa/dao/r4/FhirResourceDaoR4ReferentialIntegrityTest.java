@@ -97,9 +97,9 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 			// When
 			myPatientDao.create(p);
 			fail();
-		} catch (UnprocessableEntityException e) {
+		} catch (InvalidRequestException e) {
 			// Then: identify that it is the wrong resource type, since ref integrity is enabled
-			assertEquals(Msg.code(1095) + "Resource contains reference to unknown resource ID Organization/" + obsId.getIdPart(), e.getMessage());
+			assertEquals(Msg.code(1094) + "Resource Organization/" + obsId.getIdPart() + " not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
 
 		// Given: now disable referential integrity on write

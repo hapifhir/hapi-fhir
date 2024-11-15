@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
@@ -204,12 +205,16 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		// We still haven't found IDs, let's look them up in the DB
 		if (!ids.isEmpty()) {
-			resolveResourceIdentitiesForFhirIdsUsingDatabase(theIds, requestPartitionId, ids, idToLookup);
+			resolveResourceIdentitiesForFhirIdsUsingDatabase(requestPartitionId, ids, idToLookup);
 		}
 
 		// Convert the multimap into a simple map
 		Map<IIdType, IResourceLookup> retVal = new HashMap<>();
 		for (Map.Entry<IIdType, IResourceLookup> next : idToLookup.entries()) {
+			if (theExcludeDeleted && next.getValue().getDeleted() != null) {
+				continue;
+			}
+
 			IResourceLookup previousValue = retVal.put(next.getKey(), next.getValue());
 			if (previousValue != null) {
 				/*
@@ -326,10 +331,22 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	private void resolveResourceIdentitiesForFhirIdsUsingDatabase(
-			Collection<IIdType> theIds,
 			RequestPartitionId theRequestPartitionId,
 			Collection<IIdType> theIdsToResolve,
 			ListMultimap<IIdType, IResourceLookup> theMapToPopulate) {
+
+		/*
+		 * If we have more than a threshold of IDs, we need to chunk the execution to
+		 * avoid having too many parameters in one SQL statement
+		 */
+		int maxPageSize = (SearchBuilder.getMaximumPageSize() / 2) - 10;
+		if (theIdsToResolve.size() > maxPageSize) {
+			new TaskChunker<IIdType>().chunk(theIdsToResolve, maxPageSize, chunk -> {
+				resolveResourceIdentitiesForFhirIdsUsingDatabase(theRequestPartitionId, chunk, theMapToPopulate);
+			});
+			return;
+		}
+
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
 		Root<ResourceTable> from = criteriaQuery.from(ResourceTable.class);
@@ -346,7 +363,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		}
 
 		// one create one clause per id.
-		List<Predicate> innerIdPredicates = new ArrayList<>(theIds.size());
+		List<Predicate> innerIdPredicates = new ArrayList<>(theIdsToResolve.size());
 		for (IIdType next : theIdsToResolve) {
 			List<Predicate> idPredicates = new ArrayList<>(2);
 

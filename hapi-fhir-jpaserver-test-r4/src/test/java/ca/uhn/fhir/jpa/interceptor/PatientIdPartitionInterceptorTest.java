@@ -188,9 +188,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		Patient patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertTrue(patient.getActive());
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(3);
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("rt1_0.PARTITION_ID in (?)");
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("where rt1_0.PARTITION_ID=? and rt1_0.RES_ID=?");
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("rt1_0.PARTITION_ID=?");
 	}
 
 	@Test
@@ -223,9 +222,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		List<SqlQuery> selectQueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-		assertEquals(4, selectQueriesForCurrentThread.size());
-		assertThat(selectQueriesForCurrentThread.get(0).getSql(false, false)).contains("PARTITION_ID in (?)");
-		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).contains("PARTITION_ID=");
+		assertEquals(3, selectQueriesForCurrentThread.size());
+		assertThat(selectQueriesForCurrentThread.get(0).getSql(false, false)).contains("PARTITION_ID=?");
 	}
 
 
@@ -238,7 +236,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(3);
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("rt1_0.PARTITION_ID in (?)");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("rt1_0.PARTITION_ID=?");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("t0.PARTITION_ID = ?");
 	}
 
@@ -352,9 +350,9 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		IBundleProvider outcome = myOrganizationDao.history(new IdType("Organization/C"), null, null, null, mySrd);
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, outcome.size());
-		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(3);
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("PARTITION_ID in ");
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("PARTITION_ID=");
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("PARTITION_ID=?");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("PARTITION_ID in (?)");
 	}
 
 

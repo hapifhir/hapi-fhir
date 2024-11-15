@@ -1,10 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
@@ -97,7 +92,11 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -472,31 +471,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1094) + "Resource Organization/" + id1.getIdPart() + " not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
-	}
-
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testCreateWithIllegalReference_InvalidTypeForElement(boolean theClientAssignedId) {
-
-		Observation o1 = new Observation();
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		IIdType id1;
-		if (theClientAssignedId) {
-			o1.setId("testCreateWithIllegalReference");
-			id1 = myObservationDao.update(o1, mySrd).getId().toUnqualifiedVersionless();
-		} else {
-			id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReference(id1);
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
-		}
-
 	}
 
 	@Test
