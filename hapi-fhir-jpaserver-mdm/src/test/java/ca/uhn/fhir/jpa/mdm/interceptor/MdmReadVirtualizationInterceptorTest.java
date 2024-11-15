@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.interceptor.MdmReadVirtualizationInterceptor;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -34,6 +35,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {MdmHelperConfig.class})
 public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
@@ -62,6 +64,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.SEARCH_TYPE);
 	}
 
 	@Override

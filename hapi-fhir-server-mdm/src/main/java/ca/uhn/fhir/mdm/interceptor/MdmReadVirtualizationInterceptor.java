@@ -102,10 +102,19 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 		myMdmSearchExpansionSvc.expandSearch(theRequestDetails, theSearchParameterMap, t -> true);
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShowResources(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
 		if (theRequestDetails.getUserData().get(CURRENTLY_PROCESSING_FLAG) == Boolean.TRUE) {
 			return;
+		}
+		switch (theRequestDetails.getRestOperationType()) {
+			case SEARCH_TYPE:
+			case SEARCH_SYSTEM:
+			case GET_PAGE:
+				break;
+			default:
+				return;
 		}
 
 		// Gather all the resource IDs we might need to remap
