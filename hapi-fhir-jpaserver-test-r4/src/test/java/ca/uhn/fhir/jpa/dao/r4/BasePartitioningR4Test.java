@@ -53,7 +53,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	private boolean myHaveDroppedForcedIdUniqueConstraint;
 	@Autowired
 	private IPartitionLookupSvc myPartitionConfigSvc;
-	private SearchParamValidatingInterceptor myRegisteredSearchParamValidatingInterceptor;
+	@Autowired
+	private SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
+	private boolean myRegisteredSearchParamValidatingInterceptor;
 
 	@AfterEach
 	public void after() {
@@ -71,8 +73,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
 		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().getMatchUrlCache());
 
-		if (myRegisteredSearchParamValidatingInterceptor != null) {
-			myInterceptorRegistry.unregisterInterceptor(myRegisteredSearchParamValidatingInterceptor);
+		if (myRegisteredSearchParamValidatingInterceptor) {
+			myInterceptorRegistry.unregisterInterceptor(mySearchParamValidatingInterceptor);
 		}
 	}
 
@@ -119,8 +121,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		}
 
 		if (myInterceptorRegistry.getAllRegisteredInterceptors().stream().noneMatch(t->t instanceof SearchParamValidatingInterceptor)) {
-			myRegisteredSearchParamValidatingInterceptor = new SearchParamValidatingInterceptor();
-			myInterceptorRegistry.registerInterceptor(myRegisteredSearchParamValidatingInterceptor);
+			myRegisteredSearchParamValidatingInterceptor = true;
+			myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
 		}
 	}
 

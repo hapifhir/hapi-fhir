@@ -218,9 +218,12 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			IResourceLookup previousValue = retVal.put(next.getKey(), next.getValue());
 			if (previousValue != null) {
 				/*
-				 *  This means that:
-				 *  1. There are two resources with the exact same resource type and forced id
-				 *  2. The unique constraint on this column-pair has been dropped
+				 *  This means that either:
+				 *  1. There are two resources with the exact same resource type and forced
+				 *     id. The most likely reason for that is that someone is performing a
+				 *     multi-partition search and there are resources on each partition
+				 *     with the same ID.
+				 *  2. The unique constraint on the FHIR_ID column has been dropped
 				 */
 				ourLog.warn(
 						"Resource ID[{}] corresponds to lookups: {} and {}",
@@ -235,11 +238,25 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		return retVal;
 	}
 
+	/**
+	 * Fetch the resource identity ({@link IResourceLookup}) for a collection of
+	 * numeric IDs, i.e. resource IDs that should actually correspond to the PID
+	 * of those resources.
+	 *
+	 * @param theRequestPartitionId The partition(s) to search
+	 * @param theExcludeDeleted Should we exclude any deleted identities from the
+	 *                          results?
+	 * @param theIdsToResolve The IDs we should look up
+	 * @param theMapToPopulate The results will be populated into this map
+	 */
 	private void resolveResourceIdentitiesForPureNumericIds(
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			boolean theExcludeDeleted,
 			Collection<IIdType> theIdsToResolve,
 			ListMultimap<IIdType, IResourceLookup> theMapToPopulate) {
+
+		// FIXME: what if there are more than 1000 IDs?
+
 		List<MemoryCacheService.TypedPidCacheKey> numericIds = null;
 		for (Iterator<IIdType> iter = theIdsToResolve.iterator(); iter.hasNext(); ) {
 			IIdType t = iter.next();
@@ -254,58 +271,88 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			}
 		}
 		if (numericIds != null) {
-			if (!myStorageSettings.isDeleteEnabled() || !theExcludeDeleted) {
-				for (Iterator<MemoryCacheService.TypedPidCacheKey> forcedIdIterator = numericIds.iterator();
-						forcedIdIterator.hasNext(); ) {
-					MemoryCacheService.TypedPidCacheKey typedResourcePid = forcedIdIterator.next();
-					List<IResourceLookup<JpaPid>> cachedLookup = myMemoryCacheService.getIfPresent(
-							MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, typedResourcePid);
-					if (cachedLookup != null) {
-						forcedIdIterator.remove();
-						theMapToPopulate.putAll(typedResourcePid.toIdType(myFhirCtx), cachedLookup);
-					}
-				}
-			}
-
-			if (!numericIds.isEmpty()) {
-				Collection<Object[]> lookup;
-				List<Long> remainingPids = numericIds.stream()
-						.map(MemoryCacheService.TypedPidCacheKey::getPid)
-						.collect(Collectors.toList());
-				if (theRequestPartitionId.isAllPartitions()) {
-					lookup = myResourceTableDao.findLookupFieldsByResourcePid(remainingPids);
-				} else {
-					if (theRequestPartitionId.isDefaultPartition()) {
-						lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(remainingPids);
-					} else if (theRequestPartitionId.hasDefaultPartitionId()) {
-						lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIdsOrNullPartition(
-								remainingPids, theRequestPartitionId.getPartitionIdsWithoutDefault());
-					} else {
-						lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIds(
-								remainingPids, theRequestPartitionId.getPartitionIds());
-					}
-				}
-				lookup.stream()
-						.map(t -> new JpaResourceLookup(
-								(String) t[0],
-								(Long) t[1],
-								(Date) t[2],
-								PartitionablePartitionId.with((Integer) t[3], (LocalDate) t[4])))
-						.forEach(t -> {
-							IIdType id = newIdType(t.getResourceType() + "/"
-									+ t.getPersistentId().toString());
-							theMapToPopulate.put(id, t);
-
-							MemoryCacheService.TypedPidCacheKey nextKey = new MemoryCacheService.TypedPidCacheKey(
-									t.getResourceType(), t.getPersistentId().getId(), theRequestPartitionId);
-							List<IResourceLookup> value = theMapToPopulate.get(id);
-							myMemoryCacheService.putAfterCommit(
-									MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, nextKey, value);
-						});
-			}
+			int maxPageSize = (SearchBuilder.getMaximumPageSize() / 2);
+			TaskChunker.chunk(
+					numericIds,
+					maxPageSize,
+					chunk -> resolveResourceIdentitiesForPureNumericTypedIds(
+							theRequestPartitionId, theExcludeDeleted, theMapToPopulate, chunk));
 		}
 	}
 
+	/**
+	 * Internal method for {@link #resolveResourceIdentitiesForPureNumericIds(RequestPartitionId, boolean, Collection, ListMultimap)}
+	 */
+	private void resolveResourceIdentitiesForPureNumericTypedIds(
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			boolean theExcludeDeleted,
+			ListMultimap<IIdType, IResourceLookup> theMapToPopulate,
+			List<MemoryCacheService.TypedPidCacheKey> numericIds) {
+		if (!myStorageSettings.isDeleteEnabled() || !theExcludeDeleted) {
+			for (Iterator<MemoryCacheService.TypedPidCacheKey> forcedIdIterator = numericIds.iterator();
+					forcedIdIterator.hasNext(); ) {
+				MemoryCacheService.TypedPidCacheKey typedResourcePid = forcedIdIterator.next();
+				List<IResourceLookup<JpaPid>> cachedLookup = myMemoryCacheService.getIfPresent(
+						MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, typedResourcePid);
+				if (cachedLookup != null) {
+					forcedIdIterator.remove();
+					theMapToPopulate.putAll(typedResourcePid.toIdType(myFhirCtx), cachedLookup);
+				}
+			}
+		}
+
+		if (!numericIds.isEmpty()) {
+			Collection<Object[]> lookup;
+			List<Long> remainingPids = numericIds.stream()
+					.map(MemoryCacheService.TypedPidCacheKey::getPid)
+					.collect(Collectors.toList());
+			if (theRequestPartitionId.isAllPartitions()) {
+				lookup = myResourceTableDao.findLookupFieldsByResourcePid(remainingPids);
+			} else {
+				if (theRequestPartitionId.isDefaultPartition()) {
+					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(remainingPids);
+				} else if (theRequestPartitionId.hasDefaultPartitionId()) {
+					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIdsOrNullPartition(
+							remainingPids, theRequestPartitionId.getPartitionIdsWithoutDefault());
+				} else {
+					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIds(
+							remainingPids, theRequestPartitionId.getPartitionIds());
+				}
+			}
+			lookup.stream()
+					.map(t -> new JpaResourceLookup(
+							(String) t[0],
+							(Long) t[1],
+							(Date) t[2],
+							PartitionablePartitionId.with((Integer) t[3], (LocalDate) t[4])))
+					.forEach(t -> {
+						IIdType id = newIdType(
+								t.getResourceType() + "/" + t.getPersistentId().toString());
+						theMapToPopulate.put(id, t);
+
+						MemoryCacheService.TypedPidCacheKey nextKey = new MemoryCacheService.TypedPidCacheKey(
+								t.getResourceType(), t.getPersistentId().getId(), theRequestPartitionId);
+						List<IResourceLookup> value = theMapToPopulate.get(id);
+						myMemoryCacheService.putAfterCommit(
+								MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, nextKey, value);
+					});
+		}
+	}
+
+	/**
+	 * Fetch the resource identity ({@link IResourceLookup}) for a collection of
+	 * resource IDs from the internal memory cache if possible. Note that we only
+	 * use cached results if deletes are disabled on the server (since it is
+	 * therefore not possible that we have an entry in the cache that has since
+	 * been deleted but the cache doesn't know about the deletion), or if we
+	 * aren't excluding deleted results anyhow.
+	 *
+	 * @param theRequestPartitionId The partition(s) to search
+	 * @param theExcludeDeleted Should we exclude any deleted identities from the
+	 *                          results?
+	 * @param theIdsToResolve The IDs we should look up
+	 * @param theMapToPopulate The results will be populated into this map
+	 */
 	private void resolveResourceIdentitiesForFhirIdsUsingCache(
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			boolean theExcludeDeleted,
@@ -330,6 +377,14 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		}
 	}
 
+	/**
+	 * Fetch the resource identity ({@link IResourceLookup}) for a collection of
+	 * resource IDs from the database
+	 *
+	 * @param theRequestPartitionId The partition(s) to search
+	 * @param theIdsToResolve The IDs we should look up
+	 * @param theMapToPopulate The results will be populated into this map
+	 */
 	private void resolveResourceIdentitiesForFhirIdsUsingDatabase(
 			RequestPartitionId theRequestPartitionId,
 			Collection<IIdType> theIdsToResolve,
@@ -341,7 +396,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		 */
 		int maxPageSize = (SearchBuilder.getMaximumPageSize() / 2) - 10;
 		if (theIdsToResolve.size() > maxPageSize) {
-			new TaskChunker<IIdType>().chunk(theIdsToResolve, maxPageSize, chunk -> {
+			TaskChunker.chunk(theIdsToResolve, maxPageSize, chunk -> {
 				resolveResourceIdentitiesForFhirIdsUsingDatabase(theRequestPartitionId, chunk, theMapToPopulate);
 			});
 			return;
@@ -578,11 +633,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 				idsToCheck.add(nextId);
 			}
-			new QueryChunker<IIdType>()
-					.chunk(
-							idsToCheck,
-							SearchBuilder.getMaximumPageSize() / 2,
-							ids -> doResolvePersistentIds(theRequestPartitionId, ids, retVal));
+			new QueryChunker<IIdType>();
+			TaskChunker.chunk(
+					idsToCheck,
+					SearchBuilder.getMaximumPageSize() / 2,
+					ids -> doResolvePersistentIds(theRequestPartitionId, ids, retVal));
 		}
 
 		return retVal;
@@ -736,7 +791,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		List<Long> remainingPids =
 				thePids.stream().filter(t -> !retVal.containsKey(t)).collect(Collectors.toList());
 
-		new QueryChunker<Long>().chunk(remainingPids, t -> {
+		QueryChunker.chunk(remainingPids, t -> {
 			List<ResourceTable> resourceEntities = myResourceTableDao.findAllById(t);
 
 			for (ResourceTable nextResourceEntity : resourceEntities) {

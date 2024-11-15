@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -42,6 +41,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -87,9 +87,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]+[?][a-z0-9-]+=[^&,]+$");
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
-
-	// TODO: REMOVE THIS BEFORE MERGING
-	private static final boolean ourFixes = true;
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
@@ -153,11 +150,28 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			List<IBase> theEntries,
 			StopWatch theTransactionStopWatch) {
 
+		/*
+		 * We temporarily set the flush mode for the duration of the DB transaction
+		 * from the default of AUTO to the temporary value of COMMIT here. We do this
+		 * because in AUTO mode, if any SQL SELECTs are required during the
+		 * processing of an individual transaction entry, the server will flush the
+		 * pending INSERTs/UPDATEs to the database before executing the SELECT.
+		 * This hurts performance since we don't get the benefit of batching those
+		 * write operations as much as possible. The tradeoff here is that we
+		 * could theoretically have transaction operations which try to read
+		 * data previously written in the same transaction, and they won't see it.
+		 * This shouldn't actually be an issue anyhow - we pre-fetch conditional
+		 * URLs and reference targets at the start of the transaction. But this
+		 * tradeoff still feels worth it, since the most common use of transactions
+		 * is for fast writing of data.
+		 *
+		 * Note that it's probably not necessary to reset it back, it should
+		 * automatically go back to the default value after the transaction but
+		 * we reset it just to be safe.
+		 */
 		FlushModeType initialFlushMode = myEntityManager.getFlushMode();
 		try {
-			if (ourFixes) {
-				myEntityManager.setFlushMode(FlushModeType.COMMIT);
-			}
+			myEntityManager.setFlushMode(FlushModeType.COMMIT);
 
 			ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
 			RequestPartitionId requestPartitionId =
@@ -241,30 +255,37 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					}
 				}
 
-				if (ourFixes) {
-					/*
-					 * Pre-fetch any resources that are referred to directly by ID (don't replace
-					 * the TRUE flag with FALSE in case we're updating a resource but also
-					 * pointing to that resource elsewhere in the bundle)
-					 */
-					if ("PUT".equals(verb) || "POST".equals(verb)) {
-						for (ResourceReferenceInfo referenceInfo : terser.getAllResourceReferences(resource)) {
-							IIdType reference =
-									referenceInfo.getResourceReference().getReferenceElement();
-							if (reference != null
-									&& !reference.isLocal()
-									&& !reference.isUuid()
-									&& reference.hasResourceType()
-									&& reference.hasIdPart()
-									&& !reference.getValue().contains("?")) {
-								idsToPreResolve.putIfAbsent(reference.toUnqualifiedVersionless(), Boolean.FALSE);
-							}
+				/*
+				 * Pre-fetch any resources that are referred to directly by ID (don't replace
+				 * the TRUE flag with FALSE in case we're updating a resource but also
+				 * pointing to that resource elsewhere in the bundle)
+				 */
+				if ("PUT".equals(verb) || "POST".equals(verb)) {
+					for (ResourceReferenceInfo referenceInfo : terser.getAllResourceReferences(resource)) {
+						IIdType reference = referenceInfo.getResourceReference().getReferenceElement();
+						if (reference != null
+								&& !reference.isLocal()
+								&& !reference.isUuid()
+								&& reference.hasResourceType()
+								&& reference.hasIdPart()
+								&& !reference.getValue().contains("?")) {
+							idsToPreResolve.putIfAbsent(reference.toUnqualifiedVersionless(), Boolean.FALSE);
 						}
 					}
 				}
 			}
 		}
 
+		/*
+		 * If all the entries in the pre-fetch ID map have a value of TRUE, this
+		 * means we only have IDs associated with resources we're going to directly
+		 * update/patch within the transaction. In that case, it's fine to include
+		 * deleted resources, since updating them will bring them back to life.
+		 *
+		 * If we have any FALSE entries, we're also pre-fetching reference targets
+		 * which means we don't want deleted resources, because those are not OK
+		 * to reference.
+		 */
 		boolean excludeDeleted = idsToPreResolve.values().stream().anyMatch(t -> !t);
 
 		Map<IIdType, IResourceLookup> outcomes = myIdHelperService.resolveResourceIdentities(
@@ -329,12 +350,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 		}
 
-		new QueryChunker<MatchUrlToResolve>()
-				.chunk(
-						searchParameterMapsToResolve,
-						100,
-						map -> preFetchSearchParameterMaps(
-								theTransactionDetails, theRequestPartitionId, map, idsToPreFetch));
+		TaskChunker.chunk(
+				searchParameterMapsToResolve,
+				100,
+				map -> preFetchSearchParameterMaps(theTransactionDetails, theRequestPartitionId, map, idsToPreFetch));
 	}
 
 	/**
