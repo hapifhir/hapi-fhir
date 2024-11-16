@@ -39,7 +39,11 @@ import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -85,6 +89,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -113,12 +120,17 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoR4Test.class);
 	private static final String TEST_IDENTIFIER_SYSTEM = "http://some-system.com";
+
+	@Mock
+	private Appender<ILoggingEvent> myAppender;
 
 	@AfterEach
 	public void after() {
@@ -2956,7 +2968,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		 * these four operations in the reverse order and verifies
 		 * that they are invoked correctly.
 		 */
-		//@formatter:off
+		//@formatter:on
 
 		int pass = 0;
 		IdType patientPlaceholderId = IdType.newRandomUuid();
@@ -3023,22 +3035,38 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionOruBundle() throws IOException {
+		// setup
 		myStorageSettings.setAllowMultipleDelete(true);
+		Logger logger = (Logger) LoggerFactory.getLogger(AbstractEntityPersister.class);
+		logger.addAppender(myAppender);
 
-		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/oruBundle.json"), StandardCharsets.UTF_8);
+		try {
+			String input = IOUtils.toString(getClass().getResourceAsStream("/r4/oruBundle.json"), StandardCharsets.UTF_8);
 
-		Bundle inputBundle;
-		Bundle outputBundle;
-		inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
-		outputBundle = mySystemDao.transaction(mySrd, inputBundle);
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
+			Bundle inputBundle;
+			Bundle outputBundle;
 
-		inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
-		outputBundle = mySystemDao.transaction(mySrd, inputBundle);
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
+			// execute transaction
+			inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
+			outputBundle = mySystemDao.transaction(mySrd, inputBundle);
+			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
 
-		IBundleProvider allPatients = myPatientDao.search(new SearchParameterMap());
-		assertEquals(1, allPatients.size().intValue());
+			// execute same transaction again
+			inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
+			outputBundle = mySystemDao.transaction(mySrd, inputBundle);
+			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
+
+			// validate
+			IBundleProvider allPatients = myPatientDao.search(new SearchParameterMap());
+			assertEquals(1, allPatients.size().intValue());
+
+			// validate that AbstractEntityPersister does not produce log messages
+			// see https://github.com/hapifhir/hapi-fhir/issues/6475 for details
+			ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
+			verify(myAppender, times(0)).doAppend(logCaptor.capture());
+		} finally {
+			logger.detachAppender(myAppender);
+		}
 	}
 
 	@Test
