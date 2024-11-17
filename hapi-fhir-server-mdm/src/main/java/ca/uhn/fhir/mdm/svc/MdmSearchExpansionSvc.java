@@ -75,9 +75,9 @@ public class MdmSearchExpansionSvc {
 	 * @since 8.0.0
 	 */
 	public MdmSearchExpansionResults expandSearchAndStoreInRequestDetails(
-		@Nullable RequestDetails theRequestDetails,
-		@Nonnull SearchParameterMap theSearchParameterMap,
-		IParamTester theParamTester) {
+			@Nullable RequestDetails theRequestDetails,
+			@Nonnull SearchParameterMap theSearchParameterMap,
+			IParamTester theParamTester) {
 
 		if (theRequestDetails == null) {
 			return null;
@@ -88,7 +88,7 @@ public class MdmSearchExpansionSvc {
 		String resourceName = theRequestDetails.getResourceName();
 		String queryString = theSearchParameterMap.toNormalizedQueryString(myFhirContext);
 		if (!Objects.equals(resourceName, theRequestDetails.getUserData().get(RESOURCE_NAME))
-			|| !Objects.equals(queryString, theRequestDetails.getUserData().get(QUERY_STRING))) {
+				|| !Objects.equals(queryString, theRequestDetails.getUserData().get(QUERY_STRING))) {
 			theRequestDetails.getUserData().remove(EXPANSION_RESULTS);
 		}
 		theRequestDetails.getUserData().put(RESOURCE_NAME, resourceName);
@@ -102,8 +102,8 @@ public class MdmSearchExpansionSvc {
 		expansionResults = new MdmSearchExpansionResults();
 
 		final RequestPartitionId requestPartitionId =
-			myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-				theRequestDetails, theRequestDetails.getResourceName(), theSearchParameterMap);
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+						theRequestDetails, theRequestDetails.getResourceName(), theSearchParameterMap);
 
 		for (Map.Entry<String, List<List<IQueryParameterType>>> set : theSearchParameterMap.entrySet()) {
 			String paramName = set.getKey();
@@ -112,12 +112,12 @@ public class MdmSearchExpansionSvc {
 				// here we will know if it's an _id param or not
 				// from theSearchParameterMap.keySet()
 				expandAnyReferenceParameters(
-					requestPartitionId,
-					theRequestDetails.getResourceName(),
-					paramName,
-					orList,
-					theParamTester,
-					expansionResults);
+						requestPartitionId,
+						theRequestDetails.getResourceName(),
+						paramName,
+						orList,
+						theParamTester,
+						expansionResults);
 			}
 		}
 
@@ -127,12 +127,12 @@ public class MdmSearchExpansionSvc {
 	}
 
 	private void expandAnyReferenceParameters(
-		RequestPartitionId theRequestPartitionId,
-		String theResourceName,
-		String theParamName,
-		List<IQueryParameterType> orList,
-		IParamTester theParamTester,
-		MdmSearchExpansionResults theResultsToPopulate) {
+			RequestPartitionId theRequestPartitionId,
+			String theResourceName,
+			String theParamName,
+			List<IQueryParameterType> orList,
+			IParamTester theParamTester,
+			MdmSearchExpansionResults theResultsToPopulate) {
 
 		List<IQueryParameterType> toRemove = new ArrayList<>();
 		List<IQueryParameterType> toAdd = new ArrayList<>();
@@ -144,12 +144,12 @@ public class MdmSearchExpansionSvc {
 					// First, attempt to expand as a source resource.
 					IIdType sourceId = newId(refParam.getValue());
 					Set<String> expandedResourceIds =
-						myMdmLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, sourceId);
+							myMdmLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, sourceId);
 
 					// If we failed, attempt to expand as a golden resource
 					if (expandedResourceIds.isEmpty()) {
 						expandedResourceIds =
-							myMdmLinkExpandSvc.expandMdmByGoldenResourceId(theRequestPartitionId, sourceId);
+								myMdmLinkExpandSvc.expandMdmByGoldenResourceId(theRequestPartitionId, sourceId);
 					}
 
 					// Rebuild the search param list.
@@ -158,7 +158,7 @@ public class MdmSearchExpansionSvc {
 						toRemove.add(refParam);
 						for (String resourceId : expandedResourceIds) {
 							IIdType nextReference =
-								newId(addResourceTypeIfNecessary(refParam.getResourceType(), resourceId));
+									newId(addResourceTypeIfNecessary(refParam.getResourceType(), resourceId));
 							toAdd.add(new ReferenceParam(nextReference));
 							theResultsToPopulate.addExpandedId(sourceId, nextReference);
 						}
@@ -166,13 +166,13 @@ public class MdmSearchExpansionSvc {
 				}
 			} else if (theParamName.equalsIgnoreCase(IAnyResource.SP_RES_ID)) {
 				expandIdParameter(
-					theRequestPartitionId,
-					iQueryParameterType,
-					toAdd,
-					toRemove,
-					theParamTester,
-					theResourceName,
-					theResultsToPopulate);
+						theRequestPartitionId,
+						iQueryParameterType,
+						toAdd,
+						toRemove,
+						theParamTester,
+						theResourceName,
+						theResultsToPopulate);
 			}
 		}
 
@@ -197,13 +197,13 @@ public class MdmSearchExpansionSvc {
 	 * ids of linked resources.
 	 */
 	private void expandIdParameter(
-		RequestPartitionId theRequestPartitionId,
-		IQueryParameterType theIdParameter,
-		List<IQueryParameterType> theAddList,
-		List<IQueryParameterType> theRemoveList,
-		IParamTester theParamTester,
-		String theResourceName,
-		MdmSearchExpansionResults theResultsToPopulate) {
+			RequestPartitionId theRequestPartitionId,
+			IQueryParameterType theIdParameter,
+			List<IQueryParameterType> theAddList,
+			List<IQueryParameterType> theRemoveList,
+			IParamTester theParamTester,
+			String theResourceName,
+			MdmSearchExpansionResults theResultsToPopulate) {
 		// id parameters can either be StringParam (for $everything operation)
 		// or TokenParam (for searches)
 		// either case, we want to expand it out and grab all related resources
@@ -225,8 +225,8 @@ public class MdmSearchExpansionSvc {
 		if (id == null) {
 			// in case the _id parameter type is different from the above
 			ourLog.warn(
-				"_id parameter of incorrect type. Expected StringParam or TokenParam, but got {}. No expansion will be done!",
-				theIdParameter.getClass().getSimpleName());
+					"_id parameter of incorrect type. Expected StringParam or TokenParam, but got {}. No expansion will be done!",
+					theIdParameter.getClass().getSimpleName());
 		} else if (mdmExpand) {
 			ourLog.debug("_id parameter must be expanded out from: {}", id.getValue());
 
@@ -248,7 +248,7 @@ public class MdmSearchExpansionSvc {
 
 				for (String expandedId : expandedResourceIds) {
 					theResultsToPopulate.addExpandedId(
-						id, newId(addResourceTypeIfNecessary(theResourceName, expandedId)));
+							id, newId(addResourceTypeIfNecessary(theResourceName, expandedId)));
 				}
 			}
 		}
@@ -269,7 +269,7 @@ public class MdmSearchExpansionSvc {
 	@Nullable
 	public static MdmSearchExpansionResults getCachedExpansionResults(@Nonnull RequestDetails theRequestDetails) {
 		MdmSearchExpansionResults expansionResults =
-			(MdmSearchExpansionResults) theRequestDetails.getUserData().get(EXPANSION_RESULTS);
+				(MdmSearchExpansionResults) theRequestDetails.getUserData().get(EXPANSION_RESULTS);
 		return expansionResults;
 	}
 }
