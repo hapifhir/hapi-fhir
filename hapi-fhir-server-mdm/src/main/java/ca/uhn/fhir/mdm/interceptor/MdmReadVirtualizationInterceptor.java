@@ -76,9 +76,9 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmReadVirtualizationInterceptor.class);
 
 	private static final String CURRENTLY_PROCESSING_FLAG =
-		MdmReadVirtualizationInterceptor.class.getName() + "_CURRENTLY_PROCESSING";
+			MdmReadVirtualizationInterceptor.class.getName() + "_CURRENTLY_PROCESSING";
 	private static final MdmSearchExpansionSvc.IParamTester PARAM_TESTER_NO_RES_ID =
-		(paramName, param) -> !IAnyResource.SP_RES_ID.equals(paramName);
+			(paramName, param) -> !IAnyResource.SP_RES_ID.equals(paramName);
 	private static final MdmSearchExpansionSvc.IParamTester PARAM_TESTER_ALL = (paramName, param) -> true;
 
 	@Autowired
@@ -100,30 +100,30 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	private HapiTransactionService myTxService;
 
 	@Hook(
-		value = Pointcut.STORAGE_PRESEARCH_REGISTERED,
-		order = MdmConstants.ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR)
+			value = Pointcut.STORAGE_PRESEARCH_REGISTERED,
+			order = MdmConstants.ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR)
 	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
 		ourLog.atDebug()
-			.setMessage("Original search: {}{}")
-			.addArgument(theRequestDetails.getResourceName())
-			.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
-			.log();
+				.setMessage("Original search: {}{}")
+				.addArgument(theRequestDetails.getResourceName())
+				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
+				.log();
 
 		if (theSearchParameterMap.hasIncludes() || theSearchParameterMap.hasRevIncludes()) {
 			myMdmSearchExpansionSvc.expandSearchAndStoreInRequestDetails(
-				theRequestDetails, theSearchParameterMap, PARAM_TESTER_ALL);
+					theRequestDetails, theSearchParameterMap, PARAM_TESTER_ALL);
 		} else {
 			// If we don't have any includes, it's not worth auto-expanding the _id parameter since we'll only end
 			// up filtering out the extra resources afterward
 			myMdmSearchExpansionSvc.expandSearchAndStoreInRequestDetails(
-				theRequestDetails, theSearchParameterMap, PARAM_TESTER_NO_RES_ID);
+					theRequestDetails, theSearchParameterMap, PARAM_TESTER_NO_RES_ID);
 		}
 
 		ourLog.atDebug()
-			.setMessage("R search: {}{}")
-			.addArgument(theRequestDetails.getResourceName())
-			.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
-			.log();
+				.setMessage("R search: {}{}")
+				.addArgument(theRequestDetails.getResourceName())
+				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
+				.log();
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
@@ -176,29 +176,31 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 				List<ResourceReferenceInfo> referenceInfos = terser.getAllResourceReferences(resource);
 				for (ResourceReferenceInfo referenceInfo : referenceInfos) {
 					IIdType referenceId = referenceInfo
-						.getResourceReference()
-						.getReferenceElement()
-						.toUnqualifiedVersionless();
+							.getResourceReference()
+							.getReferenceElement()
+							.toUnqualifiedVersionless();
 					if (referenceId.hasResourceType()
-						&& referenceId.hasIdPart()
-						&& !referenceId.isLocal()
-						&& !referenceId.isUuid()) {
+							&& referenceId.hasIdPart()
+							&& !referenceId.isLocal()
+							&& !referenceId.isUuid()) {
 						Optional<IIdType> nonExpandedId = expansionResults.getOriginalIdForExpandedId(referenceId);
 						if (nonExpandedId.isPresent()) {
 							referenceInfo
-								.getResourceReference()
-								.setReference(nonExpandedId.get().getValue());
+									.getResourceReference()
+									.setReference(nonExpandedId.get().getValue());
 						}
 					}
 				}
 			}
 		}
 
-		ourLog.atDebug().setMessage("Returning resources: {}").addArgument(() -> theDetails.getAllResources().stream()
-			.map(t -> t.getIdElement().toUnqualifiedVersionless().getValue())
-			.sorted()
-			.collect(Collectors.toList())).log();
-
+		ourLog.atDebug()
+				.setMessage("Returning resources: {}")
+				.addArgument(() -> theDetails.getAllResources().stream()
+						.map(t -> t.getIdElement().toUnqualifiedVersionless().getValue())
+						.sorted()
+						.collect(Collectors.toList()))
+				.log();
 	}
 
 	private IBaseResource fetchResourceFromRepository(RequestDetails theRequestDetails, IIdType originalId) {
@@ -212,5 +214,4 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 		}
 		return originalResource;
 	}
-
 }
