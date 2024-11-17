@@ -19,17 +19,18 @@
  */
 package ca.uhn.fhir.mdm.svc;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.BaseParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,16 +38,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class MdmSearchExpansionSvc {
-	// A simple interface to turn ids into some form of IQueryParameterTypes
-	private interface Creator<T extends IQueryParameterType> {
-		T create(String id);
-	}
-
+	private static final String EXPANSION_RESULTS = MdmSearchExpansionSvc.class.getName() + "_EXPANSION_RESULTS";
+	private static final String RESOURCE_NAME = MdmSearchExpansionSvc.class.getName() + "_RESOURCE_NAME";
+	private static final String QUERY_STRING = MdmSearchExpansionSvc.class.getName() + "_QUERY_STRING";
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+
+	@Autowired
+	private FhirContext myFhirContext;
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
@@ -64,71 +68,120 @@ public class MdmSearchExpansionSvc {
 	 * This is an internal MDM service and its API is subject to change. Use with caution!
 	 * </p>
 	 *
-	 * @param theRequestDetails The incoming request details
+	 * @param theRequestDetails     The incoming request details
 	 * @param theSearchParameterMap The parameter map to modify
-	 * @param theExpansionCandidateTester Each {@link ReferenceParam} in the map will be first tested
-	 *                                    by this function to determine whether it should be expanded.
+	 * @param theParamTester        Determines which parameters should be expanded
+	 * @return Returns the results of the expansion, which are also stored in the {@link RequestDetails} userdata map, so this service will only be invoked a maximum of once per request.
 	 * @since 8.0.0
 	 */
-	public void expandSearch(
-			RequestDetails theRequestDetails,
-			SearchParameterMap theSearchParameterMap,
-			Function<ReferenceParam, Boolean> theExpansionCandidateTester) {
-		final RequestDetails requestDetailsToUse =
-				theRequestDetails == null ? new SystemRequestDetails() : theRequestDetails;
+	public MdmSearchExpansionResults expandSearchAndStoreInRequestDetails(
+			@Nullable RequestDetails theRequestDetails,
+			@Nonnull SearchParameterMap theSearchParameterMap,
+			IParamTester theParamTester) {
+
+		if (theRequestDetails == null) {
+			return null;
+		}
+
+		// Try to detect if the RequestDetails is being reused across multiple different queries, which
+		// can happen during CQL measure evaluation
+		String resourceName = theRequestDetails.getResourceName();
+		String queryString = theSearchParameterMap.toNormalizedQueryString(myFhirContext);
+		if (!Objects.equals(resourceName, theRequestDetails.getUserData().get(RESOURCE_NAME))
+				|| !Objects.equals(queryString, theRequestDetails.getUserData().get(QUERY_STRING))) {
+			theRequestDetails.getUserData().remove(EXPANSION_RESULTS);
+		}
+		theRequestDetails.getUserData().put(RESOURCE_NAME, resourceName);
+		theRequestDetails.getUserData().put(QUERY_STRING, queryString);
+
+		MdmSearchExpansionResults expansionResults = getCachedExpansionResults(theRequestDetails);
+		if (expansionResults != null) {
+			return expansionResults;
+		}
+
+		expansionResults = new MdmSearchExpansionResults();
+
 		final RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-						requestDetailsToUse, requestDetailsToUse.getResourceName(), theSearchParameterMap);
+						theRequestDetails, theRequestDetails.getResourceName(), theSearchParameterMap);
+
 		for (Map.Entry<String, List<List<IQueryParameterType>>> set : theSearchParameterMap.entrySet()) {
 			String paramName = set.getKey();
 			List<List<IQueryParameterType>> andList = set.getValue();
 			for (List<IQueryParameterType> orList : andList) {
 				// here we will know if it's an _id param or not
 				// from theSearchParameterMap.keySet()
-				expandAnyReferenceParameters(requestPartitionId, paramName, orList, theExpansionCandidateTester);
+				expandAnyReferenceParameters(
+						requestPartitionId,
+						theRequestDetails.getResourceName(),
+						paramName,
+						orList,
+						theParamTester,
+						expansionResults);
 			}
 		}
+
+		theRequestDetails.getUserData().put(EXPANSION_RESULTS, expansionResults);
+
+		return expansionResults;
 	}
 
 	private void expandAnyReferenceParameters(
 			RequestPartitionId theRequestPartitionId,
+			String theResourceName,
 			String theParamName,
 			List<IQueryParameterType> orList,
-			Function<ReferenceParam, Boolean> theExpansionCandidateTester) {
+			IParamTester theParamTester,
+			MdmSearchExpansionResults theResultsToPopulate) {
+
 		List<IQueryParameterType> toRemove = new ArrayList<>();
 		List<IQueryParameterType> toAdd = new ArrayList<>();
 		for (IQueryParameterType iQueryParameterType : orList) {
 			if (iQueryParameterType instanceof ReferenceParam) {
 				ReferenceParam refParam = (ReferenceParam) iQueryParameterType;
-				if (theExpansionCandidateTester.apply(refParam)) {
+				if (theParamTester.shouldExpand(theParamName, refParam)) {
 					ourLog.debug("Found a reference parameter to expand: {}", refParam);
 					// First, attempt to expand as a source resource.
-					Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(
-							theRequestPartitionId, new IdDt(refParam.getValue()));
+					IIdType sourceId = newId(refParam.getValue());
+					Set<String> expandedResourceIds =
+							myMdmLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, sourceId);
 
 					// If we failed, attempt to expand as a golden resource
 					if (expandedResourceIds.isEmpty()) {
-						expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId(
-								theRequestPartitionId, new IdDt(refParam.getValue()));
+						expandedResourceIds =
+								myMdmLinkExpandSvc.expandMdmByGoldenResourceId(theRequestPartitionId, sourceId);
 					}
 
 					// Rebuild the search param list.
 					if (!expandedResourceIds.isEmpty()) {
 						ourLog.debug("Parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
 						toRemove.add(refParam);
-						expandedResourceIds.stream()
-								.map(resourceId -> addResourceTypeIfNecessary(refParam.getResourceType(), resourceId))
-								.map(ReferenceParam::new)
-								.forEach(toAdd::add);
+						for (String resourceId : expandedResourceIds) {
+							IIdType nextReference =
+									newId(addResourceTypeIfNecessary(refParam.getResourceType(), resourceId));
+							toAdd.add(new ReferenceParam(nextReference));
+							theResultsToPopulate.addExpandedId(sourceId, nextReference);
+						}
 					}
 				}
-			} else if (theParamName.equalsIgnoreCase("_id")) {
-				expandIdParameter(theRequestPartitionId, iQueryParameterType, toAdd, toRemove);
+			} else if (theParamName.equalsIgnoreCase(IAnyResource.SP_RES_ID)) {
+				expandIdParameter(
+						theRequestPartitionId,
+						iQueryParameterType,
+						toAdd,
+						toRemove,
+						theParamTester,
+						theResourceName,
+						theResultsToPopulate);
 			}
 		}
 
 		orList.removeAll(toRemove);
 		orList.addAll(toAdd);
+	}
+
+	private IIdType newId(String value) {
+		return myFhirContext.getVersion().newIdType(value);
 	}
 
 	private String addResourceTypeIfNecessary(String theResourceType, String theResourceId) {
@@ -142,17 +195,15 @@ public class MdmSearchExpansionSvc {
 	/**
 	 * Expands out the provided _id parameter into all the various
 	 * ids of linked resources.
-	 *
-	 * @param theRequestPartitionId
-	 * @param theIdParameter
-	 * @param theAddList
-	 * @param theRemoveList
 	 */
 	private void expandIdParameter(
 			RequestPartitionId theRequestPartitionId,
 			IQueryParameterType theIdParameter,
 			List<IQueryParameterType> theAddList,
-			List<IQueryParameterType> theRemoveList) {
+			List<IQueryParameterType> theRemoveList,
+			IParamTester theParamTester,
+			String theResourceName,
+			MdmSearchExpansionResults theResultsToPopulate) {
 		// id parameters can either be StringParam (for $everything operation)
 		// or TokenParam (for searches)
 		// either case, we want to expand it out and grab all related resources
@@ -161,8 +212,10 @@ public class MdmSearchExpansionSvc {
 		boolean mdmExpand = false;
 		if (theIdParameter instanceof TokenParam) {
 			TokenParam param = (TokenParam) theIdParameter;
-			mdmExpand = param.isMdmExpand();
-			id = new IdDt(param.getValue());
+			mdmExpand = theParamTester.shouldExpand(IAnyResource.SP_RES_ID, param);
+			String value = param.getValue();
+			value = addResourceTypeIfNecessary(theResourceName, value);
+			id = newId(value);
 			creator = TokenParam::new;
 		} else {
 			creator = null;
@@ -180,20 +233,43 @@ public class MdmSearchExpansionSvc {
 			Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, id);
 
 			if (expandedResourceIds.isEmpty()) {
-				expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId(theRequestPartitionId, (IdDt) id);
+				expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId(theRequestPartitionId, id);
 			}
 
 			// Rebuild
 			if (!expandedResourceIds.isEmpty()) {
-				ourLog.debug("_id parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
+				ourLog.debug("_id parameter has been expanded to: {}", expandedResourceIds);
 
 				// remove the original
 				theRemoveList.add(theIdParameter);
 
 				// add in all the linked values
 				expandedResourceIds.stream().map(creator::create).forEach(theAddList::add);
+
+				for (String expandedId : expandedResourceIds) {
+					theResultsToPopulate.addExpandedId(
+							id, newId(addResourceTypeIfNecessary(theResourceName, expandedId)));
+				}
 			}
 		}
 		// else - no expansion required
+	}
+
+	// A simple interface to turn ids into some form of IQueryParameterTypes
+	private interface Creator<T extends IQueryParameterType> {
+		T create(String id);
+	}
+
+	@FunctionalInterface
+	public interface IParamTester {
+
+		boolean shouldExpand(String theParamName, BaseParam theParam);
+	}
+
+	@Nullable
+	public static MdmSearchExpansionResults getCachedExpansionResults(@Nonnull RequestDetails theRequestDetails) {
+		MdmSearchExpansionResults expansionResults =
+				(MdmSearchExpansionResults) theRequestDetails.getUserData().get(EXPANSION_RESULTS);
+		return expansionResults;
 	}
 }

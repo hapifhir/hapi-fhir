@@ -24,9 +24,11 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -36,17 +38,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Interceptor
 public class MdmSearchExpandingInterceptor {
 
+	private static final MdmSearchExpansionSvc.IParamTester PARAM_TESTER = (paramName, param) -> {
+		boolean retVal = false;
+		if (param instanceof ReferenceParam) {
+			retVal = ((ReferenceParam) param).isMdmExpand();
+		} else if (param instanceof TokenParam) {
+			retVal = ((TokenParam) param).isMdmExpand();
+		}
+		return retVal;
+	};
+
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
 	private MdmSearchExpansionSvc myMdmSearchExpansionSvc;
 
-	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
+	@Hook(
+			value = Pointcut.STORAGE_PRESEARCH_REGISTERED,
+			order = MdmConstants.ORDER_PRESEARCH_REGISTERED_MDM_SEARCH_EXPANDING_INTERCEPTOR)
 	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
 
 		if (myStorageSettings.isAllowMdmExpansion()) {
-			myMdmSearchExpansionSvc.expandSearch(theRequestDetails, theSearchParameterMap, ReferenceParam::isMdmExpand);
+			myMdmSearchExpansionSvc.expandSearchAndStoreInRequestDetails(
+					theRequestDetails, theSearchParameterMap, PARAM_TESTER);
 		}
 	}
 }

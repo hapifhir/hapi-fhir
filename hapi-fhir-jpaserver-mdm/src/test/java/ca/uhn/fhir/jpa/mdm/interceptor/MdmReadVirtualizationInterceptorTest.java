@@ -11,15 +11,21 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.interceptor.MdmReadVirtualizationInterceptor;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -31,10 +37,12 @@ import org.springframework.test.context.ContextConfiguration;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {MdmHelperConfig.class})
@@ -64,7 +72,6 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.SEARCH_TYPE);
 	}
 
 	@Override
@@ -83,14 +90,15 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testRead_ObservationReferencingSourcePatient(boolean theUseClientAssignedIds) {
 		// Setup
-		createTestData(theUseClientAssignedIds);
+		createTestPatientsAndObservations(theUseClientAssignedIds);
 		registerVirtualizationInterceptor();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.READ);
 
 		// Test
 		Observation obs = myObservationDao.read(myObservationReferencingSourcePatientA0Id, mySrd);
 
 		// Verify
-		assertEquals(myGoldenResourcePatientAId.getValue(), obs.getSubject().getReference());
+		assertEquals(mySourcePatientA0Id.getValue(), obs.getSubject().getReference());
 	}
 
 	/**
@@ -101,8 +109,9 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testRead_ObservationReferencingGoldenPatient(boolean theUseClientAssignedIds) {
 		// Setup
-		createTestData(theUseClientAssignedIds);
+		createTestPatientsAndObservations(theUseClientAssignedIds);
 		registerVirtualizationInterceptor();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.READ);
 
 		// Test
 		Observation obs = myObservationDao.read(myObservationReferencingGoldenPatientAId, mySrd);
@@ -117,15 +126,22 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 	@Test
 	public void testSearch_Patient_FetchAll() {
 		// Setup
-		createTestData(false);
+		createTestPatientsAndObservations(false);
 		registerVirtualizationInterceptor();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.SEARCH_TYPE);
 
 		// Test
 		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd);
 
 		// Verify
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
-		assertThat(ids).asList().containsExactlyInAnyOrder(myGoldenResourcePatientAId.getValue(), myGoldenResourcePatientBId.getValue());
+		assertThat(ids).asList().containsExactlyInAnyOrder(
+			mySourcePatientA0Id.getValue(),
+			mySourcePatientA1Id.getValue(),
+			mySourcePatientA2Id.getValue(),
+			mySourcePatientB0Id.getValue(),
+			myGoldenResourcePatientAId.getValue(),
+			myGoldenResourcePatientBId.getValue());
 	}
 
 	/**
@@ -135,8 +151,9 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 	@Test
 	public void testSearch_Patient_FetchOnlySource() {
 		// Setup
-		createTestData(false);
+		createTestPatientsAndObservations(false);
 		registerVirtualizationInterceptor();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.SEARCH_TYPE);
 
 		// Test
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
@@ -147,7 +164,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 
 		// Verify
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
-		assertThat(ids).asList().containsExactlyInAnyOrder(myGoldenResourcePatientAId.getValue(), myGoldenResourcePatientBId.getValue());
+		assertThat(ids).asList().containsExactlyInAnyOrder(mySourcePatientA0Id.getValue(), mySourcePatientB0Id.getValue());
 	}
 
 	/**
@@ -156,40 +173,40 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 	 */
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testSearch_Patient_FetchAll_AlsoRevIncludeDependentResources(boolean theUseClientAssginedId) {
+	public void testSearch_Patient_FetchSourcePatient_AlsoRevIncludeDependentResources(boolean theUseClientAssginedId) {
 		// Setup
-		createTestData(theUseClientAssginedId);
+		createTestPatientsAndObservations(theUseClientAssginedId);
 		registerVirtualizationInterceptor();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.SEARCH_TYPE);
 
 		// Test
-		SearchParameterMap params = new SearchParameterMap();
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add(Observation.SP_RES_ID, new TokenParam(mySourcePatientA2Id.getValue()));
 		params.addRevInclude(IBaseResource.INCLUDE_ALL);
 		IBundleProvider outcome = myPatientDao.search(params, mySrd);
 
 		// Verify
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		assertThat(ids).asList().containsExactlyInAnyOrder(
-			myGoldenResourcePatientAId.getValue(),
-			myGoldenResourcePatientBId.getValue(),
+			mySourcePatientA2Id.getValue(),
 			myObservationReferencingGoldenPatientAId.getValue(),
 			myObservationReferencingSourcePatientA0Id.getValue(),
 			myObservationReferencingSourcePatientA1Id.getValue(),
-			myObservationReferencingSourcePatientA2Id.getValue(),
-			myObservationReferencingSourcePatientB0Id.getValue()
+			myObservationReferencingSourcePatientA2Id.getValue()
 		);
 		Map<String, IBaseResource> resources = toResourceIdValueMap(outcome);
-		Observation obs;
-		obs = (Observation) resources.get(myObservationReferencingGoldenPatientAId.getValue());
-		assertEquals(myGoldenResourcePatientAId.getValue(), obs.getSubject().getReference());
-		obs = (Observation) resources.get(myObservationReferencingSourcePatientB0Id.getValue());
-		assertEquals(myGoldenResourcePatientBId.getValue(), obs.getSubject().getReference());
+		assertEquals(mySourcePatientA2Id.getValue(), getObservation(resources, myObservationReferencingGoldenPatientAId).getSubject().getReference());
+		assertEquals(mySourcePatientA2Id.getValue(), getObservation(resources, myObservationReferencingSourcePatientA0Id).getSubject().getReference());
+		assertEquals(mySourcePatientA2Id.getValue(), getObservation(resources, myObservationReferencingSourcePatientA1Id).getSubject().getReference());
+		assertEquals(mySourcePatientA2Id.getValue(), getObservation(resources, myObservationReferencingSourcePatientA2Id).getSubject().getReference());
 	}
 
 	@Test
 	public void testSearch_Observation_SpecificSourcePatient() {
 		// Setup
-		createTestData(false);
+		createTestPatientsAndObservations(true);
 		registerVirtualizationInterceptor();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.SEARCH_TYPE);
 
 		// Test
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
@@ -200,22 +217,123 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 		// Verify
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		assertThat(ids).asList().containsExactlyInAnyOrder(
-			myGoldenResourcePatientAId.getValue(),
+			mySourcePatientA2Id.getValue(),
 			myObservationReferencingGoldenPatientAId.getValue(),
 			myObservationReferencingSourcePatientA0Id.getValue(),
 			myObservationReferencingSourcePatientA1Id.getValue(),
 			myObservationReferencingSourcePatientA2Id.getValue()
 		);
 		Map<String, IBaseResource> resources = toResourceIdValueMap(outcome);
-		Observation obs = (Observation) resources.get(myObservationReferencingGoldenPatientAId.getValue());
-		assertEquals(myGoldenResourcePatientAId.getValue(), obs.getSubject().getReference());
+		assertEquals(mySourcePatientA2Id.getValue(), getObservation(resources, myObservationReferencingGoldenPatientAId).getSubject().getReference());
+		assertEquals(mySourcePatientA2Id.getValue(), getObservation(resources, myObservationReferencingSourcePatientA0Id).getSubject().getReference());
+		assertEquals(mySourcePatientA2Id.getValue(), getObservation(resources, myObservationReferencingSourcePatientA1Id).getSubject().getReference());
+		assertEquals(mySourcePatientA2Id.getValue(), getObservation(resources, myObservationReferencingSourcePatientA2Id).getSubject().getReference());
+	}
+
+	@Test
+	public void testSearch_Observation_NonRelativeReferencesAreLeftAlone() {
+		// Setup
+		createTestPatients(true);
+		registerVirtualizationInterceptor();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.SEARCH_TYPE);
+
+		IIdType obsId = createObservation(withSubject(mySourcePatientA0Id), withObservationCode("http://foo", "code0")).toUnqualifiedVersionless();
+		Observation obs = myObservationDao.read(obsId, mySrd);
+		Encounter encounter = new Encounter();
+		encounter.setId("1");
+		encounter.setStatus(Encounter.EncounterStatus.ARRIVED);
+		obs.getContained().add(encounter);
+
+		// Add 2 non-relative references. The interceptor should just ignore these
+		obs.setEncounter(new Reference("#1"));
+		obs.addBasedOn().setIdentifier(new Identifier().setValue("123"));
+		myObservationDao.update(obs, mySrd);
+
+		logAllResourceLinks();
+
+		// Test
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add(Observation.SP_SUBJECT, new ReferenceParam(mySourcePatientA2Id.getValue()));
+		params.addInclude(Observation.INCLUDE_PATIENT);
+		IBundleProvider outcome = myObservationDao.search(params, mySrd);
+
+		// Verify
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids).asList().containsExactlyInAnyOrder(
+			mySourcePatientA2Id.getValue(),
+			obsId.getValue()
+		);
+
+	}
+
+	/**
+	 * The CQL evaluator uses a shared RequestDetails across multiple different requests - Make sure
+	 * we don't return the wrong cached results
+	 */
+	@Test
+	public void testSearch_RequestDetailsIsReused() {
+		// Setup
+		createTestPatientsAndObservations(true);
+		registerVirtualizationInterceptor();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.SEARCH_TYPE);
+
+		// Test
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+
+		// Search for patients
+		requestDetails.setResourceName("Patient");
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add(IAnyResource.SP_RES_ID, new TokenParam(mySourcePatientA2Id.getValue()));
+		IBundleProvider outcome = myPatientDao.search(params, mySrd);
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids).asList().containsExactlyInAnyOrder(
+			mySourcePatientA2Id.getValue()
+		);
+
+		// Search for Observations
+		requestDetails.setResourceName("Observation");
+		params = SearchParameterMap.newSynchronous();
+		params.add(Observation.SP_SUBJECT, new ReferenceParam(mySourcePatientA2Id.getValue()));
+		params.addInclude(Observation.INCLUDE_PATIENT);
+		outcome = myObservationDao.search(params, mySrd);
+
+		// Verify
+		ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids).asList().containsExactlyInAnyOrder(
+			mySourcePatientA2Id.getValue(),
+			myObservationReferencingGoldenPatientAId.getValue(),
+			myObservationReferencingSourcePatientA0Id.getValue(),
+			myObservationReferencingSourcePatientA1Id.getValue(),
+			myObservationReferencingSourcePatientA2Id.getValue()
+		);
+
+	}
+
+	private static Observation getObservation(Map<String, IBaseResource> resources, IIdType observationReferencingGoldenPatientAId) {
+		Observation retVal = (Observation) resources.get(observationReferencingGoldenPatientAId.getValue());
+		if (retVal == null) {
+			fail("Could not find '" + observationReferencingGoldenPatientAId.getValue() + "' - Valid IDs: " + new TreeSet<>(resources.keySet()));
+		}
+		return retVal;
 	}
 
 	private void registerVirtualizationInterceptor() {
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
 
-	private void createTestData(boolean theUseClientAssignedIds) {
+	private void createTestPatientsAndObservations(boolean theUseClientAssignedIds) {
+		createTestPatients(theUseClientAssignedIds);
+
+		myObservationReferencingSourcePatientA0Id = createObservation(theUseClientAssignedIds, mySourcePatientA0Id, "code0");
+		myObservationReferencingSourcePatientA1Id = createObservation(theUseClientAssignedIds, mySourcePatientA1Id, "code1");
+		myObservationReferencingSourcePatientA2Id = createObservation(theUseClientAssignedIds, mySourcePatientA2Id, "code2");
+		myObservationReferencingGoldenPatientAId = createObservation(theUseClientAssignedIds, myGoldenResourcePatientAId, "code2");
+		myObservationReferencingSourcePatientB0Id = createObservation(theUseClientAssignedIds, mySourcePatientB0Id, "code0");
+
+		logAllResources();
+	}
+
+	private void createTestPatients(boolean theUseClientAssignedIds) {
 		String inputState;
 		if (theUseClientAssignedIds) {
 			inputState = """
@@ -243,17 +361,8 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 		mySourcePatientB0Id = toId(state, outcome.getResults().get(3).getSourcePersistenceId());
 		myGoldenResourcePatientBId = toId(state, outcome.getResults().get(3).getGoldenResourcePersistenceId());
 		assertEquals(4, logAllMdmLinks());
-
-		myObservationReferencingSourcePatientA0Id = createObservation(theUseClientAssignedIds, mySourcePatientA0Id, "code0");
-		myObservationReferencingSourcePatientA1Id = createObservation(theUseClientAssignedIds, mySourcePatientA1Id, "code1");
-		myObservationReferencingSourcePatientA2Id = createObservation(theUseClientAssignedIds, mySourcePatientA2Id, "code2");
-		myObservationReferencingGoldenPatientAId = createObservation(theUseClientAssignedIds, myGoldenResourcePatientAId, "code2");
-		myObservationReferencingSourcePatientB0Id = createObservation(theUseClientAssignedIds, mySourcePatientB0Id, "code0");
-
 		assertEquals(!theUseClientAssignedIds, mySourcePatientA0Id.isIdPartValidLong());
 		assertEquals(!theUseClientAssignedIds, myGoldenResourcePatientAId.isIdPartValidLong());
-
-		logAllResources();
 	}
 
 	@Nonnull

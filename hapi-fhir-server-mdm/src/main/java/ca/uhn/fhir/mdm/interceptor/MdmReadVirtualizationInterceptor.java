@@ -22,34 +22,32 @@ package ca.uhn.fhir.mdm.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
-import ca.uhn.fhir.mdm.model.MdmPidTuple;
+import ca.uhn.fhir.mdm.svc.MdmSearchExpansionResults;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.MultimapBuilder;
-import jakarta.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * <b>This class is experimental and subject to change. Use with caution.</b>
@@ -75,9 +73,13 @@ import java.util.Set;
  * @since 8.0.0
  */
 public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>> {
+	private static final Logger ourLog = LoggerFactory.getLogger(MdmReadVirtualizationInterceptor.class);
 
-	public static final String CURRENTLY_PROCESSING_FLAG =
-			MdmReadVirtualizationInterceptor.class.getName() + "-CURRENTLY-PROCESSING";
+	private static final String CURRENTLY_PROCESSING_FLAG =
+		MdmReadVirtualizationInterceptor.class.getName() + "_CURRENTLY_PROCESSING";
+	private static final MdmSearchExpansionSvc.IParamTester PARAM_TESTER_NO_RES_ID =
+		(paramName, param) -> !IAnyResource.SP_RES_ID.equals(paramName);
+	private static final MdmSearchExpansionSvc.IParamTester PARAM_TESTER_ALL = (paramName, param) -> true;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -97,191 +99,118 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	@Autowired
 	private HapiTransactionService myTxService;
 
-	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
+	@Hook(
+		value = Pointcut.STORAGE_PRESEARCH_REGISTERED,
+		order = MdmConstants.ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR)
 	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
-		myMdmSearchExpansionSvc.expandSearch(theRequestDetails, theSearchParameterMap, t -> true);
+		ourLog.atDebug()
+			.setMessage("Original search: {}{}")
+			.addArgument(theRequestDetails.getResourceName())
+			.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
+			.log();
+
+		if (theSearchParameterMap.hasIncludes() || theSearchParameterMap.hasRevIncludes()) {
+			myMdmSearchExpansionSvc.expandSearchAndStoreInRequestDetails(
+				theRequestDetails, theSearchParameterMap, PARAM_TESTER_ALL);
+		} else {
+			// If we don't have any includes, it's not worth auto-expanding the _id parameter since we'll only end
+			// up filtering out the extra resources afterward
+			myMdmSearchExpansionSvc.expandSearchAndStoreInRequestDetails(
+				theRequestDetails, theSearchParameterMap, PARAM_TESTER_NO_RES_ID);
+		}
+
+		ourLog.atDebug()
+			.setMessage("R search: {}{}")
+			.addArgument(theRequestDetails.getResourceName())
+			.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
+			.log();
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShowResources(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
-		if (theRequestDetails.getUserData().get(CURRENTLY_PROCESSING_FLAG) == Boolean.TRUE) {
+		MdmSearchExpansionResults expansionResults = MdmSearchExpansionSvc.getCachedExpansionResults(theRequestDetails);
+		if (expansionResults == null) {
+			// This means the PRESEARCH hook didn't save anything, which probably means
+			// no RequestDetails is available
 			return;
 		}
-		switch (theRequestDetails.getRestOperationType()) {
-			case SEARCH_TYPE:
-			case SEARCH_SYSTEM:
-			case GET_PAGE:
-				break;
-			default:
-				return;
+
+		if (theRequestDetails.getUserData().get(CURRENTLY_PROCESSING_FLAG) != null) {
+			// Avoid recursive calls
+			return;
 		}
 
-		// Gather all the resource IDs we might need to remap
-		ListMultimap<String, Integer> candidateResourceIds = extractRemapCandidateResources(theDetails);
-		ListMultimap<String, ResourceReferenceInfo> candidateReferences = extractRemapCandidateReferences(theDetails);
-
-		CandidateMdmLinkedResources<P> candidates =
-				findCandidateMdmLinkedResources(candidateResourceIds, candidateReferences);
-
-		// Loop through each link and figure out whether we need to remap anything
-		for (MdmPidTuple<P> tuple : candidates.getTuples()) {
-			Optional<String> sourceIdOpt = candidates.getFhirIdForPersistentId(tuple.getSourcePid());
-			if (sourceIdOpt.isPresent()) {
-				String sourceId = sourceIdOpt.get();
-
-				// Remap references from source to golden
-				List<ResourceReferenceInfo> referencesToRemap = candidateReferences.get(sourceId);
-				if (!referencesToRemap.isEmpty()) {
-					P associatedGoldenResourcePid = tuple.getGoldenPid();
-					Optional<String> associatedGoldenResourceId =
-							candidates.getFhirIdForPersistentId(associatedGoldenResourcePid);
-					if (associatedGoldenResourceId.isPresent()) {
-						for (ResourceReferenceInfo referenceInfoToRemap : referencesToRemap) {
-							IBaseReference referenceToRemap = referenceInfoToRemap.getResourceReference();
-							referenceToRemap.setReference(associatedGoldenResourceId.get());
-						}
-					}
-				}
-
-				// Filter out source resources
-				Optional<String> targetIdOpt = candidates.getFhirIdForPersistentId(tuple.getGoldenPid());
-				if (targetIdOpt.isPresent()) {
-					Integer filteredIndex = null;
-					for (int sourceIdResourceIndex : candidateResourceIds.get(sourceId)) {
-						theDetails.setResource(sourceIdResourceIndex, null);
-						if (filteredIndex == null) {
-							filteredIndex = sourceIdResourceIndex;
-						}
-					}
-
-					if (filteredIndex != null) {
-						String targetId = targetIdOpt.get();
-						if (candidateResourceIds.get(targetId).isEmpty()) {
-							// If we filtered a resource out because it's not a golden record,
-							// and the golden record itself isn't already a part of the results,
-							// then we'll manually add it
-							IIdType targetResourceId = newIdType(targetId);
-							IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(targetResourceId.getResourceType());
-
-							theRequestDetails.getUserData().put(CURRENTLY_PROCESSING_FLAG, Boolean.TRUE);
-							IBaseResource goldenResource;
-							try {
-								goldenResource = dao.read(targetResourceId, theRequestDetails);
-							} finally {
-								theRequestDetails.getUserData().remove(CURRENTLY_PROCESSING_FLAG);
-							}
-							theDetails.setResource(filteredIndex, goldenResource);
-							candidateResourceIds.put(targetId, filteredIndex);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	@Nonnull
-	private CandidateMdmLinkedResources<P> findCandidateMdmLinkedResources(
-			ListMultimap<String, Integer> candidateResourceIds,
-			ListMultimap<String, ResourceReferenceInfo> candidateReferences) {
-		return myTxService.withSystemRequest().read(() -> {
-			// Resolve all the resource IDs we've seen that could be MDM candidates,
-			// and look for MDM links that have these IDs as either the source or the
-			// golden resource side of the link
-			Set<IIdType> allIds = new HashSet<>();
-			candidateResourceIds.keySet().forEach(t -> allIds.add(newIdType(t)));
-			candidateReferences.keySet().forEach(t -> allIds.add(newIdType(t)));
-			List<P> sourcePids =
-					myIdHelperService.getPidsOrThrowException(RequestPartitionId.allPartitions(), List.copyOf(allIds));
-			Collection<MdmPidTuple<P>> tuples = myMdmLinkDao.resolveGoldenResources(sourcePids);
-
-			// Resolve the link PIDs into FHIR IDs
-			Set<P> allPersistentIds = new HashSet<>();
-			tuples.forEach(t -> allPersistentIds.add(t.getGoldenPid()));
-			tuples.forEach(t -> allPersistentIds.add(t.getSourcePid()));
-			PersistentIdToForcedIdMap<P> persistentIdToFhirIdMap =
-					myIdHelperService.translatePidsToForcedIds(allPersistentIds);
-			return new CandidateMdmLinkedResources<>(tuples, persistentIdToFhirIdMap);
-		});
-	}
-
-	/**
-	 * @return Returns a map where the keys are a typed ID (Patient/ABC) and the values are the index of
-	 * that resource within the {@link IPreResourceShowDetails}
-	 */
-	private ListMultimap<String, Integer> extractRemapCandidateResources(IPreResourceShowDetails theDetails) {
-		ListMultimap<String, Integer> retVal =
-				MultimapBuilder.hashKeys().arrayListValues().build();
+		/*
+		 * If a resource being returned is a resource that was mdm-expanded,
+		 * we'll replace that resource with the originally requested resource,
+		 * making sure to avoid adding duplicates to the results.
+		 */
+		Set<IIdType> resourcesInBundle = new HashSet<>();
 		for (int resourceIdx = 0; resourceIdx < theDetails.size(); resourceIdx++) {
 			IBaseResource resource = theDetails.getResource(resourceIdx);
-
-			// Extract the IDs of the actual resources being returned in case
-			// we want to replace them with golden equivalents
-			if (isRemapCandidate(resource.getIdElement().getResourceType())) {
-				IIdType id = resource.getIdElement().toUnqualifiedVersionless();
-				retVal.put(id.getValue(), resourceIdx);
+			IIdType id = resource.getIdElement().toUnqualifiedVersionless();
+			Optional<IIdType> originalIdOpt = expansionResults.getOriginalIdForExpandedId(id);
+			if (originalIdOpt.isPresent()) {
+				IIdType originalId = originalIdOpt.get();
+				if (resourcesInBundle.add(originalId)) {
+					IBaseResource originalResource = fetchResourceFromRepository(theRequestDetails, originalId);
+					theDetails.setResource(resourceIdx, originalResource);
+				} else {
+					theDetails.setResource(resourceIdx, null);
+				}
+			} else {
+				if (!resourcesInBundle.add(id)) {
+					theDetails.setResource(resourceIdx, null);
+				}
 			}
 		}
 
-		return retVal;
-	}
-
-	/**
-	 * @return Returns a map where the keys are a typed ID (Patient/ABC) and the values are references
-	 * found in any of the resources that are referring to that ID.
-	 */
-	private ListMultimap<String, ResourceReferenceInfo> extractRemapCandidateReferences(
-			IPreResourceShowDetails theDetails) {
-		ListMultimap<String, ResourceReferenceInfo> retVal =
-				MultimapBuilder.hashKeys().arrayListValues().build();
 		FhirTerser terser = myFhirContext.newTerser();
-
 		for (int resourceIdx = 0; resourceIdx < theDetails.size(); resourceIdx++) {
 			IBaseResource resource = theDetails.getResource(resourceIdx);
+			if (resource != null) {
 
-			// Extract all the references in the resources we're returning
-			// in case we need to remap them to golden equivalents
-			List<ResourceReferenceInfo> referenceInfos = terser.getAllResourceReferences(resource);
-			for (ResourceReferenceInfo referenceInfo : referenceInfos) {
-				IIdType referenceId = referenceInfo.getResourceReference().getReferenceElement();
-
-				if (isRemapCandidate(referenceId.getResourceType())) {
-					IIdType id = referenceId.toUnqualifiedVersionless();
-					retVal.put(id.getValue(), referenceInfo);
+				// Extract all the references in the resources we're returning
+				// in case we need to remap them to golden equivalents
+				List<ResourceReferenceInfo> referenceInfos = terser.getAllResourceReferences(resource);
+				for (ResourceReferenceInfo referenceInfo : referenceInfos) {
+					IIdType referenceId = referenceInfo
+						.getResourceReference()
+						.getReferenceElement()
+						.toUnqualifiedVersionless();
+					if (referenceId.hasResourceType()
+						&& referenceId.hasIdPart()
+						&& !referenceId.isLocal()
+						&& !referenceId.isUuid()) {
+						Optional<IIdType> nonExpandedId = expansionResults.getOriginalIdForExpandedId(referenceId);
+						if (nonExpandedId.isPresent()) {
+							referenceInfo
+								.getResourceReference()
+								.setReference(nonExpandedId.get().getValue());
+						}
+					}
 				}
 			}
 		}
 
-		return retVal;
+		ourLog.atDebug().setMessage("Returning resources: {}").addArgument(() -> theDetails.getAllResources().stream()
+			.map(t -> t.getIdElement().toUnqualifiedVersionless().getValue())
+			.sorted()
+			.collect(Collectors.toList())).log();
+
 	}
 
-	private IIdType newIdType(String targetId) {
-		return myFhirContext.getVersion().newIdType().setValue(targetId);
-	}
-
-	/**
-	 * Is the given resource a candidate for virtualization?
-	 */
-	private boolean isRemapCandidate(String theResourceType) {
-		return "Patient".equals(theResourceType);
-	}
-
-	private static class CandidateMdmLinkedResources<P extends IResourcePersistentId<?>> {
-		private final Collection<MdmPidTuple<P>> myTuples;
-		private final PersistentIdToForcedIdMap<P> myPersistentIdToFhirIdMap;
-
-		public CandidateMdmLinkedResources(
-				Collection<MdmPidTuple<P>> thePidTuples, PersistentIdToForcedIdMap<P> thePersistentIdToForcedIdMap) {
-			this.myTuples = thePidTuples;
-			this.myPersistentIdToFhirIdMap = thePersistentIdToForcedIdMap;
+	private IBaseResource fetchResourceFromRepository(RequestDetails theRequestDetails, IIdType originalId) {
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(originalId.getResourceType());
+		theRequestDetails.getUserData().put(CURRENTLY_PROCESSING_FLAG, Boolean.TRUE);
+		IBaseResource originalResource;
+		try {
+			originalResource = dao.read(originalId, theRequestDetails);
+		} finally {
+			theRequestDetails.getUserData().remove(CURRENTLY_PROCESSING_FLAG);
 		}
-
-		public Collection<MdmPidTuple<P>> getTuples() {
-			return myTuples;
-		}
-
-		public Optional<String> getFhirIdForPersistentId(P theSourcePid) {
-			return myPersistentIdToFhirIdMap.get(theSourcePid);
-		}
+		return originalResource;
 	}
+
 }
