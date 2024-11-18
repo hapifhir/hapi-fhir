@@ -168,8 +168,9 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 	}
 
 	/**
-	 * If we search for all patients and _revinclude things that point to them,
-	 * only the golden resource ones should be returned
+	 * If we search for a patient by _id, and we _revinclude things pointing to the patient, we
+	 * should also return things pointing to linked patients and update the references to
+	 * point to that patient. The linked patients should not be included.
 	 */
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
@@ -181,7 +182,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 
 		// Test
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
-		params.add(Observation.SP_RES_ID, new TokenParam(mySourcePatientA2Id.getValue()));
+		params.add(IAnyResource.SP_RES_ID, new TokenParam(mySourcePatientA2Id.getValue()));
 		params.addRevInclude(IBaseResource.INCLUDE_ALL);
 		IBundleProvider outcome = myPatientDao.search(params, mySrd);
 
