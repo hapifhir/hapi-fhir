@@ -201,9 +201,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	protected void postTransactionProcess(TransactionDetails theTransactionDetails) {
 		Set<IResourcePersistentId> resourceIds = theTransactionDetails.getUpdatedResourceIds();
 		if (!resourceIds.isEmpty()) {
-			List<Long> ids = resourceIds.stream()
-				.map(r -> (Long) r.getId())
-				.collect(Collectors.toList());
+			List<Long> ids = resourceIds.stream().map(r -> (Long) r.getId()).collect(Collectors.toList());
 
 			myResourceSearchUrlSvc.deleteByResIds(ids);
 		}

@@ -13,13 +13,15 @@ public class TransactionUtils {
 
 	public static final String SEARCH_URL_IDS_KEY = "searchIdsToDelete";
 
-	public static void addSearchUrlIdToTransactionDetails(TransactionDetails theTransactionDetails, ResourceTable theEntity) {
-		List<Long> ids = theTransactionDetails.getOrCreateUserData(SEARCH_URL_IDS_KEY, (Supplier<List<Long>>) ArrayList::new);
+	public static void addSearchUrlIdToTransactionDetails(
+			TransactionDetails theTransactionDetails, ResourceTable theEntity) {
+		List<Long> ids =
+				theTransactionDetails.getOrCreateUserData(SEARCH_URL_IDS_KEY, (Supplier<List<Long>>) ArrayList::new);
 		ids.add((Long) theEntity.getPersistentId().getId());
 		theEntity.setSearchUrlPresent(false);
-//		myResourceSearchUrlSvc.deleteByResId(
-//			(Long) theEntity.getPersistentId().getId());
-//		entity.setSearchUrlPresent(false);
+		//		myResourceSearchUrlSvc.deleteByResId(
+		//			(Long) theEntity.getPersistentId().getId());
+		//		entity.setSearchUrlPresent(false);
 	}
 
 	public static List<Long> getSearchResearchUrlIdsToDelete(TransactionDetails theTransactionDetails) {
