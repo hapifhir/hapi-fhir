@@ -132,7 +132,7 @@ public class MdmLinkHelper {
 	}
 
 	private Patient createPatientAndTags(String theId, MDMState<Patient, JpaPid> theState) {
-		boolean clientAssignedId = theId.startsWith(SERVER_ASSIGNED_PREFIX);
+		boolean serverAssignedId = theId.startsWith(SERVER_ASSIGNED_PREFIX);
 		boolean previouslyExisting = false;
 
 		Patient patient = new Patient();
@@ -141,10 +141,10 @@ public class MdmLinkHelper {
 		// we add an identifier and use a forced id
 		// to make test debugging a little simpler
 		patient.addIdentifier(new Identifier().setValue(theId));
-		if (clientAssignedId && theState.getForcedIdForConditionalIdPlaceholder(theId) != null) {
+		if (serverAssignedId && theState.getForcedIdForConditionalIdPlaceholder(theId) != null) {
 			patient.setId(theState.getForcedIdForConditionalIdPlaceholder(theId));
 			previouslyExisting = true;
-		} else if (!clientAssignedId) {
+		} else if (!serverAssignedId) {
 			patient.setId(theId);
 		}
 
@@ -157,7 +157,7 @@ public class MdmLinkHelper {
 
 		SystemRequestDetails srd = SystemRequestDetails.forAllPartitions();
 		DaoMethodOutcome outcome;
-		if (clientAssignedId && !previouslyExisting) {
+		if (serverAssignedId && !previouslyExisting) {
 			outcome = myPatientDao.create(patient, srd);
 		} else {
 			outcome = myPatientDao.update(patient, srd);
@@ -165,7 +165,7 @@ public class MdmLinkHelper {
 		Patient outputPatient = (Patient) outcome.getResource();
 		theState.addPID(theId, (JpaPid) outcome.getPersistentId());
 
-		if (clientAssignedId) {
+		if (serverAssignedId) {
 			theState.addConditionalIdPlaceholderToForcedId(theId, outputPatient.getIdPart());
 		}
 

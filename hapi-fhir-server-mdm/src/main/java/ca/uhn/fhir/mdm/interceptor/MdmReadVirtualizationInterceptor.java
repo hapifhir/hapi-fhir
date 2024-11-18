@@ -184,7 +184,8 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 							&& !referenceId.isLocal()
 							&& !referenceId.isUuid()) {
 						Optional<IIdType> nonExpandedId = expansionResults.getOriginalIdForExpandedId(referenceId);
-						if (nonExpandedId.isPresent()) {
+						if (nonExpandedId != null && nonExpandedId.isPresent()) {
+							ourLog.debug("Replacing reference at {} value {} with {}", referenceInfo.getName(), referenceInfo.getResourceReference().getReferenceElement(), nonExpandedId.get().getValue());
 							referenceInfo
 									.getResourceReference()
 									.setReference(nonExpandedId.get().getValue());

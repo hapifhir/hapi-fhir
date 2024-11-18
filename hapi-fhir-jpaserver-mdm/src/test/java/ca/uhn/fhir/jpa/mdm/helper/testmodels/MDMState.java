@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.mdm.helper.testmodels;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import org.testcontainers.shaded.com.google.common.collect.HashMultimap;
 import org.testcontainers.shaded.com.google.common.collect.Multimap;
 
@@ -60,15 +62,13 @@ public class MDMState<T, P extends IResourcePersistentId> {
 	/**
 	 * Map of forcedId -> resource persistent id for each resource created
 	 */
-	private final Map<String, P> myForcedIdToPID = new HashMap<>();
-	private final Map<P, String> myPIDToForcedId = new HashMap<>();
+	private final BiMap<String, P> myForcedIdToPID = HashBiMap.create();
 
 	private final Map<String, String> myConditionalIdPlaceholderToForcedId = new HashMap<>();
 
 	public void addPID(String theForcedId, P thePid) {
 		assert !myForcedIdToPID.containsKey(theForcedId);
 		myForcedIdToPID.put(theForcedId, thePid);
-		myPIDToForcedId.put(thePid, theForcedId);
 	}
 
 	public P getPID(String theForcedId) {
@@ -76,7 +76,7 @@ public class MDMState<T, P extends IResourcePersistentId> {
 	}
 
 	public String getForcedId(JpaPid thePID) {
-		String retVal = myPIDToForcedId.get(thePID);
+		String retVal = myForcedIdToPID.inverse().get(thePID);
 		if (myConditionalIdPlaceholderToForcedId.containsKey(retVal)) {
 			retVal = myConditionalIdPlaceholderToForcedId.get(retVal);
 		}

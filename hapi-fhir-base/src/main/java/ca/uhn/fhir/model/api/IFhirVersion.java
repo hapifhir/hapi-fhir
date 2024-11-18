@@ -64,6 +64,8 @@ public interface IFhirVersion {
 	IIdType newIdType();
 
 	/**
+	 * Creates a new {@link IIdType} instance for the given version with the given value
+	 *
 	 * @since 8.0.0
 	 */
 	default IIdType newIdType(String theValue) {
