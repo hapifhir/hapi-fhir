@@ -68,6 +68,7 @@ import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
+import ca.uhn.fhir.jpa.util.TransactionUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
@@ -2456,9 +2457,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 */
 		ResourceTable entity = (ResourceTable) theEntity;
 		if (entity.isSearchUrlPresent()) {
-			myResourceSearchUrlSvc.deleteByResId(
-					(Long) theEntity.getPersistentId().getId());
-			entity.setSearchUrlPresent(false);
+			JpaPid persistentId = JpaPid.fromId(entity.getResourceId());
+			theTransactionDetails.addUpdatedResourceId(persistentId);
 		}
 
 		return super.doUpdateForUpdateOrPatch(

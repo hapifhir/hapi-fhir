@@ -31,11 +31,13 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
@@ -107,6 +109,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
+
+	@Autowired
+	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionSvc;
@@ -190,6 +195,18 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		IFhirSystemDao<?, ?> systemDao = myApplicationContext.getBean(IFhirSystemDao.class);
 		systemDao.preFetchResources(JpaPid.fromLongList(idsToPreFetch), true);
+	}
+
+	@SuppressWarnings("rawtypes")
+	protected void postTransactionProcess(TransactionDetails theTransactionDetails) {
+		Set<IResourcePersistentId> resourceIds = theTransactionDetails.getUpdatedResourceIds();
+		if (!resourceIds.isEmpty()) {
+			List<Long> ids = resourceIds.stream()
+				.map(r -> (Long) r.getId())
+				.collect(Collectors.toList());
+
+			myResourceSearchUrlSvc.deleteByResIds(ids);
+		}
 	}
 
 	private void preFetchResourcesById(
