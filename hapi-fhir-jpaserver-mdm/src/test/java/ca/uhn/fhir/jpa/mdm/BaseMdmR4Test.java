@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -92,7 +93,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	private static final String NAME_GIVEN_FRANK = "Frank";
 
 	@Autowired
-	protected IFhirResourceDao<Patient> myPatientDao;
+	protected IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
 	protected IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired

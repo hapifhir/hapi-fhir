@@ -726,7 +726,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	 */
 	protected Map<String, IBaseResource> toResourceIdValueMap(IBundleProvider theFound) {
 		Map<String, IBaseResource> retVal = new HashMap<>();
-		List<IBaseResource> resources = theFound.getResources(0, Integer.MAX_VALUE);
+		List<IBaseResource> resources = theFound.getAllResources();
 		for (IBaseResource next : resources) {
 			retVal.put(next.getIdElement().toUnqualifiedVersionless().getValue(), next);
 		}

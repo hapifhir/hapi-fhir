@@ -34,8 +34,8 @@ import java.util.Set;
  */
 public class MdmSearchExpansionResults {
 
-	private Set<IIdType> myOriginalIdToExpandedId = new HashSet<>();
-	private Map<IIdType, IIdType> myExpandedIdToOriginalId = new HashMap<>();
+	private final Set<IIdType> myOriginalIdToExpandedId = new HashSet<>();
+	private final Map<IIdType, IIdType> myExpandedIdToOriginalId = new HashMap<>();
 
 	void addExpandedId(IIdType theOriginalId, IIdType theExpandedId) {
 		assert isRemapCandidate(theOriginalId) : theOriginalId.getValue();

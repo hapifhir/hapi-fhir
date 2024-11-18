@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -80,6 +82,34 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 		super.after();
 		myInterceptorRegistry.unregisterInterceptor(myInterceptor);
 		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
+	}
+
+	@Test
+	public void testEverything() {
+		// Setup
+		createTestPatientsAndObservations(true);
+		registerVirtualizationInterceptor();
+		when(mySrd.getResourceName()).thenReturn("Patient");
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE);
+
+		// Test
+		PatientEverythingParameters params = new PatientEverythingParameters();
+		IBundleProvider outcome = myPatientDao.patientInstanceEverything(null, mySrd, params, mySourcePatientA1Id);
+
+		// Verify
+		Map<String, IBaseResource> resources = toResourceIdValueMap(outcome);
+		List<String> ids = new ArrayList<>(resources.keySet());
+		assertThat(ids).asList().containsExactlyInAnyOrder(
+			mySourcePatientA1Id.getValue(),
+			myObservationReferencingGoldenPatientAId.getValue(),
+			myObservationReferencingSourcePatientA0Id.getValue(),
+			myObservationReferencingSourcePatientA1Id.getValue(),
+			myObservationReferencingSourcePatientA2Id.getValue()
+		);
+		assertEquals(mySourcePatientA1Id.getValue(), getObservation(resources, myObservationReferencingGoldenPatientAId).getSubject().getReference());
+		assertEquals(mySourcePatientA1Id.getValue(), getObservation(resources, myObservationReferencingSourcePatientA0Id).getSubject().getReference());
+		assertEquals(mySourcePatientA1Id.getValue(), getObservation(resources, myObservationReferencingSourcePatientA1Id).getSubject().getReference());
+		assertEquals(mySourcePatientA1Id.getValue(), getObservation(resources, myObservationReferencingSourcePatientA2Id).getSubject().getReference());
 	}
 
 	/**

@@ -24,11 +24,9 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmConstants;
-import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionResults;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
@@ -40,7 +38,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
@@ -52,7 +49,7 @@ import java.util.stream.Collectors;
 /**
  * <b>This class is experimental and subject to change. Use with caution.</b>
  * <p>
- * This interceptor provided an "MDM Virtualized" endpoint, meaning that
+ * This interceptor provides an "MDM Virtualized" endpoint, meaning that
  * searches are expanded to include MDM-linked resources (including any
  * linked golden resource, and also including any other resources linked
  * to that golden resource). Searches for non-MDM resources which have
@@ -73,7 +70,7 @@ import java.util.stream.Collectors;
  * @since 8.0.0
  */
 public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>> {
-	private static final Logger ourLog = LoggerFactory.getLogger(MdmReadVirtualizationInterceptor.class);
+	private static final Logger ourMdmTroubleshootingLog = Logs.getMdmTroubleshootingLog();
 
 	private static final String CURRENTLY_PROCESSING_FLAG =
 			MdmReadVirtualizationInterceptor.class.getName() + "_CURRENTLY_PROCESSING";
@@ -85,26 +82,18 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	private FhirContext myFhirContext;
 
 	@Autowired
-	private IMdmLinkDao<P, ?> myMdmLinkDao;
-
-	@Autowired
-	private IIdHelperService<P> myIdHelperService;
-
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
 	private MdmSearchExpansionSvc myMdmSearchExpansionSvc;
 
-	@Autowired
-	private HapiTransactionService myTxService;
-
 	@Hook(
 			value = Pointcut.STORAGE_PRESEARCH_REGISTERED,
 			order = MdmConstants.ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR)
 	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
-		ourLog.atDebug()
-				.setMessage("Original search: {}{}")
+		ourMdmTroubleshootingLog
+				.atTrace()
+				.setMessage("MDM virtualization original search: {}{}")
 				.addArgument(theRequestDetails.getResourceName())
 				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
 				.log();
@@ -119,8 +108,9 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 					theRequestDetails, theSearchParameterMap, PARAM_TESTER_NO_RES_ID);
 		}
 
-		ourLog.atDebug()
-				.setMessage("R search: {}{}")
+		ourMdmTroubleshootingLog
+				.atDebug()
+				.setMessage("MDM virtualization remapped search: {}{}")
 				.addArgument(theRequestDetails.getResourceName())
 				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
 				.log();
@@ -185,8 +175,8 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 							&& !referenceId.isUuid()) {
 						Optional<IIdType> nonExpandedId = expansionResults.getOriginalIdForExpandedId(referenceId);
 						if (nonExpandedId != null && nonExpandedId.isPresent()) {
-							ourLog.debug(
-									"Replacing reference at {} value {} with {}",
+							ourMdmTroubleshootingLog.debug(
+									"MDM virtualization is replacing reference at {} value {} with {}",
 									referenceInfo.getName(),
 									referenceInfo.getResourceReference().getReferenceElement(),
 									nonExpandedId.get().getValue());
@@ -199,7 +189,8 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 			}
 		}
 
-		ourLog.atDebug()
+		ourMdmTroubleshootingLog
+				.atTrace()
 				.setMessage("Returning resources: {}")
 				.addArgument(() -> theDetails.getAllResources().stream()
 						.map(t -> t.getIdElement().toUnqualifiedVersionless().getValue())
