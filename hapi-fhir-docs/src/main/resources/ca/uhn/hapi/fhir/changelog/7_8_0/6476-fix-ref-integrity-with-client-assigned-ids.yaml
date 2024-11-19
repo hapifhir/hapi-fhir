@@ -1,0 +1,6 @@
+---
+type: fix
+jira: SMILE-8941
+issue: 6476
+title: "Previously, when Enforce Referential Integrity on Write was enabled, it was possible to create a resource with 
+a reference to another resource by using its internal PID instead of its forced ID. This has now been fixed."
