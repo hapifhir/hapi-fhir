@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -567,8 +568,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Pre-cache the resource ID
 		jpaPid.setAssociatedResourceId(entity.getIdType(myFhirContext));
+		String fhirId = entity.getFhirId();
+		if (fhirId == null) {
+			fhirId = Long.toString(entity.getId());
+		}
 		myIdHelperService.addResolvedPidToForcedId(
-				jpaPid, theRequestPartitionId, getResourceName(), entity.getFhirId(), null);
+				jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
@@ -1736,8 +1741,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		BaseHasResource entity;
-		JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
-				requestPartitionId, getResourceName(), theId.getIdPart());
+		JpaPid pid = myIdHelperService
+				.resolveResourceIdentity(
+						requestPartitionId,
+						getResourceName(),
+						theId.getIdPart(),
+						ResolveIdentityModeEnum.includeDeleted().useCache())
+				.getPersistentId();
 		Set<Integer> readPartitions = null;
 		if (requestPartitionId.isAllPartitions()) {
 			entity = myEntityManager.find(ResourceTable.class, pid.getId());
@@ -1871,8 +1881,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (persistentId == null) {
-			persistentId = myIdHelperService.resolveResourcePersistentIds(
-					theRequestPartitionId, getResourceName(), theId.getIdPart());
+			persistentId = myIdHelperService.resolveResourceIdentityPid(
+					theRequestPartitionId,
+					getResourceName(),
+					theId.getIdPart(),
+					ResolveIdentityModeEnum.includeDeleted().useCache());
 		}
 
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());

@@ -24,6 +24,7 @@ import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -107,6 +108,8 @@ public class MdmSurvivorshipSvcImplTest {
 		);
 	}
 
+	// FIXME: run this test class
+
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@ParameterizedTest
 	@ValueSource(booleans = {true,false})
@@ -176,7 +179,7 @@ public class MdmSurvivorshipSvcImplTest {
 		when(myMdmSettings.getMdmRules())
 			.thenReturn(new MdmRulesJson());
 		doReturn(sourceIdToPid).when(myIIdHelperService)
-			.resolveResourcePersistentIds(any(RequestPartitionId.class), anyString(), any(List.class));
+			.resolveResourceIdentities(any(RequestPartitionId.class), any(List.class), any());
 		// we will return a non-empty list to reduce mocking
 		when(myEIDHelper.getExternalEid(any()))
 			.thenReturn(Collections.singletonList(new CanonicalEID("example", "value", "use")));
@@ -199,14 +202,12 @@ public class MdmSurvivorshipSvcImplTest {
 		verify(resourceDao)
 			.update(eq(goldenPatientRebuilt), any(RequestDetails.class));
 
-		ArgumentCaptor<List<String>> idsCaptor = ArgumentCaptor.forClass(List.class);
-		verify(myIIdHelperService).resolveResourcePersistentIds(any(RequestPartitionId.class), anyString(), idsCaptor.capture());
+		ArgumentCaptor<List<IIdType>> idsCaptor = ArgumentCaptor.forClass(List.class);
+		verify(myIIdHelperService).resolveResourceIdentities(any(RequestPartitionId.class), idsCaptor.capture(), any());
 		assertNotNull(idsCaptor.getValue());
 		assertFalse(idsCaptor.getValue().isEmpty());
-		for (String id : idsCaptor.getValue()) {
-			assertFalse(id.contains("/"));
-			assertFalse(id.contains("Patient"));
-		}
+		List<String> ids = idsCaptor.getValue().stream().map(t->t.getValue()).toList();
+		assertThat(ids).asList().containsExactlyInAnyOrder("AAAA");
 	}
 
 	private MdmTransactionContext createTransactionContext() {

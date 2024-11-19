@@ -346,6 +346,9 @@ public class MemoryCacheService {
 
 		public ForcedIdCacheKey(
 				String theResourceType, String theResourceId, RequestPartitionId theRequestPartitionId) {
+			assert theResourceType != null;
+			assert theResourceId != null;
+			assert theRequestPartitionId != null;
 			myResourceType = theResourceType;
 			myResourceId = theResourceId;
 			myRequestPartitionId = theRequestPartitionId;
@@ -381,22 +384,17 @@ public class MemoryCacheService {
 		}
 	}
 
+	// FIXME: rename to PidCacheKey
 	public static class TypedPidCacheKey {
 
-		private final String myResourceType;
 		private final Long myPid;
 		private final RequestPartitionId myRequestPartitionId;
 		private final int myHashCode;
 
-		public TypedPidCacheKey(String theResourceType, Long thePid, RequestPartitionId theRequestPartitionId) {
-			myResourceType = theResourceType;
+		public TypedPidCacheKey(Long thePid, RequestPartitionId theRequestPartitionId) {
 			myPid = thePid;
 			myRequestPartitionId = theRequestPartitionId;
-			myHashCode = Objects.hash(myResourceType, myPid, myRequestPartitionId);
-		}
-
-		public String getResourceType() {
-			return myResourceType;
+			myHashCode = Objects.hash(myPid, myRequestPartitionId);
 		}
 
 		public Long getPid() {
@@ -412,8 +410,7 @@ public class MemoryCacheService {
 				return false;
 			}
 			TypedPidCacheKey that = (TypedPidCacheKey) theO;
-			return Objects.equals(myResourceType, that.myResourceType)
-					&& Objects.equals(myPid, that.myPid)
+			return Objects.equals(myPid, that.myPid)
 					&& Objects.equals(myRequestPartitionId, that.myRequestPartitionId);
 		}
 
@@ -422,13 +419,5 @@ public class MemoryCacheService {
 			return myHashCode;
 		}
 
-		/**
-		 * Creates and returns a new unqualified versionless IIdType instance
-		 */
-		public IIdType toIdType(FhirContext theFhirCtx) {
-			IIdType retVal = theFhirCtx.getVersion().newIdType();
-			retVal.setValue(myResourceType + "/" + myPid);
-			return retVal;
-		}
 	}
 }

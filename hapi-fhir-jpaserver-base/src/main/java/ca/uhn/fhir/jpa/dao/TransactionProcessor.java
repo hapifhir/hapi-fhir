@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -286,11 +287,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * which means we don't want deleted resources, because those are not OK
 		 * to reference.
 		 */
-		boolean excludeDeleted = idsToPreResolve.values().stream().anyMatch(t -> !t);
+		boolean preFetchIncludesReferences = idsToPreResolve.values().stream().anyMatch(t -> !t);
+		ResolveIdentityModeEnum resolveMode = preFetchIncludesReferences
+				? ResolveIdentityModeEnum.excludeDeleted().noCache()
+				: ResolveIdentityModeEnum.includeDeleted().useCache();
 
-		Map<IIdType, IResourceLookup> outcomes = myIdHelperService.resolveResourceIdentities(
-				theRequestPartitionId, idsToPreResolve.keySet(), excludeDeleted);
-		for (Map.Entry<IIdType, IResourceLookup> entry : outcomes.entrySet()) {
+		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(
+				theRequestPartitionId, idsToPreResolve.keySet(), resolveMode);
+		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> entry : outcomes.entrySet()) {
 			JpaPid next = (JpaPid) entry.getValue().getPersistentId();
 			IIdType unqualifiedVersionlessId = entry.getKey();
 			foundIds.add(unqualifiedVersionlessId.getValue());
@@ -303,6 +307,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				}
 			}
 		}
+
+		// Any IDs that could not be resolved are presumably not there, so
+		// cache that fact so we don't look again later
 		for (IIdType next : idsToPreResolve.keySet()) {
 			if (!foundIds.contains(next.getValue())) {
 				theTransactionDetails.addResolvedResourceId(next.toUnqualifiedVersionless(), null);

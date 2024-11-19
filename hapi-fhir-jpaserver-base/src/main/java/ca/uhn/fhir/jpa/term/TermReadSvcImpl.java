@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.config.util.ConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
@@ -2092,10 +2093,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
-		return myIdHelperService.resolveResourcePersistentIds(
+		return myIdHelperService.resolveResourceIdentityPid(
 				RequestPartitionId.allPartitions(),
 				theValueSet.getIdElement().getResourceType(),
-				theValueSet.getIdElement().getIdPart());
+				theValueSet.getIdElement().getIdPart(),
+				ResolveIdentityModeEnum.includeDeleted().useCache());
 	}
 
 	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(

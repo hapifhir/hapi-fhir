@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -98,7 +99,7 @@ public class IdHelperServiceTest {
         String resourceType = "Patient";
         Long id = 123L;
         List<String> ids = List.of(String.valueOf(id));
-        boolean theExcludeDeleted = false;
+        ResolveIdentityModeEnum mode = ResolveIdentityModeEnum.includeDeleted().noCache();
 
         //prepare results
         Patient expectedPatient = new Patient();
@@ -107,7 +108,7 @@ public class IdHelperServiceTest {
         // configure mock behaviour
 		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
 
-		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted));
+		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, mode));
 		assertEquals("HAPI-2001: Resource Patient/123 is not known", resourceNotFoundException.getMessage());
     }
 
@@ -121,7 +122,7 @@ public class IdHelperServiceTest {
         String resourceType = "Patient";
         List<String> ids = List.of(String.valueOf(id));
         String forcedId = "(all)/" + resourceType + "/" + id;
-        boolean theExcludeDeleted = false;
+        ResolveIdentityModeEnum mode = ResolveIdentityModeEnum.includeDeleted().noCache();
 
         //prepare results
         Patient expectedPatient = new Patient();
@@ -130,113 +131,16 @@ public class IdHelperServiceTest {
         // configure mock behaviour
         when(myStorageSettings.isDeleteEnabled()).thenReturn(false);
 
-		Map<String, JpaPid> actualIds = myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted);
+		Map<String, JpaPid> actualIds = myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, mode);
 
 		//verifyResult
 		assertFalse(actualIds.isEmpty());
 		assertNull(actualIds.get(ids.get(0)));
     }
 
-	@Test
-	public void resolveResourcePersistentIds_withValidPids_returnsMap() {
-		lenient().doReturn(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC).when(myStorageSettings).getResourceClientIdStrategy();
 
-		RequestPartitionId partitionId = RequestPartitionId.allPartitions();
-		String resourceType = Patient.class.getSimpleName();
-		List<String> patientIdsToResolve = new ArrayList<>();
-		patientIdsToResolve.add("123");
-		patientIdsToResolve.add("456");
 
-		// test
-		Map<String, JpaPid> idToPid = myHelperSvc.resolveResourcePersistentIds(partitionId,
-			resourceType,
-			patientIdsToResolve);
 
-		assertFalse(idToPid.isEmpty());
-		for (String pid : patientIdsToResolve) {
-			assertThat(idToPid).containsKey(pid);
-		}
-	}
-
-	@Test
-	public void resolveResourcePersistentIds_withForcedIdsAndDeleteEnabled_returnsMap() {
-		lenient().doReturn(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC).when(myStorageSettings).getResourceClientIdStrategy();
-
-		RequestPartitionId partitionId = RequestPartitionId.allPartitions();
-		String resourceType = Patient.class.getSimpleName();
-		List<String> patientIdsToResolve = new ArrayList<>();
-		patientIdsToResolve.add("RED");
-		patientIdsToResolve.add("BLUE");
-
-		Object[] redView = new Object[] {
-			123L,
-			"Patient",
-			"RED",
-			new Date(),
-			null
-		};
-		Object[] blueView = new Object[] {
-			456L,
-			"Patient",
-			"BLUE",
-			new Date(),
-			null
-		};
-
-		// when
-		when(myStorageSettings.isDeleteEnabled())
-			.thenReturn(true);
-		when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(myTypedQuery);
-		when(myTypedQuery.getResultList()).thenReturn(List.of(
-			new TupleImpl(null, redView),
-			new TupleImpl(null, blueView)
-		));
-
-		// test
-		Map<String, JpaPid> map = myHelperSvc.resolveResourcePersistentIds(
-			partitionId,
-			resourceType,
-			patientIdsToResolve);
-
-		assertFalse(map.isEmpty());
-		for (String id : patientIdsToResolve) {
-			assertThat(map).containsKey(id);
-		}
-	}
-
-	@Test
-	public void resolveResourcePersistenIds_withForcedIdAndDeleteDisabled_returnsMap() {
-		lenient().doReturn(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC).when(myStorageSettings).getResourceClientIdStrategy();
-
-		RequestPartitionId partitionId = RequestPartitionId.allPartitions();
-		String resourceType = Patient.class.getSimpleName();
-		List<String> patientIdsToResolve = new ArrayList<>();
-		patientIdsToResolve.add("RED");
-		patientIdsToResolve.add("BLUE");
-
-		JpaPid red = JpaPid.fromId(123L);
-		JpaPid blue = JpaPid.fromId(456L);
-
-		// we will pretend the lookup value is in the cache
-		when(myMemoryCacheService.getIfPresent(eq(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID),
-			any()))
-			.thenReturn(List.of(new JpaResourceLookup("Patient", red.getId(), null, new PartitionablePartitionId())))
-			.thenReturn(List.of(new JpaResourceLookup("Patient", blue.getId(), null, new PartitionablePartitionId())));
-
-		// test
-		Map<String, JpaPid> map = myHelperSvc.resolveResourcePersistentIds(
-			partitionId,
-			resourceType,
-			patientIdsToResolve
-		);
-
-		assertFalse(map.isEmpty());
-		for (String id : patientIdsToResolve) {
-			assertThat(map).containsKey(id);
-		}
-		assertThat(map).containsEntry("RED", red);
-		assertThat(map).containsEntry("BLUE", blue);
-	}
 
 	@Test
 	public void testResolveResourceIdentity_defaultFunctionality(){
@@ -259,35 +163,11 @@ public class IdHelperServiceTest {
 			new TupleImpl(null, tuple)
 		));
 
-		IResourceLookup<JpaPid> result = myHelperSvc.resolveResourceIdentity(partitionId, resourceType, resourceForcedId);
+		IResourceLookup<JpaPid> result = myHelperSvc.resolveResourceIdentity(partitionId, resourceType, resourceForcedId, ResolveIdentityModeEnum.includeDeleted().noCache());
 		assertEquals(tuple[0], result.getPersistentId().getId());
 		assertEquals(tuple[1], result.getResourceType());
 		assertEquals(tuple[3], result.getDeleted());
 	}
 
-	@Test
-	public void testResolveResourcePersistentIds_mapDefaultFunctionality(){
-		lenient().doReturn(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC).when(myStorageSettings).getResourceClientIdStrategy();
-
-		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
-		String resourceType = "Patient";
-		List<String> ids = Arrays.asList("A", "B", "C");
-
-		JpaPid resourcePersistentId1 = JpaPid.fromId(1L);
-		JpaPid resourcePersistentId2 = JpaPid.fromId(2L);
-		JpaPid resourcePersistentId3 = JpaPid.fromId(3L);
-		when(myMemoryCacheService.getIfPresent(eq(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID),
-			any()))
-			.thenReturn(List.of(new JpaResourceLookup("Patient", resourcePersistentId1.getId(), null, new PartitionablePartitionId())))
-			.thenReturn(List.of(new JpaResourceLookup("Patient", resourcePersistentId2.getId(), null, new PartitionablePartitionId())))
-			.thenReturn(List.of(new JpaResourceLookup("Patient", resourcePersistentId3.getId(), null, new PartitionablePartitionId())));
-
-		Map<String, JpaPid> result = myHelperSvc.resolveResourcePersistentIds(partitionId, resourceType, ids)
-			.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue()));
-		assertThat(result.keySet()).hasSize(3);
-		assertEquals(1L, result.get("A").getId());
-		assertEquals(2L, result.get("B").getId());
-		assertEquals(3L, result.get("C").getId());
-	}
 
 }

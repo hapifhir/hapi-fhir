@@ -1644,6 +1644,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = dao.search(map, mySrd);
 		toUnqualifiedVersionlessIdValues(outcome);
+		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
 
 		myCaptureQueriesListener.clear();

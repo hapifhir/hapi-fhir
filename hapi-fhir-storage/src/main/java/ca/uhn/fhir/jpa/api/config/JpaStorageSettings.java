@@ -1889,6 +1889,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 *
 	 * @since 5.0.0
 	 */
+	// FIXME: change this setting so that we can't undelete a resource with this disabled
 	public boolean isDeleteEnabled() {
 		return myDeleteEnabled;
 	}

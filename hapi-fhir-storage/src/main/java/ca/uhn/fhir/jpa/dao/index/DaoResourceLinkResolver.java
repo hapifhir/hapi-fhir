@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -64,7 +65,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements IResourceLinkResolver {
+public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
 
 	@Autowired
@@ -124,11 +125,14 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		String idPart = targetResourceId.getIdPart();
 		try {
 			if (persistentId == null) {
-				resolvedResource =
-						myIdHelperService.resolveResourceIdentity(theRequestPartitionId, resourceType, idPart, true);
+				resolvedResource = myIdHelperService.resolveResourceIdentity(
+						theRequestPartitionId,
+						resourceType,
+						idPart,
+						ResolveIdentityModeEnum.excludeDeleted().noCache());
 				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
-				resolvedResource = new ResourceLookupPersistentIdWrapper(persistentId);
+				resolvedResource = new ResourceLookupPersistentIdWrapper<>(persistentId);
 			}
 		} catch (ResourceNotFoundException e) {
 
@@ -146,7 +150,10 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 				// Check if this was a deleted resource
 				try {
 					resolvedResource = myIdHelperService.resolveResourceIdentity(
-							theRequestPartitionId, resourceType, idPart, false);
+							theRequestPartitionId,
+							resourceType,
+							idPart,
+							ResolveIdentityModeEnum.includeDeleted().noCache());
 					handleDeletedTarget(resourceType, idPart, sourcePath);
 				} catch (ResourceNotFoundException e2) {
 					resolvedResource = null;

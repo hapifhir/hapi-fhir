@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
@@ -44,7 +45,7 @@ import java.util.Set;
  * This interface is used to translate between {@link IResourcePersistentId}
  * and actual resource IDs.
  */
-public interface IIdHelperService<T extends IResourcePersistentId> {
+public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 
 	/**
 	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.
@@ -59,15 +60,6 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 			@Nonnull RequestPartitionId theRequestPartitionId, List<IIdType> theIds, boolean theOnlyForcedIds);
 
 	/**
-	 * Given a resource type and ID, determines the internal persistent ID for the resource.
-	 *
-	 * @throws ResourceNotFoundException If the ID can not be found
-	 */
-	@Nonnull
-	T resolveResourcePersistentIds(
-			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId);
-
-	/**
 	 * Given a resource type and ID, determines the internal persistent ID for a resource.
 	 * Optionally filters out deleted resources.
 	 *
@@ -78,28 +70,20 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theId,
-			boolean theExcludeDeleted);
-
-	/**
-	 * Returns a mapping of Id -> IResourcePersistentId.
-	 * If any resource is not found, it will throw ResourceNotFound exception
-	 * (and no map will be returned)
-	 */
-	@Nonnull
-	Map<String, T> resolveResourcePersistentIds(
-			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds);
+			ResolveIdentityModeEnum theMode);
 
 	/**
 	 * Returns a mapping of Id -> IResourcePersistentId.
 	 * If any resource is not found, it will throw ResourceNotFound exception (and no map will be returned)
 	 * Optionally filters out deleted resources.
 	 */
+	// FIXME: can we remove this and replace with lookup resource identity
 	@Nonnull
 	Map<String, T> resolveResourcePersistentIds(
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			List<String> theIds,
-			boolean theExcludeDeleted);
+			ResolveIdentityModeEnum theMode);
 
 	/**
 	 * Given a persistent ID, returns the associated resource ID
@@ -107,36 +91,20 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	@Nonnull
 	IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, T theId);
 
-	/**
-	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
-	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
-	 *
-	 * @throws ResourceNotFoundException If the ID can not be found
-	 */
-	@Nonnull
-	IResourceLookup resolveResourceIdentity(
-			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId)
-			throws ResourceNotFoundException;
-
+	// FIXME: update javadoc
 	/**
 	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
 	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
 	 * Optionally filters out deleted resources.
 	 *
-	 * @param theExcludeDeleted If set to {@literal true}, deleted resources will not be returned by this method. Setting
-	 *                          this to {@literal false} means that even deleted resources will be returned, and means that
-	 *                          caching can be used more aggressively since potentially deleted results can be returned.
-	 *                          Note that when set to {@literal false}, lookups may be returned for results that have
-	 *                          been recently deleted but indicating that the resource is not deleted. This is due to
-	 *                          caching that can occur inside the service.
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	IResourceLookup resolveResourceIdentity(
+	IResourceLookup<T> resolveResourceIdentity(
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theResourceId,
-			boolean theExcludeDeleted)
+			ResolveIdentityModeEnum theMode)
 			throws ResourceNotFoundException;
 
 	/**
@@ -144,17 +112,32 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
 	 * Optionally filters out deleted resources.
 	 *
-	 * @param theExcludeDeleted If set to {@literal true}, deleted resources will not be returned by this method. Setting
-	 *                          this to {@literal false} means that even deleted resources will be returned, and means that
-	 *                          caching can be used more aggressively since potentially deleted results can be returned.
-	 *                          Note that when set to {@literal false}, lookups may be returned for results that have
-	 *                          been recently deleted but indicating that the resource is not deleted. This is due to
-	 *                          caching that can occur inside the service.
+	 * @throws ResourceNotFoundException If the ID can not be found
+	 */
+	// FIXME: rename to resolveResourcePersistentId and update JavaDoc
+	@Nonnull
+	default T resolveResourceIdentityPid(
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			String theResourceId,
+			ResolveIdentityModeEnum theMode)
+			throws ResourceNotFoundException {
+		return resolveResourceIdentity(theRequestPartitionId, theResourceType, theResourceId, theMode)
+				.getPersistentId();
+	}
+
+	/**
+	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
+	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
+	 * Optionally filters out deleted resources.
+	 *
 	 * @since 8.0.0
 	 */
 	@Nonnull
-	default Map<IIdType, IResourceLookup> resolveResourceIdentities(
-			@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds, boolean theExcludeDeleted) {
+	default Map<IIdType, IResourceLookup<JpaPid>> resolveResourceIdentities(
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			Collection<IIdType> theIds,
+			ResolveIdentityModeEnum theMode) {
 		// TODO: implement this in CDR for Mongo, them remove this default message
 		throw new UnsupportedOperationException(Msg.code(2571) + "Not implemented");
 	}
