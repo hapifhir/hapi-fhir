@@ -198,6 +198,26 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private String mySearchUuid;
 	private int myFetchSize;
 	private Integer myMaxResultsToFetch;
+
+	/**
+	 * Set of PIDs of results that have already been returned in a search.
+	 *
+	 * Searches use pre-fetch thresholds to avoid returning every result in the db
+	 * (see {@link JpaStorageSettings mySearchPreFetchThresholds}). These threshold values
+	 * dictate the usage of this set.
+	 *
+	 * Results from searches returning *less* than a prefetch threshold are put into this set
+	 * for 2 purposes:
+	 * 1) skipping already seen resources. ie, client requesting next "page" of
+	 *    results should skip previously returned results
+	 * 2) deduplication of returned results. ie, searches can return duplicate resources (due to
+	 *    sort and filter criteria), so this set will be used to avoid returning duplicate results.
+	 *
+	 * NOTE: if a client requests *more* resources than *all* prefetch thresholds,
+	 * we push the work of "deduplication" to the database. No newly seen resource
+	 * will be stored in this set (to avoid this set exploding in size and the JVM running out memory).
+	 * We will, however, still use it to skip previously seen results.
+	 */
 	private Set<JpaPid> myPidSet;
 	private boolean myHasNextIteratorQuery = false;
 	private RequestPartitionId myRequestPartitionId;
@@ -2408,10 +2428,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							JpaPid next = JpaPid.fromId(nextLong);
 							if (doNotSkipNextPidForEverything() && !myPidSet.contains(next)) {
 								if (myMaxResultsToFetch != null) {
-									// we only add to the map if we aren't fetching "everything";
-									// otherwise, we let the de-duplication happen in the database
-									// (see createChunkedQueryNormalSearch above), becuase it saves
-									// memory that way
+									/*
+									 * We only add to the map if we aren't fetching "everything";
+									 * otherwise, we let the de-duplication happen in the database
+									 * (see createChunkedQueryNormalSearch above), because it
+									 * saves memory that way.
+									 */
 									myPidSet.add(next);
 								}
 								myNext = next;
