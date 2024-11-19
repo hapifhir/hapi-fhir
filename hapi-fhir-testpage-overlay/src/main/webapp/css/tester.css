@@ -14,7 +14,7 @@ fieldset[disabled].btn {
    border-radius: 0.5rem;
 }
 
-.badge-secondary {
+.bg-secondary {
    color: #fff;
    background-color: #98a5b0;
 }

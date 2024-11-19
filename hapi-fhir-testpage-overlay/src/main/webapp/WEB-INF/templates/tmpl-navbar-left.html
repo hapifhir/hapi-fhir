@@ -5,45 +5,45 @@
 	<h4>Options</h4>
 
 	<label class="navBarButtonLabel">Encoding</label>
-	<div class="btn-group btn-group-toggle" data-toggle="buttons" id="encodingBtnGroup">
+	<div class="btn-group btn-group-toggle" data-bs-toggle="buttons" id="encodingBtnGroup">
 		<label class="btn btn-info active">
-			<input type="radio" name="encoding" id="encode-default" value="" />(default)
+			<input type="radio" class="btn-check" name="encoding" id="encode-default" value="" />(default)
 		</label> 
 		<label class="btn btn-info">
-			<input type="radio" name="encoding" id="encode-xml" value="xml" />XML
+			<input type="radio" class="btn-check" name="encoding" id="encode-xml" value="xml" />XML
 		</label>
 		<label class="btn btn-info">
-			<input type="radio" name="encoding" id="encode-json" value="json" />JSON
+			<input type="radio" class="btn-check" name="encoding" id="encode-json" value="json" />JSON
 		</label>
 	</div>
 
 	<br /> <label class="navBarButtonLabel">Pretty</label>
-	<div class="btn-group btn-group-toggle" data-toggle="buttons" id="prettyBtnGroup" style="margin-top: 5px;">
+	<div class="btn-group btn-group-toggle" data-bs-toggle="buttons" id="prettyBtnGroup" style="margin-top: 5px;">
 		<label class="btn btn-info active"> <input
-			type="radio" name="pretty" id="pretty-default" value="" />(default)
+			type="radio" class="btn-check" name="pretty" id="pretty-default" value="" />(default)
 		</label> <label class="btn btn-info"> <input
-			type="radio" name="pretty" id="pretty-true" value="true" />On
+			type="radio" class="btn-check" name="pretty" id="pretty-true" value="true" />On
 		</label> <label class="btn btn-info"> <input
-			type="radio" name="pretty" id="pretty-false" value="false" />Off
+			type="radio" class="btn-check" name="pretty" id="pretty-false" value="false" />Off
 		</label>
 	</div>
 
 	<br /> <label class="navBarButtonLabel">Summary</label>
-	<div class="btn-group btn-group-toggle" data-toggle="buttons" id="summaryBtnGroup" style="margin-top: 5px;">
+	<div class="btn-group btn-group-toggle" data-bs-toggle="buttons" id="summaryBtnGroup" style="margin-top: 5px;">
 		<label class="btn btn-info active">
-			<input type="radio" name="_summary" id="summary-default" value="" />(none)
+			<input type="radio" class="btn-check" name="_summary" id="summary-default" value="" />(none)
 		</label> 
 		<label class="btn btn-info">
-			<input type="radio" name="_summary" id="summary-true" value="true" />true
+			<input type="radio" class="btn-check" name="_summary" id="summary-true" value="true" />true
 		</label> 
 		<label class="btn btn-info">
-			<input type="radio" name="_summary" id="summary-text" value="text" />text
+			<input type="radio" class="btn-check" name="_summary" id="summary-text" value="text" />text
 		</label>
 		<label class="btn btn-info">
-			<input type="radio" name="_summary" id="summary-data" value="data" />data
+			<input type="radio" class="btn-check" name="_summary" id="summary-data" value="data" />data
 		</label>
 		<label class="btn btn-info">
-			<input type="radio" name="_summary" id="summary-count" value="count" />count
+			<input type="radio" class="btn-check" name="_summary" id="summary-count" value="count" />count
 		</label>
 	</div>
 

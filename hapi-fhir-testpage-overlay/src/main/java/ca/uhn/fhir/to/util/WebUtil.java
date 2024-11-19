@@ -20,7 +20,7 @@ import java.util.Properties;
 
 public class WebUtil {
 	public static final String BOOTSTRAP_ID = "bootstrap";
-	public static final String BOOTSTRAP_PKG = "org.webjars.npm";
+	public static final String BOOTSTRAP_PKG = "org.webjars";
 	public static final String JQUERY_ID = "jquery";
 	public static final String JQUERY_PKG = "org.webjars.bower";
 
