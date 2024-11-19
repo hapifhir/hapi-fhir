@@ -2097,7 +2097,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				RequestPartitionId.allPartitions(),
 				theValueSet.getIdElement().getResourceType(),
 				theValueSet.getIdElement().getIdPart(),
-				ResolveIdentityModeEnum.includeDeleted().useCache());
+				ResolveIdentityModeEnum.includeDeleted().cacheOk());
 	}
 
 	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(

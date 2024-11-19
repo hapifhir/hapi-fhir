@@ -77,7 +77,6 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 * If any resource is not found, it will throw ResourceNotFound exception (and no map will be returned)
 	 * Optionally filters out deleted resources.
 	 */
-	// FIXME: can we remove this and replace with lookup resource identity
 	@Nonnull
 	Map<String, T> resolveResourcePersistentIds(
 			@Nonnull RequestPartitionId theRequestPartitionId,
@@ -91,12 +90,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	@Nonnull
 	IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, T theId);
 
-	// FIXME: update javadoc
 	/**
-	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
-	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
-	 * Optionally filters out deleted resources.
-	 *
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
@@ -108,13 +102,8 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 			throws ResourceNotFoundException;
 
 	/**
-	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
-	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
-	 * Optionally filters out deleted resources.
-	 *
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
-	// FIXME: rename to resolveResourcePersistentId and update JavaDoc
 	@Nonnull
 	default T resolveResourceIdentityPid(
 			@Nonnull RequestPartitionId theRequestPartitionId,
@@ -167,11 +156,11 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods
 	 */
-	void addResolvedPidToForcedId(
-			T theResourcePersistentId,
+	void addResolvedPidToFhirId(
+			@Nonnull T theResourcePersistentId,
 			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			@Nullable String theForcedId,
+			@Nonnull String theResourceType,
+			@Nonnull String theFhirId,
 			@Nullable Date theDeletedAt);
 
 	@Nonnull

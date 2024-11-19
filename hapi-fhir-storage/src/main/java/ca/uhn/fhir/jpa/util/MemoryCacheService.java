@@ -206,7 +206,7 @@ public class MemoryCacheService {
 		 * Key type: {@literal JpaPid}
 		 * Value type: {@literal JpaResourceLookup}
 		 */
-		RESOURCE_LOOKUP_BY_PID(TypedPidCacheKey.class),
+		RESOURCE_LOOKUP_BY_PID(PidCacheKey.class),
 		/**
 		 * Key type: {@link ForcedIdCacheKey}
 		 * Value type: {@literal JpaResourceLookup}
@@ -384,14 +384,13 @@ public class MemoryCacheService {
 		}
 	}
 
-	// FIXME: rename to PidCacheKey
-	public static class TypedPidCacheKey {
+	public static class PidCacheKey {
 
 		private final Long myPid;
 		private final RequestPartitionId myRequestPartitionId;
 		private final int myHashCode;
 
-		public TypedPidCacheKey(Long thePid, RequestPartitionId theRequestPartitionId) {
+		public PidCacheKey(Long thePid, RequestPartitionId theRequestPartitionId) {
 			myPid = thePid;
 			myRequestPartitionId = theRequestPartitionId;
 			myHashCode = Objects.hash(myPid, myRequestPartitionId);
@@ -406,18 +405,16 @@ public class MemoryCacheService {
 			if (this == theO) {
 				return true;
 			}
-			if (!(theO instanceof TypedPidCacheKey)) {
+			if (!(theO instanceof PidCacheKey)) {
 				return false;
 			}
-			TypedPidCacheKey that = (TypedPidCacheKey) theO;
-			return Objects.equals(myPid, that.myPid)
-					&& Objects.equals(myRequestPartitionId, that.myRequestPartitionId);
+			PidCacheKey that = (PidCacheKey) theO;
+			return Objects.equals(myPid, that.myPid) && Objects.equals(myRequestPartitionId, that.myRequestPartitionId);
 		}
 
 		@Override
 		public int hashCode() {
 			return myHashCode;
 		}
-
 	}
 }

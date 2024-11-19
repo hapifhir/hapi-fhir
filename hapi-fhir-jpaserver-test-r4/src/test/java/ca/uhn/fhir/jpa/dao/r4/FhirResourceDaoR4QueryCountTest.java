@@ -257,7 +257,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		List<IIdType> coverageIds = new ArrayList<>();
 		AtomicInteger counter = new AtomicInteger(0);
 		for (int i = 0; i < 10; i++) {
+			// Server-assigned numeric ID
 			coverageIds.add(createResource("Coverage", withStatus("active")));
+			// Client-assigned string ID
 			patientIds.add(createPatient(withId(UUID.randomUUID().toString()), withActiveTrue()));
 			orgIds.add(createOrganization(withId(UUID.randomUUID().toString()), withName("FOO")));
 		}
@@ -294,7 +296,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Verify
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesRepeated());
 		assertEquals(33, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 

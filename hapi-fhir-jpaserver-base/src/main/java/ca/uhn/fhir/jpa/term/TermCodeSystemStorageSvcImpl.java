@@ -387,7 +387,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				RequestPartitionId.allPartitions(),
 				csId.getResourceType(),
 				csId.getIdPart(),
-				ResolveIdentityModeEnum.includeDeleted().useCache());
+				ResolveIdentityModeEnum.includeDeleted().cacheOk());
 		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getId());
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());

@@ -572,8 +572,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (fhirId == null) {
 			fhirId = Long.toString(entity.getId());
 		}
-		myIdHelperService.addResolvedPidToForcedId(
-				jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
+		myIdHelperService.addResolvedPidToFhirId(jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
@@ -1746,7 +1745,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						requestPartitionId,
 						getResourceName(),
 						theId.getIdPart(),
-						ResolveIdentityModeEnum.includeDeleted().useCache())
+						ResolveIdentityModeEnum.includeDeleted().cacheOk())
 				.getPersistentId();
 		Set<Integer> readPartitions = null;
 		if (requestPartitionId.isAllPartitions()) {
@@ -1885,7 +1884,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					theRequestPartitionId,
 					getResourceName(),
 					theId.getIdPart(),
-					ResolveIdentityModeEnum.includeDeleted().useCache());
+					ResolveIdentityModeEnum.includeDeleted().cacheOk());
 		}
 
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());

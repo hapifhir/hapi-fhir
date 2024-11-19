@@ -1886,10 +1886,13 @@ public class JpaStorageSettings extends StorageSettings {
 	 * deletion can be skipped, which improves performance. This is particularly helpful when large
 	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
 	 * search performance.
+	 * <p>
+	 * If deletes are disabled, it is also not possible to un-delete a previously deleted
+	 * resource.
+	 * </p>
 	 *
 	 * @since 5.0.0
 	 */
-	// FIXME: change this setting so that we can't undelete a resource with this disabled
 	public boolean isDeleteEnabled() {
 		return myDeleteEnabled;
 	}
@@ -1900,6 +1903,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * deletion can be skipped, which improves performance. This is particularly helpful when large
 	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
 	 * search performance.
+	 * <p>
+	 * If deletes are disabled, it is also not possible to un-delete a previously deleted
+	 * resource.
+	 * </p>
 	 *
 	 * @since 5.0.0
 	 */

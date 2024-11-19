@@ -289,8 +289,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 */
 		boolean preFetchIncludesReferences = idsToPreResolve.values().stream().anyMatch(t -> !t);
 		ResolveIdentityModeEnum resolveMode = preFetchIncludesReferences
-				? ResolveIdentityModeEnum.excludeDeleted().noCache()
-				: ResolveIdentityModeEnum.includeDeleted().useCache();
+				? ResolveIdentityModeEnum.excludeDeleted().noCacheUnlessDeletesDisabled()
+				: ResolveIdentityModeEnum.includeDeleted().cacheOk();
 
 		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(
 				theRequestPartitionId, idsToPreResolve.keySet(), resolveMode);
@@ -315,6 +315,13 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				theTransactionDetails.addResolvedResourceId(next.toUnqualifiedVersionless(), null);
 			}
 		}
+	}
+
+	@Override
+	protected void handleVerbChangeInTransactionWriteOperations() {
+		super.handleVerbChangeInTransactionWriteOperations();
+
+		myEntityManager.flush();
 	}
 
 	private void preFetchConditionalUrls(

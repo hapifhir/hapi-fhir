@@ -91,7 +91,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 										theRequestPartitionId,
 										theResourceName,
 										valueAsId.getIdPart(),
-										ResolveIdentityModeEnum.excludeDeleted().noCache())
+										ResolveIdentityModeEnum.excludeDeleted().noCacheUnlessDeletesDisabled())
 								.getPersistentId();
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {

@@ -60,13 +60,11 @@ public class ResolveIdentityModeEnum {
 			myFailOnDeleted = theFailOnDeleted;
 		}
 
-		// FIXME: rename to cacheOk
-		public ResolveIdentityModeEnum useCache() {
+		public ResolveIdentityModeEnum cacheOk() {
 			return new ResolveIdentityModeEnum(myIncludeDeleted, myFailOnDeleted, true);
 		}
 
-		// FIXME: rename to noCacheUnlessDeletesDisabled (here and in the rest of the class)
-		public ResolveIdentityModeEnum noCache() {
+		public ResolveIdentityModeEnum noCacheUnlessDeletesDisabled() {
 			return new ResolveIdentityModeEnum(myIncludeDeleted, myFailOnDeleted, false);
 		}
 	}

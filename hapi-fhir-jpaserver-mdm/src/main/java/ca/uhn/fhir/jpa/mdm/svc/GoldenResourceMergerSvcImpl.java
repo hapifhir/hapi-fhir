@@ -240,7 +240,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 				getPartitionIdForResource(theToResource),
 				theToResource.getIdElement().getResourceType(),
 				theToResource.getIdElement().getIdPart(),
-				ResolveIdentityModeEnum.includeDeleted().useCache());
+				ResolveIdentityModeEnum.includeDeleted().cacheOk());
 
 		// reassign links:
 		// to <- from

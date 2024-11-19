@@ -7,7 +7,10 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -108,8 +111,6 @@ public class MdmSurvivorshipSvcImplTest {
 		);
 	}
 
-	// FIXME: run this test class
-
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@ParameterizedTest
 	@ValueSource(booleans = {true,false})
@@ -130,7 +131,7 @@ public class MdmSurvivorshipSvcImplTest {
 
 		List<IBaseResource> resources = new ArrayList<>();
 		List<MdmLinkJson> links = new ArrayList<>();
-		Map<String, IResourcePersistentId> sourceIdToPid = new HashMap<>();
+		Map<IIdType, IResourceLookup<JpaPid>> sourceIdToPid = new HashMap<>();
 		for (int i = 0; i < 10; i++) {
 			// we want our resources to be slightly different
 			Patient patient = new Patient();
@@ -155,7 +156,7 @@ public class MdmSurvivorshipSvcImplTest {
 			link.setSourceId(patient.getId());
 			link.setGoldenResourceId(goldenPatient.getId());
 			links.add(link);
-			sourceIdToPid.put(patient.getId(), link.getSourcePid());
+			sourceIdToPid.put(patient.getIdElement(), new JpaResourceLookup("Patient", (Long) link.getSourcePid().getId(), null, new PartitionablePartitionId()));
 		}
 
 		IFhirResourceDao resourceDao = mock(IFhirResourceDao.class);
@@ -206,8 +207,10 @@ public class MdmSurvivorshipSvcImplTest {
 		verify(myIIdHelperService).resolveResourceIdentities(any(RequestPartitionId.class), idsCaptor.capture(), any());
 		assertNotNull(idsCaptor.getValue());
 		assertFalse(idsCaptor.getValue().isEmpty());
-		List<String> ids = idsCaptor.getValue().stream().map(t->t.getValue()).toList();
-		assertThat(ids).asList().containsExactlyInAnyOrder("AAAA");
+		List<String> ids = idsCaptor.getValue().stream().map(IIdType::getValue).toList();
+
+		List<String> expectedIds = resources.stream().map(t -> t.getIdElement().toUnqualifiedVersionless().getValue()).toList();
+		assertThat(ids).asList().containsExactlyInAnyOrder(expectedIds.toArray());
 	}
 
 	private MdmTransactionContext createTransactionContext() {

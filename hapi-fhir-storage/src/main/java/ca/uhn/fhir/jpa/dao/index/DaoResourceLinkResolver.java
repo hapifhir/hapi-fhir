@@ -129,7 +129,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 						theRequestPartitionId,
 						resourceType,
 						idPart,
-						ResolveIdentityModeEnum.excludeDeleted().noCache());
+						ResolveIdentityModeEnum.excludeDeleted().noCacheUnlessDeletesDisabled());
 				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
 				resolvedResource = new ResourceLookupPersistentIdWrapper<>(persistentId);
@@ -153,7 +153,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 							theRequestPartitionId,
 							resourceType,
 							idPart,
-							ResolveIdentityModeEnum.includeDeleted().noCache());
+							ResolveIdentityModeEnum.includeDeleted().noCacheUnlessDeletesDisabled());
 					handleDeletedTarget(resourceType, idPart, sourcePath);
 				} catch (ResourceNotFoundException e2) {
 					resolvedResource = null;

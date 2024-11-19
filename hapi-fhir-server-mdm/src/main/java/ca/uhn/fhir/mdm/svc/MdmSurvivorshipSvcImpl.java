@@ -175,7 +175,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 						Map<IIdType, ? extends IResourceLookup<?>> ids = myIIdHelperService.resolveResourceIdentities(
 								RequestPartitionId.allPartitions(),
 								sourceIds,
-								ResolveIdentityModeEnum.includeDeleted().useCache());
+								ResolveIdentityModeEnum.includeDeleted().cacheOk());
 						for (Map.Entry<IIdType, ? extends IResourceLookup<?>> entry : ids.entrySet()) {
 							sourceIdToPid.put(
 									entry.getKey().getIdPart(), entry.getValue().getPersistentId());

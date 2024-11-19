@@ -7,13 +7,10 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 import org.hibernate.sql.results.internal.TupleImpl;
@@ -24,19 +21,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -99,7 +88,7 @@ public class IdHelperServiceTest {
         String resourceType = "Patient";
         Long id = 123L;
         List<String> ids = List.of(String.valueOf(id));
-        ResolveIdentityModeEnum mode = ResolveIdentityModeEnum.includeDeleted().noCache();
+        ResolveIdentityModeEnum mode = ResolveIdentityModeEnum.includeDeleted().noCacheUnlessDeletesDisabled();
 
         //prepare results
         Patient expectedPatient = new Patient();
@@ -122,7 +111,7 @@ public class IdHelperServiceTest {
         String resourceType = "Patient";
         List<String> ids = List.of(String.valueOf(id));
         String forcedId = "(all)/" + resourceType + "/" + id;
-        ResolveIdentityModeEnum mode = ResolveIdentityModeEnum.includeDeleted().noCache();
+        ResolveIdentityModeEnum mode = ResolveIdentityModeEnum.includeDeleted().noCacheUnlessDeletesDisabled();
 
         //prepare results
         Patient expectedPatient = new Patient();
@@ -163,7 +152,7 @@ public class IdHelperServiceTest {
 			new TupleImpl(null, tuple)
 		));
 
-		IResourceLookup<JpaPid> result = myHelperSvc.resolveResourceIdentity(partitionId, resourceType, resourceForcedId, ResolveIdentityModeEnum.includeDeleted().noCache());
+		IResourceLookup<JpaPid> result = myHelperSvc.resolveResourceIdentity(partitionId, resourceType, resourceForcedId, ResolveIdentityModeEnum.includeDeleted().noCacheUnlessDeletesDisabled());
 		assertEquals(tuple[0], result.getPersistentId().getId());
 		assertEquals(tuple[1], result.getResourceType());
 		assertEquals(tuple[3], result.getDeleted());

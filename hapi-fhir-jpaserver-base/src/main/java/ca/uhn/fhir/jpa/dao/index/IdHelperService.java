@@ -45,7 +45,6 @@ import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -69,7 +68,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -232,7 +230,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		return retVal;
 	}
-
 
 	/**
 	 * Fetch the resource identity ({@link IResourceLookup}) for a collection of
@@ -693,24 +690,23 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods
 	 */
-	// FIXME: rename forced to fhir
 	@Override
-	public void addResolvedPidToForcedId(
+	public void addResolvedPidToFhirId(
 			@Nonnull JpaPid theJpaPid,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			@Nonnull String theResourceType,
-			@Nonnull String theForcedId,
+			@Nonnull String theFhirId,
 			@Nullable Date theDeletedAt) {
-		if (theForcedId != null) {
+		if (theFhirId != null) {
 			if (theJpaPid.getAssociatedResourceId() == null) {
-				populateAssociatedResourceId(theResourceType, theForcedId, theJpaPid);
+				populateAssociatedResourceId(theResourceType, theFhirId, theJpaPid);
 			}
 
 			myMemoryCacheService.putAfterCommit(
 					MemoryCacheService.CacheEnum.PID_TO_FORCED_ID,
 					theJpaPid.getId(),
-					Optional.of(theResourceType + "/" + theForcedId));
-			String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, theForcedId);
+					Optional.of(theResourceType + "/" + theFhirId));
+			String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, theFhirId);
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, theJpaPid);
 		} else {
 			myMemoryCacheService.putAfterCommit(
@@ -720,13 +716,13 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		JpaResourceLookup lookup = new JpaResourceLookup(
 				theResourceType, theJpaPid.getId(), theDeletedAt, theJpaPid.getPartitionablePartitionId());
 
-		MemoryCacheService.TypedPidCacheKey pidKey =
-				new MemoryCacheService.TypedPidCacheKey(theJpaPid.getId(), theRequestPartitionId);
+		MemoryCacheService.PidCacheKey pidKey =
+				new MemoryCacheService.PidCacheKey(theJpaPid.getId(), theRequestPartitionId);
 		myMemoryCacheService.putAfterCommit(
 				MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, pidKey, List.of(lookup));
 
 		MemoryCacheService.ForcedIdCacheKey fhirIdKey =
-				new MemoryCacheService.ForcedIdCacheKey(theResourceType, theForcedId, theRequestPartitionId);
+				new MemoryCacheService.ForcedIdCacheKey(theResourceType, theFhirId, theRequestPartitionId);
 		myMemoryCacheService.putAfterCommit(
 				MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID, fhirIdKey, List.of(lookup));
 	}
@@ -755,7 +751,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 						theRequestPartitionId,
 						id.getResourceType(),
 						id.getIdPart(),
-						ResolveIdentityModeEnum.includeDeleted().useCache());
+						ResolveIdentityModeEnum.includeDeleted().cacheOk());
 			} catch (ResourceNotFoundException e) {
 				retVal = null;
 			}

@@ -148,7 +148,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 										requestPartitionId,
 										ref.getResourceType(),
 										ref.getIdPart(),
-										ResolveIdentityModeEnum.includeDeleted().useCache())
+										ResolveIdentityModeEnum.includeDeleted().cacheOk())
 								.getPersistentId();
 						orderedSubjectReferenceMap.put(pid.getId(), nextOr);
 					} else {

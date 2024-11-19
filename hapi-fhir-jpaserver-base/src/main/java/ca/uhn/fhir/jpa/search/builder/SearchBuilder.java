@@ -542,7 +542,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									myRequestPartitionId,
 									myResourceName,
 									String.valueOf(lastNResourceId),
-									ResolveIdentityModeEnum.excludeDeleted().useCache())
+									ResolveIdentityModeEnum.excludeDeleted().cacheOk())
 							.getPersistentId())
 					.collect(Collectors.toList());
 		} else {
@@ -570,7 +570,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							myRequestPartitionId,
 							myResourceName,
 							idParamValue,
-							ResolveIdentityModeEnum.includeDeleted().useCache())
+							ResolveIdentityModeEnum.includeDeleted().cacheOk())
 					.getPersistentId();
 		}
 		return myFulltextSearchSvc.everything(myResourceName, myParams, pid, theRequestDetails);
@@ -628,7 +628,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Map<IIdType, IResourceLookup<JpaPid>> idToIdentity = myIdHelperService.resolveResourceIdentities(
 				myRequestPartitionId,
 				new ArrayList<>(ids),
-				ResolveIdentityModeEnum.failOnDeleted().noCache());
+				ResolveIdentityModeEnum.failOnDeleted().noCacheUnlessDeletesDisabled());
 
 		// add the pids to targetPids
 		for (IResourceLookup pid : idToIdentity.values()) {
