@@ -26,8 +26,8 @@
 					<!-- ** Default Home                                         ** -->
 					<!-- ********************************************************** -->
 
-						<div class="accordion">
-                     <div class="accordion-header">
+						<div class="card">
+                     <div class="card-header">
 							This is a RESTful server tester, which can be used to send
 							requests to, and receive responses from the server at the
 							following URL:
@@ -39,9 +39,9 @@
 						<!-- ** Resource Actions                           ** -->
 						<!-- ************************************************ -->
 						
-						<div class="accordion" style="margin-top: 20px;" th:if="${resourceName.empty} == false">
-							<h3 class="accordion-header panel-title" th:text="'Resource: ' + ${resourceName}">Resource: <b>Patient</b></h3>
-							<div class="accordion-body">
+						<div class="card" style="margin-top: 20px;" th:if="${resourceName.empty} == false">
+							<h3 class="card-header panel-title" th:text="'Resource: ' + ${resourceName}">Resource: <b>Patient</b></h3>
+							<div class="card-body">
 								This page contains various operations for interacting with
 								the <th:block th:text="${resourceName}"></th:block> resource.
 							</div>
@@ -80,12 +80,12 @@
 						</script>
 						
 						<!-- Tab panes -->
-						<div class="accordion" style="top: -2px;"><div class="accordion-body tab-content">
+						<div class="card" style="top: -2px;"><div class="card-body tab-content">
 
 							<!-- *************************************************** -->
 							<!-- Search Tab -->
 							<!-- *************************************************** -->
-							<div class="tab-pane active" id="tab-search" aria-labelledby="search-tab">
+							<div class="tab-pane" id="tab-search" aria-labelledby="search-tab">
 	
 								<!-- Search contents -->
 								<div class="container-fluid">
