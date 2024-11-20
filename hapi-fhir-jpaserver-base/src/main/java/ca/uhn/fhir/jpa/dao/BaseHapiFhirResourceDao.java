@@ -43,7 +43,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -1745,7 +1745,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						requestPartitionId,
 						getResourceName(),
 						theId.getIdPart(),
-						ResolveIdentityModeEnum.includeDeleted().cacheOk())
+						ResolveIdentityMode.includeDeleted().cacheOk())
 				.getPersistentId();
 		Set<Integer> readPartitions = null;
 		if (requestPartitionId.isAllPartitions()) {
@@ -1900,7 +1900,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					theRequestPartitionId,
 					resourceName,
 					theId.getIdPart(),
-					ResolveIdentityModeEnum.includeDeleted().cacheOk());
+					ResolveIdentityMode.includeDeleted().cacheOk());
 		}
 
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());

@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -88,6 +88,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]+[?][a-z0-9-]+=[^&,]+$");
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
+	public static final int CONDITIONAL_URL_FETCH_CHUNK_SIZE = 100;
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
@@ -288,9 +289,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * to reference.
 		 */
 		boolean preFetchIncludesReferences = idsToPreResolve.values().stream().anyMatch(t -> !t);
-		ResolveIdentityModeEnum resolveMode = preFetchIncludesReferences
-				? ResolveIdentityModeEnum.excludeDeleted().noCacheUnlessDeletesDisabled()
-				: ResolveIdentityModeEnum.includeDeleted().cacheOk();
+		ResolveIdentityMode resolveMode = preFetchIncludesReferences
+				? ResolveIdentityMode.excludeDeleted().noCacheUnlessDeletesDisabled()
+				: ResolveIdentityMode.includeDeleted().cacheOk();
 
 		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(
 				theRequestPartitionId, idsToPreResolve.keySet(), resolveMode);
@@ -367,7 +368,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		TaskChunker.chunk(
 				searchParameterMapsToResolve,
-				100,
+				CONDITIONAL_URL_FETCH_CHUNK_SIZE,
 				map -> preFetchSearchParameterMaps(theTransactionDetails, theRequestPartitionId, map, idsToPreFetch));
 	}
 

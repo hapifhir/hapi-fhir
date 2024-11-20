@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -91,7 +91,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 										theRequestPartitionId,
 										theResourceName,
 										valueAsId.getIdPart(),
-										ResolveIdentityModeEnum.excludeDeleted().noCacheUnlessDeletesDisabled())
+										ResolveIdentityMode.excludeDeleted().noCacheUnlessDeletesDisabled())
 								.getPersistentId();
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {

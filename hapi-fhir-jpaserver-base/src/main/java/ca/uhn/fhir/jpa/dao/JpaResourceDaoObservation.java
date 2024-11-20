@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
-import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -148,7 +148,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 										requestPartitionId,
 										ref.getResourceType(),
 										ref.getIdPart(),
-										ResolveIdentityModeEnum.includeDeleted().cacheOk())
+										ResolveIdentityMode.includeDeleted().cacheOk())
 								.getPersistentId();
 						orderedSubjectReferenceMap.put(pid.getId(), nextOr);
 					} else {

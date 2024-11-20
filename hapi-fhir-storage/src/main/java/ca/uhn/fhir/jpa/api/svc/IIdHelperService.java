@@ -70,7 +70,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theId,
-			ResolveIdentityModeEnum theMode);
+			ResolveIdentityMode theMode);
 
 	/**
 	 * Returns a mapping of Id -> IResourcePersistentId.
@@ -82,7 +82,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			List<String> theIds,
-			ResolveIdentityModeEnum theMode);
+			ResolveIdentityMode theMode);
 
 	/**
 	 * Given a persistent ID, returns the associated resource ID
@@ -98,7 +98,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			@Nullable String theResourceType,
 			@Nonnull String theResourceId,
-			@Nonnull ResolveIdentityModeEnum theMode)
+			@Nonnull ResolveIdentityMode theMode)
 			throws ResourceNotFoundException;
 
 	/**
@@ -109,7 +109,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			@Nullable String theResourceType,
 			@Nonnull String theResourceId,
-			@Nonnull ResolveIdentityModeEnum theMode)
+			@Nonnull ResolveIdentityMode theMode)
 			throws ResourceNotFoundException {
 		return resolveResourceIdentity(theRequestPartitionId, theResourceType, theResourceId, theMode)
 				.getPersistentId();
@@ -126,7 +126,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	default Map<IIdType, IResourceLookup<JpaPid>> resolveResourceIdentities(
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			Collection<IIdType> theIds,
-			ResolveIdentityModeEnum theMode) {
+			ResolveIdentityMode theMode) {
 		// TODO: implement this in CDR for Mongo, them remove this default message
 		throw new UnsupportedOperationException(Msg.code(2571) + "Not implemented");
 	}

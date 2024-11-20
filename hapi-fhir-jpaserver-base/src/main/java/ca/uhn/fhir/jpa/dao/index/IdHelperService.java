@@ -25,7 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -146,7 +146,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			@Nullable String theResourceType,
 			@Nonnull final String theResourceId,
-			@Nonnull ResolveIdentityModeEnum theMode)
+			@Nonnull ResolveIdentityMode theMode)
 			throws ResourceNotFoundException {
 
 		IIdType id;
@@ -171,7 +171,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	public Map<IIdType, IResourceLookup<JpaPid>> resolveResourceIdentities(
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			Collection<IIdType> theIds,
-			ResolveIdentityModeEnum theMode) {
+			ResolveIdentityMode theMode) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive()
 				: "no transaction active";
 
@@ -254,7 +254,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	 */
 	private void resolveResourceIdentitiesForFhirIdsUsingCache(
 			@Nonnull RequestPartitionId theRequestPartitionId,
-			ResolveIdentityModeEnum theMode,
+			ResolveIdentityMode theMode,
 			Collection<IIdType> theIdsToResolve,
 			ListMultimap<IIdType, IResourceLookup<JpaPid>> theMapToPopulate) {
 		for (Iterator<IIdType> idIterator = theIdsToResolve.iterator(); idIterator.hasNext(); ) {
@@ -387,7 +387,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			List<String> theIds,
-			ResolveIdentityModeEnum theMode) {
+			ResolveIdentityMode theMode) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 		Validate.notNull(theIds, "theIds cannot be null");
 		Validate.isTrue(!theIds.isEmpty(), "theIds must not be empty");
@@ -440,7 +440,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theId,
-			ResolveIdentityModeEnum theMode) {
+			ResolveIdentityMode theMode) {
 		Validate.notNull(theId, "theId must not be null");
 
 		Map<String, JpaPid> retVal = resolveResourcePersistentIds(
@@ -772,7 +772,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 						theRequestPartitionId,
 						id.getResourceType(),
 						id.getIdPart(),
-						ResolveIdentityModeEnum.includeDeleted().cacheOk());
+						ResolveIdentityMode.includeDeleted().cacheOk());
 			} catch (ResourceNotFoundException e) {
 				retVal = null;
 			}

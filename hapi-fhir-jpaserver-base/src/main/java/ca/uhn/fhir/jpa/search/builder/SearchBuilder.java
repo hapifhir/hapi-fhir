@@ -36,7 +36,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -542,7 +542,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									myRequestPartitionId,
 									myResourceName,
 									String.valueOf(lastNResourceId),
-									ResolveIdentityModeEnum.excludeDeleted().cacheOk())
+									ResolveIdentityMode.excludeDeleted().cacheOk())
 							.getPersistentId())
 					.collect(Collectors.toList());
 		} else {
@@ -570,7 +570,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							myRequestPartitionId,
 							myResourceName,
 							idParamValue,
-							ResolveIdentityModeEnum.includeDeleted().cacheOk())
+							ResolveIdentityMode.includeDeleted().cacheOk())
 					.getPersistentId();
 		}
 		return myFulltextSearchSvc.everything(myResourceName, myParams, pid, theRequestDetails);
@@ -628,7 +628,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Map<IIdType, IResourceLookup<JpaPid>> idToIdentity = myIdHelperService.resolveResourceIdentities(
 				myRequestPartitionId,
 				new ArrayList<>(ids),
-				ResolveIdentityModeEnum.failOnDeleted().noCacheUnlessDeletesDisabled());
+				ResolveIdentityMode.failOnDeleted().noCacheUnlessDeletesDisabled());
 
 		// add the pids to targetPids
 		for (IResourceLookup pid : idToIdentity.values()) {

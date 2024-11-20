@@ -31,7 +31,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -129,7 +129,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 						theRequestPartitionId,
 						resourceType,
 						idPart,
-						ResolveIdentityModeEnum.excludeDeleted().noCacheUnlessDeletesDisabled());
+						ResolveIdentityMode.excludeDeleted().noCacheUnlessDeletesDisabled());
 				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
 				resolvedResource = new ResourceLookupPersistentIdWrapper<>(persistentId);
@@ -153,7 +153,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 							theRequestPartitionId,
 							resourceType,
 							idPart,
-							ResolveIdentityModeEnum.includeDeleted().noCacheUnlessDeletesDisabled());
+							ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled());
 					handleDeletedTarget(resourceType, idPart, sourcePath);
 				} catch (ResourceNotFoundException e2) {
 					resolvedResource = null;

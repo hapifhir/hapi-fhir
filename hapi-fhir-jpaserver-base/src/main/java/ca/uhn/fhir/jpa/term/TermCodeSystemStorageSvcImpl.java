@@ -25,7 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -387,7 +387,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				RequestPartitionId.allPartitions(),
 				csId.getResourceType(),
 				csId.getIdPart(),
-				ResolveIdentityModeEnum.includeDeleted().cacheOk());
+				ResolveIdentityMode.includeDeleted().cacheOk());
 		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getId());
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());

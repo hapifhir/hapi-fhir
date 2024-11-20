@@ -1,12 +1,18 @@
 package ca.uhn.fhir.jpa.api.svc;
 
-public class ResolveIdentityModeEnum {
+/**
+ * Resolution mode parameter for methods on {@link IIdHelperService}
+ */
+public class ResolveIdentityMode {
 
 	private final boolean myIncludeDeleted;
 	private final boolean myUseCache;
 	private final boolean myFailOnDeleted;
 
-	private ResolveIdentityModeEnum(boolean theIncludeDeleted, boolean theFailOnDeleted, boolean theUseCache) {
+	/**
+	 * Non-instantiable. Use the factory methods on this class.
+	 */
+	private ResolveIdentityMode(boolean theIncludeDeleted, boolean theFailOnDeleted, boolean theUseCache) {
 		myIncludeDeleted = theIncludeDeleted;
 		myUseCache = theUseCache;
 		myFailOnDeleted = theFailOnDeleted;
@@ -36,7 +42,7 @@ public class ResolveIdentityModeEnum {
 	}
 
 	/**
-	 * Deleted resource identities should be exluded from the results
+	 * Deleted resource identities should be excluded from the results
 	 */
 	public static Builder excludeDeleted() {
 		return new Builder(false, false);
@@ -60,12 +66,21 @@ public class ResolveIdentityModeEnum {
 			myFailOnDeleted = theFailOnDeleted;
 		}
 
-		public ResolveIdentityModeEnum cacheOk() {
-			return new ResolveIdentityModeEnum(myIncludeDeleted, myFailOnDeleted, true);
+		/**
+		 * Cached results are acceptable. This mode is obviously more efficient since it'll always
+		 * try the cache first, but it should not be used in cases where it matters whether the
+		 * deleted status has changed for a resource.
+		 */
+		public ResolveIdentityMode cacheOk() {
+			return new ResolveIdentityMode(myIncludeDeleted, myFailOnDeleted, true);
 		}
 
-		public ResolveIdentityModeEnum noCacheUnlessDeletesDisabled() {
-			return new ResolveIdentityModeEnum(myIncludeDeleted, myFailOnDeleted, false);
+		/**
+		 * In this mode, the cache won't be used unless deletes are disabled on this server
+		 * (meaning that the deleted status of a resource is not able to change)
+		 */
+		public ResolveIdentityMode noCacheUnlessDeletesDisabled() {
+			return new ResolveIdentityMode(myIncludeDeleted, myFailOnDeleted, false);
 		}
 	}
 }

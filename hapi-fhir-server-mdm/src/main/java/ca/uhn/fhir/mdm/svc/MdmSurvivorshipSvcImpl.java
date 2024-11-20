@@ -24,7 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
@@ -175,7 +175,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 						Map<IIdType, ? extends IResourceLookup<?>> ids = myIIdHelperService.resolveResourceIdentities(
 								RequestPartitionId.allPartitions(),
 								sourceIds,
-								ResolveIdentityModeEnum.includeDeleted().cacheOk());
+								ResolveIdentityMode.includeDeleted().cacheOk());
 						for (Map.Entry<IIdType, ? extends IResourceLookup<?>> entry : ids.entrySet()) {
 							sourceIdToPid.put(
 									entry.getKey().getIdPart(), entry.getValue().getPersistentId());

@@ -25,7 +25,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
@@ -240,7 +240,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 				getPartitionIdForResource(theToResource),
 				theToResource.getIdElement().getResourceType(),
 				theToResource.getIdElement().getIdPart(),
-				ResolveIdentityModeEnum.includeDeleted().cacheOk());
+				ResolveIdentityMode.includeDeleted().cacheOk());
 
 		// reassign links:
 		// to <- from

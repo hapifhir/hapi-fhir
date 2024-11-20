@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.svc.ResolveIdentityModeEnum;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -88,7 +88,7 @@ public class IdHelperServiceTest {
         String resourceType = "Patient";
         Long id = 123L;
         List<String> ids = List.of(String.valueOf(id));
-        ResolveIdentityModeEnum mode = ResolveIdentityModeEnum.includeDeleted().noCacheUnlessDeletesDisabled();
+        ResolveIdentityMode mode = ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled();
 
         //prepare results
         Patient expectedPatient = new Patient();
@@ -111,7 +111,7 @@ public class IdHelperServiceTest {
         String resourceType = "Patient";
         List<String> ids = List.of(String.valueOf(id));
         String forcedId = "(all)/" + resourceType + "/" + id;
-        ResolveIdentityModeEnum mode = ResolveIdentityModeEnum.includeDeleted().noCacheUnlessDeletesDisabled();
+        ResolveIdentityMode mode = ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled();
 
         //prepare results
         Patient expectedPatient = new Patient();
@@ -152,7 +152,7 @@ public class IdHelperServiceTest {
 			new TupleImpl(null, tuple)
 		));
 
-		IResourceLookup<JpaPid> result = myHelperSvc.resolveResourceIdentity(partitionId, resourceType, resourceForcedId, ResolveIdentityModeEnum.includeDeleted().noCacheUnlessDeletesDisabled());
+		IResourceLookup<JpaPid> result = myHelperSvc.resolveResourceIdentity(partitionId, resourceType, resourceForcedId, ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled());
 		assertEquals(tuple[0], result.getPersistentId().getId());
 		assertEquals(tuple[1], result.getResourceType());
 		assertEquals(tuple[3], result.getDeleted());
