@@ -1880,9 +1880,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (persistentId == null) {
+			String resourceName = getResourceName();
+			if (myStorageSettings.getResourceClientIdStrategy() == JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC) {
+				if (theId.isIdPartValidLong()) {
+					/*
+					 * If it's a pure numeric ID and we are in ALPHANUMERIC mode, then the number
+					 * corresponds to a DB PID. In this case we want to resolve it regardless of
+					 * which type the client has supplied. This is because DB PIDs are unique across
+					 * all resource types (unlike FHIR_IDs which are namespaced to the resource type).
+					 * We want to load the resource with that PID regardless of type because if
+					 * the user is trying to update it we want to fail if the type is wrong, as
+					 * opposed to trying to create a new instance.
+					 */
+					resourceName = null;
+				}
+			}
 			persistentId = myIdHelperService.resolveResourceIdentityPid(
 					theRequestPartitionId,
-					getResourceName(),
+					resourceName,
 					theId.getIdPart(),
 					ResolveIdentityModeEnum.includeDeleted().cacheOk());
 		}

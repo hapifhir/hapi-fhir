@@ -3188,8 +3188,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		Bundle input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
 
 		myCaptureQueriesListener.clear();
-		Bundle output = mySystemDao.transaction(mySrd, input);
-		myCaptureQueriesListener.logSelectQueries();
+		Bundle output;
+		try {
+			output = mySystemDao.transaction(mySrd, input);
+		} finally {
+			myCaptureQueriesListener.logSelectQueries();
+			myCaptureQueriesListener.logInsertQueries();
+		}
 
 		assertEquals(17, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(6189, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
@@ -3233,9 +3238,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		Bundle output = mySystemDao.transaction(mySrd, input);
 
 		// Verify
+		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(6, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
@@ -3247,6 +3253,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			assertEquals(1, myResourceHistoryTableDao.count());
 		});
 
+		IdType id = new IdType(output.getEntry().get(0).getResponse().getLocation());
+		assertEquals("1", id.getVersionIdPart());
+		id = new IdType(output.getEntry().get(1).getResponse().getLocation());
+		assertEquals("2", id.getVersionIdPart());
+
+		Patient p = myPatientDao.read(id.toVersionless(), mySrd);
+		assertEquals("2", p.getIdElement().getVersionIdPart());
+		assertEquals("http://system", p.getIdentifierFirstRep().getSystem());
+		assertTrue(p.getActive());
 	}
 
 	/**
@@ -3630,7 +3645,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(7, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(8, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));

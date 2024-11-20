@@ -55,7 +55,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 
 	public static final Predicate<String> DEFAULT_SELECT_INCLUSION_CRITERIA =
 			t -> t.toLowerCase(Locale.US).startsWith("select");
-	private static final int CAPACITY = 1000;
+	private static final int CAPACITY = 10000;
 	private static final Logger ourLog = LoggerFactory.getLogger(CircularQueueCaptureQueriesListener.class);
 	private Queue<SqlQuery> myQueries;
 	private AtomicInteger myCommitCounter;

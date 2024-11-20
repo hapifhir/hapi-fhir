@@ -96,9 +96,9 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	@Nonnull
 	IResourceLookup<T> resolveResourceIdentity(
 			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theResourceId,
-			ResolveIdentityModeEnum theMode)
+			@Nullable String theResourceType,
+			@Nonnull String theResourceId,
+			@Nonnull ResolveIdentityModeEnum theMode)
 			throws ResourceNotFoundException;
 
 	/**
@@ -107,9 +107,9 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	@Nonnull
 	default T resolveResourceIdentityPid(
 			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theResourceId,
-			ResolveIdentityModeEnum theMode)
+			@Nullable String theResourceType,
+			@Nonnull String theResourceId,
+			@Nonnull ResolveIdentityModeEnum theMode)
 			throws ResourceNotFoundException {
 		return resolveResourceIdentity(theRequestPartitionId, theResourceType, theResourceId, theMode)
 				.getPersistentId();

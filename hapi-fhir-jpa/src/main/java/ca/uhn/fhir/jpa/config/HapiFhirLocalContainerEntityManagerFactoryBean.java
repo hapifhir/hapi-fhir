@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import com.google.common.base.Strings;
+import jakarta.annotation.Nonnull;
 import org.hibernate.cfg.BatchSettings;
 import org.hibernate.cfg.JdbcSettings;
 import org.hibernate.cfg.ManagedBeanSettings;
@@ -49,6 +50,7 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		myConfigurableListableBeanFactory = theConfigurableListableBeanFactory;
 	}
 
+	@Nonnull
 	@Override
 	public Map<String, Object> getJpaPropertyMap() {
 		Map<String, Object> retVal = super.getJpaPropertyMap();
@@ -72,10 +74,8 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 			retVal.put(BatchSettings.STATEMENT_BATCH_SIZE, "30");
 		}
 
-		if (!retVal.containsKey(BatchSettings.ORDER_INSERTS)) {
-			retVal.put(BatchSettings.ORDER_INSERTS, "true");
-		}
-
+		// Note that we don't order inserts, because the ordering of row creation
+		// inside a FHIR transaction can cause things to fail
 		if (!retVal.containsKey(BatchSettings.ORDER_UPDATES)) {
 			retVal.put(BatchSettings.ORDER_UPDATES, "true");
 		}
@@ -84,8 +84,7 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 			retVal.put(BatchSettings.BATCH_VERSIONED_DATA, "true");
 		}
 		// Why is this here, you ask? LocalContainerEntityManagerFactoryBean actually clobbers the setting hibernate
-		// needs
-		// in order to be able to resolve beans, so we add it back in manually here
+		// needs in order to be able to resolve beans, so we add it back in manually here
 		if (!retVal.containsKey(ManagedBeanSettings.BEAN_CONTAINER)) {
 			retVal.put(ManagedBeanSettings.BEAN_CONTAINER, new SpringBeanContainer(myConfigurableListableBeanFactory));
 		}

@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -77,7 +78,6 @@ public class MemoryCacheService {
 				case PID_TO_FORCED_ID:
 				case FORCED_ID_TO_PID:
 				case MATCH_URL:
-				case RESOURCE_LOOKUP_BY_PID:
 				case RESOURCE_LOOKUP_BY_FORCED_ID:
 				case HISTORY_COUNT:
 				case TAG_DEFINITION:
@@ -202,11 +202,6 @@ public class MemoryCacheService {
 
 	public enum CacheEnum {
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
-		/**
-		 * Key type: {@literal JpaPid}
-		 * Value type: {@literal JpaResourceLookup}
-		 */
-		RESOURCE_LOOKUP_BY_PID(PidCacheKey.class),
 		/**
 		 * Key type: {@link ForcedIdCacheKey}
 		 * Value type: {@literal JpaResourceLookup}
@@ -345,10 +340,7 @@ public class MemoryCacheService {
 		private final int myHashCode;
 
 		public ForcedIdCacheKey(
-				String theResourceType, String theResourceId, RequestPartitionId theRequestPartitionId) {
-			assert theResourceType != null;
-			assert theResourceId != null;
-			assert theRequestPartitionId != null;
+			@Nullable String theResourceType,@Nonnull String theResourceId, @Nonnull RequestPartitionId theRequestPartitionId) {
 			myResourceType = theResourceType;
 			myResourceId = theResourceId;
 			myRequestPartitionId = theRequestPartitionId;
@@ -378,43 +370,22 @@ public class MemoryCacheService {
 		 * Creates and returns a new unqualified versionless IIdType instance
 		 */
 		public IIdType toIdType(FhirContext theFhirCtx) {
+			if (myResourceType == null) {
+				return toIdTypeWithoutResourceType(theFhirCtx);
+			}
 			IIdType retVal = theFhirCtx.getVersion().newIdType();
 			retVal.setValue(myResourceType + "/" + myResourceId);
 			return retVal;
 		}
-	}
 
-	public static class PidCacheKey {
-
-		private final Long myPid;
-		private final RequestPartitionId myRequestPartitionId;
-		private final int myHashCode;
-
-		public PidCacheKey(Long thePid, RequestPartitionId theRequestPartitionId) {
-			myPid = thePid;
-			myRequestPartitionId = theRequestPartitionId;
-			myHashCode = Objects.hash(myPid, myRequestPartitionId);
-		}
-
-		public Long getPid() {
-			return myPid;
-		}
-
-		@Override
-		public boolean equals(Object theO) {
-			if (this == theO) {
-				return true;
-			}
-			if (!(theO instanceof PidCacheKey)) {
-				return false;
-			}
-			PidCacheKey that = (PidCacheKey) theO;
-			return Objects.equals(myPid, that.myPid) && Objects.equals(myRequestPartitionId, that.myRequestPartitionId);
-		}
-
-		@Override
-		public int hashCode() {
-			return myHashCode;
+		/**
+		 * Creates and returns a new unqualified versionless IIdType instance
+		 */
+		public IIdType toIdTypeWithoutResourceType(FhirContext theFhirCtx) {
+			IIdType retVal = theFhirCtx.getVersion().newIdType();
+			retVal.setValue(myResourceId);
+			return retVal;
 		}
 	}
+
 }
