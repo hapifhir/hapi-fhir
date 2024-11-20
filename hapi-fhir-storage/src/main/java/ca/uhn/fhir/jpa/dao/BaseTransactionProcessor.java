@@ -1408,8 +1408,6 @@ public abstract class BaseTransactionProcessor {
 				theTransactionStopWatch.endCurrentTask();
 			}
 
-			handleVerbChangeInTransactionWriteOperations();
-
 			/*
 			 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
 			 * if something else has a reference to it.. Unless the thing that has a reference to it

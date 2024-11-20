@@ -1881,7 +1881,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (persistentId == null) {
 			String resourceName = getResourceName();
-			if (myStorageSettings.getResourceClientIdStrategy() == JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC) {
+			if (myStorageSettings.getResourceClientIdStrategy()
+					== JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC) {
 				if (theId.isIdPartValidLong()) {
 					/*
 					 * If it's a pure numeric ID and we are in ALPHANUMERIC mode, then the number

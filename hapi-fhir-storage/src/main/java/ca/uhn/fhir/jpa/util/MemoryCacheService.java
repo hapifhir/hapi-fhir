@@ -340,7 +340,9 @@ public class MemoryCacheService {
 		private final int myHashCode;
 
 		public ForcedIdCacheKey(
-			@Nullable String theResourceType,@Nonnull String theResourceId, @Nonnull RequestPartitionId theRequestPartitionId) {
+				@Nullable String theResourceType,
+				@Nonnull String theResourceId,
+				@Nonnull RequestPartitionId theRequestPartitionId) {
 			myResourceType = theResourceType;
 			myResourceId = theResourceId;
 			myRequestPartitionId = theRequestPartitionId;
@@ -387,5 +389,4 @@ public class MemoryCacheService {
 			return retVal;
 		}
 	}
-
 }
