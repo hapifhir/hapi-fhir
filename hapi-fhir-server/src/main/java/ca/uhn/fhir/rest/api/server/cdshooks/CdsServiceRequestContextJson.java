@@ -17,9 +17,8 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.hapi.fhir.cdshooks.api.json;
+package ca.uhn.fhir.rest.api.server.cdshooks;
 
-import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,7 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CdsServiceRequestContextJson extends BaseCdsServiceJson implements IModelJson {
+public class CdsServiceRequestContextJson extends BaseCdsServiceJson {
 
 	@JsonAnyGetter
 	private Map<String, Object> myMap;
