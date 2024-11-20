@@ -74,8 +74,10 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 			retVal.put(BatchSettings.STATEMENT_BATCH_SIZE, "30");
 		}
 
-		// Note that we don't order inserts, because the ordering of row creation
-		// inside a FHIR transaction can cause things to fail
+		if (!retVal.containsKey(BatchSettings.ORDER_INSERTS)) {
+			retVal.put(BatchSettings.ORDER_INSERTS, "true");
+		}
+
 		if (!retVal.containsKey(BatchSettings.ORDER_UPDATES)) {
 			retVal.put(BatchSettings.ORDER_UPDATES, "true");
 		}

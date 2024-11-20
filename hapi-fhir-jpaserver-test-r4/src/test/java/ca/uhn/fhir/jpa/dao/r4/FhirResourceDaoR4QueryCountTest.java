@@ -307,7 +307,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Verify again
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesRepeated());
 		assertEquals(30, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 	}
