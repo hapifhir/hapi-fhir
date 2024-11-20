@@ -24,22 +24,22 @@
 					<!-- *************************************************** -->
 					<!-- ** Response                                      ** -->
 					<!-- *************************************************** -->
-					<div class="card" id="resultWell">
-                  <div class="card-header">
+					<div class="accordion" id="resultWell">
+                  <div class="accordion-header">
                      Executed request against FHIR RESTful server in
                      <th:block th:text="${latencyMs} + 'ms'"/>
                   </div>
 					</div>
 
-					<div th:if="${clientCodeJson} != null" class="card" style="margin-top: 20px;">
-						<div class="card-header">
+					<div th:if="${clientCodeJson} != null" class="accordion" style="margin-top: 20px;">
+						<div class="accordion-header">
 							Client Code - 
 							<small style="color: #888;">
 								Use the following code snippet to execute this action in your
 								own client.
 							</small>
 						</div>
-						<div class="card-body clientCodeBox" id="clientCodeBody">
+						<div class="accordion-body clientCodeBox" id="clientCodeBody">
 						</div>
 						<script type="text/javascript" src="js/ClientCodeGeneratorHapi.js"></script>
 						<script type="text/javascript" th:utext="'var jsonClientCode = ' + ${clientCodeJson} + ';'">
