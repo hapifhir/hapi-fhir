@@ -243,4 +243,18 @@ public class ProviderConstants {
 	 * Operation name for the "$export" operation
 	 */
 	public static final String OPERATION_EXPORT = "$export";
+	/**
+	 * Operation name for the Resource "$merge" operation
+	 * Hapi-fhir use is based on https://www.hl7.org/fhir/patient-operation-merge.html
+	 */
+	public static final String OPERATION_MERGE = "$merge";
+	/**
+	 * Patient $merge operation parameters
+	 */
+	public static final String OPERATION_MERGE_SOURCE_PATIENT = "source-patient";
+	public static final String OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER = "source-patient-identifier";
+	public static final String OPERATION_MERGE_TARGET_PATIENT = "target-patient";
+	public static final String OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER = "target-patient-identifier";
+	public static final String OPERATION_MERGE_RESULT_PATIENT = "result-patient";
+	public static final String OPERATION_MERGE_PREVIEW = "preview";
 }
