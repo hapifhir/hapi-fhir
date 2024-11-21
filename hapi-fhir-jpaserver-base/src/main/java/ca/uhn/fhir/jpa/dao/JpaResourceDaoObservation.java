@@ -23,6 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -40,12 +41,15 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
@@ -139,23 +143,28 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 				patientParams.addAll(theSearchParameterMap.get(getSubjectParamName()));
 			}
 
+			Map<IIdType, ReferenceParam> ids = new HashMap<>();
 			for (List<? extends IQueryParameterType> nextPatientList : patientParams) {
 				for (IQueryParameterType nextOr : nextPatientList) {
 					if (nextOr instanceof ReferenceParam) {
 						ReferenceParam ref = (ReferenceParam) nextOr;
-						JpaPid pid = myIdHelperService
-								.resolveResourceIdentity(
-										requestPartitionId,
-										ref.getResourceType(),
-										ref.getIdPart(),
-										ResolveIdentityMode.includeDeleted().cacheOk())
-								.getPersistentId();
-						orderedSubjectReferenceMap.put(pid.getId(), nextOr);
+						IIdType id = myFhirContext.getVersion().newIdType();
+						id.setParts(null, ref.getResourceType(), ref.getIdPart(), null);
+						ids.put(id, ref);
 					} else {
 						throw new IllegalArgumentException(
 								Msg.code(942) + "Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
 					}
 				}
+			}
+
+			Map<IIdType, IResourceLookup<JpaPid>> resolvedIds = myIdHelperService.resolveResourceIdentities(
+					requestPartitionId,
+					ids.keySet(),
+					ResolveIdentityMode.includeDeleted().cacheOk());
+			for (Map.Entry<IIdType, ReferenceParam> entry : ids.entrySet()) {
+				IResourceLookup<JpaPid> lookup = resolvedIds.get(entry.getKey());
+				orderedSubjectReferenceMap.put(lookup.getPersistentId().getId(), entry.getValue());
 			}
 
 			theSearchParameterMap.remove(getSubjectParamName());
