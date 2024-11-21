@@ -86,6 +86,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -536,15 +537,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				throw new InvalidRequestException(Msg.code(2027)
 						+ "LastN operation is not enabled on this service, can not process this request");
 			}
-			return myFulltextSearchSvc.lastN(myParams, theMaximumResults).stream()
-					.map(lastNResourceId -> myIdHelperService
-							.resolveResourceIdentity(
-									myRequestPartitionId,
-									myResourceName,
-									String.valueOf(lastNResourceId),
-									ResolveIdentityMode.excludeDeleted().cacheOk())
-							.getPersistentId())
-					.collect(Collectors.toList());
+			List<IResourcePersistentId> persistentIds = myFulltextSearchSvc.lastN(myParams, theMaximumResults);
+			return persistentIds.stream().map(t -> (JpaPid) t).collect(Collectors.toList());
 		} else {
 			throw new InvalidRequestException(
 					Msg.code(2033) + "LastN operation is not enabled on this service, can not process this request");

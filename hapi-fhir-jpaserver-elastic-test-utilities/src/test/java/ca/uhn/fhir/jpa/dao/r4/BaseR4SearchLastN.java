@@ -72,7 +72,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 	protected static IIdType patient2Id = null;
 	// Using static variables including the flag below so that we can initalize the database and indexes once
 	// (all of the tests only read from the DB and indexes and so no need to re-initialze them for each test).
-	private static Calendar observationDate = new GregorianCalendar();
+	private static final Calendar observationDate = new GregorianCalendar();
 	protected final String observationCd0 = "code0";
 	protected final String observationCd1 = "code1";
 	protected final String observationCd2 = "code2";
@@ -120,9 +120,10 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		// enabled to also create extended lucene index during creation of test data
 		boolean hsearchSaved = myStorageSettings.isAdvancedHSearchIndexing();
 		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setDeleteEnabled(false);
 
 		// Using a static flag to ensure that test data and elasticsearch index is only created once.
-		// Creating this data and the index is time consuming and as such want to avoid having to repeat for each test.
+		// Creating this data and the index is time-consuming and as such want to avoid having to repeat for each test.
 		// Normally would use a static @BeforeClass method for this purpose, but Autowired objects cannot be accessed in static methods.
 
 		Patient pt = new Patient();

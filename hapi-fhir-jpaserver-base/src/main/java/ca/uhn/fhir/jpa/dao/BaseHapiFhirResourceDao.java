@@ -1827,7 +1827,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		Validate.notNull(entity);
+		if (entity == null) {
+			throw new ResourceNotFoundException(Msg.code(1996) + "Resource " + theId + " is not known");
+		}
+
 		validateResourceType(entity);
 
 		if (theCheckForForcedId) {

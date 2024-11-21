@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -155,6 +156,7 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_CACHE_CONTROL;
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static java.util.stream.Collectors.joining;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -393,6 +395,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
 		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		myStorageSettings.setDeleteEnabled(defaultConfig.isDeleteEnabled());
 		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultConfig.isIncludeHashIdentityForTokenSearches());
 		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultConfig.getMaximumIncludesToLoadPerPage());
 		myStorageSettings.getTreatBaseUrlsAsLocal().clear();
@@ -907,7 +910,10 @@ public abstract class BaseJpaTest extends BaseTest {
 			dao.read(theId, mySrd);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			// good
+			assertThat(e.getMessage()).containsAnyOf(
+				Msg.code(1996) + "Resource " + theId.toUnqualifiedVersionless().getValue() + " is not known",
+				Msg.code(2001) + "Resource " + theId.toUnqualifiedVersionless().getValue() + " is not known"
+			);
 		}
 	}
 }
