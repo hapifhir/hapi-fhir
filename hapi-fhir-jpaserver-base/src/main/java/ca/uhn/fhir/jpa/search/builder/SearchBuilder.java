@@ -219,6 +219,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * We will, however, still use it to skip previously seen results.
 	 */
 	private Set<JpaPid> myPidSet;
+
 	private boolean myHasNextIteratorQuery = false;
 	private RequestPartitionId myRequestPartitionId;
 
