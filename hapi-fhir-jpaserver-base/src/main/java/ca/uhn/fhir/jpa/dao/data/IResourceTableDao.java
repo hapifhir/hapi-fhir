@@ -136,7 +136,7 @@ public interface IResourceTableDao
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query(
-			"SELECT t.myResourceType, t.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid)")
+			"SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid)")
 	Collection<Object[]> findLookupFieldsByResourcePid(@Param("pid") List<Long> thePids);
 
 	/**
@@ -144,7 +144,7 @@ public interface IResourceTableDao
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query(
-			"SELECT t.myResourceType, t.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid) AND t.myPartitionIdValue IN :partition_id")
+			"SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid) AND t.myPartitionIdValue IN :partition_id")
 	Collection<Object[]> findLookupFieldsByResourcePidInPartitionIds(
 			@Param("pid") List<Long> thePids, @Param("partition_id") Collection<Integer> thePartitionId);
 
@@ -153,7 +153,7 @@ public interface IResourceTableDao
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query(
-			"SELECT t.myResourceType, t.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid) AND (t.myPartitionIdValue IS NULL OR t.myPartitionIdValue IN :partition_id)")
+			"SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid) AND (t.myPartitionIdValue IS NULL OR t.myPartitionIdValue IN :partition_id)")
 	Collection<Object[]> findLookupFieldsByResourcePidInPartitionIdsOrNullPartition(
 			@Param("pid") List<Long> thePids, @Param("partition_id") Collection<Integer> thePartitionId);
 
@@ -162,7 +162,7 @@ public interface IResourceTableDao
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query(
-			"SELECT t.myResourceType, t.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid) AND t.myPartitionIdValue IS NULL")
+			"SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid) AND t.myPartitionIdValue IS NULL")
 	Collection<Object[]> findLookupFieldsByResourcePidInPartitionNull(@Param("pid") List<Long> thePids);
 
 	@Query("SELECT t.myVersion FROM ResourceTable t WHERE t.myId = :pid")
