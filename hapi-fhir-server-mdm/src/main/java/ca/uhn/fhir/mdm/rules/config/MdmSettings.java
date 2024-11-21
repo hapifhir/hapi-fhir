@@ -42,6 +42,7 @@ public class MdmSettings implements IMdmSettings {
 	private String myGoldenResourcePartitionName;
 	private boolean mySearchAllPartitionForMatch = false;
 	private boolean myShouldAutoDeleteGoldenResources = true;
+	private boolean myPassiveModeEnabled = false;
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
@@ -168,5 +169,14 @@ public class MdmSettings implements IMdmSettings {
 	@Override
 	public void setAutoExpungeGoldenResources(boolean theShouldAutoExpunge) {
 		myShouldAutoDeleteGoldenResources = theShouldAutoExpunge;
+	}
+
+	public void setPassiveModeEnabled(boolean thePassiveModeEnabled) {
+		myPassiveModeEnabled = thePassiveModeEnabled;
+	}
+
+	@Override
+	public boolean isPassiveModeEnabled() {
+		return myPassiveModeEnabled;
 	}
 }

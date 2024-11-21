@@ -72,4 +72,7 @@ public interface IMdmSettings {
 	default void setAutoExpungeGoldenResources(boolean theShouldAutoExpunge) {
 		throw new UnsupportedOperationException(Msg.code(2427));
 	}
+
+	// In passive mode, the Patient/$match operation is available, but no mdm processing takes place.
+	boolean isPassiveModeEnabled();
 }
