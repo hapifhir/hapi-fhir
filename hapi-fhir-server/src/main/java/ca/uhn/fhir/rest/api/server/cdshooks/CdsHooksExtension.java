@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - CDS Hooks
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
