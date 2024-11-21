@@ -4,5 +4,5 @@ issue: 6478
 jira: SMILE-8955
 title: "Transactions with multiple saved search urls will have the saved search urls
         deleted in a batch, instead of 1 at a time.
-        This is a minor performance update
+        This is a minor performance update.
 "
