@@ -860,12 +860,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 		populateHistoryEntityVersionAndDates(retVal);
 
-		// FIXME: delete?
-		//		if (getCurrentVersionEntity() != null && getCurrentVersionEntity().getId() != null &&
-		// isVersionUpdatedInCurrentTransaction()) {
-		//			retVal.setVersion(getCurrentVersionEntity().getVersion() + 1);
-		//		}
-
 		return retVal;
 	}
 
