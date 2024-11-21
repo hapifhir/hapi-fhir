@@ -1319,7 +1319,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * the previous version entity.
 		 */
 		if (historyEntry == null) {
-			historyEntry = theEntity.toHistory(versionedTags);
+			historyEntry = theEntity.toHistory(versionedTags && theEntity.getDeleted() == null);
 		}
 
 		historyEntry.setEncoding(theChanged.getEncoding());

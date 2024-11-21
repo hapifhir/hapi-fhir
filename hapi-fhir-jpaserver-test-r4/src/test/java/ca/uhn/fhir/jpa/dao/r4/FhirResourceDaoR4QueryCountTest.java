@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -51,6 +52,7 @@ import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -1407,6 +1409,57 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		return ids;
 	}
 
+	@Test
+	public void testSearchByMultipleIds() {
+		// Setup
+		List<String> idValues = new ArrayList<>();
+		for (int i = 0; i < 5; i++) {
+			// Client assigned and server assigned IDs
+			idValues.add(createPatient(withId(UUID.randomUUID().toString()), withActiveTrue()).toUnqualifiedVersionless().getValue());
+			idValues.add(createPatient(withActiveTrue()).toUnqualifiedVersionless().getValue());
+		}
+		String[] idValueArray = idValues.toArray(new String[0]);
+
+		// Test
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(IAnyResource.SP_RES_ID, new TokenOrListParam(null, idValueArray));
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		List<String> values = toUnqualifiedVersionlessIdValues(outcome);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertThat(values).asList().containsExactlyInAnyOrder(idValueArray);
+
+		// Now invalidate the caches, should add one more query
+		myMemoryCacheService.invalidateAllCaches();
+		map = SearchParameterMap.newSynchronous();
+		map.add(IAnyResource.SP_RES_ID, new TokenOrListParam(null, idValueArray));
+		myCaptureQueriesListener.clear();
+		outcome = myPatientDao.search(map, mySrd);
+		values = toUnqualifiedVersionlessIdValues(outcome);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+		assertThat(values).asList().containsExactlyInAnyOrder(idValueArray);
+
+		// And again, should be cached once more
+		map = SearchParameterMap.newSynchronous();
+		map.add(IAnyResource.SP_RES_ID, new TokenOrListParam(null, idValueArray));
+		myCaptureQueriesListener.clear();
+		outcome = myPatientDao.search(map, mySrd);
+		values = toUnqualifiedVersionlessIdValues(outcome);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertThat(values).asList().containsExactlyInAnyOrder(idValueArray);
+
+	}
+
+
 
 	/**
 	 * See the class javadoc before changing the counts in this test!
@@ -1647,12 +1700,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		IBundleProvider outcome = dao.search(map, mySrd);
 		toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 
 		myCaptureQueriesListener.clear();
 		outcome = dao.search(map, mySrd);
 		toUnqualifiedVersionlessIdValues(outcome);
-		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 	}
 
 

@@ -23,23 +23,25 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nullable;
-import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -69,9 +71,8 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 		Set<JpaPid> allOrPids = null;
 		SearchFilterParser.CompareOperation defaultOperation = SearchFilterParser.CompareOperation.eq;
 
-		boolean allIdsAreForcedIds = true;
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
-			Set<JpaPid> orPids = new HashSet<>();
+			Set<IIdType> ids = new LinkedHashSet<>();
 			boolean haveValue = false;
 			for (IQueryParameterType next : nextValue) {
 				String value = next.getValueAsQueryToken(getFhirContext());
@@ -79,25 +80,14 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					value = value.substring(1);
 				}
 
-				IdType valueAsId = new IdType(value);
 				if (isNotBlank(value)) {
-					if (!myIdHelperService.idRequiresForcedId(valueAsId.getIdPart()) && allIdsAreForcedIds) {
-						allIdsAreForcedIds = false;
-					}
 					haveValue = true;
-					try {
-						JpaPid pid = myIdHelperService
-								.resolveResourceIdentity(
-										theRequestPartitionId,
-										theResourceName,
-										valueAsId.getIdPart(),
-										ResolveIdentityMode.excludeDeleted().noCacheUnlessDeletesDisabled())
-								.getPersistentId();
-						orPids.add(pid);
-					} catch (ResourceNotFoundException e) {
-						// This is not an error in a search, it just results in no matches
-						ourLog.debug("Resource ID {} was requested but does not exist", valueAsId.getIdPart());
+					if (!value.contains("/")) {
+						value = theResourceName + "/" + value;
 					}
+					IIdType id = getFhirContext().getVersion().newIdType();
+					id.setValue(value);
+					ids.add(id);
 				}
 
 				if (next instanceof TokenParam) {
@@ -106,6 +96,20 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					}
 				}
 			}
+
+			Set<JpaPid> orPids = new HashSet<>();
+
+			// We're joining this to a query that will explicitly ask for non-deleted,
+			// so we really only want the PID and can safely cache (even if a previously
+			// deleted status was cached, since it might now be undeleted)
+			Map<IIdType, IResourceLookup<JpaPid>> resolvedPids = myIdHelperService.resolveResourceIdentities(
+					theRequestPartitionId,
+					ids,
+					ResolveIdentityMode.includeDeleted().cacheOk());
+			for (IResourceLookup<JpaPid> lookup : resolvedPids.values()) {
+				orPids.add(lookup.getPersistentId());
+			}
+
 			if (haveValue) {
 				if (allOrPids == null) {
 					allOrPids = orPids;
@@ -127,7 +131,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 			List<Long> resourceIds = JpaPid.toLongList(allOrPids);
 			if (theSourceJoinColumn == null) {
-				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable(!allIdsAreForcedIds);
+				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable(true);
 				Condition predicate;
 				switch (operation) {
 					default:

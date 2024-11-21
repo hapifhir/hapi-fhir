@@ -599,18 +599,28 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			return Optional.empty();
 		} else if (theRequestPartitionId.isAllPartitions()) {
 			return Optional.empty();
-		} else if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
-			Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue"));
-			return Optional.of(partitionIdCriteria);
-		} else if (!theRequestPartitionId.isAllPartitions()) {
+		} else {
 			List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
 			partitionIds = replaceDefaultPartitionIdIfNonNull(myPartitionSettings, partitionIds);
-			if (partitionIds.size() > 1) {
-				Predicate partitionIdCriteria = from.get("myPartitionIdValue").in(partitionIds);
-				return Optional.of(partitionIdCriteria);
-			} else if (partitionIds.size() == 1) {
-				Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue"), partitionIds.get(0));
-				return Optional.of(partitionIdCriteria);
+			if (partitionIds.contains(null)) {
+				Predicate partitionIdNullCriteria =
+						from.get("myPartitionIdValue").isNull();
+				if (partitionIds.size() == 1) {
+					return Optional.of(partitionIdNullCriteria);
+				} else {
+					Predicate partitionIdCriteria = from.get("myPartitionIdValue")
+							.in(partitionIds.stream().filter(t -> t != null).collect(Collectors.toList()));
+					return Optional.of(cb.or(partitionIdCriteria, partitionIdNullCriteria));
+				}
+			} else {
+				if (partitionIds.size() > 1) {
+					Predicate partitionIdCriteria =
+							from.get("myPartitionIdValue").in(partitionIds);
+					return Optional.of(partitionIdCriteria);
+				} else if (partitionIds.size() == 1) {
+					Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue"), partitionIds.get(0));
+					return Optional.of(partitionIdCriteria);
+				}
 			}
 		}
 		return Optional.empty();

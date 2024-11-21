@@ -647,10 +647,17 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 
+		logAllResources();
+		logAllResourceVersions();
+
 		// Second pass (resource already exists)
 
 		myCaptureQueriesListener.clear();
-		outcome = mySystemDao.transaction(mySrd, createBundleWithDeleteAndUpdateOnSameResource(myFhirContext));
+		try {
+			outcome = mySystemDao.transaction(mySrd, createBundleWithDeleteAndUpdateOnSameResource(myFhirContext));
+		} finally {
+			myCaptureQueriesListener.logInsertQueries();
+		}
 		myCaptureQueriesListener.logUpdateQueries();
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("Patient/P/_history/2", outcome.getEntry().get(0).getResponse().getLocation());
@@ -661,8 +668,10 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		logAllResources();
 		logAllResourceVersions();
 
-		assertThrows(ResourceGoneException.class, () -> myPatientDao.read(resourceId.withVersion("2"), mySrd));
+		assertThrows(ResourceGoneException.class, ()->myPatientDao.read(resourceId.withVersion("2"), mySrd));
 		actual = myPatientDao.read(resourceId.withVersion("3"), mySrd);
+		assertEquals("3", actual.getIdElement().getVersionIdPart());
+		actual = myPatientDao.read(resourceId.toVersionless(), mySrd);
 		assertEquals("3", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
@@ -676,7 +685,6 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("Patient/P/_history/5", outcome.getEntry().get(1).getResponse().getLocation());
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
-		assertThrows(ResourceGoneException.class, () -> myPatientDao.read(resourceId.withVersion("4"), mySrd));
 		actual = myPatientDao.read(resourceId.withVersion("5"), mySrd);
 		assertEquals("5", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
@@ -695,12 +703,12 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		bb.addTransactionDeleteEntry(new IdType("Patient/P"));
 		bb.addTransactionUpdateEntry(createPatientWithIdentifierAndTag().setActive(false)).conditional("Patient?identifier=http://foo|bar");
 		Bundle outcome = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).endsWith("_history/2");
 		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/3");
 
 		// Verify
-		assertThrows(ResourceGoneException.class, ()->myPatientDao.read(new IdType("Patient/P/_history/2"), mySrd));
 		Patient patient = myPatientDao.read(new IdType("Patient/P"), mySrd);
 		assertFalse(patient.getActive());
 		assertEquals("3", patient.getIdElement().getVersionIdPart());

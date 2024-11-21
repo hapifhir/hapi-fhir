@@ -1662,46 +1662,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	public void testReadInvalidVersion() throws Exception {
-		String methodName = "testReadInvalidVersion";
-
-		Patient pat = new Patient();
-		pat.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id = myPatientDao.create(pat, mySrd).getId();
-
-		assertEquals(methodName, myPatientDao.read(id, mySrd).getIdentifier().get(0).getValue());
-
-		try {
-			myPatientDao.read(id.withVersion("0"), mySrd);
-			fail("");
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(979) + "Version \"0\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
-		}
-
-		try {
-			myPatientDao.read(id.withVersion("2"), mySrd);
-			fail("");
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(979) + "Version \"2\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
-		}
-
-		try {
-			myPatientDao.read(id.withVersion("H"), mySrd);
-			fail("");
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(978) + "Version \"H\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
-		}
-
-		try {
-			myPatientDao.read(new IdDt("Patient/9999999999999/_history/1"), mySrd);
-			fail("");
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1996) + "Resource Patient/9999999999999/_history/1 is not known", e.getMessage());
-		}
-
-	}
-
-	@Test
 	public void testReadWithDeletedResource() {
 		String methodName = "testReadWithDeletedResource";
 

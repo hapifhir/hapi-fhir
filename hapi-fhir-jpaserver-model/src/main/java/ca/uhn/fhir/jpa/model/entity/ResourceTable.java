@@ -850,7 +850,21 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			}
 		}
 
+		// If we've deleted and updated the same resource in the same transaction,
+		// we need to actually create 2 distinct versions
+		if (getCurrentVersionEntity() != null
+				&& getCurrentVersionEntity().getId() != null
+				&& getVersion() == getCurrentVersionEntity().getVersion()) {
+			myVersion++;
+		}
+
 		populateHistoryEntityVersionAndDates(retVal);
+
+		// FIXME: delete?
+		//		if (getCurrentVersionEntity() != null && getCurrentVersionEntity().getId() != null &&
+		// isVersionUpdatedInCurrentTransaction()) {
+		//			retVal.setVersion(getCurrentVersionEntity().getVersion() + 1);
+		//		}
 
 		return retVal;
 	}
