@@ -239,15 +239,8 @@ public class ProviderConstants {
 	 * Operation name for the "$export-poll-status" operation
 	 */
 	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
-
 	/**
 	 * Operation name for the "$export" operation
 	 */
 	public static final String OPERATION_EXPORT = "$export";
-
-	/**
-	 * Operation name for the "$rehoming" operation
-	 */
-	public static final String OPERATION_REHOME = "$rehome" +
-		"";
 }
