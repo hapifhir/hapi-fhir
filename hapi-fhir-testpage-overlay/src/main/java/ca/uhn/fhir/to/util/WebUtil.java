@@ -84,6 +84,6 @@ public class WebUtil {
 	}
 
 	public static void webJarAddPopperJs(ResourceHandlerRegistry theRegistry) {
-		WebUtil.addStaticResourceWebJar(theRegistry, "org.webjars.npm", "popper.js");
+		WebUtil.addStaticResourceWebJar(theRegistry, "org.webjars", "popper.js");
 	}
 }

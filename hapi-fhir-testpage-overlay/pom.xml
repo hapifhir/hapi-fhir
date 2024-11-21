@@ -185,7 +185,7 @@
 			<artifactId>moment</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.webjars.npm</groupId>
+			<groupId>org.webjars</groupId>
 			<artifactId>popper.js</artifactId>
 		</dependency>
 
