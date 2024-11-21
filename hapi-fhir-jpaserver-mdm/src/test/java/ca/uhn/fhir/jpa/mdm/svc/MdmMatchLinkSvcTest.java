@@ -495,7 +495,7 @@ public class MdmMatchLinkSvcTest {
 			Optional<? extends IMdmLink> matchedLinkForTargetPid = runInTransaction(() -> myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), incomingJanePatient)));
 			assertThat(matchedLinkForTargetPid.isPresent()).isEqualTo(false);
 
-			logAllLinks();
+			logAllMdmLinks();
 			assertLinksMatchResult(MATCH, MATCH, POSSIBLE_MATCH, POSSIBLE_MATCH, POSSIBLE_DUPLICATE);
 			assertLinksCreatedNewResource(true, true, false, false, false);
 			assertLinksMatchedByEid(false, false, false, false, false);

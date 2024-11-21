@@ -58,12 +58,14 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
@@ -87,6 +89,7 @@ import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -145,6 +148,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -197,6 +201,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
 	protected InterceptorService mySrdInterceptorService;
+	@Autowired
+	protected IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
@@ -494,6 +500,22 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
+	protected int countAllMdmLinks() {
+		return runInTransaction(()-> myMdmLinkDao.findAll().size());
+	}
+
+	protected int logAllMdmLinks() {
+		return runInTransaction(()->{
+			List<MdmLink> links = myMdmLinkDao.findAll();
+			if (links.isEmpty()) {
+				ourLog.info("MDM Links: NONE");
+			} else {
+				ourLog.info("MDM Links:\n * {}", links.stream().map(t -> t.toString()).collect(joining("\n * ")));
+			}
+			return links.size();
+		});
+	}
+
 	protected void logAllResourceLinks() {
 		runInTransaction(() -> {
 			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(ResourceLink::toString).collect(Collectors.joining("\n * ")));
@@ -703,6 +725,19 @@ public abstract class BaseJpaTest extends BaseTest {
 		int fromIndex = 0;
 		Integer toIndex = theFound.size();
 		return toUnqualifiedVersionlessIdValues(theFound, fromIndex, toIndex, true);
+	}
+
+	/**
+	 * Keys will be unqualified versionless IDs (Patient/ABC) and values will be the resources
+	 * themselves.
+	 */
+	protected Map<String, IBaseResource> toResourceIdValueMap(IBundleProvider theFound) {
+		Map<String, IBaseResource> retVal = new HashMap<>();
+		List<IBaseResource> resources = theFound.getAllResources();
+		for (IBaseResource next : resources) {
+			retVal.put(next.getIdElement().toUnqualifiedVersionless().getValue(), next);
+		}
+		return retVal;
 	}
 
 	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound, int theFromIndex, Integer theToIndex, boolean theFirstCall) {

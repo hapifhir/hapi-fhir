@@ -172,9 +172,9 @@ public class HistoryBuilder {
 					// For that reason, strip the prefix before setting the transientForcedId below.
 					// If not stripped this messes up the id of the resource as the resourceType would be repeated
 					// twice like Patient/Patient/1234 in the resource constructed
-					int slashIndex = resourceId.lastIndexOf('/');
-					if (slashIndex > 0) {
-						resourceId = resourceId.substring(slashIndex + 1);
+					int slashIdx = resourceId.indexOf('/');
+					if (slashIdx != -1) {
+						resourceId = resourceId.substring(slashIdx + 1);
 					}
 				} else {
 					resourceId = nextResourceId.toString();

@@ -1020,6 +1020,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (entity.getId() == null) {
 			myEntityManager.persist(entity);
 
+			if (entity.getFhirId() == null) {
+				entity.setFhirId(Long.toString(entity.getResourceId()));
+			}
+
 			postPersist(entity, (T) theResource, theRequest);
 
 		} else if (entity.getDeleted() != null) {
