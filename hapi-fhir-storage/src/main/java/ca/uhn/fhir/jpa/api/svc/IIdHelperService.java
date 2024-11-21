@@ -24,7 +24,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
@@ -122,7 +121,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 * @since 8.0.0
 	 */
 	@Nonnull
-	Map<IIdType, IResourceLookup<JpaPid>> resolveResourceIdentities(
+	Map<IIdType, IResourceLookup<T>> resolveResourceIdentities(
 			@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds, ResolveIdentityMode theMode);
 
 	/**
