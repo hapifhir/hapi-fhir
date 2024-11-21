@@ -235,9 +235,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous("_id", new TokenParam("A")), mySrd);
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(3);
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("rt1_0.PARTITION_ID=?");
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("t0.PARTITION_ID = ?");
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("PARTITION_ID = ?");
 	}
 
 	@Test
