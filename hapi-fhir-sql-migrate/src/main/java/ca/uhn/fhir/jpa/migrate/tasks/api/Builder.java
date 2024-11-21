@@ -397,7 +397,7 @@ public class Builder {
 				private final String myVersion;
 				private final boolean myUnique;
 				private String[] myIncludeColumns;
-				private boolean myOnline;
+				private boolean myOnline = true;
 
 				public BuilderAddIndexUnique(String theVersion, boolean theUnique) {
 					myVersion = theVersion;
