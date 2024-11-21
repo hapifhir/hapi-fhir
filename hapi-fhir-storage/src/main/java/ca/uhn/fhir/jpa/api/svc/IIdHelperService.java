@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
@@ -123,13 +122,8 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 * @since 8.0.0
 	 */
 	@Nonnull
-	default Map<IIdType, IResourceLookup<JpaPid>> resolveResourceIdentities(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			Collection<IIdType> theIds,
-			ResolveIdentityMode theMode) {
-		// TODO: implement this in CDR for Mongo, them remove this default message
-		throw new UnsupportedOperationException(Msg.code(2571) + "Not implemented");
-	}
+	Map<IIdType, IResourceLookup<JpaPid>> resolveResourceIdentities(
+			@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds, ResolveIdentityMode theMode);
 
 	/**
 	 * Returns true if the given resource ID should be stored in a forced ID. Under default config
