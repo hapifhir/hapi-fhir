@@ -2154,8 +2154,10 @@ public class QueryStack {
 				}
 			}
 
-			UriParam nextParam = (UriParam) nextParamUncasted;
-			if (isNotBlank(nextParam.getValue())) {
+			// UriParam nextParam = (UriParam) nextParamUncasted;
+			if (nextParamUncasted instanceof UriParam && isNotBlank(((UriParam) nextParamUncasted).getValue())
+					|| nextParamUncasted instanceof ReferenceParam
+							&& isNotBlank(((ReferenceParam) nextParamUncasted).getValue())) {
 				return true;
 			}
 		}

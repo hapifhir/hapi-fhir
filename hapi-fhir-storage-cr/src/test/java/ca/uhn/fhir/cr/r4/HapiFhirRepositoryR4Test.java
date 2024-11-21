@@ -7,8 +7,10 @@ import ca.uhn.fhir.rest.param.InternalCodingDt;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
@@ -16,6 +18,7 @@ import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.search.Searches;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -52,6 +55,14 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		transactionReadsPatientResources(repository);
 		transactionReadsEncounterResources(repository);
 		assertTrue(crudTest(repository));
+	}
+
+	@Test
+	void correctProfileSPType() {
+		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
+		Map<String, List<IQueryParameterType>> map = new HashMap<>();
+		map.put("_profile", Collections.singletonList(new ReferenceParam("test")));
+		repository.search(Bundle.class, Observation.class, map);
 	}
 
 
