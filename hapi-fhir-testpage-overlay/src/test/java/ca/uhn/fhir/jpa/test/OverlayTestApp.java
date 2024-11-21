@@ -17,16 +17,16 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
+import jakarta.annotation.Nonnull;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.ee10.webapp.WebAppContext;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -39,7 +39,6 @@ public class OverlayTestApp {
 
 	private static AnnotationConfigApplicationContext ourAppCtx;
 
-	@SuppressWarnings({"unchecked"})
 	public static void main(String[] args) throws Exception {
 		IHfqlExecutor hfqlExecutor = mock(IHfqlExecutor.class);
 		List<String> columnNames = List.of("family", "given");
