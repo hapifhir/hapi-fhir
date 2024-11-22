@@ -74,7 +74,7 @@ public class MdmProviderLoader {
 				myResourceProviderFactory.addSupplier(myPatientMatchProviderSupplier);
 				break;
 			default:
-				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version "
+				throw new ConfigurationException(Msg.code(2574) + "Patient/$match not supported for FHIR version "
 						+ myFhirContext.getVersion().getVersion());
 		}
 	}
