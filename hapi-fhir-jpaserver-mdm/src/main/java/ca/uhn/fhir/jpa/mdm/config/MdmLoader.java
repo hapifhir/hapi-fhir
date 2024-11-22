@@ -52,6 +52,12 @@ public class MdmLoader {
 			return;
 		}
 
+		myMdmProviderLoader.loadPatientMatchProvider();
+
+		if (myMdmSettings.isPassiveModeEnabled()) {
+			return;
+		}
+
 		myMdmProviderLoader.loadProvider();
 		ourLog.info("MDM provider registered");
 

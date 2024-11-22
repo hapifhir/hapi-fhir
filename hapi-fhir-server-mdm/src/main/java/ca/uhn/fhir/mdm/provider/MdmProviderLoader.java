@@ -61,7 +61,23 @@ public class MdmProviderLoader {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	private Supplier<Object> myMdmProviderSupplier;
+	private Supplier<Object> myPatientMatchProviderSupplier;
 	private Supplier<Object> myMdmHistoryProviderSupplier;
+
+	public void loadPatientMatchProvider() {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case DSTU3:
+			case R4:
+			case R5:
+				// We store the supplier so that removeSupplier works properly
+				myPatientMatchProviderSupplier = () -> new PatientMatchProvider(myMdmControllerHelper);
+				myResourceProviderFactory.addSupplier(myPatientMatchProviderSupplier);
+				break;
+			default:
+				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version "
+					+ myFhirContext.getVersion().getVersion());
+		}
+	}
 
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
@@ -70,23 +86,22 @@ public class MdmProviderLoader {
 			case R5:
 				// We store the supplier so that removeSupplier works properly
 				myMdmProviderSupplier = () -> new MdmProviderDstu3Plus(
-						myFhirContext,
-						myMdmControllerSvc,
-						myMdmControllerHelper,
-						myMdmSubmitSvc,
-						myInterceptorBroadcaster,
-						myMdmSettings);
-				// We store the supplier so that removeSupplier works properly
+					myFhirContext,
+					myMdmControllerSvc,
+					myMdmControllerHelper,
+					myMdmSubmitSvc,
+					myInterceptorBroadcaster,
+					myMdmSettings);
 				myResourceProviderFactory.addSupplier(myMdmProviderSupplier);
 				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
 					myMdmHistoryProviderSupplier = () -> new MdmLinkHistoryProviderDstu3Plus(
-							myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
+						myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
 					myResourceProviderFactory.addSupplier(myMdmHistoryProviderSupplier);
 				}
 				break;
 			default:
 				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version "
-						+ myFhirContext.getVersion().getVersion());
+					+ myFhirContext.getVersion().getVersion());
 		}
 	}
 
@@ -97,6 +112,9 @@ public class MdmProviderLoader {
 		}
 		if (myMdmHistoryProviderSupplier != null) {
 			myResourceProviderFactory.removeSupplier(myMdmHistoryProviderSupplier);
+		}
+		if (myPatientMatchProviderSupplier != null) {
+			myResourceProviderFactory.removeSupplier(myPatientMatchProviderSupplier);
 		}
 	}
 }
