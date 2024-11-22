@@ -2128,6 +2128,10 @@ public class QueryStack {
 				if (nextParam.getModifier() == TokenParamModifier.NOT) {
 					paramInverted = true;
 				}
+			} else if (nextOrParam instanceof ReferenceParam) {
+				ReferenceParam nextParam = (ReferenceParam) nextOrParam;
+				code = nextParam.getValue();
+				system = null;
 			} else {
 				UriParam nextParam = (UriParam) nextOrParam;
 				code = nextParam.getValue();
