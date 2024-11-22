@@ -267,13 +267,14 @@ public class TermValueSet implements Serializable {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("id", myId)
 				.append("url", myUrl)
-				.append(myResource != null ? ("resource=" + myResource.toString()) : ("resource=(null)"))
+				.append("version", myVersion)
 				.append("resourcePid", myResourcePid)
 				.append("name", myName)
-				.append(myConcepts != null ? ("concepts - size=" + myConcepts.size()) : ("concepts=(null)"))
+				.append(myConcepts != null ? ("conceptCount=" + myConcepts.size()) : ("concepts=(null)"))
 				.append("totalConcepts", myTotalConcepts)
 				.append("totalConceptDesignations", myTotalConceptDesignations)
 				.append("expansionStatus", myExpansionStatus)
+				.append(myResource != null ? ("resId=" + myResource) : ("resource=(null)"))
 				.toString();
 	}
 }

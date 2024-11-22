@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.config.util.ConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
@@ -470,7 +471,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		myCodeSystemCurrentVersionCache.invalidateAll();
 	}
 
-	public void deleteValueSetForResource(ResourceTable theResourceTable) {
+	public Optional<TermValueSet> deleteValueSetForResource(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
 		Optional<TermValueSet> optionalExistingTermValueSetById =
 				myTermValueSetDao.findByResourcePid(theResourceTable.getId());
@@ -481,8 +482,19 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			ourLog.info("Deleting existing TermValueSet[{}] and its children...", existingTermValueSet.getId());
 			deletePreCalculatedValueSetContents(existingTermValueSet);
 			myTermValueSetDao.deleteById(existingTermValueSet.getId());
+
+			/*
+			 * If we're updating an existing ValueSet within a transaction, we need to make
+			 * sure to manually flush now since otherwise we'll try to create a new
+			 * TermValueSet entity and fail with a constraint error on the URL, since
+			 * this one won't be deleted yet
+			 */
+			myTermValueSetDao.flush();
+
 			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
 		}
+
+		return optionalExistingTermValueSetById;
 	}
 
 	private void deletePreCalculatedValueSetContents(TermValueSet theValueSet) {
@@ -2081,10 +2093,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
-		return myIdHelperService.resolveResourcePersistentIds(
+		return myIdHelperService.resolveResourceIdentityPid(
 				RequestPartitionId.allPartitions(),
 				theValueSet.getIdElement().getResourceType(),
-				theValueSet.getIdElement().getIdPart());
+				theValueSet.getIdElement().getIdPart(),
+				ResolveIdentityMode.includeDeleted().cacheOk());
 	}
 
 	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(
@@ -2527,6 +2540,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	@Override
 	@Transactional
 	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
+		// If we're in a transaction, we need to flush now so that we can correctly detect
+		// duplicates if there are multiple ValueSets in the same TX with the same URL
+		// (which is an error, but we need to catch it). It'd be better to catch this by
+		// inspecting the URLs in the bundle or something, since flushing hurts performance
+		// but it's not expected that loading valuesets is going to be a huge high frequency
+		// thing so it probably doesn't matter
+		myEntityManager.flush();
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		if (isPlaceholder(theValueSet)) {
@@ -2552,7 +2572,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
 
 		// Delete version being replaced
-		deleteValueSetForResource(theResourceTable);
+		Optional<TermValueSet> deletedTrmValueSet = deleteValueSetForResource(theResourceTable);
 
 		/*
 		 * Do the upload.
@@ -2560,11 +2580,17 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		String url = termValueSet.getUrl();
 		String version = termValueSet.getVersion();
 		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
-		if (version != null) {
-			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion(url, version);
+
+		if (deletedTrmValueSet.isPresent()
+				&& Objects.equals(deletedTrmValueSet.get().getUrl(), url)
+				&& Objects.equals(deletedTrmValueSet.get().getVersion(), version)) {
+			// If we just deleted the valueset marker, we don't need to check if it exists
+			// in the database
+			optionalExistingTermValueSetByUrl = Optional.empty();
 		} else {
-			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(url);
+			optionalExistingTermValueSetByUrl = getTermValueSet(version, url);
 		}
+
 		if (optionalExistingTermValueSetByUrl.isEmpty()) {
 
 			myTermValueSetDao.save(termValueSet);
@@ -2600,6 +2626,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 			throw new UnprocessableEntityException(Msg.code(902) + msg);
 		}
+	}
+
+	private Optional<TermValueSet> getTermValueSet(String version, String url) {
+		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
+		if (version != null) {
+			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion(url, version);
+		} else {
+			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(url);
+		}
+		return optionalExistingTermValueSetByUrl;
 	}
 
 	@Override
