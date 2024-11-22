@@ -59,9 +59,19 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 	void _profileCanBeReferenceParam() {
 		// as per https://www.hl7.org/fhir/r4/search.html#all _profile is a reference param
 		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
+		var profileToFind = "http://www.a-test-profile.com";
+		var encounterWithProfile = new Encounter();
+		encounterWithProfile.getMeta().addProfile(profileToFind);
+		repository.create(encounterWithProfile);
+		repository.create(new Encounter());
 		Map<String, List<IQueryParameterType>> map = new HashMap<>();
-		map.put("_profile", Collections.singletonList(new ReferenceParam("test")));
-		assertDoesNotThrow(() -> repository.search(Bundle.class, Encounter.class, map));
+		map.put("_profile", Collections.singletonList(new ReferenceParam(profileToFind)));
+		assertDoesNotThrow(() -> {
+			var returnBundle = repository.search(Bundle.class, Encounter.class, map);
+			assertTrue(returnBundle.hasEntry());
+			assertEquals(1,returnBundle.getEntry().size());
+			assertEquals(profileToFind, returnBundle.getEntryFirstRep().getResource().getMeta().getProfile().get(0).getValue());
+		});
 	}
 
 
