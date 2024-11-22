@@ -46,6 +46,10 @@ public class MdmQueueConsumerLoader {
 		myMdmSettings = theMdmSettings;
 		myMdmMessageHandler = theMdmMessageHandler;
 
+		if (myMdmSettings.isPassiveModeEnabled()) {
+			return;
+		}
+
 		startListeningToMdmChannel();
 	}
 
