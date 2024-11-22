@@ -75,7 +75,7 @@ public class MdmProviderLoader {
 				break;
 			default:
 				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version "
-					+ myFhirContext.getVersion().getVersion());
+						+ myFhirContext.getVersion().getVersion());
 		}
 	}
 
@@ -86,22 +86,22 @@ public class MdmProviderLoader {
 			case R5:
 				// We store the supplier so that removeSupplier works properly
 				myMdmProviderSupplier = () -> new MdmProviderDstu3Plus(
-					myFhirContext,
-					myMdmControllerSvc,
-					myMdmControllerHelper,
-					myMdmSubmitSvc,
-					myInterceptorBroadcaster,
-					myMdmSettings);
+						myFhirContext,
+						myMdmControllerSvc,
+						myMdmControllerHelper,
+						myMdmSubmitSvc,
+						myInterceptorBroadcaster,
+						myMdmSettings);
 				myResourceProviderFactory.addSupplier(myMdmProviderSupplier);
 				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
 					myMdmHistoryProviderSupplier = () -> new MdmLinkHistoryProviderDstu3Plus(
-						myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
+							myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
 					myResourceProviderFactory.addSupplier(myMdmHistoryProviderSupplier);
 				}
 				break;
 			default:
 				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version "
-					+ myFhirContext.getVersion().getVersion());
+						+ myFhirContext.getVersion().getVersion());
 		}
 	}
 

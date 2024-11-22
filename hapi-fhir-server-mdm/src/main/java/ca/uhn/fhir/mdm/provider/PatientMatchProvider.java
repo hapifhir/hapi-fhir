@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR - Master Data Management
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.i18n.Msg;
@@ -24,9 +43,9 @@ public class PatientMatchProvider {
 	 */
 	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
 	public IBaseBundle match(
-		@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient")
-		IAnyResource thePatient,
-		RequestDetails theRequestDetails) {
+			@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient")
+					IAnyResource thePatient,
+			RequestDetails theRequestDetails) {
 		if (thePatient == null) {
 			throw new InvalidRequestException(Msg.code(1498) + "resource may not be null");
 		}

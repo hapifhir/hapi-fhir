@@ -55,7 +55,7 @@ public class MdmLoader {
 
 		myMdmProviderLoader.loadPatientMatchProvider();
 
-		if (myMdmSettings.getMode() == MdmModeEnum.RULES) {
+		if (myMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY) {
 			return;
 		}
 

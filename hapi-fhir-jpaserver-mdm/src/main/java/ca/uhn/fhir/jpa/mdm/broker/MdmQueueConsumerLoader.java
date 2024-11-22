@@ -47,7 +47,7 @@ public class MdmQueueConsumerLoader {
 		myMdmSettings = theMdmSettings;
 		myMdmMessageHandler = theMdmMessageHandler;
 
-		if (myMdmSettings.getMode() == MdmModeEnum.RULES) {
+		if (myMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY) {
 			return;
 		}
 

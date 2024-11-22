@@ -73,6 +73,6 @@ public interface IMdmSettings {
 		throw new UnsupportedOperationException(Msg.code(2427));
 	}
 
-	// In RULES mode, the Patient/$match operation is available, but no mdm processing takes place.
+	// In MATCH_ONLY mode, the Patient/$match operation is available, but no mdm processing takes place.
 	MdmModeEnum getMode();
 }

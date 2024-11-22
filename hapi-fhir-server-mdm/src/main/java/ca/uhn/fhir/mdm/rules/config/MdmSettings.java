@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-import static ca.uhn.fhir.mdm.api.MdmModeEnum.LINK_PROCESSING;
+import static ca.uhn.fhir.mdm.api.MdmModeEnum.MATCH_AND_LINK;
 
 @Component
 public class MdmSettings implements IMdmSettings {
@@ -45,7 +45,7 @@ public class MdmSettings implements IMdmSettings {
 	private String myGoldenResourcePartitionName;
 	private boolean mySearchAllPartitionForMatch = false;
 	private boolean myShouldAutoDeleteGoldenResources = true;
-	private MdmModeEnum myMdmMode = LINK_PROCESSING;
+	private MdmModeEnum myMdmMode = MATCH_AND_LINK;
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
