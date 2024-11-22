@@ -21,12 +21,15 @@ package ca.uhn.fhir.mdm.rules.config;
 
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+
+import static ca.uhn.fhir.mdm.api.MdmModeEnum.LINK_PROCESSING;
 
 @Component
 public class MdmSettings implements IMdmSettings {
@@ -42,7 +45,7 @@ public class MdmSettings implements IMdmSettings {
 	private String myGoldenResourcePartitionName;
 	private boolean mySearchAllPartitionForMatch = false;
 	private boolean myShouldAutoDeleteGoldenResources = true;
-	private boolean myPassiveModeEnabled = false;
+	private MdmModeEnum myMdmMode = LINK_PROCESSING;
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
@@ -171,12 +174,12 @@ public class MdmSettings implements IMdmSettings {
 		myShouldAutoDeleteGoldenResources = theShouldAutoExpunge;
 	}
 
-	public void setPassiveModeEnabled(boolean thePassiveModeEnabled) {
-		myPassiveModeEnabled = thePassiveModeEnabled;
+	public void setMdmMode(MdmModeEnum theMdmMode) {
+		myMdmMode = theMdmMode;
 	}
 
 	@Override
-	public boolean isPassiveModeEnabled() {
-		return myPassiveModeEnabled;
+	public MdmModeEnum getMode() {
+		return myMdmMode;
 	}
 }

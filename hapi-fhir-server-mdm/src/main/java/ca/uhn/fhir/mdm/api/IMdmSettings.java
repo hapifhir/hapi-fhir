@@ -73,6 +73,6 @@ public interface IMdmSettings {
 		throw new UnsupportedOperationException(Msg.code(2427));
 	}
 
-	// In passive mode, the Patient/$match operation is available, but no mdm processing takes place.
-	boolean isPassiveModeEnabled();
+	// In RULES mode, the Patient/$match operation is available, but no mdm processing takes place.
+	MdmModeEnum getMode();
 }

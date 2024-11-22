@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PreDestroy;
@@ -46,7 +47,7 @@ public class MdmQueueConsumerLoader {
 		myMdmSettings = theMdmSettings;
 		myMdmMessageHandler = theMdmMessageHandler;
 
-		if (myMdmSettings.isPassiveModeEnabled()) {
+		if (myMdmSettings.getMode() == MdmModeEnum.RULES) {
 			return;
 		}
 

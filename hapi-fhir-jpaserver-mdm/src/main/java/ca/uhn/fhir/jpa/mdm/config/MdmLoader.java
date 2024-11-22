@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ public class MdmLoader {
 
 		myMdmProviderLoader.loadPatientMatchProvider();
 
-		if (myMdmSettings.isPassiveModeEnabled()) {
+		if (myMdmSettings.getMode() == MdmModeEnum.RULES) {
 			return;
 		}
 
