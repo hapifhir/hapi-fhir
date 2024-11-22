@@ -566,9 +566,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
-	@RegisterExtension
-	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
-
 	@AfterEach()
 	@Order(0)
 	public void afterCleanupDao() {

@@ -81,7 +81,7 @@ public class HistoryBuilder {
 	private FhirContext myCtx;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	/**
 	 * Constructor
@@ -150,13 +150,13 @@ public class HistoryBuilder {
 		query.setMaxResults(theToIndex - theFromIndex);
 
 		List<ResourceHistoryTable> tables = query.getResultList();
-		if (tables.size() > 0) {
+		if (!tables.isEmpty()) {
 			ImmutableListMultimap<Long, ResourceHistoryTable> resourceIdToHistoryEntries =
 					Multimaps.index(tables, ResourceHistoryTable::getResourceId);
 			Set<JpaPid> pids = resourceIdToHistoryEntries.keySet().stream()
 					.map(JpaPid::fromId)
 					.collect(Collectors.toSet());
-			PersistentIdToForcedIdMap pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
+			PersistentIdToForcedIdMap<JpaPid> pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
 			ourLog.trace("Translated IDs: {}", pidToForcedId.getResourcePersistentIdOptionalMap());
 
 			for (Long nextResourceId : resourceIdToHistoryEntries.keySet()) {
