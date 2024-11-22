@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6502
+title: "Allow `_profile` to be used as a ReferenceParam as per the spec"
