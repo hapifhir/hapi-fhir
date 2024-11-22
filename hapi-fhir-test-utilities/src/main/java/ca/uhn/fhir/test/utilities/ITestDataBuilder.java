@@ -171,9 +171,15 @@ public interface ITestDataBuilder {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "name", "string", theStatus);
 	}
 
-	default ICreationArgument withId(String theId) {
+	default ICreationArgument withId(@Nonnull String theId) {
 		return t -> {
 			assertThat(theId).matches("[a-zA-Z0-9-]+");
+			((IBaseResource)t).setId(theId);
+		};
+	}
+
+	default ICreationArgument withIdOrNull(@Nullable String theId) {
+		return t -> {
 			((IBaseResource)t).setId(theId);
 		};
 	}

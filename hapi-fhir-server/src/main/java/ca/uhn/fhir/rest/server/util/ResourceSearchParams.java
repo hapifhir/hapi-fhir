@@ -30,9 +30,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
+
 public class ResourceSearchParams {
 	private final String myResourceName;
 	private final Map<String, RuntimeSearchParam> myMap;
+	private final Map<ISearchParamRegistry.SearchParamLookupContextEnum, ResourceSearchParams> myContextToParams =
+			new HashMap<>();
 
 	public ResourceSearchParams(String theResourceName) {
 		myResourceName = theResourceName;
@@ -48,6 +52,32 @@ public class ResourceSearchParams {
 		return myMap.values();
 	}
 
+	/**
+	 * Returns a filtered view of this {@link ResourceSearchParams} instance if
+	 * any parameters are not valid for the given {@literal theContext}.
+	 */
+	public ResourceSearchParams toFilteredForContext(ISearchParamRegistry.SearchParamLookupContextEnum theContext) {
+		if (theContext == null) {
+			return this;
+		}
+		synchronized (this) {
+			ResourceSearchParams retVal = myContextToParams.get(theContext);
+			if (retVal == null) {
+				Map<String, RuntimeSearchParam> filteredMap = new HashMap<>(myMap.size());
+				for (var nextEntry : myMap.entrySet()) {
+					String key = nextEntry.getKey();
+					RuntimeSearchParam nextParam = nextEntry.getValue();
+					if (isAllowedForContext(nextParam, theContext)) {
+						filteredMap.put(key, nextParam);
+					}
+				}
+				retVal = new ResourceSearchParams(myResourceName, filteredMap);
+				myContextToParams.put(theContext, retVal);
+			}
+			return retVal;
+		}
+	}
+
 	public static ResourceSearchParams empty(String theResourceName) {
 		return new ResourceSearchParams(theResourceName, Collections.emptyMap());
 	}
@@ -57,6 +87,7 @@ public class ResourceSearchParams {
 	}
 
 	public void remove(String theName) {
+		myContextToParams.clear();
 		myMap.remove(theName);
 	}
 
@@ -69,10 +100,12 @@ public class ResourceSearchParams {
 	}
 
 	public RuntimeSearchParam put(String theName, RuntimeSearchParam theSearchParam) {
+		myContextToParams.clear();
 		return myMap.put(theName, theSearchParam);
 	}
 
 	public void addSearchParamIfAbsent(String theParamName, RuntimeSearchParam theRuntimeSearchParam) {
+		myContextToParams.clear();
 		myMap.putIfAbsent(theParamName, theRuntimeSearchParam);
 	}
 

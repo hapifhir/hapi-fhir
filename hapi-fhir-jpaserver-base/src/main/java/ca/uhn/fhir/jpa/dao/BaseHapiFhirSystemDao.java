@@ -192,7 +192,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 		HapiTransactionService.requireTransaction();
 		List<Long> pids = theResolvedIds.stream().map(t -> ((JpaPid) t).getId()).collect(Collectors.toList());
 
-		new QueryChunker<Long>().chunk(pids, idChunk -> {
+		QueryChunker.chunk(pids, idChunk -> {
 
 			/*
 			 * Pre-fetch the resources we're touching in this transaction in mass - this reduced the

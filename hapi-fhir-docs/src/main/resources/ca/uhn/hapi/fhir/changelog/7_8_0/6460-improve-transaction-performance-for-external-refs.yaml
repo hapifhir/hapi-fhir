@@ -1,0 +1,9 @@
+---
+type: perf
+issue: 6460
+title: "The JPA server FHIR transaction processor will now pre-fetch the target
+   resource state for references to resources that don't also appear in the
+   transaction bundle. This means that if you process a large FHIR transaction containing
+   many references to other resources in the repository that are not also being
+   updated in the same transaction, you should see a very significant improvement
+   in performance."

@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.7.0-SNAPSHOT</version>
+	<version>7.7.7-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -948,6 +948,15 @@
 			<id>Boereck</id>
 			<name>Max Bureck</name>
 		</developer>
+		<developer>
+			<id>SevcikMichal</id>
+			<name>Michal Sevcik</name>
+		</developer>
+		<developer>
+			<id>iyt-trifork</id>
+			<name>Ibrahim</name>
+			<organization>Trifork A/S</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -958,7 +967,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.3.25</fhir_core_version>
+		<fhir_core_version>6.4.0</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
@@ -2609,6 +2618,24 @@
 						</excludes>
 					</configuration>
 				</plugin>
+
+				<!-- Generate the DDL schema files -->
+				<plugin>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>hapi-tinder-plugin</artifactId>
+					<version>7.7.7-SNAPSHOT</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>generate-ddl</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<skip>true</skip>
+					</configuration>
+				</plugin>
+
 				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>

@@ -831,6 +831,61 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasPatientEntities(auditEvent, patientId.toUnqualified().getValue());
 	}
 
+	@Test
+	public void testSearchMultiplePatientsWithMultipleAuditEvents()
+	{
+		Patient p1 = buildResource("Patient", withId("P1"), withFamily("Simpson"), withGiven("Homer"));
+		Patient p2 = buildResource("Patient", withId("P2"), withFamily("Simpson"), withGiven("Marge"));
+
+		myPatientProvider.store(p1);
+		myPatientProvider.store(p2);
+
+		myClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		verify(myAuditEventSink, times(2)).recordAuditEvent(myAuditEventCaptor.capture());
+		List<AuditEvent> values = myAuditEventCaptor.getAllValues();
+		verifyAuditEvent(values.get(0), "Patient/P1/_history/1");
+		verifyAuditEvent(values.get(1),"Patient/P2/_history/1");
+	}
+
+	@Test
+	public void testSearchObservationsAmongMultiplePatients()
+	{
+		Patient p1 = buildResource("Patient", withId("P1"), withFamily("Simpson"), withGiven("Homer"));
+		Patient p2 = buildResource("Patient", withId("P2"), withFamily("Simpson"), withGiven("Marge"));
+		myPatientProvider.store(p1);
+		myPatientProvider.store(p2);
+
+		createObservation(withId("O1"), withSubject("Patient/P1"));
+		createObservation(withId("O2"), withSubject("Patient/P2"));
+
+		Bundle outcome = myClient
+			.search()
+			.forResource(Observation.class)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		verify(myAuditEventSink, times(2)).recordAuditEvent(myAuditEventCaptor.capture());
+		List<AuditEvent> values = myAuditEventCaptor.getAllValues();
+		verifyAuditEvent(values.get(0), "Patient/P1");
+		verifyAuditEvent(values.get(1),"Patient/P2");
+	}
+
+	private void verifyAuditEvent(AuditEvent auditEvent, String id) {
+        ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
+		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_QUERY);
+		assertType(auditEvent);
+		assertSubType(auditEvent, "search-type");
+		assertEquals(AuditEvent.AuditEventAction.E, auditEvent.getAction());
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
+		assertHasPatientEntities(auditEvent, id);
+	}
+
 	private void create10Observations(String... thePatientIds) {
 		for (int i = 0; i < 10; i++) {
 			createObservation(withId("O" + i), withSubject(thePatientIds[i % thePatientIds.length]));

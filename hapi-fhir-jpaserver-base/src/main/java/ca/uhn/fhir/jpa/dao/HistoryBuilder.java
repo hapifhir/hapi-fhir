@@ -81,7 +81,7 @@ public class HistoryBuilder {
 	private FhirContext myCtx;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	/**
 	 * Constructor
@@ -150,13 +150,13 @@ public class HistoryBuilder {
 		query.setMaxResults(theToIndex - theFromIndex);
 
 		List<ResourceHistoryTable> tables = query.getResultList();
-		if (tables.size() > 0) {
+		if (!tables.isEmpty()) {
 			ImmutableListMultimap<Long, ResourceHistoryTable> resourceIdToHistoryEntries =
 					Multimaps.index(tables, ResourceHistoryTable::getResourceId);
 			Set<JpaPid> pids = resourceIdToHistoryEntries.keySet().stream()
 					.map(JpaPid::fromId)
 					.collect(Collectors.toSet());
-			PersistentIdToForcedIdMap pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
+			PersistentIdToForcedIdMap<JpaPid> pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
 			ourLog.trace("Translated IDs: {}", pidToForcedId.getResourcePersistentIdOptionalMap());
 
 			for (Long nextResourceId : resourceIdToHistoryEntries.keySet()) {
@@ -172,8 +172,9 @@ public class HistoryBuilder {
 					// For that reason, strip the prefix before setting the transientForcedId below.
 					// If not stripped this messes up the id of the resource as the resourceType would be repeated
 					// twice like Patient/Patient/1234 in the resource constructed
-					if (resourceId.startsWith(myResourceType + "/")) {
-						resourceId = resourceId.substring(myResourceType.length() + 1);
+					int slashIdx = resourceId.indexOf('/');
+					if (slashIdx != -1) {
+						resourceId = resourceId.substring(slashIdx + 1);
 					}
 				} else {
 					resourceId = nextResourceId.toString();

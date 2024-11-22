@@ -26,7 +26,6 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -137,7 +136,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	}
 
 	@Override
-	public Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IdDt theId) {
+	public Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IIdType theId) {
 		ourLog.debug("About to expand golden resource with golden resource id {}", theId);
 		IResourcePersistentId<?> pidOrThrowException =
 				myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId);

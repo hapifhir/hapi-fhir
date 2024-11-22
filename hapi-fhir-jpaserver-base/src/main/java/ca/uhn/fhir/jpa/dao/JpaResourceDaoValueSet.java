@@ -303,12 +303,14 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 				theForceUpdate,
 				theCreateNewHistoryEntry);
 
-		if (getStorageSettings().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
-			if (retVal.getDeleted() == null) {
-				ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
-				myTerminologySvc.storeTermValueSet(retVal, valueSet);
-			} else {
-				myTerminologySvc.deleteValueSetAndChildren(retVal);
+		if (thePerformIndexing) {
+			if (getStorageSettings().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
+				if (retVal.getDeleted() == null) {
+					ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
+					myTerminologySvc.storeTermValueSet(retVal, valueSet);
+				} else {
+					myTerminologySvc.deleteValueSetAndChildren(retVal);
+				}
 			}
 		}
 

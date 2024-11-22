@@ -29,6 +29,7 @@ import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -121,6 +122,20 @@ public interface IMdmLinkJpaRepository
 					+ "AND lookup_link.myMatchResult = :matchResult")
 	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(
 			@Param("goldenPid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	@Query(
+			"SELECT lookup_link.myGoldenResourcePid as goldenPid, gld_rt.myPartitionIdValue as goldenPartitionId, lookup_link.mySourcePid as sourcePid, lookup_link.myPartitionIdValue as sourcePartitionId "
+					+ "FROM MdmLink lookup_link "
+					+ "INNER JOIN ResourceTable gld_rt "
+					+ "on lookup_link.myGoldenResourcePid=gld_rt.myId "
+					+ "WHERE "
+					+ "   (lookup_link.myGoldenResourcePid IN (:pids) "
+					+ "    OR"
+					+ "    lookup_link.mySourcePid IN (:pids))"
+					+ "AND lookup_link.myMatchResult = :matchResult")
+	List<MdmPidTuple> expandPidsByGoldenResourcePidsOrSourcePidsAndMatchResult(
+			@Param("pids") Collection<Long> theSourcePid,
+			@Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
 	@Query(
 			"SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold ORDER BY ml.myCreated DESC")

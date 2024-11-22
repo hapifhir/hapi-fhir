@@ -27,6 +27,7 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Encounter;
@@ -263,7 +264,7 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+		public RuntimeSearchParam getActiveSearchParam(@Nonnull String theResourceName, @Nonnull String theParamName, @Nonnull SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -278,7 +279,7 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public ResourceSearchParams getActiveSearchParams(String theResourceName) {
+		public ResourceSearchParams getActiveSearchParams(@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 			RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
 			ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
@@ -291,28 +292,28 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(@Nonnull String theResourceName, @Nonnull Set<String> theParamNames, @Nonnull SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Nullable
 		@Override
-		public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+		public RuntimeSearchParam getActiveSearchParamByUrl(@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(@Nonnull String theResourceName, @Nonnull ComboSearchParamType theParamType, @Nonnull SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException(Msg.code(2210));
 		}
 
 		@Override
-		public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
+		public Optional<RuntimeSearchParam> getActiveComboSearchParamById(@Nonnull String theResourceName, @Nonnull IIdType theId) {
 			throw new UnsupportedOperationException(Msg.code(2212));
 		}
 

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - CDS Hooks
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.hapi.fhir.cdshooks.api.json;
+package ca.uhn.fhir.rest.api.server.cdshooks;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
