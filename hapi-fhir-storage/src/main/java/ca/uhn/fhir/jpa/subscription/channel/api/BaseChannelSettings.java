@@ -29,6 +29,8 @@ public abstract class BaseChannelSettings implements IChannelSettings {
 	// init true to match previous behaviour
 	private boolean myUseJacksonMessageConverter = true;
 
+	private boolean myUsePrefixChannelName = true;
+
 	/**
 	 * Default true.  Used by IChannelNamer to decide how to qualify the channel name.
 	 */
@@ -59,5 +61,14 @@ public abstract class BaseChannelSettings implements IChannelSettings {
 
 	public void setUseJacksonMessageConverter(boolean theUseJacksonMessageConverter) {
 		myUseJacksonMessageConverter = theUseJacksonMessageConverter;
+	}
+
+	@Override
+	public boolean isUsePrefixChannelName() {
+		return myUsePrefixChannelName;
+	}
+
+	public void setUsePrefixChannelName(boolean theUsePrefixChannelName) {
+		myUsePrefixChannelName = theUsePrefixChannelName;
 	}
 }
