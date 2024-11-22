@@ -762,7 +762,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * if the MaxResultsToFetch is null, we are requesting "everything",
 		 * so we'll let the db do the deduplication (instead of in-memory)
 		 */
-		if (theOffset != null || myMaxResultsToFetch == null) {
+		if (theOffset != null || (myMaxResultsToFetch == null && !theCountOnlyFlag)) {
 			queryStack3.addGrouping();
 			queryStack3.setUseAggregate(true);
 		}
@@ -2507,7 +2507,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					}
 				}
 
-				mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
+				if (myMaxResultsToFetch == null) {
+					mySearchRuntimeDetails.setFoundIndexMatchesCount(myNonSkipCount);
+				} else {
+					mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
+				}
 
 			} finally {
 				// search finished - fire hooks
