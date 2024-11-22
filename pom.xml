@@ -1013,7 +1013,7 @@
 		<jaxb_runtime_version>4.0.4</jaxb_runtime_version>
 		<jena_version>4.9.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
-		<jetty_version>12.0.9</jetty_version>
+		<jetty_version>12.0.12</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.10.1</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
