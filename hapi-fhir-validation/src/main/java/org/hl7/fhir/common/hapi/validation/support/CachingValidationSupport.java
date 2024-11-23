@@ -50,54 +50,28 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	@Deprecated
 	public static class CacheTimeouts {
 
-		private long myTranslateCodeMillis;
-		private long myLookupCodeMillis;
-		private long myValidateCodeMillis;
-		private long myMiscMillis;
-		private long myExpandValueSetMillis;
-
-		public long getExpandValueSetMillis() {
-			return myExpandValueSetMillis;
-		}
-
 		public CacheTimeouts setExpandValueSetMillis(long theExpandValueSetMillis) {
-			myExpandValueSetMillis = theExpandValueSetMillis;
+			// nothing
 			return this;
-		}
-
-		public long getTranslateCodeMillis() {
-			return myTranslateCodeMillis;
 		}
 
 		public CacheTimeouts setTranslateCodeMillis(long theTranslateCodeMillis) {
-			myTranslateCodeMillis = theTranslateCodeMillis;
+			// nothing
 			return this;
-		}
-
-		public long getLookupCodeMillis() {
-			return myLookupCodeMillis;
 		}
 
 		public CacheTimeouts setLookupCodeMillis(long theLookupCodeMillis) {
-			myLookupCodeMillis = theLookupCodeMillis;
+			// nothibng
 			return this;
-		}
-
-		public long getValidateCodeMillis() {
-			return myValidateCodeMillis;
 		}
 
 		public CacheTimeouts setValidateCodeMillis(long theValidateCodeMillis) {
-			myValidateCodeMillis = theValidateCodeMillis;
+			// nothing
 			return this;
 		}
 
-		public long getMiscMillis() {
-			return myMiscMillis;
-		}
-
 		public CacheTimeouts setMiscMillis(long theMiscMillis) {
-			myMiscMillis = theMiscMillis;
+			// nothing
 			return this;
 		}
 

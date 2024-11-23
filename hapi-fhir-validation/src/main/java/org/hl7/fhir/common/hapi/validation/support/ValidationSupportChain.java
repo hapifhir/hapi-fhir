@@ -573,8 +573,9 @@ public class ValidationSupportChain implements IValidationSupport {
 					for (IBaseResource structureDefinition : allStructureDefinitions) {
 						String url = terser.getSinglePrimitiveValueOrNull(structureDefinition, "url");
 						url = defaultIfBlank(url, UUID.randomUUID().toString());
-						myStructureDefinitionsByUrl.put(url, structureDefinition);
-						myStructureDefinitionsAsList.add(structureDefinition);
+						if (myStructureDefinitionsByUrl.putIfAbsent(url, structureDefinition) == null) {
+							myStructureDefinitionsAsList.add(structureDefinition);
+						}
 					}
 				}
 			}
@@ -681,8 +682,9 @@ public class ValidationSupportChain implements IValidationSupport {
 				candidate = fetchResource(key, invoker, theUrl);
 				if (myExpiringCache != null) {
 					if (candidate != null) {
-						myStructureDefinitionsByUrl.put(theUrl, candidate);
-						myStructureDefinitionsAsList.add(candidate);
+						if (myStructureDefinitionsByUrl.putIfAbsent(theUrl, candidate) == null) {
+							myStructureDefinitionsAsList.add(candidate);
+						}
 					}
 				}
 			}

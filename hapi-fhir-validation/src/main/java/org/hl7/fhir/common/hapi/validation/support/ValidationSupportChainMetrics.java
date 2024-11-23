@@ -13,7 +13,15 @@ import org.slf4j.LoggerFactory;
 
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
+/**
+ * This class provides OpenTelemetry metrics for the {@link ValidationSupportChain} cache.
+ */
 public class ValidationSupportChainMetrics {
+
+	/*
+	 * See ValidationSupportChainTest#testMetrics for a unit test
+	 * which exercises the functionality in this class.
+	 */
 
 	public static final String EXPIRING_CACHE_MAXIMUM_SIZE = "expiring_cache.maximum_size";
 	public static final String EXPIRING_CACHE_CURRENT_ENTRIES = "expiring_cache.current_entries";

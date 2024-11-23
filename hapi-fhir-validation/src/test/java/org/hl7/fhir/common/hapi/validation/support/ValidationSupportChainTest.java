@@ -619,10 +619,20 @@ public class ValidationSupportChainTest extends BaseTest {
 		}
 	}
 
+	/**
+	 * Verify that OpenTelemetry metrics are generated correctly
+	 */
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testMetrics(boolean theUseCache) {
 		LibraryTestRunner libraryTestRunner = LibraryTestRunner.instance();
+
+		/*
+		 * As of version 2.10.0 of the opentelemetry-testing-common library,
+		 * the following doesn't actually clear the stored metrics. Hopefully
+		 * this will be fixed in a future release.
+		 */
+		libraryTestRunner.clearAllExportedData();
 
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		when(myValidationSupport0.fetchStructureDefinition("http://foo")).thenReturn(new StructureDefinition().setUrl("http://foo"));
@@ -669,8 +679,7 @@ public class ValidationSupportChainTest extends BaseTest {
 		ArrayList<?> dataPoints = new ArrayList<>(data.getPoints());
 		assertEquals(1, dataPoints.size());
 		LongPointData pointData = (LongPointData) dataPoints.get(0);
-		long lastValue = pointData.getValue();
-		return lastValue;
+		return pointData.getValue();
 	}
 
 
