@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterc
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SynchronousSubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,6 +29,7 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @ContextConfiguration(classes = {AsyncSubscriptionMessageSubmissionIT.SpringConfig.class})
 public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(AsyncSubscriptionMessageSubmissionIT.class);
+
+	@RegisterExtension
+	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(AsyncResourceModifiedSubmitterSvc.class);
 
 	@SpyBean
 	IResourceModifiedConsumer myResourceModifiedConsumer;
