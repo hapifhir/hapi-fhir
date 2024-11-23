@@ -1,13 +1,13 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class ValidationSupportUtils {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ValidationSupportUtils.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 
 	private ValidationSupportUtils() {}
 
@@ -128,6 +128,6 @@ public final class ValidationSupportUtils {
 	}
 
 	private static void logCodeAndValueSet(String theCode, String theValueSet) {
-		ourLog.trace("CodeSystem couldn't be extracted for code: {} for ValueSet: {}", theCode, theValueSet);
+		ourLog.debug("CodeSystem couldn't be extracted for code: {} for ValueSet: {}", theCode, theValueSet);
 	}
 }

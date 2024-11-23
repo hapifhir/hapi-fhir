@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -33,7 +34,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean noTerminologyChecks = false;
 	private boolean noExtensibleWarnings = false;
 	private boolean noBindingMsgSuppressed = false;
-	private volatile VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
+	private VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
 	private boolean errorForUnknownProfiles = true;
 
 	private boolean assumeValidRestReferences;
@@ -151,6 +152,17 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	}
 
 	/**
+	 * Resets the {@link VersionSpecificWorkerContextWrapper} so it can be created again.
+	 * This method is needed for (integration) test purposes and should not be used otherwise.
+	 */
+	@VisibleForTesting
+	public void resetWorkerContext() {
+		// this method had to be added because the current bean is autowired in the DAOs (BaseHapiFhirResourceDao)
+		// so the only way to force it to reinitialize as of now is by resetting it
+		myWrappedWorkerContext = null;
+	}
+
+	/**
 	 * If set to {@literal true} (default is true) extensions which are not known to the
 	 * validator (e.g. because they have not been explicitly declared in a profile) will
 	 * be validated but will not cause an error.
@@ -249,6 +261,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
 		return wrappedWorkerContext;
+	}
+
+	@VisibleForTesting
+	public VersionSpecificWorkerContextWrapper getWorkerContext() {
+		return myWrappedWorkerContext;
 	}
 
 	public IValidationPolicyAdvisor getValidatorPolicyAdvisor() {

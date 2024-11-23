@@ -4,16 +4,16 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class DefaultProfileValidationSupportNpmStrategy extends NpmPackageValidationSupport {
-	private static final Logger ourLog = LoggerFactory.getLogger(DefaultProfileValidationSupportNpmStrategy.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 
 	/**
 	 * Constructor

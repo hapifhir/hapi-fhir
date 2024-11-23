@@ -1,144 +1,179 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
-import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-
-import org.hl7.fhir.r5.model.Resource;
-import org.hl7.fhir.r5.model.StructureDefinition;
-import org.hl7.fhir.r5.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.r5.model.ValueSet;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.quality.Strictness;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
-
-import java.util.List;
 
 public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestWithInlineMocks {
 
-	final byte[] EXPECTED_BINARY_CONTENT_1 = "dummyBinaryContent1".getBytes();
-	final byte[] EXPECTED_BINARY_CONTENT_2 = "dummyBinaryContent2".getBytes();
-	final String EXPECTED_BINARY_KEY_1 = "dummyBinaryKey1";
-	final String EXPECTED_BINARY_KEY_2 = "dummyBinaryKey2";
-	final String NON_EXISTENT_BINARY_KEY = "nonExistentBinaryKey";
+	private static final byte[] EXPECTED_BINARY_CONTENT_1 = "dummyBinaryContent1".getBytes();
+	private static final byte[] EXPECTED_BINARY_CONTENT_2 = "dummyBinaryContent2".getBytes();
+	private static final String EXPECTED_BINARY_KEY_1 = "dummyBinaryKey1";
+	private static final String EXPECTED_BINARY_KEY_2 = "dummyBinaryKey2";
+	private static final String NON_EXISTENT_BINARY_KEY = "nonExistentBinaryKey";
+
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private IValidationSupport myValidationSupport;
+	private ValidationSupportContext myValidationSupportContext;
+	private VersionSpecificWorkerContextWrapper myWorkerContextWrapper;
+
+	public void setupValidationForBinary() {
+		myValidationSupport = mockValidationSupportWithTwoBinaries();
+		myValidationSupportContext = mockValidationSupportContext(myValidationSupport);
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(ourCtx);
+		myWorkerContextWrapper = new VersionSpecificWorkerContextWrapper(myValidationSupportContext, versionCanonicalizer);
+	}
+
+	public void setupValidation() {
+		myValidationSupport = mockValidationSupport();
+		myValidationSupportContext = mockValidationSupportContext(myValidationSupport);
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(ourCtx);
+		myWorkerContextWrapper = new VersionSpecificWorkerContextWrapper(myValidationSupportContext, versionCanonicalizer);
+	}
 
 	@Test
 	public void hasBinaryKey_normally_returnsExpected() {
-
-		IValidationSupport validationSupport = mockValidationSupportWithTwoBinaries();
-
-		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
-
-		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
-
-		assertThat(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_1)).as("wrapper should have binary key " + EXPECTED_BINARY_KEY_1).isTrue();
-		assertThat(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_2)).as("wrapper should have binary key " + EXPECTED_BINARY_KEY_1).isTrue();
-		assertThat(wrapper.hasBinaryKey(NON_EXISTENT_BINARY_KEY)).as("wrapper should not have binary key " + NON_EXISTENT_BINARY_KEY).isFalse();
+		setupValidationForBinary();
+		assertThat(myWorkerContextWrapper.hasBinaryKey(EXPECTED_BINARY_KEY_1)).as("wrapper should have binary key " + EXPECTED_BINARY_KEY_1).isTrue();
+		assertThat(myWorkerContextWrapper.hasBinaryKey(EXPECTED_BINARY_KEY_2)).as("wrapper should have binary key " + EXPECTED_BINARY_KEY_1).isTrue();
+		assertThat(myWorkerContextWrapper.hasBinaryKey(NON_EXISTENT_BINARY_KEY)).as("wrapper should not have binary key " + NON_EXISTENT_BINARY_KEY).isFalse();
 
 	}
 
 	@Test
 	public void getBinaryForKey_normally_returnsExpected() {
-
-		IValidationSupport validationSupport = mockValidationSupportWithTwoBinaries();
-
-		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
-
-		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
-
-		assertThat(wrapper.getBinaryForKey(EXPECTED_BINARY_KEY_1)).containsExactly(EXPECTED_BINARY_CONTENT_1);
-		assertThat(wrapper.getBinaryForKey(EXPECTED_BINARY_KEY_2)).containsExactly(EXPECTED_BINARY_CONTENT_2);
-		assertThat(wrapper.getBinaryForKey(NON_EXISTENT_BINARY_KEY)).as("wrapper should return null for binary key " + NON_EXISTENT_BINARY_KEY).isNull();
+		setupValidationForBinary();
+		assertThat(myWorkerContextWrapper.getBinaryForKey(EXPECTED_BINARY_KEY_1)).containsExactly(EXPECTED_BINARY_CONTENT_1);
+		assertThat(myWorkerContextWrapper.getBinaryForKey(EXPECTED_BINARY_KEY_2)).containsExactly(EXPECTED_BINARY_CONTENT_2);
+		assertThat(myWorkerContextWrapper.getBinaryForKey(NON_EXISTENT_BINARY_KEY)).as("wrapper should return null for binary key " + NON_EXISTENT_BINARY_KEY).isNull();
 	}
 
 	@Test
-	public void cacheResource_normally_executesWithoutException() {
-
-		IValidationSupport validationSupport = mockValidationSupport();
-
-		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
-
-		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
-
-		wrapper.cacheResource(mock(Resource.class));
-	}
-
-	@Test
-	public void validateCode_normally_resolvesCodeSystemFromValueSet() {
+	public void validateCode_codeInValueSet_resolvesCodeSystemFromValueSet() {
 		// setup
-		IValidationSupport validationSupport = mockValidationSupport();
-		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
-		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
+		setupValidation();
 
-		ValueSet valueSet = new ValueSet();
+		org.hl7.fhir.r5.model.ValueSet valueSet = new org.hl7.fhir.r5.model.ValueSet();
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
-		when(validationSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(valueSet);
-		when(validationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new IValidationSupport.CodeValidationResult());
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(mock(IValidationSupport.CodeValidationResult.class));
 
 		// execute
-		wrapper.validateCode(new ValidationOptions(), "code0", valueSet);
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), "code0", valueSet);
 
 		// verify
-		verify(validationSupport, times(1)).validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
-		verify(validationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
+		verify(myValidationSupport, times(1)).validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
+	}
+
+	@Test
+	public void validateCode_codeNotInValueSet_doesNotResolveSystem() {
+		setupValidation();
+		org.hl7.fhir.r5.model.ValueSet valueSet = new org.hl7.fhir.r5.model.ValueSet();
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), "code1", valueSet);
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCodeInValueSet(any(), any(), eq(null), eq("code1"), any(), any());
+		verify(myValidationSupport, never()).validateCode(any(), any(), any(), any(), any(), any());
 	}
 
 	@Test
 	public void isPrimitive_primitive() {
 		// setup
-		IValidationSupport validationSupport = mockValidationSupport();
-		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
-		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
+		setupValidation();
 
-		List<StructureDefinition> structDefs = createStructureDefinitions();
+		List<StructureDefinition> structDefs = createPrimitiveStructureDefinitions();
 
-		when(mockContext.getRootValidationSupport().<StructureDefinition>fetchAllStructureDefinitions()).thenReturn(structDefs);
-		assertThat(wrapper.isPrimitiveType("boolean")).isTrue();
+		when(myValidationSupportContext.getRootValidationSupport().<StructureDefinition>fetchAllStructureDefinitions()).thenReturn(structDefs);
+		assertThat(myWorkerContextWrapper.isPrimitiveType("boolean")).isTrue();
 
 		// try again to check if lookup after cache is built is working
-		assertThat(wrapper.isPrimitiveType("string")).isTrue();
+		assertThat(myWorkerContextWrapper.isPrimitiveType("string")).isTrue();
 	}
 
 	@Test
 	public void isPrimitive_not_primitive() {
 		// setup
-		IValidationSupport validationSupport = mockValidationSupport();
-		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
-		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
+		setupValidation();
 
-		List<StructureDefinition> structDefs = createStructureDefinitions();
+		List<StructureDefinition> structDefs = createPrimitiveStructureDefinitions();
 
-		when(mockContext.getRootValidationSupport().<StructureDefinition>fetchAllStructureDefinitions()).thenReturn(structDefs);
-		assertThat(wrapper.isPrimitiveType("Person")).isFalse();
+		when(myValidationSupportContext.getRootValidationSupport().<StructureDefinition>fetchAllStructureDefinitions()).thenReturn(structDefs);
+		assertThat(myWorkerContextWrapper.isPrimitiveType("Person")).isFalse();
 
 		// try again to check if lookup after cache is built is working
-		assertThat(wrapper.isPrimitiveType("Organization")).isFalse();
+		assertThat(myWorkerContextWrapper.isPrimitiveType("Organization")).isFalse();
 
 		// Assert that unknown types are not regarded as primitive
-		assertThat(wrapper.isPrimitiveType("Unknown")).isFalse();
+		assertThat(myWorkerContextWrapper.isPrimitiveType("Unknown")).isFalse();
 	}
 
-	private List<StructureDefinition> createStructureDefinitions() {
+	@Nested
+	public class ResourceCacheTimeoutTest {
+		@RegisterExtension
+		public final LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(Logs.getTerminologyTroubleshootingLog());
+
+		@Test
+		public void cacheTimeout_lessThanUnderlyingCacheTimeout_logsWarning() {
+			// setup
+			long persistenceTimeout = CachingValidationSupport.CacheTimeouts.defaultValues().getMiscMillis();
+			HapiSystemProperties.setValidationResourceCacheTimeoutMillis(persistenceTimeout - 1);
+			long timeout = HapiSystemProperties.getValidationResourceCacheTimeoutMillis();
+
+			// test
+			setupValidation();
+
+			// verify
+			assertThat(timeout).isLessThan(persistenceTimeout);
+			String message = String.format("The VersionSpecificWorkerContextWrapper cache expires at %sms which is sooner than the underlying cache at %sms.", timeout, persistenceTimeout);
+			assertThat(myLogbackTestExtension.getLogEvents().stream().filter(event -> event.getLevel() == Level.WARN && event.getFormattedMessage().equals(message))).isNotEmpty();
+		}
+
+		@Test
+		public void cacheTimeout_valid_logsNoWarning() {
+			// setup
+			long persistenceTimeout = CachingValidationSupport.CacheTimeouts.defaultValues().getMiscMillis();
+			HapiSystemProperties.restoreDefaultValidationResourceCacheTimeoutMillis();
+			long timeout = HapiSystemProperties.getValidationResourceCacheTimeoutMillis();
+
+			// test
+			setupValidation();
+
+			// verify
+			assertThat(persistenceTimeout).isEqualTo(timeout);
+			String message = String.format("The VersionSpecificWorkerContextWrapper cache expires at %sms which is sooner than the underlying cache at %sms.", timeout, persistenceTimeout);
+			assertThat(myLogbackTestExtension.getLogEvents().stream().filter(event -> event.getLevel() == Level.WARN && event.getFormattedMessage().equals(message))).isEmpty();
+		}
+	}
+
+	private List<StructureDefinition> createPrimitiveStructureDefinitions() {
 		StructureDefinition stringType = createPrimitive("string");
 		StructureDefinition boolType = createPrimitive("boolean");
 		StructureDefinition personType = createComplex("Person");
@@ -148,11 +183,11 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 	}
 
 	private StructureDefinition createComplex(String name){
-		return createStructureDefinition(name).setKind(StructureDefinitionKind.COMPLEXTYPE);
+		return createStructureDefinition(name).setKind(StructureDefinition.StructureDefinitionKind.COMPLEXTYPE);
 	}
 
 	private StructureDefinition createPrimitive(String name){
-		return createStructureDefinition(name).setKind(StructureDefinitionKind.PRIMITIVETYPE);
+		return createStructureDefinition(name).setKind(StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE);
 	}
 
 	private StructureDefinition createStructureDefinition(String name) {
@@ -179,12 +214,8 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 
 
 	private static IValidationSupport mockValidationSupport() {
-		IValidationSupport mockValidationSupport;
-		mockValidationSupport = mock(IValidationSupport.class);
-		FhirContext mockFhirContext = mock(FhirContext.class, withSettings().strictness(Strictness.LENIENT));
-		when(mockFhirContext.getLocalizer()).thenReturn(new HapiLocalizer());
-		when(mockFhirContext.getVersion()).thenReturn(FhirVersionEnum.R4.getVersionImplementation());
-		when(mockValidationSupport.getFhirContext()).thenReturn(mockFhirContext);
+		IValidationSupport mockValidationSupport = mock(IValidationSupport.class);
+		when(mockValidationSupport.getFhirContext()).thenReturn(ourCtx);
 		return mockValidationSupport;
 	}
 }

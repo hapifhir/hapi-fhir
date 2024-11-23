@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.sl.cache.LoadingCache;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
@@ -50,10 +52,7 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,13 +66,24 @@ import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * Implements a FHIR context which is used to interact with the FHIR standard libraries
+ * by implementing {@link IWorkerContext}.
+ */
 public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
-	private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWorkerContextWrapper.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	private final ValidationSupportContext myValidationSupportContext;
 	private final VersionCanonicalizer myVersionCanonicalizer;
+
+	/**
+	 * This caches canonical validation resources (R5).
+	 * The cache(s) within {@link ValidationSupportContext} use the current versioned resource.
+	 * This cache uses the other cache(s) to populate, and also does the translation to canonical.
+	 */
 	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
-	private volatile List<StructureDefinition> myAllStructures;
-	private volatile Set<String> myAllPrimitiveTypes;
+
+	private List<StructureDefinition> myAllStructures;
+	private Set<String> myAllPrimitiveTypes;
 	private Parameters myExpansionProfile;
 
 	public VersionSpecificWorkerContextWrapper(
@@ -81,19 +91,31 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		myValidationSupportContext = theValidationSupportContext;
 		myVersionCanonicalizer = theVersionCanonicalizer;
 
-		long timeoutMillis = HapiSystemProperties.getTestValidationResourceCachesMs();
+		long timeoutMillis = HapiSystemProperties.getValidationResourceCacheTimeoutMillis();
+		long fetchTimeoutMillis =
+				CachingValidationSupport.CacheTimeouts.defaultValues().getMiscMillis();
+		if (timeoutMillis < fetchTimeoutMillis) {
+			ourLog.warn(
+					"The {} cache expires at {}ms which is sooner than the underlying cache at {}ms.",
+					getClass().getSimpleName(),
+					timeoutMillis,
+					fetchTimeoutMillis);
+		}
 
 		myFetchResourceCache = CacheFactory.build(timeoutMillis, 10000, key -> {
 			String fetchResourceName = key.getResourceName();
+			String uri = key.getUri();
+
+			ourLog.trace("Adding resource type {} with uri {} to the cache", fetchResourceName, uri);
+
 			if (myValidationSupportContext
-							.getRootValidationSupport()
-							.getFhirContext()
-							.getVersion()
-							.getVersion()
-					== FhirVersionEnum.DSTU2) {
-				if ("CodeSystem".equals(fetchResourceName)) {
-					fetchResourceName = "ValueSet";
-				}
+									.getRootValidationSupport()
+									.getFhirContext()
+									.getVersion()
+									.getVersion()
+							== FhirVersionEnum.DSTU2
+					&& "CodeSystem".equals(fetchResourceName)) {
+				fetchResourceName = "ValueSet";
 			}
 
 			Class<? extends IBaseResource> fetchResourceType;
@@ -107,23 +129,22 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 						.getImplementingClass();
 			}
 
-			IBaseResource fetched = myValidationSupportContext
-					.getRootValidationSupport()
-					.fetchResource(fetchResourceType, key.getUri());
+			IBaseResource fetched =
+					myValidationSupportContext.getRootValidationSupport().fetchResource(fetchResourceType, uri);
 
 			Resource canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
 
 			if (canonical instanceof StructureDefinition) {
 				StructureDefinition canonicalSd = (StructureDefinition) canonical;
-				if (canonicalSd.getSnapshot().isEmpty()) {
+				if (!canonicalSd.hasSnapshot()) {
 					ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
 					fetched = myValidationSupportContext
 							.getRootValidationSupport()
-							.generateSnapshot(theValidationSupportContext, fetched, "", null, "");
+							.generateSnapshot(myValidationSupportContext, fetched, "", null, "");
 					Validate.isTrue(
 							fetched != null,
 							"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
-							key.getUri());
+							uri);
 					canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
 				}
 			}
@@ -132,6 +153,57 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		});
 
 		setValidationMessageLanguage(getLocale());
+	}
+
+	/**
+	 * Fetch a validation resource by resource type name and URI.
+	 * Please note that this method does not exist in the implementing interface {@link IWorkerContext}.
+	 * @param theResourceType the resource type
+	 * @param theUri the uri
+	 * @return the resource
+	 * @param <T> the returned resource type class
+	 */
+	public <T extends Resource> T fetchResource(String theResourceType, String theUri) {
+		ResourceKey key = getResourceKey(theResourceType, theUri);
+		if (key == null) {
+			return null;
+		}
+		@SuppressWarnings("unchecked")
+		T resource = (T) myFetchResourceCache.get(key);
+		return resource;
+	}
+
+	/**
+	 * Check if a validation resource exists by resource type name and URI.
+	 * Please note that this method does not exist in the implementing interface {@link IWorkerContext}.
+	 * @param theResourceType the resource type
+	 * @param theUri the uri
+	 * @return true if the validation resource exists, false otherwise
+	 */
+	public boolean hasResource(String theResourceType, String theUri) {
+		return fetchResource(theResourceType, theUri) != null;
+	}
+
+	private static ResourceKey getResourceKey(String theResourceName, String theUri) {
+		if (isBlank(theUri)) {
+			ourLog.debug("Encountered unexpected uri {} with resource type {}", theUri, theResourceName);
+			return null;
+		}
+
+		// validation does not currently support (not implemented) multiple versions of the same validation resource
+		// as such, version is not ignored when doing the resource lookup
+
+		String uri = theUri;
+		// handle profile version, if present
+		if (theUri.contains("|")) {
+			String[] parts = theUri.split("\\|");
+			if (parts.length == 2) {
+				uri = parts[0];
+			} else {
+				ourLog.warn("Unrecognized resource uri {} for resource type {}", theUri, theResourceName);
+			}
+		}
+		return new ResourceKey(theResourceName, uri);
 	}
 
 	@Override
@@ -155,8 +227,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, List<String> types)
-			throws FileNotFoundException, IOException, FHIRException {
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, List<String> types) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(653));
 	}
 
@@ -250,7 +321,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					throw new InternalErrorException(Msg.code(659) + e);
 				}
 			}
-			myAllStructures = retVal;
+			myAllStructures = Collections.unmodifiableList(retVal);
 		}
 
 		return retVal;
@@ -408,9 +479,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			Resource src,
 			ElementDefinition.ElementDefinitionBindingComponent binding,
 			boolean cacheOk,
-			boolean Hierarchical) {
+			boolean hierarchical) {
 		ValueSet valueSet = fetchResource(ValueSet.class, binding.getValueSet(), src);
-		return expandVS(valueSet, cacheOk, Hierarchical);
+		return expandVS(valueSet, cacheOk, hierarchical);
 	}
 
 	@Override
@@ -435,30 +506,14 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public CodeSystem fetchCodeSystem(String system) {
-		IBaseResource fetched =
-				myValidationSupportContext.getRootValidationSupport().fetchCodeSystem(system);
-		if (fetched == null) {
-			return null;
-		}
-		try {
-			return myVersionCanonicalizer.codeSystemToValidatorCanonical(fetched);
-		} catch (FHIRException e) {
-			throw new InternalErrorException(Msg.code(665) + e);
-		}
+		return fetchResource(CodeSystem.class, system);
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(String system, String verison) {
-		IBaseResource fetched =
-				myValidationSupportContext.getRootValidationSupport().fetchCodeSystem(system);
-		if (fetched == null) {
-			return null;
-		}
-		try {
-			return myVersionCanonicalizer.codeSystemToValidatorCanonical(fetched);
-		} catch (FHIRException e) {
-			throw new InternalErrorException(Msg.code(1992) + e);
-		}
+	public CodeSystem fetchCodeSystem(String system, String version) {
+		// validation does not currently support (not implemented) multiple versions of the same validation resource
+		// as such, version is not ignored when doing the resource lookup
+		return fetchCodeSystem(system);
 	}
 
 	@Override
@@ -498,26 +553,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String theUri) {
-		if (isBlank(theUri)) {
-			return null;
-		}
-
-		String uri = theUri;
-		// handle profile version, if present
-		if (theUri.contains("|")) {
-			String[] parts = theUri.split("\\|");
-			if (parts.length == 2) {
-				uri = parts[0];
-			} else {
-				ourLog.warn("Unrecognized profile uri: {}", theUri);
-			}
-		}
-
-		ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
-		@SuppressWarnings("unchecked")
-		T retVal = (T) myFetchResourceCache.get(key);
-
-		return retVal;
+		return fetchResource(class_.getSimpleName(), theUri);
 	}
 
 	@Override
@@ -635,7 +671,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					.map(StructureDefinition::getName)
 					.filter(Objects::nonNull)
 					.collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
-			myAllPrimitiveTypes = retVal;
+			myAllPrimitiveTypes = Collections.unmodifiableSet(retVal);
 		}
 
 		return retVal;
@@ -668,12 +704,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public <T extends Resource> boolean hasResource(Class<T> class_, String uri) {
-		if (isBlank(uri)) {
-			return false;
-		}
-
-		ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
-		return myFetchResourceCache.get(key) != null;
+		return hasResource(class_.getSimpleName(), uri);
 	}
 
 	@Override
@@ -712,15 +743,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public void setLogger(org.hl7.fhir.r5.context.ILoggingService logger) {
+	public void setLogger(@Nonnull org.hl7.fhir.r5.context.ILoggingService logger) {
 		throw new UnsupportedOperationException(Msg.code(687));
 	}
 
 	@Override
 	public boolean supportsSystem(String system) {
-		return myValidationSupportContext
-				.getRootValidationSupport()
-				.isCodeSystemSupported(myValidationSupportContext, system);
+		return hasResource(CodeSystem.class, system);
 	}
 
 	@Override
@@ -832,6 +861,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			String theSystem,
 			String theCode,
 			String theDisplay) {
+		ourLog.trace(
+				"Calling validateCode for ValueSet {} CodeSystem {} and code {}",
+				theValueSet != null ? theValueSet.toString() : null,
+				theSystem,
+				theCode);
 		IValidationSupport.CodeValidationResult result;
 		if (theValueSet != null) {
 			result = validateCodeInValueSet(theValueSet, theValidationOptions, theSystem, theCode, theDisplay);
@@ -906,37 +940,21 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			if (retVal.isOk()) {
 				validationResultsOk.add(retVal);
 			} else {
-				for (OperationOutcome.OperationOutcomeIssueComponent issue : retVal.getIssues()) {
-					issues.add(issue);
-				}
+				issues.addAll(retVal.getIssues());
 			}
 		}
 
-		if (code.getCoding().size() > 0) {
+		if (!code.getCoding().isEmpty()) {
 			if (!myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
 				if (validationResultsOk.size() == code.getCoding().size()) {
 					return validationResultsOk.get(0);
 				}
-			} else {
-				if (validationResultsOk.size() > 0) {
-					return validationResultsOk.get(0);
-				}
+			} else if (!validationResultsOk.isEmpty()) {
+				return validationResultsOk.get(0);
 			}
 		}
 
 		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, issues);
-	}
-
-	private static OperationOutcome.OperationOutcomeIssueComponent getOperationOutcomeTxIssueComponent(
-			String message, OperationOutcome.IssueType issueCode, String txIssueTypeCode) {
-		OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent()
-				.setSeverity(OperationOutcome.IssueSeverity.ERROR)
-				.setDiagnostics(message);
-		issue.getDetails().setText(message);
-
-		issue.setCode(issueCode);
-		issue.getDetails().addCoding("http://hl7.org/fhir/tools/CodeSystem/tx-issue-type", txIssueTypeCode, null);
-		return issue;
 	}
 
 	public void invalidateCaches() {
@@ -946,7 +964,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
 		if (theClass.equals(StructureDefinition.class)) {
-			return (List<T>) allStructures();
+			@SuppressWarnings("unchecked")
+			List<T> allStructures = (List<T>) allStructures();
+			return allStructures;
 		}
 		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
 	}

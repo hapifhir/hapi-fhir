@@ -43,12 +43,15 @@ import org.hl7.fhir.utilities.CanonicalPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * Please note that this bean is not currently used as part of the $validate operation.
+ * The FHIR Core validation library uses {@link VersionSpecificWorkerContextWrapper} to retrieve validation resources.
+ */
 public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorResourceFetcher.class);
@@ -105,10 +108,9 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 		} catch (InvalidRequestException e) {
 			ourLog.info("Resource does not support 'url' or 'version' Search Parameters");
 		}
-		if (results != null && results.size() > 0) {
-			if (results.size() > 1) {
-				ourLog.warn(
-						String.format("Multiple results found for URL '%s', only the first will be considered.", url));
+		if (results != null && !results.isEmpty()) {
+			if (results.size() > 1 && ourLog.isWarnEnabled()) {
+				ourLog.warn("Multiple results found for URL '{}', only the first will be considered.", url);
 			}
 			return results.get(0);
 		} else {
@@ -134,8 +136,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 	}
 
 	@Override
-	public CanonicalResource fetchCanonicalResource(IResourceValidator validator, Object appContext, String url)
-			throws URISyntaxException {
+	public CanonicalResource fetchCanonicalResource(IResourceValidator validator, Object appContext, String url) {
 		return null;
 	}
 

@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -36,7 +37,6 @@ import org.hl7.fhir.r4.model.Property;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,7 +57,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * operation in order to validate codes.
  */
 public class RemoteTerminologyServiceValidationSupport extends BaseValidationSupport implements IValidationSupport {
-	private static final Logger ourLog = LoggerFactory.getLogger(RemoteTerminologyServiceValidationSupport.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 
 	public static final String ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM = "unknownCodeInSystem";
 	public static final String ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET = "unknownCodeInValueSet";
