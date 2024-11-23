@@ -749,7 +749,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public boolean supportsSystem(String system) {
-		return hasResource(CodeSystem.class, system);
+		return myValidationSupportContext
+				.getRootValidationSupport()
+				.isCodeSystemSupported(myValidationSupportContext, system);
 	}
 
 	@Override
