@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.model.cross;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
 
@@ -58,5 +60,15 @@ public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 		jpaPid.setPartitionablePartitionId(myPartitionablePartitionId);
 
 		return jpaPid;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("resType", myResourceType)
+				.append("resPid", myResourcePid)
+				.append("deletedAt", myDeletedAt)
+				.append("partId", myPartitionablePartitionId)
+				.toString();
 	}
 }

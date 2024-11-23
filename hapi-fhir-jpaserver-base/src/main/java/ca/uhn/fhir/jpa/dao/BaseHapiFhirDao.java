@@ -1323,7 +1323,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * the previous version entity.
 		 */
 		if (historyEntry == null) {
-			historyEntry = theEntity.toHistory(versionedTags);
+			historyEntry = theEntity.toHistory(versionedTags && theEntity.getDeleted() == null);
 		}
 
 		historyEntry.setEncoding(theChanged.getEncoding());
@@ -1331,7 +1331,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		historyEntry.setResourceTextVc(theChanged.getResourceText());
 
 		ourLog.debug("Saving history entry ID[{}] for RES_ID[{}]", historyEntry.getId(), historyEntry.getResourceId());
-		myResourceHistoryTableDao.save(historyEntry);
+		myEntityManager.persist(historyEntry);
 		theEntity.setCurrentVersionEntity(historyEntry);
 
 		// Save resource source
@@ -1487,6 +1487,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		boolean wasDeleted = false;
 		if (theOldResource != null) {
 			wasDeleted = theOldResource.isDeleted();
+		}
+
+		if (wasDeleted && !myStorageSettings.isDeleteEnabled()) {
+			String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "cantUndeleteWithDeletesDisabled");
+			throw new InvalidRequestException(Msg.code(2573) + msg);
 		}
 
 		DaoMethodOutcome outcome = toMethodOutcome(
