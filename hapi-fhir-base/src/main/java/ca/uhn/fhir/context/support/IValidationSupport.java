@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -212,8 +213,8 @@ public interface IValidationSupport {
 				() -> fetchStructureDefinition(theUri), () -> fetchValueSet(theUri), () -> fetchCodeSystem(theUri)
 			};
 			return (T) Arrays.stream(sources)
-					.map(t -> t.get())
-					.filter(t -> t != null)
+					.map(Supplier::get)
+					.filter(Objects::nonNull)
 					.findFirst()
 					.orElse(null);
 		}

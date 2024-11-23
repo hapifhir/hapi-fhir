@@ -63,6 +63,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	 * @param theFhirContext The context to use
 	 */
 	public DefaultProfileValidationSupport(FhirContext theFhirContext) {
+		assert theFhirContext != null;
 		myCtx = theFhirContext;
 
 		IValidationSupport strategy;

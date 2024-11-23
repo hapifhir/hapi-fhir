@@ -21,7 +21,6 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
@@ -133,7 +132,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	private Set<String> myValidSystemsNotReturningIssues = new HashSet<>();
 	private Set<String> myValidValueSets = new HashSet<>();
 	private Map<String, StructureDefinition> myStructureDefinitionMap = new HashMap<>();
-	private CachingValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 	private IValidationSupport myMockSupport;
 
 	private void addValidConcept(String theSystem, String theCode) {
@@ -909,7 +908,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
-		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)), false);
+		ValidationSupportChain support = new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)).setEnabledValidationForCodingsLogicalAnd(false);
 
 		// Prepopulate SDs
 		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-profile.xml"));
@@ -1929,7 +1928,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			new CommonCodeSystemsTerminologyService(ourCtx),
 			new InMemoryTerminologyServerValidationSupport(ourCtx),
 			new SnapshotGeneratingValidationSupport(ourCtx));
-		myValidationSupport = new CachingValidationSupport(chain, theLogicalAnd);
+		myValidationSupport = chain.setEnabledValidationForCodingsLogicalAnd(theLogicalAnd);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 		myFhirValidator.registerValidatorModule(myInstanceVal);
 	}

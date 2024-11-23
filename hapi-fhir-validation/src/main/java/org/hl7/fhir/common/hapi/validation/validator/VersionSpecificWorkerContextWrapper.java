@@ -1,14 +1,12 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.sl.cache.CacheFactory;
-import ca.uhn.fhir.sl.cache.LoadingCache;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -69,9 +67,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
 	private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWorkerContextWrapper.class);
+	public static final String CANONICAL_USERDATA_KEY =
+			VersionSpecificWorkerContextWrapper.class.getName() + "_CANONICAL_USERDATA_KEY";
+	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
 	private final VersionCanonicalizer myVersionCanonicalizer;
-	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
 	private volatile List<StructureDefinition> myAllStructures;
 	private volatile Set<String> myAllPrimitiveTypes;
 	private Parameters myExpansionProfile;
@@ -80,56 +80,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer) {
 		myValidationSupportContext = theValidationSupportContext;
 		myVersionCanonicalizer = theVersionCanonicalizer;
-
-		long timeoutMillis = HapiSystemProperties.getTestValidationResourceCachesMs();
-
-		myFetchResourceCache = CacheFactory.build(timeoutMillis, 10000, key -> {
-			String fetchResourceName = key.getResourceName();
-			if (myValidationSupportContext
-							.getRootValidationSupport()
-							.getFhirContext()
-							.getVersion()
-							.getVersion()
-					== FhirVersionEnum.DSTU2) {
-				if ("CodeSystem".equals(fetchResourceName)) {
-					fetchResourceName = "ValueSet";
-				}
-			}
-
-			Class<? extends IBaseResource> fetchResourceType;
-			if (fetchResourceName.equals("Resource")) {
-				fetchResourceType = null;
-			} else {
-				fetchResourceType = myValidationSupportContext
-						.getRootValidationSupport()
-						.getFhirContext()
-						.getResourceDefinition(fetchResourceName)
-						.getImplementingClass();
-			}
-
-			IBaseResource fetched = myValidationSupportContext
-					.getRootValidationSupport()
-					.fetchResource(fetchResourceType, key.getUri());
-
-			Resource canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
-
-			if (canonical instanceof StructureDefinition) {
-				StructureDefinition canonicalSd = (StructureDefinition) canonical;
-				if (canonicalSd.getSnapshot().isEmpty()) {
-					ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
-					fetched = myValidationSupportContext
-							.getRootValidationSupport()
-							.generateSnapshot(theValidationSupportContext, fetched, "", null, "");
-					Validate.isTrue(
-							fetched != null,
-							"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
-							key.getUri());
-					canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
-				}
-			}
-
-			return canonical;
-		});
 
 		setValidationMessageLanguage(getLocale());
 	}
@@ -236,19 +186,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		myExpansionProfile = expParameters;
 	}
 
-	private List<StructureDefinition> allStructures() {
+	private List<StructureDefinition> allStructureDefinitions() {
 
 		List<StructureDefinition> retVal = myAllStructures;
 		if (retVal == null) {
 			retVal = new ArrayList<>();
-			for (IBaseResource next :
-					myValidationSupportContext.getRootValidationSupport().fetchAllStructureDefinitions()) {
-				try {
-					StructureDefinition converted = myVersionCanonicalizer.structureDefinitionToCanonical(next);
-					retVal.add(converted);
-				} catch (FHIRException e) {
-					throw new InternalErrorException(Msg.code(659) + e);
-				}
+			List<IBaseResource> allStructureDefinitions =
+					myValidationSupportContext.getRootValidationSupport().fetchAllStructureDefinitions();
+			assert allStructureDefinitions != null;
+			for (IBaseResource next : allStructureDefinitions) {
+				retVal.add((StructureDefinition) convertToCanonicalVersion(next));
 			}
 			myAllStructures = retVal;
 		}
@@ -513,9 +460,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			}
 		}
 
-		ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
+		String resourceType = getResourceType(class_);
 		@SuppressWarnings("unchecked")
-		T retVal = (T) myFetchResourceCache.get(key);
+		T retVal = (T) fetchResource(resourceType, uri);
 
 		return retVal;
 	}
@@ -610,7 +557,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public List<StructureDefinition> fetchTypeDefinitions(String theTypeName) {
-		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
+		List<StructureDefinition> allStructures = new ArrayList<>(allStructureDefinitions());
 		allStructures.removeIf(sd -> !sd.hasType() || !sd.getType().equals(theTypeName));
 		return allStructures;
 	}
@@ -629,7 +576,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		Set<String> retVal = myAllPrimitiveTypes;
 		if (retVal == null) {
 			// Collector may be changed to Collectors.toUnmodifiableSet() when switching to Android API level >= 33
-			retVal = allStructures().stream()
+			retVal = allStructureDefinitions().stream()
 					.filter(structureDefinition ->
 							structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
 					.map(StructureDefinition::getName)
@@ -672,8 +619,15 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return false;
 		}
 
-		ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
-		return myFetchResourceCache.get(key) != null;
+		String resourceType = getResourceType(class_);
+		return fetchResource(resourceType, uri) != null;
+	}
+
+	private static <T extends Resource> String getResourceType(Class<T> theClass) {
+		if (theClass.getSimpleName().equals("Resource")) {
+			return "Resource";
+		}
+		return FHIR_CONTEXT_R5.getResourceType(theClass);
 	}
 
 	@Override
@@ -851,7 +805,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				.getRootValidationSupport()
 				.validateCodeInValueSet(
 						myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
-		if (result != null) {
+		if (result != null && isNotBlank(theSystem)) {
 			/* We got a value set result, which could be successful, or could contain errors/warnings. The code
 			might also be invalid in the code system, so we will check that as well and add those issues
 			to our result.
@@ -940,13 +894,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	public void invalidateCaches() {
-		myFetchResourceCache.invalidateAll();
+		// nothing for now
 	}
 
 	@Override
 	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
 		if (theClass.equals(StructureDefinition.class)) {
-			return (List<T>) allStructures();
+			return (List<T>) allStructureDefinitions();
 		}
 		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
 	}
@@ -1067,5 +1021,67 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public boolean isServerSideSystem(String url) {
 		return false;
+	}
+
+	private IBaseResource fetchResource(String theResourceType, String theUrl) {
+		String fetchResourceName = theResourceType;
+		if (myValidationSupportContext
+						.getRootValidationSupport()
+						.getFhirContext()
+						.getVersion()
+						.getVersion()
+				== FhirVersionEnum.DSTU2) {
+			if ("CodeSystem".equals(fetchResourceName)) {
+				fetchResourceName = "ValueSet";
+			}
+		}
+
+		Class<? extends IBaseResource> fetchResourceType;
+		if (fetchResourceName.equals("Resource")) {
+			fetchResourceType = null;
+		} else {
+			fetchResourceType = myValidationSupportContext
+					.getRootValidationSupport()
+					.getFhirContext()
+					.getResourceDefinition(fetchResourceName)
+					.getImplementingClass();
+		}
+
+		IBaseResource fetched =
+				myValidationSupportContext.getRootValidationSupport().fetchResource(fetchResourceType, theUrl);
+
+		if (fetched == null) {
+			return null;
+		}
+
+		return convertToCanonicalVersion(fetched);
+	}
+
+	private Resource convertToCanonicalVersion(@Nonnull IBaseResource theResource) {
+		Resource canonical;
+		synchronized (theResource) {
+			canonical = (Resource) theResource.getUserData(CANONICAL_USERDATA_KEY);
+			if (canonical == null) {
+				canonical = myVersionCanonicalizer.resourceToValidatorCanonical(theResource);
+
+				if (canonical instanceof StructureDefinition) {
+					StructureDefinition canonicalSd = (StructureDefinition) canonical;
+					if (canonicalSd.getSnapshot().isEmpty()) {
+						ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
+						theResource = myValidationSupportContext
+								.getRootValidationSupport()
+								.generateSnapshot(myValidationSupportContext, theResource, "", null, "");
+						Validate.isTrue(
+								theResource != null,
+								"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
+								canonicalSd.getUrl());
+						canonical = myVersionCanonicalizer.resourceToValidatorCanonical(theResource);
+					}
+				}
+
+				theResource.setUserData(CANONICAL_USERDATA_KEY, canonical);
+			}
+		}
+		return canonical;
 	}
 }

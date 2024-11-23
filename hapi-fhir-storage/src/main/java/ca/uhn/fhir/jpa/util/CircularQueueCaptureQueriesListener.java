@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Queues;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.hl7.fhir.r4.model.InstantType;
@@ -56,6 +57,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	private static final int CAPACITY = 1000;
 	private static final Logger ourLog = LoggerFactory.getLogger(CircularQueueCaptureQueriesListener.class);
 	private Queue<SqlQuery> myQueries;
+	private AtomicInteger myGetConnectionCounter;
 	private AtomicInteger myCommitCounter;
 	private AtomicInteger myRollbackCounter;
 
@@ -89,6 +91,12 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		return myCommitCounter;
 	}
 
+	@Nullable
+	@Override
+	protected AtomicInteger provideGetConnectionCounter() {
+		return myGetConnectionCounter;
+	}
+
 	@Override
 	protected AtomicInteger provideRollbackCounter() {
 		return myRollbackCounter;
@@ -99,6 +107,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public void clear() {
 		myQueries.clear();
+		myGetConnectionCounter.set(0);
 		myCommitCounter.set(0);
 		myRollbackCounter.set(0);
 	}
@@ -108,6 +117,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public void startCollecting() {
 		myQueries = Queues.synchronizedQueue(new CircularFifoQueue<>(CAPACITY));
+		myGetConnectionCounter = new AtomicInteger(0);
 		myCommitCounter = new AtomicInteger(0);
 		myRollbackCounter = new AtomicInteger(0);
 	}
@@ -163,6 +173,10 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	private List<SqlQuery> getQueriesForCurrentThreadMatching(Predicate<String> thePredicate) {
 		String threadName = Thread.currentThread().getName();
 		return getQueriesMatching(thePredicate, threadName);
+	}
+
+	public int getConnectionCount() {
+		return myGetConnectionCounter.get();
 	}
 
 	public int getCommitCount() {

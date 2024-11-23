@@ -25,13 +25,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("removal")
 @ExtendWith(MockitoExtension.class)
 public class CachingValidationSupportTest {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
 	@Mock
-	private IValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport0;
+	@Mock
+	private IValidationSupport myValidationSupport1;
 
 	@ParameterizedTest
 	@NullSource
@@ -44,8 +47,8 @@ public class CachingValidationSupportTest {
 			sd0, sd1, sd2
 		));
 
-		when(myValidationSupport.getFhirContext()).thenReturn(ourCtx);
-		when(myValidationSupport.fetchAllNonBaseStructureDefinitions()).thenAnswer(t -> {
+		when(myValidationSupport0.getFhirContext()).thenReturn(ourCtx);
+		when(myValidationSupport0.fetchAllNonBaseStructureDefinitions()).thenAnswer(t -> {
 			Thread.sleep(2000);
 			return Collections.singletonList(responses.remove(0));
 		});
@@ -83,18 +86,18 @@ public class CachingValidationSupportTest {
 	public void fetchBinary_normally_accessesSuperOnlyOnce(Boolean theIsEnabledValidationForCodingsLogicalAnd) {
 		final byte[] EXPECTED_BINARY = "dummyBinaryContent".getBytes();
 		final String EXPECTED_BINARY_KEY = "dummyBinaryKey";
-		when(myValidationSupport.getFhirContext()).thenReturn(ourCtx);
-		when(myValidationSupport.fetchBinary(EXPECTED_BINARY_KEY)).thenReturn(EXPECTED_BINARY);
+		when(myValidationSupport0.getFhirContext()).thenReturn(ourCtx);
+		when(myValidationSupport0.fetchBinary(EXPECTED_BINARY_KEY)).thenReturn(EXPECTED_BINARY);
 
 		final CachingValidationSupport support = getSupport(null, theIsEnabledValidationForCodingsLogicalAnd);
 
 		final byte[] firstActualBinary = support.fetchBinary(EXPECTED_BINARY_KEY);
 		assertEquals(EXPECTED_BINARY, firstActualBinary);
-		verify(myValidationSupport, times(1)).fetchBinary(EXPECTED_BINARY_KEY);
+		verify(myValidationSupport0, times(1)).fetchBinary(EXPECTED_BINARY_KEY);
 
 		final byte[] secondActualBinary = support.fetchBinary(EXPECTED_BINARY_KEY);
 		assertEquals(EXPECTED_BINARY, secondActualBinary);
-		verify(myValidationSupport, times(1)).fetchBinary(EXPECTED_BINARY_KEY);
+		verify(myValidationSupport0, times(1)).fetchBinary(EXPECTED_BINARY_KEY);
 
 		assertEquals(theIsEnabledValidationForCodingsLogicalAnd != null && theIsEnabledValidationForCodingsLogicalAnd, support.isEnabledValidationForCodingsLogicalAnd());
 	}
@@ -103,16 +106,16 @@ public class CachingValidationSupportTest {
 	private CachingValidationSupport getSupport(@Nullable CachingValidationSupport.CacheTimeouts theCacheTimeouts, @Nullable Boolean theIsEnabledValidationForCodingsLogicalAnd) {
 		if (theCacheTimeouts == null) {
 			if (theIsEnabledValidationForCodingsLogicalAnd == null) {
-				return new CachingValidationSupport(myValidationSupport);
+				return new CachingValidationSupport(myValidationSupport0);
 			}
 
-			return new CachingValidationSupport(myValidationSupport, theIsEnabledValidationForCodingsLogicalAnd);
+			return new CachingValidationSupport(myValidationSupport0, theIsEnabledValidationForCodingsLogicalAnd);
 		}
 
 		if (theIsEnabledValidationForCodingsLogicalAnd == null) {
-			return new CachingValidationSupport(myValidationSupport, theCacheTimeouts);
+			return new CachingValidationSupport(myValidationSupport0, theCacheTimeouts);
 		}
 
-		return new CachingValidationSupport(myValidationSupport, theCacheTimeouts, theIsEnabledValidationForCodingsLogicalAnd);
+		return new CachingValidationSupport(myValidationSupport0, theCacheTimeouts, theIsEnabledValidationForCodingsLogicalAnd);
 	}
 }

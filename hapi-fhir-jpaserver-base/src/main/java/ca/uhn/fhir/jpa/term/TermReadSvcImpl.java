@@ -116,7 +116,6 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
@@ -282,9 +281,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	// We need this bean so we can tell which mode hibernate search is running in.
 	@Autowired
 	private HibernatePropertiesProvider myHibernatePropertiesProvider;
-
-	@Autowired
-	private CachingValidationSupport myCachingValidationSupport;
 
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
@@ -2497,7 +2493,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private void afterValueSetExpansionStatusChange() {
 		// TODO: JA2 - Move this caching into the memorycacheservice, and only purge the
 		// relevant individual cache
-		myCachingValidationSupport.invalidateCaches();
+		myValidationSupport.invalidateCaches();
 	}
 
 	private synchronized boolean isPreExpandingValueSets() {

@@ -27,6 +27,8 @@ import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.listener.MethodExecutionContext;
 import net.ttddyy.dsproxy.proxy.ParameterSetOperation;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseCaptureQueriesListener
 		implements ProxyDataSourceBuilder.SingleQueryExecution, ProxyDataSourceBuilder.SingleMethodExecution {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseCaptureQueriesListener.class);
 	private boolean myCaptureQueryStackTrace = false;
 
 	/**
@@ -113,6 +115,9 @@ public abstract class BaseCaptureQueriesListener
 	protected abstract AtomicInteger provideCommitCounter();
 
 	@Nullable
+	protected abstract AtomicInteger provideGetConnectionCounter();
+
+	@Nullable
 	protected abstract AtomicInteger provideRollbackCounter();
 
 	@Override
@@ -125,11 +130,18 @@ public abstract class BaseCaptureQueriesListener
 			case "rollback":
 				counter = provideRollbackCounter();
 				break;
+			case "getConnection":
+				counter = provideGetConnectionCounter();
+				break;
 		}
 
 		if (counter != null) {
 			counter.incrementAndGet();
 		}
+	}
+
+	public int countGetConnections() {
+		return provideGetConnectionCounter().get();
 	}
 
 	public int countCommits() {

@@ -118,7 +118,6 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.test.util.LogbackTestExtension;
 import jakarta.persistence.EntityManager;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -245,8 +244,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IPartitionDao myPartitionDao;
 	@Autowired
 	protected ITermReadSvc myHapiTerminologySvc;
-	@Autowired
-	protected CachingValidationSupport myCachingValidationSupport;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired

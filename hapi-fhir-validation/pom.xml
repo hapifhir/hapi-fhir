@@ -256,6 +256,16 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+		<dependency>
+			<groupId>io.opentelemetry.javaagent</groupId>
+			<artifactId>opentelemetry-testing-common</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry.javaagent</groupId>
+			<artifactId>opentelemetry-agent-for-testing</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<artifactId>commons-lang</artifactId>
