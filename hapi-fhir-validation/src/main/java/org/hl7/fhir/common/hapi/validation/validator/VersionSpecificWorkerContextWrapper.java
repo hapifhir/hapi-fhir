@@ -460,20 +460,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return null;
 		}
 
-		String uri = theUri;
-		// handle profile version, if present
 		if (theUri.contains("|")) {
 			String[] parts = theUri.split("\\|");
-			if (parts.length == 2) {
-				uri = parts[0];
-			} else {
+			if (parts.length != 2) {
 				ourLog.warn("Unrecognized profile uri: {}", theUri);
 			}
 		}
 
 		String resourceType = getResourceType(class_);
 		@SuppressWarnings("unchecked")
-		T retVal = (T) fetchResource(resourceType, uri);
+		T retVal = (T) fetchResource(resourceType, theUri);
 
 		return retVal;
 	}
@@ -568,7 +564,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public List<StructureDefinition> fetchTypeDefinitions(String theTypeName) {
-		List<StructureDefinition> allStructures = new ArrayList<>(allStructureDefinitions());
+		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
 		allStructures.removeIf(sd -> !sd.hasType() || !sd.getType().equals(theTypeName));
 		return allStructures;
 	}
@@ -587,7 +583,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		Set<String> retVal = myAllPrimitiveTypes;
 		if (retVal == null) {
 			// Collector may be changed to Collectors.toUnmodifiableSet() when switching to Android API level >= 33
-			retVal = allStructureDefinitions().stream()
+			retVal = allStructures().stream()
 					.filter(structureDefinition ->
 							structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
 					.map(StructureDefinition::getName)
@@ -816,7 +812,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				.getRootValidationSupport()
 				.validateCodeInValueSet(
 						myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
-		if (result != null && isNotBlank(theSystem)) {
+		if (result != null && theSystem != null) {
 			/* We got a value set result, which could be successful, or could contain errors/warnings. The code
 			might also be invalid in the code system, so we will check that as well and add those issues
 			to our result.
@@ -879,7 +875,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		}
 
 		if (code.getCoding().size() > 0) {
-			if (!myValidationSupportContext.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid()) {
+			if (!myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
 				if (validationResultsOk.size() == code.getCoding().size()) {
 					return validationResultsOk.get(0);
 				}
@@ -906,13 +902,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	public void invalidateCaches() {
-		// nothing for now
+		myFetchResourceCache.invalidateAll();
 	}
 
 	@Override
 	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
 		if (theClass.equals(StructureDefinition.class)) {
-			return (List<T>) allStructureDefinitions();
+			return (List<T>) allStructures();
 		}
 		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
 	}
