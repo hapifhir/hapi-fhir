@@ -491,12 +491,14 @@ public class ValidationSupportChain implements IValidationSupport {
 		if (retVal == null) {
 			retVal = CacheValue.empty();
 			for (IValidationSupport next : myChain) {
-				ValueSetExpansionOutcome expanded =
-						next.expandValueSet(theValidationSupportContext, expansionOptions, theValueSetUrlToExpand);
-				if (expanded != null) {
-					ourLog.debug("ValueSet {} expanded by URL by {}", theValueSetUrlToExpand, next.getName());
-					retVal = new CacheValue<>(expanded);
-					break;
+				if (isValueSetSupported(theValidationSupportContext, theValueSetUrlToExpand, next)) {
+					ValueSetExpansionOutcome expanded =
+							next.expandValueSet(theValidationSupportContext, expansionOptions, theValueSetUrlToExpand);
+					if (expanded != null) {
+						ourLog.debug("ValueSet {} expanded by URL by {}", theValueSetUrlToExpand, next.getName());
+						retVal = new CacheValue<>(expanded);
+						break;
+					}
 				}
 			}
 
