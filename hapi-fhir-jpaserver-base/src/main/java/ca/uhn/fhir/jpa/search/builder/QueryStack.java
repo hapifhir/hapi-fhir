@@ -210,7 +210,7 @@ public class QueryStack {
 				CoordsPredicateBuilder coordsBuilder = (CoordsPredicateBuilder) builder;
 
 				List<List<IQueryParameterType>> params = theParams.get(theParamName);
-				if (params.size() > 0 && params.get(0).size() > 0) {
+				if (!params.isEmpty() && !params.get(0).isEmpty()) {
 					IQueryParameterType param = params.get(0).get(0);
 					ParsedLocationParam location = ParsedLocationParam.from(theParams, param);
 					double latitudeValue = location.getLatitudeValue();
@@ -2128,6 +2128,10 @@ public class QueryStack {
 				if (nextParam.getModifier() == TokenParamModifier.NOT) {
 					paramInverted = true;
 				}
+			} else if (nextOrParam instanceof ReferenceParam) {
+				ReferenceParam nextParam = (ReferenceParam) nextOrParam;
+				code = nextParam.getValue();
+				system = null;
 			} else {
 				UriParam nextParam = (UriParam) nextOrParam;
 				code = nextParam.getValue();
@@ -2154,8 +2158,10 @@ public class QueryStack {
 				}
 			}
 
-			UriParam nextParam = (UriParam) nextParamUncasted;
-			if (isNotBlank(nextParam.getValue())) {
+			if (nextParamUncasted instanceof ReferenceParam
+					&& isNotBlank(((ReferenceParam) nextParamUncasted).getValue())) {
+				return true;
+			} else if (nextParamUncasted instanceof UriParam && isNotBlank(((UriParam) nextParamUncasted).getValue())) {
 				return true;
 			}
 		}
