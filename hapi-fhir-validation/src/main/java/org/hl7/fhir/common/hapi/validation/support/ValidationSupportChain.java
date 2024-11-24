@@ -485,7 +485,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			@Nonnull String theValueSetUrlToExpand)
 			throws ResourceNotFoundException {
 		ValueSetExpansionOptions expansionOptions = defaultIfNull(theExpansionOptions, EMPTY_EXPANSION_OPTIONS);
-		ExpandValueSetKey key = new ExpandValueSetKey(expansionOptions, theValueSetUrlToExpand);
+		ExpandValueSetKey key = new ExpandValueSetKey(expansionOptions, null, theValueSetUrlToExpand);
 		CacheValue<ValueSetExpansionOutcome> retVal = getFromCache(key);
 
 		if (retVal == null) {
@@ -515,11 +515,11 @@ public class ValidationSupportChain implements IValidationSupport {
 			@Nonnull IBaseResource theValueSetToExpand) {
 
 		ValueSetExpansionOptions expansionOptions = defaultIfNull(theExpansionOptions, EMPTY_EXPANSION_OPTIONS);
-		String url = CommonCodeSystemsTerminologyService.getValueSetUrl(getFhirContext(), theValueSetToExpand);
+		String id = theValueSetToExpand.getIdElement().getValue();
 		ExpandValueSetKey key = null;
 		CacheValue<ValueSetExpansionOutcome> retVal = null;
-		if (url != null) {
-			key = new ExpandValueSetKey(expansionOptions, url);
+		if (isNotBlank(id)) {
+			key = new ExpandValueSetKey(expansionOptions, id, null);
 			retVal = getFromCache(key);
 		}
 		if (retVal == null) {
@@ -1028,13 +1028,15 @@ public class ValidationSupportChain implements IValidationSupport {
 	static class ExpandValueSetKey extends BaseKey<ValueSetExpansionOutcome> {
 
 		private final ValueSetExpansionOptions myOptions;
+		private final String myId;
 		private final String myUrl;
 		private final int myHashCode;
 
-		private ExpandValueSetKey(ValueSetExpansionOptions theOptions, String theUrl) {
+		private ExpandValueSetKey(ValueSetExpansionOptions theOptions, String theId, String theUrl) {
 			myOptions = theOptions;
+			myId = theId;
 			myUrl = theUrl;
-			myHashCode = Objects.hash(myOptions, myUrl);
+			myHashCode = Objects.hash(myOptions, myId, myUrl);
 		}
 
 		@Override
@@ -1042,7 +1044,9 @@ public class ValidationSupportChain implements IValidationSupport {
 			if (this == theO) return true;
 			if (!(theO instanceof ExpandValueSetKey)) return false;
 			ExpandValueSetKey that = (ExpandValueSetKey) theO;
-			return Objects.equals(myOptions, that.myOptions) && Objects.equals(myUrl, that.myUrl);
+			return Objects.equals(myOptions, that.myOptions)
+					&& Objects.equals(myId, that.myId)
+					&& Objects.equals(myUrl, that.myUrl);
 		}
 
 		@Override
