@@ -241,13 +241,15 @@ public class JpaConfig {
 	@Autowired
 	private FhirContext myFhirContext;
 
-	@Autowired
-	private ValidationSupportChain.CacheConfiguration myCacheConfiguration;
+	@Bean
+	public ValidationSupportChain.CacheConfiguration validationSupportChainCacheConfiguration() {
+		return ValidationSupportChain.CacheConfiguration.defaultValues();
+	}
 
 	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	@Primary
 	public IValidationSupport jpaValidationSupportChain() {
-		return new JpaValidationSupportChain(myFhirContext, myCacheConfiguration);
+		return new JpaValidationSupportChain(myFhirContext, validationSupportChainCacheConfiguration());
 	}
 
 	@Bean("myDaoRegistry")

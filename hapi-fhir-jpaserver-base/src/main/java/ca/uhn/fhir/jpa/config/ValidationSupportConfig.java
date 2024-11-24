@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,11 +54,6 @@ public class ValidationSupportConfig {
 				new InMemoryTerminologyServerValidationSupport(theFhirContext);
 		retVal.setIssueSeverityForCodeDisplayMismatch(theStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 		return retVal;
-	}
-
-	@Bean
-	public ValidationSupportChain.CacheConfiguration validationSupportChainCacheConfiguration() {
-		return ValidationSupportChain.CacheConfiguration.defaultValues();
 	}
 
 	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT)

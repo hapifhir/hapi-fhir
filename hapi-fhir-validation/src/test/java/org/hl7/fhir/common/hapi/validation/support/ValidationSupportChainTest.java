@@ -14,24 +14,13 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongCounter;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.ObservableLongMeasurement;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Scope;
 import io.opentelemetry.instrumentation.testing.LibraryTestRunner;
 import io.opentelemetry.sdk.metrics.data.Data;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -45,17 +34,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.filechooser.FileSystemView;
-import java.io.File;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.opentelemetry.api.common.AttributeKey.stringKey;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -399,7 +385,7 @@ public class ValidationSupportChainTest extends BaseTest {
 
 		final ValidationSupportChain.CacheConfiguration cacheTimeouts = ValidationSupportChain.CacheConfiguration
 			.defaultValues()
-			.setCacheTimeout(500);
+			.setCacheTimeout(Duration.ofMillis(500));
 		ValidationSupportChain chain = new ValidationSupportChain(cacheTimeouts, myValidationSupport0);
 
 		// First call should return the full list
@@ -415,8 +401,7 @@ public class ValidationSupportChainTest extends BaseTest {
 		assertEquals(3, chain.fetchAllNonBaseStructureDefinitions().size());
 
 		// Eventually we should refresh
-		await().until(() -> chain.fetchAllNonBaseStructureDefinitions().size(), equalTo(2));
-
+		await().until(() -> chain.fetchAllNonBaseStructureDefinitions().size(), t -> t == 2);
 	}
 
 	@ParameterizedTest
@@ -540,16 +525,50 @@ public class ValidationSupportChainTest extends BaseTest {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testResource(boolean theUseCache) {
+	public void testResource_ValueSet(boolean theUseCache) {
+		// Setup
+		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
+
+		when(myValidationSupport0.fetchValueSet(any())).thenReturn(null);
+		when(myValidationSupport1.fetchValueSet(any())).thenAnswer(t -> new ValueSet());
+
+		// Test
+		IBaseResource result = chain.fetchResource(ValueSet.class, VALUE_SET_URL_0);
+
+		// Verify
+		verify(myValidationSupport0, times(1)).fetchValueSet( any());
+		verify(myValidationSupport1, times(1)).fetchValueSet( any());
+		verify(myValidationSupport2, times(0)).fetchValueSet(any());
+
+		// Test again (should use cache)
+		IBaseResource result2 = chain.fetchResource(ValueSet.class, VALUE_SET_URL_0);
+
+		// Verify
+		if (theUseCache) {
+			assertSame(result, result2);
+			verify(myValidationSupport0, times(1)).fetchValueSet( any());
+			verify(myValidationSupport1, times(1)).fetchValueSet( any());
+			verify(myValidationSupport2, times(0)).fetchValueSet( any());
+		} else {
+			verify(myValidationSupport0, times(2)).fetchValueSet( any());
+			verify(myValidationSupport1, times(2)).fetchValueSet( any());
+			verify(myValidationSupport2, times(0)).fetchValueSet(any());
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testResource_Arbitrary(boolean theUseCache) {
 		// Setup
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
 		when(myValidationSupport0.fetchResource(any(), any())).thenReturn(null);
-		when(myValidationSupport1.fetchResource(any(), any())).thenAnswer(t -> new ValueSet());
+		when(myValidationSupport1.fetchResource(any(), any())).thenAnswer(t -> new ListResource());
 
 		// Test
-		IBaseResource result = chain.fetchResource(ValueSet.class, VALUE_SET_URL_0);
+		IBaseResource result = chain.fetchResource(ListResource.class, "http://foo");
 
 		// Verify
 		verify(myValidationSupport0, times(1)).fetchResource(any(), any());
@@ -557,7 +576,7 @@ public class ValidationSupportChainTest extends BaseTest {
 		verify(myValidationSupport2, times(0)).fetchResource(any(), any());
 
 		// Test again (should use cache)
-		IBaseResource result2 = chain.fetchResource(ValueSet.class, VALUE_SET_URL_0);
+		IBaseResource result2 = chain.fetchResource(ListResource.class, "http://foo");
 
 		// Verify
 		if (theUseCache) {
@@ -702,72 +721,6 @@ public class ValidationSupportChainTest extends BaseTest {
 
 	private static void createMockValidationSupportWithSingleBinary(IValidationSupport theValidationSupport, String theExpectedBinaryKey, byte[] theExpectedBinaryContent) {
 		when(theValidationSupport.fetchBinary(theExpectedBinaryKey)).thenReturn(theExpectedBinaryContent);
-	}
-
-	// FIXME: remove
-	public static final class LongCounterExample {
-
-		public static final String INSTRUMENTATION_SCOPE = "io.opentelemetry.example.metrics";
-		private static final File homeDirectory = FileSystemView.getFileSystemView().getHomeDirectory();
-
-		private static final AttributeKey<String> ROOT_DIRECTORY_KEY = stringKey("root directory");
-		// statically allocate the attributes, since they are known at init time.
-		private static final Attributes HOME_DIRECTORY_ATTRIBUTES =
-			Attributes.of(ROOT_DIRECTORY_KEY, homeDirectory.getName());
-		private final Meter meter;
-		private final Tracer tracer;
-
-		public LongCounterExample(Tracer tracer, Meter meter) {
-			this.tracer = tracer;
-			this.meter = meter;
-		}
-
-		void run() {
-			Span span = tracer.spanBuilder("workflow").setSpanKind(SpanKind.INTERNAL).startSpan();
-			try (Scope scope = span.makeCurrent()) {
-				LongCounter directoryCounter = findFile("file_to_find.txt", homeDirectory);
-				directoryCounter.add(1, HOME_DIRECTORY_ATTRIBUTES); // count root directory
-			} catch (Exception e) {
-				span.setStatus(StatusCode.ERROR, "Error while finding file");
-			} finally {
-				span.end();
-			}
-		}
-
-		/**
-		 * Uses the Meter instance to create a LongCounter with the given name, description, and units.
-		 * This is the counter that is used to count directories during filesystem traversal.
-		 */
-		LongCounter createCounter() {
-			return meter
-				.counterBuilder("directories_search_count")
-				.setDescription("Counts directories accessed while searching for files.")
-				.setUnit("unit")
-				.build();
-		}
-
-		LongCounter findFile(String name, File directory) {
-			LongCounter directoryCounter = createCounter();
-			directoryCounter.add(1, HOME_DIRECTORY_ATTRIBUTES);
-			return directoryCounter;
-		}
-
-		public static void main(String[] args) {
-			OpenTelemetry sdk = GlobalOpenTelemetry.get();
-
-			Tracer tracer = sdk.getTracer(INSTRUMENTATION_SCOPE, "0.13.1");
-
-			Meter meterBuilder = sdk.meterBuilder("AAAAAA").setInstrumentationVersion("1").build();
-			ObservableLongMeasurement bbbb = meterBuilder.counterBuilder("BBBB").buildObserver();
-			bbbb.record(222L);
-
-			meterBuilder.counterBuilder("BBBB").buildWithCallback(t -> t.record(123L));
-
-
-			Meter meter = sdk.getMeter(INSTRUMENTATION_SCOPE);
-			LongCounterExample example = new LongCounterExample(tracer, meter);
-			example.run();
-		}
 	}
 
 }

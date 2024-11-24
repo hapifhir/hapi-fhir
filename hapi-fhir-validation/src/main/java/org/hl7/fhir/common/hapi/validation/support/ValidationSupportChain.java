@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -21,11 +22,11 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -657,8 +658,30 @@ public class ValidationSupportChain implements IValidationSupport {
 		return fetchResource(key, invoker, theUrl);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
+
+		/*
+		 * If we're looking for a common type with a dedicated fetch method, use that
+		 * so that we can use a common cache location for lookups wanting a given
+		 * URL on both methods (the validator will call both paths when looking for a
+		 * specific URL so this improves cache efficiency).
+		 */
+		if (theClass != null) {
+			BaseRuntimeElementDefinition<?> elementDefinition = getFhirContext().getElementDefinition(theClass);
+			if (elementDefinition != null) {
+				switch (elementDefinition.getName()) {
+					case "ValueSet":
+						return (T) fetchValueSet(theUri);
+					case "CodeSystem":
+						return (T) fetchCodeSystem(theUri);
+					case "StructureDefinition":
+						return (T) fetchStructureDefinition(theUri);
+				}
+			}
+		}
+
 		Function<IValidationSupport, T> invoker = v -> v.fetchResource(theClass, theUri);
 		TypedResourceByUrlKey<T> key = new TypedResourceByUrlKey<>(theClass, theUri);
 		return fetchResource(key, invoker, theUri);
@@ -956,9 +979,9 @@ public class ValidationSupportChain implements IValidationSupport {
 			return myCacheTimeout;
 		}
 
-		public CacheConfiguration setCacheTimeout(long theCacheTimeout) {
-			Validate.isTrue(theCacheTimeout >= 0, "Cache timeout must not be negative");
-			myCacheTimeout = theCacheTimeout;
+		public CacheConfiguration setCacheTimeout(Duration theCacheTimeout) {
+			Validate.isTrue(theCacheTimeout.toMillis() >= 0, "Cache timeout must not be negative");
+			myCacheTimeout = theCacheTimeout.toMillis();
 			return this;
 		}
 
@@ -978,12 +1001,12 @@ public class ValidationSupportChain implements IValidationSupport {
 		 */
 		public static CacheConfiguration defaultValues() {
 			return new CacheConfiguration()
-					.setCacheTimeout(10 * DateUtils.MILLIS_PER_MINUTE)
+					.setCacheTimeout(Duration.ofMinutes(10))
 					.setCacheSize(5000);
 		}
 
 		public static CacheConfiguration disabled() {
-			return new CacheConfiguration().setCacheSize(0).setCacheTimeout(0);
+			return new CacheConfiguration().setCacheSize(0).setCacheTimeout(Duration.ofMillis(0));
 		}
 	}
 
