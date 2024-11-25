@@ -2574,25 +2574,25 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	public void testUpdateRejectsInvalidTypes() {
 
-		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
-		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
-		IdDt p1id = (IdDt) myClient.create().resource(p1).execute().getId();
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
+		patient.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
+		IdDt p1id = (IdDt) myClient.create().resource(patient).execute().getId();
 
-		Organization p2 = new Organization();
-		p2.getNameElement().setValue("testUpdateRejectsInvalidTypes");
+		Organization org = new Organization();
+		org.getNameElement().setValue("testUpdateRejectsInvalidTypes");
 		try {
-			myClient.update().resource(p2).withId("Organization/" + p1id.getIdPart()).execute();
+			myClient.update().resource(org).withId("Organization/" + p1id.getIdPart()).execute();
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			// good
+			assertThat(e.getMessage()).contains("HAPI-0930: Existing resource ID[Patient/" + p1id.getIdPart() + "] is of type[Patient] - Cannot update with [Organization]");
 		}
 
 		try {
-			myClient.update().resource(p2).withId("Patient/" + p1id.getIdPart()).execute();
+			myClient.update().resource(org).withId("Patient/" + p1id.getIdPart()).execute();
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			// good
+			assertThat(e.getMessage()).contains("HAPI-0930: Existing resource ID[Patient/" + p1id.getIdPart() + "] is of type[Patient] - Cannot update with [Organization]");
 		}
 
 	}

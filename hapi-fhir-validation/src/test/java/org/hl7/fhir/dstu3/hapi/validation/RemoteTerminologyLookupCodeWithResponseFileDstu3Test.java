@@ -5,13 +5,10 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import ca.uhn.fhir.util.ClasspathUtil;
-import org.hl7.fhir.common.hapi.validation.IValidationProviders;
+import ca.uhn.fhir.test.utilities.validation.IValidationProvidersDstu3;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
-import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,13 +16,15 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_LOOKUP;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RemoteTerminologyLookupCodeWithResponseFileDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
-	private IValidateCodeProvidersDstu3.MyCodeSystemProviderDstu3 myCodeSystemProvider;
+	private IValidationProvidersDstu3.MyCodeSystemProviderDstu3 myCodeSystemProvider;
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
@@ -36,7 +35,7 @@ public class RemoteTerminologyLookupCodeWithResponseFileDstu3Test {
 		String baseUrl = "http://localhost:" + ourRestfulServerExtension.getPort();
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx, baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(false).setLogRequestSummary(true).setLogResponseSummary(true));
-		myCodeSystemProvider = new IValidateCodeProvidersDstu3.MyCodeSystemProviderDstu3();
+		myCodeSystemProvider = new IValidationProvidersDstu3.MyCodeSystemProviderDstu3();
 		ourRestfulServerExtension.getRestfulServer().registerProviders(myCodeSystemProvider);
 	}
 
@@ -47,13 +46,10 @@ public class RemoteTerminologyLookupCodeWithResponseFileDstu3Test {
 	}
 	@Test
 	void lookupCode_withParametersOutput_convertsCorrectly() {
-		String paramsAsString = ClasspathUtil.loadResource("/terminology/CodeSystem-lookup-output-with-subproperties.json");
-		IBaseResource baseResource = ourCtx.newJsonParser().parseResource(paramsAsString);
-		assertTrue(baseResource instanceof Parameters);
-		Parameters resultParameters = (Parameters) baseResource;
-		myCodeSystemProvider.setReturnParams(resultParameters);
+		String outputFile ="/terminology/CodeSystem-lookup-output-with-subproperties.json";
+		IBaseParameters resultParameters = myCodeSystemProvider.addTerminologyResponse(OPERATION_LOOKUP, CODE_SYSTEM, CODE, ourCtx, outputFile);
 
-		LookupCodeRequest request = new LookupCodeRequest(IValidationProviders.CODE_SYSTEM, IValidationProviders.CODE, null, List.of("interfaces"));
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, null, List.of("interfaces"));
 
 		// test
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, request);

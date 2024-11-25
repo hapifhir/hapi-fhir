@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -133,6 +134,7 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -567,8 +569,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Pre-cache the resource ID
 		jpaPid.setAssociatedResourceId(entity.getIdType(myFhirContext));
-		myIdHelperService.addResolvedPidToForcedId(
-				jpaPid, theRequestPartitionId, getResourceName(), entity.getFhirId(), null);
+		String fhirId = entity.getFhirId();
+		if (fhirId == null) {
+			fhirId = Long.toString(entity.getId());
+		}
+		myIdHelperService.addResolvedPidToFhirId(jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
@@ -1693,9 +1698,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (theOptimizeStorageMode == ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS) {
 				int pageSize = 100;
 				for (int page = 0; ((long) page * pageSize) < entity.getVersion(); page++) {
+
+					// We need to sort the pages, because we are updating the same data we are paging through.
+					// If not sorted explicitly, a database like Postgres returns the same data multiple times on
+					// different pages as the underlying data gets updated.
+					PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("myId"));
 					Slice<ResourceHistoryTable> historyEntities =
 							myResourceHistoryTableDao.findForResourceIdAndReturnEntitiesAndFetchProvenance(
-									PageRequest.of(page, pageSize), entity.getId(), historyEntity.getVersion());
+									pageRequest, entity.getId(), historyEntity.getVersion());
+
 					for (ResourceHistoryTable next : historyEntities) {
 						reindexOptimizeStorageHistoryEntity(entity, next);
 					}
@@ -1736,8 +1747,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		BaseHasResource entity;
-		JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
-				requestPartitionId, getResourceName(), theId.getIdPart());
+		JpaPid pid = myIdHelperService
+				.resolveResourceIdentity(
+						requestPartitionId,
+						getResourceName(),
+						theId.getIdPart(),
+						ResolveIdentityMode.includeDeleted().cacheOk())
+				.getPersistentId();
 		Set<Integer> readPartitions = null;
 		if (requestPartitionId.isAllPartitions()) {
 			entity = myEntityManager.find(ResourceTable.class, pid.getId());
@@ -1779,10 +1795,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		if (entity == null) {
-			throw new ResourceNotFoundException(Msg.code(1996) + "Resource " + theId + " is not known");
-		}
-
 		if (theId.hasVersionIdPart()) {
 			if (!theId.isVersionIdPartValidLong()) {
 				throw new ResourceNotFoundException(Msg.code(978)
@@ -1822,7 +1834,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		Validate.notNull(entity);
+		if (entity == null) {
+			throw new ResourceNotFoundException(Msg.code(1996) + "Resource " + theId + " is not known");
+		}
+
 		validateResourceType(entity);
 
 		if (theCheckForForcedId) {
@@ -1871,8 +1886,27 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (persistentId == null) {
-			persistentId = myIdHelperService.resolveResourcePersistentIds(
-					theRequestPartitionId, getResourceName(), theId.getIdPart());
+			String resourceName = getResourceName();
+			if (myStorageSettings.getResourceClientIdStrategy()
+					== JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC) {
+				if (theId.isIdPartValidLong()) {
+					/*
+					 * If it's a pure numeric ID and we are in ALPHANUMERIC mode, then the number
+					 * corresponds to a DB PID. In this case we want to resolve it regardless of
+					 * which type the client has supplied. This is because DB PIDs are unique across
+					 * all resource types (unlike FHIR_IDs which are namespaced to the resource type).
+					 * We want to load the resource with that PID regardless of type because if
+					 * the user is trying to update it we want to fail if the type is wrong, as
+					 * opposed to trying to create a new instance.
+					 */
+					resourceName = null;
+				}
+			}
+			persistentId = myIdHelperService.resolveResourceIdentityPid(
+					theRequestPartitionId,
+					resourceName,
+					theId.getIdPart(),
+					ResolveIdentityMode.includeDeleted().cacheOk());
 		}
 
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());

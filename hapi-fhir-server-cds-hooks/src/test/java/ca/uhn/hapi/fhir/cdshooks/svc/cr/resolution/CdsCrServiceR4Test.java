@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsConfigServiceImpl;

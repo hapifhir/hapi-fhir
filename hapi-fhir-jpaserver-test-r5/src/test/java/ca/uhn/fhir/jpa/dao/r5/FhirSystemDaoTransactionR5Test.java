@@ -2,12 +2,20 @@ package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermConceptMap;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.ConceptMap;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Parameters;
@@ -15,6 +23,7 @@ import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Quantity;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.UriType;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,14 +31,17 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
@@ -363,21 +375,21 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		myCaptureQueriesListener.logSelectQueries();
 		if (theTargetAlreadyExists) {
 			if (theResourceChanges) {
-				assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			} else {
-				assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			}
 		} else {
 			if (theResourceChanges) {
-				assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(7, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			} else {
-				assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(7, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			}
@@ -488,14 +500,14 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/2");
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/3");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		logAllResources();
 		logAllResourceVersions();
 
 		actual = myPatientDao.read(resourceId, mySrd);
-		assertEquals("2", actual.getIdElement().getVersionIdPart());
+		assertEquals("3", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 
@@ -505,11 +517,11 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/3");
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/5");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		actual = myPatientDao.read(resourceId, mySrd);
-		assertEquals("3", actual.getIdElement().getVersionIdPart());
+		assertEquals("5", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 	}
@@ -523,7 +535,6 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		Bundle output = mySystemDao.transaction(mySrd, input);
 		assertThat(output.getEntry()).hasSize(1);
 	}
-
 
 
 	@Test
@@ -558,7 +569,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		// First pass (resource doesn't already exist)
 
-		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
+		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext, "FAMILY-0"));
 		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
 		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
@@ -569,23 +580,26 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("1", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
+		assertEquals("FAMILY-0", actual.getNameFirstRep().getFamily());
 
 		// Second pass (resource already exists)
 
 		myCaptureQueriesListener.clear();
-		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
+		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext, "FAMILY-1"));
 		myCaptureQueriesListener.logUpdateQueries();
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
 		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+		resourceId = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
+		actual = myPatientDao.read(resourceId, mySrd);
+		assertEquals("FAMILY-1", actual.getNameFirstRep().getFamily());
 
 		logAllResources();
 		logAllResourceVersions();
 
 		IdType resourceId2 = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
-		assertThat(resourceId2.getIdPart()).isNotEqualTo(resourceId.getIdPart());
 		actual = myPatientDao.read(resourceId2, mySrd);
 		assertEquals("1", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
@@ -593,7 +607,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		// Third pass (resource already exists)
 
-		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
+		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext, "FAMILY-2"));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
@@ -606,6 +620,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("1", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
+		assertEquals("FAMILY-2", actual.getNameFirstRep().getFamily());
 	}
 
 	/**
@@ -632,22 +647,32 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 
+		logAllResources();
+		logAllResourceVersions();
+
 		// Second pass (resource already exists)
 
 		myCaptureQueriesListener.clear();
-		outcome = mySystemDao.transaction(mySrd, createBundleWithDeleteAndUpdateOnSameResource(myFhirContext));
+		try {
+			outcome = mySystemDao.transaction(mySrd, createBundleWithDeleteAndUpdateOnSameResource(myFhirContext));
+		} finally {
+			myCaptureQueriesListener.logInsertQueries();
+		}
 		myCaptureQueriesListener.logUpdateQueries();
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("Patient/P/_history/2", outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertEquals("Patient/P/_history/2", outcome.getEntry().get(1).getResponse().getLocation());
+		assertEquals("Patient/P/_history/3", outcome.getEntry().get(1).getResponse().getLocation());
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		logAllResources();
 		logAllResourceVersions();
 
-		actual = myPatientDao.read(resourceId, mySrd);
-		assertEquals("2", actual.getIdElement().getVersionIdPart());
+		assertThrows(ResourceGoneException.class, ()->myPatientDao.read(resourceId.withVersion("2"), mySrd));
+		actual = myPatientDao.read(resourceId.withVersion("3"), mySrd);
+		assertEquals("3", actual.getIdElement().getVersionIdPart());
+		actual = myPatientDao.read(resourceId.toVersionless(), mySrd);
+		assertEquals("3", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 
@@ -655,17 +680,38 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		outcome = mySystemDao.transaction(mySrd, createBundleWithDeleteAndUpdateOnSameResource(myFhirContext));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertEquals("Patient/P/_history/3", outcome.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Patient/P/_history/4", outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertEquals("Patient/P/_history/3", outcome.getEntry().get(1).getResponse().getLocation());
+		assertEquals("Patient/P/_history/5", outcome.getEntry().get(1).getResponse().getLocation());
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
-		actual = myPatientDao.read(resourceId, mySrd);
-		assertEquals("3", actual.getIdElement().getVersionIdPart());
+		actual = myPatientDao.read(resourceId.withVersion("5"), mySrd);
+		assertEquals("5", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 
 
+	}
+
+	@Test
+	public void testDeleteThenConditionalCreateOnTheSameResource() {
+		// Create a patient
+		myPatientDao.update(createPatientWithIdentifierAndTag().setActive(true), mySrd);
+
+		// Transaction which deletes that patient by ID and then recreates it conditionally
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionDeleteEntry(new IdType("Patient/P"));
+		bb.addTransactionUpdateEntry(createPatientWithIdentifierAndTag().setActive(false)).conditional("Patient?identifier=http://foo|bar");
+		Bundle outcome = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).endsWith("_history/2");
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/3");
+
+		// Verify
+		Patient patient = myPatientDao.read(new IdType("Patient/P"), mySrd);
+		assertFalse(patient.getActive());
+		assertEquals("3", patient.getIdElement().getVersionIdPart());
 	}
 
 
@@ -674,7 +720,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 	 */
 	@Test
 	public void testTransactionWithMissingSystem() {
-        BundleBuilder bb = new BundleBuilder(myFhirContext);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
 
@@ -685,11 +731,147 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		patient.addName().setText("Jane Doe");
 		bb.addTransactionCreateEntry(patient);
-        Bundle inputBundle = bb.getBundleTyped();
+		Bundle inputBundle = bb.getBundleTyped();
 
 		Bundle outputBundle = mySystemDao.transaction(mySrd, inputBundle);
 
 		assertThat(outputBundle.getEntry().get(0).getResponse().getLocation()).matches("Patient/[0-9]+/_history/1");
+	}
+
+	/**
+	 * Make sure we can successfully handle this in a transaction, including
+	 * creating the extra table rows for this resource type
+	 */
+	@Test
+	public void testCreateCodeSystem() {
+		CodeSystem cs = newDummyCodeSystem();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(cs);
+
+		// Test
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Verify
+		runInTransaction(() -> {
+			List<TermCodeSystem> valueSets = myTermCodeSystemDao.findAll();
+			assertThat(valueSets).hasSize(1);
+		});
+	}
+
+	/**
+	 * Make sure we can successfully handle this in a transaction, including
+	 * creating the extra table rows for this resource type
+	 */
+	@Test
+	public void testCreateConceptMap() {
+		ConceptMap cm = newDummyConceptMap();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(cm);
+
+		// Test
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Verify
+		runInTransaction(() -> {
+			List<TermConceptMap> valueSets = myTermConceptMapDao.findAll();
+			assertThat(valueSets).hasSize(1);
+		});
+	}
+
+	/**
+	 * Make sure we can successfully handle this in a transaction, including
+	 * creating the extra table rows for this resource type
+	 */
+	@Test
+	public void testCreateValueSet() {
+		ValueSet vs = newDummyValueSet();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(vs);
+
+		// Test
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Verify
+		runInTransaction(() -> {
+			List<TermValueSet> valueSets = myTermValueSetDao.findAll();
+			assertThat(valueSets).hasSize(1);
+		});
+	}
+
+	/**
+	 * Two resources with the same URL in a single transaction
+	 * bundle should error gracefully
+	 */
+	@Test
+	public void testCreateDuplicateCodeSystem() {
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(newDummyCodeSystem());
+		bb.addTransactionCreateEntry(newDummyCodeSystem());
+
+		// Test
+		try {
+			mySystemDao.transaction(mySrd, bb.getBundleTyped());
+			fail();
+		} catch (UnprocessableEntityException e) {
+			// Verify
+			assertThat(e.getMessage()).contains("Can not create multiple CodeSystem resources with CodeSystem.url");
+		}
+
+	}
+
+	/**
+	 * Two resources with the same URL in a single transaction
+	 * bundle should error gracefully
+	 */
+	@Test
+	public void testCreateDuplicateValueSet() {
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(newDummyValueSet());
+		bb.addTransactionCreateEntry(newDummyValueSet());
+
+		// Test
+		try {
+			mySystemDao.transaction(mySrd, bb.getBundleTyped());
+			fail();
+		} catch (UnprocessableEntityException e) {
+			// Verify
+			assertThat(e.getMessage()).contains("Can not create multiple ValueSet resources with ValueSet.url");
+		}
+
+	}
+
+	@Nonnull
+	private static CodeSystem newDummyCodeSystem() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setVersion("1.2.3");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept().setCode("HELLO");
+		return cs;
+	}
+
+	@Nonnull
+	private static ConceptMap newDummyConceptMap() {
+		ConceptMap cm = new ConceptMap();
+		cm.setUrl("http://foo");
+		cm.setVersion("1.2.3");
+		cm.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		return cm;
+	}
+
+	@Nonnull
+	private static ValueSet newDummyValueSet() {
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://foo");
+		vs.setVersion("1.2.3");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://hl7.org/fhir/administrative-gender");
+		return vs;
 	}
 
 
@@ -705,13 +887,14 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 	}
 
 	@Nonnull
-	private static Bundle createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(FhirContext theFhirContext) {
+	private static Bundle createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(FhirContext theFhirContext, String theFamilyName) {
 		// Build a new bundle each time we need it
 		BundleBuilder bb = new BundleBuilder(theFhirContext);
 		bb.addTransactionDeleteConditionalEntry("Patient?identifier=http://foo|bar");
 
 		Patient patient = createPatientWithIdentifierAndTag();
-		patient.setId((String)null);
+		patient.setId((String) null);
+		patient.getNameFirstRep().setFamily(theFamilyName);
 		bb.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://foo|bar");
 		return bb.getBundleTyped();
 	}

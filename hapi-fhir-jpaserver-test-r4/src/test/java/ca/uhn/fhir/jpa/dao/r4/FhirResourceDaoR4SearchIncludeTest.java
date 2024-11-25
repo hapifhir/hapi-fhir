@@ -177,7 +177,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		}
 
 		if (!theReverse && theMatchAll) {
-			SqlQuery searchForCanonicalReferencesQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(3);
+			SqlQuery searchForCanonicalReferencesQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2);
 			// Make sure we have the right query - If this ever fails, maybe we have optimized the queries
 			// (or somehow made things worse) and the search for the canonical target is no longer the 4th
 			// SQL query
