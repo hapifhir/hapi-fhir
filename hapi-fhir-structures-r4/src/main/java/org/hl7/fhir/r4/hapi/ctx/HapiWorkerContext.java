@@ -453,7 +453,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
     List<T> res = new ArrayList<>();
     if (theClass == StructureDefinition.class) {
-      res.addAll(myValidationSupport.fetchAllStructureDefinitions());
+      res.addAll((Collection<? extends T>) getStructures());
     }
     return res;
 	}
