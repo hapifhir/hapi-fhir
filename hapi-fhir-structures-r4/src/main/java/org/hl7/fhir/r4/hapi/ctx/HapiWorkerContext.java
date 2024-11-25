@@ -40,6 +40,7 @@ import org.hl7.fhir.utilities.validation.ValidationOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -450,8 +451,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
-
-		return null;
+    List<T> res = new ArrayList<>();
+    if (theClass == StructureDefinition.class) {
+      res.addAll(myValidationSupport.fetchAllStructureDefinitions());
+    }
+    return res;
 	}
 
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri, Resource source) {
