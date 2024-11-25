@@ -43,8 +43,8 @@ public class NarrativeGeneratorTemplateUtils {
 	 * Given a Bundle as input, are any entries present with a given resource type
 	 */
 	public boolean bundleHasEntriesWithResourceType(IBaseBundle theBaseBundle, String theResourceType) {
-        FhirVersionEnum fhirVersionEnum = theBaseBundle.getStructureFhirVersionEnum();
-        FhirContext ctx = FhirContext.forCached(fhirVersionEnum);
+		FhirVersionEnum fhirVersionEnum = theBaseBundle.getStructureFhirVersionEnum();
+		FhirContext ctx = FhirContext.forCached(fhirVersionEnum);
 		List<Pair<String, IBaseResource>> entryResources =
 				BundleUtil.getBundleEntryUrlsAndResources(ctx, theBaseBundle);
 		return entryResources.stream()
