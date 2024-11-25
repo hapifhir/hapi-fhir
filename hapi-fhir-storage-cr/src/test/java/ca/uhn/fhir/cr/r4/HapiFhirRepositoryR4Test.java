@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,6 +53,25 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		transactionReadsPatientResources(repository);
 		transactionReadsEncounterResources(repository);
 		assertTrue(crudTest(repository));
+	}
+
+	@Test
+	void _profileCanBeReferenceParam() {
+		// as per https://www.hl7.org/fhir/r4/search.html#all _profile is a reference param
+		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
+		var profileToFind = "http://www.a-test-profile.com";
+		var encounterWithProfile = new Encounter();
+		encounterWithProfile.getMeta().addProfile(profileToFind);
+		repository.create(encounterWithProfile);
+		repository.create(new Encounter());
+		Map<String, List<IQueryParameterType>> map = new HashMap<>();
+		map.put("_profile", Collections.singletonList(new ReferenceParam(profileToFind)));
+		assertDoesNotThrow(() -> {
+			var returnBundle = repository.search(Bundle.class, Encounter.class, map);
+			assertTrue(returnBundle.hasEntry());
+			assertEquals(1,returnBundle.getEntry().size());
+			assertEquals(profileToFind, returnBundle.getEntryFirstRep().getResource().getMeta().getProfile().get(0).getValue());
+		});
 	}
 
 

@@ -11,6 +11,17 @@ public final class ValidationSupportUtils {
 
 	private ValidationSupportUtils() {}
 
+	/**
+	 * This method extracts a code system that can be (potentially) associated with a code when
+	 * performing validation against a ValueSet. This method was created for internal purposes.
+	 * Please use this method with care because it will only cover some
+	 * use-cases (e.g. standard bindings) while for others it may not return correct results or return null.
+	 * An incorrect result could be considered if the resource declares a code with a system, and you're calling
+	 * this method to check a binding against a ValueSet that has nothing to do with that system.
+	 * @param theValueSet the valueSet
+	 * @param theCode the code
+	 * @return the system which can be associated with the code
+	 */
 	public static String extractCodeSystemForCode(IBaseResource theValueSet, String theCode) {
 		if (theValueSet instanceof org.hl7.fhir.dstu3.model.ValueSet) {
 			return extractCodeSystemForCodeDSTU3((org.hl7.fhir.dstu3.model.ValueSet) theValueSet, theCode);
