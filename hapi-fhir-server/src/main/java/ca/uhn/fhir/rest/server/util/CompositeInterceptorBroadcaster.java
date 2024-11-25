@@ -81,7 +81,7 @@ public class CompositeInterceptorBroadcaster {
 				}
 				if (theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster() != null && retVal) {
 					IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
-					interceptorBroadcaster.callHooks(thePointcut, theParams);
+					retVal = interceptorBroadcaster.callHooks(thePointcut, theParams);
 				}
 				return retVal;
 			}

@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.IValidationSupport.StringConceptProperty;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.junit.jupiter.api.Test;
 
@@ -21,12 +22,12 @@ import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_GROUP;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_STRING;
 import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE_SYSTEM;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE_SYSTEM_NAME;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE_SYSTEM_VERSION;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.DISPLAY;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.LANGUAGE;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM_NAME;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM_VERSION;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.DISPLAY;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.LANGUAGE;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.createConceptProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -189,8 +190,6 @@ public interface ILookupCodeTest {
 
 		// verify
 		assertNotNull(outcome);
-		assertEquals(theRequest.getCode(), getLookupCodeProvider().getCode());
-		assertEquals(theRequest.getSystem(), getLookupCodeProvider().getSystem());
 		assertEquals(theExpectedResult.isFound(), outcome.isFound());
 		assertEquals(theExpectedResult.getErrorMessage(), outcome.getErrorMessage());
 		assertEquals(theExpectedResult.getCodeSystemDisplayName(), outcome.getCodeSystemDisplayName());

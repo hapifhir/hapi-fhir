@@ -62,6 +62,9 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 			myMessages.add("REUSING CACHED SEARCH");
 			return null;
 		});
+
+		// allow searches to use cached results
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH), ArgumentMatchers.any(HookParams.class))).thenReturn(true);
 	}
 
 	@AfterEach

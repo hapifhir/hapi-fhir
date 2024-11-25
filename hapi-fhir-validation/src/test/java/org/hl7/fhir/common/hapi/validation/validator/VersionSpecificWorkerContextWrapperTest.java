@@ -17,6 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -24,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -86,7 +89,7 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseTest {
 	}
 
 	@Test
-	public void validateCode_normally_resolvesCodeSystemFromValueSet() {
+	public void validateCode_codeInValueSet_resolvesCodeSystemFromValueSet() {
 		// setup
 		IValidationSupport validationSupport = mockValidationSupport();
 		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
@@ -104,6 +107,26 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseTest {
 		// verify
 		verify(validationSupport, times(1)).validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
 		verify(validationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
+	}
+
+	@Test
+	public void validateCode_codeNotInValueSet_doesNotResolveSystem() {
+		// setup
+		IValidationSupport validationSupport = mockValidationSupport();
+		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
+		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
+
+		// execute
+		wrapper.validateCode(new ValidationOptions(), "code1", valueSet);
+
+		// verify
+		verify(validationSupport, times(1)).validateCodeInValueSet(any(), any(), eq(null), eq("code1"), any(), any());
+		verify(validationSupport, never()).validateCode(any(), any(), any(), any(), any(), any());
 	}
 
 	@Test
