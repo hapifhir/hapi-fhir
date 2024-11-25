@@ -130,7 +130,6 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						List<List<IQueryParameterType>> contentAndTerms = theParams.get(Constants.PARAM_CONTENT);
 						List<List<IQueryParameterType>> textAndTerms = theParams.get(Constants.PARAM_TEXT);
 
-						// TODO - this count query should not be grouped
 						count = theSb.createCountQuery(
 								theParams, theSearchUuid, theRequestDetails, theRequestPartitionId);
 
