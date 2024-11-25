@@ -124,6 +124,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -2452,7 +2453,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						if (nextLong != null) {
 							JpaPid next = JpaPid.fromId(nextLong);
-							if (doNotSkipNextPidForEverything() && !myPidSet.contains(next)) {
+
+							if (!myPidSet.contains(next)) {
 								if (myMaxResultsToFetch != null) {
 									/*
 									 * We only add to the map if we aren't fetching "everything";
@@ -2462,9 +2464,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									 */
 									myPidSet.add(next);
 								}
-								myNext = next;
-								myNonSkipCount++;
-								break;
+								if (doNotSkipNextPidForEverything()) {
+									myNext = next;
+									myNonSkipCount++;
+									break;
+								}
 							} else {
 								mySkipCount++;
 							}
