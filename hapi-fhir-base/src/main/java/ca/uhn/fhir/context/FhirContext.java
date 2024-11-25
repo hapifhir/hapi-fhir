@@ -1296,6 +1296,14 @@ public class FhirContext {
 		return ourStaticContexts.computeIfAbsent(theFhirVersionEnum, v -> new FhirContext(v));
 	}
 
+	/**
+	 * An uncached version of forCached()
+	 * @return a new FhirContext for theFhirVersionEnum
+	 */
+	public static FhirContext forVersion(FhirVersionEnum theFhirVersionEnum) {
+		return new FhirContext(v);
+	}
+
 	private static Collection<Class<? extends IBaseResource>> toCollection(
 			Class<? extends IBaseResource> theResourceType) {
 		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<>(1);
