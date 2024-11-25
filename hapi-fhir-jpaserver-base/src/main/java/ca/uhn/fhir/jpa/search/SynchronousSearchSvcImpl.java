@@ -181,12 +181,16 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 					}
 
 					JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> theSb);
-					HookParams params = new HookParams()
-							.add(IPreResourceAccessDetails.class, accessDetails)
-							.add(RequestDetails.class, theRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									myInterceptorBroadcaster, theRequestDetails);
+					if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+						HookParams params = new HookParams()
+								.add(IPreResourceAccessDetails.class, accessDetails)
+								.add(RequestDetails.class, theRequestDetails)
+								.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+						compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+					}
 
 					for (int i = pids.size() - 1; i >= 0; i--) {
 						if (accessDetails.isDontReturnResourceAtIndex(i)) {

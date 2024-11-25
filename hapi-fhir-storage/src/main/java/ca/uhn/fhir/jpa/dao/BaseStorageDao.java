@@ -335,14 +335,14 @@ public abstract class BaseStorageDao {
 		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
 		if (outcome.getResource() != null) {
 			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(outcome.getResource());
-			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(getInterceptorBroadcaster(), theRequest);
+			IInterceptorBroadcaster compositeBroadcaster =
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(getInterceptorBroadcaster(), theRequest);
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
 				HookParams params = new HookParams()
-					.add(IPreResourceAccessDetails.class, accessDetails)
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				compositeBroadcaster.callHooks(
-					Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+						.add(IPreResourceAccessDetails.class, accessDetails)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 				if (accessDetails.isDontReturnResourceAtIndex(0)) {
 					outcome.setResource(null);
 				}
@@ -355,13 +355,14 @@ public abstract class BaseStorageDao {
 		// outcome.fireResourceViewCallback())
 		outcome.registerResourceViewCallback(() -> {
 			if (outcome.getResource() != null) {
-				IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(getInterceptorBroadcaster(), theRequest);
+				IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+						getInterceptorBroadcaster(), theRequest);
 				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
 					SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
 					HookParams params = new HookParams()
-						.add(IPreResourceShowDetails.class, showDetails)
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+							.add(IPreResourceShowDetails.class, showDetails)
+							.add(RequestDetails.class, theRequest)
+							.addIfMatchesType(ServletRequestDetails.class, theRequest);
 					compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 					outcome.setResource(showDetails.getResource(0));
 				}
@@ -383,14 +384,15 @@ public abstract class BaseStorageDao {
 		outcome.setEntitySupplierUseCallback(() -> {
 			// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
 			if (outcome.getResource() != null) {
-				IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(getInterceptorBroadcaster(), theRequest);
+				IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+						getInterceptorBroadcaster(), theRequest);
 				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
 					SimplePreResourceAccessDetails accessDetails =
-						new SimplePreResourceAccessDetails(outcome.getResource());
+							new SimplePreResourceAccessDetails(outcome.getResource());
 					HookParams params = new HookParams()
-						.add(IPreResourceAccessDetails.class, accessDetails)
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+							.add(IPreResourceAccessDetails.class, accessDetails)
+							.add(RequestDetails.class, theRequest)
+							.addIfMatchesType(ServletRequestDetails.class, theRequest);
 					compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 					if (accessDetails.isDontReturnResourceAtIndex(0)) {
 						outcome.setResource(null);
@@ -404,13 +406,16 @@ public abstract class BaseStorageDao {
 			// outcome.fireResourceViewCallback())
 			outcome.registerResourceViewCallback(() -> {
 				if (outcome.getResource() != null) {
-					IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(getInterceptorBroadcaster(), theRequest);
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									getInterceptorBroadcaster(), theRequest);
 					if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
-						SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
+						SimplePreResourceShowDetails showDetails =
+								new SimplePreResourceShowDetails(outcome.getResource());
 						HookParams params = new HookParams()
-							.add(IPreResourceShowDetails.class, showDetails)
-							.add(RequestDetails.class, theRequest)
-							.addIfMatchesType(ServletRequestDetails.class, theRequest);
+								.add(IPreResourceShowDetails.class, showDetails)
+								.add(RequestDetails.class, theRequest)
+								.addIfMatchesType(ServletRequestDetails.class, theRequest);
 						compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 						outcome.setResource(showDetails.getResource(0));
 					}
@@ -429,7 +434,8 @@ public abstract class BaseStorageDao {
 		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts(thePointcut)) {
 			theTransactionDetails.addDeferredInterceptorBroadcast(thePointcut, theParams);
 		} else {
-			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(getInterceptorBroadcaster(), theRequestDetails);
+			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+					getInterceptorBroadcaster(), theRequestDetails);
 			compositeBroadcaster.callHooks(thePointcut, theParams);
 		}
 	}

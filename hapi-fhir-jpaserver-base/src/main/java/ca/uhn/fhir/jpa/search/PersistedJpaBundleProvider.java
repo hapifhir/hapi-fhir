@@ -189,15 +189,17 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			retVal.add(myJpaStorageResourceParser.toResource(resource, true));
 		}
 
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequest);
+
 		// Interceptor call: STORAGE_PREACCESS_RESOURCES
-		{
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
 			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(retVal);
 			HookParams params = new HookParams()
 					.add(IPreResourceAccessDetails.class, accessDetails)
 					.add(RequestDetails.class, myRequest)
 					.addIfMatchesType(ServletRequestDetails.class, myRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 			for (int i = retVal.size() - 1; i >= 0; i--) {
 				if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -207,14 +209,13 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		}
 
 		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
-		{
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
 			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
 			HookParams params = new HookParams()
 					.add(IPreResourceShowDetails.class, showDetails)
 					.add(RequestDetails.class, myRequest)
 					.addIfMatchesType(ServletRequestDetails.class, myRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 			retVal = showDetails.toList();
 		}
 

@@ -226,15 +226,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Nullable
 	public static <T extends IBaseResource> T invokeStoragePreShowResources(
 			IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, T retVal) {
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.STORAGE_PRESHOW_RESOURCES, theInterceptorBroadcaster, theRequest)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(theInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
 			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
 			HookParams params = new HookParams()
 					.add(IPreResourceShowDetails.class, showDetails)
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					theInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 			//noinspection unchecked
 			retVal = (T) showDetails.getResource(
 					0); // TODO GGG/JA : getting resource 0 is interesting. We apparently allow null values in the list.
@@ -1584,15 +1584,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private Optional<T> invokeStoragePreAccessResources(RequestDetails theRequest, T theResource) {
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.STORAGE_PREACCESS_RESOURCES, myInterceptorBroadcaster, theRequest)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
 			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(theResource);
 			HookParams params = new HookParams()
 					.add(IPreResourceAccessDetails.class, accessDetails)
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 			if (accessDetails.isDontReturnResourceAtIndex(0)) {
 				return Optional.empty();
 			}

@@ -113,6 +113,7 @@ public class SearchTask implements Callable<Void> {
 	private final JpaStorageSettings myStorageSettings;
 	private final ISearchCacheSvc mySearchCacheSvc;
 	private final IPagingProvider myPagingProvider;
+	private final IInterceptorBroadcaster myCompositeBroadcaster;
 	private Search mySearch;
 	private boolean myAbortRequested;
 	private int myCountSavedTotal = 0;
@@ -161,6 +162,8 @@ public class SearchTask implements Callable<Void> {
 		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myCallingDao.getContext()));
 		myRequestPartitionId = theCreationParams.RequestPartitionId;
 		myParentTransaction = ElasticApm.currentTransaction();
+		myCompositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequest);
 	}
 
 	protected RequestPartitionId getRequestPartitionId() {
@@ -307,8 +310,7 @@ public class SearchTask implements Callable<Void> {
 								.add(RequestDetails.class, mySearchRuntimeDetails.getRequestDetails())
 								.addIfMatchesType(
 										ServletRequestDetails.class, mySearchRuntimeDetails.getRequestDetails());
-						CompositeInterceptorBroadcaster.doCallHooks(
-								myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+						myCompositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 						for (int i = unsyncedPids.size() - 1; i >= 0; i--) {
 							if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -454,15 +456,13 @@ public class SearchTask implements Callable<Void> {
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, params);
+				myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, params);
 			} else {
 				HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, params);
+				myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, params);
 			}
 
 			ourLog.trace(
@@ -516,8 +516,7 @@ public class SearchTask implements Callable<Void> {
 					.add(RequestDetails.class, myRequest)
 					.addIfMatchesType(ServletRequestDetails.class, myRequest)
 					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FAILED, params);
+			myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_FAILED, params);
 
 			saveSearch();
 			span.captureException(t);
