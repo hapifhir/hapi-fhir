@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 6460
+title: "The JPA server FHIR transaction processor will now more aggressively cache
+   resource IDs for previously seen resources, reducing the number of database reads
+   required when processing transactions. This should provide a noticeable improvement
+   in performance when processing transactions which update pre-existing resources."

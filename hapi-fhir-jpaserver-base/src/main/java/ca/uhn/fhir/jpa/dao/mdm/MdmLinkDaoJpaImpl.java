@@ -69,6 +69,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.history.Revisions;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -147,6 +148,17 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 				.expandPidsByGoldenResourcePidAndMatchResult((theSourcePid).getId(), theMdmMatchResultEnum)
 				.stream()
 				.map(this::daoTupleToMdmTuple)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<MdmPidTuple<JpaPid>> resolveGoldenResources(List<JpaPid> theSourcePids) {
+		return myMdmLinkDao
+				.expandPidsByGoldenResourcePidsOrSourcePidsAndMatchResult(
+						JpaPid.toLongList(theSourcePids), MdmMatchResultEnum.MATCH)
+				.stream()
+				.map(this::daoTupleToMdmTuple)
+				.distinct()
 				.collect(Collectors.toList());
 	}
 

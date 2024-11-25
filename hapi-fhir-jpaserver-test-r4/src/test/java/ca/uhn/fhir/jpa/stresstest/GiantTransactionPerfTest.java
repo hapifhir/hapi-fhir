@@ -292,11 +292,11 @@ public class GiantTransactionPerfTest {
 
 		ourLog.info("Merges:\n * " + myEntityManager.myMergeCount.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 
-		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactly("ResourceTable");
+		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactly("ResourceTable", "ResourceHistoryTable");
 		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactlyInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken");
 		assertEquals(1, myEntityManager.myFlushCount);
 		assertEquals(1, myResourceVersionSvc.myGetVersionMap);
-		assertEquals(1, myResourceHistoryTableDao.mySaveCount);
+		assertEquals(0, myResourceHistoryTableDao.mySaveCount);
 	}
 
 	@Test
@@ -632,12 +632,12 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public FlushModeType getFlushMode() {
-			throw new UnsupportedOperationException();
+			return FlushModeType.AUTO;
 		}
 
 		@Override
 		public void setFlushMode(FlushModeType flushMode) {
-			throw new UnsupportedOperationException();
+			// ignore
 		}
 
 		@Override

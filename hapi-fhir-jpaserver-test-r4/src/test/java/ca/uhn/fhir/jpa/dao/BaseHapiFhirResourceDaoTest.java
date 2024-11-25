@@ -71,6 +71,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -136,7 +137,7 @@ class BaseHapiFhirResourceDaoTest {
 	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
 
 	// we won't inject this
-	private FhirContext myFhirContext = FhirContext.forR4Cached();
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@InjectMocks
 	private TestResourceDao mySvc;
@@ -236,16 +237,17 @@ class BaseHapiFhirResourceDaoTest {
 		// mock
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
 			any(RequestDetails.class),
-			Mockito.anyString(),
+			anyString(),
 			any(IIdType.class)
 		)).thenReturn(partitionId);
-		when(myIdHelperService.resolveResourcePersistentIds(
+		when(myIdHelperService.resolveResourceIdentityPid(
 			any(RequestPartitionId.class),
-			Mockito.anyString(),
-			Mockito.anyString()
+			anyString(),
+			anyString(),
+			any()
 		)).thenReturn(jpaPid);
 		when(myEntityManager.find(
-			any(Class.class),
+			any(),
 			anyLong()
 		)).thenReturn(entity);
 		// we don't stub myConfig.getResourceClientIdStrategy()

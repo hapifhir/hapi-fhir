@@ -7,6 +7,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
@@ -28,6 +29,7 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationDispense;
@@ -60,6 +62,7 @@ import jakarta.annotation.Nonnull;
 import org.testcontainers.shaded.com.trilead.ssh2.packets.PacketDisconnect;
 
 import java.io.IOException;
+import java.sql.Ref;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -284,10 +287,10 @@ public class JsonParserR4Test extends BaseTest {
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
 		//Then: Diag should contain one local contained specimen
-		assertThat(encoded).contains("[{\"resource\":{\"resourceType\":\"DiagnosticReport\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"1\"}]");
+		assertThat(encoded).contains("[{\"resource\":{\"resourceType\":\"DiagnosticReport\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\""+ specimen.getId().replaceFirst("#", "") +"\"}]");
 		//Then: Obs should contain one local contained specimen, and one local contained pract
-		assertThat(encoded).contains("\"resource\":{\"resourceType\":\"Observation\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"1\"},{\"resourceType\":\"Practitioner\",\"id\":\"2\"}]");
-		assertThat(encoded).contains("\"performer\":[{\"reference\":\"#2\"}],\"specimen\":{\"reference\":\"#1\"}");
+		assertThat(encoded).contains("\"resource\":{\"resourceType\":\"Observation\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\""+ specimen.getId().replaceFirst("#", "") +"\"},{\"resourceType\":\"Practitioner\",\"id\":\"" + practitioner.getId().replaceAll("#","") + "\"}]");
+		assertThat(encoded).contains("\"performer\":[{\"reference\":\""+practitioner.getId()+"\"}],\"specimen\":{\"reference\":\""+specimen.getId()+"\"}");
 
 		//Also, reverting the operation should work too!
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
@@ -295,7 +298,6 @@ public class JsonParserR4Test extends BaseTest {
 		IBaseResource resource = ((Observation) bundle.getEntry().get(1).getResource()).getSpecimen().getResource();
 		assertThat(resource1.getIdElement().getIdPart()).isEqualTo(resource.getIdElement().getIdPart());
 		assertThat(resource1).isNotSameAs(resource);
-
 	}
 
 	@Test
@@ -357,8 +359,9 @@ public class JsonParserR4Test extends BaseTest {
 
 		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
-		assertEquals("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"1\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"#1\"}}", encoded);
-
+		String guidWithHash = med.getId();
+		String withoutHash = guidWithHash.replace("#", "");
+		assertThat(encoded).contains("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"" + withoutHash + "\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"" + guidWithHash +"\"}}"); //Note we dont check exact ID since its a GUID
 	}
 
 	@Test
@@ -649,7 +652,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
 		assertEquals("#1", obs.getContained().get(0).getId());
-		assertEquals("#2", obs.getContained().get(1).getId());
+		assertEquals(enc.getId(), obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
@@ -678,7 +681,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
 		assertEquals("#1", obs.getContained().get(0).getId());
-		assertEquals("#2", obs.getContained().get(1).getId());
+		assertEquals(pt.getId(), obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
@@ -698,13 +701,14 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
 
-		mr.setMedication(new Reference(new Medication().setStatus(Medication.MedicationStatus.ACTIVE)));
+		Medication med = new Medication().setStatus(Medication.MedicationStatus.ACTIVE);
+		mr.setMedication(new Reference(med));
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(mr);
 		ourLog.info(encoded);
 		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
 
-		assertEquals("#1", mr.getContained().get(0).getId());
-		assertEquals("#2", mr.getContained().get(1).getId());
+		assertEquals(pract.getId(), mr.getContained().get(0).getId());
+		assertEquals(med.getId(), mr.getContained().get(1).getId());
 
 	}
 

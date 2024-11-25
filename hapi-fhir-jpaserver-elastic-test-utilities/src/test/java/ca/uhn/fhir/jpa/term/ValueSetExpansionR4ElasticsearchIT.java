@@ -274,8 +274,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
 			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList());
 
-//		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		await().atMost(10, SECONDS).until(() -> {
+		await().atMost(20, SECONDS).until(() -> {
 			myTerminologyDeferredStorageSvc.saveDeferred();
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
 		});

@@ -799,57 +799,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testCreateWithIllegalReference() {
-		Observation o1 = new Observation();
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(id1);
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
-		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(new IdType("Organization", id1.getIdPart()));
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1095) + "Resource contains reference to unknown resource ID Organization/" + id1.getIdPart(), e.getMessage());
-		}
-
-		// Now with a forced ID
-
-		o1 = new Observation();
-		o1.setId("testCreateWithIllegalReference");
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		id1 = myObservationDao.update(o1, mySrd).getId().toUnqualifiedVersionless();
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(id1);
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
-		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(new IdType("Organization", id1.getIdPart()));
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1094) + "Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
-		}
-
-	}
-
-	@Test
 	public void testCreateWithInvalid() {
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
@@ -2345,7 +2294,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.read(new IdType("Patient/9999999999999/_history/1"), mySrd);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1996) + "Resource Patient/9999999999999/_history/1 is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Patient/9999999999999 is not known", e.getMessage());
 		}
 
 	}

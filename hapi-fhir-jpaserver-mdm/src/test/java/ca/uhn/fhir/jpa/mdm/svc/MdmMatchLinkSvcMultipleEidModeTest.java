@@ -208,7 +208,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		addExternalEID(patient2, "eid-11");
 		addExternalEID(patient2, "eid-22");
 		patient2 = updatePatientAndUpdateLinks(patient2);
-		logAllLinks();
+		logAllMdmLinks();
 		assertLinksMatchResult(MATCH, POSSIBLE_MATCH, MATCH, POSSIBLE_MATCH, POSSIBLE_DUPLICATE);
 		assertLinksCreatedNewResource(true, true, false, false, false);
 		assertLinksMatchedByEid(false, true, true, true, true);

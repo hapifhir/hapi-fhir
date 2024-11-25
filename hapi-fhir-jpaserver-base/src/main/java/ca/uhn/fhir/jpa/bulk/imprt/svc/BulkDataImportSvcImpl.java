@@ -217,6 +217,12 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 		String biJobId = null;
 		try {
 			biJobId = processJob(bulkImportJobEntity);
+			// set job status to RUNNING so it would not be processed again
+			myTxTemplate.execute(t -> {
+				bulkImportJobEntity.setStatus(BulkImportJobStatusEnum.RUNNING);
+				myJobDao.save(bulkImportJobEntity);
+				return null;
+			});
 		} catch (Exception e) {
 			ourLog.error("Failure while preparing bulk export extract", e);
 			myTxTemplate.execute(t -> {
@@ -256,6 +262,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 	}
 
 	@Override
+	@Transactional
 	public JobInfo getJobStatus(String theBiJobId) {
 		BulkImportJobEntity theJob = findJobByBiJobId(theBiJobId);
 		return new JobInfo()

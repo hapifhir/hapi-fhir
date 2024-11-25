@@ -38,7 +38,6 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import com.google.common.collect.Lists;
@@ -71,6 +70,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -78,7 +78,6 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.substring;
 
 public class FhirTerser {
 
@@ -1814,19 +1813,7 @@ public class FhirTerser {
 
 			IIdType newId = theResource.getIdElement();
 			if (isBlank(newId.getValue())) {
-				newId.setValue("#" + myNextContainedId++);
-			} else {
-				// Avoid auto-assigned contained IDs colliding with pre-existing ones
-				String idPart = newId.getValue();
-				if (substring(idPart, 0, 1).equals("#")) {
-					idPart = idPart.substring(1);
-					if (StringUtils.isNumeric(idPart)) {
-						// If there is a user-supplied numeric contained ID, our auto-assigned IDs should exceed the
-						// largest
-						// client-assigned contained ID.
-						myNextContainedId = Math.max(myNextContainedId, Long.parseLong(idPart) + 1);
-					}
-				}
+				newId.setValue("#" + UUID.randomUUID());
 			}
 
 			getResourceToIdMap().put(theResource, newId);

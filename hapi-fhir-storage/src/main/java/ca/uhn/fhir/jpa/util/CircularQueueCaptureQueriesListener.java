@@ -32,9 +32,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -53,7 +55,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 
 	public static final Predicate<String> DEFAULT_SELECT_INCLUSION_CRITERIA =
 			t -> t.toLowerCase(Locale.US).startsWith("select");
-	private static final int CAPACITY = 1000;
+	private static final int CAPACITY = 10000;
 	private static final Logger ourLog = LoggerFactory.getLogger(CircularQueueCaptureQueriesListener.class);
 	private Queue<SqlQuery> myQueries;
 	private AtomicInteger myCommitCounter;
@@ -185,6 +187,13 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public List<SqlQuery> getInsertQueries() {
 		return getQueriesStartingWith("insert");
+	}
+
+	/**
+	 * Returns all INSERT queries executed on the current thread - Index 0 is oldest
+	 */
+	public List<SqlQuery> getInsertQueries(Predicate<SqlQuery> theFilter) {
+		return getQueriesStartingWith("insert").stream().filter(theFilter).collect(Collectors.toList());
 	}
 
 	/**
@@ -352,11 +361,8 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		List<SqlQuery> insertQueries = getInsertQueries().stream()
 				.filter(t -> theInclusionPredicate == null || theInclusionPredicate.test(t))
 				.collect(Collectors.toList());
-		boolean inlineParams = true;
-		List<String> queries = insertQueries.stream()
-				.map(t -> CircularQueueCaptureQueriesListener.formatQueryAsSql(t, inlineParams, inlineParams))
-				.collect(Collectors.toList());
-		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
+		List<String> queriesStrings = renderQueriesForLogging(true, true, insertQueries);
+		ourLog.info("Insert Queries:\n{}", String.join("\n", queriesStrings));
 
 		return countQueries(insertQueries);
 	}
@@ -400,6 +406,17 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 
 	public int countInsertQueries() {
 		return countQueries(getInsertQueries());
+	}
+
+	/**
+	 * This method returns a count of insert queries which were issued more than
+	 * once. If a query was issued twice with batched parameters, that does not
+	 * count as a repeated query, but if it is issued as two separate insert
+	 * statements with a single set of parameters this counts as a repeated
+	 * query.
+	 */
+	public int countInsertQueriesRepeated() {
+		return getInsertQueries(new DuplicateCheckingPredicate()).size();
 	}
 
 	public int countUpdateQueries() {
@@ -466,5 +483,20 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		}
 		b.append("\n");
 		return b.toString();
+	}
+
+	/**
+	 * Create a new instance of this each time you use it
+	 */
+	private static class DuplicateCheckingPredicate implements Predicate<SqlQuery> {
+		private final Set<String> mySeenSql = new HashSet<>();
+
+		@Override
+		public boolean test(SqlQuery theSqlQuery) {
+			String sql = theSqlQuery.getSql(false, false);
+			boolean retVal = !mySeenSql.add(sql);
+			ourLog.trace("SQL duplicate[{}]: {}", retVal, sql);
+			return retVal;
+		}
 	}
 }

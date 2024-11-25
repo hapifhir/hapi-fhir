@@ -67,6 +67,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -193,12 +194,12 @@ public class FhirTerserR4Test {
 
 		FhirTerser.ContainedResources contained = myCtx.newTerser().containResources(mr, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 
-		assertEquals("#1", mr.getContained().get(0).getId());
-		assertEquals("#2", mr.getContained().get(1).getId());
+		assertThat(mr.getContained().get(0).getId()).containsPattern(HASH_UUID_PATTERN);
+		assertThat(mr.getContained().get(1).getId()).containsPattern(HASH_UUID_PATTERN);
 		assertEquals(ResourceType.Medication, mr.getContained().get(0).getResourceType());
 		assertEquals(ResourceType.Practitioner, mr.getContained().get(1).getResourceType());
-		assertEquals("#1", mr.getMedicationReference().getReference());
-		assertEquals("#2", mr.getRequester().getReference());
+		assertEquals(mr.getContained().get(0).getId(), mr.getMedicationReference().getReference());
+		assertEquals(mr.getContained().get(1).getId(), mr.getRequester().getReference());
 
 		FhirTerser.ContainedResources secondPass = myCtx.newTerser().containResources(mr, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 		assertThat(secondPass).isSameAs(contained);
@@ -217,12 +218,12 @@ public class FhirTerserR4Test {
 
 		myCtx.newTerser().containResources(medAdmin, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 
-		assertEquals("#1", medAdmin.getContained().get(0).getId());
-		assertEquals("#2", medAdmin.getContained().get(1).getId());
+		assertThat(medAdmin.getContained().get(0).getId()).containsPattern(HASH_UUID_PATTERN);
+		assertThat(medAdmin.getContained().get(1).getId()).containsPattern(HASH_UUID_PATTERN);
 		assertEquals(ResourceType.Medication, medAdmin.getContained().get(0).getResourceType());
 		assertEquals(ResourceType.Substance, medAdmin.getContained().get(1).getResourceType());
-		assertEquals("#1", medAdmin.getMedicationReference().getReference());
-		assertEquals("#2", ((Medication) (medAdmin.getContained().get(0))).getIngredientFirstRep().getItemReference().getReference());
+		assertEquals(medAdmin.getContained().get(0).getId(), medAdmin.getMedicationReference().getReference());
+		assertEquals(medAdmin.getContained().get(1).getId(), ((Medication) (medAdmin.getContained().get(0))).getIngredientFirstRep().getItemReference().getReference());
 
 	}
 
