@@ -11,6 +11,7 @@ import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 	}
 
 	@Test
-	public void hasBinaryKey_normally_returnsExpected() {
+	public void hasBinaryKey_returnsExpected() {
 		setupValidationForBinary();
 		assertThat(myWorkerContextWrapper.hasBinaryKey(EXPECTED_BINARY_KEY_1)).as("wrapper should have binary key " + EXPECTED_BINARY_KEY_1).isTrue();
 		assertThat(myWorkerContextWrapper.hasBinaryKey(EXPECTED_BINARY_KEY_2)).as("wrapper should have binary key " + EXPECTED_BINARY_KEY_1).isTrue();
@@ -64,7 +65,7 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 	}
 
 	@Test
-	public void getBinaryForKey_normally_returnsExpected() {
+	public void getBinaryForKey_returnsExpected() {
 		setupValidationForBinary();
 		assertThat(myWorkerContextWrapper.getBinaryForKey(EXPECTED_BINARY_KEY_1)).containsExactly(EXPECTED_BINARY_CONTENT_1);
 		assertThat(myWorkerContextWrapper.getBinaryForKey(EXPECTED_BINARY_KEY_2)).containsExactly(EXPECTED_BINARY_CONTENT_2);
@@ -76,10 +77,12 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 		// setup
 		setupValidation();
 
-		org.hl7.fhir.r5.model.ValueSet valueSet = new org.hl7.fhir.r5.model.ValueSet();
+		ValueSet valueSet = new ValueSet();
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
 		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(mock(IValidationSupport.CodeValidationResult.class));
+		when(myValidationSupport.fetchResource(ValueSet.class, eq("http://somevalueset"))).thenReturn(valueSet);
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new IValidationSupport.CodeValidationResult());
 
 		// execute
 		myWorkerContextWrapper.validateCode(new ValidationOptions(), "code0", valueSet);
@@ -92,7 +95,7 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 	@Test
 	public void validateCode_codeNotInValueSet_doesNotResolveSystem() {
 		setupValidation();
-		org.hl7.fhir.r5.model.ValueSet valueSet = new org.hl7.fhir.r5.model.ValueSet();
+		ValueSet valueSet = new ValueSet();
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
 
