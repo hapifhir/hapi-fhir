@@ -94,7 +94,7 @@ public class ExtendedHSearchSearchBuilder {
 		boolean canUseHibernate = false;
 
 		ResourceSearchParams resourceActiveSearchParams = theSearchParamRegistry.getActiveSearchParams(
-			theResourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+				theResourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 		// special SearchParam handling:
 		// _lastUpdated

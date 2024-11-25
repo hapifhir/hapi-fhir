@@ -291,7 +291,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 
-	@Test //TODO LS : This test fails, and did not before.
+	@Test
 	public void testNoOpUpdateDoesNotModifyLastUpdated() throws InterruptedException {
 		myStorageSettings.setAdvancedHSearchIndexing(true);
 		Patient patient = new Patient();
