@@ -94,7 +94,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * </li>
  * <li>
  *     Results of {@link #generateSnapshot(ValidationSupportContext, IBaseResource, String, String, String)}
- *     are not cached, as this method is generally called in contexts where the results
+ *     are not cached, since this method is generally called in contexts where the results
  *     are cached.
  * </li>
  * <li>
