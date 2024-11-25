@@ -140,14 +140,23 @@ public abstract class BaseCaptureQueriesListener
 		}
 	}
 
+	/**
+	 * @return Returns the number of times the connection pool was asked for a new connection
+	 */
 	public int countGetConnections() {
 		return provideGetConnectionCounter().get();
 	}
 
+	/**
+	 * @return Returns the number of DB commits which have happened against connections from the pool
+	 */
 	public int countCommits() {
 		return provideCommitCounter().get();
 	}
 
+	/**
+	 * @return Returns the number of DB rollbacks which have happened against connections from the pool
+	 */
 	public int countRollbacks() {
 		return provideRollbackCounter().get();
 	}

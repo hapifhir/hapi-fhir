@@ -23,7 +23,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.ILockable;
 import ca.uhn.fhir.util.ReflectionUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -62,8 +64,8 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	 *
 	 * @param theFhirContext The context to use
 	 */
-	public DefaultProfileValidationSupport(FhirContext theFhirContext) {
-		assert theFhirContext != null;
+	public DefaultProfileValidationSupport(@Nonnull FhirContext theFhirContext) {
+		Validate.notNull(theFhirContext, "FhirContext must not be null");
 		myCtx = theFhirContext;
 
 		IValidationSupport strategy;

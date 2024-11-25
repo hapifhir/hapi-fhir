@@ -177,14 +177,18 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		return getQueriesMatching(thePredicate, threadName);
 	}
 
-	public int getConnectionCount() {
-		return myGetConnectionCounter.get();
-	}
-
+	/**
+	 * @deprecated Use {@link #countCommits()}
+	 */
+	@Deprecated
 	public int getCommitCount() {
 		return myCommitCounter.get();
 	}
 
+	/**
+	 * @deprecated Use {@link #countRollbacks()}
+	 */
+	@Deprecated
 	public int getRollbackCount() {
 		return myRollbackCounter.get();
 	}

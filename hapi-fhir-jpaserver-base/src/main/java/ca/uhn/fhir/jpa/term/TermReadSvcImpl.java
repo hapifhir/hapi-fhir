@@ -2504,9 +2504,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	 * results while they test changes, which is probably a worthwhile sacrifice
 	 */
 	private void afterValueSetExpansionStatusChange() {
-		// TODO: JA2 - Move this caching into the memorycacheservice, and only purge the
-		// relevant individual cache
-		myValidationSupport.invalidateCaches();
+		provideValidationSupport().invalidateCaches();
 	}
 
 	private synchronized boolean isPreExpandingValueSets() {

@@ -67,8 +67,20 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
 	private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWorkerContextWrapper.class);
-	public static final String CANONICAL_USERDATA_KEY =
+
+	/**
+	 * When we fetch conformance resources such as StructureDefinitions from {@link IValidationSupport}
+	 * they will be returned using whatever version of FHIR the underlying infrastructure is
+	 * configured to support. But we need to convert it to R5 since that's what the validator
+	 * uses. In order to avoid repeated conversions, we put the converted version of the resource
+	 * in the {@link org.hl7.fhir.instance.model.api.IAnyResource#getUserData(String)} map
+	 * using this key. Since conformance resources returned by validation support are typically
+	 * cached by {@link org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain},
+	 * the converted version gets cached too.
+	 */
+	private static final String CANONICAL_USERDATA_KEY =
 			VersionSpecificWorkerContextWrapper.class.getName() + "_CANONICAL_USERDATA_KEY";
+
 	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
 	private final VersionCanonicalizer myVersionCanonicalizer;

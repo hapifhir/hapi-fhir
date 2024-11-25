@@ -25,7 +25,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -51,11 +50,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * This test verifies how {@link RemoteTerminologyServiceValidationSupport} interacts with
+ * the rest of the ValidationSupportChain. The aim here is that we should perform as few
+ * interactions across the network as we can, so any caching that avoids a lookup through
+ * the remote module is a good thing. We're also testing that we don't open more database
+ * connections than we need to, since every connection is a delay.
+ */
 public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 	private static final MyCodeSystemProvider ourCodeSystemProvider = new MyCodeSystemProvider();
@@ -87,7 +94,8 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 		// Warm this as it's needed once by the FhirPath evaluator on startup
 		// so this avoids having different connection counts depending on
-		// which test method is called first
+		// which test method is called first. This is a non-expiring cache, so
+		// pre-warming here isn't affecting anything meaningful.
 		myValidationSupportChain.fetchAllStructureDefinitions();
 	}
 
@@ -130,7 +138,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 		outcome = validate(p);
 		assertSuccess(outcome);
 
-		// Verify 1
+		// Verify 2
 		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
 		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().isEmpty();
@@ -141,8 +149,8 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 	public void testValidateSimpleCode_SupportedByRemoteService() {
 		Patient p = new Patient();
 		p.setGender(Enumerations.AdministrativeGender.FEMALE);
-		ourValueSetProvider.add((ValueSet) myInternalValidationSupport.fetchValueSet("http://hl7.org/fhir/ValueSet/administrative-gender"));
-		ourCodeSystemProvider.add((CodeSystem) myInternalValidationSupport.fetchCodeSystem("http://hl7.org/fhir/administrative-gender"));
+		ourValueSetProvider.add((ValueSet) requireNonNull(myInternalValidationSupport.fetchValueSet("http://hl7.org/fhir/ValueSet/administrative-gender")));
+		ourCodeSystemProvider.add((CodeSystem) requireNonNull(myInternalValidationSupport.fetchCodeSystem("http://hl7.org/fhir/administrative-gender")));
 
 		// Test 1
 		ourCodeSystemProvider.clearCalls();
@@ -174,7 +182,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 		outcome = validate(p);
 		assertSuccess(outcome);
 
-		// Verify 1
+		// Verify 2
 		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
 		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
 		assertThat(ourValueSetProvider.myValidatedCodes).asList().isEmpty();
@@ -223,7 +231,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 		outcome = validate(p);
 		assertSuccess(outcome);
 
-		// Verify 1
+		// Verify 2
 		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
 		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
 		assertThat(ourValueSetProvider.myValidatedCodes).asList().isEmpty();
@@ -260,7 +268,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 		outcome = validate(p);
 		assertSuccess(outcome);
 
-		// Verify 1
+		// Verify 2
 		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
 		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().isEmpty();
@@ -315,7 +323,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		validate(p);
 
-		// Verify 1
+		// Verify 2
 		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
 		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().isEmpty();
@@ -339,15 +347,12 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 	}
 
 	private IBaseOperationOutcome validate(Patient p) {
-		IBaseOperationOutcome outcome = myPatientDao.validate(p, null, myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p), EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd).getOperationOutcome();
-		return outcome;
+		return myPatientDao.validate(p, null, myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p), EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd).getOperationOutcome();
 	}
 
-	private IBaseOperationOutcome validate(Bundle p) {
-		IBaseOperationOutcome outcome = myBundleDao.validate(p, null, myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p), EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd).getOperationOutcome();
-		return outcome;
-	}
-
+	/**
+	 * Create a StructureDefinition for an extension with URL <a href="http://foo">http://foo</a>
+	 */
 	@Nonnull
 	private static StructureDefinition createFooExtensionStructureDefinition() {
 		StructureDefinition sd = new StructureDefinition();

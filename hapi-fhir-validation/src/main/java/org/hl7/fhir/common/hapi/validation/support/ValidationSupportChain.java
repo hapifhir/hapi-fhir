@@ -122,13 +122,19 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	/**
 	 * See class documentation for an explanation of why this is separate
-	 * and non-expiring.
+	 * and non-expiring. Note that this field is non-synchronized. If you
+	 * access it, you should first wrap the call in
+	 * <code>synchronized(myStructureDefinitionsByUrl)</code>.
 	 */
 	@Nonnull
 	private final Map<String, IBaseResource> myStructureDefinitionsByUrl = new HashMap<>();
 	/**
 	 * See class documentation for an explanation of why this is separate
-	 * and non-expiring.
+	 * and non-expiring. Note that this field is non-synchronized. If you
+	 * access it, you should first wrap the call in
+	 * <code>synchronized(myStructureDefinitionsByUrl)</code> (synchronize on
+	 * the other field because both collections are expected to be modified
+	 * at the same time).
 	 */
 	@Nonnull
 	private final List<IBaseResource> myStructureDefinitionsAsList = new ArrayList<>();
@@ -301,9 +307,9 @@ public class ValidationSupportChain implements IValidationSupport {
 		if (retVal == null) {
 
 			/*
-			 * This method works a bit differently from many others in the
-			 * chain in that it calls all chained providers and aggregates
-			 * the results.
+			 * The chain behaviour for this method is to call every element in the
+			 * chain and aggregate the results (as opposed to just using the first
+			 * module which provides a response).
 			 */
 			retVal = CacheValue.empty();
 
@@ -367,7 +373,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 		for (IValidationSupport next : myChain) {
-			boolean retVal = isValueSetSupported(theValidationSupportContext, theValueSetUrl, next);
+			boolean retVal = isValueSetSupported(theValidationSupportContext, next, theValueSetUrl);
 			if (retVal) {
 				ourLog.debug("ValueSet {} found in {}", theValueSetUrl, next.getName());
 				return true;
@@ -378,8 +384,8 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	private boolean isValueSetSupported(
 			ValidationSupportContext theValidationSupportContext,
-			String theValueSetUrl,
-			IValidationSupport theValidationSupport) {
+			IValidationSupport theValidationSupport,
+			String theValueSetUrl) {
 		IsValueSetSupportedKey key = new IsValueSetSupportedKey(theValidationSupport, theValueSetUrl);
 		CacheValue<Boolean> value = getFromCache(key);
 		if (value == null) {
@@ -491,7 +497,7 @@ public class ValidationSupportChain implements IValidationSupport {
 		if (retVal == null) {
 			retVal = CacheValue.empty();
 			for (IValidationSupport next : myChain) {
-				if (isValueSetSupported(theValidationSupportContext, theValueSetUrlToExpand, next)) {
+				if (isValueSetSupported(theValidationSupportContext, next, theValueSetUrlToExpand)) {
 					ValueSetExpansionOutcome expanded =
 							next.expandValueSet(theValidationSupportContext, expansionOptions, theValueSetUrlToExpand);
 					if (expanded != null) {
@@ -720,7 +726,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		for (IValidationSupport next : myChain) {
-			if (isCodeSystemSupported(theValidationSupportContext, theSystem, next)) {
+			if (isCodeSystemSupported(theValidationSupportContext, next, theSystem)) {
 				if (ourLog.isDebugEnabled()) {
 					ourLog.debug("CodeSystem with System {} is supported by {}", theSystem, next.getName());
 				}
@@ -732,8 +738,8 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	private boolean isCodeSystemSupported(
 			ValidationSupportContext theValidationSupportContext,
-			String theCodeSystemUrl,
-			IValidationSupport theValidationSupport) {
+			IValidationSupport theValidationSupport,
+			String theCodeSystemUrl) {
 		IsCodeSystemSupportedKey key = new IsCodeSystemSupportedKey(theValidationSupport, theCodeSystemUrl);
 		CacheValue<Boolean> value = getFromCache(key);
 		if (value == null) {
@@ -759,9 +765,9 @@ public class ValidationSupportChain implements IValidationSupport {
 			retVal = CacheValue.empty();
 
 			for (IValidationSupport next : myChain) {
-				if ((isBlank(theValueSetUrl) && isCodeSystemSupported(theValidationSupportContext, theCodeSystem, next))
+				if ((isBlank(theValueSetUrl) && isCodeSystemSupported(theValidationSupportContext, next, theCodeSystem))
 						|| (isNotBlank(theValueSetUrl)
-								&& isValueSetSupported(theValidationSupportContext, theValueSetUrl, next))) {
+								&& isValueSetSupported(theValidationSupportContext, next, theValueSetUrl))) {
 					CodeValidationResult outcome = next.validateCode(
 							theValidationSupportContext,
 							theOptions,
@@ -811,7 +817,7 @@ public class ValidationSupportChain implements IValidationSupport {
 
 		retVal = CacheValue.empty();
 		for (IValidationSupport next : myChain) {
-			if (isBlank(url) || isValueSetSupported(theValidationSupportContext, url, next)) {
+			if (isBlank(url) || isValueSetSupported(theValidationSupportContext, next, url)) {
 				CodeValidationResult outcome = next.validateCodeInValueSet(
 						theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
 				if (outcome != null) {
@@ -848,7 +854,7 @@ public class ValidationSupportChain implements IValidationSupport {
 				final String system = theLookupCodeRequest.getSystem();
 				final String code = theLookupCodeRequest.getCode();
 				final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
-				if (isCodeSystemSupported(theValidationSupportContext, system, next)) {
+				if (isCodeSystemSupported(theValidationSupportContext, next, system)) {
 					LookupCodeResult lookupCodeResult =
 							next.lookupCode(theValidationSupportContext, theLookupCodeRequest);
 					if (lookupCodeResult == null) {
