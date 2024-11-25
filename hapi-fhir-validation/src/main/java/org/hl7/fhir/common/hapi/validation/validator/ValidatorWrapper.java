@@ -19,6 +19,7 @@ import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.utils.XVerExtensionManager;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
+import org.hl7.fhir.r5.utils.validation.ValidatorSession;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.IdStatus;
 import org.hl7.fhir.utilities.i18n.I18nConstants;
@@ -119,7 +120,7 @@ class ValidatorWrapper {
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
 		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
 		try {
-			v = new InstanceValidator(theWorkerContext, evaluationCtx, xverManager);
+			v = new InstanceValidator(theWorkerContext, evaluationCtx, xverManager, new ValidatorSession());
 		} catch (Exception e) {
 			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
 		}

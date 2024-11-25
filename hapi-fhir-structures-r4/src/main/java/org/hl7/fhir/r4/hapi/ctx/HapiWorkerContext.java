@@ -449,6 +449,26 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		return retVal;
 	}
 
+	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
+
+		return null;
+	}
+
+	public <T extends Resource> T fetchResource(Class<T> class_, String uri, Resource source) {
+		return fetchResource(class_, uri);
+	}
+
+	@Override
+	public List<StructureDefinition> fetchTypeDefinitions(String n) {
+		List<StructureDefinition> types = new ArrayList<>();
+		for (StructureDefinition sd : allStructures()) {
+			if (n.equals(sd.getTypeTail())) {
+				types.add(sd);
+			}
+		}
+		return types;
+	}
+
 	@Override
 	public org.hl7.fhir.r4.model.Resource fetchResourceById(String theType, String theUri) {
 		throw new UnsupportedOperationException(Msg.code(282));
