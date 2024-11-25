@@ -71,8 +71,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  *     that can support the URL will be returned to the caller.
  * </li>
  * <li>
- *     All other methods will invoke the method in the chain in order, and will return
- *     immediately as soon as a non-null value is returned.
+ *     All other methods will invoke each method in the chain in order, and will stop processing and return
+ *     immediately as soon as the first non-null value is returned.
  * </li>
  * </ul>
  * </p>
