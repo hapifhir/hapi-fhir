@@ -928,9 +928,11 @@ public class ValidationSupportChain implements IValidationSupport {
 					myNonExpiringCache.put(theKey, value);
 					putInCache(theKey, value);
 				};
+				returnValue = retVal.getValue();
+				
 				myBackgroundExecutor.execute(loaderTask);
 
-				return retVal.getValue();
+				return returnValue;
 			} else {
 				retVal = new CacheValue<>(theLoader.get());
 				myNonExpiringCache.put(theKey, retVal);
