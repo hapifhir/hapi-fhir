@@ -144,6 +144,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	private boolean myEnabledValidationForCodingsLogicalAnd;
 	private String myName = getClass().getSimpleName();
 	private ValidationSupportChainMetrics myMetrics;
+	private volatile boolean myHaveFetchedAllStructureDefinitions = false;
 
 	/**
 	 * Constructor which initializes the chain with no modules (modules
@@ -293,6 +294,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	 * 	   </li>
 	 * 	  </ul>
 	 * </p>
+	 *
 	 * @return true or false depending on the desired coding validation behaviour.
 	 */
 	public ValidationSupportChain setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(
@@ -356,6 +358,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public void invalidateCaches() {
 		ourLog.debug("Invalidating caches in {} validation support modules", myChain.size());
+		myHaveFetchedAllStructureDefinitions = false;
 		for (IValidationSupport next : myChain) {
 			next.invalidateCaches();
 		}
@@ -368,6 +371,17 @@ public class ValidationSupportChain implements IValidationSupport {
 		synchronized (myStructureDefinitionsByUrl) {
 			myStructureDefinitionsByUrl.clear();
 			myStructureDefinitionsAsList.clear();
+		}
+	}
+
+	/**
+	 * Invalidate the expiring cache, but not the permanent StructureDefinition cache
+	 *
+	 * @since 8.0.0
+	 */
+	public void invalidateExpiringCaches() {
+		if (myExpiringCache != null) {
+			myExpiringCache.invalidateAll();
 		}
 	}
 
@@ -577,8 +591,9 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Nonnull
 	public List<IBaseResource> fetchAllStructureDefinitions() {
-		if (myStructureDefinitionsByUrl.isEmpty()) {
+		if (!myHaveFetchedAllStructureDefinitions) {
 			FhirTerser terser = getFhirContext().newTerser();
 			List<IBaseResource> allStructureDefinitions =
 					doFetchStructureDefinitions(IValidationSupport::fetchAllStructureDefinitions);

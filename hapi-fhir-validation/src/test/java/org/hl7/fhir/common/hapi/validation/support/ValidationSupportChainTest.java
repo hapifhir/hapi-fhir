@@ -76,8 +76,8 @@ public class ValidationSupportChainTest extends BaseTest {
 
 	@Test
 	public void testVersionCheck() {
-		DefaultProfileValidationSupport ctx3 = new DefaultProfileValidationSupport(FhirContext.forDstu3());
-		DefaultProfileValidationSupport ctx4 = new DefaultProfileValidationSupport(FhirContext.forR4());
+		DefaultProfileValidationSupport ctx3 = new DefaultProfileValidationSupport(FhirContext.forDstu3Cached());
+		DefaultProfileValidationSupport ctx4 = new DefaultProfileValidationSupport(FhirContext.forR4Cached());
 
 		try {
 			new ValidationSupportChain(ctx3, ctx4);
@@ -85,6 +85,18 @@ public class ValidationSupportChainTest extends BaseTest {
 			assertEquals(Msg.code(709) + "Trying to add validation support of version R4 to chain with 1 entries of version DSTU3", e.getMessage());
 		}
 	}
+
+
+	@Test
+	public void testFetchIndividualStructureDefinitionThenAll() {
+		DefaultProfileValidationSupport ctx = new DefaultProfileValidationSupport(FhirContext.forR4Cached());
+		ValidationSupportChain chain = new ValidationSupportChain(ctx);
+
+		assertNotNull(chain.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Patient"));
+		assertEquals(649, chain.fetchAllStructureDefinitions().size());
+
+	}
+
 
 	@Test
 	public void testMissingContext() {
@@ -300,11 +312,14 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
+		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
 		when(myValidationSupport0.expandValueSet(any(), any(), any(IBaseResource.class))).thenReturn(null);
+		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
 		when(myValidationSupport1.expandValueSet(any(), any(), any(IBaseResource.class))).thenAnswer(t -> new IValidationSupport.ValueSetExpansionOutcome(new ValueSet()));
 
 		ValueSet valueSetToExpand = new ValueSet();
 		if (theValueSetHasUrl) {
+			valueSetToExpand.setId("123");
 			valueSetToExpand.setUrl("http://foo");
 		}
 
@@ -339,7 +354,9 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
+		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
 		when(myValidationSupport0.expandValueSet(any(), any(), any(String.class))).thenReturn(null);
+		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
 		when(myValidationSupport1.expandValueSet(any(), any(), any(String.class))).thenAnswer(t -> new IValidationSupport.ValueSetExpansionOutcome(new ValueSet()));
 
 		// Test

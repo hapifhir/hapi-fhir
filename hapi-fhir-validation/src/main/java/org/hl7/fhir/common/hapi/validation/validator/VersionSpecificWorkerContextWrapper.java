@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
@@ -211,10 +212,14 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					myValidationSupportContext.getRootValidationSupport().fetchAllStructureDefinitions();
 			assert allStructureDefinitions != null;
 			for (IBaseResource next : allStructureDefinitions) {
-				retVal.add((StructureDefinition) convertToCanonicalVersion(next));
+				Resource converted = convertToCanonicalVersion(next, false);
+				retVal.add((StructureDefinition) converted);
 			}
 			myAllStructures = retVal;
 		}
+
+		// FIXME: remove
+		ourLog.info("AAAAAAA Returning {} SDs", retVal.size());
 
 		return retVal;
 	}
@@ -1034,14 +1039,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return null;
 		}
 
-		return convertToCanonicalVersion(fetched);
+		return convertToCanonicalVersion(fetched, true);
 	}
 
-	private Resource convertToCanonicalVersion(@Nonnull IBaseResource theResource) {
+	private Resource convertToCanonicalVersion(
+			@Nonnull IBaseResource theResource, boolean thePropagateSnapshotException) {
 		Resource canonical;
 		synchronized (theResource) {
 			canonical = (Resource) theResource.getUserData(CANONICAL_USERDATA_KEY);
 			if (canonical == null) {
+				boolean storeCanonical = true;
 				canonical = myVersionCanonicalizer.resourceToValidatorCanonical(theResource);
 
 				if (canonical instanceof StructureDefinition) {
@@ -1057,7 +1064,10 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 									resource != null,
 									"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
 									canonicalSd.getUrl());
-						} catch (Exception e) {
+						} catch (BaseServerResponseException e) {
+							if (thePropagateSnapshotException) {
+								throw e;
+							}
 							String message = e.toString();
 							Throwable rootCause = ExceptionUtils.getRootCause(e);
 							if (rootCause != null) {
@@ -1067,7 +1077,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 									"Failed to generate snapshot for profile with URL[{}]: {}",
 									canonicalSd.getUrl(),
 									message);
+							storeCanonical = false;
 						}
+
 						canonical = myVersionCanonicalizer.resourceToValidatorCanonical(resource);
 					}
 				}
@@ -1078,7 +1090,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					canonical.setSourcePackage(new PackageInformation(sourcePackageId, null, null, new Date()));
 				}
 
-				theResource.setUserData(CANONICAL_USERDATA_KEY, canonical);
+				if (storeCanonical) {
+					theResource.setUserData(CANONICAL_USERDATA_KEY, canonical);
+				}
 			}
 		}
 		return canonical;
