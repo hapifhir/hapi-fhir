@@ -698,14 +698,14 @@ public class ValidationSupportChainTest extends BaseTest {
 		when(myValidationSupport1.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(true);
 
 		ValidationSupportChain svc = new ValidationSupportChain(myValidationSupport0, myValidationSupport1);
-		assertTrue(svc.isValueSetSupported(newValidationCtx(svc), "http://foo"));
+		assertTrue(svc.isCodeSystemSupported(newValidationCtx(svc), "http://foo"));
 
 		// Test
 		svc.addValidationSupport(myValidationSupport2);
 		when(myValidationSupport0.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(false);
 		when(myValidationSupport1.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(false);
 		when(myValidationSupport2.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(false);
-		boolean actual = svc.isValueSetSupported(newValidationCtx(svc), "http://foo");
+		boolean actual = svc.isCodeSystemSupported(newValidationCtx(svc), "http://foo");
 
 		// Verify
 		assertFalse(actual);
