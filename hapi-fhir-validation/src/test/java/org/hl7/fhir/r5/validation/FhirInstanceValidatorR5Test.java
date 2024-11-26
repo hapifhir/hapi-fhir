@@ -222,7 +222,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		when(myMockSupport.fetchStructureDefinition(nullable(String.class))).thenAnswer(new Answer<StructureDefinition>() {
 			@Override
 			public StructureDefinition answer(InvocationOnMock theInvocation) {
-				StructureDefinition retVal = (StructureDefinition) myDefaultValidationSupport.fetchStructureDefinition((String) theInvocation.getArguments()[1]);
+				StructureDefinition retVal = (StructureDefinition) myDefaultValidationSupport.fetchStructureDefinition((String) theInvocation.getArguments()[0]);
 				ourLog.debug("fetchStructureDefinition({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
 				return retVal;
 			}
