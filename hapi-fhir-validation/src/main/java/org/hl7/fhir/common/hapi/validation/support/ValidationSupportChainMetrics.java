@@ -24,12 +24,16 @@ public class ValidationSupportChainMetrics {
 	 * which exercises the functionality in this class.
 	 */
 
-	public static final String CLASS_OPENTELEMETRY_BASE_NAME = Constants.OPENTELEMETRY_BASE_NAME + ".validation_support_chain";
+	public static final String CLASS_OPENTELEMETRY_BASE_NAME =
+			Constants.OPENTELEMETRY_BASE_NAME + ".validation_support_chain";
 	static final String INSTRUMENTATION_NAME = CLASS_OPENTELEMETRY_BASE_NAME;
 	private static final AttributeKey<String> INSTANCE_NAME = stringKey(INSTRUMENTATION_NAME + ".instance_name");
-	public static final String EXPIRING_CACHE_MAXIMUM_SIZE = CLASS_OPENTELEMETRY_BASE_NAME + ".expiring_cache.maximum_size";
-	public static final String EXPIRING_CACHE_CURRENT_ENTRIES = CLASS_OPENTELEMETRY_BASE_NAME + ".expiring_cache.current_entries";
-	public static final String NON_EXPIRING_CACHE_CURRENT_ENTRIES = CLASS_OPENTELEMETRY_BASE_NAME + ".non_expiring_cache.current_entries";
+	public static final String EXPIRING_CACHE_MAXIMUM_SIZE =
+			CLASS_OPENTELEMETRY_BASE_NAME + ".expiring_cache.maximum_size";
+	public static final String EXPIRING_CACHE_CURRENT_ENTRIES =
+			CLASS_OPENTELEMETRY_BASE_NAME + ".expiring_cache.current_entries";
+	public static final String NON_EXPIRING_CACHE_CURRENT_ENTRIES =
+			CLASS_OPENTELEMETRY_BASE_NAME + ".non_expiring_cache.current_entries";
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidationSupportChainMetrics.class);
 	private final ValidationSupportChain myValidationSupportChain;
 	private BatchCallback myBatchCallback;
