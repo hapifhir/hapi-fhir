@@ -19,8 +19,11 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
+import ca.uhn.fhir.jpa.dao.merge.MergeOperationParameters;
+import ca.uhn.fhir.jpa.dao.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -39,12 +42,25 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.CanonicalIdentifier;
+import ca.uhn.fhir.util.IdentifierUtil;
+import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Patient;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -238,6 +254,90 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 		} finally {
 			endRequest(theServletRequest);
 		}
+	}
+
+	/**
+	 * /Patient/$merge
+	 */
+	@Operation(
+			name = ProviderConstants.OPERATION_MERGE,
+			canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-merge")
+	public void patientMerge(
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse,
+			ServletRequestDetails theRequestDetails,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER)
+					List<Identifier> theSourcePatientIdentifier,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER)
+					List<Identifier> theTargetPatientIdentifier,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT, max = 1)
+					IBaseReference theSourcePatient,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_TARGET_PATIENT, max = 1)
+					IBaseReference theTargetPatient,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PREVIEW, typeName = "boolean", max = 1)
+					IPrimitiveType<Boolean> thePreview,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_RESULT_PATIENT, max = 1)
+					IBaseResource theResultPatient)
+			throws IOException {
+
+		startRequest(theServletRequest);
+		try {
+			MergeOperationParameters mergeOperationParameters = createMergeOperationParameters(
+					theSourcePatientIdentifier,
+					theTargetPatientIdentifier,
+					theSourcePatient,
+					theTargetPatient,
+					thePreview,
+					theResultPatient);
+
+			IFhirResourceDaoPatient<?> dao = (IFhirResourceDaoPatient<?>) getDao();
+			ResourceMergeService resourceMergeService = new ResourceMergeService(dao);
+
+			FhirContext fhirContext = dao.getContext();
+
+			ResourceMergeService.MergeOutcome mergeOutcome =
+					resourceMergeService.merge(mergeOperationParameters, theRequestDetails);
+
+			IBaseParameters retVal = ParametersUtil.newInstance(fhirContext);
+			ParametersUtil.addParameterToParameters(fhirContext, retVal, "outcome", mergeOutcome.getOperationOutcome());
+
+			theServletResponse.setStatus(mergeOutcome.getHttpStatusCode());
+			// we are writing the response to directly, otherwise the response status we set above is ignored.
+			fhirContext
+					.newJsonParser()
+					.setPrettyPrint(true)
+					.encodeResourceToWriter(retVal, theServletResponse.getWriter());
+			theServletResponse.getWriter().close();
+		} finally {
+			endRequest(theServletRequest);
+		}
+	}
+
+	private MergeOperationParameters createMergeOperationParameters(
+			List<Identifier> theSourcePatientIdentifier,
+			List<Identifier> theTargetPatientIdentifier,
+			IBaseReference theSourcePatient,
+			IBaseReference theTargetPatient,
+			IPrimitiveType<Boolean> thePreview,
+			IBaseResource theResultPatient) {
+		MergeOperationParameters mergeOperationParameters = new MergeOperationParameters();
+		if (theSourcePatientIdentifier != null) {
+			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourcePatientIdentifier.stream()
+					.map(IdentifierUtil::identifierDtFromIdentifier)
+					.collect(Collectors.toList());
+			mergeOperationParameters.setSourceResourceIdentifiers(sourceResourceIdentifiers);
+		}
+		if (theTargetPatientIdentifier != null) {
+			List<CanonicalIdentifier> targetResourceIdentifiers = theTargetPatientIdentifier.stream()
+					.map(IdentifierUtil::identifierDtFromIdentifier)
+					.collect(Collectors.toList());
+			mergeOperationParameters.setTargetResourceIdentifiers(targetResourceIdentifiers);
+		}
+		mergeOperationParameters.setSourceResource(theSourcePatient);
+		mergeOperationParameters.setTargetResource(theTargetPatient);
+		mergeOperationParameters.setPreview(thePreview != null && thePreview.getValue());
+		mergeOperationParameters.setResultPatient((Patient) theResultPatient);
+		return mergeOperationParameters;
 	}
 
 	/**

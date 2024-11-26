@@ -252,6 +252,7 @@ public class ProviderConstants {
 	 * Patient $merge operation parameters
 	 */
 	public static final String OPERATION_MERGE_SOURCE_PATIENT = "source-patient";
+
 	public static final String OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER = "source-patient-identifier";
 	public static final String OPERATION_MERGE_TARGET_PATIENT = "target-patient";
 	public static final String OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER = "target-patient-identifier";
