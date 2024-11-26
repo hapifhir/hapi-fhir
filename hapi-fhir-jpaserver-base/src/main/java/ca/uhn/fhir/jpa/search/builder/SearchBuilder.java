@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -49,6 +50,7 @@ import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
@@ -84,6 +86,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -117,6 +120,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -533,10 +537,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				throw new InvalidRequestException(Msg.code(2027)
 						+ "LastN operation is not enabled on this service, can not process this request");
 			}
-			return myFulltextSearchSvc.lastN(myParams, theMaximumResults).stream()
-					.map(lastNResourceId -> myIdHelperService.resolveResourcePersistentIds(
-							myRequestPartitionId, myResourceName, String.valueOf(lastNResourceId)))
-					.collect(Collectors.toList());
+			List<IResourcePersistentId> persistentIds = myFulltextSearchSvc.lastN(myParams, theMaximumResults);
+			return persistentIds.stream().map(t -> (JpaPid) t).collect(Collectors.toList());
 		} else {
 			throw new InvalidRequestException(
 					Msg.code(2033) + "LastN operation is not enabled on this service, can not process this request");
@@ -557,7 +559,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				idParamValue = idParm.getValue();
 			}
 
-			pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParamValue);
+			pid = myIdHelperService
+					.resolveResourceIdentity(
+							myRequestPartitionId,
+							myResourceName,
+							idParamValue,
+							ResolveIdentityMode.includeDeleted().cacheOk())
+					.getPersistentId();
 		}
 		return myFulltextSearchSvc.everything(myResourceName, myParams, pid, theRequestDetails);
 	}
@@ -579,37 +587,46 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	/**
 	 * Combs through the params for any _id parameters and extracts the PIDs for them
-	 *
-	 * @param theTargetPids
 	 */
 	private void extractTargetPidsFromIdParams(Set<Long> theTargetPids) {
 		// get all the IQueryParameterType objects
 		// for _id -> these should all be StringParam values
-		HashSet<String> ids = new HashSet<>();
+		HashSet<IIdType> ids = new HashSet<>();
 		List<List<IQueryParameterType>> params = myParams.get(IAnyResource.SP_RES_ID);
 		for (List<IQueryParameterType> paramList : params) {
 			for (IQueryParameterType param : paramList) {
+				String id;
 				if (param instanceof StringParam) {
 					// we expect all _id values to be StringParams
-					ids.add(((StringParam) param).getValue());
+					id = ((StringParam) param).getValue();
 				} else if (param instanceof TokenParam) {
-					ids.add(((TokenParam) param).getValue());
+					id = ((TokenParam) param).getValue();
 				} else {
 					// we do not expect the _id parameter to be a non-string value
 					throw new IllegalArgumentException(
 							Msg.code(1193) + "_id parameter must be a StringParam or TokenParam");
 				}
+
+				IIdType idType = myContext.getVersion().newIdType();
+				if (id.contains("/")) {
+					idType.setValue(id);
+				} else {
+					idType.setValue(myResourceName + "/" + id);
+				}
+				ids.add(idType);
 			}
 		}
 
 		// fetch our target Pids
 		// this will throw if an id is not found
-		Map<String, JpaPid> idToPid = myIdHelperService.resolveResourcePersistentIds(
-				myRequestPartitionId, myResourceName, new ArrayList<>(ids));
+		Map<IIdType, IResourceLookup<JpaPid>> idToIdentity = myIdHelperService.resolveResourceIdentities(
+				myRequestPartitionId,
+				new ArrayList<>(ids),
+				ResolveIdentityMode.failOnDeleted().noCacheUnlessDeletesDisabled());
 
 		// add the pids to targetPids
-		for (JpaPid pid : idToPid.values()) {
-			theTargetPids.add(pid.getId());
+		for (IResourceLookup pid : idToIdentity.values()) {
+			theTargetPids.add((Long) pid.getPersistentId().getId());
 		}
 	}
 

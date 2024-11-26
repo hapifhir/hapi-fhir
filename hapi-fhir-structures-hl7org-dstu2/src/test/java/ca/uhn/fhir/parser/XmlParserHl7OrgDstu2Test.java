@@ -9,6 +9,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.JsonParserHl7OrgDstu2Test.MyPatientWithOneDeclaredAddressExtension;
 import ca.uhn.fhir.parser.JsonParserHl7OrgDstu2Test.MyPatientWithOneDeclaredExtension;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.utilities.UuidUtils;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import org.apache.commons.io.IOUtils;
@@ -216,8 +217,11 @@ public class XmlParserHl7OrgDstu2Test {
 
     String encoded = xmlParser.encodeResourceToString(patient);
     ourLog.info(encoded);
+    String organizationUuid = UuidUtils.findFirstUUID(encoded);
+    assertNotNull(organizationUuid);
+
     assertThat(encoded).contains("<contained>");
-    assertThat(encoded).contains("<reference value=\"#1\"/>");
+    assertThat(encoded).contains("<reference value=\"#" + organizationUuid + "\"/>");
 
     // Create a bundle with just the patient resource
     Bundle b = new Bundle();
@@ -226,37 +230,37 @@ public class XmlParserHl7OrgDstu2Test {
     // Encode the bundle
     encoded = xmlParser.encodeResourceToString(b);
     ourLog.info(encoded);
-    assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<id value=\"1\"/>", "</contained>"));
-    assertThat(encoded).contains("<reference value=\"#1\"/>");
+    assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<id value=\"" + organizationUuid + "\"/>", "</contained>"));
+    assertThat(encoded).contains("<reference value=\"#" + organizationUuid + "\"/>");
     assertThat(encoded).containsSubsequence(Arrays.asList("<entry>", "</entry>"));
     assertThat(encoded).doesNotContainPattern("(?s)<entry>.*</entry>.*<entry>");
 
     // Re-parse the bundle
     patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
-    assertEquals("#1", patient.getManagingOrganization().getReferenceElement().getValue());
+    assertEquals("#" + organizationUuid, patient.getManagingOrganization().getReferenceElement().getValue());
 
     assertNotNull(patient.getManagingOrganization().getResource());
     org = (Organization) patient.getManagingOrganization().getResource();
-    assertEquals("#1", org.getIdElement().getValue());
+    assertEquals("#" + organizationUuid, org.getIdElement().getValue());
     assertEquals("Contained Test Organization", org.getName());
 
     // And re-encode a second time
     encoded = xmlParser.encodeResourceToString(patient);
     ourLog.info(encoded);
-    assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>",
-        "</Organization", "</contained>", "<reference value=\"#1\"/>"));
+    assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"" + organizationUuid + "\"/>",
+        "</Organization", "</contained>", "<reference value=\"#" + organizationUuid + "\"/>"));
     assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
-    assertThat(encoded).contains("<reference value=\"#1\"/>");
+    assertThat(encoded).contains("<reference value=\"#" + organizationUuid + "\"/>");
 
     // And re-encode once more, with the references cleared
     patient.getContained().clear();
     patient.getManagingOrganization().setReference(null);
     encoded = xmlParser.encodeResourceToString(patient);
     ourLog.info(encoded);
-    assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>",
-        "</Organization", "</contained>", "<reference value=\"#1\"/>"));
+    assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"" + organizationUuid + "\"/>",
+        "</Organization", "</contained>", "<reference value=\"#" + organizationUuid + "\"/>"));
     assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
-    assertThat(encoded).contains("<reference value=\"#1\"/>");
+    assertThat(encoded).contains("<reference value=\"#" + organizationUuid + "\"/>");
 
     // And re-encode once more, with the references cleared and a manually set
     // local ID
@@ -969,13 +973,15 @@ public class XmlParserHl7OrgDstu2Test {
 
     String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
     ourLog.info(encoded);
+    String conditionUuid = UuidUtils.findFirstUUID(encoded);
+    assertNotNull(conditionUuid);
 
     //@formatter:off
     assertThat(encoded).containsSubsequence(
       "<Patient xmlns=\"http://hl7.org/fhir\">", 
         "<contained>", 
           "<Condition xmlns=\"http://hl7.org/fhir\">", 
-            "<id value=\"1\"/>", 
+            "<id value=\"" + conditionUuid + "\"/>",
             "<bodySite>", 
               "<text value=\"BODY SITE\"/>", 
             "</bodySite>", 
@@ -983,7 +989,7 @@ public class XmlParserHl7OrgDstu2Test {
         "</contained>", 
         "<extension url=\"testCondition\">", 
           "<valueReference>", 
-            "<reference value=\"#1\"/>", 
+            "<reference value=\"#" + conditionUuid + "\"/>",
           "</valueReference>", 
         "</extension>", 
         "<birthDate value=\"2016-04-14\"/>", 

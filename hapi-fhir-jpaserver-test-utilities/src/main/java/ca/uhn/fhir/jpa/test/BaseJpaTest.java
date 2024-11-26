@@ -20,7 +20,9 @@
 package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -56,12 +58,14 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
@@ -85,6 +89,7 @@ import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -143,6 +148,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -154,6 +160,7 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_CACHE_CONTROL;
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static java.util.stream.Collectors.joining;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -194,6 +201,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
 	protected InterceptorService mySrdInterceptorService;
+	@Autowired
+	protected IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
@@ -392,9 +401,13 @@ public abstract class BaseJpaTest extends BaseTest {
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
 		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		myStorageSettings.setDeleteEnabled(defaultConfig.isDeleteEnabled());
 		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultConfig.isIncludeHashIdentityForTokenSearches());
 		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultConfig.getMaximumIncludesToLoadPerPage());
+		myStorageSettings.getTreatBaseUrlsAsLocal().clear();
 
+		ParserOptions defaultParserOptions = new ParserOptions();
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(defaultParserOptions.isStripVersionsFromReferences());
 	}
 
 	@AfterEach
@@ -484,6 +497,22 @@ public abstract class BaseJpaTest extends BaseTest {
 	public void logAllPackageVersions() {
 		runInTransaction(() -> {
 			ourLog.info("Package Versions:\n * {}", myPackageVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected int countAllMdmLinks() {
+		return runInTransaction(()-> myMdmLinkDao.findAll().size());
+	}
+
+	protected int logAllMdmLinks() {
+		return runInTransaction(()->{
+			List<MdmLink> links = myMdmLinkDao.findAll();
+			if (links.isEmpty()) {
+				ourLog.info("MDM Links: NONE");
+			} else {
+				ourLog.info("MDM Links:\n * {}", links.stream().map(t -> t.toString()).collect(joining("\n * ")));
+			}
+			return links.size();
 		});
 	}
 
@@ -698,6 +727,19 @@ public abstract class BaseJpaTest extends BaseTest {
 		return toUnqualifiedVersionlessIdValues(theFound, fromIndex, toIndex, true);
 	}
 
+	/**
+	 * Keys will be unqualified versionless IDs (Patient/ABC) and values will be the resources
+	 * themselves.
+	 */
+	protected Map<String, IBaseResource> toResourceIdValueMap(IBundleProvider theFound) {
+		Map<String, IBaseResource> retVal = new HashMap<>();
+		List<IBaseResource> resources = theFound.getAllResources();
+		for (IBaseResource next : resources) {
+			retVal.put(next.getIdElement().toUnqualifiedVersionless().getValue(), next);
+		}
+		return retVal;
+	}
+
 	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound, int theFromIndex, Integer theToIndex, boolean theFirstCall) {
 		if (theToIndex == null) {
 			theToIndex = 99999;
@@ -903,7 +945,10 @@ public abstract class BaseJpaTest extends BaseTest {
 			dao.read(theId, mySrd);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			// good
+			assertThat(e.getMessage()).containsAnyOf(
+				Msg.code(1996) + "Resource " + theId.toUnqualifiedVersionless().getValue() + " is not known",
+				Msg.code(2001) + "Resource " + theId.toUnqualifiedVersionless().getValue() + " is not known"
+			);
 		}
 	}
 }

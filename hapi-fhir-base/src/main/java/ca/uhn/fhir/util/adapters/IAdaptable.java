@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - CDS Hooks
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
@@ -17,14 +17,22 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.hapi.fhir.cdshooks.api.json;
+package ca.uhn.fhir.util.adapters;
 
-import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.annotation.Nonnull;
+
+import java.util.Optional;
 
 /**
- * Users can define CDS Hooks extensions by extending this class.
- * Implementors can extend this class for defining their custom extensions.
+ * Generic version of Eclipse IAdaptable interface.
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class CdsHooksExtension implements IModelJson {}
+public interface IAdaptable {
+	/**
+	 * Get an adapter of requested type.
+	 * @param theTargetType the desired type of the adapter
+	 * @return an adapter of theTargetType if possible, or empty.
+	 */
+	default <T> @Nonnull Optional<T> getAdapter(@Nonnull Class<T> theTargetType) {
+		return AdapterUtils.adapt(this, theTargetType);
+	}
+}

@@ -21,7 +21,7 @@ package ca.uhn.hapi.fhir.cdshooks.serializer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;

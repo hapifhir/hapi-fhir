@@ -191,7 +191,7 @@ public class RDFParser extends BaseParser {
 		}
 
 		if (!containedResource) {
-			containResourcesInReferences(resource);
+			containResourcesInReferences(resource, encodeContext);
 		}
 
 		if (!(resource instanceof IAnyResource)) {
@@ -354,7 +354,7 @@ public class RDFParser extends BaseParser {
 		try {
 
 			if (element == null || element.isEmpty()) {
-				if (!isChildContained(childDef, includedResource)) {
+				if (!isChildContained(childDef, includedResource, theEncodeContext)) {
 					return rdfModel;
 				}
 			}

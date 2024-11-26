@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -72,20 +73,29 @@ public class HapiFhirRepository implements Repository {
 	@Override
 	public <T extends IBaseResource, I extends IIdType> T read(
 			Class<T> theResourceType, I theId, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
+		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.READ)
+				.addHeaders(theHeaders)
+				.create();
 		return myDaoRegistry.getResourceDao(theResourceType).read(theId, details);
 	}
 
 	@Override
 	public <T extends IBaseResource> MethodOutcome create(T theResource, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
+		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.CREATE)
+				.addHeaders(theHeaders)
+				.create();
 		return myDaoRegistry.getResourceDao(theResource).create(theResource, details);
 	}
 
 	@Override
 	public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
 			I theId, P thePatchParameters, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
+		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.PATCH)
+				.addHeaders(theHeaders)
+				.create();
 		// TODO update FHIR patchType once FHIRPATCH bug has been fixed
 		return myDaoRegistry
 				.getResourceDao(theId.getResourceType())
@@ -94,7 +104,10 @@ public class HapiFhirRepository implements Repository {
 
 	@Override
 	public <T extends IBaseResource> MethodOutcome update(T theResource, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
+		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.UPDATE)
+				.addHeaders(theHeaders)
+				.create();
 
 		return myDaoRegistry.getResourceDao(theResource).update(theResource, details);
 	}
@@ -102,7 +115,10 @@ public class HapiFhirRepository implements Repository {
 	@Override
 	public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
 			Class<T> theResourceType, I theId, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
+		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.DELETE)
+				.addHeaders(theHeaders)
+				.create();
 
 		return myDaoRegistry.getResourceDao(theResourceType).delete(theId, details);
 	}
@@ -113,10 +129,14 @@ public class HapiFhirRepository implements Repository {
 			Class<T> theResourceType,
 			Map<String, List<IQueryParameterType>> theSearchParameters,
 			Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
+		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.SEARCH_TYPE)
+				.addHeaders(theHeaders)
+				.create();
 		SearchConverter converter = new SearchConverter();
 		converter.convertParameters(theSearchParameters, fhirContext());
 		details.setParameters(converter.resultParameters);
+		details.setResourceName(myRestfulServer.getFhirContext().getResourceType(theResourceType));
 		var bundleProvider =
 				myDaoRegistry.getResourceDao(theResourceType).search(converter.searchParameterMap, details);
 
@@ -182,7 +202,10 @@ public class HapiFhirRepository implements Repository {
 	// repository action"?
 	@Override
 	public <B extends IBaseBundle> B link(Class<B> theBundleType, String theUrl, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
+		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.GET_PAGE)
+				.addHeaders(theHeaders)
+				.create();
 		var urlParts = UrlUtil.parseUrl(theUrl);
 		details.setCompleteUrl(theUrl);
 		details.setParameters(UrlUtil.parseQueryStrings(urlParts.getParams()));
@@ -233,13 +256,19 @@ public class HapiFhirRepository implements Repository {
 		if (method == null) {
 			return null;
 		}
-		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
+		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.METADATA)
+				.addHeaders(theHeaders)
+				.create();
 		return (C) method.provideCapabilityStatement(myRestfulServer, details);
 	}
 
 	@Override
 	public <B extends IBaseBundle> B transaction(B theBundle, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
+		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.TRANSACTION)
+				.addHeaders(theHeaders)
+				.create();
 		return (B) myDaoRegistry.getSystemDao().transaction(details, theBundle);
 	}
 
@@ -247,6 +276,7 @@ public class HapiFhirRepository implements Repository {
 	public <R extends IBaseResource, P extends IBaseParameters> R invoke(
 			String theName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
 				.addHeaders(theHeaders)
 				.setOperation(theName)
 				.setParameters(theParameters)
@@ -259,6 +289,7 @@ public class HapiFhirRepository implements Repository {
 	public <P extends IBaseParameters> MethodOutcome invoke(
 			String theName, P theParameters, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
 				.addHeaders(theHeaders)
 				.setOperation(theName)
 				.setParameters(theParameters)
@@ -275,6 +306,7 @@ public class HapiFhirRepository implements Repository {
 			Class<R> theReturnType,
 			Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
 				.addHeaders(theHeaders)
 				.setOperation(theName)
 				.setResourceType(theResourceType.getSimpleName())
@@ -288,6 +320,7 @@ public class HapiFhirRepository implements Repository {
 	public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
 			Class<T> theResourceType, String theName, P theParameters, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
 				.addHeaders(theHeaders)
 				.setOperation(theName)
 				.setResourceType(theResourceType.getSimpleName())
@@ -301,6 +334,7 @@ public class HapiFhirRepository implements Repository {
 	public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
 			I theId, String theName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
 				.addHeaders(theHeaders)
 				.setOperation(theName)
 				.setResourceType(theId.getResourceType())
@@ -315,6 +349,7 @@ public class HapiFhirRepository implements Repository {
 	public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(
 			I theId, String theName, P theParameters, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails)
+				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
 				.addHeaders(theHeaders)
 				.setOperation(theName)
 				.setResourceType(theId.getResourceType())

@@ -1,0 +1,5 @@
+---
+type: change
+issue: 6460
+title: "The HFJ_RES_LINK table with no longer store the `PARTITION_DATE` value for the indexed link target
+   resource, as this was an unused feature which has been removed as a part of a larger performance optimization."

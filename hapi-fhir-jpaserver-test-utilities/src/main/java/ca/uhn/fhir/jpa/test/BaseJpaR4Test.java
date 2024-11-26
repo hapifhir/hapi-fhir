@@ -539,7 +539,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected ValidationSettings myValidationSettings;
 	@Autowired
-	protected IMdmLinkJpaRepository myMdmLinkDao;
+	protected IMdmLinkJpaRepository myMdmLinkRepository;
 	@Autowired
 	protected IMdmLinkJpaRepository myMdmLinkHistoryDao;
 	@Autowired
@@ -565,9 +565,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
-
-	@RegisterExtension
-	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
 
 	@AfterEach()
 	@Order(0)

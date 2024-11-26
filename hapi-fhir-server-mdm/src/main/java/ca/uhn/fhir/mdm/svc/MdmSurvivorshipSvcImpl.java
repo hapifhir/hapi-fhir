@@ -24,7 +24,9 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -40,6 +42,7 @@ import ca.uhn.fhir.util.TerserUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.data.domain.Page;
 
 import java.util.ArrayList;
@@ -153,12 +156,15 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		Page<MdmLinkJson> linksQuery = myMdmLinkQuerySvc.queryLinks(searchParameters, theMdmTransactionContext);
 
 		// we want it ordered
-		List<String> sourceIds = new ArrayList<>();
+		List<IIdType> sourceIds = new ArrayList<>();
 		linksQuery.forEach(link -> {
 			String sourceId = link.getSourceId();
-			// we want only the id part, not the resource type
-			sourceId = sourceId.replace(resourceType + "/", "");
-			sourceIds.add(sourceId);
+			if (!sourceId.contains("/")) {
+				sourceId = resourceType + "/" + sourceId;
+			}
+			IIdType id = myFhirContext.getVersion().newIdType();
+			id.setValue(sourceId);
+			sourceIds.add(id);
 		});
 		Map<String, IResourcePersistentId> sourceIdToPid = new HashMap<>();
 		if (!sourceIds.isEmpty()) {
@@ -166,15 +172,19 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 			myTransactionService
 					.withRequest(new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions()))
 					.execute(() -> {
-						Map<String, ? extends IResourcePersistentId> ids =
-								myIIdHelperService.resolveResourcePersistentIds(
-										RequestPartitionId.allPartitions(), resourceType, sourceIds);
-						sourceIdToPid.putAll(ids);
+						Map<IIdType, ? extends IResourceLookup<?>> ids = myIIdHelperService.resolveResourceIdentities(
+								RequestPartitionId.allPartitions(),
+								sourceIds,
+								ResolveIdentityMode.includeDeleted().cacheOk());
+						for (Map.Entry<IIdType, ? extends IResourceLookup<?>> entry : ids.entrySet()) {
+							sourceIdToPid.put(
+									entry.getKey().getIdPart(), entry.getValue().getPersistentId());
+						}
 					});
 		}
 
 		return sourceIds.stream().map(id -> {
-			IResourcePersistentId<?> pid = sourceIdToPid.get(id);
+			IResourcePersistentId<?> pid = sourceIdToPid.get(id.getIdPart());
 			return dao.readByPid(pid);
 		});
 	}
