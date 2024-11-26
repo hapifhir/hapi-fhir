@@ -61,5 +61,4 @@ public class SubscriptionConstants {
 
 	public static final int ORDER_SUBSCRIPTION_VALIDATING = 100;
 	public static final int ORDER_SUBSCRIPTION_ACTIVATING = 200;
-
 }

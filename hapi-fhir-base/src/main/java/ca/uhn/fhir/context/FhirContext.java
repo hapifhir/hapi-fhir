@@ -714,7 +714,7 @@ public class FhirContext {
 			String commonCodeSystemsSupportType =
 					"org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService";
 			String snapshotGeneratingType =
-				"org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport";
+					"org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport";
 			if (ReflectionUtil.typeExists(inMemoryTermSvcType)) {
 				IValidationSupport inMemoryTermSvc = ReflectionUtil.newInstanceOrReturnNull(
 						inMemoryTermSvcType,
@@ -735,7 +735,11 @@ public class FhirContext {
 						"org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain",
 						IValidationSupport.class,
 						new Class<?>[] {IValidationSupport[].class},
-						new Object[] {new IValidationSupport[] {retVal, inMemoryTermSvc, commonCodeSystemsSupport, snapshotGeneratingSupport}});
+						new Object[] {
+							new IValidationSupport[] {
+								retVal, inMemoryTermSvc, commonCodeSystemsSupport, snapshotGeneratingSupport
+							}
+						});
 				assert retVal != null
 						: "Failed to instantiate "
 								+ "org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain";
