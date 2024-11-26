@@ -42,7 +42,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
@@ -59,6 +58,7 @@ import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import ca.uhn.fhir.util.TaskChunker;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
@@ -315,8 +315,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			// for each patient pid ->
 			//	search for the target resources, with their correct patient references, chunked.
 			// The results will be jammed into myReadPids
-			QueryChunker<JpaPid> queryChunker = new QueryChunker<>();
-			queryChunker.chunk(expandedMemberResourceIds, QUERY_CHUNK_SIZE, (idChunk) -> {
+			TaskChunker.chunk(expandedMemberResourceIds, QUERY_CHUNK_SIZE, (idChunk) -> {
 				try {
 					queryResourceTypeWithReferencesToPatients(pids, idChunk, theParams, theDef);
 				} catch (IOException ex) {
@@ -625,7 +624,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			resourceToCheck = "Patient";
 			activeSearchParamName = "organization";
 		}
-		return mySearchParamRegistry.getActiveSearchParam(resourceToCheck, activeSearchParamName);
+		return mySearchParamRegistry.getActiveSearchParam(
+				resourceToCheck, activeSearchParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 	}
 
 	/**

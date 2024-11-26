@@ -20,7 +20,11 @@
 package ca.uhn.fhir.jpa.config;
 
 import com.google.common.base.Strings;
-import org.hibernate.cfg.AvailableSettings;
+import jakarta.annotation.Nonnull;
+import org.hibernate.cfg.BatchSettings;
+import org.hibernate.cfg.JdbcSettings;
+import org.hibernate.cfg.ManagedBeanSettings;
+import org.hibernate.cfg.QuerySettings;
 import org.hibernate.query.criteria.ValueHandlingMode;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -46,18 +50,19 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		myConfigurableListableBeanFactory = theConfigurableListableBeanFactory;
 	}
 
+	@Nonnull
 	@Override
 	public Map<String, Object> getJpaPropertyMap() {
 		Map<String, Object> retVal = super.getJpaPropertyMap();
 
 		// SOMEDAY these defaults can be set in the constructor.  setJpaProperties does a merge.
-		if (!retVal.containsKey(AvailableSettings.CRITERIA_VALUE_HANDLING_MODE)) {
-			retVal.put(AvailableSettings.CRITERIA_VALUE_HANDLING_MODE, ValueHandlingMode.BIND);
+		if (!retVal.containsKey(QuerySettings.CRITERIA_VALUE_HANDLING_MODE)) {
+			retVal.put(QuerySettings.CRITERIA_VALUE_HANDLING_MODE, ValueHandlingMode.BIND);
 		}
 
-		if (!retVal.containsKey(AvailableSettings.CONNECTION_HANDLING)) {
+		if (!retVal.containsKey(JdbcSettings.CONNECTION_HANDLING)) {
 			retVal.put(
-					AvailableSettings.CONNECTION_HANDLING,
+					JdbcSettings.CONNECTION_HANDLING,
 					PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION);
 		}
 
@@ -65,26 +70,25 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		 * Set some performance options
 		 */
 
-		if (!retVal.containsKey(AvailableSettings.STATEMENT_BATCH_SIZE)) {
-			retVal.put(AvailableSettings.STATEMENT_BATCH_SIZE, "30");
+		if (!retVal.containsKey(BatchSettings.STATEMENT_BATCH_SIZE)) {
+			retVal.put(BatchSettings.STATEMENT_BATCH_SIZE, "30");
 		}
 
-		if (!retVal.containsKey(AvailableSettings.ORDER_INSERTS)) {
-			retVal.put(AvailableSettings.ORDER_INSERTS, "true");
+		if (!retVal.containsKey(BatchSettings.ORDER_INSERTS)) {
+			retVal.put(BatchSettings.ORDER_INSERTS, "true");
 		}
 
-		if (!retVal.containsKey(AvailableSettings.ORDER_UPDATES)) {
-			retVal.put(AvailableSettings.ORDER_UPDATES, "true");
+		if (!retVal.containsKey(BatchSettings.ORDER_UPDATES)) {
+			retVal.put(BatchSettings.ORDER_UPDATES, "true");
 		}
 
-		if (!retVal.containsKey(AvailableSettings.BATCH_VERSIONED_DATA)) {
-			retVal.put(AvailableSettings.BATCH_VERSIONED_DATA, "true");
+		if (!retVal.containsKey(BatchSettings.BATCH_VERSIONED_DATA)) {
+			retVal.put(BatchSettings.BATCH_VERSIONED_DATA, "true");
 		}
 		// Why is this here, you ask? LocalContainerEntityManagerFactoryBean actually clobbers the setting hibernate
-		// needs
-		// in order to be able to resolve beans, so we add it back in manually here
-		if (!retVal.containsKey(AvailableSettings.BEAN_CONTAINER)) {
-			retVal.put(AvailableSettings.BEAN_CONTAINER, new SpringBeanContainer(myConfigurableListableBeanFactory));
+		// needs in order to be able to resolve beans, so we add it back in manually here
+		if (!retVal.containsKey(ManagedBeanSettings.BEAN_CONTAINER)) {
+			retVal.put(ManagedBeanSettings.BEAN_CONTAINER, new SpringBeanContainer(myConfigurableListableBeanFactory));
 		}
 
 		return retVal;

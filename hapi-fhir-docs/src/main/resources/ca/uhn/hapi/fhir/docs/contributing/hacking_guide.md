@@ -51,6 +51,14 @@ HAPI is built primary using	[Apache Maven](http://maven.apache.org/). Even if yo
 [INFO] Finished at: 2016-02-27T15:05:35+00:00
 ```
 
+# Rebuilding the Database Schema
+
+Database schema is built as part of your maven build, but in case you need to rebuild it later, you can use the command:
+
+   ```bash
+   mvn hapi-tinder:generate-ddl
+   ```
+
 # Troubleshooting
 
 If the build fails to execute successfully, try the following:

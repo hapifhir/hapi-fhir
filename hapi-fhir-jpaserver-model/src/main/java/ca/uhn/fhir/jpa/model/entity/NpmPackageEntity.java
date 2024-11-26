@@ -62,7 +62,7 @@ public class NpmPackageEntity {
 	@Column(name = "UPDATED_TIME", nullable = false)
 	private Date myVersion;
 
-	@Column(name = "PACKAGE_DESC", length = NpmPackageVersionEntity.VERSION_ID_LENGTH, nullable = true)
+	@Column(name = "PACKAGE_DESC", length = NpmPackageVersionEntity.PACKAGE_DESC_LENGTH, nullable = true)
 	private String myDescription;
 
 	@OneToMany(mappedBy = "myPackage")

@@ -35,11 +35,11 @@ import java.util.stream.Stream;
  */
 public class QueryChunker<T> extends TaskChunker<T> {
 
-	public void chunk(Collection<T> theInput, Consumer<List<T>> theBatchConsumer) {
+	public static <T> void chunk(Collection<T> theInput, Consumer<List<T>> theBatchConsumer) {
 		chunk(theInput, SearchBuilder.getMaximumPageSize(), theBatchConsumer);
 	}
 
-	public Stream<List<T>> chunk(Stream<T> theStream) {
+	public static <T> Stream<List<T>> chunk(Stream<T> theStream) {
 		return chunk(theStream, SearchBuilder.getMaximumPageSize());
 	}
 }

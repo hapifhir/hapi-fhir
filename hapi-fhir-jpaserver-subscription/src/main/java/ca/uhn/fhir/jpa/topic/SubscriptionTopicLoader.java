@@ -71,7 +71,9 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 	protected SearchParameterMap getSearchParameterMap() {
 		SearchParameterMap map = new SearchParameterMap();
 
-		if (mySearchParamRegistry.getActiveSearchParam("SubscriptionTopic", "status") != null) {
+		if (mySearchParamRegistry.getActiveSearchParam(
+						"SubscriptionTopic", "status", ISearchParamRegistry.SearchParamLookupContextEnum.ALL)
+				!= null) {
 			map.add(SubscriptionTopic.SP_STATUS, new TokenParam(null, Enumerations.PublicationStatus.ACTIVE.toCode()));
 		}
 		map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);

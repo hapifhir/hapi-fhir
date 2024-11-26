@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6475
+jira: SMILE-8490
+title: "Previously, submitting a transaction bundle containing a conditional delete, a conditional create, and a 
+resource which relied on this conditional create as a reference would lead to excessive Hibernate warnings in the logs. 
+This has been fixed."

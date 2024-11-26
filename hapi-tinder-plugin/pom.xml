@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>7.5.2-SNAPSHOT</version>
+		<version>7.7.7-SNAPSHOT</version>
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -265,6 +265,7 @@
 				<configuration>
 					<!-- see http://jira.codehaus.org/browse/MNG-5346 -->
 					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+					<goalPrefix>hapi-tinder</goalPrefix>
 				</configuration>
 
 				<executions>

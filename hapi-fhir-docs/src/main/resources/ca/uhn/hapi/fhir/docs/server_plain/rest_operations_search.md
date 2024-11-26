@@ -287,7 +287,7 @@ Dates are a special case, since it is a fairly common scenario to want to match 
 
 # Resource Includes (_include)
 
-FHIR allows clients to request that specific linked resources be included as contained resources, which means that they will be "embedded" in a special container called "contained" within the parent resource.
+Using the `_include` FHIR parameter, clients can request that specific linked resources be embedded directly within search results. These included resources will have a search.mode of "include".
 
 HAPI allows you to add a parameter for accepting includes if you wish to support them for specific search methods.
 

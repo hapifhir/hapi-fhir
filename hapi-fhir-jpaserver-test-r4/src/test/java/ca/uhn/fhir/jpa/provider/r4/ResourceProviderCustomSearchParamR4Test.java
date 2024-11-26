@@ -402,7 +402,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		mySearchParameterDao.create(fooSp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
-		assertNotNull(mySearchParamRegistry.getActiveSearchParam("Patient", "foo"));
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam("Patient", "foo", null));
 
 		Patient pat = new Patient();
 		pat.setGender(AdministrativeGender.MALE);

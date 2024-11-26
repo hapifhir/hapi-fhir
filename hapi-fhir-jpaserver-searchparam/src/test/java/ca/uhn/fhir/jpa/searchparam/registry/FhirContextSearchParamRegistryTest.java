@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -28,7 +29,7 @@ class FhirContextSearchParamRegistryTest {
 		SP_RES_SECURITY + ", Resource.meta.security"
 	})
 	void testResourceLevelSearchParamsAreRegistered(String theSearchParamName, String theSearchParamPath) {
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Patient", theSearchParamName);
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Patient", theSearchParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 		assertThat(sp)
 			.as("path is null for search parameter: '%s'", theSearchParamName)

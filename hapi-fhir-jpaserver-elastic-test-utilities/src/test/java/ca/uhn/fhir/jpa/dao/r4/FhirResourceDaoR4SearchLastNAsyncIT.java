@@ -120,9 +120,10 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 		ourLog.info("Queries:\n * " + String.join("\n * ", queries));
 
+		// 1 query to resolve the subject PIDs
 		// 3 queries to actually perform the search
 		// 1 query to lookup up Search from cache, and 2 chunked queries to retrieve resources by PID.
-		assertThat(queries).hasSize(6);
+		assertThat(queries).hasSize(7);
 
 		// The first chunked query should have a full complement of PIDs
 		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
@@ -130,7 +131,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 			firstQueryPattern.append(",'[0-9]+'");
 		}
 		firstQueryPattern.append("\\).*");
-		assertThat(queries.get(4)).matches(firstQueryPattern.toString());
+		assertThat(queries.get(5)).matches(firstQueryPattern.toString());
 
 		// the second chunked query should be padded with "-1".
 		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
@@ -141,7 +142,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 			secondQueryPattern.append(",'-1'");
 		}
 		secondQueryPattern.append("\\).*");
-		assertThat(queries.get(5)).matches(secondQueryPattern.toString());
+		assertThat(queries.get(6)).matches(secondQueryPattern.toString());
 
 	}
 

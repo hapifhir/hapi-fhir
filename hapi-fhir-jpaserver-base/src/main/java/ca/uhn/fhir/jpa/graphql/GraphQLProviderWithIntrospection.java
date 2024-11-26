@@ -181,7 +181,8 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 			for (String nextResourceType : theResourceTypes) {
 				StructureDefinition sd = fetchStructureDefinition(nextResourceType);
 				List<SearchParameter> parameters = toR5SearchParams(mySearchParamRegistry
-						.getActiveSearchParams(nextResourceType)
+						.getActiveSearchParams(
+								nextResourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
 						.values());
 				myGenerator.generateResource(writer, sd, parameters, theOperations);
 			}
@@ -198,7 +199,8 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 				}
 				if (theOperations.contains(GraphQLSchemaGenerator.FHIROperationType.SEARCH)) {
 					List<SearchParameter> parameters = toR5SearchParams(mySearchParamRegistry
-							.getActiveSearchParams(nextResourceType)
+							.getActiveSearchParams(
+									nextResourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
 							.values());
 					myGenerator.generateListAccessQuery(writer, parameters, nextResourceType);
 					myGenerator.generateConnectionAccessQuery(writer, parameters, nextResourceType);
