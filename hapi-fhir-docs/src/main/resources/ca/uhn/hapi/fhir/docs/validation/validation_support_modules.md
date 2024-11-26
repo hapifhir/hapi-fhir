@@ -19,7 +19,7 @@ This module can be used to combine multiple implementations together so that for
 The following chaining logic is used:
 
 * Calls to `fetchAll...` methods such as `fetchAllConformanceResources()` and `fetchAllStructureDefinitions()` will call every method in the chain in order, and aggregate the results into a single list to return.
-* Calls to fetch or validate codes, such as `validateCode(...)` and `lookupCode(...)` will first test each module in the chain using the`isCodeSystemSupported(...)` or `isValueSetSupported(...)` methods (depending on whether a ValueSet URL is present in the method parameters) and will any methods in the chain which return that they can handle the given CodeSystem/ValueSet URL. The first non-null value returned by a method in the chain that can support the URL will be returned to the caller.
+* Calls to fetch or validate codes, such as `validateCode(...)` and `lookupCode(...)` will first test each module in the chain using the`isCodeSystemSupported(...)` or `isValueSetSupported(...)` methods (depending on whether a ValueSet URL is present in the method parameters) and will invoke any methods in the chain which return that they can handle the given CodeSystem/ValueSet URL. The first non-null value returned by a method in the chain that can support the URL will be returned to the caller.
 * All other methods will invoke the method in the chain in order, and will return immediately as soon as a non-null value is returned.
 
 The following caching logic is used if caching is enabled using `CacheConfiguration`. You can use `CacheConfiguration.disabled()` if you want to disable caching.

@@ -793,6 +793,7 @@ public interface IValidationSupport {
 			return myValue;
 		}
 
+		@Override
 		public String getType() {
 			return TYPE_STRING;
 		}
@@ -827,6 +828,7 @@ public interface IValidationSupport {
 			return myDisplay;
 		}
 
+		@Override
 		public String getType() {
 			return TYPE_CODING;
 		}
@@ -1432,10 +1434,9 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * <p
-	 * Warning: This method's behaviour and naming is preserved for backwards compatibility, BUT the actual naming and
-	 * function are not aligned.
-	 * </p
+	 * When validating a CodeableConcept containing multiple codings, this method can be used to control whether
+	 * the validator requires all codings in the CodeableConcept to be valid in order to consider the
+	 * CodeableConcept valid.
 	 * <p>
 	 * See VersionSpecificWorkerContextWrapper#validateCode in hapi-fhir-validation, and the refer to the values below
 	 * for the behaviour associated with each value.
@@ -1450,7 +1451,7 @@ public interface IValidationSupport {
 	 * </p>
 	 * @return true or false depending on the desired coding validation behaviour.
 	 */
-	default boolean isEnabledValidationForCodingsLogicalAnd() {
+	default boolean isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid() {
 		return false;
 	}
 }

@@ -341,6 +341,7 @@ public class Constants {
 	 * Application configuration key used to enable or disable Hibernate Envers.
 	 */
 	public static final String HIBERNATE_INTEGRATION_ENVERS_ENABLED = "hibernate.integration.envers.enabled";
+	public static final String OPENTELEMETRY_BASE_NAME = "io.hapifhir";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

@@ -811,7 +811,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
-		ValidationSupportChain support = new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)).setEnabledValidationForCodingsLogicalAnd(false);
+		ValidationSupportChain support = new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)).setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(false);
 
 		// Prepopulate SDs
 		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-profile.xml"));
@@ -1693,7 +1693,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 			new CommonCodeSystemsTerminologyService(ourCtx),
 			new InMemoryTerminologyServerValidationSupport(ourCtx),
 			new SnapshotGeneratingValidationSupport(ourCtx));
-		myValidationSupport = chain.setEnabledValidationForCodingsLogicalAnd(theLogicalAnd);
+		myValidationSupport = chain.setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(theLogicalAnd);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 		myFhirValidator.registerValidatorModule(myInstanceVal);
 	}

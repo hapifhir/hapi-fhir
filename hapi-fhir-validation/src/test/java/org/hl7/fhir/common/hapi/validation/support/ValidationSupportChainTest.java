@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -675,25 +676,48 @@ public class ValidationSupportChainTest extends BaseTest {
 
 			// Verify
 			if (theUseCache) {
-				assertEquals(5000L, getLastMetricValue(libraryTestRunner, ValidationSupportChainMetrics.EXPIRING_CACHE_MAXIMUM_SIZE));
-				assertEquals(1L, getLastMetricValue(libraryTestRunner, ValidationSupportChainMetrics.EXPIRING_CACHE_CURRENT_ENTRIES));
-				assertEquals(1L, getLastMetricValue(libraryTestRunner, ValidationSupportChainMetrics.NON_EXPIRING_CACHE_CURRENT_ENTRIES));
+				assertEquals(5000L, getLastMetricValue(libraryTestRunner, "io.hapifhir.validation_support_chain.expiring_cache.maximum_size"));
+				assertEquals(1L, getLastMetricValue(libraryTestRunner, "io.hapifhir.validation_support_chain.expiring_cache.current_entries"));
+				assertEquals(1L, getLastMetricValue(libraryTestRunner, "io.hapifhir.validation_support_chain.non_expiring_cache.current_entries"));
 			} else {
-				assertEquals(0L, getLastMetricValue(libraryTestRunner, ValidationSupportChainMetrics.EXPIRING_CACHE_MAXIMUM_SIZE));
-				assertEquals(0L, getLastMetricValue(libraryTestRunner, ValidationSupportChainMetrics.EXPIRING_CACHE_CURRENT_ENTRIES));
-				assertEquals(0L, getLastMetricValue(libraryTestRunner, ValidationSupportChainMetrics.NON_EXPIRING_CACHE_CURRENT_ENTRIES));
+				assertEquals(0L, getLastMetricValue(libraryTestRunner, "io.hapifhir.validation_support_chain.expiring_cache.maximum_size"));
+				assertEquals(0L, getLastMetricValue(libraryTestRunner, "io.hapifhir.validation_support_chain.expiring_cache.current_entries"));
+				assertEquals(0L, getLastMetricValue(libraryTestRunner, "io.hapifhir.validation_support_chain.non_expiring_cache.current_entries"));
 			}
 		} finally {
 			chain.stop();
 		}
 	}
 
+
+	@Test
+	public void testModifyingServiceInvalidatesCache() {
+		// Setup
+		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(true);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(true);
+
+		ValidationSupportChain svc = new ValidationSupportChain(myValidationSupport0, myValidationSupport1);
+		assertTrue(svc.isValueSetSupported(newValidationCtx(svc), "http://foo"));
+
+		// Test
+		svc.addValidationSupport(myValidationSupport2);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(false);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(false);
+		when(myValidationSupport2.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(false);
+		boolean actual = svc.isValueSetSupported(newValidationCtx(svc), "http://foo");
+
+		// Verify
+		assertFalse(actual);
+	}
+
+
 	private static long getLastMetricValue(LibraryTestRunner libraryTestRunner, String metricName) {
 		List<MetricData> metrics = libraryTestRunner.getExportedMetrics();
 		List<MetricData> metricsList = metrics.stream().filter(t -> t.getName().equals(metricName)).toList();
 		ourLog.info("Have metrics {}\n * {}", metricName, metricsList.stream().map(t -> t.getData().getPoints().toString()).collect(Collectors.joining("\n * ")));
 		MetricData metric = metricsList.get(metricsList.size() - 1);
-		assertEquals("io.hapifhir.ValidationSupportChain", metric.getInstrumentationScopeInfo().getName());
+		assertEquals("io.hapifhir.validation_support_chain", metric.getInstrumentationScopeInfo().getName());
 		Data<?> data = metric.getData();
 		ArrayList<?> dataPoints = new ArrayList<>(data.getPoints());
 		assertEquals(1, dataPoints.size());

@@ -58,7 +58,7 @@ public class CachingValidationSupportTest {
 	public void testEnabledValidationForCodingsLogicalAnd() {
 		when(myValidationSupport0.getFhirContext()).thenReturn(ourCtx);
 		CachingValidationSupport support = new CachingValidationSupport(myValidationSupport0, true);
-		assertTrue(support.isEnabledValidationForCodingsLogicalAnd());
+		assertTrue(support.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid());
 	}
 
 }

@@ -7,7 +7,6 @@ import org.apache.commons.lang3.time.DateUtils;
  * @deprecated This should no longer be used, caching functionality is provided by {@link ValidationSupportChain}
  */
 @Deprecated(since = "8.0.0", forRemoval = true)
-@SuppressWarnings("unchecked")
 public class CachingValidationSupport extends BaseValidationSupportWrapper implements IValidationSupport {
 
 	private final boolean myIsEnabledValidationForCodingsLogicalAnd;
@@ -78,7 +77,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		public static CacheTimeouts defaultValues() {
 			return new CacheTimeouts()
 					.setLookupCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
-					.setExpandValueSetMillis(1 * DateUtils.MILLIS_PER_MINUTE)
+					.setExpandValueSetMillis(DateUtils.MILLIS_PER_MINUTE)
 					.setTranslateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
 					.setValidateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
 					.setMiscMillis(10 * DateUtils.MILLIS_PER_MINUTE);
@@ -86,7 +85,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	@Override
-	public boolean isEnabledValidationForCodingsLogicalAnd() {
+	public boolean isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid() {
 		return myIsEnabledValidationForCodingsLogicalAnd;
 	}
 }
