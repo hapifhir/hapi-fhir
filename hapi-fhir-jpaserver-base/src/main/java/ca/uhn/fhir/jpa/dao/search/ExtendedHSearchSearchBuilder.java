@@ -111,7 +111,7 @@ public class ExtendedHSearchSearchBuilder {
 			} else {
 				// are the parameter values supported?
 				canUseHibernate =
-					theParams.get(paramName).stream()
+						theParams.get(paramName).stream()
 								.flatMap(Collection::stream)
 								.collect(Collectors.toList())
 								.stream()
@@ -164,9 +164,9 @@ public class ExtendedHSearchSearchBuilder {
 		DateRangeParam lastUpdated = theMap.getLastUpdated();
 
 		return lastUpdated.getLowerBound() != null
-			&& isParamTypeSupported(lastUpdated.getLowerBound())
-			&& lastUpdated.getUpperBound() != null
-			&& isParamTypeSupported(lastUpdated.getUpperBound());
+				&& isParamTypeSupported(lastUpdated.getLowerBound())
+				&& lastUpdated.getUpperBound() != null
+				&& isParamTypeSupported(lastUpdated.getUpperBound());
 	}
 
 	/**

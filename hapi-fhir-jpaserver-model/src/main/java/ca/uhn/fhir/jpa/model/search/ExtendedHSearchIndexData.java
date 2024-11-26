@@ -61,10 +61,10 @@ public class ExtendedHSearchIndexData {
 	private ResourceTable myEntity;
 
 	public ExtendedHSearchIndexData(
-		FhirContext theFhirContext,
-		StorageSettings theStorageSettings,
-		IBaseResource theResource,
-		ResourceTable theEntity) {
+			FhirContext theFhirContext,
+			StorageSettings theStorageSettings,
+			IBaseResource theResource,
+			ResourceTable theEntity) {
 		this.myFhirContext = theFhirContext;
 		this.myStorageSettings = theStorageSettings;
 		myResource = theResource;
