@@ -52,7 +52,6 @@ import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-@Embeddable
 @EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(

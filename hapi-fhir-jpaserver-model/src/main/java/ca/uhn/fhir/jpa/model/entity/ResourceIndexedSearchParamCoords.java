@@ -42,7 +42,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.GenericGenerator;
 
-@Embeddable
 @EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
