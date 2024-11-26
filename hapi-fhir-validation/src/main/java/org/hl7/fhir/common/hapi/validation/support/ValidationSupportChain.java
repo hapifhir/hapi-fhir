@@ -608,6 +608,7 @@ public class ValidationSupportChain implements IValidationSupport {
 					}
 				}
 			}
+			myHaveFetchedAllStructureDefinitions = true;
 		}
 		return Collections.unmodifiableList(new ArrayList<>(myStructureDefinitionsAsList));
 	}

@@ -2377,7 +2377,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		List<String> idValues;
 
+		myCaptureQueriesListener.clear();
 		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + id.getIdPart() + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
+		myCaptureQueriesListener.logSelectQueries();
 		assertThat(idValues).as(idValues.toString()).containsExactly(ids.get(3), ids.get(2), ids.get(1), ids.get(0));
 
 		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
