@@ -216,7 +216,7 @@ public class JpaBulkExportProcessorTest {
 		// from getSearchBuilderForLocalResourceType
 		when(myDaoRegistry.getResourceDao(anyString()))
 			.thenReturn(mockDao);
-		when(mySearchBuilderFactory.newSearchBuilder(eq(mockDao), eq(parameters.getResourceType()), any()))
+		when(mySearchBuilderFactory.newSearchBuilder(eq(parameters.getResourceType()), any()))
 			.thenReturn(searchBuilder);
 		// ret
 		when(searchBuilder.createQuery(
@@ -306,7 +306,7 @@ public class JpaBulkExportProcessorTest {
 		// from getSearchBuilderForLocalResourceType
 		when(myDaoRegistry.getResourceDao(not(eq("Group"))))
 			.thenReturn(mockDao);
-		when(mySearchBuilderFactory.newSearchBuilder(eq(mockDao), eq(parameters.getResourceType()), any()))
+		when(mySearchBuilderFactory.newSearchBuilder(eq(parameters.getResourceType()), any()))
 			.thenReturn(searchBuilder);
 		// ret
 		when(searchBuilder.createQuery(
@@ -434,7 +434,7 @@ public class JpaBulkExportProcessorTest {
 		// getMembersFromGroupWithFilter
 		when(myDaoRegistry.getResourceDao(eq("Patient")))
 			.thenReturn(patientDao);
-		when(mySearchBuilderFactory.newSearchBuilder(eq(patientDao), eq("Patient"), eq(Patient.class)))
+		when(mySearchBuilderFactory.newSearchBuilder(eq("Patient"), eq(Patient.class)))
 			.thenReturn(patientSearchBuilder);
 		RuntimeResourceDefinition patientDef = myFhirContext.getResourceDefinition("Patient");
 		SearchParameterMap patientSpMap = new SearchParameterMap();
@@ -449,7 +449,7 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(Collections.singletonList(observationSpMap));
 		when(myDaoRegistry.getResourceDao((eq("Observation"))))
 			.thenReturn(observationDao);
-		when(mySearchBuilderFactory.newSearchBuilder(eq(observationDao), eq("Observation"), eq(Observation.class)))
+		when(mySearchBuilderFactory.newSearchBuilder(eq("Observation"), eq(Observation.class)))
 			.thenReturn(observationSearchBuilder);
 		when(observationSearchBuilder.loadIncludes(
 			any(SearchBuilderLoadIncludesParameters.class)
@@ -523,7 +523,6 @@ public class JpaBulkExportProcessorTest {
 		when(myDaoRegistry.getResourceDao(eq("Patient")))
 			.thenReturn(dao);
 		when(mySearchBuilderFactory.newSearchBuilder(
-			any(IFhirResourceDao.class),
 			anyString(),
 			any()
 		)).thenReturn(searchBuilder);

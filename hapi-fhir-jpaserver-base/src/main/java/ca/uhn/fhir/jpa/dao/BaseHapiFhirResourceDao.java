@@ -2096,7 +2096,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					}
 
 					ISearchBuilder<JpaPid> builder =
-							mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+							mySearchBuilderFactory.newSearchBuilder(getResourceName(), getResourceType());
 
 					List<JpaPid> ids = new ArrayList<>();
 
@@ -2129,8 +2129,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
 						theRequest, myResourceName, theParams, theConditionalOperationTargetOrNull);
 
-		ISearchBuilder<JpaPid> builder =
-				mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+		ISearchBuilder<JpaPid> builder = mySearchBuilderFactory.newSearchBuilder(getResourceName(), getResourceType());
 
 		String uuid = UUID.randomUUID().toString();
 
@@ -2168,7 +2167,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withPropagation(Propagation.REQUIRED)
 				.searchList(() -> {
 					ISearchBuilder<JpaPid> builder =
-							mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+							mySearchBuilderFactory.newSearchBuilder(getResourceName(), getResourceType());
 					Stream<JpaPid> pidStream =
 							builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
 
@@ -2184,7 +2183,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Nonnull
 	private Stream<T> pidsToResource(RequestDetails theRequest, Stream<JpaPid> pidStream) {
 		ISearchBuilder<JpaPid> searchBuilder =
-				mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+				mySearchBuilderFactory.newSearchBuilder(getResourceName(), getResourceType());
 		@SuppressWarnings("unchecked")
 		Stream<T> resourceStream = (Stream<T>) new QueryChunker<>()
 				.chunk(pidStream, SearchBuilder.getMaximumPageSize())

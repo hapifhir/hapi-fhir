@@ -26,7 +26,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -95,7 +94,6 @@ public class SearchTask implements Callable<Void> {
 	protected final FhirContext myContext;
 	protected final ISearchResultCacheSvc mySearchResultCacheSvc;
 	private final SearchParameterMap myParams;
-	private final IDao myCallingDao;
 	private final String myResourceType;
 	private final ArrayList<JpaPid> mySyncedPids = new ArrayList<>();
 	private final CountDownLatch myInitialCollectionLatch = new CountDownLatch(1);
@@ -150,7 +148,6 @@ public class SearchTask implements Callable<Void> {
 		// values
 		myOnRemove = theCreationParams.OnRemove;
 		mySearch = theCreationParams.Search;
-		myCallingDao = theCreationParams.CallingDao;
 		myParams = theCreationParams.Params;
 		myResourceType = theCreationParams.ResourceType;
 		myRequest = theCreationParams.Request;
@@ -159,7 +156,7 @@ public class SearchTask implements Callable<Void> {
 		myLoadingThrottleForUnitTests = theCreationParams.getLoadingThrottleForUnitTests();
 
 		mySearchRuntimeDetails = new SearchRuntimeDetails(myRequest, mySearch.getUuid());
-		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myCallingDao.getContext()));
+		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myContext));
 		myRequestPartitionId = theCreationParams.RequestPartitionId;
 		myParentTransaction = ElasticApm.currentTransaction();
 		myCompositeBroadcaster =
@@ -206,7 +203,7 @@ public class SearchTask implements Callable<Void> {
 	private ISearchBuilder newSearchBuilder() {
 		Class<? extends IBaseResource> resourceTypeClass =
 				myContext.getResourceDefinition(myResourceType).getImplementingClass();
-		return mySearchBuilderFactory.newSearchBuilder(myCallingDao, myResourceType, resourceTypeClass);
+		return mySearchBuilderFactory.newSearchBuilder(myResourceType, resourceTypeClass);
 	}
 
 	@Nonnull
@@ -283,7 +280,7 @@ public class SearchTask implements Callable<Void> {
 				.withRequest(myRequest)
 				.withRequestPartitionId(myRequestPartitionId)
 				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> doSaveSearch());
+				.execute(this::doSaveSearch);
 	}
 
 	@SuppressWarnings("rawtypes")

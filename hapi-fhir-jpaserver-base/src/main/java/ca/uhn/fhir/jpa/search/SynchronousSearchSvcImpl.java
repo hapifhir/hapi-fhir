@@ -27,7 +27,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -283,12 +282,9 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 			RequestPartitionId theRequestPartitionId) {
 		final String searchUuid = UUID.randomUUID().toString();
 
-		IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(theResourceType);
-
 		Class<? extends IBaseResource> resourceTypeClass =
 				myContext.getResourceDefinition(theResourceType).getImplementingClass();
-		final ISearchBuilder sb =
-				mySearchBuilderFactory.newSearchBuilder(callingDao, theResourceType, resourceTypeClass);
+		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 		return executeQuery(
 				theSearchParameterMap,

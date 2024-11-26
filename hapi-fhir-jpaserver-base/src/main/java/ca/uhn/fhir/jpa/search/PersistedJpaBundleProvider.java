@@ -27,7 +27,6 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
@@ -255,9 +254,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		String resourceName = mySearchEntity.getResourceType();
 		Class<? extends IBaseResource> resourceType =
 				myContext.getResourceDefinition(resourceName).getImplementingClass();
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceName);
 
-		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, resourceName, resourceType);
+		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(resourceName, resourceType);
 
 		RequestPartitionId requestPartitionId = getRequestPartitionId();
 		// we request 1 more resource than we need

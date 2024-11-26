@@ -374,8 +374,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 		Class<? extends IBaseResource> resourceTypeClass =
 				myContext.getResourceDefinition(theResourceType).getImplementingClass();
-		final ISearchBuilder<JpaPid> sb =
-				mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
+		final ISearchBuilder<JpaPid> sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);

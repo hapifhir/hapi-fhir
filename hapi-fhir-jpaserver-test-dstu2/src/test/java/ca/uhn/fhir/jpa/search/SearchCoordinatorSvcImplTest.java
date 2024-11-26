@@ -289,7 +289,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	}
 
 	private void initSearches() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 	}
 
 	private void initAsyncSearches() {
@@ -437,7 +437,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testLoadSearchResultsFromDifferentCoordinator() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		final String uuid = UUID.randomUUID().toString();
 
@@ -517,7 +517,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearch() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -531,7 +531,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearchWithOffset() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setOffset(10);
@@ -544,7 +544,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearchUpTo() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		int loadUpto = 30;
 		SearchParameterMap params = new SearchParameterMap();

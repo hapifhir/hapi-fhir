@@ -63,6 +63,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & IPointcut>
 		implements IBaseInterceptorService<POINTCUT>, IBaseInterceptorBroadcaster<POINTCUT> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseInterceptorService.class);
@@ -72,7 +74,6 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			AttributeKey.stringKey("hapifhir.interceptor.class_name");
 	private static final AttributeKey<String> OTEL_INTERCEPTOR_METHOD_NAME_ATT_KEY =
 			AttributeKey.stringKey("hapifhir.interceptor.method_name");
-	public static final Class<Boolean> BOOLEAN_RETURN_TYPE = boolean.class;
 
 	private final List<Object> myInterceptors = new ArrayList<>();
 	private final ListMultimap<POINTCUT, IInvoker> myGlobalInvokers = ArrayListMultimap.create();
@@ -278,12 +279,17 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		return myRegisteredPointcuts.contains(thePointcut);
 	}
 
+	protected Class<?> getBooleanReturnType() {
+		return boolean.class;
+	}
+
 	@Override
 	public boolean callHooks(POINTCUT thePointcut, HookParams theParams) {
 		assert haveAppropriateParams(thePointcut, theParams);
-		assert thePointcut.getReturnType() == void.class || thePointcut.getReturnType() == BOOLEAN_RETURN_TYPE;
+		assert thePointcut.getReturnType() == void.class || thePointcut.getReturnType() == getBooleanReturnType();
 
 		Object retValObj = doCallHooks(thePointcut, theParams);
+		retValObj = defaultIfNull(retValObj, true);
 		return (Boolean) retValObj;
 	}
 
@@ -424,7 +430,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		for (IInvoker nextInvoker : invokers) {
 			Object nextOutcome = nextInvoker.invoke(theParams);
 			Class<?> pointcutReturnType = thePointcut.getReturnType();
-			if (pointcutReturnType.equals(BOOLEAN_RETURN_TYPE)) {
+			if (pointcutReturnType.equals(thePointcut.getBooleanReturnTypeForEnum())) {
 				Boolean nextOutcomeAsBoolean = (Boolean) nextOutcome;
 				if (Boolean.FALSE.equals(nextOutcomeAsBoolean)) {
 					ourLog.trace("callHooks({}) for invoker({}) returned false", thePointcut, nextInvoker);
@@ -534,10 +540,11 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			myMethod = theHookMethod;
 
 			Class<?> returnType = theHookMethod.getReturnType();
-			if (myPointcut.getReturnType().equals(BOOLEAN_RETURN_TYPE)) {
+			if (myPointcut.getReturnType().equals(myPointcut.getBooleanReturnTypeForEnum())) {
 				Validate.isTrue(
-						BOOLEAN_RETURN_TYPE.equals(returnType) || void.class.equals(returnType),
-						"Method does not return boolean or void: %s",
+						myPointcut.getBooleanReturnTypeForEnum().equals(returnType) || void.class.equals(returnType),
+						"Method does not return %s or void: %s",
+						myPointcut.getBooleanReturnTypeForEnum().getSimpleName(),
 						theHookMethod);
 			} else if (myPointcut.getReturnType().equals(void.class)) {
 				Validate.isTrue(void.class.equals(returnType), "Method does not return void: %s", theHookMethod);

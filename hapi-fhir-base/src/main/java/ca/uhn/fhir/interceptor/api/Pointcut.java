@@ -3107,6 +3107,10 @@ public enum Pointcut implements IPointcut {
 			@Nonnull Class<?> theReturnType,
 			@Nonnull ExceptionHandlingSpec theExceptionHandlingSpec,
 			String... theParameterTypes) {
+
+		// This enum uses the lowercase-b boolean type to indicate boolean return pointcuts
+		assert !theReturnType.equals(Boolean.class);
+
 		myReturnType = theReturnType;
 		myExceptionHandlingSpec = theExceptionHandlingSpec;
 		myParameterTypes = Collections.unmodifiableList(Arrays.asList(theParameterTypes));
@@ -3130,6 +3134,11 @@ public enum Pointcut implements IPointcut {
 	@Nonnull
 	public Class<?> getReturnType() {
 		return myReturnType;
+	}
+
+	@Override
+	public Class<?> getBooleanReturnTypeForEnum() {
+		return boolean.class;
 	}
 
 	@Override

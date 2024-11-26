@@ -33,6 +33,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 /**
  * This is an {@link IInterceptorBroadcaster} which combines multiple interceptor
  * broadcasters. Hook methods are called across all broadcasters, respecting
@@ -53,10 +55,11 @@ public class CompositeInterceptorBroadcaster implements IInterceptorBroadcaster 
 	public boolean callHooks(Pointcut thePointcut, HookParams theParams) {
 		assert BaseInterceptorService.haveAppropriateParams(thePointcut, theParams);
 		assert thePointcut.getReturnType() == void.class
-				|| thePointcut.getReturnType() == BaseInterceptorService.BOOLEAN_RETURN_TYPE;
+				|| thePointcut.getReturnType() == thePointcut.getBooleanReturnTypeForEnum();
 
 		List<IInvoker> invokers = getInvokersForPointcut(thePointcut);
 		Object retVal = BaseInterceptorService.callInvokers(thePointcut, theParams, invokers);
+		retVal = defaultIfNull(retVal, true);
 		return (Boolean) retVal;
 	}
 
