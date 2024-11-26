@@ -1,0 +1,22 @@
+{
+  "resourceType": "OperationOutcome",
+  "issue": [
+    {
+      "severity": "information",
+      "code": "processing",
+      "details": {
+        "coding": [
+          {
+            "system": "http://example.com/custom-issue-type",
+            "code": "valueset-is-draft"
+          }
+        ]
+      },
+      "diagnostics": "The ValueSet status is marked as draft.",
+      "location": [
+        "Bundle",
+        "Line[1] Col[2]"
+      ]
+    }
+  ]
+}
