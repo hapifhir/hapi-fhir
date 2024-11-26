@@ -294,6 +294,20 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 
+	@Test
+	public void testNoOpUpdateDoesNotModifyLastUpdated() throws InterruptedException {
+		myStorageSettings.setAdvancedHSearchIndexing(true);
+		Patient patient = new Patient();
+		patient.getNameFirstRep().setFamily("graham").addGiven("gary");
+
+		patient = (Patient) myPatientDao.create(patient).getResource();
+		Date originalLastUpdated = patient.getMeta().getLastUpdated();
+
+		patient = (Patient) myPatientDao.update(patient).getResource();
+		Date newLastUpdated = patient.getMeta().getLastUpdated();
+
+		assertThat(originalLastUpdated).isEqualTo(newLastUpdated);
+	}
 
 	@Test
 	public void testFullTextSearchesArePerformanceLogged() {
