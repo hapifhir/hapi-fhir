@@ -47,24 +47,22 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 
 		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.JPA_PERFTRACE_WARNING))).thenReturn(true);
 		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.JPA_PERFTRACE_INFO))).thenReturn(true);
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.JPA_PERFTRACE_INFO), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams params = t.getArgument(1, HookParams.class);
+		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED))).thenReturn(true);
+		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH))).thenReturn(true);
+		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.JPA_PERFTRACE_INFO))).thenReturn(MockInvoker.list(params->{
 			myMessages.add("INFO " + params.get(StorageProcessingMessage.class).getMessage());
-			return null;
-		});
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.JPA_PERFTRACE_WARNING), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams params = t.getArgument(1, HookParams.class);
+		}));
+
+
+		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.JPA_PERFTRACE_WARNING))).thenReturn(MockInvoker.list(params->{
 			myMessages.add("WARN " + params.get(StorageProcessingMessage.class).getMessage());
-			return null;
-		});
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams params = t.getArgument(1, HookParams.class);
+		}));
+		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED))).thenReturn(MockInvoker.list(params->{
 			myMessages.add("REUSING CACHED SEARCH");
-			return null;
-		});
+		}));
 
 		// allow searches to use cached results
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH), ArgumentMatchers.any(HookParams.class))).thenReturn(true);
+		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH))).thenReturn(MockInvoker.list(params->true));
 	}
 
 	@AfterEach
@@ -82,5 +80,6 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 	protected void logCapturedMessages() {
 		ourLog.info("Messages:\n  {}", String.join("\n  ", myMessages));
 	}
+
 
 }

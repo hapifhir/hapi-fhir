@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.validation.ValidationResult;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 import java.io.Writer;
@@ -3109,7 +3110,7 @@ public enum Pointcut implements IPointcut {
 			String... theParameterTypes) {
 
 		// This enum uses the lowercase-b boolean type to indicate boolean return pointcuts
-		assert !theReturnType.equals(Boolean.class);
+		Validate.isTrue(!theReturnType.equals(Boolean.class), "Return type Boolean not allowed here, must be boolean");
 
 		myReturnType = theReturnType;
 		myExceptionHandlingSpec = theExceptionHandlingSpec;

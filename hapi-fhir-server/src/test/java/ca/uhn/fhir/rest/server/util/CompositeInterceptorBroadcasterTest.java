@@ -206,7 +206,7 @@ class CompositeInterceptorBroadcasterTest {
 		when(myHookParamsMock.getParamsForType()).thenReturn(MultimapBuilder.hashKeys().arrayListValues().build());
 
 		IInterceptorBroadcaster interceptorBroadcaster = CompositeInterceptorBroadcaster
-			.newCompositeBroadcaster(List.of());
+			.newCompositeBroadcaster();
 		boolean retVal = interceptorBroadcaster.callHooks(myPointcutMock, myHookParamsMock);
 
 		assertThat(retVal).isTrue();
@@ -231,7 +231,7 @@ class CompositeInterceptorBroadcasterTest {
 		List<IInterceptorBroadcaster> serviceList = List.of(
 			services[theIndex0], services[theIndex1], services[theIndex2]
 		);
-		IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(serviceList);
+		IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(serviceList.toArray(new IInterceptorBroadcaster[0]));
 
 		assertTrue(compositeBroadcaster.hasHooks(Pointcut.TEST_RO));
 		assertFalse(compositeBroadcaster.hasHooks(Pointcut.TEST_RB));

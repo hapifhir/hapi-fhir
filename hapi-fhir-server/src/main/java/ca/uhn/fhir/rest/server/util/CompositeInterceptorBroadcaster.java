@@ -29,9 +29,11 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -42,13 +44,13 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  */
 public class CompositeInterceptorBroadcaster implements IInterceptorBroadcaster {
 
-	private final Collection<IInterceptorBroadcaster> myServices;
+	private final List<IInterceptorBroadcaster> myServices;
 
 	/**
 	 * Constructor
 	 */
 	private CompositeInterceptorBroadcaster(Collection<IInterceptorBroadcaster> theServices) {
-		myServices = theServices;
+		myServices = theServices.stream().filter(t -> t != null).collect(Collectors.toList());
 	}
 
 	@Override
@@ -77,8 +79,11 @@ public class CompositeInterceptorBroadcaster implements IInterceptorBroadcaster 
 	public List<IInvoker> getInvokersForPointcut(Pointcut thePointcut) {
 		List<IInvoker> invokers = new ArrayList<>();
 		for (IInterceptorBroadcaster services : myServices) {
-			List<IInvoker> serviceInvokers = services.getInvokersForPointcut(thePointcut);
-			invokers.addAll(serviceInvokers);
+			if (services.hasHooks(thePointcut)) {
+				List<IInvoker> serviceInvokers = services.getInvokersForPointcut(thePointcut);
+				assert serviceInvokers != null;
+				invokers.addAll(serviceInvokers);
+			}
 		}
 		invokers.sort(Comparator.naturalOrder());
 		return invokers;
@@ -97,8 +102,8 @@ public class CompositeInterceptorBroadcaster implements IInterceptorBroadcaster 
 	/**
 	 * @since 8.0.0
 	 */
-	public static IInterceptorBroadcaster newCompositeBroadcaster(Collection<IInterceptorBroadcaster> theServices) {
-		return new CompositeInterceptorBroadcaster(theServices);
+	public static IInterceptorBroadcaster newCompositeBroadcaster(IInterceptorBroadcaster... theServices) {
+		return new CompositeInterceptorBroadcaster(Arrays.asList(theServices));
 	}
 
 	/**
@@ -109,10 +114,10 @@ public class CompositeInterceptorBroadcaster implements IInterceptorBroadcaster 
 		if (theRequestDetails != null) {
 			IInterceptorBroadcaster requestBroadcaster = theRequestDetails.getInterceptorBroadcaster();
 			if (requestBroadcaster != null) {
-				return new CompositeInterceptorBroadcaster(List.of(theInterceptorBroadcaster, requestBroadcaster));
+				return newCompositeBroadcaster(theInterceptorBroadcaster, requestBroadcaster);
 			}
 		}
 
-		return new CompositeInterceptorBroadcaster(List.of(theInterceptorBroadcaster));
+		return newCompositeBroadcaster(theInterceptorBroadcaster);
 	}
 }
