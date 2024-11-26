@@ -218,9 +218,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			myAllStructures = retVal;
 		}
 
-		// FIXME: remove
-		ourLog.info("AAAAAAA Returning {} SDs", retVal.size());
-
 		return retVal;
 	}
 
