@@ -220,7 +220,7 @@ public class IpsGeneratorSvcImplTest {
 		HtmlTable table = (HtmlTable) tables.get(0);
 		int onsetIndex = 6;
 		assertEquals("Onset", table.getHeader().getRows().get(0).getCell(onsetIndex).asNormalizedText());
-		assertEquals(new DateTimeType("2020-02-03T11:22:33Z").getValue().toString(), table.getBodies().get(0).getRows().get(0).getCell(onsetIndex).asNormalizedText());
+		assertEquals(new DateTimeType("2020-02-03T11:22:33Z").getValueAsString(), table.getBodies().get(0).getRows().get(0).getCell(onsetIndex).asNormalizedText());
 		assertEquals("Some Onset", table.getBodies().get(0).getRows().get(1).getCell(onsetIndex).asNormalizedText());
 		assertEquals("", table.getBodies().get(0).getRows().get(2).getCell(onsetIndex).asNormalizedText());
 	}
