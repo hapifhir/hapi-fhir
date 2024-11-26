@@ -686,7 +686,7 @@ public class RestfulServerUtils {
 		if (context.getVersion().getVersion() != theForVersion) {
 			context = myFhirContextMap.get(theForVersion);
 			if (context == null) {
-				context = theForVersion.newContext();
+				context = FhirContext.forVersion(theForVersion);
 				myFhirContextMap.put(theForVersion, context);
 			}
 		}
