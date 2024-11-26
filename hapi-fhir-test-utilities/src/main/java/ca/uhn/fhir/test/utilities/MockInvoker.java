@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r4;
+package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-class MockInvoker implements IBaseInterceptorBroadcaster.IInvoker {
+public class MockInvoker implements IBaseInterceptorBroadcaster.IInvoker {
 
 	private final Function<HookParams, Object> myFunction;
 

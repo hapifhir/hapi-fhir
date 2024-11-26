@@ -58,7 +58,9 @@ class CompositeInterceptorBroadcasterTest {
 
 		when(myPointcutMock.getReturnType()).thenReturn(BOOLEAN_CLASS);
 		when(myPointcutMock.getBooleanReturnTypeForEnum()).thenReturn(BOOLEAN_CLASS);
+		when(myModuleBroadcasterMock.hasHooks(eq(myPointcutMock))).thenReturn(true);
 		when(myModuleBroadcasterMock.getInvokersForPointcut(eq(myPointcutMock))).thenReturn(List.of(myModuleBroadcasterInvokerMock));
+		when(myReqDetailsBroadcasterMock.hasHooks(eq(myPointcutMock))).thenReturn(true);
 		when(myReqDetailsBroadcasterMock.getInvokersForPointcut(eq(myPointcutMock))).thenReturn(List.of(myReqDetailsInvokerMock));
 		when(myPointcutMock.getParameterTypes()).thenReturn(List.of());
 		when(myHookParamsMock.getParamsForType()).thenReturn(MultimapBuilder.hashKeys().arrayListValues().build());
@@ -82,7 +84,9 @@ class CompositeInterceptorBroadcasterTest {
 
 		when(myPointcutMock.getReturnType()).thenReturn(BOOLEAN_CLASS);
 		when(myPointcutMock.getBooleanReturnTypeForEnum()).thenReturn(BOOLEAN_CLASS);
+		when(myModuleBroadcasterMock.hasHooks(eq(myPointcutMock))).thenReturn(true);
 		when(myModuleBroadcasterMock.getInvokersForPointcut(eq(myPointcutMock))).thenReturn(List.of(myModuleBroadcasterInvokerMock));
+		when(myReqDetailsBroadcasterMock.hasHooks(eq(myPointcutMock))).thenReturn(true);
 		when(myReqDetailsBroadcasterMock.getInvokersForPointcut(eq(myPointcutMock))).thenReturn(List.of(myReqDetailsInvokerMock));
 		when(myPointcutMock.getParameterTypes()).thenReturn(List.of());
 		when(myHookParamsMock.getParamsForType()).thenReturn(MultimapBuilder.hashKeys().arrayListValues().build());
@@ -105,7 +109,9 @@ class CompositeInterceptorBroadcasterTest {
 
 		when(myPointcutMock.getReturnType()).thenReturn(BOOLEAN_CLASS);
 		when(myPointcutMock.getBooleanReturnTypeForEnum()).thenReturn(BOOLEAN_CLASS);
+		when(myModuleBroadcasterMock.hasHooks(eq(myPointcutMock))).thenReturn(true);
 		when(myModuleBroadcasterMock.getInvokersForPointcut(eq(myPointcutMock))).thenReturn(List.of(myModuleBroadcasterInvokerMock));
+		when(myReqDetailsBroadcasterMock.hasHooks(eq(myPointcutMock))).thenReturn(true);
 		when(myReqDetailsBroadcasterMock.getInvokersForPointcut(eq(myPointcutMock))).thenReturn(List.of(myReqDetailsInvokerMock));
 		when(myPointcutMock.getParameterTypes()).thenReturn(List.of());
 		when(myHookParamsMock.getParamsForType()).thenReturn(MultimapBuilder.hashKeys().arrayListValues().build());
@@ -126,6 +132,7 @@ class CompositeInterceptorBroadcasterTest {
 
 		when(myPointcutMock.getReturnType()).thenReturn(BOOLEAN_CLASS);
 		when(myPointcutMock.getBooleanReturnTypeForEnum()).thenReturn(BOOLEAN_CLASS);
+		when(myModuleBroadcasterMock.hasHooks(eq(myPointcutMock))).thenReturn(true);
 		when(myModuleBroadcasterMock.getInvokersForPointcut(eq(myPointcutMock))).thenReturn(List.of(myModuleBroadcasterInvokerMock));
 		when(myPointcutMock.getParameterTypes()).thenReturn(List.of());
 		when(myHookParamsMock.getParamsForType()).thenReturn(MultimapBuilder.hashKeys().arrayListValues().build());
@@ -146,6 +153,7 @@ class CompositeInterceptorBroadcasterTest {
 
 		when(myPointcutMock.getReturnType()).thenReturn(BOOLEAN_CLASS);
 		when(myPointcutMock.getBooleanReturnTypeForEnum()).thenReturn(BOOLEAN_CLASS);
+		when(myModuleBroadcasterMock.hasHooks(eq(myPointcutMock))).thenReturn(true);
 		when(myModuleBroadcasterMock.getInvokersForPointcut(eq(myPointcutMock))).thenReturn(List.of(myModuleBroadcasterInvokerMock));
 		when(myPointcutMock.getParameterTypes()).thenReturn(List.of());
 		when(myHookParamsMock.getParamsForType()).thenReturn(MultimapBuilder.hashKeys().arrayListValues().build());
@@ -166,6 +174,7 @@ class CompositeInterceptorBroadcasterTest {
 
 		when(myPointcutMock.getReturnType()).thenReturn(BOOLEAN_CLASS);
 		when(myPointcutMock.getBooleanReturnTypeForEnum()).thenReturn(BOOLEAN_CLASS);
+		when(myModuleBroadcasterMock.hasHooks(eq(myPointcutMock))).thenReturn(true);
 		when(myModuleBroadcasterMock.getInvokersForPointcut(eq(myPointcutMock))).thenReturn(List.of(myModuleBroadcasterInvokerMock));
 		when(myPointcutMock.getParameterTypes()).thenReturn(List.of());
 		when(myHookParamsMock.getParamsForType()).thenReturn(MultimapBuilder.hashKeys().arrayListValues().build());
@@ -188,6 +197,7 @@ class CompositeInterceptorBroadcasterTest {
 		when(myPointcutMock.getBooleanReturnTypeForEnum()).thenReturn(BOOLEAN_CLASS);
 		when(myPointcutMock.getParameterTypes()).thenReturn(List.of());
 		when(myHookParamsMock.getParamsForType()).thenReturn(MultimapBuilder.hashKeys().arrayListValues().build());
+		when(myModuleBroadcasterMock.hasHooks(eq(myPointcutMock))).thenReturn(true);
 		when(myModuleBroadcasterMock.getInvokersForPointcut(eq(myPointcutMock))).thenReturn(List.of(myModuleBroadcasterInvokerMock));
 		when(myModuleBroadcasterInvokerMock.invoke(eq(myHookParamsMock))).thenReturn(false);
 
