@@ -71,8 +71,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  *     that can support the URL will be returned to the caller.
  * </li>
  * <li>
- *     All other methods will invoke the method in the chain in order, and will return
- *     immediately as soon as a non-null value is returned.
+ *     All other methods will invoke each method in the chain in order, and will stop processing and return
+ *     immediately as soon as the first non-null value is returned.
  * </li>
  * </ul>
  * </p>
@@ -94,7 +94,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * </li>
  * <li>
  *     Results of {@link #generateSnapshot(ValidationSupportContext, IBaseResource, String, String, String)}
- *     are not cached, as this method is generally called in contexts where the results
+ *     are not cached, since this method is generally called in contexts where the results
  *     are cached.
  * </li>
  * <li>
@@ -929,9 +929,11 @@ public class ValidationSupportChain implements IValidationSupport {
 					myNonExpiringCache.put(theKey, value);
 					putInCache(theKey, value);
 				};
+				returnValue = retVal.getValue();
+				
 				myBackgroundExecutor.execute(loaderTask);
 
-				return retVal.getValue();
+				return returnValue;
 			} else {
 				retVal = new CacheValue<>(theLoader.get());
 				myNonExpiringCache.put(theKey, retVal);
