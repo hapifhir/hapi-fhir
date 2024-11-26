@@ -1,10 +1,12 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.StructureDefinition.StructureDefinitionKind;
@@ -197,6 +199,7 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseTest {
 		org.hl7.fhir.r4.model.StructureDefinition expected = new org.hl7.fhir.r4.model.StructureDefinition();
 		expected.setUrl("http://foo");
 		expected.getSnapshot().addElement().setId("FOO");
+		expected.setUserData(DefaultProfileValidationSupport.SOURCE_PACKAGE_ID, "hl7.fhir.r999.core");
 		when(mockContext.getRootValidationSupport().fetchResource(eq(org.hl7.fhir.r4.model.StructureDefinition.class), eq("http://foo"))).thenReturn(expected);
 
 		// Test
@@ -204,6 +207,8 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseTest {
 
 		// Verify
 		assertEquals("FOO", actual.getSnapshot().getElementFirstRep().getId());
+		PackageInformation sourcePackage = actual.getSourcePackage();
+		assertEquals("hl7.fhir.r999.core", sourcePackage.getId());
 	}
 
 	private List<StructureDefinition> createStructureDefinitions() {

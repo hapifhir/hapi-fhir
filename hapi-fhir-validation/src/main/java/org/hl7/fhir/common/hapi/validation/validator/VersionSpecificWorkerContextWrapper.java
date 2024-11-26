@@ -3,6 +3,7 @@ package org.hl7.fhir.common.hapi.validation.validator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -55,6 +56,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1068,6 +1070,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 						}
 						canonical = myVersionCanonicalizer.resourceToValidatorCanonical(resource);
 					}
+				}
+
+				String sourcePackageId =
+						(String) theResource.getUserData(DefaultProfileValidationSupport.SOURCE_PACKAGE_ID);
+				if (sourcePackageId != null) {
+					canonical.setSourcePackage(new PackageInformation(sourcePackageId, null, null, new Date()));
 				}
 
 				theResource.setUserData(CANONICAL_USERDATA_KEY, canonical);
