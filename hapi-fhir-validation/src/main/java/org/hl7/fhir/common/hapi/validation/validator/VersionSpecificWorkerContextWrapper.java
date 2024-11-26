@@ -13,6 +13,7 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -1045,14 +1046,27 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					StructureDefinition canonicalSd = (StructureDefinition) canonical;
 					if (canonicalSd.getSnapshot().isEmpty()) {
 						ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
-						theResource = myValidationSupportContext
-								.getRootValidationSupport()
-								.generateSnapshot(myValidationSupportContext, theResource, "", null, "");
-						Validate.isTrue(
-								theResource != null,
-								"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
-								canonicalSd.getUrl());
-						canonical = myVersionCanonicalizer.resourceToValidatorCanonical(theResource);
+						IBaseResource resource = theResource;
+						try {
+							resource = myValidationSupportContext
+									.getRootValidationSupport()
+									.generateSnapshot(myValidationSupportContext, resource, "", null, "");
+							Validate.isTrue(
+									resource != null,
+									"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
+									canonicalSd.getUrl());
+						} catch (Exception e) {
+							String message = e.toString();
+							Throwable rootCause = ExceptionUtils.getRootCause(e);
+							if (rootCause != null) {
+								message = rootCause.getMessage();
+							}
+							ourLog.warn(
+									"Failed to generate snapshot for profile with URL[{}]: {}",
+									canonicalSd.getUrl(),
+									message);
+						}
+						canonical = myVersionCanonicalizer.resourceToValidatorCanonical(resource);
 					}
 				}
 
