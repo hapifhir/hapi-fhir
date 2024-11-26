@@ -117,7 +117,8 @@ public interface IValidationSupport {
 			@Nonnull String theValueSetUrlToExpand)
 			throws ResourceNotFoundException {
 		Validate.notBlank(theValueSetUrlToExpand, "theValueSetUrlToExpand must not be null or blank");
-		IBaseResource valueSet = fetchValueSet(theValueSetUrlToExpand);
+		IBaseResource valueSet =
+				theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrlToExpand);
 		if (valueSet == null) {
 			throw new ResourceNotFoundException(
 					Msg.code(2024) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetUrlToExpand));
