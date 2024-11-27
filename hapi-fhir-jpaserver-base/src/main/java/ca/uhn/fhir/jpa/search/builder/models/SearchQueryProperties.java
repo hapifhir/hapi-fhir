@@ -63,6 +63,10 @@ public class SearchQueryProperties {
 		return this;
 	}
 
+	public boolean hasMaxResultsRequested() {
+		return myMaxResultsRequested != null;
+	}
+
 	public Integer getOffset() {
 		return myOffset;
 	}
@@ -87,5 +91,14 @@ public class SearchQueryProperties {
 	public SearchQueryProperties setSortSpec(SortSpec theSortSpec) {
 		mySortSpec = theSortSpec;
 		return this;
+	}
+
+	public SearchQueryProperties clone() {
+		return new SearchQueryProperties()
+			.setMaxResultsRequested(myMaxResultsRequested)
+			.setSortSpec(mySortSpec)
+			.setOffset(myOffset)
+			.setDoCountOnlyFlag(myDoCountOnlyFlag)
+			.setDeduplicateInDBFlag(myDeduplicateInDBFlag);
 	}
 }

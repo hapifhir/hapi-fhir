@@ -378,6 +378,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		final ISearchBuilder<JpaPid> sb =
 				mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
+		sb.setRequireTotal(theParams.getCount() != null);
 
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
 		boolean isOffsetQuery = theParams.isOffsetQuery();
@@ -405,9 +406,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			// we set a max to fetch from the db for synchronous searches;
 			// otherwise, we would have to load everything into memory (or force the db to do so);
 			// So let's set a max value here
-//			Integer maxToLoad = ObjectUtils.defaultIfNull(loadSynchronousUpTo, myStorageSettings.getInternalSynchronousSearchSize());
-//			ourLog.debug("Setting a max fetch value of {} for synchronous search", maxToLoad);
-//			sb.setMaxResultsToFetch(maxToLoad);
+			Integer maxToLoad = ObjectUtils.defaultIfNull(loadSynchronousUpTo, myStorageSettings.getInternalSynchronousSearchSize());
+			ourLog.debug("Setting a max fetch value of {} for synchronous search", maxToLoad);
+			sb.setMaxResultsToFetch(maxToLoad);
 
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 			return mySynchronousSearchSvc.executeQuery(

@@ -246,7 +246,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 							resources, theRequestDetails, myInterceptorBroadcaster);
 
 					SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
-					if (hasACount) {
+					if (hasACount && theSb.requiresTotal()) {
 						bundleProvider.setTotalResourcesRequestedReturned(receivedResourceCount);
 					}
 					if (theParams.isOffsetQuery()) {

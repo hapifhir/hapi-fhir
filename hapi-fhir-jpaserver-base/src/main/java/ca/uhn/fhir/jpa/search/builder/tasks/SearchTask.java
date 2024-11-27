@@ -597,6 +597,7 @@ public class SearchTask implements Callable<Void> {
 
 			if (next == -1) {
 				sb.setMaxResultsToFetch(null);
+				sb.setShouldDeduplicateInDB(true);
 			} else {
 				// we want at least 1 more than our requested amount
 				// so we know that there are other results
