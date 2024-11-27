@@ -53,14 +53,17 @@ public class StorageInterceptorHooksFacade {
 			SearchParameterMap theParams,
 			Search search,
 			RequestPartitionId theRequestPartitionId) {
-		HookParams params = new HookParams()
-				.add(ICachedSearchDetails.class, search)
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-				.add(SearchParameterMap.class, theParams)
-				.add(RequestPartitionId.class, theRequestPartitionId);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESEARCH_REGISTERED)) {
+			HookParams params = new HookParams()
+					.add(ICachedSearchDetails.class, search)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(SearchParameterMap.class, theParams)
+					.add(RequestPartitionId.class, theRequestPartitionId);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+		}
 	}
 	// private IInterceptorBroadcaster myInterceptorBroadcaster;
 }

@@ -941,8 +941,9 @@ public class SearchParamExtractorService {
 			if (myPartitionSettings.getAllowReferencesAcrossPartitions() == ALLOWED_UNQUALIFIED) {
 
 				// Interceptor: Pointcut.JPA_CROSS_PARTITION_REFERENCE_DETECTED
-				if (CompositeInterceptorBroadcaster.hasHooks(
-						Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE, myInterceptorBroadcaster, theRequest)) {
+				IInterceptorBroadcaster compositeBroadcaster =
+						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE)) {
 					CrossPartitionReferenceDetails referenceDetails = new CrossPartitionReferenceDetails(
 							theRequestPartitionId,
 							theSourceResourceName,
@@ -950,12 +951,8 @@ public class SearchParamExtractorService {
 							theRequest,
 							theTransactionDetails);
 					HookParams params = new HookParams(referenceDetails);
-					targetResource =
-							(IResourceLookup<JpaPid>) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-									myInterceptorBroadcaster,
-									theRequest,
-									Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE,
-									params);
+					targetResource = (IResourceLookup<JpaPid>) compositeBroadcaster.callHooksAndReturnObject(
+							Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE, params);
 				} else {
 					targetResource = myResourceLinkResolver.findTargetResource(
 							RequestPartitionId.allPartitions(),
@@ -1089,8 +1086,9 @@ public class SearchParamExtractorService {
 		}
 
 		// If extraction generated any warnings, broadcast an error
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.JPA_PERFTRACE_WARNING, theInterceptorBroadcaster, theRequestDetails)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(theInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_WARNING)) {
 			for (String next : theSearchParamSet.getWarnings()) {
 				StorageProcessingMessage messageHolder = new StorageProcessingMessage();
 				messageHolder.setMessage(next);
@@ -1098,8 +1096,7 @@ public class SearchParamExtractorService {
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 						.add(StorageProcessingMessage.class, messageHolder);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						theInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
+				compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
 			}
 		}
 	}

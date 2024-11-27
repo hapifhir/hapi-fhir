@@ -374,8 +374,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 		Class<? extends IBaseResource> resourceTypeClass =
 				myContext.getResourceDefinition(theResourceType).getImplementingClass();
-		final ISearchBuilder<JpaPid> sb =
-				mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
+		final ISearchBuilder<JpaPid> sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
@@ -599,17 +598,18 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(theRequestPartitionId)
 				.execute(() -> {
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									myInterceptorBroadcaster, theRequestDetails);
 
 					// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
+
 					HookParams params = new HookParams()
 							.add(SearchParameterMap.class, theParams)
 							.add(RequestDetails.class, theRequestDetails)
 							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-					boolean canUseCache = CompositeInterceptorBroadcaster.doCallHooks(
-							myInterceptorBroadcaster,
-							theRequestDetails,
-							Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH,
-							params);
+					boolean canUseCache =
+							compositeBroadcaster.callHooks(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH, params);
 					if (!canUseCache) {
 						return null;
 					}
@@ -626,11 +626,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 							.add(SearchParameterMap.class, theParams)
 							.add(RequestDetails.class, theRequestDetails)
 							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							myInterceptorBroadcaster,
-							theRequestDetails,
-							Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED,
-							params);
+					compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
 
 					return myPersistedJpaBundleProviderFactory.newInstance(theRequestDetails, searchToUse.getUuid());
 				});

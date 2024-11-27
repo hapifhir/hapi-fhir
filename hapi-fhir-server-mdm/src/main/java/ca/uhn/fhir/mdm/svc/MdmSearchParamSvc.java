@@ -92,7 +92,7 @@ public class MdmSearchParamSvc {
 
 	public ISearchBuilder generateSearchBuilderForType(String theSourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theSourceType);
-		return mySearchBuilderFactory.newSearchBuilder(resourceDao, theSourceType, resourceDao.getResourceType());
+		return mySearchBuilderFactory.newSearchBuilder(theSourceType, resourceDao.getResourceType());
 	}
 
 	/**
