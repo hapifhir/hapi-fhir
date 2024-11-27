@@ -16,9 +16,9 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -100,7 +100,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 	private Set<String> mySupportedValueSets = new HashSet<>();
 	private Set<String> myValidSystems = new HashSet<>();
 	private Set<String> myValidSystemsNotReturningIssues = new HashSet<>();
-	private CachingValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 
 	private void addValidConcept(String theSystem, String theCode) {
 		addValidConcept(theSystem, theCode, true);
@@ -141,7 +141,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		myMockSupport = mock(IValidationSupport.class);
 		when(myMockSupport.getFhirContext()).thenReturn(ourCtx);
-		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(myMockSupport, myDefaultValidationSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx)));
+		myValidationSupport = new ValidationSupportChain(myMockSupport, myDefaultValidationSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx), new SnapshotGeneratingValidationSupport(ourCtx));
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
@@ -222,7 +222,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		when(myMockSupport.fetchStructureDefinition(nullable(String.class))).thenAnswer(new Answer<StructureDefinition>() {
 			@Override
 			public StructureDefinition answer(InvocationOnMock theInvocation) {
-				StructureDefinition retVal = (StructureDefinition) myDefaultValidationSupport.fetchStructureDefinition((String) theInvocation.getArguments()[1]);
+				StructureDefinition retVal = (StructureDefinition) myDefaultValidationSupport.fetchStructureDefinition((String) theInvocation.getArguments()[0]);
 				ourLog.debug("fetchStructureDefinition({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
 				return retVal;
 			}

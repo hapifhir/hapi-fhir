@@ -164,6 +164,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
+		assert myStructureDefinitionType != null;
 		return fetchResource(myStructureDefinitionType, theUrl);
 	}
 

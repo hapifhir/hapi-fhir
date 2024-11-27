@@ -33,7 +33,7 @@ public class SleepUtil {
 	@SuppressWarnings("BusyWait")
 	public void sleepAtLeast(long theMillis, boolean theLogProgress) {
 		long start = System.currentTimeMillis();
-		while (System.currentTimeMillis() <= start + theMillis) {
+		while (System.currentTimeMillis() < start + theMillis) {
 			try {
 				long timeSinceStarted = System.currentTimeMillis() - start;
 				long timeToSleep = Math.max(0, theMillis - timeSinceStarted);
