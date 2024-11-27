@@ -35,6 +35,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
+import org.hl7.fhir.common.hapi.validation.support.NpmPackageValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 
@@ -86,6 +87,8 @@ public class ValidateCommand extends BaseCommand {
 				"igpack",
 				true,
 				"If specified, provides the filename of an IGPack file to include in validation");
+		addOptionalOption(
+				retVal, null, "oneCode", false, "Validate allowing one coding to satisfy CodeableConcept binding");
 		addOptionalOption(retVal, "x", "xsd", false, "Validate using Schemas");
 		addOptionalOption(retVal, "s", "sch", false, "Validate using Schematrons");
 		addOptionalOption(retVal, "e", "encoding", "encoding", "File encoding (default is UTF-8)");
@@ -149,20 +152,23 @@ public class ValidateCommand extends BaseCommand {
 		}
 
 		if (theCommandLine.hasOption("p")) {
+			ValidationSupportChain validationSupportChain;
 			switch (ctx.getVersion().getVersion()) {
 				case DSTU2: {
 					FhirInstanceValidator instanceValidator;
-					ValidationSupportChain validationSupportChain =
+					validationSupportChain =
 							ValidationSupportChainCreator.getValidationSupportChainDstu2(ctx, theCommandLine);
+					validationSupportChain.oneCodingIsSufficient = true;
 					instanceValidator = new FhirInstanceValidator(validationSupportChain);
 					val.registerValidatorModule(instanceValidator);
 					break;
 				}
 				case DSTU3:
 				case R4: {
+					ourLog.info("Adding FHIR R4 validation support chain");
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
-					ValidationSupportChain validationSupportChain =
+					validationSupportChain =
 							ValidationSupportChainCreator.getValidationSupportChainR4(ctx, theCommandLine);
 					instanceValidator.setValidationSupport(validationSupportChain);
 					break;
@@ -170,6 +176,25 @@ public class ValidateCommand extends BaseCommand {
 				default:
 					throw new ParseException(
 							Msg.code(1620) + "Profile validation (-p) is not supported for this FHIR version");
+			}
+
+			// Do we allow CodeableConcepts to be satisfied by only one coding?
+			// Useful when we are using additionalBindings.
+			validationSupportChain.oneCodingIsSufficient = theCommandLine.hasOption("oneCode");
+
+			// If they want to do profile validation - there might be a whole IG to load...
+			if (theCommandLine.hasOption("igpack")) {
+				String igPack = theCommandLine.getOptionValue("igpack");
+				ourLog.info("Loading IG Package from {} to the validation support chain", igPack);
+				try {
+					NpmPackageValidationSupport npmPackageSupport = new NpmPackageValidationSupport(ctx);
+					npmPackageSupport.loadPackageFromFile(igPack);
+					validationSupportChain.addValidationSupport(0, npmPackageSupport);
+				} catch (IOException iox) {
+					throw new ParseException(
+							Msg.code(1620) + "IGpack validation (--igpack) failed: " + iox.getMessage());
+				}
+				ourLog.info("Completed loading IG Package from {}", igPack);
 			}
 		}
 
