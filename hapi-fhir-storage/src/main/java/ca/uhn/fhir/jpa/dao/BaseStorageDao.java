@@ -718,11 +718,16 @@ public abstract class BaseStorageDao {
 	 * @return A set of references that should not have their client-given versions stripped according to the
 	 * 		   versioned references settings.
 	 */
-	public static Set<IBaseReference> extractReferencesToAvoidReplacement(FhirContext theFhirContext, IBaseResource theResource) {
-		if (!theFhirContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths().isEmpty()) {
+	public static Set<IBaseReference> extractReferencesToAvoidReplacement(
+			FhirContext theFhirContext, IBaseResource theResource) {
+		if (!theFhirContext
+				.getParserOptions()
+				.getDontStripVersionsFromReferencesAtPaths()
+				.isEmpty()) {
 			String theResourceType = theFhirContext.getResourceType(theResource);
-			Set<String> versionReferencesPaths =
-				theFhirContext.getParserOptions().getDontStripVersionsFromReferencesAtPathsByResourceType(theResourceType);
+			Set<String> versionReferencesPaths = theFhirContext
+					.getParserOptions()
+					.getDontStripVersionsFromReferencesAtPathsByResourceType(theResourceType);
 			return getReferencesWithOrWithoutVersionId(versionReferencesPaths, theFhirContext, theResource, false);
 		}
 		return Collections.emptySet();
@@ -792,11 +797,15 @@ public abstract class BaseStorageDao {
 	 * @return Set of references contained in the resource with or without versions
 	 */
 	private static Set<IBaseReference> getReferencesWithOrWithoutVersionId(
-			Set<String> theVersionReferencesPaths, FhirContext theFhirContext, IBaseResource theResource, boolean theShouldFilterByRefsWithoutVersionId) {
+			Set<String> theVersionReferencesPaths,
+			FhirContext theFhirContext,
+			IBaseResource theResource,
+			boolean theShouldFilterByRefsWithoutVersionId) {
 		return theVersionReferencesPaths.stream()
 				.map(fullPath -> theFhirContext.newTerser().getValues(theResource, fullPath, IBaseReference.class))
 				.flatMap(Collection::stream)
-				.filter(reference -> reference.getReferenceElement().hasVersionIdPart() ^ theShouldFilterByRefsWithoutVersionId)
+				.filter(reference ->
+						reference.getReferenceElement().hasVersionIdPart() ^ theShouldFilterByRefsWithoutVersionId)
 				.collect(Collectors.toMap(ref -> ref, ref -> ref, (oldRef, newRef) -> oldRef, IdentityHashMap::new))
 				.keySet();
 	}

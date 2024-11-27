@@ -115,7 +115,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -284,7 +283,8 @@ public abstract class BaseTransactionProcessor {
 			IBaseResource theRes,
 			RequestDetails theRequestDetails) {
 		IIdType newId = theOutcome.getId().toUnqualified();
-		IIdType resourceId = isPlaceholder(theNextResourceId) ? theNextResourceId : theNextResourceId.toUnqualifiedVersionless();
+		IIdType resourceId =
+				isPlaceholder(theNextResourceId) ? theNextResourceId : theNextResourceId.toUnqualifiedVersionless();
 		if (!newId.equals(resourceId)) {
 			if (!theNextResourceId.isEmpty()) {
 				theIdSubstitutions.put(resourceId, newId);
@@ -1703,7 +1703,8 @@ public abstract class BaseTransactionProcessor {
 
 			Set<IBaseReference> referencesToAutoVersion =
 					BaseStorageDao.extractReferencesToAutoVersion(myContext, myStorageSettings, nextResource);
-			Set<IBaseReference> referencesToKeepClientSuppliedVersion = BaseStorageDao.extractReferencesToAvoidReplacement(myContext, nextResource);
+			Set<IBaseReference> referencesToKeepClientSuppliedVersion =
+					BaseStorageDao.extractReferencesToAvoidReplacement(myContext, nextResource);
 
 			if (referencesToAutoVersion.isEmpty()) {
 				// no references to autoversion - we can do the resolve and save now
@@ -1736,7 +1737,8 @@ public abstract class BaseTransactionProcessor {
 				DaoMethodOutcome nextOutcome = nextEntry.getKey();
 				Set<IBaseReference> referencesToAutoVersion = nextEntry.getValue();
 				IBaseResource nextResource = nextOutcome.getResource();
-				Set<IBaseReference> referencesToKeepClientSuppliedVersion = BaseStorageDao.extractReferencesToAvoidReplacement(myContext, nextResource);
+				Set<IBaseReference> referencesToKeepClientSuppliedVersion =
+						BaseStorageDao.extractReferencesToAvoidReplacement(myContext, nextResource);
 
 				resolveReferencesThenSaveAndIndexResource(
 						theRequest,
@@ -1791,7 +1793,8 @@ public abstract class BaseTransactionProcessor {
 				}
 			}
 			if (newId != null || theIdSubstitutions.containsSource(nextId)) {
-				if (shouldReplaceResourceReference(theReferencesToAutoVersion, theReferencesToKeepClientSuppliedVersion, resourceReference)) {
+				if (shouldReplaceResourceReference(
+						theReferencesToAutoVersion, theReferencesToKeepClientSuppliedVersion, resourceReference)) {
 					if (newId == null) {
 						newId = theIdSubstitutions.getForSource(nextId);
 					}
@@ -1944,8 +1947,14 @@ public abstract class BaseTransactionProcessor {
 	 * @param theResourceReference the resource reference
 	 * @return true if we should replace the resource reference, false if we should keep the client provided reference
 	 */
-	private boolean shouldReplaceResourceReference(Set<IBaseReference> theReferencesToAutoVersion, Set<IBaseReference> theReferencesToKeepClientSuppliedVersion, IBaseReference theResourceReference) {
-		return (!theReferencesToKeepClientSuppliedVersion.contains(theResourceReference) && myContext.getParserOptions().isStripVersionsFromReferences()) || theReferencesToAutoVersion.contains(theResourceReference) || isPlaceholder(theResourceReference.getReferenceElement());
+	private boolean shouldReplaceResourceReference(
+			Set<IBaseReference> theReferencesToAutoVersion,
+			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion,
+			IBaseReference theResourceReference) {
+		return (!theReferencesToKeepClientSuppliedVersion.contains(theResourceReference)
+						&& myContext.getParserOptions().isStripVersionsFromReferences())
+				|| theReferencesToAutoVersion.contains(theResourceReference)
+				|| isPlaceholder(theResourceReference.getReferenceElement());
 	}
 
 	private void replaceResourceReference(
@@ -2071,12 +2080,12 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Extracts the transaction url from the entry and verifies it's:
-     * * not null or blank
-     * * is a relative url matching the resourceType it is about
-     * <p>
-     * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
-     */
+	 * Extracts the transaction url from the entry and verifies it's:
+	 * * not null or blank
+	 * * is a relative url matching the resourceType it is about
+	 * <p>
+	 * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
+	 */
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
 		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
 
@@ -2090,12 +2099,12 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Returns true if the provided url is a valid entry request.url.
-     * <p>
-     * This means:
-     * a) not an absolute url (does not start with http/https)
-     * b) starts with either a ResourceType or /ResourceType
-     */
+	 * Returns true if the provided url is a valid entry request.url.
+	 * <p>
+	 * This means:
+	 * a) not an absolute url (does not start with http/https)
+	 * b) starts with either a ResourceType or /ResourceType
+	 */
 	private boolean isValidResourceTypeUrl(@Nonnull String theUrl) {
 		if (UrlUtil.isAbsolute(theUrl)) {
 			return false;
@@ -2120,9 +2129,9 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Extracts the transaction url from the entry and verifies that it is not null/blank
-     * and returns it
-     */
+	 * Extracts the transaction url from the entry and verifies that it is not null/blank
+	 * and returns it
+	 */
 	private String extractTransactionUrlOrThrowException(IBase nextEntry, String verb) {
 		String url = myVersionAdapter.getEntryRequestUrl(nextEntry);
 		if (isBlank(url)) {
@@ -2179,14 +2188,14 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Transaction Order, per the spec:
-     * <p>
-     * Process any DELETE interactions
-     * Process any POST interactions
-     * Process any PUT interactions
-     * Process any PATCH interactions
-     * Process any GET interactions
-     */
+	 * Transaction Order, per the spec:
+	 * <p>
+	 * Process any DELETE interactions
+	 * Process any POST interactions
+	 * Process any PUT interactions
+	 * Process any PATCH interactions
+	 * Process any GET interactions
+	 */
 	// @formatter:off
 	public class TransactionSorter implements Comparator<IBase> {
 

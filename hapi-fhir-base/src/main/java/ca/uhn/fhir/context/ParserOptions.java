@@ -134,7 +134,9 @@ public class ParserOptions {
 	 */
 	public Set<String> getDontStripVersionsFromReferencesAtPathsByResourceType(String theResourceType) {
 		Validate.notEmpty(theResourceType, "theResourceType must not be null or empty");
-		return myDontStripVersionsFromReferencesAtPaths.stream().filter(referencePath -> referencePath.startsWith(theResourceType + ".")).collect(Collectors.toSet());
+		return myDontStripVersionsFromReferencesAtPaths.stream()
+				.filter(referencePath -> referencePath.startsWith(theResourceType + "."))
+				.collect(Collectors.toSet());
 	}
 
 	/**
