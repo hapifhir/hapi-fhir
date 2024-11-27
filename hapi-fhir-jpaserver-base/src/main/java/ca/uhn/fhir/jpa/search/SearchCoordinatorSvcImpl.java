@@ -66,6 +66,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.BeanFactory;
@@ -394,13 +395,19 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 				try {
 					return direct.get();
-
 				} catch (ResourceNotFoundInIndexException theE) {
 					// some resources were not found in index, so we will inform this and resort to JPA search
 					ourLog.warn(
 							"Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
 				}
 			}
+
+			// we set a max to fetch from the db for synchronous searches;
+			// otherwise, we would have to load everything into memory (or force the db to do so);
+			// So let's set a max value here
+//			Integer maxToLoad = ObjectUtils.defaultIfNull(loadSynchronousUpTo, myStorageSettings.getInternalSynchronousSearchSize());
+//			ourLog.debug("Setting a max fetch value of {} for synchronous search", maxToLoad);
+//			sb.setMaxResultsToFetch(maxToLoad);
 
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 			return mySynchronousSearchSvc.executeQuery(
