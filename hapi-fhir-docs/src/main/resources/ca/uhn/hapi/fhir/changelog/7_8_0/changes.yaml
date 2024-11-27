@@ -37,7 +37,7 @@
       <li>hibernate-search (JPA): 7.0.0.Final -&gt; 7.2.1.Final</li>
       <li>elastic-apm (JPA): 1.44.0 -&gt; 1.52.0</li>
       <li>elastic-search (JPA): 8.14.3 -&gt; 8.15.3</li>
-      <li>lucene (JPA): 9.8.0 -&gt; 9.12.0</li>
+      <li>lucene (JPA): 9.8.0 -&gt; 9.11.1</li>
       <li>postgresql (JPA): 42.7.3 -&gt; 42.7.4</li>
       <li>mysql-connector-j (JPA): 8.2.0 -&gt; 9.1.0</li>
       <li>ojdbc11 (JPA): 23.3.0.23.09 -&gt; 23.6.0.24.10</li>
