@@ -77,7 +77,7 @@ public class ApacheHttp5Response extends BaseHttpResponse implements IHttpRespon
 				try {
 					this.myEntityBytes = IOUtils.toByteArray(respEntity);
 				} catch (IllegalStateException e) {
-					throw new InternalErrorException(Msg.code(1478) + e);
+					throw new InternalErrorException(Msg.code(2581) + e);
 				}
 			}
 		}

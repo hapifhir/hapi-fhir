@@ -76,7 +76,7 @@ public class ApacheHttp5TlsAuthenticationSvc {
 
 			return contextBuilder.build();
 		} catch (Exception e) {
-			throw new TlsAuthenticationException(Msg.code(2102) + "Failed to create SSLContext", e);
+			throw new TlsAuthenticationException(Msg.code(2575) + "Failed to create SSLContext", e);
 		}
 	}
 
@@ -98,13 +98,13 @@ public class ApacheHttp5TlsAuthenticationSvc {
 			}
 			return keyStore;
 		} catch (Exception e) {
-			throw new TlsAuthenticationException(Msg.code(2103) + "Failed to create KeyStore", e);
+			throw new TlsAuthenticationException(Msg.code(2576) + "Failed to create KeyStore", e);
 		}
 	}
 
 	public static void validateKeyStoreExists(InputStream theInputStream) {
 		if (theInputStream == null) {
-			throw new TlsAuthenticationException(Msg.code(2116) + "Keystore does not exists");
+			throw new TlsAuthenticationException(Msg.code(2577) + "Keystore does not exists");
 		}
 	}
 
@@ -124,9 +124,9 @@ public class ApacheHttp5TlsAuthenticationSvc {
 					return (X509TrustManager) trustManager;
 				}
 			}
-			throw new TlsAuthenticationException(Msg.code(2104) + "Could not find X509TrustManager");
+			throw new TlsAuthenticationException(Msg.code(2578) + "Could not find X509TrustManager");
 		} catch (Exception e) {
-			throw new TlsAuthenticationException(Msg.code(2105) + "Failed to create X509TrustManager");
+			throw new TlsAuthenticationException(Msg.code(2579) + "Failed to create X509TrustManager");
 		}
 	}
 

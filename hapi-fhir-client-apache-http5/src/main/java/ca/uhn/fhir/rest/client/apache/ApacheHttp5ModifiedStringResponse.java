@@ -66,7 +66,7 @@ public class ApacheHttp5ModifiedStringResponse extends BaseHttpResponse implemen
 				try {
 					myEntityBytes = IOUtils.toByteArray(respEntity);
 				} catch (IllegalStateException exception) {
-					throw new InternalErrorException(Msg.code(2447) + exception);
+					throw new InternalErrorException(Msg.code(2580) + exception);
 				}
 				myEntityBuffered = true;
 			}

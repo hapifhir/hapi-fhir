@@ -64,7 +64,7 @@ public class ApacheHttp5TlsAuthenticationSvcTest {
 		try {
 			ApacheHttp5TlsAuthenticationSvc.createSslContext(invalidTlsAuthentication);
 			fail();		} catch (Exception e) {
-			assertEquals(Msg.code(2102) + "Failed to create SSLContext", e.getMessage());
+			assertEquals(Msg.code(2575) + "Failed to create SSLContext", e.getMessage());
 		}
 	}
 
@@ -88,7 +88,7 @@ public class ApacheHttp5TlsAuthenticationSvcTest {
 			ApacheHttp5TlsAuthenticationSvc.createKeyStore(keyStoreInfo);
 			fail();		}
 		catch (Exception e) {
-			assertEquals(Msg.code(2103) + "Failed to create KeyStore", e.getMessage());
+			assertEquals(Msg.code(2576) + "Failed to create KeyStore", e.getMessage());
 		}
 	}
 
@@ -111,7 +111,7 @@ public class ApacheHttp5TlsAuthenticationSvcTest {
 		try {
 			ApacheHttp5TlsAuthenticationSvc.createKeyStore(trustStoreInfo);
 			fail();		} catch (Exception e) {
-			assertEquals(Msg.code(2103) + "Failed to create KeyStore", e.getMessage());
+			assertEquals(Msg.code(2576) + "Failed to create KeyStore", e.getMessage());
 		}
 	}
 
@@ -138,7 +138,7 @@ public class ApacheHttp5TlsAuthenticationSvcTest {
 		try {
 			ApacheHttp5TlsAuthenticationSvc.createTrustManager(Optional.of(invalidKeyStoreInfo));
 			fail();		} catch (Exception e) {
-			assertEquals(Msg.code(2105) + "Failed to create X509TrustManager", e.getMessage());
+			assertEquals(Msg.code(2579) + "Failed to create X509TrustManager", e.getMessage());
 		}
 	}
 
