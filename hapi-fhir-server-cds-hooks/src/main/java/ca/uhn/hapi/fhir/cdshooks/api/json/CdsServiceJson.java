@@ -19,7 +19,7 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.api.json;
 
-import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.BaseCdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -32,7 +32,7 @@ import java.util.Map;
  *
  * @see <a href="https://cds-hooks.hl7.org/ballots/2020Sep/">Version 1.1 of the CDS Hooks Specification</a>
  */
-public class CdsServiceJson extends BaseCdsServiceJson implements IModelJson {
+public class CdsServiceJson extends BaseCdsServiceJson {
 	public static final String HOOK = "hook";
 	public static final String TITLE = "title";
 	public static final String DESCRIPTION = "description";

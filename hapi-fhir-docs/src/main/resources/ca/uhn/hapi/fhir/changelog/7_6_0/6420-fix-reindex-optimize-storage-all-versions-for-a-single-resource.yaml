@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6420
+title: "Previously, when the `$reindex` operation is run for a single FHIR resource with `optimizeStorage` set to 
+`ALL_VERSIONS`, none of the versions of the resource were processed in `hfj_res_ver` table. This has been fixed."

@@ -109,15 +109,18 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 							+ "] param[" + theParamName + "]";
 					ourLog.info(msg);
 
-					StorageProcessingMessage message = new StorageProcessingMessage();
-					ourLog.warn(msg);
-					message.setMessage(msg);
-					HookParams params = new HookParams()
-							.add(RequestDetails.class, theRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-							.add(StorageProcessingMessage.class, message);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									myInterceptorBroadcaster, theRequestDetails);
+					if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_WARNING)) {
+						StorageProcessingMessage message = new StorageProcessingMessage();
+						message.setMessage(msg);
+						HookParams params = new HookParams()
+								.add(RequestDetails.class, theRequestDetails)
+								.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+								.add(StorageProcessingMessage.class, message);
+						compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
+					}
 
 					long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
 							getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName);

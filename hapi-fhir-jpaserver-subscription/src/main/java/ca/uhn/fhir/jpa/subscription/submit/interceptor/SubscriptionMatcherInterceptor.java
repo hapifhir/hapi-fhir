@@ -118,12 +118,15 @@ public class SubscriptionMatcherInterceptor {
 		ResourceModifiedMessage msg = createResourceModifiedMessage(theNewResource, theOperationType, theRequest);
 
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
-		HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);
-		boolean outcome = CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED)) {
+			HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);
+			boolean outcome = compositeBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
 
-		if (!outcome) {
-			return;
+			if (!outcome) {
+				return;
+			}
 		}
 
 		processResourceModifiedMessage(msg);

@@ -44,7 +44,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends BaseCandidateFinder {
+public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> extends BaseCandidateFinder {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired

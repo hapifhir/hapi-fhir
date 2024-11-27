@@ -21,6 +21,7 @@ package ca.uhn.fhir.cr.repo;
 
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -54,6 +55,11 @@ class RequestDetailsCloner {
 
 		DetailsBuilder(SystemRequestDetails theDetails) {
 			myDetails = theDetails;
+		}
+
+		DetailsBuilder setAction(RestOperationTypeEnum theRestOperationType) {
+			myDetails.setRestOperationType(theRestOperationType);
+			return this;
 		}
 
 		DetailsBuilder addHeaders(Map<String, String> theHeaders) {
