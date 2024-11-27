@@ -33,8 +33,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * This class is an implementation of {@link IValidationSupport} which may be pre-populated
  * with a collection of validation resources to be used by the validator.
  */
-public class PrePopulatedValidationSupport extends BaseStaticResourceValidationSupport
-		implements IValidationSupport, ILockable {
+public class PrePopulatedValidationSupport extends BaseValidationSupport implements IValidationSupport, ILockable {
 
 	private final Map<String, IBaseResource> myUrlToCodeSystems;
 	private final Map<String, IBaseResource> myUrlToStructureDefinitions;

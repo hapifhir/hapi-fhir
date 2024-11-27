@@ -30,7 +30,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class ValidationSupportChain implements IValidationSupport {
 	static Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 
-	private List<IValidationSupport> myChain;
+	private final List<IValidationSupport> myChain;
 
 	/**
 	 * Constructor
@@ -130,7 +130,7 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public FhirContext getFhirContext() {
-		if (myChain.size() == 0) {
+		if (myChain.isEmpty()) {
 			return null;
 		}
 		return myChain.get(0).getFhirContext();
@@ -214,9 +214,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			Optional<IValidationSupport> remoteTerminologyService = myChain.stream()
 					.filter(RemoteTerminologyServiceValidationSupport.class::isInstance)
 					.findFirst();
-			if (remoteTerminologyService.isPresent()) {
-				return true;
-			}
+			return remoteTerminologyService.isPresent();
 		}
 		return false;
 	}
@@ -235,12 +233,12 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public List<IBaseResource> fetchAllStructureDefinitions() {
-		return doFetchStructureDefinitions(t -> t.fetchAllStructureDefinitions());
+		return doFetchStructureDefinitions(IValidationSupport::fetchAllStructureDefinitions);
 	}
 
 	@Override
 	public List<IBaseResource> fetchAllNonBaseStructureDefinitions() {
-		return doFetchStructureDefinitions(t -> t.fetchAllNonBaseStructureDefinitions());
+		return doFetchStructureDefinitions(IValidationSupport::fetchAllNonBaseStructureDefinitions);
 	}
 
 	private List<IBaseResource> doFetchStructureDefinitions(

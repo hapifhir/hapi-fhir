@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
+import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -16,7 +17,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @SuppressWarnings("unchecked")
 public class CachingValidationSupport extends BaseValidationSupportWrapper implements IValidationSupport {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(CachingValidationSupport.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	public static final ValueSetExpansionOptions EMPTY_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
 
 	private final Cache<String, Object> myCache;
@@ -93,6 +93,11 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 				1, 1, 0L, TimeUnit.MILLISECONDS, executorQueue, threadFactory, new ThreadPoolExecutor.DiscardPolicy());
 
 		myIsEnabledValidationForCodingsLogicalAnd = theIsEnabledValidationForCodingsLogicalAnd;
+	}
+
+	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " Caching Validation Support";
 	}
 
 	@Override

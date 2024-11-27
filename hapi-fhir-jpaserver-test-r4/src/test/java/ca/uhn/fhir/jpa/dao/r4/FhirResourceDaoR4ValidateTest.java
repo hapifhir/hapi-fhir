@@ -1530,7 +1530,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		// we have errors
 		assertFalse(errors.isEmpty());
 
-		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Unrecognized profile uri");
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Unrecognized resource uri");
 	}
 
 	@Test

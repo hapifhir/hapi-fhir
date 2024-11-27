@@ -56,6 +56,11 @@ import java.util.Set;
  */
 public interface ITermReadSvc extends IValidationSupport {
 
+	@Override
+	default String getName() {
+		return getClass().getSimpleName() + " JPA Term Read Service";
+	}
+
 	ValueSet expandValueSet(
 			@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl);
 

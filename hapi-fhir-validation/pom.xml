@@ -248,7 +248,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<scope>test</scope>
 		</dependency>
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>

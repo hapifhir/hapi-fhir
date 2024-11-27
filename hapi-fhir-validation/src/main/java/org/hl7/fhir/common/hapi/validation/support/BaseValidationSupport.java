@@ -10,7 +10,7 @@ public abstract class BaseValidationSupport implements IValidationSupport {
 	/**
 	 * Constructor
 	 */
-	public BaseValidationSupport(FhirContext theFhirContext) {
+	protected BaseValidationSupport(FhirContext theFhirContext) {
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		myCtx = theFhirContext;
 	}

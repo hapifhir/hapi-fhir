@@ -29,7 +29,7 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 	 * @param theFhirContext The FhirContext object (must be initialized for the appropriate FHIR version)
 	 * @param theWrap The validation support object to wrap
 	 */
-	public BaseValidationSupportWrapper(FhirContext theFhirContext, IValidationSupport theWrap) {
+	protected BaseValidationSupportWrapper(FhirContext theFhirContext, IValidationSupport theWrap) {
 		super(theFhirContext);
 		Validate.notNull(theWrap, "theWrap must not be null");
 

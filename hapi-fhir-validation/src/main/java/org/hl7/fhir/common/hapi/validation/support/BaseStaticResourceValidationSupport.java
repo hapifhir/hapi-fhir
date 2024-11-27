@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated(since = "7.6")
 public abstract class BaseStaticResourceValidationSupport extends BaseValidationSupport implements IValidationSupport {
 
 	/**
