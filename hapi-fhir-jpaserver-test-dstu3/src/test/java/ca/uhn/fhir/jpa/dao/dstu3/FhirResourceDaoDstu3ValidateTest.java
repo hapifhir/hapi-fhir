@@ -95,7 +95,6 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 		ourLog.info("Clearing cache");
 		myValidationSupport.invalidateCaches();
-		myFhirInstanceValidator.invalidateCaches();
 		ProxyUtil.getSingletonTarget(myPersistedResourceValidationSupport, JpaPersistedResourceValidationSupport.class).clearCaches();
 
 		MethodOutcome result = myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);

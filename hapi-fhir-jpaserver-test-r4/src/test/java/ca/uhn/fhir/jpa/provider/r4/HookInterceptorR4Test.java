@@ -2,9 +2,11 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -116,8 +118,8 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType savedPatientId = myClient.create().resource(new Patient()).execute().getId();
 
 		runInTransaction(() -> {
-			List<JpaPid> pids = myIdHelperService.resolveResourcePersistentIdsWithCache(null,
-				Collections.singletonList(savedPatientId));
+			List<JpaPid> pids = myIdHelperService.resolveResourcePids(RequestPartitionId.allPartitions(),
+				Collections.singletonList(savedPatientId), ResolveIdentityMode.includeDeleted().cacheOk());
 			Long savedPatientPid = pids.get(0).getId();
 			assertEquals(savedPatientPid.longValue(), pid.get());
 		});
@@ -133,7 +135,9 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 			pid.set(resourcePid);
 		});
 		IIdType savedPatientId = myClient.create().resource(new Patient()).execute().getId();
-		Long savedPatientPid = runInTransaction(() -> myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0).getId());
+		Long savedPatientPid = runInTransaction(() ->
+			myIdHelperService.resolveResourceIdentityPid(RequestPartitionId.allPartitions(), savedPatientId.getResourceType(), savedPatientId.getValue(), ResolveIdentityMode.includeDeleted().cacheOk()).getId()
+		);
 
 		myClient.delete().resourceById(savedPatientId).execute();
 		Parameters parameters = new Parameters();
@@ -170,7 +174,9 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		patient.setActive(true);
 		myClient.update().resource(patient).execute();
 		runInTransaction(() -> {
-			Long savedPatientPid = myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0).getId();
+			Long savedPatientPid = runInTransaction(() ->
+				myIdHelperService.resolveResourceIdentityPid(RequestPartitionId.allPartitions(), savedPatientId.getResourceType(), savedPatientId.getValue(), ResolveIdentityMode.includeDeleted().cacheOk()).getId()
+			);
 			assertEquals(savedPatientPid.longValue(), pidOld.get());
 			assertEquals(savedPatientPid.longValue(), pidNew.get());
 		});

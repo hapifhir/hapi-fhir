@@ -29,13 +29,26 @@ import java.util.Date;
 public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 
 	private final String myResourceType;
-	private final Long myResourcePid;
+	private final JpaPid myResourcePid;
 	private final Date myDeletedAt;
 	private final PartitionablePartitionId myPartitionablePartitionId;
 
 	public JpaResourceLookup(
 			String theResourceType,
 			Long theResourcePid,
+			Date theDeletedAt,
+			PartitionablePartitionId thePartitionablePartitionId) {
+		myResourceType = theResourceType;
+		myDeletedAt = theDeletedAt;
+		myPartitionablePartitionId = thePartitionablePartitionId;
+
+		myResourcePid = JpaPid.fromId(theResourcePid);
+		myResourcePid.setPartitionablePartitionId(myPartitionablePartitionId);
+	}
+
+	public JpaResourceLookup(
+			String theResourceType,
+			JpaPid theResourcePid,
 			Date theDeletedAt,
 			PartitionablePartitionId thePartitionablePartitionId) {
 		myResourceType = theResourceType;
@@ -56,10 +69,7 @@ public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 
 	@Override
 	public JpaPid getPersistentId() {
-		JpaPid jpaPid = JpaPid.fromId(myResourcePid);
-		jpaPid.setPartitionablePartitionId(myPartitionablePartitionId);
-
-		return jpaPid;
+		return myResourcePid;
 	}
 
 	@Override

@@ -35,8 +35,10 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -73,6 +75,7 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +87,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -121,7 +125,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -282,9 +286,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			inverse = true;
 		}
 
-		List<JpaPid> targetPids =
-				myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, targetIds);
-		List<Long> targetPidList = JpaPid.toLongList(targetPids);
+		List<JpaPid> pids = myIdHelperService.resolveResourcePids(theRequestPartitionId, targetIds, ResolveIdentityMode.includeDeleted().cacheOk());
+		List<Long> targetPidList = pids.stream().map(JpaPid::getId).collect(Collectors.toList());
 
 		if (targetPidList.isEmpty() && targetQualifiedUrls.isEmpty()) {
 			setMatchNothing();

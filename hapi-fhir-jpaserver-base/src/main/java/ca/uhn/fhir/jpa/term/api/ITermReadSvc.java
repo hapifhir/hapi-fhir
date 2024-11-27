@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term.api;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -119,13 +120,13 @@ public interface ITermReadSvc extends IValidationSupport {
 	 */
 	@Transactional()
 	CodeValidationResult validateCodeIsInPreExpandedValueSet(
-			ConceptValidationOptions theOptions,
-			IBaseResource theValueSet,
-			String theSystem,
-			String theCode,
-			String theDisplay,
-			IBaseDatatype theCoding,
-			IBaseDatatype theCodeableConcept);
+		ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions,
+		IBaseResource theValueSet,
+		String theSystem,
+		String theCode,
+		String theDisplay,
+		IBaseDatatype theCoding,
+		IBaseDatatype theCodeableConcept);
 
 	boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet);
 

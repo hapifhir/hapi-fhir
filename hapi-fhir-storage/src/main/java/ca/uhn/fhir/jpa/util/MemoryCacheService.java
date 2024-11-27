@@ -75,8 +75,9 @@ public class MemoryCacheService {
 							SECONDS.convert(myStorageSettings.getTranslationCachesExpireAfterWriteInMinutes(), MINUTES);
 					maximumSize = 500000;
 					break;
+				case NAME_TO_PARTITION:
+				case ID_TO_PARTITION:
 				case PID_TO_FORCED_ID:
-				case FORCED_ID_TO_PID:
 				case MATCH_URL:
 				case RESOURCE_LOOKUP_BY_FORCED_ID:
 				case HISTORY_COUNT:
@@ -207,7 +208,6 @@ public class MemoryCacheService {
 		 * Value type: {@literal JpaResourceLookup}
 		 */
 		RESOURCE_LOOKUP_BY_FORCED_ID(ForcedIdCacheKey.class),
-		FORCED_ID_TO_PID(String.class),
 		FHIRPATH_EXPRESSION(String.class),
 		/**
 		 * Key type: {@literal Long}

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.TermReadSvcUtil;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -57,6 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -69,13 +71,11 @@ import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LO
  * validation resources (StructureDefinition, ValueSet, CodeSystem, etc.) from the resources
  * persisted in the JPA server.
  */
-@Transactional(propagation = Propagation.REQUIRED)
 public class JpaPersistedResourceValidationSupport implements IValidationSupport {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
 
 	private final FhirContext myFhirContext;
-	private final IBaseResource myNoMatch;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -83,18 +83,12 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 
+	@Autowired
+	private HapiTransactionService myTxService;
+
 	private Class<? extends IBaseResource> myCodeSystemType;
 	private Class<? extends IBaseResource> myStructureDefinitionType;
 	private Class<? extends IBaseResource> myValueSetType;
-
-	// TODO: JA2 We shouldn't need to cache here, but we probably still should since the
-	// TermReadSvcImpl calls these methods as a part of its "isCodeSystemSupported" calls.
-	// We should modify CachingValidationSupport to cache the results of "isXXXSupported"
-	// at which point we could do away with this cache
-	// TODO:  LD: This cache seems to supersede the cache in CachingValidationSupport, as that cache is set to
-	// 10 minutes, but this 1 minute cache now determines the expiry.
-	// This new behaviour was introduced between the 7.0.0 release and the current master (7.2.0)
-	private Cache<String, IBaseResource> myLoadCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), 1000);
 
 	/**
 	 * Constructor
@@ -103,8 +97,6 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		super();
 		Validate.notNull(theFhirContext);
 		myFhirContext = theFhirContext;
-
-		myNoMatch = myFhirContext.getResourceDefinition("Basic").newInstance();
 	}
 
 	@Override
@@ -188,17 +180,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 			return null;
 		}
 
-		String key = theClass + " " + theUri;
-		IBaseResource fetched = myLoadCache.get(key, t -> doFetchResource(theClass, theUri));
-
-		if (fetched == myNoMatch) {
-			ourLog.debug(
-					"Invalidating cache entry for URI: {} since the result of the underlying query is empty", theUri);
-			myLoadCache.invalidate(key);
-			return null;
-		}
-
-		return (T) fetched;
+		return (T) doFetchResource(theClass, theUri);
 	}
 
 	private <T extends IBaseResource> IBaseResource doFetchResource(@Nullable Class<T> theClass, String theUri) {
@@ -209,17 +191,14 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				() -> doFetchResource(StructureDefinition.class, theUri)
 			};
 			return Arrays.stream(fetchers)
-					.map(t -> t.get())
-					.filter(t -> t != myNoMatch)
+					.map(Supplier::get)
+					.filter(Objects::nonNull)
 					.findFirst()
-					.orElse(myNoMatch);
+					.orElse(null);
 		}
 
 		IdType id = new IdType(theUri);
-		boolean localReference = false;
-		if (id.hasBaseUrl() == false && id.hasIdPart() == true) {
-			localReference = true;
-		}
+		boolean localReference = id.hasBaseUrl() == false && id.hasIdPart() == true;
 
 		String resourceName = myFhirContext.getResourceType(theClass);
 		IBundleProvider search;
@@ -230,7 +209,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 					params.setLoadSynchronousUpTo(1);
 					params.add(IAnyResource.SP_RES_ID, new StringParam(theUri));
 					search = myDaoRegistry.getResourceDao(resourceName).search(params);
-					if (search.size() == 0) {
+					if (search.isEmpty()) {
 						params = new SearchParameterMap();
 						params.setLoadSynchronousUpTo(1);
 						params.add(ValueSet.SP_URL, new UriParam(theUri));
@@ -269,7 +248,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
 					String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
 					if (myFhirContext.getElementDefinition(typeName) != null) {
-						return myNoMatch;
+						return null;
 					}
 				}
 				SearchParameterMap params = new SearchParameterMap();
@@ -322,7 +301,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 		Integer size = search.size();
 		if (size == null || size == 0) {
-			return myNoMatch;
+			return null;
 		}
 
 		if (size > 1) {
@@ -350,7 +329,4 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		}
 	}
 
-	public void clearCaches() {
-		myLoadCache.invalidateAll();
-	}
 }
