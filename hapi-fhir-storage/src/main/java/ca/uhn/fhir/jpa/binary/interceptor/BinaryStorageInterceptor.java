@@ -274,12 +274,15 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	 * @return A string, which will be used to prefix the blob ID. May be null.
 	 */
 	private String invokeAssignBinaryContentPrefix(RequestDetails theRequest, IBaseResource theResource) {
-		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period
-		boolean hasStorageBinaryAssignBlobIdPrefixHooks = CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequest);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 
-		boolean hasStorageBinaryAssignBinaryContentIdPrefixHooks = CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX, myInterceptorBroadcaster, theRequest);
+		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period
+		boolean hasStorageBinaryAssignBlobIdPrefixHooks =
+				compositeBroadcaster.hasHooks(Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX);
+
+		boolean hasStorageBinaryAssignBinaryContentIdPrefixHooks =
+				compositeBroadcaster.hasHooks(Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX);
 
 		if (!(hasStorageBinaryAssignBlobIdPrefixHooks || hasStorageBinaryAssignBinaryContentIdPrefixHooks)) {
 			return null;
@@ -297,8 +300,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 			pointcutToInvoke = Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX;
 		}
 
-		return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-				myInterceptorBroadcaster, theRequest, pointcutToInvoke, params);
+		return (String) compositeBroadcaster.callHooksAndReturnObject(pointcutToInvoke, params);
 	}
 
 	@Nonnull

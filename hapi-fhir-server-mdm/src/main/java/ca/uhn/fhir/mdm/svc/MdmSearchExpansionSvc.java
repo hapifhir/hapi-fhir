@@ -85,14 +85,15 @@ public class MdmSearchExpansionSvc {
 
 		// Try to detect if the RequestDetails is being reused across multiple different queries, which
 		// can happen during CQL measure evaluation
-		String resourceName = theRequestDetails.getResourceName();
-		String queryString = theSearchParameterMap.toNormalizedQueryString(myFhirContext);
-		if (!Objects.equals(resourceName, theRequestDetails.getUserData().get(RESOURCE_NAME))
-				|| !Objects.equals(queryString, theRequestDetails.getUserData().get(QUERY_STRING))) {
-			theRequestDetails.getUserData().remove(EXPANSION_RESULTS);
+		{
+			String resourceName = theRequestDetails.getResourceName();
+			String queryString = theSearchParameterMap.toNormalizedQueryString(myFhirContext);
+			if (!Objects.equals(resourceName, theRequestDetails.getUserData().get(RESOURCE_NAME))
+					|| !Objects.equals(
+							queryString, theRequestDetails.getUserData().get(QUERY_STRING))) {
+				theRequestDetails.getUserData().remove(EXPANSION_RESULTS);
+			}
 		}
-		theRequestDetails.getUserData().put(RESOURCE_NAME, resourceName);
-		theRequestDetails.getUserData().put(QUERY_STRING, queryString);
 
 		MdmSearchExpansionResults expansionResults = getCachedExpansionResults(theRequestDetails);
 		if (expansionResults != null) {
@@ -122,6 +123,15 @@ public class MdmSearchExpansionSvc {
 		}
 
 		theRequestDetails.getUserData().put(EXPANSION_RESULTS, expansionResults);
+
+		/*
+		 * Note: Do this at the end so that the query string reflects the post-translated
+		 * query string
+		 */
+		String resourceName = theRequestDetails.getResourceName();
+		String queryString = theSearchParameterMap.toNormalizedQueryString(myFhirContext);
+		theRequestDetails.getUserData().put(RESOURCE_NAME, resourceName);
+		theRequestDetails.getUserData().put(QUERY_STRING, queryString);
 
 		return expansionResults;
 	}

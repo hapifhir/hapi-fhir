@@ -27,6 +27,8 @@ public interface IPointcut {
 	@Nonnull
 	Class<?> getReturnType();
 
+	Class<?> getBooleanReturnTypeForEnum();
+
 	@Nonnull
 	List<String> getParameterTypes();
 
