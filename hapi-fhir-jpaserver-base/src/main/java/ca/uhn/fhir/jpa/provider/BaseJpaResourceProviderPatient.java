@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.dao.merge.MergeOperationParameters;
+import ca.uhn.fhir.jpa.dao.merge.PatientMergeOperationParameters;
 import ca.uhn.fhir.jpa.dao.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -55,7 +56,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Patient;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -302,7 +302,10 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			ParametersUtil.addParameterToParameters(fhirContext, retVal, "outcome", mergeOutcome.getOperationOutcome());
 
 			theServletResponse.setStatus(mergeOutcome.getHttpStatusCode());
-			// we are writing the response to directly, otherwise the response status we set above is ignored.
+			// TODO Emre:  we are writing the response to directly, otherwise the response status we set above is
+			// ignored. CDA Import operation does it this way too, but  what if the client requests xml response?
+			// there needs to be a better way to do this
+			theServletResponse.setContentType(Constants.CT_JSON);
 			fhirContext
 					.newJsonParser()
 					.setPrettyPrint(true)
@@ -320,7 +323,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			IBaseReference theTargetPatient,
 			IPrimitiveType<Boolean> thePreview,
 			IBaseResource theResultPatient) {
-		MergeOperationParameters mergeOperationParameters = new MergeOperationParameters();
+		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 		if (theSourcePatientIdentifier != null) {
 			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourcePatientIdentifier.stream()
 					.map(IdentifierUtil::identifierDtFromIdentifier)
@@ -336,7 +339,8 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 		mergeOperationParameters.setSourceResource(theSourcePatient);
 		mergeOperationParameters.setTargetResource(theTargetPatient);
 		mergeOperationParameters.setPreview(thePreview != null && thePreview.getValue());
-		mergeOperationParameters.setResultPatient((Patient) theResultPatient);
+		mergeOperationParameters.setResultResource(theResultPatient);
+
 		return mergeOperationParameters;
 	}
 

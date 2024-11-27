@@ -5,14 +5,13 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Encounter;
@@ -23,26 +22,22 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_TARGET_PATIENT;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
@@ -126,15 +121,15 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testMerge() throws Exception {
-		Parameters inParams = new Parameters();
-		inParams.addParameter().setName(OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER).setValue(new Reference(sourcePatId));
-		inParams.addParameter().setName(OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER).setValue(new Reference(targetPatId));
+		OperationParameters params = new OperationParameters();
+		params.sourcePatient = new Reference().setReference(sourcePatId);
+		params.targetPatient = new Reference().setReference(targetPatId);
 
 		IGenericClient client = myFhirContext.newRestfulGenericClient(myServerBase);
 		Parameters outParams = client.operation()
 			.onType("Patient")
 			.named(OPERATION_MERGE)
-			.withParameters(inParams)
+			.withParameters(params.asParametersResource())
 			.returnResourceType(Parameters.class)
 			.execute();
 
@@ -161,6 +156,23 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual).contains(targetEnc1);
 	}
 
+	@Test
+	void test_MissingRequiredParameters_Returns400BadRequest() {
+		Parameters inParams = new Parameters();
+
+		IGenericClient client = myFhirContext.newRestfulGenericClient(myServerBase);
+
+		InvalidRequestException thrown = assertThrows(InvalidRequestException.class, () -> client.operation()
+			.onType("Patient")
+			.named(OPERATION_MERGE)
+			.withParameters(inParams)
+			.returnResourceType(Parameters.class)
+			.execute()
+		);
+
+		assertThat(thrown.getStatusCode()).isEqualTo(400);
+	}
+
 	// FIXME KHS look at PatientEverythingR4Test for ideas for other tests
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
@@ -176,5 +188,40 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		return bundle;
 	}
+
+
+
+	private static class OperationParameters {
+		Type sourcePatient;
+		Type sourcePatientIdentifier;
+		Type targetPatient;
+		Type targetPatientIdentifier;
+		Patient resultResource;
+		Boolean preview;
+
+		public Parameters asParametersResource() {
+			Parameters inParams = new Parameters();
+			if (sourcePatient != null) {
+				inParams.addParameter().setName("source-patient").setValue(sourcePatient);
+			}
+			if (sourcePatientIdentifier!= null) {
+				inParams.addParameter().setName("source-patient-identifier").setValue(sourcePatientIdentifier);
+			}
+			if (targetPatient != null) {
+				inParams.addParameter().setName("target-patient").setValue(targetPatient);
+			}
+			if (targetPatientIdentifier != null) {
+				inParams.addParameter().setName("target-patient-identifier").setValue(targetPatientIdentifier);
+			}
+			if (resultResource != null) {
+				inParams.addParameter().setName("result-patient").setResource(resultResource);
+			}
+			if (preview != null) {
+				inParams.addParameter().setName("preview").setValue(new BooleanType(preview));
+			}
+			return inParams;
+		}
+	}
+
 
 }
