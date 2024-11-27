@@ -21,20 +21,26 @@ package ca.uhn.fhir.jpa.dao.merge;
 
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 
-public class MergeOperationParameters {
+public abstract class MergeOperationParameters {
 
 	private List<CanonicalIdentifier> mySourceResourceIdentifiers;
 	private List<CanonicalIdentifier> myTargetResourceIdentifiers;
 	private IBaseReference mySourceResource;
 	private IBaseReference myTargetResource;
 	private boolean myPreview;
+	private IBaseResource myResultResource;
 
-	// TODO: this can be changed to a generic resource to support other resources
-	private Patient myResultResource;
+	public abstract String getSourceResourceParameterName();
+
+	public abstract String getTargetResourceParameterName();
+
+	public abstract String getSourceIdentifiersParameterName();
+
+	public abstract String getTargetIdentifiersParameterName();
 
 	public List<CanonicalIdentifier> getSourceIdentifiers() {
 		return mySourceResourceIdentifiers;
@@ -68,12 +74,12 @@ public class MergeOperationParameters {
 		this.myPreview = thePreview;
 	}
 
-	public Patient getResultPatient() {
+	public IBaseResource getResultResource() {
 		return myResultResource;
 	}
 
-	public void setResultPatient(Patient theResultPatient) {
-		this.myResultResource = theResultPatient;
+	public void setResultResource(IBaseResource theResultResource) {
+		this.myResultResource = theResultResource;
 	}
 
 	public IBaseReference getSourceResource() {

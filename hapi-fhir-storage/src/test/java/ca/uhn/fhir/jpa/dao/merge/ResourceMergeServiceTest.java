@@ -21,6 +21,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ResourceMergeServiceTest {
 
+	private static final String MISSING_SOURCE_PARAMS_MSG =
+		"There are no source resource parameters provided, include either a source-patient, or a source-patient-identifier parameter.";
+	private static final String MISSING_TARGET_PARAMS_MSG =
+		"There are no target resource parameters provided, include either a target-patient, or a target-patient-identifier parameter.";
+	private static final String BOTH_SOURCE_PARAMS_PROVIDED_MSG =
+		"Source resource must be provided either by source-patient or by source-patient-identifier, not both.";
+	private static final String BOTH_TARGET_PARAMS_PROVIDED_MSG =
+		"Target resource must be provided either by target-patient or by target-patient-identifier, not both.";
+
 	@Mock
 	private IFhirResourceDaoPatient<?> myDaoMock;
 	@Mock
@@ -36,10 +45,12 @@ public class ResourceMergeServiceTest {
 		myResourceMergeService = new ResourceMergeService(myDaoMock);
 	}
 
+
+
 	@Test
 	void testValidatesInputParameters_MissingSourcePatientParams_ReturnsErrorInOutcomeWith400Status() {
 		// Given
-		MergeOperationParameters mergeOperationParameters = new MergeOperationParameters();
+		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 		mergeOperationParameters.setTargetResource(new Reference("Patient/123"));
 
 		// When
@@ -49,9 +60,11 @@ public class ResourceMergeServiceTest {
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
 		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
 		assertThat(operationOutcome.getIssue()).hasSize(1);
-		assertThat(operationOutcome.getIssueFirstRep().getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics()).contains("There are no source resource parameters provided, include either a source-patient, " +
-			"source-patient-identifier parameter.");
+
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue.getDiagnostics()).contains(MISSING_SOURCE_PARAMS_MSG);
+		assertThat(issue.getCode().toCode()).isEqualTo("required");
 
 		verifyNoMoreInteractions(myDaoMock);
 	}
@@ -60,7 +73,7 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testValidatesInputParameters_MissingTargetPatientParams_ReturnsErrorInOutcomeWith400Status() {
 		// Given
-		MergeOperationParameters mergeOperationParameters = new MergeOperationParameters();
+		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
 
 		// When
@@ -71,9 +84,11 @@ public class ResourceMergeServiceTest {
 		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
 
 		assertThat(operationOutcome.getIssue()).hasSize(1);
-		assertThat(operationOutcome.getIssueFirstRep().getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics()).contains("There are no target resource " +
-			"parameters provided, include either a target-patient, target-patient-identifier parameter.");
+
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue.getDiagnostics()).contains(MISSING_TARGET_PARAMS_MSG);
+		assertThat(issue.getCode().toCode()).isEqualTo("required");
 
 		verifyNoMoreInteractions(myDaoMock);
 	}
@@ -81,7 +96,7 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testValidatesInputParameters_MissingBothSourceAndTargetPatientParams_ReturnsErrorsInOutcomeWith400Status() {
 		// Given
-		MergeOperationParameters mergeOperationParameters = new MergeOperationParameters();
+		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 
 		// When
 		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -90,12 +105,15 @@ public class ResourceMergeServiceTest {
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
 		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
 		assertThat(operationOutcome.getIssue()).hasSize(2);
-		assertThat(operationOutcome.getIssue().get(0).getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(operationOutcome.getIssue().get(0).getDiagnostics()).contains("There are no source resource " +
-			"parameters provided, include either a source-patient, source-patient-identifier parameter.");
-		assertThat(operationOutcome.getIssue().get(1).getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(operationOutcome.getIssue().get(1).getDiagnostics()).contains("There are no target resource " +
-			"parameters provided, include either a target-patient, target-patient-identifier parameter.");
+
+		OperationOutcome.OperationOutcomeIssueComponent issue1 = operationOutcome.getIssue().get(0);
+		OperationOutcome.OperationOutcomeIssueComponent issue2 = operationOutcome.getIssue().get(1);
+		assertThat(issue1.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue1.getDiagnostics()).contains(MISSING_SOURCE_PARAMS_MSG);
+		assertThat(issue1.getCode().toCode()).isEqualTo("required");
+		assertThat(issue2.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue2.getDiagnostics()).contains(MISSING_TARGET_PARAMS_MSG);
+		assertThat(issue2.getCode().toCode()).isEqualTo("required");
 
 		verifyNoMoreInteractions(myDaoMock);
 	}
@@ -103,7 +121,7 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testValidatesInputParameters_BothSourceResourceParamsProvided_ReturnsErrorInOutcomeWith400Status() {
 		// Given
-		MergeOperationParameters mergeOperationParameters = new MergeOperationParameters();
+		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
 		mergeOperationParameters.setSourceResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue( "val")));
 		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
@@ -115,9 +133,11 @@ public class ResourceMergeServiceTest {
 		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
 
 		assertThat(operationOutcome.getIssue()).hasSize(1);
-		assertThat(operationOutcome.getIssueFirstRep().getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics()).contains("Source patient must be provided " +
-			"either by source-patient-identifier or by source-resource, not both.");
+
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue.getDiagnostics()).contains(BOTH_SOURCE_PARAMS_PROVIDED_MSG);
+		assertThat(issue.getCode().toCode()).isEqualTo("required");
 
 
 		verifyNoMoreInteractions(myDaoMock);
@@ -127,7 +147,7 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testValidatesInputParameters_BothTargetResourceParamsProvided_ReturnsErrorInOutcomeWith400Status() {
 		// Given
-		MergeOperationParameters mergeOperationParameters = new MergeOperationParameters();
+		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 		mergeOperationParameters.setTargetResource(new Reference("Patient/123"));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue( "val")));
 		mergeOperationParameters.setSourceResource(new Reference("Patient/345"));
@@ -139,9 +159,11 @@ public class ResourceMergeServiceTest {
 		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
 
 		assertThat(operationOutcome.getIssue()).hasSize(1);
-		assertThat(operationOutcome.getIssueFirstRep().getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics()).contains("Target patient must be provided " +
-			"either by target-patient-identifier or by target-resource, not both.");
+
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue.getDiagnostics()).contains(BOTH_TARGET_PARAMS_PROVIDED_MSG);
+		assertThat(issue.getCode().toCode()).isEqualTo("required");
 
 		verifyNoMoreInteractions(myDaoMock);
 	}
