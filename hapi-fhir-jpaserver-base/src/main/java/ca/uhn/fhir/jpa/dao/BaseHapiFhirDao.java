@@ -1057,8 +1057,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			// Interceptor broadcast: JPA_PERFTRACE_INFO
 			if (!presenceCount.isEmpty()) {
-				if (CompositeInterceptorBroadcaster.hasHooks(
-						Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
+				IInterceptorBroadcaster compositeBroadcaster =
+						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 					StorageProcessingMessage message = new StorageProcessingMessage();
 					message.setMessage(
 							"For " + entity.getIdDt().toUnqualifiedVersionless().getValue() + " added "
@@ -1068,8 +1069,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 							.add(RequestDetails.class, theRequest)
 							.addIfMatchesType(ServletRequestDetails.class, theRequest)
 							.add(StorageProcessingMessage.class, message);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+					compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 				}
 			}
 		}
@@ -1092,8 +1092,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				// Interceptor broadcast: JPA_PERFTRACE_INFO
 				if (!searchParamAddRemoveCount.isEmpty()) {
-					if (CompositeInterceptorBroadcaster.hasHooks(
-							Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									myInterceptorBroadcaster, theRequest);
+					if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 						StorageProcessingMessage message = new StorageProcessingMessage();
 						message.setMessage("For "
 								+ entity.getIdDt().toUnqualifiedVersionless().getValue() + " added "
@@ -1104,8 +1106,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 								.add(RequestDetails.class, theRequest)
 								.addIfMatchesType(ServletRequestDetails.class, theRequest)
 								.add(StorageProcessingMessage.class, message);
-						CompositeInterceptorBroadcaster.doCallHooks(
-								myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+						compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 					}
 				}
 			}
