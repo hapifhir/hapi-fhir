@@ -2366,13 +2366,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id = idCreated.toUnqualifiedVersionless();
 
 		for (int i = 0; i < 10; i++) {
-			sleepOneClick();
+			sleepAtLeast(100);
 			preDates.add(new Date());
-			sleepOneClick();
+			sleepAtLeast(100);
 			patient.setId(id);
 			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
-			sleepOneClick();
 		}
 
 		List<String> idValues;
