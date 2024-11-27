@@ -95,10 +95,10 @@ public class SearchQueryProperties {
 
 	public SearchQueryProperties clone() {
 		return new SearchQueryProperties()
-			.setMaxResultsRequested(myMaxResultsRequested)
-			.setSortSpec(mySortSpec)
-			.setOffset(myOffset)
-			.setDoCountOnlyFlag(myDoCountOnlyFlag)
-			.setDeduplicateInDBFlag(myDeduplicateInDBFlag);
+				.setMaxResultsRequested(myMaxResultsRequested)
+				.setSortSpec(mySortSpec)
+				.setOffset(myOffset)
+				.setDoCountOnlyFlag(myDoCountOnlyFlag)
+				.setDeduplicateInDBFlag(myDeduplicateInDBFlag);
 	}
 }

@@ -511,7 +511,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (canSkipDatabase) {
 				ourLog.trace("Query finished after HSearch.  Skip db query phase");
 				if (theSearchProperties.hasMaxResultsRequested()) {
-					fulltextExecutor = SearchQueryExecutors.limited(fulltextExecutor, theSearchProperties.getMaxResultsRequested());
+					fulltextExecutor = SearchQueryExecutors.limited(
+							fulltextExecutor, theSearchProperties.getMaxResultsRequested());
 				}
 				queries.add(fulltextExecutor);
 			} else {
@@ -524,13 +525,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 								SearchBuilder.getMaximumPageSize(),
 								// for each list of (SearchBuilder.getMaximumPageSize())
 								// we create a chunked query and add it to 'queries'
-								t -> doCreateChunkedQueries(
-										theParams, t, theSearchProperties, theRequest, queries));
+								t -> doCreateChunkedQueries(theParams, t, theSearchProperties, theRequest, queries));
 			}
 		} else {
 			// do everything in the database.
-			createChunkedQuery(
-					theParams, theSearchProperties, theRequest, null, queries);
+			createChunkedQuery(theParams, theSearchProperties, theRequest, null, queries);
 		}
 
 		return queries;
@@ -689,8 +688,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<Long> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		if (myParams.getEverythingMode() != null) {
-			createChunkedQueryForEverythingSearch(
-					theParams, theSearchProperties, thePidList, theSearchQueryExecutors);
+			createChunkedQueryForEverythingSearch(theParams, theSearchProperties, thePidList, theSearchQueryExecutors);
 		} else {
 			createChunkedQueryNormalSearch(
 					theParams, theSearchProperties, theRequest, thePidList, theSearchQueryExecutors);
@@ -711,8 +709,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myResourceName,
 				mySqlBuilderFactory,
 				myDialectProvider,
-				theSearchProperties.isDoCountOnlyFlag()
-		);
+				theSearchProperties.isDoCountOnlyFlag());
 		QueryStack queryStack3 = new QueryStack(
 				theParams, myStorageSettings, myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
@@ -813,8 +810,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private void executeSearch(
-			SearchQueryProperties theProperties, List<ISearchQueryExecutor> theSearchQueryExecutors, SearchQueryBuilder sqlBuilder) {
-		GeneratedSql generatedSql = sqlBuilder.generate(theProperties.getOffset(), theProperties.getMaxResultsRequested());
+			SearchQueryProperties theProperties,
+			List<ISearchQueryExecutor> theSearchQueryExecutors,
+			SearchQueryBuilder sqlBuilder) {
+		GeneratedSql generatedSql =
+				sqlBuilder.generate(theProperties.getOffset(), theProperties.getMaxResultsRequested());
 		if (!generatedSql.isMatchNothing()) {
 			SearchQueryExecutor executor =
 					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, theProperties.getMaxResultsRequested());
@@ -865,7 +865,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					mySqlBuilderFactory,
 					myDialectProvider,
 					theSearchQueryProperties.isDoCountOnlyFlag());
-			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theSearchQueryProperties.getOffset(), mySearchProperties.getMaxResultsRequested());
+			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(
+					theSearchQueryProperties.getOffset(), mySearchProperties.getMaxResultsRequested());
 			String sql = allTargetsSql.getSql();
 			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 
@@ -2499,7 +2500,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						}
 
 						if (!myResultsIterator.hasNext()) {
-							if (mySearchProperties.hasMaxResultsRequested() && (mySkipCount + myNonSkipCount == mySearchProperties.getMaxResultsRequested())) {
+							if (mySearchProperties.hasMaxResultsRequested()
+									&& (mySkipCount + myNonSkipCount == mySearchProperties.getMaxResultsRequested())) {
 								if (mySkipCount > 0 && myNonSkipCount == 0) {
 									sendProcessingMsgAndFirePerformanceHook();
 									int maxResults = mySearchProperties.getMaxResultsRequested() + 1000;
@@ -2612,9 +2614,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 
 				SearchQueryProperties properties = mySearchProperties.clone();
-				properties.setOffset(offset)
-					.setMaxResultsRequested(theMaxResultsToFetch)
-					.setDoCountOnlyFlag(false);
+				properties
+						.setOffset(offset)
+						.setMaxResultsRequested(theMaxResultsToFetch)
+						.setDoCountOnlyFlag(false);
 				myQueryList = createQuery(myParams, properties, myRequest, mySearchRuntimeDetails);
 			}
 

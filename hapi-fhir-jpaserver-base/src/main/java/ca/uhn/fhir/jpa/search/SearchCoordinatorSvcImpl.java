@@ -406,7 +406,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			// we set a max to fetch from the db for synchronous searches;
 			// otherwise, we would have to load everything into memory (or force the db to do so);
 			// So let's set a max value here
-			Integer maxToLoad = ObjectUtils.defaultIfNull(loadSynchronousUpTo, myStorageSettings.getInternalSynchronousSearchSize());
+			Integer maxToLoad = ObjectUtils.defaultIfNull(
+					loadSynchronousUpTo, myStorageSettings.getInternalSynchronousSearchSize());
 			ourLog.debug("Setting a max fetch value of {} for synchronous search", maxToLoad);
 			sb.setMaxResultsToFetch(maxToLoad);
 
