@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.util.ResourceCountCacheUtil;
 import ca.uhn.fhir.jpa.config.util.ValidationSupportConfigUtil;
@@ -28,6 +30,7 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.search.HSearchSortHelperImpl;
 import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.provider.DaoRegistryResourceSupportedSvc;
+import ca.uhn.fhir.jpa.provider.ReplaceReferencesProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
@@ -84,4 +87,11 @@ public class HapiJpaConfig {
 	public ResourceCountCache resourceCountsCache(IFhirSystemDao<?, ?> theSystemDao) {
 		return ResourceCountCacheUtil.newResourceCountCache(theSystemDao);
 	}
+
+	@Bean
+	public ReplaceReferencesProvider replaceReferencesProviderProvider(FhirContext theFhirContext,
+																	   DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesProvider(theFhirContext, theDaoRegistry);
+	}
+
 }
