@@ -17,6 +17,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
@@ -24,6 +25,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.IContextResourceLoader;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.context.IWorkerContextManager;
+import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
@@ -63,6 +65,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -92,6 +95,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private volatile List<StructureDefinition> myAllStructures;
 	private volatile Set<String> myAllPrimitiveTypes;
 	private Parameters myExpansionProfile;
+	private volatile FHIRPathEngine myFHIRPathEngine;
 
 	public VersionSpecificWorkerContextWrapper(
 			ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer) {
@@ -207,15 +211,41 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		List<StructureDefinition> retVal = myAllStructures;
 		if (retVal == null) {
-			retVal = new ArrayList<>();
 			List<IBaseResource> allStructureDefinitions =
 					myValidationSupportContext.getRootValidationSupport().fetchAllStructureDefinitions();
 			assert allStructureDefinitions != null;
-			for (IBaseResource next : allStructureDefinitions) {
-				Resource converted = convertToCanonicalVersion(next, false);
-				retVal.add((StructureDefinition) converted);
-			}
+
+			/*
+			 * This method (allStructureDefinitions()) gets called recursively - As we
+			 * try to return all StructureDefinitions, we want to generate snapshots for
+			 * any that don't already have a snapshot. But the snapshot generator in turn
+			 * also calls allStructureDefinitions() - That specific call doesn't require
+			 * that the returned SDs have snapshots generated though.
+			 *
+			 * So, we first just convert to canonical version and store a list containing
+			 * the canonical versions. That way any recursive calls will return the
+			 * stored list. But after that we'll generate all the snapshots and
+			 * store that list instead. If the canonicalization fails with an
+			 * unexpected exception, we wipe the stored list. This is probably an
+			 * unrecoverable failure since this method will probably always
+			 * fail if it fails once. But at least this way we're likley to
+			 * generate useful error messages for the user.
+			 */
+			retVal = allStructureDefinitions.stream()
+					.map(t -> myVersionCanonicalizer.structureDefinitionToCanonical(t))
+					.collect(Collectors.toList());
 			myAllStructures = retVal;
+
+			try {
+				for (IBaseResource next : allStructureDefinitions) {
+					Resource converted = convertToCanonicalVersionAndGenerateSnapshot(next, false);
+					retVal.add((StructureDefinition) converted);
+				}
+				myAllStructures = retVal;
+			} catch (Exception e) {
+				ourLog.error("Failure during snapshot generation", e);
+				myAllStructures = null;
+			}
 		}
 
 		return retVal;
@@ -1036,10 +1066,10 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return null;
 		}
 
-		return convertToCanonicalVersion(fetched, true);
+		return convertToCanonicalVersionAndGenerateSnapshot(fetched, true);
 	}
 
-	private Resource convertToCanonicalVersion(
+	private Resource convertToCanonicalVersionAndGenerateSnapshot(
 			@Nonnull IBaseResource theResource, boolean thePropagateSnapshotException) {
 		Resource canonical;
 		synchronized (theResource) {
@@ -1054,13 +1084,19 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 						ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
 						IBaseResource resource = theResource;
 						try {
-							resource = myValidationSupportContext
+
+							FhirContext fhirContext = myValidationSupportContext
 									.getRootValidationSupport()
-									.generateSnapshot(myValidationSupportContext, resource, "", null, "");
+									.getFhirContext();
+							SnapshotGeneratingValidationSupport snapshotGenerator =
+									new SnapshotGeneratingValidationSupport(fhirContext, this, getFHIRPathEngine());
+							resource = snapshotGenerator.generateSnapshot(
+									myValidationSupportContext, resource, "", null, "");
 							Validate.isTrue(
 									resource != null,
 									"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
 									canonicalSd.getUrl());
+
 						} catch (BaseServerResponseException e) {
 							if (thePropagateSnapshotException) {
 								throw e;
@@ -1093,5 +1129,14 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			}
 		}
 		return canonical;
+	}
+
+	private FHIRPathEngine getFHIRPathEngine() {
+		FHIRPathEngine retVal = myFHIRPathEngine;
+		if (retVal == null) {
+			retVal = new FHIRPathEngine(this);
+			myFHIRPathEngine = retVal;
+		}
+		return retVal;
 	}
 }
