@@ -246,7 +246,7 @@ public class ProviderConstants {
 	public static final String OPERATION_EXPORT = "$export";
 
 	/**
-	 * Operation name for the "$replace_references" operation
+	 * Operation name for the "$replace-references" operation
 	 */
-	public static final String OPERATION_REPLACE_REFERENCES = "$replace_references";
+	public static final String OPERATION_REPLACE_REFERENCES = "$replace-references";
 }
