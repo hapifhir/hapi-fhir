@@ -89,9 +89,8 @@ public class HapiJpaConfig {
 	}
 
 	@Bean
-	public ReplaceReferencesProvider replaceReferencesProviderProvider(FhirContext theFhirContext,
-																	   DaoRegistry theDaoRegistry) {
+	public ReplaceReferencesProvider replaceReferencesProviderProvider(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		return new ReplaceReferencesProvider(theFhirContext, theDaoRegistry);
 	}
-
 }

@@ -69,7 +69,6 @@ public class ReplaceReferencesProvider {
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
 
-
 	public ReplaceReferencesProvider(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
@@ -90,11 +89,13 @@ public class ReplaceReferencesProvider {
 
 		// todo JM: this will be used once the batch part gets implemented. For the moment only implementing synch path
 		// operation is performed online or batched depending on the number of references to patch
-//		return referencingResources.size() > myBatchReferenceCountThreshold
-//				? replaceReferencesInTransaction(referencingResources, theCurrentTargetIdParam, theNewTargetIdParam, theRequest)
-//				: replaceReferencesBatch(referencingResources, theCurrentTargetIdParam, theNewTargetIdParam, theRequest);
+		//		return referencingResources.size() > myBatchReferenceCountThreshold
+		//				? replaceReferencesInTransaction(referencingResources, theCurrentTargetIdParam, theNewTargetIdParam,
+		// theRequest)
+		//				: replaceReferencesBatch(referencingResources, theCurrentTargetIdParam, theNewTargetIdParam, theRequest);
 
-		return replaceReferencesInTransaction(referencingResources, theCurrentTargetIdParam, theNewTargetIdParam, theRequest);
+		return replaceReferencesInTransaction(
+				referencingResources, theCurrentTargetIdParam, theNewTargetIdParam, theRequest);
 	}
 
 	private IBaseParameters replaceReferencesInTransaction(
