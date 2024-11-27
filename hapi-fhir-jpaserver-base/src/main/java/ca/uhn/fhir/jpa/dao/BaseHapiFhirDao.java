@@ -981,7 +981,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 				}
 
-				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
+				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled() && changed.isChanged()) {
 					populateFullTextFields(myContext, theResource, entity, newParams);
 				}
 
