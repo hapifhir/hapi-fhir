@@ -1307,7 +1307,15 @@ public class FhirContext {
 	 * @since 5.1.0
 	 */
 	public static FhirContext forCached(FhirVersionEnum theFhirVersionEnum) {
-		return ourStaticContexts.computeIfAbsent(theFhirVersionEnum, v -> new FhirContext(v));
+		return ourStaticContexts.computeIfAbsent(theFhirVersionEnum, FhirContext::forVersion);
+	}
+
+	/**
+	 * An uncached version of forCached()
+	 * @return a new FhirContext for theFhirVersionEnum
+	 */
+	public static FhirContext forVersion(FhirVersionEnum theFhirVersionEnum) {
+		return new FhirContext(theFhirVersionEnum);
 	}
 
 	private static Collection<Class<? extends IBaseResource>> toCollection(
