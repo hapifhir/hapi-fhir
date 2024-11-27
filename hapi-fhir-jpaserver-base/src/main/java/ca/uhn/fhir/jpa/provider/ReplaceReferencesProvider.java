@@ -190,11 +190,11 @@ public class ReplaceReferencesProvider {
 
 	private List<? extends IBaseResource> findReferencingResourceIds(
 			IIdType theCurrentTargetIdParam, RequestDetails theRequest) {
+
 		IFhirResourceDao<?> dao = getDao(theRequest.getResourceName());
 		if (dao == null) {
-			// fixme jm: msg code
 			throw new InternalErrorException(
-					Msg.code(0) + "Couldn't obtain DAO for resource type" + theRequest.getResourceName());
+					Msg.code(2582) + "Couldn't obtain DAO for resource type" + theRequest.getResourceName());
 		}
 
 		SearchParameterMap parameterMap = new SearchParameterMap();
