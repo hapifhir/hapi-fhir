@@ -36,13 +36,13 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.sl.cache.Cache;
-import ca.uhn.fhir.sl.cache.CacheFactory;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
@@ -53,14 +53,11 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -95,7 +92,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	 */
 	public JpaPersistedResourceValidationSupport(FhirContext theFhirContext) {
 		super();
-		Validate.notNull(theFhirContext);
+		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		myFhirContext = theFhirContext;
 	}
 
@@ -107,51 +104,36 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
 		if (TermReadSvcUtil.isLoincUnversionedCodeSystem(theSystem)) {
-			Optional<IBaseResource> currentCSOpt = getCodeSystemCurrentVersion(new UriType(theSystem));
-			if (!currentCSOpt.isPresent()) {
+			IIdType id = myFhirContext.getVersion().newIdType("CodeSystem", LOINC_LOW);
+			try {
+				return myDaoRegistry.getResourceDao(myCodeSystemType).read(id, new SystemRequestDetails());
+			} catch (ResourceNotFoundException e) {
 				ourLog.info("Couldn't find current version of CodeSystem: " + theSystem);
+				return null;
 			}
-			return currentCSOpt.orElse(null);
 		}
 
 		return fetchResource(myCodeSystemType, theSystem);
 	}
 
-	/**
-	 * Obtains the current version of a CodeSystem using the fact that the current
-	 * version is always pointed by the ForcedId for the no-versioned CS
-	 */
-	private Optional<IBaseResource> getCodeSystemCurrentVersion(UriType theUrl) {
-		if (!theUrl.getValueAsString().contains(LOINC_LOW)) {
-			return Optional.empty();
-		}
-
-		return myTermReadSvc.readCodeSystemByForcedId(LOINC_LOW);
-	}
-
 	@Override
 	public IBaseResource fetchValueSet(String theSystem) {
 		if (TermReadSvcUtil.isLoincUnversionedValueSet(theSystem)) {
-			Optional<IBaseResource> currentVSOpt = getValueSetCurrentVersion(new UriType(theSystem));
-			return currentVSOpt.orElse(null);
+			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theSystem);
+			if (vsIdOpt.isEmpty()) {
+				return null;
+			}
+
+			IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myValueSetType);
+			IIdType id = myFhirContext.getVersion().newIdType("ValueSet", vsIdOpt.get());
+			try {
+				return valueSetResourceDao.read(id, new SystemRequestDetails());
+			} catch (ResourceNotFoundException e) {
+				return null;
+			}
 		}
 
 		return fetchResource(myValueSetType, theSystem);
-	}
-
-	/**
-	 * Obtains the current version of a ValueSet using the fact that the current
-	 * version is always pointed by the ForcedId for the no-versioned VS
-	 */
-	private Optional<IBaseResource> getValueSetCurrentVersion(UriType theUrl) {
-		Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theUrl.getValueAsString());
-		if (!vsIdOpt.isPresent()) {
-			return Optional.empty();
-		}
-
-		IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myValueSetType);
-		IBaseResource valueSet = valueSetResourceDao.read(new IdDt("ValueSet", vsIdOpt.get()));
-		return Optional.ofNullable(valueSet);
 	}
 
 	@Override

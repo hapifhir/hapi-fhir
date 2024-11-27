@@ -2268,7 +2268,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		 */
 		HapiTransactionService.requireTransaction();
 
-		TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(new ValidationSupportContext(myValidationSupport), theCodeSystem);
+		TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(new ValidationSupportContext(provideValidationSupport()), theCodeSystem);
 		if (csv == null) {
 			return Optional.empty();
 		}
@@ -2276,10 +2276,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.MANDATORY)
 	public List<TermConcept> findCodes(String theCodeSystem, List<String> theCodeList) {
+		HapiTransactionService.requireTransaction();
 
-		TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(new ValidationSupportContext(myValidationSupport), theCodeSystem);
+		TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(new ValidationSupportContext(provideValidationSupport()), theCodeSystem);
 		if (csv == null) {
 			return Collections.emptyList();
 		}

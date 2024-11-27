@@ -215,6 +215,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				}
 			}
 
+			next.getValue().getPersistentId().setAssociatedResourceId(next.getKey());
+
 			IResourceLookup previousValue = retVal.put(next.getKey(), next.getValue());
 			if (previousValue != null) {
 				/*
