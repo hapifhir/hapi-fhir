@@ -2422,6 +2422,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			assert resourceId != null;
 			assert resourceId.hasIdPart();
 
+			if (!resourceId.hasResourceType()) {
+				resourceId = resourceId.withResourceType(getResourceName());
+			}
+
 			boolean create = false;
 
 			if (theRequest != null) {
