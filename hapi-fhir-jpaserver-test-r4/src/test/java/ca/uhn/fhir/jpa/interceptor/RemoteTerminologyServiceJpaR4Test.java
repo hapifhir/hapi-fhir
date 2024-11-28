@@ -224,8 +224,9 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().containsExactlyInAnyOrder(
 			"http://hl7.org/fhir/administrative-gender"
 		);
-		assertThat(ourCodeSystemProvider.myValidatedCodes).asList().isEmpty();
-
+		assertThat(ourCodeSystemProvider.myValidatedCodes).asList().containsExactlyInAnyOrder(
+			"http://hl7.org/fhir/administrative-gender#female#null"
+		);
 		// Test 2 (should rely on caches)
 		ourCodeSystemProvider.clearCalls();
 		ourValueSetProvider.clearCalls();
