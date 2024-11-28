@@ -59,7 +59,8 @@ public class ResourceMergeService {
 	 * @param theRequestDetails	the request details
 	 * @return the merge outcome containing OperationOutcome and HTTP status code
 	 */
-	public MergeOutcome merge(MergeOperationParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
+	public MergeOutcome merge(
+			BaseMergeOperationParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
 
 		MergeOutcome mergeOutcome = new MergeOutcome();
 		IBaseOperationOutcome outcome = OperationOutcomeUtil.newInstance(myFhirContext);
@@ -99,7 +100,7 @@ public class ResourceMergeService {
 	 * @return true if the parameters are valid, false otherwise
 	 */
 	private boolean validateMergeOperationParameters(
-			MergeOperationParameters theMergeOperationParameters, IBaseOperationOutcome theOutcome) {
+			BaseMergeOperationParameters theMergeOperationParameters, IBaseOperationOutcome theOutcome) {
 		List<String> errorMessages = new ArrayList<>();
 		if (!theMergeOperationParameters.hasAtLeastOneSourceIdentifier()
 				&& theMergeOperationParameters.getSourceResource() == null) {
@@ -152,7 +153,7 @@ public class ResourceMergeService {
 	}
 
 	private IBaseResource resolveSourceResource(
-			MergeOperationParameters theOperationParameters,
+			BaseMergeOperationParameters theOperationParameters,
 			RequestDetails theRequestDetails,
 			IBaseOperationOutcome theOutcome) {
 		return resolveResource(
@@ -165,7 +166,7 @@ public class ResourceMergeService {
 	}
 
 	private IBaseResource resolveTargetResource(
-			MergeOperationParameters theOperationParameters,
+			BaseMergeOperationParameters theOperationParameters,
 			RequestDetails theRequestDetails,
 			IBaseOperationOutcome theOutcome) {
 		return resolveResource(

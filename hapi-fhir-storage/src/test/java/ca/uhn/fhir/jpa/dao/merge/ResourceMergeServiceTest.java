@@ -50,7 +50,7 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testValidatesInputParameters_MissingSourcePatientParams_ReturnsErrorInOutcomeWith400Status() {
 		// Given
-		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
+		BaseMergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 		mergeOperationParameters.setTargetResource(new Reference("Patient/123"));
 
 		// When
@@ -73,7 +73,7 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testValidatesInputParameters_MissingTargetPatientParams_ReturnsErrorInOutcomeWith400Status() {
 		// Given
-		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
+		BaseMergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
 
 		// When
@@ -96,7 +96,7 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testValidatesInputParameters_MissingBothSourceAndTargetPatientParams_ReturnsErrorsInOutcomeWith400Status() {
 		// Given
-		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
+		BaseMergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 
 		// When
 		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -121,7 +121,7 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testValidatesInputParameters_BothSourceResourceParamsProvided_ReturnsErrorInOutcomeWith400Status() {
 		// Given
-		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
+		BaseMergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
 		mergeOperationParameters.setSourceResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue( "val")));
 		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
@@ -147,7 +147,7 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testValidatesInputParameters_BothTargetResourceParamsProvided_ReturnsErrorInOutcomeWith400Status() {
 		// Given
-		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
+		BaseMergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 		mergeOperationParameters.setTargetResource(new Reference("Patient/123"));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue( "val")));
 		mergeOperationParameters.setSourceResource(new Reference("Patient/345"));

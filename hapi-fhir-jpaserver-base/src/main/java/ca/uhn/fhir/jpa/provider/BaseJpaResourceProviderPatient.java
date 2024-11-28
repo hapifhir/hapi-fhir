@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
-import ca.uhn.fhir.jpa.dao.merge.MergeOperationParameters;
+import ca.uhn.fhir.jpa.dao.merge.BaseMergeOperationParameters;
 import ca.uhn.fhir.jpa.dao.merge.PatientMergeOperationParameters;
 import ca.uhn.fhir.jpa.dao.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -282,7 +282,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 
 		startRequest(theServletRequest);
 		try {
-			MergeOperationParameters mergeOperationParameters = createMergeOperationParameters(
+			BaseMergeOperationParameters mergeOperationParameters = createMergeOperationParameters(
 					theSourcePatientIdentifier,
 					theTargetPatientIdentifier,
 					theSourcePatient,
@@ -309,14 +309,14 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 		}
 	}
 
-	private MergeOperationParameters createMergeOperationParameters(
+	private BaseMergeOperationParameters createMergeOperationParameters(
 			List<Identifier> theSourcePatientIdentifier,
 			List<Identifier> theTargetPatientIdentifier,
 			IBaseReference theSourcePatient,
 			IBaseReference theTargetPatient,
 			IPrimitiveType<Boolean> thePreview,
 			IBaseResource theResultPatient) {
-		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
+		BaseMergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 		if (theSourcePatientIdentifier != null) {
 			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourcePatientIdentifier.stream()
 					.map(IdentifierUtil::identifierDtFromIdentifier)

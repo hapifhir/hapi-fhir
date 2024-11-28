@@ -133,8 +133,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.returnResourceType(Parameters.class)
 			.execute();
 
-		// FIXME KHS validate outParams
-
 		Bundle bundle = fetchBundle(myServerBase + "/" + targetPatId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
 		assertNull(bundle.getLink("next"));
@@ -172,8 +170,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		assertThat(thrown.getStatusCode()).isEqualTo(400);
 	}
-
-	// FIXME KHS look at PatientEverythingR4Test for ideas for other tests
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
 		Bundle bundle;
