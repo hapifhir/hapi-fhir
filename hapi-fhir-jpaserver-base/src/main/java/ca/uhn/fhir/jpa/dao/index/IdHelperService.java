@@ -84,7 +84,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class is used to convert between PIDs (the internal primary key for a particular resource as
- * stored in the {@link ca.uhn.fhir.jpa.model.entity.ResourceTable HFJ_RESOURCE} table), and the
+ * stored in the {@link ResourceTable HFJ_RESOURCE} table), and the
  * public ID that a resource has.
  * <p>
  * These IDs are sometimes one and the same (by default, a resource that the server assigns the ID of
@@ -147,20 +147,30 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			throws ResourceNotFoundException {
 
 		IIdType id;
+		boolean untyped;
 		if (theResourceType != null) {
+			untyped = false;
 			id = newIdType(theResourceType + "/" + theResourceId);
 		} else {
+			untyped = true;
 			id = newIdType(theResourceId);
 		}
 		List<IIdType> ids = List.of(id);
 		Map<IIdType, IResourceLookup<JpaPid>> outcome = resolveResourceIdentities(theRequestPartitionId, ids, theMode);
 
+		IResourceLookup<JpaPid> retVal;
+		if (untyped) {
+			retVal = outcome.values().iterator().next();
+		} else {
+			retVal = outcome.get(id);
+		}
+
 		// We only pass 1 input in so only 0..1 will come back
-		if (!outcome.containsKey(id)) {
+		if (retVal == null) {
 			throw new ResourceNotFoundException(Msg.code(2001) + "Resource " + id + " is not known");
 		}
 
-		return outcome.get(id);
+		return retVal;
 	}
 
 	@Nonnull
@@ -201,15 +211,15 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		Map<IIdType, IResourceLookup<JpaPid>> retVal = new HashMap<>(idToLookup.size());
 		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> next : idToLookup.entries()) {
 
-			IIdType resourceId = myFhirCtx.getVersion().newIdType(next.getValue().getResourceType(), next.getValue().getFhirId());
+			IIdType resourceId = myFhirCtx
+					.getVersion()
+					.newIdType(
+							next.getValue().getResourceType(), next.getValue().getFhirId());
 			if (next.getValue().getDeleted() != null) {
 				if (theMode.isFailOnDeleted()) {
 					String msg = myFhirCtx
 							.getLocalizer()
-							.getMessageSanitized(
-									IdHelperService.class,
-									"deletedId",
-									resourceId.getValue());
+							.getMessageSanitized(IdHelperService.class, "deletedId", resourceId.getValue());
 					throw new ResourceGoneException(Msg.code(2572) + msg);
 				}
 				if (!theMode.isIncludeDeleted()) {
@@ -231,7 +241,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				 */
 				ourLog.warn(
 						"Resource ID[{}] corresponds to lookups: {} and {}",
-					resourceId,
+						resourceId,
 						previousValue,
 						next.getValue());
 				String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
@@ -325,12 +335,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		// one create one clause per id.
 		List<Predicate> innerIdPredicates = new ArrayList<>(theIdsToResolve.size());
-		boolean haveUntypedIds = false;
 		for (IIdType next : theIdsToResolve) {
-			if (!next.hasResourceType()) {
-				haveUntypedIds = true;
-			}
-
 			List<Predicate> idPredicates = new ArrayList<>(2);
 
 			if (myStorageSettings.getResourceClientIdStrategy() == JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC
@@ -368,12 +373,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 						new MemoryCacheService.ForcedIdCacheKey(resourceType, fhirId, theRequestPartitionId);
 				IIdType id = nextKey.toIdType(myFhirCtx);
 				theMapToPopulate.put(id, lookup);
-
-				// FIXME: what fails if we remove this?
-//				if (haveUntypedIds) {
-//					id = nextKey.toIdTypeWithoutResourceType(myFhirCtx);
-//					theMapToPopulate.put(id, lookup);
-//				}
 
 				List<IResourceLookup<JpaPid>> valueToCache = theMapToPopulate.get(id);
 				myMemoryCacheService.putAfterCommit(

@@ -724,7 +724,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateDeleteEnabled();
 
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-			theRequestDetails, getResourceName(), theId);
+				theRequestDetails, getResourceName(), theId);
 
 		final ResourceTable entity;
 		try {
@@ -807,12 +807,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg, StorageResponseCodeEnum.SUCCESSFUL_DELETE));
 
 		myIdHelperService.addResolvedPidToFhirId(
-			entity.getPersistentId(),
-			requestPartitionId,
-			entity.getResourceType(),
-			entity.getFhirId(),
-			entity.getDeleted()
-		);
+				entity.getPersistentId(),
+				requestPartitionId,
+				entity.getResourceType(),
+				entity.getFhirId(),
+				entity.getDeleted());
 
 		return outcome;
 	}
