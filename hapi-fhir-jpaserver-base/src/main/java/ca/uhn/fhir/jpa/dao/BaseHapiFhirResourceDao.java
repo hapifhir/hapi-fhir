@@ -1155,15 +1155,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
+		HapiTransactionService.noTransactionAllowed();
 		validateExpungeEnabled();
 		return forceExpungeInExistingTransaction(theId, theExpungeOptions, theRequest);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		HapiTransactionService.noTransactionAllowed();
 		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
 		validateExpungeEnabled();
 		return myExpungeService.expunge(getResourceName(), null, theExpungeOptions, theRequestDetails);
@@ -1885,34 +1885,36 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			TransactionDetails theTransactionDetails) {
 		HapiTransactionService.requireTransaction();
-		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		Validate.isTrue(
-				getResourceName().equals(theId.getResourceType()), "ID resource type doesn't match expected for DAO");
+		IIdType id = theId;
+		validateResourceTypeAndThrowInvalidRequestException(id);
+		if (!id.hasResourceType()) {
+			id = id.withResourceType(getResourceName());
+		}
 
 		JpaPid persistentId = null;
 		if (theTransactionDetails != null) {
-			if (theTransactionDetails.isResolvedResourceIdEmpty(theId.toUnqualifiedVersionless())) {
-				throw new ResourceNotFoundException(Msg.code(1997) + theId);
+			if (theTransactionDetails.isResolvedResourceIdEmpty(id.toUnqualifiedVersionless())) {
+				throw new ResourceNotFoundException(Msg.code(1997) + id);
 			}
 			if (theTransactionDetails.hasResolvedResourceIds()) {
-				persistentId = (JpaPid) theTransactionDetails.getResolvedResourceId(theId);
+				persistentId = (JpaPid) theTransactionDetails.getResolvedResourceId(id);
 			}
 		}
 
 		if (persistentId == null) {
 			persistentId = myIdHelperService.resolveResourceIdentityPid(
 					theRequestPartitionId,
-					theId.getResourceType(),
-					theId.getIdPart(),
+					id.getResourceType(),
+					id.getIdPart(),
 					ResolveIdentityMode.includeDeleted().cacheOk());
 		}
 
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
 		if (entity == null) {
-			throw new ResourceNotFoundException(Msg.code(1998) + theId);
+			throw new ResourceNotFoundException(Msg.code(1998) + id);
 		}
-		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
+		validateGivenIdIsAppropriateToRetrieveResource(id, entity);
 		return entity;
 	}
 
@@ -2586,7 +2588,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.SUPPORTS)
 	public MethodOutcome validate(
 			T theResource,
 			IIdType theId,

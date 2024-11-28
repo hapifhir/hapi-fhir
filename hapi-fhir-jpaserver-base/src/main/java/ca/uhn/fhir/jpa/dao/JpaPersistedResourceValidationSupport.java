@@ -24,10 +24,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.TermReadSvcUtil;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -35,7 +33,6 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
@@ -76,12 +73,6 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private ITermReadSvc myTermReadSvc;
-
-	@Autowired
-	private HapiTransactionService myTxService;
-
 	private Class<? extends IBaseResource> myCodeSystemType;
 	private Class<? extends IBaseResource> myStructureDefinitionType;
 	private Class<? extends IBaseResource> myValueSetType;
@@ -104,15 +95,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	public IBaseResource fetchCodeSystem(String theSystem) {
 		if (TermReadSvcUtil.isLoincUnversionedCodeSystem(theSystem)) {
 			IIdType id = myFhirContext.getVersion().newIdType("CodeSystem", LOINC_LOW);
-
-			return myTxService.withSystemRequest().readOnly().execute(() -> {
-				try {
-					return myDaoRegistry.getResourceDao(myCodeSystemType).read(id, new SystemRequestDetails());
-				} catch (ResourceNotFoundException e) {
-					ourLog.info("Couldn't find current version of CodeSystem: " + theSystem);
-					return null;
-				}
-			});
+			return findResourceByIdWithNoException(id, myCodeSystemType);
 		}
 
 		return fetchResource(myCodeSystemType, theSystem);
@@ -125,20 +108,30 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 			if (vsIdOpt.isEmpty()) {
 				return null;
 			}
-
-			IFhirResourceDao<? extends IBaseResource> valueSetResourceDao =
-					myDaoRegistry.getResourceDao(myValueSetType);
 			IIdType id = myFhirContext.getVersion().newIdType("ValueSet", vsIdOpt.get());
-			return myTxService.withSystemRequest().readOnly().execute(() -> {
-				try {
-					return valueSetResourceDao.read(id, new SystemRequestDetails());
-				} catch (ResourceNotFoundException e) {
-					return null;
-				}
-			});
+			return findResourceByIdWithNoException(id, myValueSetType);
 		}
 
 		return fetchResource(myValueSetType, theSystem);
+	}
+
+	/**
+	 * Performs a lookup by ID, with no exception thrown (since that can mark the active
+	 * transaction as rollback).
+	 */
+	@Nullable
+	private IBaseResource findResourceByIdWithNoException(IIdType id, Class<? extends IBaseResource> type) {
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+				.setLoadSynchronousUpTo(1)
+				.add(IAnyResource.SP_RES_ID, new TokenParam(id.getValue()));
+		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(type);
+		IBundleProvider outcome = dao.search(map, new SystemRequestDetails());
+		List<IBaseResource> resources = outcome.getResources(0, 1);
+		if (resources.isEmpty()) {
+			return null;
+		} else {
+			return resources.get(0);
+		}
 	}
 
 	@Override

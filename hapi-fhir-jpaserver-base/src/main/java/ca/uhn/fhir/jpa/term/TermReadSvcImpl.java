@@ -2050,7 +2050,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(readOnly = true)
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
 		Optional<TermValueSet> optionalTermValueSet = fetchValueSetEntity(theValueSet);
 
@@ -2350,7 +2350,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return retVal;
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	@Override
 	public Set<TermConcept> findCodesAbove(
 			Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
@@ -2370,7 +2370,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return retVal;
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	@Override
 	public List<FhirVersionIndependentConcept> findCodesAbove(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
@@ -2383,7 +2383,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return toVersionIndependentConcepts(theSystem, codes);
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	@Override
 	public Set<TermConcept> findCodesBelow(
 			Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
@@ -2407,7 +2407,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return retVal;
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	@Override
 	public List<FhirVersionIndependentConcept> findCodesBelow(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);

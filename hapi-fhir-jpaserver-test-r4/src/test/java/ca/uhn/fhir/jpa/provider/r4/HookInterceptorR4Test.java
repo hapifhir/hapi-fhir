@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -20,20 +19,17 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(HookInterceptorR4Test.class);
 
 	@Autowired
 	IIdHelperService<JpaPid> myIdHelperService;
@@ -136,7 +132,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		});
 		IIdType savedPatientId = myClient.create().resource(new Patient()).execute().getId();
 		Long savedPatientPid = runInTransaction(() ->
-			myIdHelperService.resolveResourceIdentityPid(RequestPartitionId.allPartitions(), savedPatientId.getResourceType(), savedPatientId.getValue(), ResolveIdentityMode.includeDeleted().cacheOk()).getId()
+			myIdHelperService.resolveResourceIdentityPid(RequestPartitionId.allPartitions(), savedPatientId.getResourceType(), savedPatientId.getIdPart(), ResolveIdentityMode.includeDeleted().cacheOk()).getId()
 		);
 
 		myClient.delete().resourceById(savedPatientId).execute();
@@ -175,7 +171,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		myClient.update().resource(patient).execute();
 		runInTransaction(() -> {
 			Long savedPatientPid = runInTransaction(() ->
-				myIdHelperService.resolveResourceIdentityPid(RequestPartitionId.allPartitions(), savedPatientId.getResourceType(), savedPatientId.getValue(), ResolveIdentityMode.includeDeleted().cacheOk()).getId()
+				myIdHelperService.resolveResourceIdentityPid(RequestPartitionId.allPartitions(), savedPatientId.getResourceType(), savedPatientId.getIdPart(), ResolveIdentityMode.includeDeleted().cacheOk()).getId()
 			);
 			assertEquals(savedPatientPid.longValue(), pidOld.get());
 			assertEquals(savedPatientPid.longValue(), pidNew.get());
