@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.DateSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
@@ -55,7 +56,7 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 			myJpaStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
-		ExtendedHSearchIndexData indexData = extractor.extract(new Observation(), extractedParams);
+		ExtendedHSearchIndexData indexData = extractor.extract(new Observation(), new ResourceTable(), extractedParams);
 
 		// validate
 		Set<CompositeSearchIndexData> spIndexData = indexData.getSearchParamComposites().get("component-code-value-concept");
@@ -78,7 +79,7 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 			myJpaStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
-		ExtendedHSearchIndexData indexData = extractor.extract(new SearchParameter(), searchParams);
+		ExtendedHSearchIndexData indexData = extractor.extract(new SearchParameter(), new ResourceTable(), searchParams);
 
 		// validate
 		Set<DateSearchIndexData> dIndexData = indexData.getDateIndexData().get("Date");
