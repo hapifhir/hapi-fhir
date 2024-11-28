@@ -262,7 +262,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 	@Operation(
 			name = ProviderConstants.OPERATION_MERGE,
 			canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-merge")
-	public void patientMerge(
+	public IBaseParameters patientMerge(
 			HttpServletRequest theServletRequest,
 			HttpServletResponse theServletResponse,
 			ServletRequestDetails theRequestDetails,
@@ -302,15 +302,8 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			ParametersUtil.addParameterToParameters(fhirContext, retVal, "outcome", mergeOutcome.getOperationOutcome());
 
 			theServletResponse.setStatus(mergeOutcome.getHttpStatusCode());
-			// TODO Emre:  we are writing the response to directly, otherwise the response status we set above is
-			// ignored. CDA Import operation does it this way too, but  what if the client requests xml response?
-			// there needs to be a better way to do this
-			theServletResponse.setContentType(Constants.CT_JSON);
-			fhirContext
-					.newJsonParser()
-					.setPrettyPrint(true)
-					.encodeResourceToWriter(retVal, theServletResponse.getWriter());
-			theServletResponse.getWriter().close();
+
+			return retVal;
 		} finally {
 			endRequest(theServletRequest);
 		}
