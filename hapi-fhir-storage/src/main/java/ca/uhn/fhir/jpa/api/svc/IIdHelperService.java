@@ -141,7 +141,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 		IResourceLookup<T> identity = resolveResourceIdentity(
 				theRequestPartitionId,
 				theId.getResourceType(),
-				theId.getValue(),
+				theId.getIdPart(),
 				ResolveIdentityMode.includeDeleted().cacheOk());
 		if (identity == null) {
 			throw new InvalidRequestException(Msg.code(2295) + "Invalid ID was provided: [" + theId.getIdPart() + "]");
