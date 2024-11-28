@@ -57,6 +57,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -166,6 +167,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		List<IIdType> ids = List.of(id);
 		Map<IIdType, IResourceLookup<JpaPid>> outcome = resolveResourceIdentities(theRequestPartitionId, ids, theMode);
 
+		// We only pass 1 input in so only 0..1 will come back
+		Validate.isTrue(outcome.size() <= 1, "Unexpected output size %s for ID: %s", outcome.size(), ids);
+
 		IResourceLookup<JpaPid> retVal;
 		if (untyped) {
 			if (outcome.isEmpty()) {
@@ -177,7 +181,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			retVal = outcome.get(id);
 		}
 
-		// We only pass 1 input in so only 0..1 will come back
 		if (retVal == null) {
 			throw new ResourceNotFoundException(Msg.code(2001) + "Resource " + id + " is not known");
 		}
