@@ -2513,9 +2513,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 										// if we're not using the database to deduplicate
 										// we should recheck our memory usage
 										// the prefetch size check is future proofing
-										int prefetchSize = myStorageSettings.getSearchPreFetchThresholds().size();
+										int prefetchSize = myStorageSettings
+												.getSearchPreFetchThresholds()
+												.size();
 										if (prefetchSize > 0) {
-											if (myStorageSettings.getSearchPreFetchThresholds().get(prefetchSize - 1) < mySearchProperties.getMaxResultsRequested()) {
+											if (myStorageSettings
+															.getSearchPreFetchThresholds()
+															.get(prefetchSize - 1)
+													< mySearchProperties.getMaxResultsRequested()) {
 												mySearchProperties.setDeduplicateInDBFlag(true);
 											}
 										}
