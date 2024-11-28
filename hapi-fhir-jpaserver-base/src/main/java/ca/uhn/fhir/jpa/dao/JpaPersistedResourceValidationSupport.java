@@ -60,6 +60,7 @@ import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
+import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_LAST_UPDATED;
 
 /**
  * This class is a {@link IValidationSupport Validation support} module that loads
@@ -103,12 +104,15 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	public IBaseResource fetchCodeSystem(String theSystem) {
 		if (TermReadSvcUtil.isLoincUnversionedCodeSystem(theSystem)) {
 			IIdType id = myFhirContext.getVersion().newIdType("CodeSystem", LOINC_LOW);
-			try {
-				return myDaoRegistry.getResourceDao(myCodeSystemType).read(id, new SystemRequestDetails());
-			} catch (ResourceNotFoundException e) {
-				ourLog.info("Couldn't find current version of CodeSystem: " + theSystem);
-				return null;
-			}
+
+			return myTxService.withSystemRequest().readOnly().execute(() -> {
+				try {
+					return myDaoRegistry.getResourceDao(myCodeSystemType).read(id, new SystemRequestDetails());
+				} catch (ResourceNotFoundException e) {
+					ourLog.info("Couldn't find current version of CodeSystem: " + theSystem);
+					return null;
+				}
+			});
 		}
 
 		return fetchResource(myCodeSystemType, theSystem);
@@ -125,11 +129,13 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 			IFhirResourceDao<? extends IBaseResource> valueSetResourceDao =
 					myDaoRegistry.getResourceDao(myValueSetType);
 			IIdType id = myFhirContext.getVersion().newIdType("ValueSet", vsIdOpt.get());
-			try {
-				return valueSetResourceDao.read(id, new SystemRequestDetails());
-			} catch (ResourceNotFoundException e) {
-				return null;
-			}
+			return myTxService.withSystemRequest().readOnly().execute(() -> {
+				try {
+					return valueSetResourceDao.read(id, new SystemRequestDetails());
+				} catch (ResourceNotFoundException e) {
+					return null;
+				}
+			});
 		}
 
 		return fetchResource(myValueSetType, theSystem);
@@ -206,7 +212,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 					} else {
 						params.add(ValueSet.SP_URL, new UriParam(theUri));
 					}
-					params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));
+					params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 					search = myDaoRegistry.getResourceDao(resourceName).search(params);
 
 					if (search.isEmpty()
@@ -215,11 +221,13 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 						params.setLoadSynchronousUpTo(1);
 						if (versionSeparator != -1) {
 							params.add(ValueSet.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
-							params.add("system", new UriParam(theUri.substring(0, versionSeparator)));
+							params.add(
+									ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_SYSTEM,
+									new UriParam(theUri.substring(0, versionSeparator)));
 						} else {
-							params.add("system", new UriParam(theUri));
+							params.add(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_SYSTEM, new UriParam(theUri));
 						}
-						params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));
+						params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 						search = myDaoRegistry.getResourceDao(resourceName).search(params);
 					}
 				}
@@ -259,7 +267,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				} else {
 					params.add(CodeSystem.SP_URL, new UriParam(theUri));
 				}
-				params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));
+				params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 				search = myDaoRegistry.getResourceDao(resourceName).search(params);
 				break;
 			}

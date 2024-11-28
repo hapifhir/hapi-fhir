@@ -2287,7 +2287,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		// Fetch the CodeSystem from ValidationSupport, which should return a cached copy. We
 		// keep a copy of the current version entity in userData in that cached copy
 		// to avoid repeated lookups
-		TermCodeSystemVersionDetails retVal = null;
+		TermCodeSystemVersionDetails retVal;
 		IBaseResource codeSystem =
 				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemIdentifier);
 		if (codeSystem != null) {
@@ -2295,29 +2295,36 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			synchronized (codeSystem) {
 				retVal = (TermCodeSystemVersionDetails) codeSystem.getUserData(CS_USERDATA_CURRENT_VERSION);
 				if (retVal == null) {
-					retVal = myTxTemplate.execute(tx -> {
-						TermCodeSystemVersion csv = null;
-						TermCodeSystem cs =
-								myCodeSystemDao.findByCodeSystemUri(getUrlFromIdentifier(theCodeSystemIdentifier));
-						if (cs != null) {
-							if (version != null) {
-								csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(cs.getPid(), version);
-							} else if (cs.getCurrentVersion() != null) {
-								csv = cs.getCurrentVersion();
-							}
-						}
-						if (csv != null) {
-							return new TermCodeSystemVersionDetails(csv.getPid(), csv.getCodeSystemVersionId());
-						} else {
-							return null;
-						}
-					});
-
+					retVal = getCurrentCodeSystemVersion(theCodeSystemIdentifier, version);
 					codeSystem.setUserData(CS_USERDATA_CURRENT_VERSION, retVal);
 				}
 			}
+		} else {
+			retVal = getCurrentCodeSystemVersion(theCodeSystemIdentifier, version);
 		}
 
+		return retVal;
+	}
+
+	@Nullable
+	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(String theCodeSystemIdentifier, String version) {
+		TermCodeSystemVersionDetails retVal;
+		retVal = myTxTemplate.execute(tx -> {
+			TermCodeSystemVersion csv = null;
+			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(getUrlFromIdentifier(theCodeSystemIdentifier));
+			if (cs != null) {
+				if (version != null) {
+					csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(cs.getPid(), version);
+				} else if (cs.getCurrentVersion() != null) {
+					csv = cs.getCurrentVersion();
+				}
+			}
+			if (csv != null) {
+				return new TermCodeSystemVersionDetails(csv.getPid(), csv.getCodeSystemVersionId());
+			} else {
+				return null;
+			}
+		});
 		return retVal;
 	}
 
