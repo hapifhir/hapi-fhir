@@ -374,7 +374,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
 		myClient.meta().add().onResource(obs.getIdElement()).meta(new Meta().addTag("http://blah", "blah", null)).execute();
 
-		obs = myClient.read().resource(Observation.class).withId(obs.getIdElement().toUnqualifiedVersionless()).execute();
+		obs = myClient.read().resource(Observation.class).withId(obs.getIdElement().toVersionless()).execute();
 		Coding tag = obs.getMeta().getTag("http://blah", "blah");
 		assertNotNull(tag);
 
@@ -716,7 +716,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement().toUnqualifiedVersionless()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -796,7 +796,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement().toVersionless()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -870,7 +870,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement().toVersionless()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();

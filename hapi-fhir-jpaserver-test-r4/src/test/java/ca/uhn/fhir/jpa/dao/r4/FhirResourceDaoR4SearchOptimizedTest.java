@@ -910,7 +910,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertThat(outcome.getResources(0, 999)).hasSize(2);
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertThat(selectQuery).contains("where (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='A' or rt1_0.RES_ID='" + obs2id + "')");
+			assertThat(selectQuery).containsAnyOf(
+				"where (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='A' or rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='" + obs2id + "')",
+				"where (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='" + obs2id + "' or rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='A')"
+			);
 			assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		}
 

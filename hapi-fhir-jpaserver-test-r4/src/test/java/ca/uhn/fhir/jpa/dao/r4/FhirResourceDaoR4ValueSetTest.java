@@ -553,7 +553,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, new IdType("ValueSet/vaccinecode"), new CodeType("28571000087109"), new CodeType("http://snomed.info/sct"), null, null, null, mySrd);
-		assertTrue(outcome.isOk());
+		assertTrue(outcome.isOk(), outcome.getMessage());
 		outcome = myTermSvc.validateCodeInValueSet(
 			new ValidationSupportContext(myValidationSupport),
 			new ConceptValidationOptions(),

@@ -257,7 +257,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 		// Verify 1
 		myCaptureQueriesListener.logSelectQueries();
-		Assertions.assertEquals(4, myCaptureQueriesListener.countGetConnections());
+		Assertions.assertEquals(3, myCaptureQueriesListener.countGetConnections());
 		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().isEmpty();
 

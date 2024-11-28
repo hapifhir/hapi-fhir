@@ -20,6 +20,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
@@ -38,8 +39,11 @@ import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -75,6 +79,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -97,6 +102,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -3892,6 +3898,54 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countGetConnections());
 		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testValidateResource(boolean theStoredInRepository) {
+		Patient resource = new Patient();
+		resource.setGender(Enumerations.AdministrativeGender.MALE);
+		resource.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>hello</div>");
+		String encoded;
+
+		IIdType id = null;
+		int initialAdditionalSelects = 0;
+		if (theStoredInRepository) {
+			id = myPatientDao.create(resource, mySrd).getId();
+			resource = null;
+			encoded = null;
+			initialAdditionalSelects = 1;
+		} else {
+			resource.setId("A");
+			encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource);
+		}
+
+		myCaptureQueriesListener.clear();
+		ValidationModeEnum mode = ValidationModeEnum.UPDATE;
+		MethodOutcome outcome = myPatientDao.validate(resource, id, encoded, EncodingEnum.JSON, mode, null, mySrd);
+		assertThat(((OperationOutcome)outcome.getOperationOutcome()).getIssueFirstRep().getDiagnostics()).contains("No issues detected");
+		myCaptureQueriesListener.logSelectQueries();
+		if (theStoredInRepository) {
+			assertEquals(7, myCaptureQueriesListener.countGetConnections());
+			assertEquals(8, myCaptureQueriesListener.countSelectQueries());
+		} else {
+			assertEquals(6, myCaptureQueriesListener.countGetConnections());
+			assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		}
+
+		// Again (should use caches)
+		myCaptureQueriesListener.clear();
+		outcome = myPatientDao.validate(resource, id, encoded, EncodingEnum.JSON, mode, null, mySrd);
+		assertThat(((OperationOutcome)outcome.getOperationOutcome()).getIssueFirstRep().getDiagnostics()).contains("No issues detected");
+		if (theStoredInRepository) {
+			assertEquals(1, myCaptureQueriesListener.countGetConnections());
+			assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		} else {
+			assertEquals(0, myCaptureQueriesListener.countGetConnections());
+			assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		}
+	}
+
+
 
 	@Test
 	public void testValidateCode_BuiltIn() {
