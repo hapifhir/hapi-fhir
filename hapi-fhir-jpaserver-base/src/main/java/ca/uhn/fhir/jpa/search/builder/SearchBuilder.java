@@ -627,8 +627,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (thePids.size() < getMaximumPageSize()) {
 			thePids = normalizeIdListForInClause(thePids);
 		}
-		// TODO - thesize was the 4th parameter... what is it supposed to be in createchunkedquery?
-		theSearchQueryProperties.setMaxResultsRequested(theParams.size());
+		theSearchQueryProperties.setMaxResultsRequested(thePids.size());
 		createChunkedQuery(theParams, theSearchQueryProperties, theRequest, thePids, theQueries);
 	}
 
@@ -2481,7 +2480,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							JpaPid next = JpaPid.fromId(nextLong);
 
 							if (!myPidSet.contains(next)) {
-								if (mySearchProperties.hasMaxResultsRequested()) {
+								if (!mySearchProperties.isDeduplicateInDBFlag()) {
 									/*
 									 * We only add to the map if we aren't fetching "everything";
 									 * otherwise, we let the de-duplication happen in the database
@@ -2505,8 +2504,23 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									&& (mySkipCount + myNonSkipCount == mySearchProperties.getMaxResultsRequested())) {
 								if (mySkipCount > 0 && myNonSkipCount == 0) {
 									sendProcessingMsgAndFirePerformanceHook();
+									// need the next iterator; increase the maxsize
+									// (we should always do this)
 									int maxResults = mySearchProperties.getMaxResultsRequested() + 1000;
 									mySearchProperties.setMaxResultsRequested(maxResults);
+
+									if (!mySearchProperties.isDeduplicateInDBFlag()) {
+										// if we're not using the database to deduplicate
+										// we should recheck our memory usage
+										// the prefetch size check is future proofing
+										int prefetchSize = myStorageSettings.getSearchPreFetchThresholds().size();
+										if (prefetchSize > 0) {
+											if (myStorageSettings.getSearchPreFetchThresholds().get(prefetchSize - 1) < mySearchProperties.getMaxResultsRequested()) {
+												mySearchProperties.setDeduplicateInDBFlag(true);
+											}
+										}
+									}
+
 									initializeIteratorQuery(myOffset, mySearchProperties.getMaxResultsRequested());
 								}
 							}
