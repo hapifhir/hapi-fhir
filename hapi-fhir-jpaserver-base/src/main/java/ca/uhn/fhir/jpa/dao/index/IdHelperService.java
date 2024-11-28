@@ -198,8 +198,10 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		}
 
 		// Convert the multimap into a simple map
-		Map<IIdType, IResourceLookup<JpaPid>> retVal = new HashMap<>();
+		Map<IIdType, IResourceLookup<JpaPid>> retVal = new HashMap<>(idToLookup.size());
 		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> next : idToLookup.entries()) {
+
+			IIdType resourceId = myFhirCtx.getVersion().newIdType(next.getValue().getResourceType(), next.getValue().getFhirId());
 			if (next.getValue().getDeleted() != null) {
 				if (theMode.isFailOnDeleted()) {
 					String msg = myFhirCtx
@@ -207,7 +209,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 							.getMessageSanitized(
 									IdHelperService.class,
 									"deletedId",
-									next.getKey().getValue());
+									resourceId.getValue());
 					throw new ResourceGoneException(Msg.code(2572) + msg);
 				}
 				if (!theMode.isIncludeDeleted()) {
@@ -215,9 +217,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				}
 			}
 
-			next.getValue().getPersistentId().setAssociatedResourceId(next.getKey());
+			next.getValue().getPersistentId().setAssociatedResourceId(resourceId);
 
-			IResourceLookup previousValue = retVal.put(next.getKey(), next.getValue());
+			IResourceLookup<JpaPid> previousValue = retVal.put(resourceId, next.getValue());
 			if (previousValue != null) {
 				/*
 				 *  This means that either:
@@ -229,7 +231,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				 */
 				ourLog.warn(
 						"Resource ID[{}] corresponds to lookups: {} and {}",
-						next.getKey(),
+					resourceId,
 						previousValue,
 						next.getValue());
 				String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
@@ -360,17 +362,18 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			Integer partitionId = nextId.get(4, Integer.class);
 			if (resourcePid != null) {
 				JpaResourceLookup lookup = new JpaResourceLookup(
-						resourceType, resourcePid, deletedAd, PartitionablePartitionId.with(partitionId, null));
+						resourceType, fhirId, resourcePid, deletedAd, PartitionablePartitionId.with(partitionId, null));
 
 				MemoryCacheService.ForcedIdCacheKey nextKey =
 						new MemoryCacheService.ForcedIdCacheKey(resourceType, fhirId, theRequestPartitionId);
 				IIdType id = nextKey.toIdType(myFhirCtx);
 				theMapToPopulate.put(id, lookup);
 
-				if (haveUntypedIds) {
-					id = nextKey.toIdTypeWithoutResourceType(myFhirCtx);
-					theMapToPopulate.put(id, lookup);
-				}
+				// TODO: what fails if we remove this?
+//				if (haveUntypedIds) {
+//					id = nextKey.toIdTypeWithoutResourceType(myFhirCtx);
+//					theMapToPopulate.put(id, lookup);
+//				}
 
 				List<IResourceLookup<JpaPid>> valueToCache = theMapToPopulate.get(id);
 				myMemoryCacheService.putAfterCommit(
@@ -543,7 +546,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				Optional.of(theResourceType + "/" + theFhirId));
 
 		JpaResourceLookup lookup = new JpaResourceLookup(
-				theResourceType, theJpaPid.getId(), theDeletedAt, theJpaPid.getPartitionablePartitionId());
+				theResourceType, theFhirId, theJpaPid.getId(), theDeletedAt, theJpaPid.getPartitionablePartitionId());
 
 		MemoryCacheService.ForcedIdCacheKey fhirIdKey =
 				new MemoryCacheService.ForcedIdCacheKey(theResourceType, theFhirId, theRequestPartitionId);

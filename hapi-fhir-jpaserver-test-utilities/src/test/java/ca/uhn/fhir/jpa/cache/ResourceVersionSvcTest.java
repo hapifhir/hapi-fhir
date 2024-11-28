@@ -113,12 +113,12 @@ public class ResourceVersionSvcTest {
 		IResourcePersistentId<Long> first = resourcePersistentIds.remove(0);
 		if (resourcePersistentIds.isEmpty()) {
 			when(myIdHelperService.resolveResourceIdentities(any(), any(), any()))
-				.thenReturn(Map.of(first.getAssociatedResourceId(), new JpaResourceLookup(first.getResourceType(), (JpaPid) first, null, null)));
+				.thenReturn(Map.of(first.getAssociatedResourceId(), new JpaResourceLookup(first.getResourceType(), first.getAssociatedResourceId().getIdPart(), (JpaPid) first, null, null)));
 		} else {
 
 			HashMap<IIdType, IResourceLookup<JpaPid>> map = new HashMap<>();
 			for (var next : resourcePersistentIds) {
-				map.put(next.getAssociatedResourceId(), new JpaResourceLookup(next.getResourceType(), (JpaPid) next, null, null));
+				map.put(next.getAssociatedResourceId(), new JpaResourceLookup(next.getResourceType(),next.getAssociatedResourceId().getIdPart() ,(JpaPid) next, null, null));
 			}
 
 			when(myIdHelperService.resolveResourceIdentities(any(), any(), any()))

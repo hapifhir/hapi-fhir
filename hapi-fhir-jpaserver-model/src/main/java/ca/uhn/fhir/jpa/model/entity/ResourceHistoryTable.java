@@ -251,6 +251,11 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return myResourceType;
 	}
 
+	@Override
+	public String getFhirId() {
+		return getIdDt().getIdPart();
+	}
+
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
 	}

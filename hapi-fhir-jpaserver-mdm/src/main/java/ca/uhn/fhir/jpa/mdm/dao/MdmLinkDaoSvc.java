@@ -410,12 +410,6 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId<?>, M extends IMdmLin
 		myMdmLinkDao.deleteLinksWithAnyReferenceToPids(theGoldenResourcePids);
 	}
 
-	// TODO: LD:  delete for good on the next bump
-	@Deprecated(since = "6.5.7", forRemoval = true)
-	public Revisions<Long, M> findMdmLinkHistory(M mdmLink) {
-		return myMdmLinkDao.findHistory(mdmLink.getId());
-	}
-
 	@Transactional
 	public List<MdmLinkWithRevision<M>> findMdmLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters) {
 		return myMdmLinkDao.getHistoryForIds(theMdmHistorySearchParameters);

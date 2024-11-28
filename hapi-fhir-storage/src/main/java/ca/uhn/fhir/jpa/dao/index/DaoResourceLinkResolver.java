@@ -441,6 +441,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	private static class ResourceLookupPersistentIdWrapper<P extends IResourcePersistentId> implements IResourceLookup {
 		private final P myPersistentId;
 
+		// FIXME: who calls this? Add FHIR ID
 		public ResourceLookupPersistentIdWrapper(P thePersistentId) {
 			myPersistentId = thePersistentId;
 		}
@@ -448,6 +449,11 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		@Override
 		public String getResourceType() {
 			return myPersistentId.getAssociatedResourceId().getResourceType();
+		}
+
+		@Override
+		public String getFhirId() {
+			return "";
 		}
 
 		@Override

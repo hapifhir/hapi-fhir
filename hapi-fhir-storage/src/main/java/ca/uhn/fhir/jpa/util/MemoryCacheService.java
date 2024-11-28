@@ -357,21 +357,11 @@ public class MemoryCacheService {
 		 * Creates and returns a new unqualified versionless IIdType instance
 		 */
 		public IIdType toIdType(FhirContext theFhirCtx) {
-			if (myResourceType == null) {
-				return toIdTypeWithoutResourceType(theFhirCtx);
-			}
-			IIdType retVal = theFhirCtx.getVersion().newIdType();
-			retVal.setValue(myResourceType + "/" + myResourceId);
-			return retVal;
+			return theFhirCtx.getVersion().newIdType(myResourceType, myResourceId);
 		}
 
-		/**
-		 * Creates and returns a new unqualified versionless IIdType instance
-		 */
 		public IIdType toIdTypeWithoutResourceType(FhirContext theFhirCtx) {
-			IIdType retVal = theFhirCtx.getVersion().newIdType();
-			retVal.setValue(myResourceId);
-			return retVal;
+			return theFhirCtx.getVersion().newIdType(null, myResourceId);
 		}
 	}
 }
