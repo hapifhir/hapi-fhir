@@ -214,12 +214,13 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		// Convert the multimap into a simple map
 		Map<IIdType, IResourceLookup<JpaPid>> retVal = new HashMap<>(idToLookup.size());
 		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> next : idToLookup.entries()) {
+			IResourceLookup<JpaPid> nextLookup = next.getValue();
 
 			IIdType resourceId = myFhirCtx
 					.getVersion()
 					.newIdType(
-							next.getValue().getResourceType(), next.getValue().getFhirId());
-			if (next.getValue().getDeleted() != null) {
+							nextLookup.getResourceType(), nextLookup.getFhirId());
+			if (nextLookup.getDeleted() != null) {
 				if (theMode.isFailOnDeleted()) {
 					String msg = myFhirCtx
 							.getLocalizer()
@@ -231,9 +232,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				}
 			}
 
-			next.getValue().getPersistentId().setAssociatedResourceId(resourceId);
+			nextLookup.getPersistentId().setAssociatedResourceId(resourceId);
 
-			IResourceLookup<JpaPid> previousValue = retVal.put(resourceId, next.getValue());
+			IResourceLookup<JpaPid> previousValue = retVal.put(resourceId, nextLookup);
 			if (previousValue != null) {
 				/*
 				 *  This means that either:
@@ -247,7 +248,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 						"Resource ID[{}] corresponds to lookups: {} and {}",
 						resourceId,
 						previousValue,
-						next.getValue());
+					nextLookup);
 				String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
 				throw new PreconditionFailedException(Msg.code(1099) + msg);
 			}
