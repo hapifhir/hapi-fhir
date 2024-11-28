@@ -320,7 +320,8 @@ class BaseHapiFhirResourceDaoTest {
 		mySvc.setTransactionService(myTransactionService);
 
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(mock(RequestPartitionId.class));
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(myISearchBuilder);
+//		lenient().
+			when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(myISearchBuilder);
 		when(myISearchBuilder.createQuery(any(), any(), any(), any())).thenReturn(mock(IResultIterator.class));
 
 		lenient().when(myStorageSettings.getInternalSynchronousSearchSize()).thenReturn(5000);

@@ -32,6 +32,7 @@ public class SearchBuilderFactory<T extends IResourcePersistentId<?>> {
 
 	public SearchBuilderFactory() {}
 
+	@SuppressWarnings("unchecked")
 	public ISearchBuilder<T> newSearchBuilder(
 			IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		return (ISearchBuilder<T>) myApplicationContext.getBean(
