@@ -152,6 +152,14 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			untyped = false;
 			id = newIdType(theResourceType + "/" + theResourceId);
 		} else {
+			/*
+			 * This shouldn't be common, but we need to be able to handle it.
+			 * The only real known use case currently is when handing references
+			 * in searches where the client didn't qualify the ID. E.g.
+			 * /Provenance?target=A,B,C
+			 * We emit a warning in this case that they should be qualfying the
+			 * IDs, but we do stil allow it.
+			 */
 			untyped = true;
 			id = newIdType(theResourceId);
 		}

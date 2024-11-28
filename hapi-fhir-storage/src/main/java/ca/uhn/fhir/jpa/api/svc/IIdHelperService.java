@@ -55,6 +55,9 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, T theId);
 
 	/**
+	 * @param theResourceType Note that it is inefficient to call this method
+	 *                        with a null resource type, so this should be avoided
+	 *                        unless strictly necessary.
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
@@ -66,6 +69,9 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 			throws ResourceNotFoundException;
 
 	/**
+	 * @param theResourceType Note that it is inefficient to call this method
+	 *                        with a null resource type, so this should be avoided
+	 *                        unless strictly necessary.
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
