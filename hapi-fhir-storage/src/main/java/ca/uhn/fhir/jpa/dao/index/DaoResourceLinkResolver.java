@@ -453,7 +453,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 
 		@Override
 		public String getFhirId() {
-			return "";
+			return myPersistentId.getAssociatedResourceId().getIdPart();
 		}
 
 		@Override

@@ -160,7 +160,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		IResourceLookup<JpaPid> retVal;
 		if (untyped) {
-			retVal = outcome.values().iterator().next();
+			if (outcome.isEmpty()) {
+				retVal = null;
+			} else {
+				retVal = outcome.values().iterator().next();
+			}
 		} else {
 			retVal = outcome.get(id);
 		}
