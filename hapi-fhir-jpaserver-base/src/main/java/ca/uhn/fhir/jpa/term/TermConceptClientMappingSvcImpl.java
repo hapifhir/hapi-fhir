@@ -118,8 +118,7 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 			if (coding.hasCode()) {
 				predicates.add(criteriaBuilder.equal(elementJoin.get("myCode"), coding.getCode()));
 			} else {
-				throw new InvalidRequestException(
-						Msg.code(842) + "A code must be provided for translation to occur.");
+				throw new InvalidRequestException(Msg.code(842) + "A code must be provided for translation to occur.");
 			}
 
 			if (coding.hasSystem()) {
@@ -131,8 +130,7 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 			}
 
 			if (translationQuery.hasTargetSystem()) {
-				predicates.add(
-						criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem()));
+				predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem()));
 			}
 
 			if (translationQuery.hasUrl()) {
@@ -144,8 +142,7 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 				} else {
 					if (StringUtils.isNotBlank(latestConceptMapVersion)) {
 						// only url and use latestConceptMapVersion
-						predicates.add(
-								criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
 					} else {
 						predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
 					}
@@ -176,7 +173,8 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 			org.hibernate.query.Query<TermConceptMapGroupElementTarget> hibernateQuery =
 					(org.hibernate.query.Query<TermConceptMapGroupElementTarget>) typedQuery;
 			hibernateQuery.setFetchSize(myFetchSize);
-			ScrollableResults<TermConceptMapGroupElementTarget> scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+			ScrollableResults<TermConceptMapGroupElementTarget> scrollableResults =
+					hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 			try (ScrollableResultsIterator<TermConceptMapGroupElementTarget> scrollableResultsIterator =
 					new ScrollableResultsIterator<>(scrollableResults)) {
 
@@ -246,8 +244,7 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 				predicates.add(criteriaBuilder.equal(targetJoin.get("myCode"), coding.getCode()));
 				targetCode = coding.getCode();
 			} else {
-				throw new InvalidRequestException(
-						Msg.code(843) + "A code must be provided for translation to occur.");
+				throw new InvalidRequestException(Msg.code(843) + "A code must be provided for translation to occur.");
 			}
 
 			if (coding.hasSystem()) {
@@ -268,8 +265,7 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 				} else {
 					if (StringUtils.isNotBlank(latestConceptMapVersion)) {
 						// only url and use latestConceptMapVersion
-						predicates.add(
-								criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
 					} else {
 						predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
 					}
@@ -277,8 +273,7 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 			}
 
 			if (translationQuery.hasTargetSystem()) {
-				predicates.add(
-						criteriaBuilder.equal(groupJoin.get("mySource"), translationQuery.getTargetSystem()));
+				predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), translationQuery.getTargetSystem()));
 			}
 
 			if (translationQuery.hasSource()) {
@@ -300,12 +295,12 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 			query.where(outerPredicate);
 
 			// Use scrollable results.
-			final TypedQuery<TermConceptMapGroupElement> typedQuery =
-					myEntityManager.createQuery(query.select(root));
+			final TypedQuery<TermConceptMapGroupElement> typedQuery = myEntityManager.createQuery(query.select(root));
 			org.hibernate.query.Query<TermConceptMapGroupElement> hibernateQuery =
 					(org.hibernate.query.Query<TermConceptMapGroupElement>) typedQuery;
 			hibernateQuery.setFetchSize(myFetchSize);
-			ScrollableResults<TermConceptMapGroupElement> scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+			ScrollableResults<TermConceptMapGroupElement> scrollableResults =
+					hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 			try (ScrollableResultsIterator<TermConceptMapGroupElement> scrollableResultsIterator =
 					new ScrollableResultsIterator<>(scrollableResults)) {
 
@@ -317,20 +312,19 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 					 * but removing it causes tests in TerminologySvcImplR4Test to fail. We use the outcome
 					 * in a trace log to avoid ErrorProne flagging an unused return value.
 					 */
-					int size =
-							nextElement.getConceptMapGroupElementTargets().size();
+					int size = nextElement.getConceptMapGroupElementTargets().size();
 					ourLog.trace("Have {} targets", size);
 
 					myEntityManager.detach(nextElement);
 
 					if (isNotBlank(targetCode)) {
-						for (TermConceptMapGroupElementTarget next :
-								nextElement.getConceptMapGroupElementTargets()) {
+						for (TermConceptMapGroupElementTarget next : nextElement.getConceptMapGroupElementTargets()) {
 							if (matches.add(next)) {
 								if (isBlank(targetCodeSystem)
 										|| StringUtils.equals(targetCodeSystem, next.getSystem())) {
 									if (StringUtils.equals(targetCode, next.getCode())) {
-										TranslateConceptResult translationMatch = newTranslateConceptResult(nextElement, next);
+										TranslateConceptResult translationMatch =
+												newTranslateConceptResult(nextElement, next);
 
 										if (alreadyContainsMapping(elements, translationMatch)
 												|| alreadyContainsMapping(retVal.getResults(), translationMatch)) {
@@ -354,7 +348,8 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 	}
 
 	@Nonnull
-	private static TranslateConceptResult newTranslateConceptResult(TermConceptMapGroupElement theGroup, TermConceptMapGroupElementTarget theTarget) {
+	private static TranslateConceptResult newTranslateConceptResult(
+			TermConceptMapGroupElement theGroup, TermConceptMapGroupElementTarget theTarget) {
 		TranslateConceptResult translationMatch = new TranslateConceptResult();
 		translationMatch.setCode(theGroup.getCode());
 		translationMatch.setSystem(theGroup.getSystem());
@@ -364,8 +359,7 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 		translationMatch.setSystemVersion(theGroup.getSystemVersion());
 		translationMatch.setConceptMapUrl(theGroup.getConceptMapUrl());
 		if (theTarget.getEquivalence() != null) {
-			translationMatch.setEquivalence(
-					theTarget.getEquivalence().toCode());
+			translationMatch.setEquivalence(theTarget.getEquivalence().toCode());
 		}
 		return translationMatch;
 	}
