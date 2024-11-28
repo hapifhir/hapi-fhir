@@ -369,7 +369,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				IIdType id = nextKey.toIdType(myFhirCtx);
 				theMapToPopulate.put(id, lookup);
 
-				// TODO: what fails if we remove this?
+				// FIXME: what fails if we remove this?
 //				if (haveUntypedIds) {
 //					id = nextKey.toIdTypeWithoutResourceType(myFhirCtx);
 //					theMapToPopulate.put(id, lookup);

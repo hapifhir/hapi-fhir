@@ -723,9 +723,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
+			theRequestDetails, getResourceName(), theId);
+
 		final ResourceTable entity;
 		try {
-			entity = readEntityLatestVersion(theId, theRequestDetails, theTransactionDetails);
+			entity = readEntityLatestVersion(theId, requestPartitionId, theTransactionDetails);
 		} catch (ResourceNotFoundException ex) {
 			// we don't want to throw 404s.
 			// if not found, return an outcome anyways.
@@ -802,6 +805,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						.getLocalizer()
 						.getMessageSanitized(BaseStorageDao.class, "successfulTimingSuffix", w.getMillis());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg, StorageResponseCodeEnum.SUCCESSFUL_DELETE));
+
+		myIdHelperService.addResolvedPidToFhirId(
+			entity.getPersistentId(),
+			requestPartitionId,
+			entity.getResourceType(),
+			entity.getFhirId(),
+			entity.getDeleted()
+		);
 
 		return outcome;
 	}
@@ -1873,6 +1884,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			IIdType theId,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			TransactionDetails theTransactionDetails) {
+		HapiTransactionService.requireTransaction();
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		JpaPid persistentId = null;
