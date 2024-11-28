@@ -1887,6 +1887,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		HapiTransactionService.requireTransaction();
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
+		Validate.isTrue(
+				getResourceName().equals(theId.getResourceType()), "ID resource type doesn't match expected for DAO");
+
 		JpaPid persistentId = null;
 		if (theTransactionDetails != null) {
 			if (theTransactionDetails.isResolvedResourceIdEmpty(theId.toUnqualifiedVersionless())) {
