@@ -392,7 +392,7 @@ public class ExtendedHSearchClauseBuilder {
 
 	/**
 	 * Create date clause from date params. The date lower and upper bounds are taken
-	 * into considertion when generating date query ranges
+	 * into consideration when generating date query ranges
 	 *
 	 * <p>Example 1 ('eq' prefix/empty): <code>http://fhirserver/Observation?date=eq2020</code>
 	 * would generate the following search clause

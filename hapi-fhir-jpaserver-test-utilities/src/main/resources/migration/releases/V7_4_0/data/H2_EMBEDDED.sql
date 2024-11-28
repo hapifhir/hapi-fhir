@@ -51,3 +51,33 @@ INSERT INTO TRM_CONCEPT_DESIG (
    54,
    150
 );
+
+INSERT INTO HFJ_RES_LINK (
+   PID,
+   PARTITION_DATE,
+   PARTITION_ID,
+   SRC_PATH,
+   SRC_RESOURCE_ID,
+   SOURCE_RESOURCE_TYPE,
+   TARGET_RESOURCE_ID,
+   TARGET_RESOURCE_TYPE,
+   TARGET_RESOURCE_URL,
+   TARGET_RESOURCE_VERSION,
+   SP_UPDATED,
+   TARGET_RES_PARTITION_ID,
+   TARGET_RES_PARTITION_DATE
+) VALUES (
+   702,
+   '2024-11-05',
+   1,
+   'Observation.subject.where(resolve() is Patient)',
+   1656,
+   'Observation',
+   1906,
+   'Patient',
+   'http://localhost:8000/Patient/123',
+   1,
+   '2024-11-01 18:01:12.921',
+   1,
+   '2024-11-05'
+);

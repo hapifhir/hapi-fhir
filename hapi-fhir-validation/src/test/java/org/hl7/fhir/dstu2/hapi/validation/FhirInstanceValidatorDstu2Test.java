@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
@@ -28,10 +27,7 @@ import org.hl7.fhir.dstu2.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu2.model.StringType;
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -41,9 +37,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -100,7 +94,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code");
+					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code");
 				} else {
 					retVal = null;
 				}

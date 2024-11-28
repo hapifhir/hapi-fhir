@@ -1,0 +1,79 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "profile-procedure-with-slicing",
+  "url": "http://example.ca/fhir/StructureDefinition/profile-procedure-with-slicing",
+  "version": "0.11.0",
+  "name": "ProcedureProfile",
+  "title": "Procedure Profile",
+  "status": "active",
+  "date": "2022-10-15T12:00:00+00:00",
+  "publisher": "Example Organization",
+  "fhirVersion": "4.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Procedure",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Procedure",
+  "derivation": "constraint",
+  "differential": {
+    "element":  [
+      {
+        "id": "Procedure.code.coding",
+        "path": "Procedure.code.coding",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "pattern",
+              "path": "$this"
+            }
+          ],
+          "description": "Discriminated by the bound value set",
+          "rules": "open"
+        },
+        "mustSupport": true,
+        "binding": {
+          "strength": "preferred",
+          "valueSet": "http://hl7.org/fhir/ValueSet/procedure-code"
+        }
+      },
+      {
+        "id": "Procedure.code.coding.display.extension:translation",
+        "path": "Procedure.code.coding.display.extension",
+        "sliceName": "translation"
+      },
+      {
+        "id": "Procedure.code.coding.display.extension:translation.extension",
+        "path": "Procedure.code.coding.display.extension.extension",
+        "min": 2
+      },
+      {
+        "id": "Procedure.code.coding:absentOrUnknownProcedure",
+        "path": "Procedure.code.coding",
+        "sliceName": "absentOrUnknownProcedure",
+        "short": "Optional slice for representing a code for absent problem or for unknown procedure",
+        "definition": "Code representing the statement \"absent problem\" or the statement \"procedures unknown\"",
+        "mustSupport": true,
+        "binding": {
+          "extension":  [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "absentOrUnknownProcedure"
+            }
+          ],
+          "strength": "required",
+          "description": "A code to identify absent or unknown procedures",
+          "valueSet": "http://hl7.org/fhir/uv/ips/ValueSet/absent-or-unknown-procedures-uv-ips"
+        }
+      },
+      {
+        "id": "Procedure.code.coding:absentOrUnknownProcedure.display.extension:translation",
+        "path": "Procedure.code.coding.display.extension",
+        "sliceName": "translation"
+      },
+      {
+        "id": "Procedure.code.coding:absentOrUnknownProcedure.display.extension:translation.extension",
+        "path": "Procedure.code.coding.display.extension.extension",
+        "min": 2
+      }
+    ]
+  }
+}

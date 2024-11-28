@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.7.7-SNAPSHOT</version>
+	<version>7.7.8-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -999,8 +999,8 @@
 		<!-- Before Bumping: See note above about dbcp2 -->
 		<commons_pool2_version>2.12.0</commons_pool2_version>
 		<commons_text_version>1.10.0</commons_text_version>
-		<commons_io_version>2.11.0</commons_io_version>
-		<commons_lang3_version>3.14.0</commons_lang3_version>
+		<commons_io_version>2.17.0</commons_io_version>
+		<commons_lang3_version>3.17.0</commons_lang3_version>
 		<com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
 		<error_prone_core_version>2.23.0</error_prone_core_version>
 		<mockito_version>5.8.0</mockito_version>
@@ -1013,15 +1013,15 @@
 		<jaxb_runtime_version>4.0.4</jaxb_runtime_version>
 		<jena_version>4.9.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
-		<jetty_version>12.0.9</jetty_version>
+		<jetty_version>12.0.14</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.10.1</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>9.4.0</flyway_version>
-		<hibernate_version>6.4.1.Final</hibernate_version>
+		<hibernate_version>6.4.10.Final</hibernate_version>
 		<logback_version>1.4.14</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
-		<hibernate_search_version>7.0.0.Final</hibernate_search_version>
+		<hibernate_search_version>7.0.1.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<lucene_version>9.8.0</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
@@ -1033,7 +1033,13 @@
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>4.12.0</okhttp_version>
+		<!--
+		Note: As of 2024-11, the opentelemetry-agent-for-testing dependency published to Maven
+		uses a version which lines up with the OTEL instrumentation version, but with "-alpha"
+		appended to it. So we do that too here. This could change in the future.
+		-->
 		<otel_instrumentation.version>2.8.0</otel_instrumentation.version>
+		<otel_agent_for_testing.version>${otel_instrumentation.version}-alpha</otel_agent_for_testing.version>
 		<poi_version>4.1.2</poi_version>
 		<poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
 		<resteasy_version>6.2.9.Final</resteasy_version>
@@ -1046,8 +1052,8 @@
 		<swagger_version>2.2.22</swagger_version>
 		<slf4j_version>2.0.13</slf4j_version>
 		<log4j_to_slf4j_version>2.19.0</log4j_to_slf4j_version>
-		<spring_version>6.1.8</spring_version>
-		<spring_data_bom_version>2023.1.6</spring_data_bom_version>
+		<spring_version>6.1.14</spring_version>
+		<spring_data_bom_version>2024.0.5</spring_data_bom_version>
 		<spring_batch_version>4.3.10</spring_batch_version>
 		<spring_boot_version>3.2.6</spring_boot_version>
 		<spring_retry_version>2.0.6</spring_retry_version>
@@ -1063,7 +1069,7 @@
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- Clinical Reasoning & CQL Support -->
-		<clinical-reasoning.version>3.13.0</clinical-reasoning.version>
+		<clinical-reasoning.version>3.13.1</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1673,7 +1679,7 @@
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
 				<artifactId>velocity-engine-core</artifactId>
-				<version>2.3</version>
+				<version>2.4.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.awaitility</groupId>
@@ -2306,6 +2312,16 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry.javaagent</groupId>
+				<artifactId>opentelemetry-testing-common</artifactId>
+				<version>${otel_agent_for_testing.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry.javaagent</groupId>
+				<artifactId>opentelemetry-agent-for-testing</artifactId>
+				<version>${otel_agent_for_testing.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.assertj</groupId>
@@ -2623,7 +2639,7 @@
 				<plugin>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-tinder-plugin</artifactId>
-					<version>7.7.7-SNAPSHOT</version>
+					<version>7.7.8-SNAPSHOT</version>
 					<executions>
 						<execution>
 							<goals>
