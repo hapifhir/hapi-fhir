@@ -573,7 +573,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (fhirId == null) {
 			fhirId = Long.toString(entity.getId());
 		}
-		myIdHelperService.addResolvedPidToFhirId(jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
+		myIdHelperService.addResolvedPidToFhirIdAfterCommit(jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
@@ -806,7 +806,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						.getMessageSanitized(BaseStorageDao.class, "successfulTimingSuffix", w.getMillis());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg, StorageResponseCodeEnum.SUCCESSFUL_DELETE));
 
-		myIdHelperService.addResolvedPidToFhirId(
+		myIdHelperService.addResolvedPidToFhirIdAfterCommit(
 				entity.getPersistentId(),
 				requestPartitionId,
 				entity.getResourceType(),
@@ -2491,6 +2491,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			myResourceSearchUrlSvc.deleteByResId(
 					(Long) theEntity.getPersistentId().getId());
 			entity.setSearchUrlPresent(false);
+		}
+
+		if (entity.isDeleted()) {
+			// We're un-deleting this entity so let's inform the memory cache service
+			myIdHelperService.addResolvedPidToFhirIdAfterCommit(
+				entity.getPersistentId(),
+				entity.getPartitionId() == null ? RequestPartitionId.defaultPartition() : entity.getPartitionId().toPartitionId(),
+				entity.getResourceType(),
+				entity.getFhirId(),
+				null
+			);
 		}
 
 		return super.doUpdateForUpdateOrPatch(

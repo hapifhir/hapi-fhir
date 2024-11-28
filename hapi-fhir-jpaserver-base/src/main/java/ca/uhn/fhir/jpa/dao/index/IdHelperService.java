@@ -530,10 +530,14 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	/**
-	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods
+	 * This method can be called to pre-emptively add entries to the ID cache. It should
+	 * be called by DAO methods if they are creating or changing the deleted status
+	 * of a resource. This method returns immediately, but the data is not
+	 * added to the internal caches until the current DB transaction is successfully
+	 * committed, and nothing is added if the transaction rolls back.
 	 */
 	@Override
-	public void addResolvedPidToFhirId(
+	public void addResolvedPidToFhirIdAfterCommit(
 			@Nonnull JpaPid theJpaPid,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			@Nonnull String theResourceType,
