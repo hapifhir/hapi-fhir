@@ -170,6 +170,7 @@ import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.PersistenceContextProvider;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
@@ -187,6 +188,7 @@ import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -232,10 +234,25 @@ public class JpaConfig {
 	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER =
 			"PersistedJpaSearchFirstPageBundleProvider";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
+	public static final String DEFAULT_PROFILE_VALIDATION_SUPPORT = "myDefaultProfileValidationSupport";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 
 	@Autowired
 	public JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private FhirContext myFhirContext;
+
+	@Bean
+	public ValidationSupportChain.CacheConfiguration validationSupportChainCacheConfiguration() {
+		return ValidationSupportChain.CacheConfiguration.defaultValues();
+	}
+
+	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
+	@Primary
+	public IValidationSupport jpaValidationSupportChain() {
+		return new JpaValidationSupportChain(myFhirContext, validationSupportChainCacheConfiguration());
+	}
 
 	@Bean("myDaoRegistry")
 	public DaoRegistry daoRegistry() {

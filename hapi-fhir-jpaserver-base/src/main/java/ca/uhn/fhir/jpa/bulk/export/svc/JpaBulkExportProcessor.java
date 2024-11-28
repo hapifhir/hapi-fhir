@@ -27,7 +27,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
@@ -349,10 +348,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 * Get a ISearchBuilder for the given resource type.
 	 */
 	protected ISearchBuilder<JpaPid> getSearchBuilderForResourceType(String theResourceType) {
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
 		Class<? extends IBaseResource> typeClass = def.getImplementingClass();
-		return mySearchBuilderFactory.newSearchBuilder(dao, theResourceType, typeClass);
+		return mySearchBuilderFactory.newSearchBuilder(theResourceType, typeClass);
 	}
 
 	protected RuntimeSearchParam getPatientSearchParamForCurrentResourceType(String theResourceType) {

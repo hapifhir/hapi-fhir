@@ -89,7 +89,7 @@ public interface IFulltextSearchSvc {
 	boolean isDisabled();
 
 	ExtendedHSearchIndexData extractLuceneIndexData(
-			IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
+			IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams);
 
 	/**
 	 * Returns true if the parameter map can be handled for hibernate search.

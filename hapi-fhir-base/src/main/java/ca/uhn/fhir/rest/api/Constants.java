@@ -342,6 +342,8 @@ public class Constants {
 	 */
 	public static final String HIBERNATE_INTEGRATION_ENVERS_ENABLED = "hibernate.integration.envers.enabled";
 
+	public static final String OPENTELEMETRY_BASE_NAME = "io.hapifhir";
+
 	public static final String PARAM_NEW_REFERENCE_TARGET_ID = "newReferenceTargetId";
 
 	static {

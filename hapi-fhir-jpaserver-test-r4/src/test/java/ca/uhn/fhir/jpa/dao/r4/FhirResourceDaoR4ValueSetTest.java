@@ -169,7 +169,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		logAllValueSets();
-		myCachingValidationSupport.invalidateCaches();
+		myValidationSupport.invalidateCaches();
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
@@ -272,7 +272,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		logAllValueSets();
-		myCachingValidationSupport.invalidateCaches();
+		myValidationSupport.invalidateCaches();
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);

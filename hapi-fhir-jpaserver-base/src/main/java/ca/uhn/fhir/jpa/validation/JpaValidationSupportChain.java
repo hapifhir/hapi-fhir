@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -39,7 +40,7 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	private final FhirContext myFhirContext;
 
 	@Autowired
-	@Qualifier("myJpaValidationSupport")
+	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
 	public IValidationSupport myJpaValidationSupport;
 
 	@Qualifier("myDefaultProfileValidationSupport")
@@ -64,7 +65,13 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	/**
 	 * Constructor
 	 */
-	public JpaValidationSupportChain(FhirContext theFhirContext) {
+	public JpaValidationSupportChain(
+			FhirContext theFhirContext, ValidationSupportChain.CacheConfiguration theCacheConfiguration) {
+		super(theCacheConfiguration);
+
+		assert theFhirContext != null;
+		assert theCacheConfiguration != null;
+
 		myFhirContext = theFhirContext;
 	}
 

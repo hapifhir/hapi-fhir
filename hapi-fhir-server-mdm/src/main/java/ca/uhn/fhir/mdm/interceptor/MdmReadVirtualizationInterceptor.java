@@ -90,7 +90,7 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	@Hook(
 			value = Pointcut.STORAGE_PRESEARCH_REGISTERED,
 			order = MdmConstants.ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR)
-	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
+	public void preSearchRegistered(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
 		ourMdmTroubleshootingLog
 				.atTrace()
 				.setMessage("MDM virtualization original search: {}{}")
