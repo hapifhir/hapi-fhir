@@ -2,10 +2,14 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -16,6 +20,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
+
+import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
+
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
@@ -187,6 +195,29 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 			// Then
 			p = myPatientDao.read(id);
 			assertEquals(qualifiedReferenceId, p.getManagingOrganization().getReference());
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = JpaStorageSettings.ClientIdStrategyEnum.class, mode = EXCLUDE, names = {"NOT_ALLOWED"})
+	public void testReferentialIntegrityOnWrite_withReferenceByPidForClientAssignedIdResource(JpaStorageSettings.ClientIdStrategyEnum theClientIdStrategy) {
+		myStorageSettings.setResourceClientIdStrategy(theClientIdStrategy);
+		myStorageSettings.setEnforceReferentialIntegrityOnWrite(true);
+
+		Organization o = new Organization();
+		o.setName("FOO");
+		o.setId("O1");
+		DaoMethodOutcome outcome = myOrganizationDao.update(o);
+		Long organizationPid = (Long) outcome.getEntity().getPersistentId().getId();
+
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("Organization/" + organizationPid));
+//110
+		try {
+			myPatientDao.create(p);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage()).contains("Resource Organization/" + organizationPid + " not found, specified in path: Patient.managingOrganization");
 		}
 	}
 
