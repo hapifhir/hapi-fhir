@@ -116,7 +116,10 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 			return retval;
 		}
 
-		Map<IIdType, IResourceLookup<JpaPid>> identities = myIdHelperService.resolveResourceIdentities(thePartitionId, new ArrayList<>(theIds), ResolveIdentityMode.includeDeleted().cacheOk());
+		Map<IIdType, IResourceLookup<JpaPid>> identities = myIdHelperService.resolveResourceIdentities(
+				thePartitionId,
+				new ArrayList<>(theIds),
+				ResolveIdentityMode.includeDeleted().cacheOk());
 
 		// we'll use this map to fetch pids that require versions
 		HashMap<Long, JpaPid> pidsToVersionToResourcePid = new HashMap<>();

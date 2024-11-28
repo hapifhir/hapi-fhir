@@ -79,12 +79,11 @@ public interface IFhirVersion {
 	 *
 	 * @since 8.0.0
 	 */
-    default IIdType newIdType(String theResourceType, String theIdPart) {
+	default IIdType newIdType(String theResourceType, String theIdPart) {
 		IIdType retVal = newIdType();
 		retVal.setParts(null, theResourceType, theIdPart, null);
 		return retVal;
 	}
-
 
 	/**
 	 * Returns an instance of <code>IFhirVersionServer<code> for this version.
@@ -92,5 +91,4 @@ public interface IFhirVersion {
 	 * JAR is on the classpath. Otherwise it will result in a {@link ClassNotFoundException}
 	 */
 	Object getServerVersion();
-
 }

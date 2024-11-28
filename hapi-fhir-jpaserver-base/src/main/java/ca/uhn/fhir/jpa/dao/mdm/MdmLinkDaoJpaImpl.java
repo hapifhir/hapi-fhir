@@ -456,10 +456,13 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	@Nonnull
 	private List<Long> convertToLongIds(List<IIdType> theMdmHistorySearchParameters) {
 		return myIdHelperService
-			.resolveResourceIdentities(RequestPartitionId.allPartitions(), theMdmHistorySearchParameters, ResolveIdentityMode.includeDeleted().cacheOk())
-			.values()
+				.resolveResourceIdentities(
+						RequestPartitionId.allPartitions(),
+						theMdmHistorySearchParameters,
+						ResolveIdentityMode.includeDeleted().cacheOk())
+				.values()
 				.stream()
-				.map(t->t.getPersistentId().getId())
+				.map(t -> t.getPersistentId().getId())
 				.collect(Collectors.toUnmodifiableList());
 	}
 

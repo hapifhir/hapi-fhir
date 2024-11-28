@@ -147,7 +147,9 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 
 		List<IIdType> idsList = new ArrayList<>(ids.keySet());
 		Map<IIdType, ? extends IResourceLookup<?>> resolvedIdentities = myIdHelperService.resolveResourceIdentities(
-			theRequestDetails.getRequestPartitionId(), idsList, ResolveIdentityMode.includeDeleted().cacheOk());
+				theRequestDetails.getRequestPartitionId(),
+				idsList,
+				ResolveIdentityMode.includeDeleted().cacheOk());
 		List<IResourcePersistentId<?>> resolvedIds = new ArrayList<>(resolvedIdentities.size());
 		for (Map.Entry<IIdType, ? extends IResourceLookup<?>> next : resolvedIdentities.entrySet()) {
 			IIdType resId = next.getKey();

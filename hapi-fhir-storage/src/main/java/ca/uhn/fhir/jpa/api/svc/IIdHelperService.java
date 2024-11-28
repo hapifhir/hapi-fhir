@@ -94,12 +94,13 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 *
 	 * @since 8.0.0
 	 */
-	default List<T> resolveResourcePids(RequestPartitionId theRequestPartitionId, List<IIdType> theTargetIds, ResolveIdentityMode theResolveIdentityMode) {
-		return resolveResourceIdentities(theRequestPartitionId, theTargetIds, theResolveIdentityMode)
-			.values()
-			.stream()
-			.map(IResourceLookup::getPersistentId)
-			.collect(Collectors.toList());
+	default List<T> resolveResourcePids(
+			RequestPartitionId theRequestPartitionId,
+			List<IIdType> theTargetIds,
+			ResolveIdentityMode theResolveIdentityMode) {
+		return resolveResourceIdentities(theRequestPartitionId, theTargetIds, theResolveIdentityMode).values().stream()
+				.map(IResourceLookup::getPersistentId)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -137,7 +138,11 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 
 	@Nonnull
 	default T getPidOrThrowException(RequestPartitionId theRequestPartitionId, IIdType theId) {
-		IResourceLookup<T> identity = resolveResourceIdentity(theRequestPartitionId, theId.getResourceType(), theId.getValue(), ResolveIdentityMode.includeDeleted().cacheOk());
+		IResourceLookup<T> identity = resolveResourceIdentity(
+				theRequestPartitionId,
+				theId.getResourceType(),
+				theId.getValue(),
+				ResolveIdentityMode.includeDeleted().cacheOk());
 		if (identity == null) {
 			throw new InvalidRequestException(Msg.code(2295) + "Invalid ID was provided: [" + theId.getIdPart() + "]");
 		}
@@ -165,5 +170,4 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	T newPid(Object thePid);
 
 	T newPidFromStringIdAndResourceName(String thePid, String theResourceType);
-
 }

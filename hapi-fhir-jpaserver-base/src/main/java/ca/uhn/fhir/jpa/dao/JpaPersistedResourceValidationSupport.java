@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.TermReadSvcUtil;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -48,7 +47,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +122,8 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				return null;
 			}
 
-			IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myValueSetType);
+			IFhirResourceDao<? extends IBaseResource> valueSetResourceDao =
+					myDaoRegistry.getResourceDao(myValueSetType);
 			IIdType id = myFhirContext.getVersion().newIdType("ValueSet", vsIdOpt.get());
 			try {
 				return valueSetResourceDao.read(id, new SystemRequestDetails());
@@ -310,5 +309,4 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 			myCodeSystemType = myFhirContext.getResourceDefinition("ValueSet").getImplementingClass();
 		}
 	}
-
 }

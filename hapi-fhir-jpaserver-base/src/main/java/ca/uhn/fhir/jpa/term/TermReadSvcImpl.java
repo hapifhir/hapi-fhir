@@ -458,15 +458,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return retVal;
 	}
 
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	// FIXME: remove
-	@VisibleForTesting
-	public void clearCaches() {
-//		myCodeSystemCurrentVersionCache.invalidateAll();
-	}
-
 	public Optional<TermValueSet> deleteValueSetForResource(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
 		Optional<TermValueSet> optionalExistingTermValueSetById =
@@ -2107,7 +2098,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(
-		ValidationSupportContext theValidationSupportContext,
+			ValidationSupportContext theValidationSupportContext,
 			ConceptValidationOptions theValidationOptions,
 			ValueSet theValueSet,
 			String theSystem,
@@ -2147,8 +2138,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			return null;
 		}
 
-		TermValueSet valueSetEntity = fetchValueSetEntity(theValueSet)
-				.orElseThrow(IllegalStateException::new);
+		TermValueSet valueSetEntity = fetchValueSetEntity(theValueSet).orElseThrow(IllegalStateException::new);
 		String timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
 		String preExpansionMessage = myContext
 				.getLocalizer()
@@ -2268,7 +2258,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		 */
 		HapiTransactionService.requireTransaction();
 
-		TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(new ValidationSupportContext(provideValidationSupport()), theCodeSystem);
+		TermCodeSystemVersionDetails csv =
+				getCurrentCodeSystemVersion(new ValidationSupportContext(provideValidationSupport()), theCodeSystem);
 		if (csv == null) {
 			return Optional.empty();
 		}
@@ -2279,7 +2270,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public List<TermConcept> findCodes(String theCodeSystem, List<String> theCodeList) {
 		HapiTransactionService.requireTransaction();
 
-		TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(new ValidationSupportContext(provideValidationSupport()), theCodeSystem);
+		TermCodeSystemVersionDetails csv =
+				getCurrentCodeSystemVersion(new ValidationSupportContext(provideValidationSupport()), theCodeSystem);
 		if (csv == null) {
 			return Collections.emptyList();
 		}
@@ -2288,14 +2280,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Nullable
-	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(ValidationSupportContext theValidationSupportContext, String theCodeSystemIdentifier) {
+	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(
+			ValidationSupportContext theValidationSupportContext, String theCodeSystemIdentifier) {
 		String version = getVersionFromIdentifier(theCodeSystemIdentifier);
 
 		// Fetch the CodeSystem from ValidationSupport, which should return a cached copy. We
 		// keep a copy of the current version entity in userData in that cached copy
 		// to avoid repeated lookups
 		TermCodeSystemVersionDetails retVal = null;
-		IBaseResource codeSystem = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemIdentifier);
+		IBaseResource codeSystem =
+				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemIdentifier);
 		if (codeSystem != null) {
 
 			synchronized (codeSystem) {
@@ -2304,7 +2298,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					retVal = myTxTemplate.execute(tx -> {
 						TermCodeSystemVersion csv = null;
 						TermCodeSystem cs =
-							myCodeSystemDao.findByCodeSystemUri(getUrlFromIdentifier(theCodeSystemIdentifier));
+								myCodeSystemDao.findByCodeSystemUri(getUrlFromIdentifier(theCodeSystemIdentifier));
 						if (cs != null) {
 							if (version != null) {
 								csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(cs.getPid(), version);
@@ -2840,7 +2834,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		txTemplate.setReadOnly(true);
 		Optional<FhirVersionIndependentConcept> codeOpt =
 				txTemplate.execute(tx -> findCode(theCodeSystemUrl, theCode).map(c -> {
-					String codeSystemVersionId = getCurrentCodeSystemVersion(theValidationSupportContext, theCodeSystemUrl).myCodeSystemVersionId;
+					String codeSystemVersionId = getCurrentCodeSystemVersion(
+									theValidationSupportContext, theCodeSystemUrl)
+							.myCodeSystemVersionId;
 					return new FhirVersionIndependentConcept(
 							theCodeSystemUrl, c.getCode(), c.getDisplay(), codeSystemVersionId);
 				}));
@@ -2887,8 +2883,15 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 				retVal = txTemplate.execute(tx -> {
 					if (isValueSetPreExpandedForCodeValidation(valueSet)) {
-						return validateCodeIsInPreExpandedValueSet(theValidationSupportContext,
-								theValidationOptions, valueSet, theCodeSystem, theCode, theDisplay, null, null);
+						return validateCodeIsInPreExpandedValueSet(
+								theValidationSupportContext,
+								theValidationOptions,
+								valueSet,
+								theCodeSystem,
+								theCode,
+								theDisplay,
+								null,
+								null);
 					} else {
 						return null;
 					}
@@ -3229,21 +3232,29 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Override
 	public CodeValidationResult validateCodeIsInPreExpandedValueSet(
-		ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions,
-		IBaseResource theValueSet,
-		String theSystem,
-		String theCode,
-		String theDisplay,
-		IBaseDatatype theCoding,
-		IBaseDatatype theCodeableConcept) {
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
+			IBaseResource theValueSet,
+			String theSystem,
+			String theCode,
+			String theDisplay,
+			IBaseDatatype theCoding,
+			IBaseDatatype theCodeableConcept) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = myVersionCanonicalizer.valueSetToCanonical(theValueSet);
 		org.hl7.fhir.r4.model.Coding codingR4 = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCoding);
 		org.hl7.fhir.r4.model.CodeableConcept codeableConcept =
 				myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
 
-		return validateCodeIsInPreExpandedValueSet(theValidationSupportContext,
-				theOptions, valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConcept);
+		return validateCodeIsInPreExpandedValueSet(
+				theValidationSupportContext,
+				theOptions,
+				valueSetR4,
+				theSystem,
+				theCode,
+				theDisplay,
+				codingR4,
+				codeableConcept);
 	}
 
 	@Override
