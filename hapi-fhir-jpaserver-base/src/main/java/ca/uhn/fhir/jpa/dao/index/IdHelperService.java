@@ -216,10 +216,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> next : idToLookup.entries()) {
 			IResourceLookup<JpaPid> nextLookup = next.getValue();
 
-			IIdType resourceId = myFhirCtx
-					.getVersion()
-					.newIdType(
-							nextLookup.getResourceType(), nextLookup.getFhirId());
+			IIdType resourceId = myFhirCtx.getVersion().newIdType(nextLookup.getResourceType(), nextLookup.getFhirId());
 			if (nextLookup.getDeleted() != null) {
 				if (theMode.isFailOnDeleted()) {
 					String msg = myFhirCtx
@@ -244,11 +241,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				 *     with the same ID.
 				 *  2. The unique constraint on the FHIR_ID column has been dropped
 				 */
-				ourLog.warn(
-						"Resource ID[{}] corresponds to lookups: {} and {}",
-						resourceId,
-						previousValue,
-					nextLookup);
+				ourLog.warn("Resource ID[{}] corresponds to lookups: {} and {}", resourceId, previousValue, nextLookup);
 				String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
 				throw new PreconditionFailedException(Msg.code(1099) + msg);
 			}
@@ -343,18 +336,12 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		for (IIdType next : theIdsToResolve) {
 			List<Predicate> idPredicates = new ArrayList<>(2);
 
-			if (myStorageSettings.getResourceClientIdStrategy() == JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC
-					&& next.isIdPartValidLong()) {
-				Predicate typeCriteria = cb.equal(from.get("myId"), next.getIdPartAsLong());
+			if (isNotBlank(next.getResourceType())) {
+				Predicate typeCriteria = cb.equal(from.get("myResourceType"), next.getResourceType());
 				idPredicates.add(typeCriteria);
-			} else {
-				if (isNotBlank(next.getResourceType())) {
-					Predicate typeCriteria = cb.equal(from.get("myResourceType"), next.getResourceType());
-					idPredicates.add(typeCriteria);
-				}
-				Predicate idCriteria = cb.equal(from.get("myFhirId"), next.getIdPart());
-				idPredicates.add(idCriteria);
 			}
+			Predicate idCriteria = cb.equal(from.get("myFhirId"), next.getIdPart());
+			idPredicates.add(idCriteria);
 
 			innerIdPredicates.add(cb.and(idPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
 		}

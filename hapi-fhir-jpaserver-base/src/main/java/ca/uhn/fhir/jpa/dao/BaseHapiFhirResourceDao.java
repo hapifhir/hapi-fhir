@@ -573,7 +573,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (fhirId == null) {
 			fhirId = Long.toString(entity.getId());
 		}
-		myIdHelperService.addResolvedPidToFhirIdAfterCommit(jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
+		myIdHelperService.addResolvedPidToFhirIdAfterCommit(
+				jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
@@ -2496,12 +2497,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (entity.isDeleted()) {
 			// We're un-deleting this entity so let's inform the memory cache service
 			myIdHelperService.addResolvedPidToFhirIdAfterCommit(
-				entity.getPersistentId(),
-				entity.getPartitionId() == null ? RequestPartitionId.defaultPartition() : entity.getPartitionId().toPartitionId(),
-				entity.getResourceType(),
-				entity.getFhirId(),
-				null
-			);
+					entity.getPersistentId(),
+					entity.getPartitionId() == null
+							? RequestPartitionId.defaultPartition()
+							: entity.getPartitionId().toPartitionId(),
+					entity.getResourceType(),
+					entity.getFhirId(),
+					null);
 		}
 
 		return super.doUpdateForUpdateOrPatch(
