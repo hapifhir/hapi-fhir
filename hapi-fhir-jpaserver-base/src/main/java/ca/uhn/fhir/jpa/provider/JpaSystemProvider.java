@@ -22,10 +22,12 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -33,7 +35,9 @@ import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 
 import java.util.Collections;
 import java.util.Map;
@@ -140,5 +144,18 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 		} finally {
 			endRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
 		}
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_REPLACE_REFERENCES, global = true)
+	@Description(
+			value =
+					"This operation replaces referenced resources by a target resource instance of the same previously pointed type.",
+			shortDefinition = "Repoints referencing resources to another resources instance")
+	public IBaseParameters replaceReferences(
+			@IdParam IIdType theId,
+			@OperationParam(name = Constants.PARAM_NEW_REFERENCE_TARGET_ID) IdType theNewId,
+			RequestDetails theRequest) {
+
+		return getReplaceReferencesSvc().replaceReferences(theId, theNewId, theRequest);
 	}
 }

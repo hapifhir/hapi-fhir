@@ -97,8 +97,10 @@ import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
+import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
 import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
+import ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
@@ -900,5 +902,10 @@ public class JpaConfig {
 	public CacheTagDefinitionDao tagDefinitionDao(
 			ITagDefinitionDao tagDefinitionDao, MemoryCacheService memoryCacheService) {
 		return new CacheTagDefinitionDao(tagDefinitionDao, memoryCacheService);
+	}
+
+	@Bean
+	public IReplaceReferencesSvc replaceReferencesSvc(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesSvcImpl(theFhirContext, theDaoRegistry);
 	}
 }
