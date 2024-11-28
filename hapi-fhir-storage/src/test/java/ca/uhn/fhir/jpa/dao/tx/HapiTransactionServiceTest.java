@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.test.utilities.MockInvoker;
 import ca.uhn.fhir.util.SleepUtil;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,17 +81,15 @@ class HapiTransactionServiceTest {
 	}
 
 	private void mockInterceptorBroadcaster() {
-		lenient().when(myInterceptorBroadcasterMock.callHooksAndReturnObject(eq(Pointcut.STORAGE_VERSION_CONFLICT),
-			isA(HookParams.class)))
-			.thenAnswer(invocationOnMock -> {
-				HookParams hookParams = (HookParams) invocationOnMock.getArguments()[1];
+		lenient().when(myInterceptorBroadcasterMock.hasHooks(eq(Pointcut.STORAGE_VERSION_CONFLICT))).thenReturn(true);
+		lenient().when(myInterceptorBroadcasterMock.getInvokersForPointcut(eq(Pointcut.STORAGE_VERSION_CONFLICT))).thenReturn(MockInvoker.list(hookParams->{
 				//answer with whatever retry settings passed in as HookParam
 				RequestDetails requestDetails = hookParams.get(RequestDetails.class);
 				ResourceVersionConflictResolutionStrategy answer = new ResourceVersionConflictResolutionStrategy();
 				answer.setRetry(requestDetails.isRetry());
 				answer.setMaxRetries(requestDetails.getMaxRetries());
 				return answer;
-			});
+			}));
 	}
 
 

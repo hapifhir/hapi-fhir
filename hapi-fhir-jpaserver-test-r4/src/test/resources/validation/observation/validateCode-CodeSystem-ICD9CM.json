@@ -1,0 +1,48 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "result",
+      "valueBoolean": false
+    },
+    {
+      "name": "code",
+      "valueCode": "10xx"
+    },
+    {
+      "name": "system",
+      "valueUri": "http://fhir.infoway-inforoute.ca/io/psca/CodeSystem/ICD9CM"
+    },
+    {
+      "name": "issues",
+      "resource": {
+        "resourceType": "OperationOutcome",
+        "issue": [
+          {
+            "severity": "error",
+            "code": "code-invalid",
+            "details": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+                  "code": "invalid-code"
+                }
+              ],
+              "text": "Unknown code '10xx' in the CodeSystem 'http://fhir.infoway-inforoute.ca/io/psca/CodeSystem/ICD9CM' version '0.1.0'"
+            },
+            "location": [
+              "code"
+            ],
+            "expression": [
+              "code"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "message",
+      "valueString": "Unknown code '10xx' in the CodeSystem 'http://fhir.infoway-inforoute.ca/io/psca/CodeSystem/ICD9CM' version '0.1.0'"
+    }
+  ]
+}

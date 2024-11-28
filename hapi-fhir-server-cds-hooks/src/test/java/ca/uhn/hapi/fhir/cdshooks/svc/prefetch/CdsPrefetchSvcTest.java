@@ -2,7 +2,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

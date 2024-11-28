@@ -6,7 +6,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
 import ca.uhn.fhir.util.ClasspathUtil;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;

@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +31,8 @@ public class SearchBuilderFactory<T extends IResourcePersistentId<?>> {
 
 	public SearchBuilderFactory() {}
 
-	public ISearchBuilder<T> newSearchBuilder(
-			IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
-		return (ISearchBuilder<T>) myApplicationContext.getBean(
-				ISearchBuilder.SEARCH_BUILDER_BEAN_NAME, theDao, theResourceName, theResourceType);
+	public ISearchBuilder<T> newSearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
+		return (ISearchBuilder<T>)
+				myApplicationContext.getBean(ISearchBuilder.SEARCH_BUILDER_BEAN_NAME, theResourceName, theResourceType);
 	}
 }

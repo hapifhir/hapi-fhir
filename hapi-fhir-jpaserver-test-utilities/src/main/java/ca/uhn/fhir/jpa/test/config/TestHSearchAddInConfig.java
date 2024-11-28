@@ -85,7 +85,6 @@ public class TestHSearchAddInConfig {
 			Path tempDirPath = Files.createTempDirectory(null);
 			String dirPath = tempDirPath.toString();
 
-
 			Map<String, String> luceneProperties = new HashMap<>();
 			luceneProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 			luceneProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
@@ -116,7 +115,6 @@ public class TestHSearchAddInConfig {
 		}
 
 	}
-
 
 	/**
 	 * Our default config - Lucene in-memory.

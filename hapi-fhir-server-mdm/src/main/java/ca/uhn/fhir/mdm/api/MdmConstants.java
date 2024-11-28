@@ -53,4 +53,17 @@ public class MdmConstants {
 			"This resource was found to be a duplicate and has been redirected.";
 
 	public static final String UNKNOWN_MDM_TYPES = "Unknown Resource Types";
+
+	/**
+	 * Interceptor order constant for {@link ca.uhn.fhir.mdm.interceptor.MdmReadVirtualizationInterceptor}, which
+	 * should fire before {@link ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor} since it is a
+	 * superset of the same functionality and only one should run if they are both registered for whatever
+	 * reason.
+	 */
+	public static final int ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR = 0;
+
+	/**
+	 * @see #ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR
+	 */
+	public static final int ORDER_PRESEARCH_REGISTERED_MDM_SEARCH_EXPANDING_INTERCEPTOR = 1;
 }

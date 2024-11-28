@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
+import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -38,6 +39,11 @@ public class MdmJpaConfig {
 	@Bean
 	public MdmLinkExpandSvc mdmLinkExpandSvc() {
 		return new MdmLinkExpandSvc();
+	}
+
+	@Bean
+	public MdmSearchExpansionSvc mdmSearchExpansionSvc() {
+		return new MdmSearchExpansionSvc();
 	}
 
 	@Bean

@@ -77,7 +77,8 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 				.toString();
 	}
 
-	public <T extends IResourcePersistentId> List<T> getResourcePersistentIds(IIdHelperService<T> theIdHelperService) {
+	public <T extends IResourcePersistentId<?>> List<T> getResourcePersistentIds(
+			IIdHelperService<T> theIdHelperService) {
 		if (myTypedPids.isEmpty()) {
 			return Collections.emptyList();
 		}

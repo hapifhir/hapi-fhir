@@ -46,7 +46,11 @@ public @interface Hook {
 	 * and allowable values can be positive or negative or 0.
 	 * <p>
 	 * If no order is specified, or the order is set to <code>0</code> (the default order),
-	 * the order specified at the interceptor type level will take precedence.
+	 * the order specified at the {@link Interceptor#order() interceptor type level} will be used.
+	 * </p>
+	 * <p>
+	 * Note that if two hook methods have the same order, then the order of execution is undefined. If
+	 * order is important, then an order must always be explicitly stated.
 	 * </p>
 	 */
 	int order() default Interceptor.DEFAULT_ORDER;

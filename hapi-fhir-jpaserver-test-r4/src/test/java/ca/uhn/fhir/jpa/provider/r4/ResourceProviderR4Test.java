@@ -263,6 +263,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
 
+
+
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
@@ -2364,18 +2366,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id = idCreated.toUnqualifiedVersionless();
 
 		for (int i = 0; i < 10; i++) {
-			sleepOneClick();
+			sleepAtLeast(100);
 			preDates.add(new Date());
-			sleepOneClick();
+			sleepAtLeast(100);
 			patient.setId(id);
 			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
-			sleepOneClick();
 		}
 
 		List<String> idValues;
 
+		myCaptureQueriesListener.clear();
 		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + id.getIdPart() + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
+		myCaptureQueriesListener.logSelectQueries();
 		assertThat(idValues).as(idValues.toString()).containsExactly(ids.get(3), ids.get(2), ids.get(1), ids.get(0));
 
 		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));

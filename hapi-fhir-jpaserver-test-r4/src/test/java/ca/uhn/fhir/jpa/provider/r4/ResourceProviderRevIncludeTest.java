@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -39,7 +40,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
 
 
-	class SqlCapturingInterceptor {
+	static class SqlCapturingInterceptor {
 		SqlQueryList queryList = null;
 		@Hook(Pointcut.JPA_PERFTRACE_RAW_SQL)
 		public void trackRequest(RequestDetails theRequestDetails, SqlQueryList theQueryList) {
@@ -89,7 +90,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		Bundle bundle = myClient.search()
 			.forResource(Patient.class)
 			.count(200)
-			.where(Patient.RES_ID.exactly().codes(pid.getIdPart()))
+			.where(IAnyResource.RES_ID.exactly().codes(pid.getIdPart()))
 			.revInclude(new Include("CareTeam:subject:Group").setRecurse(true))
 //			.revInclude(new Include("CareTeam:subject:Group"))
 			.revInclude(new Include("Group:member:Patient"))
@@ -128,7 +129,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 					}
 					break;
 				default:
-					ourLog.warn(type + " found but not expected");
+					ourLog.warn("{} found but not expected", type);
 			}
 
 			if (patientFound && groupFound && careTeamFound && detectedIssueFound) {
@@ -144,7 +145,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		assertEquals(methodName, patient.getName().get(0).getFamily());
 
 		//Ensure that the revincludes are included in the query list of the sql trace.
-		//TODO GGG/KHS reduce this to something less than 6 by smarter iterating and getting the resource types earlier when needed.
+		//TODO GGG/KHS reduce this to something less than 5 by smarter iterating and getting the resource types earlier when needed.
 		assertThat(sqlCapturingInterceptor.getQueryList()).hasSize(5);
 		myInterceptorRegistry.unregisterInterceptor(sqlCapturingInterceptor);
 	}
@@ -166,7 +167,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		// DetectedIssue?_id=123&_include=DetectedIssue:author&_revinclude=PractitionerRole:practitioner
 		Bundle bundle = myClient.search()
 			.forResource(DetectedIssue.class)
-			.where(DetectedIssue.RES_ID.exactly().codes(detectedIssueId.getIdPart()))
+			.where(IAnyResource.RES_ID.exactly().codes(detectedIssueId.getIdPart()))
 			.include(new Include("DetectedIssue:author"))
 			.revInclude(new Include("PractitionerRole:practitioner").setRecurse(true))
 			.returnBundle(Bundle.class)

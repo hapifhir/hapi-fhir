@@ -1,8 +1,8 @@
 package ca.uhn.hapi.fhir.cdshooks.module;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;

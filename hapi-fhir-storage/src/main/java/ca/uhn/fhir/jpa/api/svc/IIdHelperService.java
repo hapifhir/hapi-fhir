@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,7 @@ import java.util.Set;
  * This interface is used to translate between {@link IResourcePersistentId}
  * and actual resource IDs.
  */
-public interface IIdHelperService<T extends IResourcePersistentId> {
+public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 
 	/**
 	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.
@@ -57,15 +58,6 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 			@Nonnull RequestPartitionId theRequestPartitionId, List<IIdType> theIds, boolean theOnlyForcedIds);
 
 	/**
-	 * Given a resource type and ID, determines the internal persistent ID for the resource.
-	 *
-	 * @throws ResourceNotFoundException If the ID can not be found
-	 */
-	@Nonnull
-	T resolveResourcePersistentIds(
-			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId);
-
-	/**
 	 * Given a resource type and ID, determines the internal persistent ID for a resource.
 	 * Optionally filters out deleted resources.
 	 *
@@ -76,16 +68,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theId,
-			boolean theExcludeDeleted);
-
-	/**
-	 * Returns a mapping of Id -> IResourcePersistentId.
-	 * If any resource is not found, it will throw ResourceNotFound exception
-	 * (and no map will be returned)
-	 */
-	@Nonnull
-	Map<String, T> resolveResourcePersistentIds(
-			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds);
+			ResolveIdentityMode theMode);
 
 	/**
 	 * Returns a mapping of Id -> IResourcePersistentId.
@@ -97,7 +80,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			List<String> theIds,
-			boolean theExcludeDeleted);
+			ResolveIdentityMode theMode);
 
 	/**
 	 * Given a persistent ID, returns the associated resource ID
@@ -106,30 +89,40 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, T theId);
 
 	/**
-	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
-	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
-	 *
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	IResourceLookup resolveResourceIdentity(
-			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId)
+	IResourceLookup<T> resolveResourceIdentity(
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			@Nullable String theResourceType,
+			@Nonnull String theResourceId,
+			@Nonnull ResolveIdentityMode theMode)
 			throws ResourceNotFoundException;
+
+	/**
+	 * @throws ResourceNotFoundException If the ID can not be found
+	 */
+	@Nonnull
+	default T resolveResourceIdentityPid(
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			@Nullable String theResourceType,
+			@Nonnull String theResourceId,
+			@Nonnull ResolveIdentityMode theMode)
+			throws ResourceNotFoundException {
+		return resolveResourceIdentity(theRequestPartitionId, theResourceType, theResourceId, theMode)
+				.getPersistentId();
+	}
 
 	/**
 	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
 	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
 	 * Optionally filters out deleted resources.
 	 *
-	 * @throws ResourceNotFoundException If the ID can not be found
+	 * @since 8.0.0
 	 */
 	@Nonnull
-	IResourceLookup resolveResourceIdentity(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theResourceId,
-			boolean theExcludeDeleted)
-			throws ResourceNotFoundException;
+	Map<IIdType, IResourceLookup<T>> resolveResourceIdentities(
+			@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds, ResolveIdentityMode theMode);
 
 	/**
 	 * Returns true if the given resource ID should be stored in a forced ID. Under default config
@@ -149,18 +142,25 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	@Nonnull
 	List<T> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds);
 
+	/**
+	 * Value will be an empty Optional if the PID doesn't exist, or
+	 * a typed resource ID if so (Patient/ABC).
+	 */
 	Optional<String> translatePidIdToForcedIdWithCache(T theResourcePersistentId);
 
+	/**
+	 * Values in the returned map are typed resource IDs (Patient/ABC)
+	 */
 	PersistentIdToForcedIdMap<T> translatePidsToForcedIds(Set<T> theResourceIds);
 
 	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods
 	 */
-	void addResolvedPidToForcedId(
-			T theResourcePersistentId,
+	void addResolvedPidToFhirId(
+			@Nonnull T theResourcePersistentId,
 			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			@Nullable String theForcedId,
+			@Nonnull String theResourceType,
+			@Nonnull String theFhirId,
 			@Nullable Date theDeletedAt);
 
 	@Nonnull

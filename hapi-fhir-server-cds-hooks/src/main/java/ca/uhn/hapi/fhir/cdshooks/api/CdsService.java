@@ -19,7 +19,7 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.api;
 
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsHooksExtension;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

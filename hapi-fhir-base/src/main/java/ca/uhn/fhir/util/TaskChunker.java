@@ -40,13 +40,22 @@ import java.util.stream.Stream;
  */
 public class TaskChunker<T> {
 
-	public void chunk(Collection<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer) {
+	public static <T> void chunk(List<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer) {
+		if (theInput.size() <= theChunkSize) {
+			theBatchConsumer.accept(theInput);
+			return;
+		}
+		chunk((Collection<T>) theInput, theChunkSize, theBatchConsumer);
+	}
+
+	public static <T> void chunk(Collection<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer) {
 		List<T> input;
 		if (theInput instanceof List) {
 			input = (List<T>) theInput;
 		} else {
 			input = new ArrayList<>(theInput);
 		}
+
 		for (int i = 0; i < input.size(); i += theChunkSize) {
 			int to = i + theChunkSize;
 			to = Math.min(to, input.size());
@@ -56,12 +65,11 @@ public class TaskChunker<T> {
 	}
 
 	@Nonnull
-	public <T> Stream<List<T>> chunk(Stream<T> theStream, int theChunkSize) {
+	public static <T> Stream<List<T>> chunk(Stream<T> theStream, int theChunkSize) {
 		return StreamUtil.partition(theStream, theChunkSize);
 	}
 
-	@Nonnull
-	public void chunk(Iterator<T> theIterator, int theChunkSize, Consumer<List<T>> theListConsumer) {
+	public static <T> void chunk(Iterator<T> theIterator, int theChunkSize, Consumer<List<T>> theListConsumer) {
 		chunk(Streams.stream(theIterator), theChunkSize).forEach(theListConsumer);
 	}
 }

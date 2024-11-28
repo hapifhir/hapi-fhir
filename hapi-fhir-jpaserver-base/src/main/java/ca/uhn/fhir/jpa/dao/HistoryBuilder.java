@@ -48,6 +48,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -81,7 +84,7 @@ public class HistoryBuilder {
 	private FhirContext myCtx;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	/**
 	 * Constructor
@@ -150,13 +153,13 @@ public class HistoryBuilder {
 		query.setMaxResults(theToIndex - theFromIndex);
 
 		List<ResourceHistoryTable> tables = query.getResultList();
-		if (tables.size() > 0) {
+		if (!tables.isEmpty()) {
 			ImmutableListMultimap<Long, ResourceHistoryTable> resourceIdToHistoryEntries =
 					Multimaps.index(tables, ResourceHistoryTable::getResourceId);
 			Set<JpaPid> pids = resourceIdToHistoryEntries.keySet().stream()
 					.map(JpaPid::fromId)
 					.collect(Collectors.toSet());
-			PersistentIdToForcedIdMap pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
+			PersistentIdToForcedIdMap<JpaPid> pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
 			ourLog.trace("Translated IDs: {}", pidToForcedId.getResourcePersistentIdOptionalMap());
 
 			for (Long nextResourceId : resourceIdToHistoryEntries.keySet()) {
@@ -172,8 +175,9 @@ public class HistoryBuilder {
 					// For that reason, strip the prefix before setting the transientForcedId below.
 					// If not stripped this messes up the id of the resource as the resourceType would be repeated
 					// twice like Patient/Patient/1234 in the resource constructed
-					if (resourceId.startsWith(myResourceType + "/")) {
-						resourceId = resourceId.substring(myResourceType.length() + 1);
+					int slashIdx = resourceId.indexOf('/');
+					if (slashIdx != -1) {
+						resourceId = resourceId.substring(slashIdx + 1);
 					}
 				} else {
 					resourceId = nextResourceId.toString();
@@ -242,8 +246,23 @@ public class HistoryBuilder {
 		Subquery<Date> pastDateSubQuery = theQuery.subquery(Date.class);
 		Root<ResourceHistoryTable> subQueryResourceHistory = pastDateSubQuery.from(ResourceHistoryTable.class);
 		Expression myUpdatedMostRecent = theCriteriaBuilder.max(subQueryResourceHistory.get("myUpdated"));
+
+		/*
+		 * This conversion from the Date in myRangeEndInclusive into a ZonedDateTime is an experiment -
+		 * There is an intermittent test failure in testSearchHistoryWithAtAndGtParameters() that I can't
+		 * figure out. But I've added a ton of logging to the error it fails with and I noticed that
+		 * we emit SQL along the lines of
+		 *   select coalesce(max(rht2_0.RES_UPDATED), timestamp with time zone '2024-10-05 18:24:48.172000000Z')
+		 * for this date, and all other dates are in GMT so this is an experiment. If nothing changes,
+		 * we can roll this back to
+		 *   theCriteriaBuilder.literal(myRangeStartInclusive)
+		 * JA 20241005
+		 */
+		ZonedDateTime rangeStart =
+				ZonedDateTime.ofInstant(Instant.ofEpochMilli(myRangeStartInclusive.getTime()), ZoneId.of("GMT"));
+
 		Expression myUpdatedMostRecentOrDefault =
-				theCriteriaBuilder.coalesce(myUpdatedMostRecent, theCriteriaBuilder.literal(myRangeStartInclusive));
+				theCriteriaBuilder.coalesce(myUpdatedMostRecent, theCriteriaBuilder.literal(rangeStart));
 
 		pastDateSubQuery
 				.select(myUpdatedMostRecentOrDefault)
