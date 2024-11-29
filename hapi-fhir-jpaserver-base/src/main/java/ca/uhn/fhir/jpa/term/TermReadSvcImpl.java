@@ -2526,6 +2526,29 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		provideValidationSupport().invalidateCaches();
 	}
 
+	@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+	@Override
+	public void invalidateCaches() {
+		/*
+		 * Clear out anything left in the userdata caches. We do this mostly because it messes
+		 * up unit tests to have these things stick around between test runs, since many of
+		 * these resources come from DefaultProfileValidationSupport and therefore live beyond
+		 * any single test execution.
+		 */
+		for (IBaseResource next : myValidationSupport.fetchAllConformanceResources()) {
+			if (next != null) {
+				synchronized (next) {
+					if (next.getUserData(CS_USERDATA_CURRENT_VERSION) != null) {
+						next.setUserData(CS_USERDATA_CURRENT_VERSION, null);
+					}
+					if (next.getUserData(VS_USERDATA_CURRENT_VERSION) != null) {
+						next.setUserData(VS_USERDATA_CURRENT_VERSION, null);
+					}
+				}
+			}
+		}
+	}
+
 	private synchronized boolean isPreExpandingValueSets() {
 		return myPreExpandingValueSets;
 	}

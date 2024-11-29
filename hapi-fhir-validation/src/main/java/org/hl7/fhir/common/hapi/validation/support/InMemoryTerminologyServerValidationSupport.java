@@ -1027,6 +1027,23 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {
 
 				if (theWantCode != null) {
+
+					StringBuilder sb = new StringBuilder();
+					ValidationSupportChain chain =
+							(ValidationSupportChain) theValidationSupportContext.getRootValidationSupport();
+					for (IValidationSupport next : chain.getValidationSupports()) {
+						boolean supported = next.isCodeSystemSupported(
+								theValidationSupportContext, includeOrExcludeConceptSystemUrl);
+						sb.append("isCodeSystemSupported: " + includeOrExcludeConceptSystemUrl + " " + supported + " "
+								+ next.getClass() + " " + next.toString() + "\n");
+					}
+					sb.append("isCodeSystemSupported: " + includeOrExcludeConceptSystemUrl + " ROOT "
+							+ theValidationSupportContext
+									.getRootValidationSupport()
+									.isCodeSystemSupported(
+											theValidationSupportContext, includeOrExcludeConceptSystemUrl));
+					theResponseBuilder.addMessage(sb.toString());
+
 					if (theValidationSupportContext
 							.getRootValidationSupport()
 							.isCodeSystemSupported(theValidationSupportContext, includeOrExcludeConceptSystemUrl)) {
