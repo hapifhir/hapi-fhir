@@ -56,6 +56,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Patient;
 
 import java.util.Arrays;
 import java.util.List;
@@ -288,7 +289,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					thePreview,
 					theResultPatient);
 
-			IFhirResourceDaoPatient<?> dao = (IFhirResourceDaoPatient<?>) getDao();
+			IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) getDao();
 			ResourceMergeService resourceMergeService = new ResourceMergeService(dao);
 
 			FhirContext fhirContext = dao.getContext();

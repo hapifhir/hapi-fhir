@@ -278,7 +278,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		the SERVER_OUTGOING_RESPONSE pointcut.
 		*/
 
-		// if the response status  code is set by the method, respect it. Otherwise, use the default 200.
+		// if the response status code is set by the method, respect it. Otherwise, use the default 200.
 		int responseCode = Constants.STATUS_HTTP_200_OK;
 		if (theRequest instanceof ServletRequestDetails) {
 			HttpServletResponse servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
