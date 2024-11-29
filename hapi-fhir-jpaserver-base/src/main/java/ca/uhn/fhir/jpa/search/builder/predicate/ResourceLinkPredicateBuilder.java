@@ -407,12 +407,16 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 		String message = builder.toString();
 		StorageProcessingMessage msg = new StorageProcessingMessage().setMessage(message);
-		HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest)
-				.add(StorageProcessingMessage.class, msg);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
+
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_WARNING)) {
+			HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(StorageProcessingMessage.class, msg);
+			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
+		}
 	}
 
 	/**

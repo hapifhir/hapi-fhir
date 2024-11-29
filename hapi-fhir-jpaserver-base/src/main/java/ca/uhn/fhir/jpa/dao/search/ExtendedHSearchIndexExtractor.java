@@ -25,6 +25,8 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.DateSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
@@ -37,6 +39,7 @@ import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.MetaUtil;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -74,8 +77,10 @@ public class ExtendedHSearchIndexExtractor {
 	}
 
 	@Nonnull
-	public ExtendedHSearchIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
-		ExtendedHSearchIndexData retVal = new ExtendedHSearchIndexData(myContext, myJpaStorageSettings, theResource);
+	public ExtendedHSearchIndexData extract(
+			IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
+		ExtendedHSearchIndexData retVal =
+				new ExtendedHSearchIndexData(myContext, myJpaStorageSettings, theResource, theEntity);
 
 		if (myJpaStorageSettings.isStoreResourceInHSearchIndex()) {
 			retVal.setRawResourceData(myContext.newJsonParser().encodeResourceToString(theResource));
@@ -113,11 +118,27 @@ public class ExtendedHSearchIndexExtractor {
 				.filter(nextParam -> !nextParam.isMissing())
 				.forEach(nextParam -> retVal.addUriIndexData(nextParam.getParamName(), nextParam.getUri()));
 
-		theResource.getMeta().getTag().forEach(tag -> retVal.addTokenIndexData("_tag", tag));
+		theEntity.getTags().forEach(tag -> {
+			TagDefinition td = tag.getTag();
 
-		theResource.getMeta().getSecurity().forEach(sec -> retVal.addTokenIndexData("_security", sec));
-
-		theResource.getMeta().getProfile().forEach(prof -> retVal.addUriIndexData("_profile", prof.getValue()));
+			IBaseCoding coding = (IBaseCoding) myContext.getVersion().newCodingDt();
+			coding.setVersion(td.getVersion());
+			coding.setDisplay(td.getDisplay());
+			coding.setCode(td.getCode());
+			coding.setSystem(td.getSystem());
+			coding.setUserSelected(ObjectUtils.defaultIfNull(td.getUserSelected(), false));
+			switch (td.getTagType()) {
+				case TAG:
+					retVal.addTokenIndexData("_tag", coding);
+					break;
+				case PROFILE:
+					retVal.addUriIndexData("_profile", coding.getCode());
+					break;
+				case SECURITY_LABEL:
+					retVal.addTokenIndexData("_security", coding);
+					break;
+			}
+		});
 
 		String source = MetaUtil.getSource(myContext, theResource.getMeta());
 		if (isNotBlank(source)) {
@@ -127,20 +148,14 @@ public class ExtendedHSearchIndexExtractor {
 		theNewParams.myCompositeParams.forEach(nextParam ->
 				retVal.addCompositeIndexData(nextParam.getSearchParamName(), buildCompositeIndexData(nextParam)));
 
-		if (theResource.getMeta().getLastUpdated() != null) {
-			int ordinal = ResourceIndexedSearchParamDate.calculateOrdinalValue(
-							theResource.getMeta().getLastUpdated())
+		if (theEntity.getUpdated() != null && !theEntity.getUpdated().isEmpty()) {
+			int ordinal = ResourceIndexedSearchParamDate.calculateOrdinalValue(theEntity.getUpdatedDate())
 					.intValue();
 			retVal.addDateIndexData(
-					"_lastUpdated",
-					theResource.getMeta().getLastUpdated(),
-					ordinal,
-					theResource.getMeta().getLastUpdated(),
-					ordinal);
+					"_lastUpdated", theEntity.getUpdatedDate(), ordinal, theEntity.getUpdatedDate(), ordinal);
 		}
 
 		if (!theNewParams.myLinks.isEmpty()) {
-
 			// awkwardly, links are indexed by jsonpath, not by search param.
 			// so we re-build the linkage.
 			Map<String, List<String>> linkPathToParamName = new HashMap<>();

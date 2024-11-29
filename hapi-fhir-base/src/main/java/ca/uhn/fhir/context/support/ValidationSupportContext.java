@@ -42,7 +42,7 @@ public class ValidationSupportContext {
 		return myCurrentlyGeneratingSnapshots;
 	}
 
-	public boolean isEnabledValidationForCodingsLogicalAnd() {
-		return myRootValidationSupport.isEnabledValidationForCodingsLogicalAnd();
+	public boolean isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid() {
+		return myRootValidationSupport.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid();
 	}
 }

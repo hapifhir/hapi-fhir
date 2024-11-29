@@ -15,7 +15,6 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
@@ -115,7 +114,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 	private HashMap<String, CodeSystem> myCodeSystems;
 	private HashMap<String, ValueSet> myValueSets;
 	private HashMap<String, Questionnaire> myQuestionnaires;
-	private CachingValidationSupport myValidationSupport;
+	private ValidationSupportChain myValidationSupport;
 
 	private void addValidConcept(String theSystem, String theCode) {
 		addValidConcept(theSystem, theCode, true);
@@ -139,12 +138,12 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		IValidationSupport mockSupport = mock(IValidationSupport.class, withSettings().strictness(Strictness.LENIENT));
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
-		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(
+		myValidationSupport = new ValidationSupportChain(
 			mockSupport,
 			myDefaultValidationSupport,
 			new InMemoryTerminologyServerValidationSupport(ourCtx),
 			new CommonCodeSystemsTerminologyService(ourCtx),
-			new SnapshotGeneratingValidationSupport(ourCtx)));
+			new SnapshotGeneratingValidationSupport(ourCtx));
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);

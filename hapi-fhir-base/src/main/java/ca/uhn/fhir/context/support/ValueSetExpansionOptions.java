@@ -21,6 +21,8 @@ package ca.uhn.fhir.context.support;
 
 import org.apache.commons.lang3.Validate;
 
+import java.util.Objects;
+
 /**
  * Options for ValueSet expansion
  *
@@ -125,5 +127,24 @@ public class ValueSetExpansionOptions {
 	public ValueSetExpansionOptions setTheDisplayLanguage(String theDisplayLanguage) {
 		myDisplayLanguage = theDisplayLanguage;
 		return this;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (!(theO instanceof ValueSetExpansionOptions)) return false;
+		ValueSetExpansionOptions that = (ValueSetExpansionOptions) theO;
+		return myFailOnMissingCodeSystem == that.myFailOnMissingCodeSystem
+				&& myCount == that.myCount
+				&& myOffset == that.myOffset
+				&& myIncludeHierarchy == that.myIncludeHierarchy
+				&& Objects.equals(myFilter, that.myFilter)
+				&& Objects.equals(myDisplayLanguage, that.myDisplayLanguage);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(
+				myFailOnMissingCodeSystem, myCount, myOffset, myIncludeHierarchy, myFilter, myDisplayLanguage);
 	}
 }

@@ -1,0 +1,13 @@
+---
+type: perf
+issue: 6508
+title: "The ValidationSupportChain module has been rewritten to improve validator performance. This change:
+* Adds new caching capabilities to ValidationSupportChain. This is an improvement over the previous separate caching module because the chain can now remember which entries in the cache responded affirmative to `isValueSetSupported()` and will therefore be more efficient about trying entries in the chain. It also makes debugging much less confusing as there is less recursion and the caches don't use loadingCache.
+* Importantly, the caching in ValidationSupportChain caches negative lookups (i.e. items that could not be found by URL) as well as positive lookups. This is a change from the historical caching behaviour.
+* Changes ValidationSupportChain to never expire StructureDefinition entries in the cache, which is needed because the validator makes assumptions about structuredefinitions never changing. Fixes #6424.
+* Modifies `VersionSpecificWorkerContextWrapper` so that it doesn't use a separate cache and instead relies on the caching provided by ValidationSupportChain. This class previously used a cache because it converts arbitrary versions of FHIR StructureDefinitions into the canonical version required by the validator (R5), but these converted versions are now stored in the userdata map of objects returned by and cached by ValidationSupportChain. This makes the caching more predictable since there is only one cache to track.
+* Adds OpenTelemetry support to ValidationSupportChain, with metrics for tracking the cache size.
+* Deprecates CachingValidationSupport since caching is now provided by ValidationSupportChain. CachingValidationSupport is now just a passthrough and should be removed from applications. It will be removed from the library in a future release.
+* Removes ConceptMap caching from TermReachSvcImpl, as this caching is both redundant and inefficient as it operates within a database transaction.
+
+These changes result in very significant performance improvements when performing validation in the JPA server. Throughput improvements of 1000% have been recorded in benchmarking use cases involving large profiles and remote terminology services enabled. Many other validation use cases should see significant improvements as well."
