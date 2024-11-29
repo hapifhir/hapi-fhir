@@ -168,7 +168,6 @@ public class WebTest {
 			ourFhirServer.getFhirClient().delete().resourceById(new IdType("Patient/A" + i));
 		}
 
-
 		// Load home page
 		HtmlPage page = myWebClient.getPage("http://localhost/");
 		// Navigate to Patient resource page
@@ -231,6 +230,7 @@ public class WebTest {
 			.filter(theButtonMappingPredicate)
 			.findFirst()
 			.orElseThrow();
+
 
 		// alter button attributes to imitate Reflected XSS attack
 		summaryButton.setAttribute("data2", "A0%3Cscript%3Ealert(2)%3C/script%3E");
