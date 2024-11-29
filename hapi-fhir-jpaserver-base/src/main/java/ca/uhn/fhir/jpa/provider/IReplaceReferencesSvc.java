@@ -9,5 +9,5 @@ import org.hl7.fhir.instance.model.api.IIdType;
  */
 public interface IReplaceReferencesSvc {
 
-	IBaseParameters replaceReferences(IIdType theCurrentTargetId, IIdType theNewTargetId, RequestDetails theRequest);
+	IBaseParameters replaceReferences(IIdType theCurrentTargetId, String theNewTargetId, RequestDetails theRequest);
 }

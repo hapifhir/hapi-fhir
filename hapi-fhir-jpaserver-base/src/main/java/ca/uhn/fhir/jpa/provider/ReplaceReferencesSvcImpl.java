@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -49,12 +50,14 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	@Override
 	public IBaseParameters replaceReferences(
-			IIdType theCurrentTargetId, IIdType theNewTargetId, RequestDetails theRequest) {
-		validate(theCurrentTargetId, theNewTargetId, theRequest);
+		IIdType theCurrentTargetId, String theNewTargetId, RequestDetails theRequest) {
+
+		validateParameters(theCurrentTargetId, theNewTargetId, theRequest);
+		IIdType newTargetId = new IdDt(theNewTargetId);
 
 		List<? extends IBaseResource> referencingResources = findReferencingResourceIds(theCurrentTargetId, theRequest);
 
-		return replaceReferencesInTransaction(referencingResources, theCurrentTargetId, theNewTargetId, theRequest);
+		return replaceReferencesInTransaction(referencingResources, theCurrentTargetId, newTargetId, theRequest);
 	}
 
 	private IBaseParameters replaceReferencesInTransaction(
@@ -164,22 +167,27 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return myDaoRegistry.getResourceDao(theResourceName);
 	}
 
-	private void validate(IIdType theCurrentTargetIdParam, IIdType theNewTargetIdParam, RequestDetails theRequest) {
+	private void validateParameters(IIdType theCurrentTargetIdParam, String theNewTargetIdParam, RequestDetails theRequest) {
 		if (theCurrentTargetIdParam == null) {
 			throw new InvalidParameterException(Msg.code(2583) + "Parameter 'theCurrentTargetIdParam' is null");
 		}
 
-		if (theNewTargetIdParam == null) {
-			throw new InvalidParameterException(Msg.code(2584) + "Parameter 'theNewTargetIdParam' is null");
+		if (isBlank(theNewTargetIdParam)) {
+			throw new InvalidParameterException(Msg.code(2584) + "Parameter 'theNewTargetIdParam' is blank");
 		}
 
-		if (!theNewTargetIdParam.getResourceType().equals(theCurrentTargetIdParam.getResourceType())) {
+		IIdType targetId = new IdDt(theNewTargetIdParam);
+		if (isBlank(targetId.getResourceType())) {
 			throw new InvalidParameterException(
-					Msg.code(2585) + "Current and new references must be for the same resource type");
+					Msg.code(2585) + "New reference id parameter must be a resource type qualified id");
+		}
+		if (!targetId.getResourceType().equals(theCurrentTargetIdParam.getResourceType())) {
+			throw new InvalidParameterException(
+					Msg.code(2586) + "Current and new references must be for the same resource type");
 		}
 
 		if (isBlank(theRequest.getResourceName())) {
-			throw new InvalidParameterException(Msg.code(2586) + "RequestDetails.resourceName must must be provided");
+			throw new InvalidParameterException(Msg.code(2587) + "RequestDetails.resourceName must must be provided");
 		}
 	}
 }

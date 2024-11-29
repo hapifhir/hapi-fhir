@@ -37,7 +37,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.IdType;
 
 import java.util.Collections;
 import java.util.Map;
@@ -153,7 +152,7 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 			shortDefinition = "Repoints referencing resources to another resources instance")
 	public IBaseParameters replaceReferences(
 			@IdParam IIdType theId,
-			@OperationParam(name = Constants.PARAM_NEW_REFERENCE_TARGET_ID) IdType theNewId,
+			@OperationParam(name = Constants.PARAM_NEW_REFERENCE_TARGET_ID) String theNewId,
 			RequestDetails theRequest) {
 
 		return getReplaceReferencesSvc().replaceReferences(theId, theNewId, theRequest);
