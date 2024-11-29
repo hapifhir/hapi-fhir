@@ -26,6 +26,7 @@ public class BatchWorkChunkStatusDTO {
 	public final WorkChunkStatusEnum status;
 	public final Date start;
 	public final Date stop;
+
 	public final Double avg;
 	public final Long totalChunks;
 

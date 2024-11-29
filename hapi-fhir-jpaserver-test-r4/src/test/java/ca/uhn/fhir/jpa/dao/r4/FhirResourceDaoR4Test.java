@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -1090,16 +1091,28 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			Patient p = new Patient();
-			p.setId(id);
+			p.setId(id.getIdPart());
 			p.setActive(true);
 			p.addName().setFamily("FAMILY");
-			myPatientDao.update(p);
+			IIdType update1Id = myPatientDao.update(p).getId();
+			assertEquals("2", update1Id.getVersionIdPart());
 
 			p = new Patient();
-			p.setId(id);
+			p.setId(id.getIdPart());
 			p.setActive(false);
 			p.addName().setFamily("FAMILY2");
-			myPatientDao.update(p);
+			IIdType update2Id = myPatientDao.update(p).getId();
+			assertEquals("3", update2Id.getVersionIdPart());
+			assertEquals(update1Id.getIdPart(), update2Id.getIdPart());
+		});
+
+		runInTransaction(()->{
+			List<ResourceTable> resourceTables = myResourceTableDao.findAll();
+			assertEquals(1, resourceTables.size());
+			assertEquals(2, resourceTables.get(0).getVersion());
+
+			List<ResourceHistoryTable> versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(resourceTables.get(0).getResourceId());
+			assertThat(versions.stream().map(ResourceHistoryTable::getVersion).toList()).asList().containsExactly(1L, 2L, 3L);
 		});
 
 		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous("name", new StringParam("family2"))).size());
@@ -1193,61 +1206,28 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	}
 
-	@Test
-	public void testCreateWithIllegalReference() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testCreateWithIllegalReference_InvalidTypeForElement(boolean theClientAssignedId) {
+
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
+		IIdType id1;
+		if (theClientAssignedId) {
+			o1.setId("testCreateWithIllegalReference");
+			id1 = myObservationDao.update(o1, mySrd).getId().toUnqualifiedVersionless();
+		} else {
+			id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
+		}
 
 		try {
 			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(id1);
+			p.getManagingOrganization().setReference(id1.getValue());
 			myPatientDao.create(p, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
 		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(new IdType("Organization", id1.getIdPart()));
-			myPatientDao.create(p, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1095) + "Resource contains reference to unknown resource ID Organization/" + id1.getIdPart(), e.getMessage());
-		}
-
-		// Now with a forced ID
-
-		o1 = new Observation();
-		o1.setId("testCreateWithIllegalReference");
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		id1 = myObservationDao.update(o1, mySrd).getId().toUnqualifiedVersionless();
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(id1);
-			myPatientDao.create(p, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
-		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(new IdType("Organization", id1.getIdPart()));
-			myPatientDao.create(p, mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1094) + "Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
-		}
-
-		// Disable validation
-		myStorageSettings.setEnforceReferenceTargetTypes(false);
-		Patient p = new Patient();
-		p.getManagingOrganization().setReferenceElement(id1);
-		myPatientDao.create(p, mySrd);
-
 
 	}
 
@@ -2803,7 +2783,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			myPatientDao.read(new IdType("Patient/9999999999999/_history/1"), mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1996) + "Resource Patient/9999999999999/_history/1 is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Patient/9999999999999 is not known", e.getMessage());
 		}
 
 	}

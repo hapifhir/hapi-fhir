@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>7.7.2-SNAPSHOT</version>
+		<version>7.7.9-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -414,7 +414,6 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<id>build_dstu2</id>
@@ -525,7 +524,6 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -534,6 +532,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<skip>false</skip>
 					<packageNames>
 						<packageName>ca.uhn.fhir.jpa.entity</packageName>
 						<packageName>ca.uhn.fhir.jpa.model.entity</packageName>

@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -64,7 +65,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements IResourceLinkResolver {
+public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
 
 	@Autowired
@@ -124,11 +125,14 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		String idPart = targetResourceId.getIdPart();
 		try {
 			if (persistentId == null) {
-				resolvedResource =
-						myIdHelperService.resolveResourceIdentity(theRequestPartitionId, resourceType, idPart);
+				resolvedResource = myIdHelperService.resolveResourceIdentity(
+						theRequestPartitionId,
+						resourceType,
+						idPart,
+						ResolveIdentityMode.excludeDeleted().noCacheUnlessDeletesDisabled());
 				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
-				resolvedResource = new ResourceLookupPersistentIdWrapper(persistentId);
+				resolvedResource = new ResourceLookupPersistentIdWrapper<>(persistentId);
 			}
 		} catch (ResourceNotFoundException e) {
 
@@ -142,8 +146,23 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 
 				RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(type);
 				String resName = missingResourceDef.getName();
-				throw new InvalidRequestException(Msg.code(1094) + "Resource " + resName + "/" + idPart
-						+ " not found, specified in path: " + sourcePath);
+
+				// Check if this was a deleted resource
+				try {
+					resolvedResource = myIdHelperService.resolveResourceIdentity(
+							theRequestPartitionId,
+							resourceType,
+							idPart,
+							ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled());
+					handleDeletedTarget(resourceType, idPart, sourcePath);
+				} catch (ResourceNotFoundException e2) {
+					resolvedResource = null;
+				}
+
+				if (resolvedResource == null) {
+					throw new InvalidRequestException(Msg.code(1094) + "Resource " + resName + "/" + idPart
+							+ " not found, specified in path: " + sourcePath);
+				}
 			}
 			resolvedResource = createdTableOpt.get();
 		}
@@ -201,14 +220,18 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		}
 
 		if (resolvedResource.getDeleted() != null) {
-			if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
-				return false;
-			}
-			String resName = resolvedResource.getResourceType();
-			throw new InvalidRequestException(Msg.code(1096) + "Resource " + resName + "/" + idPart
-					+ " is deleted, specified in path: " + sourcePath);
+			return handleDeletedTarget(resolvedResource.getResourceType(), idPart, sourcePath);
 		}
 		return true;
+	}
+
+	private boolean handleDeletedTarget(String resType, String idPart, String sourcePath) {
+		if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
+			return false;
+		}
+		String resName = resType;
+		throw new InvalidRequestException(Msg.code(1096) + "Resource " + resName + "/" + idPart
+				+ " is deleted, specified in path: " + sourcePath);
 	}
 
 	@Nullable
@@ -425,6 +448,11 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		@Override
 		public String getResourceType() {
 			return myPersistentId.getAssociatedResourceId().getResourceType();
+		}
+
+		@Override
+		public String getFhirId() {
+			return myPersistentId.getAssociatedResourceId().getIdPart();
 		}
 
 		@Override

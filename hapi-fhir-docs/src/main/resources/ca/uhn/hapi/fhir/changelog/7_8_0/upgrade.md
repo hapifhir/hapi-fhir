@@ -14,3 +14,7 @@ If you do have such data, you should follow the following steps:
 * Perform a server resource reindex by invoking the [$reindex Operation (server)](https://smilecdr.com/docs/fhir_repository/search_parameter_reindexing.html#reindex-server) with the `optimizeStorage` parameter set to `ALL_VERSIONS`. 
 
 * When this reindex operation has successfully completed, the setting above can be disabled. Disabling this setting avoids an extra database round-trip when loading data, so this change will have a positive performance impact on your server.
+
+# Fulltext Search with _lastUpdated Filter
+
+Fulltext searches have been updated to support `_lastUpdated` search parameter. If you are using Advanced Hibernate Search indexing and wish to use the `_lastUpdated` search parameetr with this feature, a full reindex of your repository is required.

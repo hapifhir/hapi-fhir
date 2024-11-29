@@ -242,6 +242,11 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return myResourceType;
 	}
 
+	@Override
+	public String getFhirId() {
+		return getIdDt().getIdPart();
+	}
+
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
 	}
@@ -325,6 +330,8 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	public void setTransientForcedId(String theTransientForcedId) {
+		assert theTransientForcedId == null || !theTransientForcedId.contains("/")
+				: "Invalid FHIR ID: " + theTransientForcedId;
 		myTransientForcedId = theTransientForcedId;
 	}
 }

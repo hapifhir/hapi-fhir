@@ -78,13 +78,16 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 					Msg.code(820) + "Delete Expunge not allowed:  " + myStorageSettings.cannotDeleteExpungeReason());
 		}
 
-		for (String url : theUrlsToDeleteExpunge) {
-			HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(String.class, url);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRE_DELETE_EXPUNGE)) {
+			for (String url : theUrlsToDeleteExpunge) {
+				HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(String.class, url);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
+			}
 		}
 
 		DeleteExpungeJobParameters deleteExpungeJobParameters = new DeleteExpungeJobParameters();

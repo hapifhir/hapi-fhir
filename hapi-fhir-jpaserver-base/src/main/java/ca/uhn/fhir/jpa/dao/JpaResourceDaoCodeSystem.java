@@ -242,13 +242,15 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 				theTransactionDetails,
 				theForceUpdate,
 				theCreateNewHistoryEntry);
-		if (!retVal.isUnchangedInCurrentOperation()) {
+		if (thePerformIndexing) {
+			if (!retVal.isUnchangedInCurrentOperation()) {
 
-			org.hl7.fhir.r4.model.CodeSystem cs = myVersionCanonicalizer.codeSystemToCanonical(theResource);
-			addPidToResource(theEntity, cs);
+				org.hl7.fhir.r4.model.CodeSystem cs = myVersionCanonicalizer.codeSystemToCanonical(theResource);
+				addPidToResource(theEntity, cs);
 
-			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(
-					cs, (ResourceTable) theEntity, theRequest);
+				myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(
+						cs, (ResourceTable) theEntity, theRequest);
+			}
 		}
 
 		return retVal;

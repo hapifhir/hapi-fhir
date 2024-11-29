@@ -8,9 +8,11 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import jakarta.persistence.Id;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -35,6 +37,24 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 	public void after() {
 		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
 	}
+
+	@Test
+	public void testPreventUnDeleteIfDeletesDisabled() {
+		// Setup
+		createPatient(withId("A"), withActiveTrue());
+		myPatientDao.delete(new IdType("Patient/A"), mySrd);
+
+		// Test
+		myStorageSettings.setDeleteEnabled(false);
+		try {
+			createPatient(withId("A"), withActiveFalse());
+			fail();
+		} catch (InvalidRequestException e) {
+			// Verify
+			assertThat(e.getMessage()).contains("HAPI-2573: Unable to restore previously deleted resource as deletes are disabled");
+		}
+	}
+
 
 	@Test
 	public void testDeleteMarksResourceAndVersionAsDeleted() {

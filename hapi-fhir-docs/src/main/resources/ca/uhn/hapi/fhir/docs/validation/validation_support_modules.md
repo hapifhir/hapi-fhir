@@ -16,6 +16,21 @@ There are a several implementations of the [IValidationSupport](/hapi-fhir/apido
 
 This module can be used to combine multiple implementations together so that for every request, each support class instance in the chain is tried in sequence. Note that nearly all methods in the [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html) interface are permitted to return `null` if they are not able to service a particular method call. So for example, if a call to the [`validateCode`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html#validateCode(ca.uhn.fhir.context.support.ValidationSupportContext,ca.uhn.fhir.context.support.ConceptValidationOptions,java.lang.String,java.lang.String,java.lang.String,java.lang.String)) method is made, the validator will try each module in the chain until one of them returns a non-null response.
 
+The following chaining logic is used:
+
+* Calls to `fetchAll...` methods such as `fetchAllConformanceResources()` and `fetchAllStructureDefinitions()` will call every method in the chain in order, and aggregate the results into a single list to return.
+* Calls to fetch or validate codes, such as `validateCode(...)` and `lookupCode(...)` will first test each module in the chain using the`isCodeSystemSupported(...)` or `isValueSetSupported(...)` methods (depending on whether a ValueSet URL is present in the method parameters) and will invoke any methods in the chain which return that they can handle the given CodeSystem/ValueSet URL. The first non-null value returned by a method in the chain that can support the URL will be returned to the caller.
+* All other methods will invoke the method in the chain in order, and will return immediately as soon as a non-null value is returned.
+
+The following caching logic is used if caching is enabled using `CacheConfiguration`. You can use `CacheConfiguration.disabled()` if you want to disable caching.
+
+* Calls to fetch StructureDefinitions including `fetchAllStructureDefinitions()` and `fetchStructureDefinition(...)` are cached in a non-expiring cache. This is because the `FhirInstanceValidator` module makes assumptions that these objects will not change for the lifetime of the validator for performance reasons.
+* Calls to all other `fetchAll...` methods including `fetchAllConformanceResources()` and `fetchAllSearchParameters()` cache their results in an expiring cache, but will refresh that cache asynchronously.
+* Results of `generateSnapshot(...)` are not cached, as this method is generally called in contexts where the results are cached.
+* Results of all other methods are stored in an expiring cache.
+
+Note that caching functionality used to be provided by a separate provider called {@literal CachingValidationSupport} but that functionality has been moved into this class as of HAPI FHIR 8.0.0, because it is possible to provide a more efficient chain when these functions are combined.
+
 # DefaultProfileValidationSupport
 
 [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-base/undefined/ca/uhn/fhir/context/support/DefaultProfileValidationSupport.html) / [Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-base/src/main/java/ca/uhn/fhir/context/support/DefaultProfileValidationSupport.java)
@@ -43,12 +58,6 @@ This module contains a series of HashMaps that store loaded conformance resource
 
 This module can be used to load FHIR NPM Packages and supply the conformance resources within them to the validator. See [Validating Using Packages](./instance_validator.html#packages) for am example of how to use this module. 
 
-
-# CachingValidationSupport
-
-[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/CachingValidationSupport.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/CachingValidationSupport.java)
-
-This module caches results of calls to a wrapped service implementation for a period of time. This class can be a significant help in terms of performance if you are loading conformance resources or performing terminology operations from a database or disk, but it also has value even for purely in-memory validation since validating codes against a ValueSet can require the expansion of that ValueSet.
 
 # SnapshotGeneratingValidationSupport
 
@@ -160,6 +169,12 @@ This module will invoke the following operations on the remote terminology serve
 This validation support module may be placed at the end of a ValidationSupportChain in order to configure the validator to generate a warning if a resource being validated contains an unknown code system.
 
 Note that this module must also be activated by calling [setAllowNonExistentCodeSystem(true)](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/UnknownCodeSystemWarningValidationSupport.html#setAllowNonExistentCodeSystem(boolean)) in order to specify that unknown code systems should be allowed.
+
+# CachingValidationSupport
+
+[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/CachingValidationSupport.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/CachingValidationSupport.java)
+
+This module is deprecated and no longer provides any functionality. Caching is provided by [ValidationSupportChain](#validationsupportchain).
 
 
 # Recipes

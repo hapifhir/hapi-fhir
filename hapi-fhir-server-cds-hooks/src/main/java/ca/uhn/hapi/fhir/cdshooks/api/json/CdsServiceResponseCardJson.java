@@ -19,7 +19,7 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.api.json;
 
-import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.BaseCdsServiceJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Represents a CDS Hooks Service Response Card
  */
-public class CdsServiceResponseCardJson extends BaseCdsServiceJson implements IModelJson {
+public class CdsServiceResponseCardJson extends BaseCdsServiceJson {
 	@JsonProperty("uuid")
 	String myUuid;
 

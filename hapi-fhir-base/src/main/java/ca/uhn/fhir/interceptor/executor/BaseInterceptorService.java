@@ -20,6 +20,7 @@
 package ca.uhn.fhir.interceptor.executor;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorService;
@@ -57,11 +58,12 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & IPointcut>
 		implements IBaseInterceptorService<POINTCUT>, IBaseInterceptorBroadcaster<POINTCUT> {
@@ -74,12 +76,11 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			AttributeKey.stringKey("hapifhir.interceptor.method_name");
 
 	private final List<Object> myInterceptors = new ArrayList<>();
-	private final ListMultimap<POINTCUT, BaseInvoker> myGlobalInvokers = ArrayListMultimap.create();
-	private final ListMultimap<POINTCUT, BaseInvoker> myAnonymousInvokers = ArrayListMultimap.create();
+	private final ListMultimap<POINTCUT, IInvoker> myGlobalInvokers = ArrayListMultimap.create();
+	private final ListMultimap<POINTCUT, IInvoker> myAnonymousInvokers = ArrayListMultimap.create();
 	private final Object myRegistryMutex = new Object();
 	private final Class<POINTCUT> myPointcutType;
 	private volatile EnumSet<POINTCUT> myRegisteredPointcuts;
-	private String myName;
 	private boolean myWarnOnInterceptorWithNoHooks = true;
 
 	/**
@@ -93,10 +94,11 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 	 * Constructor
 	 *
 	 * @param theName The name for this registry (useful for troubleshooting)
+	 * @deprecated The name parameter is not used for anything
 	 */
+	@Deprecated(since = "8.0.0", forRemoval = true)
 	public BaseInterceptorService(Class<POINTCUT> thePointcutType, String theName) {
 		super();
-		myName = theName;
 		myPointcutType = thePointcutType;
 		rebuildRegisteredPointcutSet();
 	}
@@ -113,13 +115,17 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		return myInterceptors;
 	}
 
-	public void setName(String theName) {
-		myName = theName;
+	/**
+	 * @deprecated This value is not used anywhere
+	 */
+	@Deprecated(since = "8.0.0", forRemoval = true)
+	public void setName(@SuppressWarnings("unused") String theName) {
+		// nothing
 	}
 
 	protected void registerAnonymousInterceptor(POINTCUT thePointcut, Object theInterceptor, BaseInvoker theInvoker) {
-		Validate.notNull(thePointcut);
-		Validate.notNull(theInterceptor);
+		Validate.notNull(thePointcut, "thePointcut must not be null");
+		Validate.notNull(theInterceptor, "theInterceptor must not be null");
 		synchronized (myRegistryMutex) {
 			myAnonymousInvokers.put(thePointcut, theInvoker);
 			if (!isInterceptorAlreadyRegistered(theInterceptor)) {
@@ -179,9 +185,9 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 	}
 
 	private void unregisterInterceptorsIf(
-			Predicate<Object> theShouldUnregisterFunction, ListMultimap<POINTCUT, BaseInvoker> theGlobalInvokers) {
+			Predicate<Object> theShouldUnregisterFunction, ListMultimap<POINTCUT, IInvoker> theGlobalInvokers) {
 		synchronized (myRegistryMutex) {
-			for (Map.Entry<POINTCUT, BaseInvoker> nextInvoker : new ArrayList<>(theGlobalInvokers.entries())) {
+			for (Map.Entry<POINTCUT, IInvoker> nextInvoker : new ArrayList<>(theGlobalInvokers.entries())) {
 				if (theShouldUnregisterFunction.test(nextInvoker.getValue().getInterceptor())) {
 					unregisterInterceptor(nextInvoker.getValue().getInterceptor());
 				}
@@ -265,7 +271,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		assert haveAppropriateParams(thePointcut, theParams);
 		assert thePointcut.getReturnType() != void.class;
 
-		return doCallHooks(thePointcut, theParams, null);
+		return doCallHooks(thePointcut, theParams);
 	}
 
 	@Override
@@ -282,116 +288,47 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		assert haveAppropriateParams(thePointcut, theParams);
 		assert thePointcut.getReturnType() == void.class || thePointcut.getReturnType() == getBooleanReturnType();
 
-		Object retValObj = doCallHooks(thePointcut, theParams, true);
+		Object retValObj = doCallHooks(thePointcut, theParams);
+		retValObj = defaultIfNull(retValObj, true);
 		return (Boolean) retValObj;
 	}
 
-	private Object doCallHooks(POINTCUT thePointcut, HookParams theParams, Object theRetVal) {
-		// use new list for loop to avoid ConcurrentModificationException in case invoker gets added while looping
-		List<BaseInvoker> invokers = new ArrayList<>(getInvokersForPointcut(thePointcut));
-
-		/*
-		 * Call each hook in order
-		 */
-		for (BaseInvoker nextInvoker : invokers) {
-			Object nextOutcome = nextInvoker.invoke(theParams);
-			Class<?> pointcutReturnType = thePointcut.getReturnType();
-			if (pointcutReturnType.equals(getBooleanReturnType())) {
-				Boolean nextOutcomeAsBoolean = (Boolean) nextOutcome;
-				if (Boolean.FALSE.equals(nextOutcomeAsBoolean)) {
-					ourLog.trace("callHooks({}) for invoker({}) returned false", thePointcut, nextInvoker);
-					theRetVal = false;
-					break;
-				} else {
-					theRetVal = true;
-				}
-			} else if (!pointcutReturnType.equals(void.class)) {
-				if (nextOutcome != null) {
-					theRetVal = nextOutcome;
-					break;
-				}
-			}
-		}
-
-		return theRetVal;
+	private Object doCallHooks(POINTCUT thePointcut, HookParams theParams) {
+		List<IInvoker> invokers = getInvokersForPointcut(thePointcut);
+		return callInvokers(thePointcut, theParams, invokers);
 	}
 
 	@VisibleForTesting
 	List<Object> getInterceptorsWithInvokersForPointcut(POINTCUT thePointcut) {
 		return getInvokersForPointcut(thePointcut).stream()
-				.map(BaseInvoker::getInterceptor)
+				.map(IInvoker::getInterceptor)
 				.collect(Collectors.toList());
 	}
 
 	/**
-	 * Returns an ordered list of invokers for the given pointcut. Note that
-	 * a new and stable list is returned to.. do whatever you want with it.
+	 * Returns a list of all invokers registered for the given pointcut. The list
+	 * is ordered by the invoker order (specified on the {@link Interceptor#order()}
+	 * and {@link Hook#order()} values.
+	 *
+	 * @return The list returned by this method will always be a newly created list, so it will be stable and can be modified.
 	 */
-	private List<BaseInvoker> getInvokersForPointcut(POINTCUT thePointcut) {
-		List<BaseInvoker> invokers;
+	@Override
+	public List<IInvoker> getInvokersForPointcut(POINTCUT thePointcut) {
+		List<IInvoker> invokers;
 
 		synchronized (myRegistryMutex) {
-			List<BaseInvoker> globalInvokers = myGlobalInvokers.get(thePointcut);
-			List<BaseInvoker> anonymousInvokers = myAnonymousInvokers.get(thePointcut);
-			List<BaseInvoker> threadLocalInvokers = null;
-			invokers = union(globalInvokers, anonymousInvokers, threadLocalInvokers);
+			List<IInvoker> globalInvokers = myGlobalInvokers.get(thePointcut);
+			List<IInvoker> anonymousInvokers = myAnonymousInvokers.get(thePointcut);
+			invokers = union(Arrays.asList(globalInvokers, anonymousInvokers));
 		}
 
 		return invokers;
 	}
 
 	/**
-	 * First argument must be the global invoker list!!
-	 */
-	@SafeVarargs
-	private List<BaseInvoker> union(List<BaseInvoker>... theInvokersLists) {
-		List<BaseInvoker> haveOne = null;
-		boolean haveMultiple = false;
-		for (List<BaseInvoker> nextInvokerList : theInvokersLists) {
-			if (nextInvokerList == null || nextInvokerList.isEmpty()) {
-				continue;
-			}
-
-			if (haveOne == null) {
-				haveOne = nextInvokerList;
-			} else {
-				haveMultiple = true;
-			}
-		}
-
-		if (haveOne == null) {
-			return Collections.emptyList();
-		}
-
-		List<BaseInvoker> retVal;
-
-		if (!haveMultiple) {
-
-			// The global list doesn't need to be sorted every time since it's sorted on
-			// insertion each time. Doing so is a waste of cycles..
-			if (haveOne == theInvokersLists[0]) {
-				retVal = haveOne;
-			} else {
-				retVal = new ArrayList<>(haveOne);
-				retVal.sort(Comparator.naturalOrder());
-			}
-
-		} else {
-
-			retVal = Arrays.stream(theInvokersLists)
-					.filter(Objects::nonNull)
-					.flatMap(Collection::stream)
-					.sorted()
-					.collect(Collectors.toList());
-		}
-
-		return retVal;
-	}
-
-	/**
 	 * Only call this when assertions are enabled, it's expensive
 	 */
-	final boolean haveAppropriateParams(POINTCUT thePointcut, HookParams theParams) {
+	public static boolean haveAppropriateParams(IPointcut thePointcut, HookParams theParams) {
 		if (theParams.getParamsForType().values().size()
 				!= thePointcut.getParameterTypes().size()) {
 			throw new IllegalArgumentException(Msg.code(1909)
@@ -430,7 +367,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 	}
 
 	private List<HookInvoker> scanInterceptorAndAddToInvokerMultimap(
-			Object theInterceptor, ListMultimap<POINTCUT, BaseInvoker> theInvokers) {
+			Object theInterceptor, ListMultimap<POINTCUT, IInvoker> theInvokers) {
 		Class<?> interceptorClass = theInterceptor.getClass();
 		int typeOrder = determineOrder(interceptorClass);
 
@@ -452,7 +389,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 
 		// Make sure we're always sorted according to the order declared in @Order
 		for (POINTCUT nextPointcut : theInvokers.keys()) {
-			List<BaseInvoker> nextInvokerList = theInvokers.get(nextPointcut);
+			List<IInvoker> nextInvokerList = theInvokers.get(nextPointcut);
 			nextInvokerList.sort(Comparator.naturalOrder());
 		}
 
@@ -483,6 +420,108 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 
 	protected abstract Optional<HookDescriptor> scanForHook(Method nextMethod);
 
+	public static Object callInvokers(IPointcut thePointcut, HookParams theParams, List<IInvoker> invokers) {
+
+		Object retVal = null;
+
+		/*
+		 * Call each hook in order
+		 */
+		for (IInvoker nextInvoker : invokers) {
+			Object nextOutcome = nextInvoker.invoke(theParams);
+			Class<?> pointcutReturnType = thePointcut.getReturnType();
+			if (pointcutReturnType.equals(thePointcut.getBooleanReturnTypeForEnum())) {
+				Boolean nextOutcomeAsBoolean = (Boolean) nextOutcome;
+				if (Boolean.FALSE.equals(nextOutcomeAsBoolean)) {
+					ourLog.trace("callHooks({}) for invoker({}) returned false", thePointcut, nextInvoker);
+					retVal = false;
+					break;
+				} else {
+					retVal = true;
+				}
+			} else if (!pointcutReturnType.equals(void.class)) {
+				if (nextOutcome != null) {
+					retVal = nextOutcome;
+					break;
+				}
+			}
+		}
+
+		return retVal;
+	}
+
+	/**
+	 * First argument must be the global invoker list!!
+	 */
+	public static List<IInvoker> union(List<List<IInvoker>> theInvokersLists) {
+		List<IInvoker> haveOne = null;
+		boolean haveMultiple = false;
+		for (List<IInvoker> nextInvokerList : theInvokersLists) {
+			if (nextInvokerList == null || nextInvokerList.isEmpty()) {
+				continue;
+			}
+
+			if (haveOne == null) {
+				haveOne = nextInvokerList;
+			} else {
+				haveMultiple = true;
+			}
+		}
+
+		if (haveOne == null) {
+			return Collections.emptyList();
+		}
+
+		List<IInvoker> retVal;
+
+		if (!haveMultiple) {
+
+			// The global list doesn't need to be sorted every time since it's sorted on
+			// insertion each time. Doing so is a waste of cycles..
+			if (haveOne == theInvokersLists.get(0)) {
+				retVal = haveOne;
+			} else {
+				retVal = new ArrayList<>(haveOne);
+				retVal.sort(Comparator.naturalOrder());
+			}
+
+		} else {
+
+			int totalSize = 0;
+			for (List<IInvoker> list : theInvokersLists) {
+				totalSize += list.size();
+			}
+			retVal = new ArrayList<>(totalSize);
+			for (List<IInvoker> list : theInvokersLists) {
+				retVal.addAll(list);
+			}
+			retVal.sort(Comparator.naturalOrder());
+		}
+
+		return retVal;
+	}
+
+	protected static <T extends Annotation> Optional<T> findAnnotation(
+			AnnotatedElement theObject, Class<T> theHookClass) {
+		T annotation;
+		if (theObject instanceof Method) {
+			annotation = MethodUtils.getAnnotation((Method) theObject, theHookClass, true, true);
+		} else {
+			annotation = theObject.getAnnotation(theHookClass);
+		}
+		return Optional.ofNullable(annotation);
+	}
+
+	private static int determineOrder(Class<?> theInterceptorClass) {
+		return findAnnotation(theInterceptorClass, Interceptor.class)
+				.map(Interceptor::order)
+				.orElse(Interceptor.DEFAULT_ORDER);
+	}
+
+	private static String toErrorString(List<String> theParameterTypes) {
+		return theParameterTypes.stream().sorted().collect(Collectors.joining(","));
+	}
+
 	private class HookInvoker extends BaseInvoker {
 
 		private final Method myMethod;
@@ -501,10 +540,11 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			myMethod = theHookMethod;
 
 			Class<?> returnType = theHookMethod.getReturnType();
-			if (myPointcut.getReturnType().equals(getBooleanReturnType())) {
+			if (myPointcut.getReturnType().equals(myPointcut.getBooleanReturnTypeForEnum())) {
 				Validate.isTrue(
-						getBooleanReturnType().equals(returnType) || void.class.equals(returnType),
-						"Method does not return boolean or void: %s",
+						myPointcut.getBooleanReturnTypeForEnum().equals(returnType) || void.class.equals(returnType),
+						"Method does not return %s or void: %s",
+						myPointcut.getBooleanReturnTypeForEnum().getSimpleName(),
 						theHookMethod);
 			} else if (myPointcut.getReturnType().equals(void.class)) {
 				Validate.isTrue(void.class.equals(returnType), "Method does not return void: %s", theHookMethod);
@@ -541,7 +581,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		 * @return Returns true/false if the hook method returns a boolean, returns true otherwise
 		 */
 		@Override
-		Object invoke(HookParams theParams) {
+		public Object invoke(HookParams theParams) {
 
 			Object[] args = new Object[myParameterTypes.length];
 			for (int i = 0; i < myParameterTypes.length; i++) {
@@ -610,7 +650,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		}
 	}
 
-	protected abstract static class BaseInvoker implements Comparable<BaseInvoker> {
+	public abstract static class BaseInvoker implements IInvoker {
 
 		private final int myOrder;
 		private final Object myInterceptor;
@@ -620,36 +660,19 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			myOrder = theOrder;
 		}
 
+		@Override
 		public Object getInterceptor() {
 			return myInterceptor;
 		}
 
-		abstract Object invoke(HookParams theParams);
+		@Override
+		public int getOrder() {
+			return myOrder;
+		}
 
 		@Override
-		public int compareTo(BaseInvoker theInvoker) {
-			return myOrder - theInvoker.myOrder;
+		public int compareTo(IInvoker theInvoker) {
+			return myOrder - theInvoker.getOrder();
 		}
-	}
-
-	protected static <T extends Annotation> Optional<T> findAnnotation(
-			AnnotatedElement theObject, Class<T> theHookClass) {
-		T annotation;
-		if (theObject instanceof Method) {
-			annotation = MethodUtils.getAnnotation((Method) theObject, theHookClass, true, true);
-		} else {
-			annotation = theObject.getAnnotation(theHookClass);
-		}
-		return Optional.ofNullable(annotation);
-	}
-
-	private static int determineOrder(Class<?> theInterceptorClass) {
-		return findAnnotation(theInterceptorClass, Interceptor.class)
-				.map(Interceptor::order)
-				.orElse(Interceptor.DEFAULT_ORDER);
-	}
-
-	private static String toErrorString(List<String> theParameterTypes) {
-		return theParameterTypes.stream().sorted().collect(Collectors.joining(","));
 	}
 }

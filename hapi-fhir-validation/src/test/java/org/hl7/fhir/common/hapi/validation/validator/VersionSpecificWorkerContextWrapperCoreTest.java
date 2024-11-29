@@ -2,16 +2,13 @@ package org.hl7.fhir.common.hapi.validation.validator;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.base.Charsets;
-
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
@@ -24,6 +21,8 @@ import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.formats.JsonParser;
+import org.hl7.fhir.r5.formats.XmlParser;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Constants;
 import org.hl7.fhir.r5.model.Parameters;
@@ -41,6 +40,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -50,14 +52,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.hl7.fhir.r5.formats.JsonParser;
-import org.hl7.fhir.r5.formats.XmlParser;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.quality.Strictness;
-import org.mockito.stubbing.Answer;
-
 import static org.junit.jupiter.api.Assertions.assertNull;
-
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
@@ -114,7 +109,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 	private FhirInstanceValidator myInstanceVal;
 	private Map<String, ValueSet.ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
 	private FhirValidator myVal;
-	private CachingValidationSupport myValidationSupport;
+	private ValidationSupportChain myValidationSupport;
 
 
 	private static final String VALIDATE_CODE_OPERATION = "validate-code";
@@ -176,14 +171,13 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 
 		UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport = new UnknownCodeSystemWarningValidationSupport(ourCtx);
 		unknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
-		myValidationSupport = new CachingValidationSupport(
+		myValidationSupport =
 			new ValidationSupportChain(
 				mockSupport,
 				myDefaultValidationSupport,
 				new InMemoryTerminologyServerValidationSupport(ourCtx),
 				new CommonCodeSystemsTerminologyService(ourCtx),
-				unknownCodeSystemWarningValidationSupport)
-		);
+				unknownCodeSystemWarningValidationSupport);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		wrapper = new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(myValidationSupport), versionCanonicalizer);
