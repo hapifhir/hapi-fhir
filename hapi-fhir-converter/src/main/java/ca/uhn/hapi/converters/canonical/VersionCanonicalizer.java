@@ -98,7 +98,7 @@ public class VersionCanonicalizer {
 	private final FhirContext myContext;
 
 	public VersionCanonicalizer(FhirVersionEnum theTargetVersion) {
-		this(theTargetVersion.newContextCached());
+		this(FhirContext.forCached(theTargetVersion));
 	}
 
 	public VersionCanonicalizer(FhirContext theTargetContext) {

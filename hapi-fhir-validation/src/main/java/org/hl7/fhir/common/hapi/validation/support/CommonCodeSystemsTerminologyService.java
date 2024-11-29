@@ -190,7 +190,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return new CodeValidationResult()
 				.setSeverity(IssueSeverity.ERROR)
 				.setMessage(theMessage)
-				.setCodeValidationIssues(Collections.singletonList(new CodeValidationIssue(
+				.setIssues(Collections.singletonList(new CodeValidationIssue(
 						theMessage,
 						IssueSeverity.ERROR,
 						CodeValidationIssueCode.INVALID,

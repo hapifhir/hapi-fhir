@@ -64,6 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static ca.uhn.fhir.subscription.SubscriptionConstants.ORDER_SUBSCRIPTION_VALIDATING;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Interceptor
@@ -92,14 +93,14 @@ public class SubscriptionValidatingInterceptor {
 	@Autowired
 	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
 
-	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
+	@Hook(value = Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, order = ORDER_SUBSCRIPTION_VALIDATING)
 	public void resourcePreCreate(
 			IBaseResource theResource, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
 		validateSubmittedSubscription(
 				theResource, theRequestDetails, theRequestPartitionId, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
 	}
 
-	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+	@Hook(value = Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, order = ORDER_SUBSCRIPTION_VALIDATING)
 	public void resourceUpdated(
 			IBaseResource theOldResource,
 			IBaseResource theResource,

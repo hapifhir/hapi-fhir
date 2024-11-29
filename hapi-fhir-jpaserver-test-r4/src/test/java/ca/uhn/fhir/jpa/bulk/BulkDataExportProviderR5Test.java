@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.MockInvoker;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -1057,18 +1058,18 @@ public class BulkDataExportProviderR5Test {
 		AtomicBoolean initiateCalled = new AtomicBoolean(false);
 
 		// when
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT), any(HookParams.class)))
-			.thenAnswer((args) -> {
+		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT))).thenReturn(true);
+		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT))).thenReturn(MockInvoker.list(params -> {
 				assertFalse(initiateCalled.get());
 				assertFalse(preInitiateCalled.getAndSet(true));
 				return true;
-			});
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.STORAGE_INITIATE_BULK_EXPORT), any(HookParams.class)))
-			.thenAnswer((args) -> {
+			}));
+		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.STORAGE_INITIATE_BULK_EXPORT))).thenReturn(true);
+		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.STORAGE_INITIATE_BULK_EXPORT))).thenReturn(MockInvoker.list(params -> {
 				assertTrue(preInitiateCalled.get());
 				assertFalse(initiateCalled.getAndSet(true));
 				return true;
-			});
+			}));
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
 

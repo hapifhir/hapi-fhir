@@ -271,6 +271,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	private IValidationSupport myJpaPersistedValidationSupport;
 	@Autowired
+	private IValidationSupport myValidationSupport;
+	@Autowired
 	private FhirInstanceValidator myFhirInstanceValidator;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
@@ -398,6 +400,10 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myFhirInstanceValidator != null) {
 			myFhirInstanceValidator.invalidateCaches();
 		}
+		if (myValidationSupport != null) {
+			myValidationSupport.invalidateCaches();
+		}
+
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
 		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());

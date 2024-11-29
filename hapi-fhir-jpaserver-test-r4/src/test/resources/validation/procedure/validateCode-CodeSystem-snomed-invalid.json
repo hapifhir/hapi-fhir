@@ -1,0 +1,48 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "result",
+      "valueBoolean": false
+    },
+    {
+      "name": "code",
+      "valueCode": "xx417005"
+    },
+    {
+      "name": "system",
+      "valueUri": "http://snomed.info/sct"
+    },
+    {
+      "name": "issues",
+      "resource": {
+        "resourceType": "OperationOutcome",
+        "issue": [
+          {
+            "severity": "error",
+            "code": "code-invalid",
+            "details": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+                  "code": "invalid-code"
+                }
+              ],
+              "text": "Unknown code 'xx417005' in the CodeSystem 'http://snomed.info/sct' version 'http://snomed.info/sct/32506021000036107/version/20241031'"
+            },
+            "location": [
+              "code"
+            ],
+            "expression": [
+              "code"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "message",
+      "valueString": "Unknown code 'xx417005' in the CodeSystem 'http://snomed.info/sct' version 'http://snomed.info/sct/32506021000036107/version/20241031'"
+    }
+  ]
+}

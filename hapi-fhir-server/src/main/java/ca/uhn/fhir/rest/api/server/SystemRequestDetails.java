@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
@@ -240,6 +241,11 @@ public class SystemRequestDetails extends RequestDetails {
 		@Override
 		public boolean hasHooks(Pointcut thePointcut) {
 			return false;
+		}
+
+		@Override
+		public List<IInvoker> getInvokersForPointcut(Pointcut thePointcut) {
+			return Collections.emptyList();
 		}
 	}
 

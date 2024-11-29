@@ -881,6 +881,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public void testFetchInstanceAndWorkChunkStatus() {
 		// Setup
 
+		Date date1 = new Date();
+		Date date2 = new Date();
+
+
+
 		List<String> chunkIds = new ArrayList<>();
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);

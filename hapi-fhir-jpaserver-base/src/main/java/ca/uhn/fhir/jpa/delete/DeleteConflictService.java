@@ -106,13 +106,15 @@ public class DeleteConflictService {
 		}
 
 		// Notify Interceptors about pre-action call
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 		HookParams hooks = new HookParams()
 				.add(DeleteConflictList.class, theDeleteConflicts)
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest)
 				.add(TransactionDetails.class, theTransactionDetails);
-		return (DeleteConflictOutcome) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-				myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
+		return (DeleteConflictOutcome)
+				compositeBroadcaster.callHooksAndReturnObject(Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
 	}
 
 	private void addConflictsToList(

@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ import static org.mockito.Mockito.when;
 public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 	private static final FhirContext ourCtx = FhirContext.forR4();
 
-	private IValidationSupport jpaValidator;
+	private JpaPersistedResourceValidationSupport jpaValidator;
 
 	@Mock
 	private DaoRegistry myDaoRegistry;
@@ -58,6 +59,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 	@BeforeEach
 	public void setUp() {
 		jpaValidator = new JpaPersistedResourceValidationSupport(ourCtx);
+		jpaValidator.start();
 		ReflectionTestUtils.setField(jpaValidator, "myDaoRegistry", myDaoRegistry);
 	}
 
