@@ -50,6 +50,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewOracleDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.ITermValueSetConceptView;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -80,8 +81,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.sl.cache.Cache;
-import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -205,10 +204,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private static final String OUR_PIPE_CHARACTER = "|";
 	private static final int SECONDS_IN_MINUTE = 60;
 	private static final int INDEXED_ROOTS_LOGGING_COUNT = 50_000;
+	private static final String CS_USERDATA_CURRENT_VERSION = TermReadSvcImpl.class.getName() + "_CS_CURRENT_VERSION";
+	private static final String VS_USERDATA_CURRENT_VERSION = TermReadSvcImpl.class.getName() + "_VS_CURRENT_VERSION";
 	private static Runnable myInvokeOnNextCallForUnitTest;
 	private static boolean ourForceDisableHibernateSearchForUnitTest;
-	private final Cache<String, TermCodeSystemVersionDetails> myCodeSystemCurrentVersionCache =
-			CacheFactory.build(TimeUnit.MINUTES.toMillis(1));
 
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
@@ -300,7 +299,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		if (isBlank(theSystem)) {
 			return false;
 		}
-		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
+		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theValidationSupportContext, theSystem);
 		return cs != null;
 	}
 
@@ -457,14 +456,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 		}
 		return retVal;
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting
-	public void clearCaches() {
-		myCodeSystemCurrentVersionCache.invalidateAll();
 	}
 
 	public Optional<TermValueSet> deleteValueSetForResource(ResourceTable theResourceTable) {
@@ -678,10 +669,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private String toHumanReadableExpansionTimestamp(TermValueSet termValueSet) {
 		String expansionTimestamp = "(unknown)";
 		if (termValueSet.getExpansionTimestamp() != null) {
-			String timeElapsed = StopWatch.formatMillis(System.currentTimeMillis()
-					- termValueSet.getExpansionTimestamp().getTime());
-			expansionTimestamp = new InstantType(termValueSet.getExpansionTimestamp()).getValueAsString() + " ("
-					+ timeElapsed + " ago)";
+			// Note: We used to append "123ms ago" to the timestamp, but we cache the
+			// results here, so it's just kind of weird to do that since the duration will
+			// be out of date when the entry comes back from cache
+			expansionTimestamp = new InstantType(termValueSet.getExpansionTimestamp()).getValueAsString();
 		}
 		return expansionTimestamp;
 	}
@@ -2059,7 +2050,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(readOnly = true)
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
 		Optional<TermValueSet> optionalTermValueSet = fetchValueSetEntity(theValueSet);
 
@@ -2084,9 +2075,18 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return true;
 	}
 
+	@SuppressWarnings({"OptionalAssignedToNull", "unchecked"})
 	private Optional<TermValueSet> fetchValueSetEntity(ValueSet theValueSet) {
-		JpaPid valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
-		return myTermValueSetDao.findByResourcePid(valueSetResourcePid.getId());
+		Optional<TermValueSet> retVal = (Optional<TermValueSet>) theValueSet.getUserData(VS_USERDATA_CURRENT_VERSION);
+		if (retVal == null) {
+			synchronized (theValueSet) {
+				JpaPid valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
+				retVal = myTermValueSetDao.findByResourcePid(valueSetResourcePid.getId());
+				theValueSet.setUserData(VS_USERDATA_CURRENT_VERSION, retVal);
+			}
+		}
+
+		return retVal;
 	}
 
 	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
@@ -2098,6 +2098,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(
+			ValidationSupportContext theValidationSupportContext,
 			ConceptValidationOptions theValidationOptions,
 			ValueSet theValueSet,
 			String theSystem,
@@ -2137,9 +2138,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			return null;
 		}
 
-		TermValueSet valueSetEntity = myTermValueSetDao
-				.findByResourcePid(valueSetResourcePid.getId())
-				.orElseThrow(IllegalStateException::new);
+		TermValueSet valueSetEntity = fetchValueSetEntity(theValueSet).orElseThrow(IllegalStateException::new);
 		String timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
 		String preExpansionMessage = myContext
 				.getLocalizer()
@@ -2255,26 +2254,24 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public Optional<TermConcept> findCode(String theCodeSystem, String theCode) {
 		/*
 		 * Loading concepts without a transaction causes issues later on some
-		 * platforms (e.g. PSQL) so this transactiontemplate is here to make
-		 * sure that we always call this with an open transaction
+		 * platforms (e.g. PSQL) so make sure that we always call this with an open transaction
 		 */
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
-		txTemplate.setReadOnly(true);
+		HapiTransactionService.requireTransaction();
 
-		return txTemplate.execute(t -> {
-			TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystem);
-			if (csv == null) {
-				return Optional.empty();
-			}
-			return myConceptDao.findByCodeSystemAndCode(csv.myPid, theCode);
-		});
+		TermCodeSystemVersionDetails csv =
+				getCurrentCodeSystemVersion(new ValidationSupportContext(provideValidationSupport()), theCodeSystem);
+		if (csv == null) {
+			return Optional.empty();
+		}
+		return myConceptDao.findByCodeSystemAndCode(csv.myPid, theCode);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.MANDATORY)
 	public List<TermConcept> findCodes(String theCodeSystem, List<String> theCodeList) {
-		TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystem);
+		HapiTransactionService.requireTransaction();
+
+		TermCodeSystemVersionDetails csv =
+				getCurrentCodeSystemVersion(new ValidationSupportContext(provideValidationSupport()), theCodeSystem);
 		if (csv == null) {
 			return Collections.emptyList();
 		}
@@ -2283,30 +2280,51 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Nullable
-	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
+	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(
+			ValidationSupportContext theValidationSupportContext, String theCodeSystemIdentifier) {
 		String version = getVersionFromIdentifier(theCodeSystemIdentifier);
-		TermCodeSystemVersionDetails retVal = myCodeSystemCurrentVersionCache.get(
-				theCodeSystemIdentifier,
-				t -> myTxTemplate.execute(tx -> {
-					TermCodeSystemVersion csv = null;
-					TermCodeSystem cs =
-							myCodeSystemDao.findByCodeSystemUri(getUrlFromIdentifier(theCodeSystemIdentifier));
-					if (cs != null) {
-						if (version != null) {
-							csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(cs.getPid(), version);
-						} else if (cs.getCurrentVersion() != null) {
-							csv = cs.getCurrentVersion();
-						}
-					}
-					if (csv != null) {
-						return new TermCodeSystemVersionDetails(csv.getPid(), csv.getCodeSystemVersionId());
-					} else {
-						return NO_CURRENT_VERSION;
-					}
-				}));
-		if (retVal == NO_CURRENT_VERSION) {
-			return null;
+
+		// Fetch the CodeSystem from ValidationSupport, which should return a cached copy. We
+		// keep a copy of the current version entity in userData in that cached copy
+		// to avoid repeated lookups
+		TermCodeSystemVersionDetails retVal;
+		IBaseResource codeSystem =
+				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemIdentifier);
+		if (codeSystem != null) {
+
+			synchronized (codeSystem) {
+				retVal = (TermCodeSystemVersionDetails) codeSystem.getUserData(CS_USERDATA_CURRENT_VERSION);
+				if (retVal == null) {
+					retVal = getCurrentCodeSystemVersion(theCodeSystemIdentifier, version);
+					codeSystem.setUserData(CS_USERDATA_CURRENT_VERSION, retVal);
+				}
+			}
+		} else {
+			retVal = getCurrentCodeSystemVersion(theCodeSystemIdentifier, version);
 		}
+
+		return retVal;
+	}
+
+	@Nullable
+	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(String theCodeSystemIdentifier, String version) {
+		TermCodeSystemVersionDetails retVal;
+		retVal = myTxTemplate.execute(tx -> {
+			TermCodeSystemVersion csv = null;
+			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(getUrlFromIdentifier(theCodeSystemIdentifier));
+			if (cs != null) {
+				if (version != null) {
+					csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(cs.getPid(), version);
+				} else if (cs.getCurrentVersion() != null) {
+					csv = cs.getCurrentVersion();
+				}
+			}
+			if (csv != null) {
+				return new TermCodeSystemVersionDetails(csv.getPid(), csv.getCodeSystemVersionId());
+			} else {
+				return null;
+			}
+		});
 		return retVal;
 	}
 
@@ -2332,7 +2350,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return retVal;
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	@Override
 	public Set<TermConcept> findCodesAbove(
 			Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
@@ -2352,7 +2370,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return retVal;
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	@Override
 	public List<FhirVersionIndependentConcept> findCodesAbove(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
@@ -2365,7 +2383,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return toVersionIndependentConcepts(theSystem, codes);
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	@Override
 	public Set<TermConcept> findCodesBelow(
 			Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
@@ -2389,7 +2407,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return retVal;
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	@Override
 	public List<FhirVersionIndependentConcept> findCodesBelow(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
@@ -2506,6 +2524,29 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	 */
 	private void afterValueSetExpansionStatusChange() {
 		provideValidationSupport().invalidateCaches();
+	}
+
+	@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+	@Override
+	public void invalidateCaches() {
+		/*
+		 * Clear out anything left in the userdata caches. We do this mostly because it messes
+		 * up unit tests to have these things stick around between test runs, since many of
+		 * these resources come from DefaultProfileValidationSupport and therefore live beyond
+		 * any single test execution.
+		 */
+		for (IBaseResource next : provideValidationSupport().fetchAllConformanceResources()) {
+			if (next != null) {
+				synchronized (next) {
+					if (next.getUserData(CS_USERDATA_CURRENT_VERSION) != null) {
+						next.setUserData(CS_USERDATA_CURRENT_VERSION, null);
+					}
+					if (next.getUserData(VS_USERDATA_CURRENT_VERSION) != null) {
+						next.setUserData(VS_USERDATA_CURRENT_VERSION, null);
+					}
+				}
+			}
+		}
 	}
 
 	private synchronized boolean isPreExpandingValueSets() {
@@ -2823,7 +2864,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		txTemplate.setReadOnly(true);
 		Optional<FhirVersionIndependentConcept> codeOpt =
 				txTemplate.execute(tx -> findCode(theCodeSystemUrl, theCode).map(c -> {
-					String codeSystemVersionId = getCurrentCodeSystemVersion(theCodeSystemUrl).myCodeSystemVersionId;
+					String codeSystemVersionId = getCurrentCodeSystemVersion(
+									theValidationSupportContext, theCodeSystemUrl)
+							.myCodeSystemVersionId;
 					return new FhirVersionIndependentConcept(
 							theCodeSystemUrl, c.getCode(), c.getDisplay(), codeSystemVersionId);
 				}));
@@ -2865,13 +2908,20 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		// If we don't have a PID, this came from some source other than the JPA
 		// database, so we don't need to check if it's pre-expanded or not
 		if (valueSet instanceof IAnyResource) {
-			Long pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
+			Long pid = IDao.RESOURCE_PID.get(valueSet);
 			if (pid != null) {
 				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 				retVal = txTemplate.execute(tx -> {
 					if (isValueSetPreExpandedForCodeValidation(valueSet)) {
 						return validateCodeIsInPreExpandedValueSet(
-								theValidationOptions, valueSet, theCodeSystem, theCode, theDisplay, null, null);
+								theValidationSupportContext,
+								theValidationOptions,
+								valueSet,
+								theCodeSystem,
+								theCode,
+								theDisplay,
+								null,
+								null);
 					} else {
 						return null;
 					}
@@ -3212,6 +3262,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Override
 	public CodeValidationResult validateCodeIsInPreExpandedValueSet(
+			ValidationSupportContext theValidationSupportContext,
 			ConceptValidationOptions theOptions,
 			IBaseResource theValueSet,
 			String theSystem,
@@ -3226,7 +3277,14 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
 
 		return validateCodeIsInPreExpandedValueSet(
-				theOptions, valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConcept);
+				theValidationSupportContext,
+				theOptions,
+				valueSetR4,
+				theSystem,
+				theCode,
+				theDisplay,
+				codingR4,
+				codeableConcept);
 	}
 
 	@Override
@@ -3261,7 +3319,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	 * Properties returned from method buildSearchScroll
 	 */
 	private static final class SearchProperties {
-		private List<Supplier<SearchScroll<EntityReference>>> mySearchScroll = new ArrayList<>();
+		private final List<Supplier<SearchScroll<EntityReference>>> mySearchScroll = new ArrayList<>();
 		private List<String> myIncludeOrExcludeCodes;
 
 		public List<Supplier<SearchScroll<EntityReference>>> getSearchScroll() {

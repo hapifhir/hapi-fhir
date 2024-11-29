@@ -30,7 +30,7 @@ public class ValidationSupportContext {
 	private final Set<String> myCurrentlyGeneratingSnapshots = new HashSet<>();
 
 	public ValidationSupportContext(IValidationSupport theRootValidationSupport) {
-		Validate.notNull(theRootValidationSupport, "theRootValidationSupport musty not be null");
+		Validate.notNull(theRootValidationSupport, "theRootValidationSupport must not be null");
 		myRootValidationSupport = theRootValidationSupport;
 	}
 

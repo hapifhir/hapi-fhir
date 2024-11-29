@@ -1356,7 +1356,8 @@ public abstract class BaseTransactionProcessor {
 						}
 
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
-						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
+						IIdType patchId =
+								myContext.getVersion().newIdType(parts.getResourceType(), parts.getResourceId());
 
 						String conditionalUrl;
 						if (isNull(patchId.getIdPart())) {

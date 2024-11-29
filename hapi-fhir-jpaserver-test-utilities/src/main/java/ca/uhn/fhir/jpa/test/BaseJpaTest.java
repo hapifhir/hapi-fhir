@@ -394,9 +394,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myMemoryCacheService != null) {
 			myMemoryCacheService.invalidateAllCaches();
 		}
-		if (myJpaPersistedValidationSupport != null) {
-			ProxyUtil.getSingletonTarget(myJpaPersistedValidationSupport, JpaPersistedResourceValidationSupport.class).clearCaches();
-		}
 		if (myFhirInstanceValidator != null) {
 			myFhirInstanceValidator.invalidateCaches();
 		}

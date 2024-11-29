@@ -5810,14 +5810,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			myClient.update().resource(p2).withId("Organization/" + p1id.getIdPart()).execute();
 			fail();
-		} catch (UnprocessableEntityException e) {
+		} catch (InvalidRequestException e) {
 			// good
 		}
 
 		try {
 			myClient.update().resource(p2).withId("Patient/" + p1id.getIdPart()).execute();
 			fail();
-		} catch (UnprocessableEntityException e) {
+		} catch (InvalidRequestException e) {
 			// good
 		}
 

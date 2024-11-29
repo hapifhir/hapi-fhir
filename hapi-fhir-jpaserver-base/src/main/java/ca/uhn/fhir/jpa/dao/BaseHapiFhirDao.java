@@ -883,7 +883,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 			}
 			if (!StringUtils.isBlank(entity.getResourceType())) {
-				validateIncomingResourceTypeMatchesExisting(theResource, entity);
+				String resourceType = myContext.getResourceType(theResource);
+				// This is just a sanity check and should never actually fail.
+				// We resolve the ID using IdLookupService, and there should be
+				// no way to get it to give you a mismatched type for an ID.
+				Validate.isTrue(resourceType.equals(entity.getResourceType()));
 			}
 		}
 
@@ -1215,7 +1219,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		} else {
 			historyEntity = (ResourceHistoryTable) theHistoryEntity;
 			if (!StringUtils.isBlank(historyEntity.getResourceType())) {
-				validateIncomingResourceTypeMatchesExisting(theResource, historyEntity);
+				String resourceType = myContext.getResourceType(theResource);
+				if (!resourceType.equals(historyEntity.getResourceType())) {
+					throw new UnprocessableEntityException(Msg.code(930) + "Existing resource ID["
+							+ historyEntity.getIdDt().toUnqualifiedVersionless() + "] is of type["
+							+ historyEntity.getResourceType()
+							+ "] - Cannot update with [" + resourceType + "]");
+				}
 			}
 
 			historyEntity.setDeleted(null);
@@ -1406,15 +1416,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return StringUtils.substringAfter(theSource, "#");
 		}
 		return theRequest != null ? theRequest.getRequestId() : null;
-	}
-
-	private void validateIncomingResourceTypeMatchesExisting(IBaseResource theResource, BaseHasResource entity) {
-		String resourceType = myContext.getResourceType(theResource);
-		if (!resourceType.equals(entity.getResourceType())) {
-			throw new UnprocessableEntityException(Msg.code(930) + "Existing resource ID["
-					+ entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType()
-					+ "] - Cannot update with [" + resourceType + "]");
-		}
 	}
 
 	@Override

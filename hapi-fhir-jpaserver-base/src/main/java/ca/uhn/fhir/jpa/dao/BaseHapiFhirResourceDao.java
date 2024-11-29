@@ -573,7 +573,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (fhirId == null) {
 			fhirId = Long.toString(entity.getId());
 		}
-		myIdHelperService.addResolvedPidToFhirId(jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
+		myIdHelperService.addResolvedPidToFhirIdAfterCommit(
+				jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
@@ -723,9 +724,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
+				theRequestDetails, getResourceName(), theId);
+
 		final ResourceTable entity;
 		try {
-			entity = readEntityLatestVersion(theId, theRequestDetails, theTransactionDetails);
+			entity = readEntityLatestVersion(theId, requestPartitionId, theTransactionDetails);
 		} catch (ResourceNotFoundException ex) {
 			// we don't want to throw 404s.
 			// if not found, return an outcome anyways.
@@ -802,6 +806,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						.getLocalizer()
 						.getMessageSanitized(BaseStorageDao.class, "successfulTimingSuffix", w.getMillis());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg, StorageResponseCodeEnum.SUCCESSFUL_DELETE));
+
+		myIdHelperService.addResolvedPidToFhirIdAfterCommit(
+				entity.getPersistentId(),
+				requestPartitionId,
+				entity.getResourceType(),
+				entity.getFhirId(),
+				entity.getDeleted());
 
 		return outcome;
 	}
@@ -1144,15 +1155,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
+		HapiTransactionService.noTransactionAllowed();
 		validateExpungeEnabled();
 		return forceExpungeInExistingTransaction(theId, theExpungeOptions, theRequest);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		HapiTransactionService.noTransactionAllowed();
 		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
 		validateExpungeEnabled();
 		return myExpungeService.expunge(getResourceName(), null, theExpungeOptions, theRequestDetails);
@@ -1873,47 +1884,37 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			IIdType theId,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			TransactionDetails theTransactionDetails) {
-		validateResourceTypeAndThrowInvalidRequestException(theId);
+		HapiTransactionService.requireTransaction();
+
+		IIdType id = theId;
+		validateResourceTypeAndThrowInvalidRequestException(id);
+		if (!id.hasResourceType()) {
+			id = id.withResourceType(getResourceName());
+		}
 
 		JpaPid persistentId = null;
 		if (theTransactionDetails != null) {
-			if (theTransactionDetails.isResolvedResourceIdEmpty(theId.toUnqualifiedVersionless())) {
-				throw new ResourceNotFoundException(Msg.code(1997) + theId);
+			if (theTransactionDetails.isResolvedResourceIdEmpty(id.toUnqualifiedVersionless())) {
+				throw new ResourceNotFoundException(Msg.code(1997) + id);
 			}
 			if (theTransactionDetails.hasResolvedResourceIds()) {
-				persistentId = (JpaPid) theTransactionDetails.getResolvedResourceId(theId);
+				persistentId = (JpaPid) theTransactionDetails.getResolvedResourceId(id);
 			}
 		}
 
 		if (persistentId == null) {
-			String resourceName = getResourceName();
-			if (myStorageSettings.getResourceClientIdStrategy()
-					== JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC) {
-				if (theId.isIdPartValidLong()) {
-					/*
-					 * If it's a pure numeric ID and we are in ALPHANUMERIC mode, then the number
-					 * corresponds to a DB PID. In this case we want to resolve it regardless of
-					 * which type the client has supplied. This is because DB PIDs are unique across
-					 * all resource types (unlike FHIR_IDs which are namespaced to the resource type).
-					 * We want to load the resource with that PID regardless of type because if
-					 * the user is trying to update it we want to fail if the type is wrong, as
-					 * opposed to trying to create a new instance.
-					 */
-					resourceName = null;
-				}
-			}
 			persistentId = myIdHelperService.resolveResourceIdentityPid(
 					theRequestPartitionId,
-					resourceName,
-					theId.getIdPart(),
+					id.getResourceType(),
+					id.getIdPart(),
 					ResolveIdentityMode.includeDeleted().cacheOk());
 		}
 
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
 		if (entity == null) {
-			throw new ResourceNotFoundException(Msg.code(1998) + theId);
+			throw new ResourceNotFoundException(Msg.code(1998) + id);
 		}
-		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
+		validateGivenIdIsAppropriateToRetrieveResource(id, entity);
 		return entity;
 	}
 
@@ -2427,6 +2428,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			assert resourceId != null;
 			assert resourceId.hasIdPart();
 
+			if (!resourceId.hasResourceType()) {
+				resourceId = resourceId.withResourceType(getResourceName());
+			}
+
 			boolean create = false;
 
 			if (theRequest != null) {
@@ -2492,6 +2497,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			myResourceSearchUrlSvc.deleteByResId(
 					(Long) theEntity.getPersistentId().getId());
 			entity.setSearchUrlPresent(false);
+		}
+
+		if (entity.isDeleted()) {
+			// We're un-deleting this entity so let's inform the memory cache service
+			myIdHelperService.addResolvedPidToFhirIdAfterCommit(
+					entity.getPersistentId(),
+					entity.getPartitionId() == null
+							? RequestPartitionId.defaultPartition()
+							: entity.getPartitionId().toPartitionId(),
+					entity.getResourceType(),
+					entity.getFhirId(),
+					null);
 		}
 
 		return super.doUpdateForUpdateOrPatch(
@@ -2571,7 +2588,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.SUPPORTS)
 	public MethodOutcome validate(
 			T theResource,
 			IIdType theId,
@@ -2587,19 +2603,30 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new InvalidRequestException(
 						Msg.code(991) + "No ID supplied. ID is required when validating with mode=DELETE");
 			}
-			final ResourceTable entity = readEntityLatestVersion(theId, theRequest, transactionDetails);
 
-			// Validate that there are no resources pointing to the candidate that
-			// would prevent deletion
-			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			if (getStorageSettings().isEnforceReferentialIntegrityOnDelete()) {
-				myDeleteConflictService.validateOkToDelete(
-						deleteConflicts, entity, true, theRequest, new TransactionDetails());
-			}
-			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+			RequestPartitionId requestPartitionId =
+					myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
+							theRequest, getResourceName(), theId);
 
-			IBaseOperationOutcome oo = createInfoOperationOutcome("Ok to delete");
-			return new MethodOutcome(new IdDt(theId.getValue()), oo);
+			return myTransactionService
+					.withRequest(theRequest)
+					.withRequestPartitionId(requestPartitionId)
+					.execute(() -> {
+						final ResourceTable entity =
+								readEntityLatestVersion(theId, requestPartitionId, transactionDetails);
+
+						// Validate that there are no resources pointing to the candidate that
+						// would prevent deletion
+						DeleteConflictList deleteConflicts = new DeleteConflictList();
+						if (getStorageSettings().isEnforceReferentialIntegrityOnDelete()) {
+							myDeleteConflictService.validateOkToDelete(
+									deleteConflicts, entity, true, theRequest, new TransactionDetails());
+						}
+						DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+
+						IBaseOperationOutcome oo = createInfoOperationOutcome("Ok to delete");
+						return new MethodOutcome(new IdDt(theId.getValue()), oo);
+					});
 		}
 
 		FhirValidator validator = getContext().newValidator();
