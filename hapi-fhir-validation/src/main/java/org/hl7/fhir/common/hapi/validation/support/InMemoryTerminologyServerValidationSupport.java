@@ -915,8 +915,10 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			throws ExpansionCouldNotBeCompletedInternallyException {
 		ExpansionCouldNotBeCompletedInternallyException caughtException = null;
 		if (theComposeList.isEmpty()) {
-			theResponseBuilder.addMessage(
-					"Empty compose list for " + (theComposeListIsInclude ? "include" : "exclude"));
+			if (theComposeListIsInclude) {
+				theResponseBuilder.addMessage(
+					"Empty compose list for includes");
+			}
 			return;
 		}
 		for (org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent nextInclude : theComposeList) {
@@ -934,7 +936,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					}
 				}
 			} catch (ExpansionCouldNotBeCompletedInternallyException e) {
-				theResponseBuilder.addMessage(e.toString());
 				if (isBlank(theWantCode)) {
 					throw e;
 				} else {
@@ -1005,7 +1006,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 
 			includeOrExcludeSystemResource = codeSystemLoader.apply(loadedCodeSystemUrl);
-			theResponseBuilder.addMessage("Loaded CS[" + loadedCodeSystemUrl + "]: " + includeOrExcludeSystemResource);
 
 			boolean isIncludeWithDeclaredConcepts = !theInclude.getConcept().isEmpty();
 
@@ -1027,23 +1027,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {
 
 				if (theWantCode != null) {
-
-					StringBuilder sb = new StringBuilder();
-					ValidationSupportChain chain =
-							(ValidationSupportChain) theValidationSupportContext.getRootValidationSupport();
-					for (IValidationSupport next : chain.getValidationSupports()) {
-						boolean supported = next.isCodeSystemSupported(
-								theValidationSupportContext, includeOrExcludeConceptSystemUrl);
-						sb.append("isCodeSystemSupported: " + includeOrExcludeConceptSystemUrl + " " + supported + " "
-								+ next.getClass() + " " + next.toString() + "\n");
-					}
-					sb.append("isCodeSystemSupported: " + includeOrExcludeConceptSystemUrl + " ROOT "
-							+ theValidationSupportContext
-									.getRootValidationSupport()
-									.isCodeSystemSupported(
-											theValidationSupportContext, includeOrExcludeConceptSystemUrl));
-					theResponseBuilder.addMessage(sb.toString());
-
 					if (theValidationSupportContext
 							.getRootValidationSupport()
 							.isCodeSystemSupported(theValidationSupportContext, includeOrExcludeConceptSystemUrl)) {
@@ -1068,15 +1051,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 										codesList,
 										nextCodeList,
 										wantCodes);
-							} else {
-								try {
-									throw new Exception(Msg.code(9999) + "AAAA");
-								} catch (Exception e) {
-									String stackTrace = ExceptionUtils.getStackTrace(e);
-									theResponseBuilder.addMessage("Did not find code " + theWantCode + " for CS URL: "
-											+ includeOrExcludeConceptSystemUrl);
-									theResponseBuilder.addMessage("Stack: " + stackTrace);
-								}
 							}
 						}
 					} else {
@@ -1131,8 +1105,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					boolean isIncludeWithFilter = !theInclude.getFilter().isEmpty();
 					if (isIncludeFromSystem && !isIncludeWithFilter) {
 						if (isIncludeWithDeclaredConcepts) {
-							theResponseBuilder.addMessage(
-									"Including " + theInclude.getConcept().size() + " concepts");
 							theInclude.getConcept().stream()
 									.map(t -> new FhirVersionIndependentConcept(
 											theInclude.getSystem(),
@@ -1142,7 +1114,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 									.forEach(nextCodeList::add);
 							ableToHandleCode = true;
 						} else if (isIncludeCodeSystemIgnored) {
-							theResponseBuilder.addMessage("Included system being ignored");
 							ableToHandleCode = true;
 						}
 					}
@@ -1213,9 +1184,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		boolean retVal = false;
 
-		theResponseBuilder.addMessage("Now have " + nextCodeList + " codes");
 		for (FhirVersionIndependentConcept next : nextCodeList) {
-			theResponseBuilder.addMessage("Next code " + next);
 			if (includeOrExcludeSystemResource != null && theWantCode != null) {
 				boolean matches;
 				if (includeOrExcludeSystemResource.getCaseSensitive()) {
@@ -1228,7 +1197,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				}
 			}
 
-			theResponseBuilder.addMessage("Adding code " + next);
 			theConsumer.accept(next);
 			retVal = true;
 		}
