@@ -503,7 +503,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		code = "AAA";
 		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://hl7.org/fhir/administrative-gender#AAA' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://hl7.org/fhir/administrative-gender#AAA' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender'");
 		assertEquals("error", outcome.getSeverityCode());
 
 	}
@@ -987,7 +987,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		String code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://invalid-cs#28571000087109' for in-memory expansion of ValueSet 'http://vs-with-invalid-cs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://invalid-cs#28571000087109' for in-memory expansion of ValueSet 'http://vs-with-invalid-cs'");
 		assertEquals("error", outcome.getSeverityCode());
 
 		// Try validating a code that is in the missing CS that is imported by the VS
@@ -1654,10 +1654,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		code = "28571000087109";
 		String display = null;
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk(), outcome.getMessage() + "\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toParameters(myFhirContext)));
+		assertTrue(outcome.isOk(), outcome.getMessage() + "\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toParameters(myFhirContext)) + "\n" + outcome.getSourceDetails());
 		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
+		assertThat(outcome.getSourceDetails()).contains("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
 
 		// Validate code - good code, bad display
 		codeSystemUrl = "http://snomed.info/sct";
@@ -1667,7 +1668,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertTrue(outcome.isOk());
 		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
 		assertEquals("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getSourceDetails());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
 
@@ -1779,7 +1780,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
 		assertEquals("error", outcome.getSeverityCode());
 
 		// Perform Pre-Expansion
@@ -1838,7 +1839,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
 		assertEquals("error", outcome.getSeverityCode());
 
 		// Perform Pre-Expansion

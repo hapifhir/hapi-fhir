@@ -568,17 +568,31 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 						+ "'";
 			}
 			if (isNotBlank(theValueSetUrl)) {
-				message += " for in-memory expansion of ValueSet '" + theValueSetUrl + "'";
+				message += createInMemoryExpansionMessageSuffix(theValueSetUrl);
 				issueCoding = CodeValidationIssueCoding.NOT_IN_VS;
+			}
+
+			String sourceDetails = "In-memory expansion containing " + codes.size() + " codes";
+			if (!codes.isEmpty() && codes.size() < 10) {
+				sourceDetails += ": "
+						+ codes.stream()
+								.map(t -> t.getSystem() + "#" + t.getCode())
+								.collect(Collectors.joining(", "));
 			}
 
 			codeValidationResult = new CodeValidationResult()
 					.setSeverity(severity)
 					.setMessage(message)
+					.setSourceDetails(sourceDetails)
 					.addIssue(new CodeValidationIssue(message, severity, issueCode, issueCoding));
 		}
 
 		return codeValidationResult;
+	}
+
+	@Nonnull
+	private static String createInMemoryExpansionMessageSuffix(String theValueSetUrl) {
+		return " for in-memory expansion of ValueSet '" + theValueSetUrl + "'";
 	}
 
 	private static String getFormattedCodeSystemAndCodeForMessage(
@@ -631,7 +645,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					} else {
 						String messageAppend = "";
 						if (isNotBlank(theValueSetUrl)) {
-							messageAppend = " for in-memory expansion of ValueSet: " + theValueSetUrl;
+							messageAppend = createInMemoryExpansionMessageSuffix(theValueSetUrl);
 						}
 						CodeValidationResult codeValidationResult = createResultForDisplayMismatch(
 								myCtx,

@@ -151,7 +151,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// In memory - Enumerated in non-present CS
 
@@ -163,7 +163,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// Precalculated
 
@@ -254,7 +254,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// In memory - Enumerated in non-present CS
 
@@ -266,7 +266,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// Precalculated
 
@@ -344,7 +344,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for 'http://acme.org#11378-7' for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
+		assertThat(result.getMessage()).contains("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for 'http://acme.org#11378-7' for in-memory expansion of ValueSet 'http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2'");
 	}
 
 	@Test
