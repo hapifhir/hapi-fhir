@@ -1053,7 +1053,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 										wantCodes);
 							} else {
 								try {
-									throw new Exception();
+									throw new Exception(Msg.code(9999) + "AAAA");
 								} catch (Exception e) {
 									String stackTrace = ExceptionUtils.getStackTrace(e);
 									theResponseBuilder.addMessage("Did not find code " + theWantCode + " for CS URL: "
