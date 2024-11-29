@@ -1020,6 +1020,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (entity.getId() == null) {
 			myEntityManager.persist(entity);
 
+			if (entity.getFhirId() == null) {
+				entity.setFhirId(Long.toString(entity.getResourceId()));
+			}
+
 			postPersist(entity, (T) theResource, theRequest);
 
 		} else if (entity.getDeleted() != null) {
@@ -1053,8 +1057,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			// Interceptor broadcast: JPA_PERFTRACE_INFO
 			if (!presenceCount.isEmpty()) {
-				if (CompositeInterceptorBroadcaster.hasHooks(
-						Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
+				IInterceptorBroadcaster compositeBroadcaster =
+						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 					StorageProcessingMessage message = new StorageProcessingMessage();
 					message.setMessage(
 							"For " + entity.getIdDt().toUnqualifiedVersionless().getValue() + " added "
@@ -1064,8 +1069,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 							.add(RequestDetails.class, theRequest)
 							.addIfMatchesType(ServletRequestDetails.class, theRequest)
 							.add(StorageProcessingMessage.class, message);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+					compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 				}
 			}
 		}
@@ -1088,8 +1092,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				// Interceptor broadcast: JPA_PERFTRACE_INFO
 				if (!searchParamAddRemoveCount.isEmpty()) {
-					if (CompositeInterceptorBroadcaster.hasHooks(
-							Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									myInterceptorBroadcaster, theRequest);
+					if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 						StorageProcessingMessage message = new StorageProcessingMessage();
 						message.setMessage("For "
 								+ entity.getIdDt().toUnqualifiedVersionless().getValue() + " added "
@@ -1100,8 +1106,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 								.add(RequestDetails.class, theRequest)
 								.addIfMatchesType(ServletRequestDetails.class, theRequest)
 								.add(StorageProcessingMessage.class, message);
-						CompositeInterceptorBroadcaster.doCallHooks(
-								myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+						compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 					}
 				}
 			}
@@ -1319,7 +1324,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * the previous version entity.
 		 */
 		if (historyEntry == null) {
-			historyEntry = theEntity.toHistory(versionedTags);
+			historyEntry = theEntity.toHistory(versionedTags && theEntity.getDeleted() == null);
 		}
 
 		historyEntry.setEncoding(theChanged.getEncoding());
@@ -1327,7 +1332,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		historyEntry.setResourceTextVc(theChanged.getResourceText());
 
 		ourLog.debug("Saving history entry ID[{}] for RES_ID[{}]", historyEntry.getId(), historyEntry.getResourceId());
-		myResourceHistoryTableDao.save(historyEntry);
+		myEntityManager.persist(historyEntry);
 		theEntity.setCurrentVersionEntity(historyEntry);
 
 		// Save resource source
@@ -1483,6 +1488,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		boolean wasDeleted = false;
 		if (theOldResource != null) {
 			wasDeleted = theOldResource.isDeleted();
+		}
+
+		if (wasDeleted && !myStorageSettings.isDeleteEnabled()) {
+			String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "cantUndeleteWithDeletesDisabled");
+			throw new InvalidRequestException(Msg.code(2573) + msg);
 		}
 
 		DaoMethodOutcome outcome = toMethodOutcome(
@@ -1679,7 +1689,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
 			if (myStorageSettings.isAdvancedHSearchIndexing()) {
 				ExtendedHSearchIndexData hSearchIndexData =
-						myFulltextSearchSvc.extractLuceneIndexData(theResource, theNewParams);
+						myFulltextSearchSvc.extractLuceneIndexData(theResource, theEntity, theNewParams);
 				theEntity.setLuceneIndexData(hSearchIndexData);
 			}
 		}

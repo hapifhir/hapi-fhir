@@ -95,7 +95,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		mySearchCoordinatorSvcImpl = ProxyUtil.getSingletonTarget(mySearchCoordinatorSvc, SearchCoordinatorSvcImpl.class);
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
+//		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
 		myStorageSettings.setAdvancedHSearchIndexing(false);
 	}
 
@@ -876,8 +876,11 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		String obs2id = myObservationDao.create(obs2).getId().getIdPart();
 		assertThat(obs2id).matches("^[0-9]+$");
 
-		// Search by ID where all IDs are forced IDs
+
+		// Search by ID where all IDs are forced IDs, and in two separate params
 		{
+			myMemoryCacheService.invalidateAllCaches();
+
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add("_id", new TokenParam("A"));
 			map.add("subject", new ReferenceParam("Patient/B"));
@@ -885,20 +888,20 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
 			assertThat(outcome.getResources(0, 999)).hasSize(1);
+
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.res_type='observation'")).as(selectQuery).isEqualTo(1);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.fhir_id in ('a')")).as(selectQuery).isEqualTo(1);
-
+			assertThat(selectQuery).contains("where rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B'");
 			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t1.res_id from hfj_resource t1")).as(selectQuery).isEqualTo(1);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_type='observation'")).as(selectQuery).isEqualTo(0);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_deleted_at is null")).as(selectQuery).isEqualTo(0);
+			assertThat(selectQuery).contains("where (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='A')");
+			assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+
 		}
 
 		// Search by ID where at least one ID is a numeric ID
 		{
+			myMemoryCacheService.invalidateAllCaches();
+
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add("_id", new TokenOrListParam(null, "A", obs2id));
 			myCaptureQueriesListener.clear();
@@ -906,20 +909,19 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertEquals(2, outcome.size());
 			assertThat(outcome.getResources(0, 999)).hasSize(2);
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0")).as(selectQuery).isEqualTo(1);
-			// Because we included a non-forced ID, we need to verify the type
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'")).as(selectQuery).isEqualTo(1);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null")).as(selectQuery).isEqualTo(1);
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			assertThat(selectQuery).contains("where (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='A' or rt1_0.RES_ID='" + obs2id + "')");
+			assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		}
 
-		// Delete the resource - There should only be one search performed because deleted resources will
-		//		be filtered out in the query that resolves forced ids to persistent ids
+		// Delete the resource
 		myObservationDao.delete(new IdType("Observation/A"));
 		myObservationDao.delete(new IdType("Observation/" + obs2id));
 
 		// Search by ID where all IDs are forced IDs
 		{
+			myMemoryCacheService.invalidateAllCaches();
+
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add("_id", new TokenParam("A"));
 			myCaptureQueriesListener.clear();
@@ -928,26 +930,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertThat(outcome.getResources(0, 999)).isEmpty();
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(1);
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.res_type='observation'")).as(selectQuery).isEqualTo(1);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.fhir_id in ('a')")).as(selectQuery).isEqualTo(1);
-		}
-
-		// Search by ID where at least one ID is a numeric ID
-		{
-			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			map.add("_id", new TokenOrListParam(null, "A", obs2id));
-			myCaptureQueriesListener.clear();
-			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
-			assertEquals(0, outcome.size());
-			assertThat(outcome.getResources(0, 999)).isEmpty();
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0")).as(selectQuery).isEqualTo(1);
-			// Because we included a non-forced ID, we need to verify the type
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'")).as(selectQuery).isEqualTo(1);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null")).as(selectQuery).isEqualTo(1);
+			assertThat(selectQuery).contains("where (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='A')");
+			assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		}
 
 	}
@@ -1248,7 +1233,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myPatientDao.update(p).getId().toUnqualifiedVersionless();
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());

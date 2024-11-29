@@ -330,7 +330,7 @@ public class AuthorizationInterceptors {
 		SearchNarrowingConsentService consentService =
 				new SearchNarrowingConsentService(validationSupport, searchParamRegistry);
 
-		// Create a ConsentIntereptor to apply the ConsentService and register it with the server
+		// Create a ConsentInterceptor to apply the ConsentService and register it with the server
 		ConsentInterceptor consentInterceptor = new ConsentInterceptor();
 		consentInterceptor.registerConsentService(consentService);
 		restfulServer.registerInterceptor(consentInterceptor);

@@ -334,6 +334,8 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	public void setTransientForcedId(String theTransientForcedId) {
+		assert theTransientForcedId == null || !theTransientForcedId.contains("/")
+				: "Invalid FHIR ID: " + theTransientForcedId;
 		myTransientForcedId = theTransientForcedId;
 	}
 }

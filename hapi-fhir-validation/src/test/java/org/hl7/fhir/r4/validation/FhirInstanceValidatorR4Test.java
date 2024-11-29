@@ -21,7 +21,6 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
@@ -133,7 +132,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	private Set<String> myValidSystemsNotReturningIssues = new HashSet<>();
 	private Set<String> myValidValueSets = new HashSet<>();
 	private Map<String, StructureDefinition> myStructureDefinitionMap = new HashMap<>();
-	private CachingValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 	private IValidationSupport myMockSupport;
 
 	private void addValidConcept(String theSystem, String theCode) {
@@ -307,10 +306,10 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
 					final String message = "Unknown code (for '" + system + "#" + code + "')";
-					retVal = new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.IssueSeverity.ERROR, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
+					retVal = new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage(message).setIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.IssueSeverity.ERROR, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
 				} else if (myValidSystemsNotReturningIssues.contains(system)) {
 					final String message = "Unknown code (for '" + system + "#" + code + "')";
-					retVal = new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message);
+					retVal = new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage(message);
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
@@ -909,7 +908,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
-		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)), false);
+		ValidationSupportChain support = new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)).setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(false);
 
 		// Prepopulate SDs
 		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-profile.xml"));
@@ -1929,7 +1928,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			new CommonCodeSystemsTerminologyService(ourCtx),
 			new InMemoryTerminologyServerValidationSupport(ourCtx),
 			new SnapshotGeneratingValidationSupport(ourCtx));
-		myValidationSupport = new CachingValidationSupport(chain, theLogicalAnd);
+		myValidationSupport = chain.setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(theLogicalAnd);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 		myFhirValidator.registerValidatorModule(myInstanceVal);
 	}

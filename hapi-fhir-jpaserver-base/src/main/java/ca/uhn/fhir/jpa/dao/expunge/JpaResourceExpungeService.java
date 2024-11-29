@@ -256,8 +256,9 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			ResourceHistoryTable theVersion,
 			IdDt theId) {
 		final AtomicInteger counter = new AtomicInteger();
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myInterceptorBroadcaster, theRequestDetails)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)) {
 			IBaseResource resource = myJpaStorageResourceParser.toResource(theVersion, false);
 			HookParams params = new HookParams()
 					.add(AtomicInteger.class, counter)
@@ -265,8 +266,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 					.add(IBaseResource.class, resource)
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, params);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, params);
 		}
 		theRemainingCount.addAndGet(-1 * counter.get());
 	}

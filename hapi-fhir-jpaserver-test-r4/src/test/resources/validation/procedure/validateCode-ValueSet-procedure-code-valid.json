@@ -1,0 +1,59 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "result",
+      "valueBoolean": true
+    },
+    {
+      "name": "code",
+      "valueCode": "417005"
+    },
+    {
+      "name": "system",
+      "valueUri": "http://snomed.info/sct"
+    },
+    {
+      "name": "version",
+      "valueString": "http://snomed.info/sct/32506021000036107/version/20241031"
+    },
+    {
+      "name": "display",
+      "valueString": "Hospital re-admission"
+    },
+    {
+      "name": "issues",
+      "resource": {
+        "resourceType": "OperationOutcome",
+        "issue": [
+          {
+            "severity": "information",
+            "code": "business-rule",
+            "details": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+                  "code": "status-check"
+                }
+              ],
+              "text": "Reference to draft ValueSet http://hl7.org/fhir/ValueSet/procedure-code|5.0.0-ballot"
+            }
+          },
+          {
+            "severity": "information",
+            "code": "business-rule",
+            "details": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+                  "code": "status-check"
+                }
+              ],
+              "text": "Reference to experimental ValueSet http://hl7.org/fhir/ValueSet/procedure-code|5.0.0-ballot"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

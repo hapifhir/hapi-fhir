@@ -20,7 +20,6 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -41,5 +40,5 @@ public interface IMdmLinkExpandSvc {
 	Set<String> expandMdmByGoldenResourcePid(
 			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid);
 
-	Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IdDt theId);
+	Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IIdType theId);
 }
