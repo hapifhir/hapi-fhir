@@ -88,6 +88,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	@AfterEach
 	public void afterEach() {
 		SearchBuilder.setMaxPageSizeForTest(null);
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
 	}
 
 	@Override
@@ -1640,6 +1641,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		String code;
 		ValueSet expansion;
 		IdType vsId = new IdType("ValueSet/vaccinecode");
+
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
 
 		// Expand VS
 		expansion = myValueSetDao.expand(vsId, new ValueSetExpansionOptions(), mySrd);
