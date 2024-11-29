@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -551,8 +552,11 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		vsInclude.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
 		myValueSetDao.update(vs);
 
-
+		myCaptureQueriesListener.clear();;
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, new IdType("ValueSet/vaccinecode"), new CodeType("28571000087109"), new CodeType("http://snomed.info/sct"), null, null, null, mySrd);
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(11, myCaptureQueriesListener.countSelectQueries(), ()->myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n")));
+		assertEquals(null, outcome.getMessage());
 		assertTrue(outcome.isOk(), outcome.getMessage());
 		outcome = myTermSvc.validateCodeInValueSet(
 			new ValidationSupportContext(myValidationSupport),

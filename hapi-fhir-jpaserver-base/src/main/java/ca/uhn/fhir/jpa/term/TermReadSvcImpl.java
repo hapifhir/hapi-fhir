@@ -2885,7 +2885,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		// If we don't have a PID, this came from some source other than the JPA
 		// database, so we don't need to check if it's pre-expanded or not
 		if (valueSet instanceof IAnyResource) {
-			Long pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
+			Long pid = IDao.RESOURCE_PID.get(valueSet);
 			if (pid != null) {
 				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 				retVal = txTemplate.execute(tx -> {
@@ -3296,7 +3296,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	 * Properties returned from method buildSearchScroll
 	 */
 	private static final class SearchProperties {
-		private List<Supplier<SearchScroll<EntityReference>>> mySearchScroll = new ArrayList<>();
+		private final List<Supplier<SearchScroll<EntityReference>>> mySearchScroll = new ArrayList<>();
 		private List<String> myIncludeOrExcludeCodes;
 
 		public List<Supplier<SearchScroll<EntityReference>>> getSearchScroll() {
