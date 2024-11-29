@@ -72,7 +72,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 			String resourceType = mapEntry.getKey();
 			IFhirResourceDao<?> resDao = myDaoRegistry.getResourceDao(resourceType);
 			if (resDao == null) {
-				throw new InternalErrorException("No DAO registered for resource type: " + resourceType);
+				throw new InternalErrorException(
+						Msg.code(2587) + "No DAO registered for resource type: " + resourceType);
 			}
 
 			// patch each resource of resourceType
