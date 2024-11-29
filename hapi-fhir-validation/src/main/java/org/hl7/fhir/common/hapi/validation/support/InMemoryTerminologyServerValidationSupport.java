@@ -281,8 +281,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					+ getFormattedCodeSystemAndCodeForMessage(theCodeSystemUrlAndVersion, theCode)
 					+ "'"
 					+ createInMemoryExpansionMessageSuffix(vsUrl)
-					+ " - Expansion result: "
-					+ expansion.getMessages().toString();
+					+ (expansion.getMessages().isEmpty() ? "" : " Expansion result: " + expansion.getMessages());
 			CodeValidationIssueCoding issueCoding = CodeValidationIssueCoding.NOT_IN_VS;
 			CodeValidationIssueCode notFound = CodeValidationIssueCode.NOT_FOUND;
 			CodeValidationResult codeValidationResult = new CodeValidationResult()
