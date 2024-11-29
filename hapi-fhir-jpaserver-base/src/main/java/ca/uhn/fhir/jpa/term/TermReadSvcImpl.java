@@ -2535,7 +2535,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		 * these resources come from DefaultProfileValidationSupport and therefore live beyond
 		 * any single test execution.
 		 */
-		for (IBaseResource next : myValidationSupport.fetchAllConformanceResources()) {
+		for (IBaseResource next : provideValidationSupport().fetchAllConformanceResources()) {
 			if (next != null) {
 				synchronized (next) {
 					if (next.getUserData(CS_USERDATA_CURRENT_VERSION) != null) {
