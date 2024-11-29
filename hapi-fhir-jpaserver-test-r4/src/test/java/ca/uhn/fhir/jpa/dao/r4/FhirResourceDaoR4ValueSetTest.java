@@ -552,11 +552,15 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		vsInclude.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
 		myValueSetDao.update(vs);
 
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
 		myCaptureQueriesListener.clear();;
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, new IdType("ValueSet/vaccinecode"), new CodeType("28571000087109"), new CodeType("http://snomed.info/sct"), null, null, null, mySrd);
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(11, myCaptureQueriesListener.countSelectQueries(), ()->myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n")));
-		assertEquals(null, outcome.getMessage());
+		assertEquals(9, myCaptureQueriesListener.countSelectQueries(), ()->myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n")));
+		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated");
 		assertTrue(outcome.isOk(), outcome.getMessage());
 		outcome = myTermSvc.validateCodeInValueSet(
 			new ValidationSupportContext(myValidationSupport),
@@ -567,10 +571,6 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			vs
 		);
 		assertTrue(outcome.isOk());
-
-		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/vaccinecode"), new ValueSetExpansionOptions(), mySrd);
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-
 	}
 
 	/** See #4449 */
