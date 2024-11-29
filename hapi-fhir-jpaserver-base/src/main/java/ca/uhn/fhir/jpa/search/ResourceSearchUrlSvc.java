@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * This service ensures uniqueness of resources during create or create-on-update
@@ -82,6 +83,10 @@ public class ResourceSearchUrlSvc {
 	 */
 	public void deleteByResId(long theResId) {
 		myResourceSearchUrlDao.deleteByResId(theResId);
+	}
+
+	public void deleteByResIds(List<Long> theResIds) {
+		myResourceSearchUrlDao.deleteByResIds(theResIds);
 	}
 
 	/**
