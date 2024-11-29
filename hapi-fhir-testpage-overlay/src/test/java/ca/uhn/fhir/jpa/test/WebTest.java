@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
@@ -18,7 +17,6 @@ import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.resource.PathResourceFactory;
 import org.eclipse.jetty.util.resource.Resource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -62,7 +60,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -70,6 +67,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
@@ -130,6 +128,15 @@ public class WebTest {
 		myWebClient = new WebClient();
 		myWebClient.setWebConnection(new MockMvcWebConnectionForHtmlUnit3(ourMockMvc, myWebClient));
 		myWebClient.getOptions().setJavaScriptEnabled(true);
+		/*
+		 * The current version of htmlunit WebClient (4.6)
+		 * does not support some ES6 features; notably the
+		 * "spread" operator (...).
+		 * Because of this, we want to not fail on script errors,
+		 * because the current bootstrap.js library makes liberal
+		 * use of it.
+		 */
+		myWebClient.getOptions().setThrowExceptionOnScriptError(false);
 		myWebClient.getOptions().setCssEnabled(false);
 		CSSErrorHandler errorHandler = new SilentCssErrorHandler();
 		myWebClient.setCssErrorHandler(errorHandler);
@@ -150,6 +157,7 @@ public class WebTest {
 		// Navigate to Patient resource page
 		HtmlAnchor patientLink = page.getHtmlElementById("leftResourcePatient");
 		HtmlPage patientPage = patientLink.click();
+
 		// Click search button
 		HtmlButton searchButton = patientPage.getHtmlElementById("search-btn");
 		HtmlPage searchResultPage = searchButton.click();
