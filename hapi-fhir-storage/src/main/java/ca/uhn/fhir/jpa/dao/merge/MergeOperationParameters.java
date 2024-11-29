@@ -42,6 +42,8 @@ public abstract class MergeOperationParameters {
 
 	public abstract String getTargetIdentifiersParameterName();
 
+	public abstract String getResultResourceParameterName();
+
 	public List<CanonicalIdentifier> getSourceIdentifiers() {
 		return mySourceResourceIdentifiers;
 	}
