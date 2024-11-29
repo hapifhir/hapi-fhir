@@ -1107,6 +1107,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					boolean isIncludeWithFilter = !theInclude.getFilter().isEmpty();
 					if (isIncludeFromSystem && !isIncludeWithFilter) {
 						if (isIncludeWithDeclaredConcepts) {
+							theResponseBuilder.addMessage(
+									"Including " + theInclude.getConcept().size() + " concepts");
 							theInclude.getConcept().stream()
 									.map(t -> new FhirVersionIndependentConcept(
 											theInclude.getSystem(),
@@ -1116,6 +1118,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 									.forEach(nextCodeList::add);
 							ableToHandleCode = true;
 						} else if (isIncludeCodeSystemIgnored) {
+							theResponseBuilder.addMessage("Included system being ignored");
 							ableToHandleCode = true;
 						}
 					}
@@ -1186,7 +1189,9 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		boolean retVal = false;
 
+		theResponseBuilder.addMessage("Now have " + nextCodeList + " codes");
 		for (FhirVersionIndependentConcept next : nextCodeList) {
+			theResponseBuilder.addMessage("Next code " + next);
 			if (includeOrExcludeSystemResource != null && theWantCode != null) {
 				boolean matches;
 				if (includeOrExcludeSystemResource.getCaseSensitive()) {
@@ -1199,6 +1204,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				}
 			}
 
+			theResponseBuilder.addMessage("Adding code " + next);
 			theConsumer.accept(next);
 			retVal = true;
 		}
