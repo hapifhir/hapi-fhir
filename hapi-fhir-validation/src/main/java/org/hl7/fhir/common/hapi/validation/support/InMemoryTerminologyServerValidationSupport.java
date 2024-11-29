@@ -131,7 +131,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		org.hl7.fhir.r5.model.ValueSet expansionR5;
 		try {
 			expansionR5 = expandValueSetToCanonical(
-					theValidationSupportContext, theValueSetToExpand, theWantSystemAndVersion, theWantCode);
+							theValidationSupportContext, theValueSetToExpand, theWantSystemAndVersion, theWantCode)
+					.getValueSet();
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
 			return new ValueSetExpansionOutcome(e.getMessage(), false);
 		}
@@ -176,17 +177,17 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		return new ValueSetExpansionOutcome(expansion);
 	}
 
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetToCanonical(
+	private ValueSetAndMessages expandValueSetToCanonical(
 			ValidationSupportContext theValidationSupportContext,
 			IBaseResource theValueSetToExpand,
 			@Nullable String theWantSystemUrlAndVersion,
 			@Nullable String theWantCode)
 			throws ExpansionCouldNotBeCompletedInternallyException {
-		org.hl7.fhir.r5.model.ValueSet expansionR5;
+		ValueSetAndMessages expansion;
 		switch (getFhirVersionEnum(
 				theValidationSupportContext.getRootValidationSupport().getFhirContext(), theValueSetToExpand)) {
 			case DSTU2: {
-				expansionR5 = expandValueSetDstu2(
+				expansion = expandValueSetDstu2(
 						theValidationSupportContext,
 						(ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSetToExpand,
 						theWantSystemUrlAndVersion,
@@ -194,7 +195,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				break;
 			}
 			case DSTU2_HL7ORG: {
-				expansionR5 = expandValueSetDstu2Hl7Org(
+				expansion = expandValueSetDstu2Hl7Org(
 						theValidationSupportContext,
 						(ValueSet) theValueSetToExpand,
 						theWantSystemUrlAndVersion,
@@ -202,7 +203,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				break;
 			}
 			case DSTU3: {
-				expansionR5 = expandValueSetDstu3(
+				expansion = expandValueSetDstu3(
 						theValidationSupportContext,
 						(org.hl7.fhir.dstu3.model.ValueSet) theValueSetToExpand,
 						theWantSystemUrlAndVersion,
@@ -210,7 +211,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				break;
 			}
 			case R4: {
-				expansionR5 = expandValueSetR4(
+				expansion = expandValueSetR4(
 						theValidationSupportContext,
 						(org.hl7.fhir.r4.model.ValueSet) theValueSetToExpand,
 						theWantSystemUrlAndVersion,
@@ -218,7 +219,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				break;
 			}
 			case R4B: {
-				expansionR5 = expandValueSetR4B(
+				expansion = expandValueSetR4B(
 						theValidationSupportContext,
 						(org.hl7.fhir.r4b.model.ValueSet) theValueSetToExpand,
 						theWantSystemUrlAndVersion,
@@ -226,7 +227,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				break;
 			}
 			case R5: {
-				expansionR5 = expandValueSetR5(
+				expansion = expandValueSetR5(
 						theValidationSupportContext,
 						(org.hl7.fhir.r5.model.ValueSet) theValueSetToExpand,
 						theWantSystemUrlAndVersion,
@@ -239,7 +240,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 						+ myCtx.getVersion().getVersion());
 		}
 
-		return expansionR5;
+		return expansion;
 	}
 
 	@Override
@@ -250,7 +251,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			String theCode,
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
-		org.hl7.fhir.r5.model.ValueSet expansion;
+		ValueSetAndMessages expansion;
 		String vsUrl = CommonCodeSystemsTerminologyService.getValueSetUrl(getFhirContext(), theValueSet);
 		try {
 			expansion = expandValueSetToCanonical(
@@ -270,8 +271,26 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			return codeValidationResult;
 		}
 
-		if (expansion == null) {
+		if (expansion == null || expansion.getValueSet() == null) {
 			return null;
+		}
+
+		if (expansion.getValueSet().getExpansion().getContains().isEmpty()) {
+			IssueSeverity severity = IssueSeverity.ERROR;
+			String message = "Unknown code '"
+					+ getFormattedCodeSystemAndCodeForMessage(theCodeSystemUrlAndVersion, theCode)
+					+ "'"
+					+ createInMemoryExpansionMessageSuffix(vsUrl)
+					+ " - Expansion result: "
+					+ expansion.getMessages().toString();
+			CodeValidationIssueCoding issueCoding = CodeValidationIssueCoding.NOT_IN_VS;
+			CodeValidationIssueCode notFound = CodeValidationIssueCode.NOT_FOUND;
+			CodeValidationResult codeValidationResult = new CodeValidationResult()
+					.setSeverity(severity)
+					.setMessage(message)
+					.setSourceDetails(null)
+					.addIssue(new CodeValidationIssue(message, severity, notFound, issueCoding));
+			return codeValidationResult;
 		}
 
 		return validateCodeInExpandedValueSet(
@@ -280,7 +299,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				theCodeSystemUrlAndVersion,
 				theCode,
 				theDisplay,
-				expansion,
+				expansion.getValueSet(),
 				vsUrl);
 	}
 
@@ -686,7 +705,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2Hl7Org(
+	private ValueSetAndMessages expandValueSetDstu2Hl7Org(
 			ValidationSupportContext theValidationSupportContext,
 			ValueSet theInput,
 			@Nullable String theWantSystemUrlAndVersion,
@@ -698,7 +717,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2(
+	private ValueSetAndMessages expandValueSetDstu2(
 			ValidationSupportContext theValidationSupportContext,
 			ca.uhn.fhir.model.dstu2.resource.ValueSet theInput,
 			@Nullable String theWantSystemUrlAndVersion,
@@ -767,7 +786,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu3(
+	private ValueSetAndMessages expandValueSetDstu3(
 			ValidationSupportContext theValidationSupportContext,
 			org.hl7.fhir.dstu3.model.ValueSet theInput,
 			@Nullable String theWantSystemUrlAndVersion,
@@ -779,7 +798,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetR4(
+	private ValueSetAndMessages expandValueSetR4(
 			ValidationSupportContext theValidationSupportContext,
 			org.hl7.fhir.r4.model.ValueSet theInput,
 			@Nullable String theWantSystemUrlAndVersion,
@@ -791,7 +810,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetR4B(
+	private ValueSetAndMessages expandValueSetR4B(
 			ValidationSupportContext theValidationSupportContext,
 			org.hl7.fhir.r4b.model.ValueSet theInput,
 			@Nullable String theWantSystemUrlAndVersion,
@@ -803,12 +822,14 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(
+	private ValueSetAndMessages expandValueSetR5(
 			ValidationSupportContext theValidationSupportContext,
 			org.hl7.fhir.r5.model.ValueSet theInput,
 			@Nullable String theWantSystemUrlAndVersion,
 			@Nullable String theWantCode)
 			throws ExpansionCouldNotBeCompletedInternallyException {
+
+		ValueSetAndMessages retVal = new ValueSetAndMessages();
 		Set<FhirVersionIndependentConcept> concepts = new HashSet<>();
 
 		expandValueSetR5IncludeOrExcludes(
@@ -817,19 +838,22 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				theInput.getCompose().getInclude(),
 				true,
 				theWantSystemUrlAndVersion,
-				theWantCode);
+				theWantCode,
+				retVal);
 		expandValueSetR5IncludeOrExcludes(
 				theValidationSupportContext,
 				concepts,
 				theInput.getCompose().getExclude(),
 				false,
 				theWantSystemUrlAndVersion,
-				theWantCode);
+				theWantCode,
+				retVal);
 
-		org.hl7.fhir.r5.model.ValueSet retVal = new org.hl7.fhir.r5.model.ValueSet();
+		org.hl7.fhir.r5.model.ValueSet vs = new org.hl7.fhir.r5.model.ValueSet();
+		retVal.setValueSet(vs);
 		for (FhirVersionIndependentConcept next : concepts) {
 			org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent contains =
-					retVal.getExpansion().addContains();
+					vs.getExpansion().addContains();
 			contains.setSystem(next.getSystem());
 			contains.setCode(next.getCode());
 			contains.setDisplay(next.getDisplay());
@@ -849,7 +873,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			Consumer<FhirVersionIndependentConcept> theConsumer,
 			org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theIncludeOrExclude)
 			throws ExpansionCouldNotBeCompletedInternallyException {
-		expandValueSetR5IncludeOrExclude(theValidationSupportContext, theConsumer, null, null, theIncludeOrExclude);
+		expandValueSetR5IncludeOrExclude(
+				theValidationSupportContext, theConsumer, null, null, theIncludeOrExclude, new ValueSetAndMessages());
 	}
 
 	private void expandValueSetR5IncludeOrExcludes(
@@ -858,7 +883,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			List<org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent> theComposeList,
 			boolean theComposeListIsInclude,
 			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
+			@Nullable String theWantCode,
+			ValueSetAndMessages theResponseBuilder)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 		Consumer<FhirVersionIndependentConcept> consumer = c -> {
 			if (theComposeListIsInclude) {
@@ -868,27 +894,46 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 		};
 		expandValueSetR5IncludeOrExcludes(
-				theValidationSupportContext, consumer, theComposeList, theWantSystemUrlAndVersion, theWantCode);
+				theComposeListIsInclude,
+				theValidationSupportContext,
+				consumer,
+				theComposeList,
+				theWantSystemUrlAndVersion,
+				theWantCode,
+				theResponseBuilder);
 	}
 
 	private void expandValueSetR5IncludeOrExcludes(
+			boolean theComposeListIsInclude,
 			ValidationSupportContext theValidationSupportContext,
 			Consumer<FhirVersionIndependentConcept> theConsumer,
 			List<org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent> theComposeList,
 			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
+			@Nullable String theWantCode,
+			ValueSetAndMessages theResponseBuilder)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 		ExpansionCouldNotBeCompletedInternallyException caughtException = null;
+		if (theComposeList.isEmpty()) {
+			theResponseBuilder.addMessage(
+					"Empty compose list for " + (theComposeListIsInclude ? "include" : "exclude"));
+			return;
+		}
 		for (org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent nextInclude : theComposeList) {
 			try {
 				boolean outcome = expandValueSetR5IncludeOrExclude(
-						theValidationSupportContext, theConsumer, theWantSystemUrlAndVersion, theWantCode, nextInclude);
+						theValidationSupportContext,
+						theConsumer,
+						theWantSystemUrlAndVersion,
+						theWantCode,
+						nextInclude,
+						theResponseBuilder);
 				if (isNotBlank(theWantCode)) {
 					if (outcome) {
 						return;
 					}
 				}
 			} catch (ExpansionCouldNotBeCompletedInternallyException e) {
+				theResponseBuilder.addMessage(e.toString());
 				if (isBlank(theWantCode)) {
 					throw e;
 				} else {
@@ -909,7 +954,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			Consumer<FhirVersionIndependentConcept> theConsumer,
 			@Nullable String theWantSystemUrlAndVersion,
 			@Nullable String theWantCode,
-			org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theInclude)
+			org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theInclude,
+			ValueSetAndMessages theResponseBuilder)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 
 		String wantSystemUrl = null;
@@ -958,6 +1004,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 
 			includeOrExcludeSystemResource = codeSystemLoader.apply(loadedCodeSystemUrl);
+			theResponseBuilder.addMessage("Loaded CS[" + loadedCodeSystemUrl + "]: " + includeOrExcludeSystemResource);
 
 			boolean isIncludeWithDeclaredConcepts = !theInclude.getConcept().isEmpty();
 
@@ -1003,6 +1050,9 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 										codesList,
 										nextCodeList,
 										wantCodes);
+							} else {
+								theResponseBuilder.addMessage("Did not find code " + theWantCode + " for CS URL: "
+										+ includeOrExcludeConceptSystemUrl);
 							}
 						}
 					} else {
@@ -1113,8 +1163,9 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		for (CanonicalType nextValueSetInclude : theInclude.getValueSet()) {
 			org.hl7.fhir.r5.model.ValueSet vs = valueSetLoader.apply(nextValueSetInclude.getValueAsString());
 			if (vs != null) {
-				org.hl7.fhir.r5.model.ValueSet subExpansion =
-						expandValueSetR5(theValidationSupportContext, vs, theWantSystemUrlAndVersion, theWantCode);
+				org.hl7.fhir.r5.model.ValueSet subExpansion = expandValueSetR5(
+								theValidationSupportContext, vs, theWantSystemUrlAndVersion, theWantCode)
+						.getValueSet();
 				if (subExpansion == null) {
 					String theMessage = "Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString();
 					throw new ExpansionCouldNotBeCompletedInternallyException(
@@ -1458,6 +1509,28 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		public CodeValidationIssue getCodeValidationIssue() {
 			return myCodeValidationIssue;
+		}
+	}
+
+	private static class ValueSetAndMessages {
+
+		private org.hl7.fhir.r5.model.ValueSet myValueSet;
+		private List<String> myMessages = new ArrayList<>();
+
+		public void setValueSet(org.hl7.fhir.r5.model.ValueSet theValueSet) {
+			myValueSet = theValueSet;
+		}
+
+		public void addMessage(String theMessage) {
+			myMessages.add(theMessage);
+		}
+
+		public org.hl7.fhir.r5.model.ValueSet getValueSet() {
+			return myValueSet;
+		}
+
+		public List<String> getMessages() {
+			return myMessages;
 		}
 	}
 }
