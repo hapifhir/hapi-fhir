@@ -14,7 +14,6 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_50;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
@@ -916,8 +915,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		ExpansionCouldNotBeCompletedInternallyException caughtException = null;
 		if (theComposeList.isEmpty()) {
 			if (theComposeListIsInclude) {
-				theResponseBuilder.addMessage(
-					"Empty compose list for includes");
+				theResponseBuilder.addMessage("Empty compose list for includes");
 			}
 			return;
 		}
