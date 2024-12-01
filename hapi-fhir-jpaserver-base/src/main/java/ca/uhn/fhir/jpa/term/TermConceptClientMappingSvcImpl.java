@@ -34,9 +34,9 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.term.api.ITermConceptClientMappingSvc;
-import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
@@ -73,17 +73,11 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 
 	private final int myFetchSize = TermReadSvcImpl.DEFAULT_FETCH_SIZE;
 
-	protected static boolean ourLastResultsFromTranslationCache; // For testing.
-	protected static boolean ourLastResultsFromTranslationWithReverseCache; // For testing.
-
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
 	@Autowired
 	protected FhirContext myContext;
-
-	@Autowired
-	protected MemoryCacheService myMemoryCacheService;
 
 	@Autowired
 	protected IIdHelperService<JpaPid> myIdHelperService;
@@ -107,7 +101,6 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 		Join<TermConceptMapGroup, TermConceptMap> conceptMapJoin = groupJoin.join("myConceptMap");
 
 		List<TranslationQuery> translationQueries = theTranslationRequest.getTranslationQueries();
-		List<TranslateConceptResult> cachedTargets;
 		ArrayList<Predicate> predicates;
 		Coding coding;
 
@@ -117,110 +110,99 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 			latestConceptMapVersion = getLatestConceptMapVersion(theTranslationRequest);
 
 		for (TranslationQuery translationQuery : translationQueries) {
-			cachedTargets = myMemoryCacheService.getIfPresent(
-					MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION, translationQuery);
-			if (cachedTargets == null) {
-				final List<TranslateConceptResult> targets = new ArrayList<>();
+			final List<TranslateConceptResult> targets = new ArrayList<>();
 
-				predicates = new ArrayList<>();
+			predicates = new ArrayList<>();
 
-				coding = translationQuery.getCoding();
-				if (coding.hasCode()) {
-					predicates.add(criteriaBuilder.equal(elementJoin.get("myCode"), coding.getCode()));
-				} else {
-					throw new InvalidRequestException(
-							Msg.code(842) + "A code must be provided for translation to occur.");
-				}
-
-				if (coding.hasSystem()) {
-					predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), coding.getSystem()));
-				}
-
-				if (coding.hasVersion()) {
-					predicates.add(criteriaBuilder.equal(groupJoin.get("mySourceVersion"), coding.getVersion()));
-				}
-
-				if (translationQuery.hasTargetSystem()) {
-					predicates.add(
-							criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem()));
-				}
-
-				if (translationQuery.hasUrl()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl()));
-					if (translationQuery.hasConceptMapVersion()) {
-						// both url and conceptMapVersion
-						predicates.add(criteriaBuilder.equal(
-								conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion()));
-					} else {
-						if (StringUtils.isNotBlank(latestConceptMapVersion)) {
-							// only url and use latestConceptMapVersion
-							predicates.add(
-									criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
-						} else {
-							predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
-						}
-					}
-				}
-
-				if (translationQuery.hasSource()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getSource()));
-				}
-
-				if (translationQuery.hasTarget()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), translationQuery.getTarget()));
-				}
-
-				if (translationQuery.hasResourceId()) {
-					IIdType resourceId = translationQuery.getResourceId();
-					JpaPid resourcePid =
-							myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getId()));
-				}
-
-				Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-				query.where(outerPredicate);
-
-				// Use scrollable results.
-				final TypedQuery<TermConceptMapGroupElementTarget> typedQuery =
-						myEntityManager.createQuery(query.select(root));
-				org.hibernate.query.Query<TermConceptMapGroupElementTarget> hibernateQuery =
-						(org.hibernate.query.Query<TermConceptMapGroupElementTarget>) typedQuery;
-				hibernateQuery.setFetchSize(myFetchSize);
-				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-				try (ScrollableResultsIterator<TermConceptMapGroupElementTarget> scrollableResultsIterator =
-						new ScrollableResultsIterator<>(scrollableResults)) {
-
-					Set<TermConceptMapGroupElementTarget> matches = new HashSet<>();
-					while (scrollableResultsIterator.hasNext()) {
-						TermConceptMapGroupElementTarget next = scrollableResultsIterator.next();
-						if (matches.add(next)) {
-
-							TranslateConceptResult translationMatch = new TranslateConceptResult();
-							if (next.getEquivalence() != null) {
-								translationMatch.setEquivalence(
-										next.getEquivalence().toCode());
-							}
-
-							translationMatch.setCode(next.getCode());
-							translationMatch.setSystem(next.getSystem());
-							translationMatch.setSystemVersion(next.getSystemVersion());
-							translationMatch.setDisplay(next.getDisplay());
-							translationMatch.setValueSet(next.getValueSet());
-							translationMatch.setSystemVersion(next.getSystemVersion());
-							translationMatch.setConceptMapUrl(next.getConceptMapUrl());
-
-							targets.add(translationMatch);
-						}
-					}
-				}
-
-				ourLastResultsFromTranslationCache = false; // For testing.
-				myMemoryCacheService.put(MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION, translationQuery, targets);
-				retVal.getResults().addAll(targets);
+			coding = translationQuery.getCoding();
+			if (coding.hasCode()) {
+				predicates.add(criteriaBuilder.equal(elementJoin.get("myCode"), coding.getCode()));
 			} else {
-				ourLastResultsFromTranslationCache = true; // For testing.
-				retVal.getResults().addAll(cachedTargets);
+				throw new InvalidRequestException(Msg.code(842) + "A code must be provided for translation to occur.");
 			}
+
+			if (coding.hasSystem()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), coding.getSystem()));
+			}
+
+			if (coding.hasVersion()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("mySourceVersion"), coding.getVersion()));
+			}
+
+			if (translationQuery.hasTargetSystem()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem()));
+			}
+
+			if (translationQuery.hasUrl()) {
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl()));
+				if (translationQuery.hasConceptMapVersion()) {
+					// both url and conceptMapVersion
+					predicates.add(criteriaBuilder.equal(
+							conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion()));
+				} else {
+					if (StringUtils.isNotBlank(latestConceptMapVersion)) {
+						// only url and use latestConceptMapVersion
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
+					} else {
+						predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
+					}
+				}
+			}
+
+			if (translationQuery.hasSource()) {
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getSource()));
+			}
+
+			if (translationQuery.hasTarget()) {
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), translationQuery.getTarget()));
+			}
+
+			if (translationQuery.hasResourceId()) {
+				IIdType resourceId = translationQuery.getResourceId();
+				JpaPid resourcePid =
+						myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getId()));
+			}
+
+			Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+			query.where(outerPredicate);
+
+			// Use scrollable results.
+			final TypedQuery<TermConceptMapGroupElementTarget> typedQuery =
+					myEntityManager.createQuery(query.select(root));
+			org.hibernate.query.Query<TermConceptMapGroupElementTarget> hibernateQuery =
+					(org.hibernate.query.Query<TermConceptMapGroupElementTarget>) typedQuery;
+			hibernateQuery.setFetchSize(myFetchSize);
+			ScrollableResults<TermConceptMapGroupElementTarget> scrollableResults =
+					hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+			try (ScrollableResultsIterator<TermConceptMapGroupElementTarget> scrollableResultsIterator =
+					new ScrollableResultsIterator<>(scrollableResults)) {
+
+				Set<TermConceptMapGroupElementTarget> matches = new HashSet<>();
+				while (scrollableResultsIterator.hasNext()) {
+					TermConceptMapGroupElementTarget next = scrollableResultsIterator.next();
+					if (matches.add(next)) {
+
+						TranslateConceptResult translationMatch = new TranslateConceptResult();
+						if (next.getEquivalence() != null) {
+							translationMatch.setEquivalence(
+									next.getEquivalence().toCode());
+						}
+
+						translationMatch.setCode(next.getCode());
+						translationMatch.setSystem(next.getSystem());
+						translationMatch.setSystemVersion(next.getSystemVersion());
+						translationMatch.setDisplay(next.getDisplay());
+						translationMatch.setValueSet(next.getValueSet());
+						translationMatch.setSystemVersion(next.getSystemVersion());
+						translationMatch.setConceptMapUrl(next.getConceptMapUrl());
+
+						targets.add(translationMatch);
+					}
+				}
+			}
+
+			retVal.getResults().addAll(targets);
 		}
 
 		buildTranslationResult(retVal);
@@ -242,7 +224,6 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 		Join<TermConceptMapGroup, TermConceptMap> conceptMapJoin = groupJoin.join("myConceptMap");
 
 		List<TranslationQuery> translationQueries = theTranslationRequest.getTranslationQueries();
-		List<TranslateConceptResult> cachedElements;
 		ArrayList<Predicate> predicates;
 		Coding coding;
 
@@ -252,143 +233,135 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 			latestConceptMapVersion = getLatestConceptMapVersion(theTranslationRequest);
 
 		for (TranslationQuery translationQuery : translationQueries) {
-			cachedElements = myMemoryCacheService.getIfPresent(
-					MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION_REVERSE, translationQuery);
-			if (cachedElements == null) {
-				final List<TranslateConceptResult> elements = new ArrayList<>();
+			final List<TranslateConceptResult> elements = new ArrayList<>();
 
-				predicates = new ArrayList<>();
+			predicates = new ArrayList<>();
 
-				coding = translationQuery.getCoding();
-				String targetCode;
-				String targetCodeSystem = null;
-				if (coding.hasCode()) {
-					predicates.add(criteriaBuilder.equal(targetJoin.get("myCode"), coding.getCode()));
-					targetCode = coding.getCode();
+			coding = translationQuery.getCoding();
+			String targetCode;
+			String targetCodeSystem = null;
+			if (coding.hasCode()) {
+				predicates.add(criteriaBuilder.equal(targetJoin.get("myCode"), coding.getCode()));
+				targetCode = coding.getCode();
+			} else {
+				throw new InvalidRequestException(Msg.code(843) + "A code must be provided for translation to occur.");
+			}
+
+			if (coding.hasSystem()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), coding.getSystem()));
+				targetCodeSystem = coding.getSystem();
+			}
+
+			if (coding.hasVersion()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("myTargetVersion"), coding.getVersion()));
+			}
+
+			if (translationQuery.hasUrl()) {
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl()));
+				if (translationQuery.hasConceptMapVersion()) {
+					// both url and conceptMapVersion
+					predicates.add(criteriaBuilder.equal(
+							conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion()));
 				} else {
-					throw new InvalidRequestException(
-							Msg.code(843) + "A code must be provided for translation to occur.");
-				}
-
-				if (coding.hasSystem()) {
-					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), coding.getSystem()));
-					targetCodeSystem = coding.getSystem();
-				}
-
-				if (coding.hasVersion()) {
-					predicates.add(criteriaBuilder.equal(groupJoin.get("myTargetVersion"), coding.getVersion()));
-				}
-
-				if (translationQuery.hasUrl()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl()));
-					if (translationQuery.hasConceptMapVersion()) {
-						// both url and conceptMapVersion
-						predicates.add(criteriaBuilder.equal(
-								conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion()));
+					if (StringUtils.isNotBlank(latestConceptMapVersion)) {
+						// only url and use latestConceptMapVersion
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
 					} else {
-						if (StringUtils.isNotBlank(latestConceptMapVersion)) {
-							// only url and use latestConceptMapVersion
-							predicates.add(
-									criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
-						} else {
-							predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
-						}
+						predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
 					}
 				}
+			}
 
-				if (translationQuery.hasTargetSystem()) {
-					predicates.add(
-							criteriaBuilder.equal(groupJoin.get("mySource"), translationQuery.getTargetSystem()));
-				}
+			if (translationQuery.hasTargetSystem()) {
+				predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), translationQuery.getTargetSystem()));
+			}
 
-				if (translationQuery.hasSource()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), translationQuery.getSource()));
-				}
+			if (translationQuery.hasSource()) {
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), translationQuery.getSource()));
+			}
 
-				if (translationQuery.hasTarget()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getTarget()));
-				}
+			if (translationQuery.hasTarget()) {
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getTarget()));
+			}
 
-				if (translationQuery.hasResourceId()) {
-					IIdType resourceId = translationQuery.getResourceId();
-					JpaPid resourcePid =
-							myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getId()));
-				}
+			if (translationQuery.hasResourceId()) {
+				IIdType resourceId = translationQuery.getResourceId();
+				JpaPid resourcePid =
+						myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
+				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getId()));
+			}
 
-				Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-				query.where(outerPredicate);
+			Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+			query.where(outerPredicate);
 
-				// Use scrollable results.
-				final TypedQuery<TermConceptMapGroupElement> typedQuery =
-						myEntityManager.createQuery(query.select(root));
-				org.hibernate.query.Query<TermConceptMapGroupElement> hibernateQuery =
-						(org.hibernate.query.Query<TermConceptMapGroupElement>) typedQuery;
-				hibernateQuery.setFetchSize(myFetchSize);
-				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-				try (ScrollableResultsIterator<TermConceptMapGroupElement> scrollableResultsIterator =
-						new ScrollableResultsIterator<>(scrollableResults)) {
+			// Use scrollable results.
+			final TypedQuery<TermConceptMapGroupElement> typedQuery = myEntityManager.createQuery(query.select(root));
+			org.hibernate.query.Query<TermConceptMapGroupElement> hibernateQuery =
+					(org.hibernate.query.Query<TermConceptMapGroupElement>) typedQuery;
+			hibernateQuery.setFetchSize(myFetchSize);
+			ScrollableResults<TermConceptMapGroupElement> scrollableResults =
+					hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+			try (ScrollableResultsIterator<TermConceptMapGroupElement> scrollableResultsIterator =
+					new ScrollableResultsIterator<>(scrollableResults)) {
 
-					Set<TermConceptMapGroupElementTarget> matches = new HashSet<>();
-					while (scrollableResultsIterator.hasNext()) {
-						TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
+				Set<TermConceptMapGroupElementTarget> matches = new HashSet<>();
+				while (scrollableResultsIterator.hasNext()) {
+					TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
 
-						/* TODO: The invocation of the size() below does not seem to be necessary but for some reason,
-						 * but removing it causes tests in TerminologySvcImplR4Test to fail. We use the outcome
-						 * in a trace log to avoid ErrorProne flagging an unused return value.
-						 */
-						int size =
-								nextElement.getConceptMapGroupElementTargets().size();
-						ourLog.trace("Have {} targets", size);
+					/* TODO: The invocation of the size() below does not seem to be necessary but for some reason,
+					 * but removing it causes tests in TerminologySvcImplR4Test to fail. We use the outcome
+					 * in a trace log to avoid ErrorProne flagging an unused return value.
+					 */
+					int size = nextElement.getConceptMapGroupElementTargets().size();
+					ourLog.trace("Have {} targets", size);
 
-						myEntityManager.detach(nextElement);
+					myEntityManager.detach(nextElement);
 
-						if (isNotBlank(targetCode)) {
-							for (TermConceptMapGroupElementTarget next :
-									nextElement.getConceptMapGroupElementTargets()) {
-								if (matches.add(next)) {
-									if (isBlank(targetCodeSystem)
-											|| StringUtils.equals(targetCodeSystem, next.getSystem())) {
-										if (StringUtils.equals(targetCode, next.getCode())) {
-											TranslateConceptResult translationMatch = new TranslateConceptResult();
-											translationMatch.setCode(nextElement.getCode());
-											translationMatch.setSystem(nextElement.getSystem());
-											translationMatch.setSystemVersion(nextElement.getSystemVersion());
-											translationMatch.setDisplay(nextElement.getDisplay());
-											translationMatch.setValueSet(nextElement.getValueSet());
-											translationMatch.setSystemVersion(nextElement.getSystemVersion());
-											translationMatch.setConceptMapUrl(nextElement.getConceptMapUrl());
-											if (next.getEquivalence() != null) {
-												translationMatch.setEquivalence(
-														next.getEquivalence().toCode());
-											}
+					if (isNotBlank(targetCode)) {
+						for (TermConceptMapGroupElementTarget next : nextElement.getConceptMapGroupElementTargets()) {
+							if (matches.add(next)) {
+								if (isBlank(targetCodeSystem)
+										|| StringUtils.equals(targetCodeSystem, next.getSystem())) {
+									if (StringUtils.equals(targetCode, next.getCode())) {
+										TranslateConceptResult translationMatch =
+												newTranslateConceptResult(nextElement, next);
 
-											if (alreadyContainsMapping(elements, translationMatch)
-													|| alreadyContainsMapping(retVal.getResults(), translationMatch)) {
-												continue;
-											}
-
-											elements.add(translationMatch);
+										if (alreadyContainsMapping(elements, translationMatch)
+												|| alreadyContainsMapping(retVal.getResults(), translationMatch)) {
+											continue;
 										}
+
+										elements.add(translationMatch);
 									}
 								}
 							}
 						}
 					}
 				}
-
-				ourLastResultsFromTranslationWithReverseCache = false; // For testing.
-				myMemoryCacheService.put(
-						MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION_REVERSE, translationQuery, elements);
-				retVal.getResults().addAll(elements);
-			} else {
-				ourLastResultsFromTranslationWithReverseCache = true; // For testing.
-				retVal.getResults().addAll(cachedElements);
 			}
+
+			retVal.getResults().addAll(elements);
 		}
 
 		buildTranslationResult(retVal);
 		return retVal;
+	}
+
+	@Nonnull
+	private static TranslateConceptResult newTranslateConceptResult(
+			TermConceptMapGroupElement theGroup, TermConceptMapGroupElementTarget theTarget) {
+		TranslateConceptResult translationMatch = new TranslateConceptResult();
+		translationMatch.setCode(theGroup.getCode());
+		translationMatch.setSystem(theGroup.getSystem());
+		translationMatch.setSystemVersion(theGroup.getSystemVersion());
+		translationMatch.setDisplay(theGroup.getDisplay());
+		translationMatch.setValueSet(theGroup.getValueSet());
+		translationMatch.setSystemVersion(theGroup.getSystemVersion());
+		translationMatch.setConceptMapUrl(theGroup.getConceptMapUrl());
+		if (theTarget.getEquivalence() != null) {
+			translationMatch.setEquivalence(theTarget.getEquivalence().toCode());
+		}
+		return translationMatch;
 	}
 
 	@Override

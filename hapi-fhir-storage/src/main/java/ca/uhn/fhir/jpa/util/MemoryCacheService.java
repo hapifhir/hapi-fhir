@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
@@ -69,14 +68,9 @@ public class MemoryCacheService {
 			int maximumSize;
 
 			switch (next) {
-				case CONCEPT_TRANSLATION:
-				case CONCEPT_TRANSLATION_REVERSE:
-					timeoutSeconds =
-							SECONDS.convert(myStorageSettings.getTranslationCachesExpireAfterWriteInMinutes(), MINUTES);
-					maximumSize = 500000;
-					break;
+				case NAME_TO_PARTITION:
+				case ID_TO_PARTITION:
 				case PID_TO_FORCED_ID:
-				case FORCED_ID_TO_PID:
 				case MATCH_URL:
 				case RESOURCE_LOOKUP_BY_FORCED_ID:
 				case HISTORY_COUNT:
@@ -207,22 +201,13 @@ public class MemoryCacheService {
 		 * Value type: {@literal JpaResourceLookup}
 		 */
 		RESOURCE_LOOKUP_BY_FORCED_ID(ForcedIdCacheKey.class),
-		FORCED_ID_TO_PID(String.class),
 		FHIRPATH_EXPRESSION(String.class),
 		/**
 		 * Key type: {@literal Long}
 		 * Value type: {@literal Optional<String>}
 		 */
 		PID_TO_FORCED_ID(Long.class),
-		/**
-		 * TODO: JA this is duplicate with the CachingValidationSupport cache.
-		 * A better solution would be to drop this cache for this item, and to
-		 * create a new CachingValidationSupport implementation which uses
-		 * the MemoryCacheService for all of its caches.
-		 */
-		CONCEPT_TRANSLATION(TranslationQuery.class),
 		MATCH_URL(String.class),
-		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class),
 		RESOURCE_CONDITIONAL_CREATE_VERSION(Long.class),
 		HISTORY_COUNT(HistoryCountKey.class),
 		NAME_TO_PARTITION(String.class),
@@ -372,21 +357,11 @@ public class MemoryCacheService {
 		 * Creates and returns a new unqualified versionless IIdType instance
 		 */
 		public IIdType toIdType(FhirContext theFhirCtx) {
-			if (myResourceType == null) {
-				return toIdTypeWithoutResourceType(theFhirCtx);
-			}
-			IIdType retVal = theFhirCtx.getVersion().newIdType();
-			retVal.setValue(myResourceType + "/" + myResourceId);
-			return retVal;
+			return theFhirCtx.getVersion().newIdType(myResourceType, myResourceId);
 		}
 
-		/**
-		 * Creates and returns a new unqualified versionless IIdType instance
-		 */
 		public IIdType toIdTypeWithoutResourceType(FhirContext theFhirCtx) {
-			IIdType retVal = theFhirCtx.getVersion().newIdType();
-			retVal.setValue(myResourceId);
-			return retVal;
+			return theFhirCtx.getVersion().newIdType(null, myResourceId);
 		}
 	}
 }

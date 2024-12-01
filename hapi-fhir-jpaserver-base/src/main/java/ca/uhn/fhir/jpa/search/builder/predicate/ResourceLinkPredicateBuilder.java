@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -121,7 +122,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -282,9 +283,11 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			inverse = true;
 		}
 
-		List<JpaPid> targetPids =
-				myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, targetIds);
-		List<Long> targetPidList = JpaPid.toLongList(targetPids);
+		List<JpaPid> pids = myIdHelperService.resolveResourcePids(
+				theRequestPartitionId,
+				targetIds,
+				ResolveIdentityMode.includeDeleted().cacheOk());
+		List<Long> targetPidList = pids.stream().map(JpaPid::getId).collect(Collectors.toList());
 
 		if (targetPidList.isEmpty() && targetQualifiedUrls.isEmpty()) {
 			setMatchNothing();
