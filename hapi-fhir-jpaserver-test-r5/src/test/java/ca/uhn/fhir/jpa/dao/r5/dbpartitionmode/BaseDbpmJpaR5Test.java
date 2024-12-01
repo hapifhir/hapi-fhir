@@ -38,10 +38,16 @@ public class BaseDbpmJpaR5Test extends BaseJpaR5Test {
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(PARTITION_2).setName(PARTITION_NAME_2), null);
 
 		// Load to pre-cache and avoid adding SQL queries
-		myPartitionConfigSvc.getPartitionById(PARTITION_1);
-		myPartitionConfigSvc.getPartitionById(PARTITION_2);
-		myPartitionConfigSvc.getPartitionByName(PARTITION_NAME_1);
-		myPartitionConfigSvc.getPartitionByName(PARTITION_NAME_2);
+		preFetchPartitionsIntoCache();
+	}
+
+	protected void preFetchPartitionsIntoCache() {
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			myPartitionConfigSvc.getPartitionById(PARTITION_1);
+			myPartitionConfigSvc.getPartitionById(PARTITION_2);
+			myPartitionConfigSvc.getPartitionByName(PARTITION_NAME_1);
+			myPartitionConfigSvc.getPartitionByName(PARTITION_NAME_2);
+		}
 	}
 
 }

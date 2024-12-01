@@ -33,8 +33,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
@@ -638,8 +636,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				ResolveIdentityMode.failOnDeleted().noCacheUnlessDeletesDisabled());
 
 		// add the pids to targetPids
-		for (IResourceLookup pid : idToIdentity.values()) {
-			theTargetPids.add((Long) pid.getPersistentId().getId());
+		for (IResourceLookup<JpaPid> pid : idToIdentity.values()) {
+			theTargetPids.add(pid.getPersistentId());
 		}
 	}
 

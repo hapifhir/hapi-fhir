@@ -137,10 +137,10 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 				switch (operation) {
 					default:
 					case eq:
-						predicate = queryRootTable.createPredicateResourceIds(false, resourceIds);
+						predicate = queryRootTable.createPredicateResourceIds(false, allOrPids);
 						break;
 					case ne:
-						predicate = queryRootTable.createPredicateResourceIds(true, resourceIds);
+						predicate = queryRootTable.createPredicateResourceIds(true, allOrPids);
 						break;
 				}
 				predicate = queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);

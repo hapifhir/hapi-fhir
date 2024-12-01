@@ -206,7 +206,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			 * However, for realistic average workloads, this should reduce the number of round trips.
 			 */
 			if (!idChunk.isEmpty()) {
-				List<ResourceTable> entityChunk = prefetchResourceTableHistoryAndProvenance(idChunk);
+				List<ResourceTable> entityChunk = prefetchResourceTableAndHistory(idChunk);
 
 				if (thePreFetchIndexes) {
 

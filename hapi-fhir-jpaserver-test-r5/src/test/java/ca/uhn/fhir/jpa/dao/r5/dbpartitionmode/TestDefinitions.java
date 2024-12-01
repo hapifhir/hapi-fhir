@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
@@ -21,7 +20,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
-import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
@@ -104,13 +102,13 @@ import static org.junit.jupiter.api.Assertions.fail;
  * This class is a set of test that are run as {@literal @Nested} by several
  * test classes. It verifies that we emit appropriate SQL for various
  * scenarios including non-partitioned mode, partitioned mode, and
- * partitioned mode with Partitioned IDs.
+ * database partitioning mode.
  */
 abstract class TestDefinitions implements ITestDataBuilder {
 
 	private final TestPartitionSelectorInterceptor myPartitionSelectorInterceptor;
 	private final boolean myIncludePartitionIdsInSql;
-	private final BaseJpaR5Test myParentTest;
+	private final BaseDbpmJpaR5Test myParentTest;
 	private final boolean myIncludePartitionIdsInPks;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
@@ -168,7 +166,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 
-	public TestDefinitions(@Nonnull BaseJpaR5Test theParentTest, @Nonnull TestPartitionSelectorInterceptor thePartitionSelectorInterceptor, boolean theIncludePartitionIdsInSql, boolean theIncludePartitionIdsInPks) {
+	public TestDefinitions(@Nonnull BaseDbpmJpaR5Test theParentTest, @Nonnull TestPartitionSelectorInterceptor thePartitionSelectorInterceptor, boolean theIncludePartitionIdsInSql, boolean theIncludePartitionIdsInPks) {
 		myParentTest = theParentTest;
 		myPartitionSelectorInterceptor = thePartitionSelectorInterceptor;
 		myIncludePartitionIdsInSql = theIncludePartitionIdsInSql;
@@ -546,12 +544,12 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		if (myIncludePartitionIdsInSql) {
 			if (myPartitionSettings.getDefaultPartitionId() == null) {
-				assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Organization' and rt1_0.FHIR_ID in ('O') and rt1_0.PARTITION_ID is null");
+				assertThat(getSelectSql(0)).endsWith(" where rt1_0.PARTITION_ID is null and (rt1_0.RES_TYPE='Organization' and rt1_0.FHIR_ID='O')");
 			} else {
-				assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Organization' and rt1_0.FHIR_ID in ('O') and rt1_0.PARTITION_ID in ('0')");
+				assertThat(getSelectSql(0)).endsWith(" where rt1_0.PARTITION_ID='0' and (rt1_0.RES_TYPE='Organization' and rt1_0.FHIR_ID='O')");
 			}
 		} else {
-			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Organization' and rt1_0.FHIR_ID in ('O')");
+			assertThat(getSelectSql(0)).endsWith(" where (rt1_0.RES_TYPE='Organization' and rt1_0.FHIR_ID='O')");
 		}
 
 		if (myIncludePartitionIdsInSql) {
@@ -615,19 +613,17 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID in ('A') and rt1_0.PARTITION_ID in ('1')");
-			assertThat(getSelectSql(1)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.PARTITION_ID='1' and rt1_0.RES_ID='" + id + "'");
+			assertThat(getSelectSql(0)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.PARTITION_ID='1' and rt1_0.RES_ID='" + id + "'");
 		} else {
-			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID in ('A')");
-			assertThat(getSelectSql(1)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.RES_ID='" + id + "'");
+			assertThat(getSelectSql(0)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.RES_ID='" + id + "'");
 		}
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(2)).endsWith(" where (rht1_0.RES_ID,rht1_0.PARTITION_ID)=('" + id + "','1') and rht1_0.RES_VER='1'");
+			assertThat(getSelectSql(1)).endsWith(" where (rht1_0.RES_ID,rht1_0.PARTITION_ID)=('" + id + "','1') and rht1_0.RES_VER='1'");
 		} else {
-			assertThat(getSelectSql(2)).endsWith(" where rht1_0.RES_ID='" + id + "' and rht1_0.RES_VER='1'");
+			assertThat(getSelectSql(1)).endsWith(" where rht1_0.RES_ID='" + id + "' and rht1_0.RES_VER='1'");
 		}
-		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 	}
 
 	@Test
@@ -730,6 +726,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		IIdType id0 = createPatient(withActiveTrue()).toUnqualifiedVersionless();
 		IIdType id1 = createPatient(withId("A"), withActiveTrue()).toUnqualifiedVersionless();
 
+		myMemoryCache.invalidateAllCaches();
+		myParentTest.preFetchPartitionsIntoCache();
+
 		// Test
 		myCaptureQueriesListener.clear();
 		SearchParameterMap params = new SearchParameterMap();
@@ -744,9 +743,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID in ('A') and rt1_0.PARTITION_ID in ('1') and rt1_0.RES_DELETED_AT is null");
+			assertThat(getSelectSql(0)).endsWith(" where rt1_0.PARTITION_ID='1' and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='" + id0.getIdPart() + "' or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A')");
 		} else {
-			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID in ('A') and rt1_0.RES_DELETED_AT is null");
+			assertThat(getSelectSql(0)).endsWith(" where (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='" + id0.getIdPart() + "' or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A')");
 		}
 		if (myIncludePartitionIdsInSql) {
 			assertThat(getSelectSql(1)).contains(" WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID = '1') AND (t0.RES_ID IN ");
@@ -1328,6 +1327,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 
 		String sql;
 
@@ -1370,8 +1370,6 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(sql).contains("join HFJ_RESOURCE mrt1_0 on mrt1_0.RES_ID=rht1_0.RES_ID where");
 			assertThat(sql).contains("where rht1_0.RES_ID in");
 		}
-
-		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 	}
 
 	@Test
@@ -1546,11 +1544,11 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID in ('O') and rt1_0.PARTITION_ID in ('1')");
-			assertThat(getSelectSql(1)).endsWith(" where rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID in ('A') and rt1_0.PARTITION_ID in ('1')");
+			assertThat(getSelectSql(0)).endsWith(" where rt1_0.PARTITION_ID='1' and (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='O')");
+			assertThat(getSelectSql(1)).endsWith(" where rt1_0.PARTITION_ID='1' and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A')");
 		} else {
-			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID in ('O')");
-			assertThat(getSelectSql(1)).endsWith(" where rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID in ('A')");
+			assertThat(getSelectSql(0)).endsWith(" where (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='O')");
+			assertThat(getSelectSql(1)).endsWith(" where (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A')");
 		}
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}

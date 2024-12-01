@@ -43,8 +43,8 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -575,7 +575,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Pre-cache the resource ID
 		jpaPid.setAssociatedResourceId(entity.getIdType(myFhirContext));
 		String fhirId = entity.getFhirId();
-        assert fhirId != null;
+		assert fhirId != null;
 		myIdHelperService.addResolvedPidToFhirIdAfterCommit(
 				jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
@@ -1718,7 +1718,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					// different pages as the underlying data gets updated.
 					PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("myId"));
 					Slice<ResourceHistoryTable> historyEntities =
-							myResourceHistoryTableDao.findForResourceIdAndReturnEntitiesAndFetchProvenance(
+							myResourceHistoryTableDao.findAllVersionsExceptSpecificForResourcePid(
 									pageRequest, entity.getId(), historyEntity.getVersion());
 
 					for (ResourceHistoryTable next : historyEntities) {
@@ -1733,7 +1733,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * Note that the entity will be detached after being saved if it has changed
 	 * in order to avoid growing the number of resources in memory to be too big
 	 */
-	private void reindexOptimizeStorageHistoryEntityThenDetachIt(ResourceTable entity, ResourceHistoryTable historyEntity) {
+	private void reindexOptimizeStorageHistoryEntityThenDetachIt(
+			ResourceTable entity, ResourceHistoryTable historyEntity) {
 		boolean changed = false;
 		if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC
 				|| historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
@@ -1765,7 +1766,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Nothing changed, so avoid a dirtiness check when we flush
 		myEntityManager.detach(historyEntity);
-
 	}
 
 	private BaseHasResource readEntity(

@@ -29,6 +29,8 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -323,6 +325,15 @@ public class MemoryCacheService {
 		private final String myResourceId;
 		private final RequestPartitionId myRequestPartitionId;
 		private final int myHashCode;
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+					.append("resType", myResourceType)
+					.append("resId", myResourceId)
+					.append("partId", myRequestPartitionId)
+					.toString();
+		}
 
 		public ForcedIdCacheKey(
 				@Nullable String theResourceType,
