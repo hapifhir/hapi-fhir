@@ -1409,6 +1409,8 @@ public abstract class BaseTransactionProcessor {
 				theTransactionStopWatch.endCurrentTask();
 			}
 
+			postTransactionProcess(theTransactionDetails);
+
 			/*
 			 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
 			 * if something else has a reference to it.. Unless the thing that has a reference to it
@@ -1515,6 +1517,13 @@ public abstract class BaseTransactionProcessor {
 	 * with a given verb.
 	 */
 	protected void handleVerbChangeInTransactionWriteOperations() {
+		// nothing
+	}
+
+	/**
+	 * Implement to handle post transaction processing
+	 */
+	protected void postTransactionProcess(TransactionDetails theTransactionDetails) {
 		// nothing
 	}
 

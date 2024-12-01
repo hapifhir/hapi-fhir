@@ -2360,13 +2360,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId) {
-
+		DaoMethodOutcome outcome = null;
 		preProcessResourceForStorage(theResource);
 		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
 		ResourceTable entity = null;
 
-		IIdType resourceId;
+		IIdType resourceId = null;
 		RestOperationTypeEnum update = RestOperationTypeEnum.UPDATE;
 		if (isNotBlank(theMatchUrl)) {
 			// Validate that the supplied resource matches the conditional.
@@ -2408,7 +2408,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					theResource.setId(UUID.randomUUID().toString());
 					theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
 				}
-				DaoMethodOutcome outcome = doCreateForPostOrPut(
+				outcome = doCreateForPostOrPut(
 						theRequest,
 						theResource,
 						theMatchUrl,
@@ -2423,8 +2423,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					myMatchResourceUrlService.matchUrlResolved(
 							theTransactionDetails, getResourceName(), theMatchUrl, (JpaPid) outcome.getPersistentId());
 				}
-
-				return outcome;
 			}
 		} else {
 			/*
@@ -2458,7 +2456,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 
 			if (create) {
-				return doCreateForPostOrPut(
+				outcome = doCreateForPostOrPut(
 						theRequest,
 						theResource,
 						null,
@@ -2471,16 +2469,35 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Start
-		return doUpdateForUpdateOrPatch(
-				theRequest,
-				resourceId,
-				theMatchUrl,
-				thePerformIndexing,
-				theForceUpdateVersion,
-				theResource,
-				entity,
-				update,
-				theTransactionDetails);
+		if (outcome == null) {
+			outcome = doUpdateForUpdateOrPatch(
+					theRequest,
+					resourceId,
+					theMatchUrl,
+					thePerformIndexing,
+					theForceUpdateVersion,
+					theResource,
+					entity,
+					update,
+					theTransactionDetails);
+		}
+
+		postUpdateTransaction(theTransactionDetails);
+
+		return outcome;
+	}
+
+	@SuppressWarnings("rawtypes")
+	protected void postUpdateTransaction(TransactionDetails theTransactionDetails) {
+		// Transactions will delete these at the end of the entire transaction
+		if (!theTransactionDetails.isFhirTransaction()) {
+			Set<IResourcePersistentId> resourceIds = theTransactionDetails.getUpdatedResourceIds();
+			if (resourceIds != null && !resourceIds.isEmpty()) {
+				List<Long> ids = resourceIds.stream().map(r -> (Long) r.getId()).collect(Collectors.toList());
+
+				myResourceSearchUrlSvc.deleteByResIds(ids);
+			}
+		}
 	}
 
 	@Override
@@ -2502,8 +2519,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 */
 		ResourceTable entity = (ResourceTable) theEntity;
 		if (entity.isSearchUrlPresent()) {
-			myResourceSearchUrlSvc.deleteByResId(entity.getPersistentId());
-			entity.setSearchUrlPresent(false);
+			JpaPid persistentId = JpaPid.fromId(entity.getResourceId());
+			theTransactionDetails.addUpdatedResourceId(persistentId);
+
+			entity.setSearchUrlPresent(false); // it will be removed at the end
 		}
 
 		if (entity.isDeleted()) {
