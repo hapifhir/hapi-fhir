@@ -1735,15 +1735,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 */
 	private void reindexOptimizeStorageHistoryEntityThenDetachIt(
 			ResourceTable entity, ResourceHistoryTable historyEntity) {
-		boolean changed = false;
 		if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC
 				|| historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
 			byte[] resourceBytes = historyEntity.getResource();
 			if (resourceBytes != null) {
 				String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
-				if (myResourceHistoryCalculator.conditionallyAlterHistoryEntity(entity, historyEntity, resourceText)) {
-					changed = true;
-				}
+				myResourceHistoryCalculator.conditionallyAlterHistoryEntity(entity, historyEntity, resourceText);
 			}
 		}
 		if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
@@ -1756,16 +1753,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					historyEntity.setSourceUri(provenanceEntity.getSourceUri());
 					historyEntity.setRequestId(provenanceEntity.getRequestId());
 					myResourceHistoryProvenanceDao.delete(provenanceEntity);
-					changed = true;
 				}
 			}
 		}
-		if (changed) {
-			myResourceHistoryTableDao.save(historyEntity);
-		}
-
-		// Nothing changed, so avoid a dirtiness check when we flush
-		myEntityManager.detach(historyEntity);
 	}
 
 	private BaseHasResource readEntity(

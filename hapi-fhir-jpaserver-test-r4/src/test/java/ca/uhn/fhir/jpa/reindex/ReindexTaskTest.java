@@ -174,7 +174,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		runInTransaction(()->{
 			assertEquals(20, myResourceHistoryTableDao.count());
 			for (ResourceHistoryTable history : myResourceHistoryTableDao.findAll()) {
-				assertNotNull(history.getResourceTextVc());
+				assertNotNull(history.getResourceTextVc(), ()->"Null history on: " + history);
 				assertNull(history.getResource());
 			}
 		});
