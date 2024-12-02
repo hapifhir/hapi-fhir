@@ -138,10 +138,15 @@ public class SqlQuery {
 					break;
 				}
 				String nextParamValue = nextParams.remove(0);
-				if (theSanitizeParams) {
-					nextParamValue = UrlUtil.sanitizeUrlPart(nextParamValue);
+				String nextSubstitution;
+				if (nextParamValue != null) {
+					if (theSanitizeParams) {
+						nextParamValue = UrlUtil.sanitizeUrlPart(nextParamValue);
+					}
+					nextSubstitution = "'" + nextParamValue + "'";
+				} else {
+					nextSubstitution = "NULL";
 				}
-				String nextSubstitution = "'" + nextParamValue + "'";
 				retVal = retVal.substring(0, idx) + nextSubstitution + retVal.substring(idx + 1);
 				idx += nextSubstitution.length();
 			}

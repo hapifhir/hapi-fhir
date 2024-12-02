@@ -3370,7 +3370,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id1.getIdPartAsLong(), 1);
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(id1.getIdPartAsLong(), 1);
 				myResourceHistoryTableDao.delete(version);
 			}
 		});
@@ -3395,7 +3395,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id1.getIdPartAsLong(), 1);
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(id1.getIdPartAsLong(), 1);
 				myResourceHistoryTableDao.delete(version);
 			}
 		});
@@ -4257,6 +4257,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchReturnsSearchDate() throws Exception {
 		Date before = new Date();
+		sleepAtLeast(10);
 
 		//@formatter:off
 		Bundle found = myClient
@@ -4267,6 +4268,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 		//@formatter:on
 
+		sleepAtLeast(10);
 		Date after = new Date();
 
 		InstantType updated = found.getMeta().getLastUpdatedElement();
@@ -6807,6 +6809,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		TestUtil.sleepAtLeast(delayInMs + 100);
 		patient.getNameFirstRep().addGiven("Bob");
 		myClient.update().resource(patient).execute();
+		TestUtil.sleepAtLeast(100);
 
 		Patient unrelatedPatient = (Patient) myClient.create().resource(new Patient()).execute().getResource();
 		assertThat(patientId).isNotEqualTo(unrelatedPatient.getIdElement().getIdPartAsLong());
@@ -6832,7 +6835,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// Issue 3138 test case, verify behavior of _at
 		verifyAtBehaviourWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
 		verifyAtBehaviourWhenQueriedDateAfterTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		myCaptureQueriesListener.clear();
 		verifyAtBehaviourWhenQueriedDateBeforeTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		myCaptureQueriesListener.logSelectQueries();
 		// verify behavior of _since
 		verifySinceBehaviourWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
 		verifySinceBehaviourWhenQueriedDateAfterTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
@@ -6854,8 +6859,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV2, delayInMs);
 		assertTrue(timeBetweenUpdates.after(dateV1));
 		assertTrue(timeBetweenUpdates.after(dateV2));
-		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
-		assertThat(resultIds).hasSize(1);
+		String url = myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates);
+		myCaptureQueriesListener.clear();
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
+		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
 
@@ -6863,8 +6870,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, -delayInMs);
 		assertTrue(timeBetweenUpdates.before(dateV1));
 		assertTrue(timeBetweenUpdates.before(dateV2));
-		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
-		assertThat(resultIds).hasSize(2);
+		String url = myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates);
+		myCaptureQueriesListener.clear();
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
+		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(2);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
@@ -6873,9 +6882,20 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, delayInMs / 2);
 		assertTrue(timeBetweenUpdates.after(dateV1));
 		assertTrue(timeBetweenUpdates.before(dateV2));
-		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
-		assertThat(resultIds).hasSize(1);
+		String url = myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates);
+		myCaptureQueriesListener.clear();
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
+		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
+	}
+
+	private String describeVersionsAndUrl(String theUrl) {
+		return runInTransaction(()->{
+			return "URL: " + theUrl + "\n\nHistory Entries:\n * " +
+				myResourceHistoryTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")) +
+				"\n\nSQL Queries:\n * " +
+				myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * "));
+		});
 	}
 
 	private void verifySinceBehaviourWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {

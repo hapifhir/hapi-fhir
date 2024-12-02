@@ -37,7 +37,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
@@ -119,10 +118,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OptimisticLock(excluded = true)
 	private ResourceEncodingEnum myEncoding;
 
-	@OneToOne(
-			mappedBy = "myResourceHistoryTable",
-			cascade = {CascadeType.REMOVE})
-	private ResourceHistoryProvenanceEntity myProvenance;
 	// TODO: This was added in 6.8.0 - In the future we should drop ResourceHistoryProvenanceEntity
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
 	private String mySourceUri;
@@ -178,10 +173,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public void setResourceTextVc(String theResourceTextVc) {
 		myResourceTextVc = theResourceTextVc;
-	}
-
-	public ResourceHistoryProvenanceEntity getProvenance() {
-		return myProvenance;
 	}
 
 	public void addTag(ResourceTag theTag) {

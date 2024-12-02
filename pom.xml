@@ -1171,6 +1171,11 @@
 				<version>${caffeine_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.github.jsqlparser</groupId>
+				<artifactId>jsqlparser</artifactId>
+				<version>5.0</version>
+			</dependency>
+			<dependency>
 				<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
 				<artifactId>owasp-java-html-sanitizer</artifactId>
 				<version>20211018.2</version>
@@ -1361,7 +1366,7 @@
 			<dependency>
 				<groupId>org.jetbrains</groupId>
 				<artifactId>annotations</artifactId>
-				<version>23.0.0</version>
+				<version>24.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>

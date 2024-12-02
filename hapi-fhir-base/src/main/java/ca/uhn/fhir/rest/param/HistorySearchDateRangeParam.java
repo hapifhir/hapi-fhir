@@ -19,9 +19,22 @@
  */
 package ca.uhn.fhir.rest.param;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class HistorySearchDateRangeParam extends DateRangeParam {
+	/**
+	 * Constructor
+	 *
+	 * @since 8.0.0
+	 */
+	public HistorySearchDateRangeParam() {
+		this(Collections.emptyMap(), new DateRangeParam(), null);
+	}
+
+	/**
+	 * Constructor
+	 */
 	public HistorySearchDateRangeParam(
 			Map<String, String[]> theParameters, DateRangeParam theDateRange, Integer theOffset) {
 		super(theDateRange);

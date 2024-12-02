@@ -44,6 +44,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -52,6 +53,7 @@ import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -205,6 +207,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	private IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
 
 	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
@@ -562,7 +567,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				thePerformIndexing);
 
 		// Store the resource forced ID if necessary
-		JpaPid jpaPid = JpaPid.fromId(updatedEntity.getResourceId());
+		JpaPid jpaPid = updatedEntity.getPersistentId();
 
 		// Populate the resource with its actual final stored ID from the entity
 		theResource.setId(entity.getIdDt());
@@ -570,9 +575,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Pre-cache the resource ID
 		jpaPid.setAssociatedResourceId(entity.getIdType(myFhirContext));
 		String fhirId = entity.getFhirId();
-		if (fhirId == null) {
-			fhirId = Long.toString(entity.getId());
-		}
+		assert fhirId != null;
 		myIdHelperService.addResolvedPidToFhirIdAfterCommit(
 				jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
@@ -1016,7 +1019,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	protected ResourceTable updateEntityForDelete(
 			RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable theEntity) {
-		myResourceSearchUrlSvc.deleteByResId(theEntity.getId());
+		myResourceSearchUrlSvc.deleteByResId(theEntity.getPersistentId());
 		Date updateTime = new Date();
 		return updateEntity(theRequest, null, theEntity, updateTime, true, true, theTransactionDetails, false, true);
 	}
@@ -1261,7 +1264,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
 							myResourceName,
-							entity.getId(),
+							entity.getPersistentId(),
 							theSince,
 							theUntil,
 							theOffset,
@@ -1291,7 +1294,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
 							myResourceName,
-							entity.getId(),
+							JpaPid.fromId(entity.getId()),
 							theHistorySearchDateRangeParam.getLowerBoundAsInstant(),
 							theHistorySearchDateRangeParam.getUpperBoundAsInstant(),
 							theHistorySearchDateRangeParam.getOffset(),
@@ -1391,8 +1394,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaAdd(theMetaAdd, latestVersion, theRequest, transactionDetails);
 
 			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-					entity.getId(), entity.getVersion());
+			ResourceHistoryTable history =
+					myResourceHistoryTableDao.findForIdAndVersion(entity.getId(), entity.getVersion());
 			doMetaAdd(theMetaAdd, history, theRequest, transactionDetails);
 		}
 
@@ -1439,8 +1442,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} else {
 			doMetaDelete(theMetaDel, latestVersion, theRequest, transactionDetails);
 			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-					entity.getId(), entity.getVersion());
+			ResourceHistoryTable history =
+					myResourceHistoryTableDao.findForIdAndVersion(entity.getId(), entity.getVersion());
 			doMetaDelete(theMetaDel, history, theRequest, transactionDetails);
 		}
 
@@ -1705,7 +1708,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			ResourceTable entity, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageMode) {
 		ResourceHistoryTable historyEntity = entity.getCurrentVersionEntity();
 		if (historyEntity != null) {
-			reindexOptimizeStorageHistoryEntity(entity, historyEntity);
+			reindexOptimizeStorageHistoryEntityThenDetachIt(entity, historyEntity);
 			if (theOptimizeStorageMode == ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS) {
 				int pageSize = 100;
 				for (int page = 0; ((long) page * pageSize) < entity.getVersion(); page++) {
@@ -1715,38 +1718,43 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					// different pages as the underlying data gets updated.
 					PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("myId"));
 					Slice<ResourceHistoryTable> historyEntities =
-							myResourceHistoryTableDao.findForResourceIdAndReturnEntitiesAndFetchProvenance(
+							myResourceHistoryTableDao.findAllVersionsExceptSpecificForResourcePid(
 									pageRequest, entity.getId(), historyEntity.getVersion());
 
 					for (ResourceHistoryTable next : historyEntities) {
-						reindexOptimizeStorageHistoryEntity(entity, next);
+						reindexOptimizeStorageHistoryEntityThenDetachIt(entity, next);
 					}
 				}
 			}
 		}
 	}
 
-	private void reindexOptimizeStorageHistoryEntity(ResourceTable entity, ResourceHistoryTable historyEntity) {
-		boolean changed = false;
+	/**
+	 * Note that the entity will be detached after being saved if it has changed
+	 * in order to avoid growing the number of resources in memory to be too big
+	 */
+	private void reindexOptimizeStorageHistoryEntityThenDetachIt(
+			ResourceTable entity, ResourceHistoryTable historyEntity) {
 		if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC
 				|| historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
 			byte[] resourceBytes = historyEntity.getResource();
 			if (resourceBytes != null) {
 				String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
-				if (myResourceHistoryCalculator.conditionallyAlterHistoryEntity(entity, historyEntity, resourceText)) {
-					changed = true;
+				myResourceHistoryCalculator.conditionallyAlterHistoryEntity(entity, historyEntity, resourceText);
+			}
+		}
+		if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
+			if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
+				Long id = historyEntity.getId();
+				Optional<ResourceHistoryProvenanceEntity> provenanceEntityOpt =
+						myResourceHistoryProvenanceDao.findById(id);
+				if (provenanceEntityOpt.isPresent()) {
+					ResourceHistoryProvenanceEntity provenanceEntity = provenanceEntityOpt.get();
+					historyEntity.setSourceUri(provenanceEntity.getSourceUri());
+					historyEntity.setRequestId(provenanceEntity.getRequestId());
+					myResourceHistoryProvenanceDao.delete(provenanceEntity);
 				}
 			}
-		}
-		if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
-			if (historyEntity.getProvenance() != null) {
-				historyEntity.setSourceUri(historyEntity.getProvenance().getSourceUri());
-				historyEntity.setRequestId(historyEntity.getProvenance().getRequestId());
-				changed = true;
-			}
-		}
-		if (changed) {
-			myResourceHistoryTableDao.save(historyEntity);
 		}
 	}
 

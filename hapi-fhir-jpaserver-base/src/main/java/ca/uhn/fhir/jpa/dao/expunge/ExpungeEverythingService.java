@@ -321,10 +321,12 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 						nativeQuery.setMaxResults(800);
 						List pids = nativeQuery.getResultList();
 
-						nativeQuery = myEntityManager.createQuery("DELETE FROM " + theEntityType.getSimpleName()
-								+ " WHERE " + idProperty + " IN (:pids)");
-						nativeQuery.setParameter("pids", pids);
-						nativeQuery.executeUpdate();
+						if (!pids.isEmpty()) {
+							nativeQuery = myEntityManager.createQuery("DELETE FROM " + theEntityType.getSimpleName()
+									+ " WHERE " + idProperty + " IN (:pids)");
+							nativeQuery.setParameter("pids", pids);
+							nativeQuery.executeUpdate();
+						}
 						return pids.size();
 					});
 

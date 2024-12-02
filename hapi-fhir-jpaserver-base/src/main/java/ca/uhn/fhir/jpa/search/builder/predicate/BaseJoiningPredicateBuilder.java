@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -31,6 +32,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,15 +98,16 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 		}
 	}
 
-	public Condition createPredicateResourceIds(boolean theInverse, List<Long> theResourceIds) {
+	public Condition createPredicateResourceIds(boolean theInverse, Collection<JpaPid> theResourceIds) {
 		Validate.notNull(theResourceIds, "theResourceIds must not be null");
 
-		// Handle the _id parameter by adding it to the tail
-		Condition inResourceIds =
-				QueryParameterUtils.toEqualToOrInPredicate(getResourceIdColumn(), generatePlaceholders(theResourceIds));
+		Condition inResourceIds = QueryParameterUtils.toEqualToOrInPredicate(
+				getResourceIdColumn(), generatePlaceholders(JpaPid.toLongList(theResourceIds)));
 		if (theInverse) {
 			inResourceIds = new NotCondition(inResourceIds);
 		}
+
+		// Handle the _id parameter by adding it to the tail
 		return inResourceIds;
 	}
 
