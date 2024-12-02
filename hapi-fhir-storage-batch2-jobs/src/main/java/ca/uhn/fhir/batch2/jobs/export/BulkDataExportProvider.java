@@ -802,5 +802,4 @@ public class BulkDataExportProvider {
 	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
 		myDaoRegistry = theDaoRegistry;
 	}
-
 }

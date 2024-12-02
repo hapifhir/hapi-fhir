@@ -15,12 +15,12 @@ public class BulkDataExportUtil {
 	private BulkDataExportUtil() {}
 
 	private static final Set<FhirVersionEnum> PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE = Set.of(
-		FhirVersionEnum.DSTU2,
-		FhirVersionEnum.DSTU2_1,
-		FhirVersionEnum.DSTU2_HL7ORG,
-		FhirVersionEnum.DSTU3,
-		FhirVersionEnum.R4,
-		FhirVersionEnum.R4B);
+			FhirVersionEnum.DSTU2,
+			FhirVersionEnum.DSTU2_1,
+			FhirVersionEnum.DSTU2_HL7ORG,
+			FhirVersionEnum.DSTU3,
+			FhirVersionEnum.R4,
+			FhirVersionEnum.R4B);
 
 	public static void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails, String theOperationName) {
 		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
@@ -31,7 +31,7 @@ public class BulkDataExportUtil {
 	}
 
 	public static boolean isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
-		FhirVersionEnum theFhirVersionEnum) {
+			FhirVersionEnum theFhirVersionEnum) {
 		return PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE.contains(theFhirVersionEnum);
 	}
 }
