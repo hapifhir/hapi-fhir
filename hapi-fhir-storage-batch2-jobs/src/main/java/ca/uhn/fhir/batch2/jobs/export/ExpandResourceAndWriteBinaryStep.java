@@ -191,7 +191,7 @@ public class ExpandResourceAndWriteBinaryStep
 				allIds = allIds.subList(batchSize, allIds.size());
 
 				PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
-						.withRequest(null)
+						.withSystemRequestOnPartition(theRequestPartitionId)
 						.execute(() -> myIdHelperService.translatePidsToForcedIds(nextBatchOfPids));
 
 				TokenOrListParam idListParam = new TokenOrListParam();

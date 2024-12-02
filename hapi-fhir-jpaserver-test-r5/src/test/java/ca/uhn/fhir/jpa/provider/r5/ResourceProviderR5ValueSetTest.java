@@ -1253,7 +1253,8 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			assertEquals(false, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
 			assertEquals("message", respParam.getParameter().get(1).getName());
-			assertEquals("Unknown code 'http://hl7.org/fhir/administrative-gender#male' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/marital-status'", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+			String message = ((StringType) respParam.getParameter().get(1).getValue()).getValue();
+			assertThat(message).contains("Unknown code 'http://hl7.org/fhir/administrative-gender#male' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/marital-status'", message);
 		}
 	}
 

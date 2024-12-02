@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6409
+title: "When performing a `_history` query using the `_at` parameter, the time value
+    is now converted to a zoned-date before being passed to the database. This should
+    avoid conflicts around date changes on some databases.
+    "

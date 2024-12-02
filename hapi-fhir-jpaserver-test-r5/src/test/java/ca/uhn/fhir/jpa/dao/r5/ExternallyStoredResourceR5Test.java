@@ -52,7 +52,7 @@ public class ExternallyStoredResourceR5Test extends BaseJpaR5Test {
 		runInTransaction(()->{
 			ResourceTable resource = myResourceTableDao.getReferenceById(id.getIdPartAsLong());
 			assertNotNull(resource);
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1L);
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 1L);
 			assertNotNull(history);
 			assertEquals(ResourceEncodingEnum.ESR, history.getEncoding());
 			assertEquals(MY_PROVIDER_ID + ":" + ADDRESS_123, history.getResourceTextVc());

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PARTITION_IDENTIFY_ANY;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -175,8 +177,10 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 	}
 
-	@Test
-	public void testSearchByProfile_VersionedMode() {
+	@ParameterizedTest
+	@EnumSource(value = JpaStorageSettings.TagStorageModeEnum.class, names = {"NON_VERSIONED", "VERSIONED"})
+	public void testSearchByProfile_VersionedAndNonVersionedMode(JpaStorageSettings.TagStorageModeEnum theTagStorageModeEnum) {
+		myStorageSettings.setTagStorageMode(theTagStorageModeEnum);
 
 		// Put a tag in so we can search for it
 		String code = "http://" + UUID.randomUUID();
@@ -185,24 +189,33 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 		myMemoryCacheService.invalidateAllCaches();
 
+		logAllResourceTags();
+		logAllResourceHistoryTags();
+
 		// Search
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 			.add(Constants.PARAM_PROFILE, new TokenParam(code));
 		IBundleProvider outcome = myPatientDao.search(map, mySrd);
-		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(3, myCaptureQueriesListener.logSelectQueries().size());
 		// Query 1 - Find resources: Make sure we search for tag type+system+code always
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
 		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) INNER JOIN HFJ_TAG_DEF t2 ON (t1.TAG_ID = t2.TAG_ID) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t2.TAG_TYPE = ?) AND (t2.TAG_SYSTEM = ?) AND (t2.TAG_CODE = ?)))", sql);
-		// Query 2 - Load resourece contents
+		// Query 2 - Load resource contents
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
-		assertThat(sql).contains("where rsv1_0.RES_ID in (?)");
-		// Query 3 - Load tags and defintions
+		assertThat(sql).contains("where rht1_0.RES_ID in (?)");
+		// Query 3 - Load tags and definitions
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(false, false);
-		assertThat(sql).contains("from HFJ_RES_TAG rt1_0 join HFJ_TAG_DEF");
+		if (theTagStorageModeEnum == JpaStorageSettings.TagStorageModeEnum.VERSIONED) {
+			assertThat(sql).contains("from HFJ_HISTORY_TAG rht1_0 join HFJ_TAG_DEF");
+		} else {
+			assertThat(sql).contains("from HFJ_RES_TAG rt1_0 join HFJ_TAG_DEF");
+		}
 
 		assertThat(toUnqualifiedVersionlessIds(outcome)).containsExactly(id);
 
+		List<String> profileDeclarations = outcome.getResources(0, 1).get(0).getMeta().getProfile().stream().map(t -> t.getValueAsString()).collect(Collectors.toList());
+		assertThat(profileDeclarations).containsExactly(code);
 	}
 
 	@Test
@@ -234,7 +247,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_URI t0 WHERE (t0.HASH_URI = ?)", sql);
 		// Query 2 - Load resourece contents
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
-		assertThat(sql).contains("where rsv1_0.RES_ID in (?)");
+		assertThat(sql).contains("where rht1_0.RES_ID in (?)");
 
 		assertThat(toUnqualifiedVersionlessIds(outcome)).containsExactly(id);
 
