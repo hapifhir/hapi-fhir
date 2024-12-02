@@ -256,22 +256,22 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@CsvSource({
-		"Pre-existing with cache,    true  ,true,  false, ",
-		"Pre-existing without cache, true  ,false, false, ",
-		"No match with cache,        false ,true,  false, ",
-		"No match without cache,     false ,false, false, ",
-		"Pre-existing with cache,    true  ,true,  true,  ",
-		"Pre-existing without cache, true  ,false, true,  ",
-		"No match with cache,        false ,true,  true,  ",
-		"No match without cache,     false ,false, true,  ",
-		"Pre-existing with cache,    true  ,true,  true,  0",
-		"Pre-existing without cache, true  ,false, true,  0",
-		"No match with cache,        false ,true,  true,  0",
-		"No match without cache,     false ,false, true,  0",
-		"Pre-existing with cache,    true  ,true,  false, 0",
-		"Pre-existing without cache, true  ,false, false, 0",
-		"No match with cache,        false ,true,  false, 0",
-		"No match without cache,     false ,false, false, 0",
+		"Pre-existing with cache ttf,     true  ,true,  false, ",
+		"Pre-existing without cache tff,  true  ,false, false, ",
+		"No match with cache ftf,         false ,true,  false, ",
+		"No match without cache fff,      false ,false, false, ",
+		"Pre-existing with cache ttt,     true  ,true,  true,  ",
+		"Pre-existing without cache tft,  true  ,false, true,  ",
+		"No match with cache ftt,         false ,true,  true,  ",
+		"No match without cache fft,      false ,false, true,  ",
+		"Pre-existing with cache ttt0,    true  ,true,  true,  0",
+		"Pre-existing without cache tft0, true  ,false, true,  0",
+		"No match with cache ftt0,        false ,true,  true,  0",
+		"No match without cache fft0,     false ,false, true,  0",
+		"Pre-existing with cache ttf0,    true  ,true,  false, 0",
+		"Pre-existing without cache tff0, true  ,false, false, 0",
+		"No match with cache ftf0,        false ,true,  false, 0",
+		"No match without cache fff0,     false ,false, false, 0",
 	})
 	public void testRepeatedInlineMatchUrls(@SuppressWarnings("unused") String theName, boolean theTargetAlreadyExists, boolean theMatchUrlCacheEnabled, boolean thePartitioningEnabled, Integer theDefaultPartitionId) {
 		if (thePartitioningEnabled) {
