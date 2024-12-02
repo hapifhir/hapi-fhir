@@ -32,6 +32,7 @@ public abstract class MergeOperationParameters {
 	private IBaseReference mySourceResource;
 	private IBaseReference myTargetResource;
 	private boolean myPreview;
+	private boolean myDeleteSource;
 	private IBaseResource myResultResource;
 
 	public abstract String getSourceResourceParameterName();
@@ -68,12 +69,20 @@ public abstract class MergeOperationParameters {
 		this.myTargetResourceIdentifiers = theTargetIdentifiers;
 	}
 
-	public boolean isPreview() {
+	public boolean getPreview() {
 		return myPreview;
 	}
 
 	public void setPreview(boolean thePreview) {
 		this.myPreview = thePreview;
+	}
+
+	public boolean getDeleteSource() {
+		return myDeleteSource;
+	}
+
+	public void setDeleteSource(boolean theDeleteSource) {
+		this.myDeleteSource = theDeleteSource;
 	}
 
 	public IBaseResource getResultResource() {
