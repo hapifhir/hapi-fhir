@@ -48,6 +48,7 @@ public class MdmQueueConsumerLoader {
 		myMdmMessageHandler = theMdmMessageHandler;
 
 		if (myMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY) {
+			ourLog.info("MDM running in {} mode. MDM channel consumer disabled.", myMdmSettings.getMode());
 			return;
 		}
 
