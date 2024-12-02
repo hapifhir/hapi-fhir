@@ -59,6 +59,7 @@ public class ResourceMergeService {
 		myDao = thePatientDao;
 		myFhirContext = myDao.getContext();
 	}
+
 	/**
 	 * Implementation of the $merge operation for resources
 	 * @param theMergeOperationParameters	the merge operation parameters
@@ -127,7 +128,7 @@ public class ResourceMergeService {
 			return;
 		}
 
-		if (theMergeOperationParameters.isPreview()) {
+		if (theMergeOperationParameters.getPreview()) {
 			addInfoToOperationOutcome(operationOutcome, "Preview only merge operation - no issues detected");
 			// TODO we should also return the resulting target patient in the response
 			return;
@@ -143,7 +144,11 @@ public class ResourceMergeService {
 			updateTargetResourceAfterRefsUpdated(targetResource, sourceResource, theRequestDetails);
 		}
 
-		updateSourceResourceAfterRefsUpdated(sourceResource, targetResource, theRequestDetails);
+		if (theMergeOperationParameters.getDeleteSource()) {
+			deleteSourceResourceAfterRefsUpdated(sourceResource, theRequestDetails);
+		} else {
+			updateSourceResourceAfterRefsUpdated(sourceResource, targetResource, theRequestDetails);
+		}
 
 		addInfoToOperationOutcome(operationOutcome, "Merge operation completed successfully.");
 	}
@@ -163,6 +168,8 @@ public class ResourceMergeService {
 			return true;
 		}
 
+		boolean isValid = true;
+
 		Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
 
 		// validate the result resource's  id as same as the target resource
@@ -170,10 +177,10 @@ public class ResourceMergeService {
 			String msg = String.format(
 					"'%s' must have the same versionless id as the actual resolved target resource. "
 							+ "The actual resolved target resource's id is: '%s'",
-					theResolvedTargetResource.getIdElement().toVersionless().getValue(),
-					theMergeOperationParameters.getResultResourceParameterName());
+					theMergeOperationParameters.getResultResourceParameterName(),
+					theResolvedTargetResource.getIdElement().toVersionless().getValue());
 			addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
-			return false;
+			isValid = false;
 		}
 
 		// validate the result resource contains the identifiers provided in the target identifiers param
@@ -184,7 +191,7 @@ public class ResourceMergeService {
 					theMergeOperationParameters.getResultResourceParameterName(),
 					theMergeOperationParameters.getTargetIdentifiersParameterName());
 			addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
-			return false;
+			isValid = false;
 		}
 
 		if (!validateResultResourceHasReplacesLinkToSourceResource(
@@ -192,10 +199,10 @@ public class ResourceMergeService {
 				theResolvedSourceResource,
 				theMergeOperationParameters.getResultResourceParameterName(),
 				theOperationOutcome)) {
-			return false;
+			isValid = false;
 		}
 
-		return true;
+		return isValid;
 	}
 
 	private boolean hasAllIdentifiers(Patient theResource, List<CanonicalIdentifier> theIdentifiers) {
@@ -222,7 +229,12 @@ public class ResourceMergeService {
 		// the result resource must have the replaces link set to the source resource
 		List<Reference> replacesLinks = getLinksOfType(theResultResource, Patient.LinkType.REPLACES);
 		List<Reference> replacesLinkToSourceResource = replacesLinks.stream()
-				.filter(r -> r.getReference() != null && r.getReference().equals(theResolvedSourceResource.getId()))
+				.filter(r -> r.getReference() != null
+						&& r.getReference()
+								.equals(theResolvedSourceResource
+										.getIdElement()
+										.toVersionless()
+										.getValue()))
 				.collect(Collectors.toList());
 
 		if (replacesLinkToSourceResource.isEmpty()) {

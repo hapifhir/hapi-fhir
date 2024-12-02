@@ -276,6 +276,8 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					IBaseReference theTargetPatient,
 			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PREVIEW, typeName = "boolean", max = 1)
 					IPrimitiveType<Boolean> thePreview,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_DELETE_SOURCE, typeName = "boolean", max = 1)
+					IPrimitiveType<Boolean> theDeleteSource,
 			@OperationParam(name = ProviderConstants.OPERATION_MERGE_RESULT_PATIENT, max = 1)
 					IBaseResource theResultPatient) {
 
@@ -287,6 +289,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					theSourcePatient,
 					theTargetPatient,
 					thePreview,
+					theDeleteSource,
 					theResultPatient);
 
 			IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) getDao();
@@ -314,6 +317,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			IBaseReference theSourcePatient,
 			IBaseReference theTargetPatient,
 			IPrimitiveType<Boolean> thePreview,
+			IPrimitiveType<Boolean> theDeleteSource,
 			IBaseResource theResultPatient) {
 		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 		if (theSourcePatientIdentifier != null) {
@@ -331,6 +335,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 		mergeOperationParameters.setSourceResource(theSourcePatient);
 		mergeOperationParameters.setTargetResource(theTargetPatient);
 		mergeOperationParameters.setPreview(thePreview != null && thePreview.getValue());
+		mergeOperationParameters.setDeleteSource(theDeleteSource != null && theDeleteSource.getValue());
 		mergeOperationParameters.setResultResource(theResultPatient);
 
 		return mergeOperationParameters;
