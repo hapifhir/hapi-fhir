@@ -76,7 +76,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 			IFhirResourceDao<?> resDao = myDaoRegistry.getResourceDao(resourceType);
 			if (resDao == null) {
 				throw new InternalErrorException(
-						Msg.code(2587) + "No DAO registered for resource type: " + resourceType);
+						Msg.code(2588) + "No DAO registered for resource type: " + resourceType);
 			}
 
 			// patch each resource of resourceType
