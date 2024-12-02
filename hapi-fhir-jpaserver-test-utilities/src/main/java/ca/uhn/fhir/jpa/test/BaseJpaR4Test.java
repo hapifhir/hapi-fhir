@@ -703,7 +703,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	protected void relocateResourceTextToCompressedColumn(Long theResourcePid, Long theVersion) {
 		runInTransaction(()->{
-			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourcePid, theVersion);
+			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersion(theResourcePid, theVersion);
 			byte[] contents = GZipUtil.compress(historyEntity.getResourceTextVc());
 			myResourceHistoryTableDao.updateNonInlinedContents(contents, historyEntity.getId());
 		});

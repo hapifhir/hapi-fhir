@@ -153,7 +153,7 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 		if (myCodeSystems != null) {
 			retVal.addAll(myCodeSystems.values());
 		}
-		if (myStructureDefinitionResources != null) {
+		if (myStructureDefinitions != null) {
 			retVal.addAll(myStructureDefinitions.values());
 		}
 		if (myValueSets != null) {

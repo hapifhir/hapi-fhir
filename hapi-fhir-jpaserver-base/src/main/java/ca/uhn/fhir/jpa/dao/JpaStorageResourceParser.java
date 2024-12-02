@@ -26,9 +26,9 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -37,9 +37,9 @@ import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -71,12 +71,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.decodeResource;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaStorageResourceParser implements IJpaStorageResourceParser {
@@ -91,6 +92,9 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
+
+	@Autowired
+	private IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -115,14 +119,14 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	public <R extends IBaseResource> R toResource(
 			Class<R> theResourceType,
 			IBaseResourceEntity theEntity,
-			Collection<ResourceTag> theTagList,
+			Collection<BaseTag> theTagList,
 			boolean theForHistoryOperation) {
 
 		// 1. get resource, it's encoding and the tags if any
 		byte[] resourceBytes;
 		String resourceText;
 		ResourceEncodingEnum resourceEncoding;
-		@Nullable Collection<? extends BaseTag> tagList = Collections.emptyList();
+		@Nullable Collection<? extends BaseTag> tagList;
 		long version;
 		String provenanceSourceUri = null;
 		String provenanceRequestId = null;
@@ -132,25 +136,42 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			resourceBytes = history.getResource();
 			resourceText = history.getResourceTextVc();
 			resourceEncoding = history.getEncoding();
-			switch (myStorageSettings.getTagStorageMode()) {
-				case VERSIONED:
-				default:
-					if (history.isHasTags()) {
-						tagList = history.getTags();
-					}
-					break;
-				case NON_VERSIONED:
-					if (history.getResourceTable().isHasTags()) {
-						tagList = history.getResourceTable().getTags();
-					}
-					break;
-				case INLINE:
-					tagList = null;
+
+			// For search results we get the list of tags passed in because we load it
+			// in bulk for all resources we're going to return, but for read results
+			// we don't get the list passed in so we need to load it here.
+			tagList = theTagList;
+			if (tagList == null) {
+				switch (myStorageSettings.getTagStorageMode()) {
+					case VERSIONED:
+					default:
+						if (history.isHasTags()) {
+							tagList = history.getTags();
+						}
+						break;
+					case NON_VERSIONED:
+						if (history.getResourceTable().isHasTags()) {
+							tagList = history.getResourceTable().getTags();
+						}
+						break;
+					case INLINE:
+						tagList = null;
+				}
 			}
+
 			version = history.getVersion();
-			if (history.getProvenance() != null) {
-				provenanceRequestId = history.getProvenance().getRequestId();
-				provenanceSourceUri = history.getProvenance().getSourceUri();
+			provenanceSourceUri = history.getSourceUri();
+			provenanceRequestId = history.getRequestId();
+			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId)) {
+				if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
+					Optional<ResourceHistoryProvenanceEntity> provenanceOpt =
+							myResourceHistoryProvenanceDao.findById(history.getId());
+					if (provenanceOpt.isPresent()) {
+						ResourceHistoryProvenanceEntity provenance = provenanceOpt.get();
+						provenanceRequestId = provenance.getRequestId();
+						provenanceSourceUri = provenance.getSourceUri();
+					}
+				}
 			}
 		} else if (theEntity instanceof ResourceTable) {
 			ResourceTable resource = (ResourceTable) theEntity;
@@ -159,14 +180,13 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 				history = resource.getCurrentVersionEntity();
 			} else {
 				version = theEntity.getVersion();
-				history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
+				history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getResourceId(), version);
 				((ResourceTable) theEntity).setCurrentVersionEntity(history);
 
 				while (history == null) {
 					if (version > 1L) {
 						version--;
-						history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-								theEntity.getId(), version);
+						history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getResourceId(), version);
 					} else {
 						return null;
 					}
@@ -181,36 +201,28 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 				case NON_VERSIONED:
 					if (resource.isHasTags()) {
 						tagList = resource.getTags();
+					} else {
+						tagList = List.of();
 					}
 					break;
 				case INLINE:
+				default:
 					tagList = null;
 					break;
 			}
 			version = history.getVersion();
-			if (history.getProvenance() != null) {
-				provenanceRequestId = history.getProvenance().getRequestId();
-				provenanceSourceUri = history.getProvenance().getSourceUri();
-			}
-		} else if (theEntity instanceof ResourceSearchView) {
-			// This is the search View
-			ResourceSearchView view = (ResourceSearchView) theEntity;
-			resourceBytes = view.getResource();
-			resourceText = view.getResourceTextVc();
-			resourceEncoding = view.getEncoding();
-			version = view.getVersion();
-			provenanceRequestId = view.getProvenanceRequestId();
-			provenanceSourceUri = view.getProvenanceSourceUri();
-			switch (myStorageSettings.getTagStorageMode()) {
-				case VERSIONED:
-				case NON_VERSIONED:
-					if (theTagList != null) {
-						tagList = theTagList;
+			provenanceSourceUri = history.getSourceUri();
+			provenanceRequestId = history.getRequestId();
+			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId)) {
+				if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
+					Optional<ResourceHistoryProvenanceEntity> provenanceOpt =
+							myResourceHistoryProvenanceDao.findById(history.getId());
+					if (provenanceOpt.isPresent()) {
+						ResourceHistoryProvenanceEntity provenance = provenanceOpt.get();
+						provenanceRequestId = provenance.getRequestId();
+						provenanceSourceUri = provenance.getSourceUri();
 					}
-					break;
-				case INLINE:
-					tagList = null;
-					break;
+				}
 			}
 		} else {
 			// something wrong
@@ -277,7 +289,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		} else if (theResourceEncoding != ResourceEncodingEnum.DEL) {
 
 			IParser parser = new TolerantJsonParser(
-					getContext(theEntity.getFhirVersion()), LENIENT_ERROR_HANDLER, theEntity.getId());
+					getContext(theEntity.getFhirVersion()), LENIENT_ERROR_HANDLER, theEntity.getResourceId());
 
 			try {
 				retVal = parser.parseResource(theResourceType, theDecodedResourceText);
@@ -519,8 +531,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 		theResourceTarget.setId(id);
 		if (theResourceTarget instanceof IResource) {
-			ResourceMetadataKeyEnum.VERSION.put((IResource) theResourceTarget, id.getVersionIdPart());
-			ResourceMetadataKeyEnum.UPDATED.put((IResource) theResourceTarget, theEntitySource.getUpdated());
+			ResourceMetadataKeyEnum.VERSION.put(theResourceTarget, id.getVersionIdPart());
+			ResourceMetadataKeyEnum.UPDATED.put(theResourceTarget, theEntitySource.getUpdated());
 		} else {
 			IBaseMetaType meta = theResourceTarget.getMeta();
 			meta.setVersionId(id.getVersionIdPart());

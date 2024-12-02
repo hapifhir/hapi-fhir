@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
@@ -140,7 +141,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR5Config.class})
+@ContextConfiguration(classes = {TestR5Config.class, TestDaoSearch.Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
@@ -419,12 +420,15 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach()
 	public void afterCleanupDao() {
-		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
-		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
-		myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
-		myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
-		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
+		JpaStorageSettings defaults = new JpaStorageSettings();
+		myStorageSettings.setAccessMetaSourceInformationFromProvenanceTable(defaults.isAccessMetaSourceInformationFromProvenanceTable());
+		myStorageSettings.setAllowContainsSearches(defaults.isAllowContainsSearches());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(defaults.isEnforceReferentialIntegrityOnDelete());
+		myStorageSettings.setExpireSearchResults(defaults.isExpireSearchResults());
+		myStorageSettings.setExpireSearchResultsAfterMillis(defaults.getExpireSearchResultsAfterMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(defaults.getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setSuppressUpdatesWithNoChange(defaults.isSuppressUpdatesWithNoChange());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaults.isAutoCreatePlaceholderReferenceTargets());
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);

@@ -177,7 +177,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 
 		List<String> messages = new ArrayList<>();
 
-		JpaPid pid = JpaPid.fromId(entity.getId());
+		JpaPid pid = entity.getPersistentId();
 		ReindexOutcome outcome = dao.reindex(pid, new ReindexParameters(), theRequestDetails, new TransactionDetails());
 		messages.add("Reindex completed in " + sw);
 

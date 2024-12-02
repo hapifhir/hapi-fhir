@@ -57,7 +57,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -561,8 +560,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			} else {
 				ResourceHistoryTable currentHistoryVersion = theEntity.getCurrentVersionEntity();
 				if (currentHistoryVersion == null) {
-					currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-							theEntity.getId(), theEntity.getVersion());
+					currentHistoryVersion =
+							myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
 				}
 				if (currentHistoryVersion == null || !currentHistoryVersion.hasResource()) {
 					changed = true;
@@ -1083,7 +1082,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 */
 		if (thePerformIndexing) {
 			if (newParams == null) {
-				myExpungeService.deleteAllSearchParams(JpaPid.fromId(entity.getId()));
+				myExpungeService.deleteAllSearchParams(entity.getPersistentId());
 				entity.clearAllParamsPopulated();
 			} else {
 
@@ -1315,8 +1314,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			 * this could return null if the current resourceVersion has been expunged
 			 * in which case we'll still create a new one
 			 */
-			historyEntry = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-					theEntity.getResourceId(), resourceVersion - 1);
+			historyEntry =
+					myResourceHistoryTableDao.findForIdAndVersion(theEntity.getResourceId(), resourceVersion - 1);
 			if (historyEntry != null) {
 				reusingHistoryEntity = true;
 				theEntity.populateHistoryEntityVersionAndDates(historyEntry);
@@ -1374,29 +1373,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		boolean haveSource = isNotBlank(source) && shouldStoreSource;
 		boolean haveRequestId = isNotBlank(requestId) && shouldStoreRequestId;
 		if (haveSource || haveRequestId) {
-			ResourceHistoryProvenanceEntity provenance = null;
-			if (reusingHistoryEntity) {
-				/*
-				 * If version history is disabled, then we may be reusing
-				 * a previous history entity. If that's the case, let's try
-				 * to reuse the previous provenance entity too.
-				 */
-				provenance = historyEntry.getProvenance();
-			}
-			if (provenance == null) {
-				provenance = historyEntry.toProvenance();
-			}
-			provenance.setResourceHistoryTable(historyEntry);
-			provenance.setResourceTable(theEntity);
-			provenance.setPartitionId(theEntity.getPartitionId());
 			if (haveRequestId) {
 				String persistedRequestId = left(requestId, Constants.REQUEST_ID_LENGTH);
-				provenance.setRequestId(persistedRequestId);
 				historyEntry.setRequestId(persistedRequestId);
 			}
 			if (haveSource) {
 				String persistedSource = left(source, ResourceHistoryTable.SOURCE_URI_LENGTH);
-				provenance.setSourceUri(persistedSource);
 				historyEntry.setSourceUri(persistedSource);
 			}
 			if (theResource != null) {
@@ -1406,8 +1388,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						shouldStoreRequestId ? requestId : null,
 						theResource);
 			}
-
-			myEntityManager.persist(provenance);
 		}
 	}
 
