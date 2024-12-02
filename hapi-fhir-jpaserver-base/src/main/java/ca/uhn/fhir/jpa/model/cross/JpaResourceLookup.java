@@ -29,16 +29,34 @@ import java.util.Date;
 public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 
 	private final String myResourceType;
-	private final Long myResourcePid;
+	private final JpaPid myResourcePid;
 	private final Date myDeletedAt;
 	private final PartitionablePartitionId myPartitionablePartitionId;
+	private final String myFhirId;
 
 	public JpaResourceLookup(
 			String theResourceType,
+			String theFhirId,
 			Long theResourcePid,
 			Date theDeletedAt,
 			PartitionablePartitionId thePartitionablePartitionId) {
 		myResourceType = theResourceType;
+		myFhirId = theFhirId;
+		myDeletedAt = theDeletedAt;
+		myPartitionablePartitionId = thePartitionablePartitionId;
+
+		myResourcePid = JpaPid.fromId(theResourcePid);
+		myResourcePid.setPartitionablePartitionId(myPartitionablePartitionId);
+	}
+
+	public JpaResourceLookup(
+			String theResourceType,
+			String theFhirId,
+			JpaPid theResourcePid,
+			Date theDeletedAt,
+			PartitionablePartitionId thePartitionablePartitionId) {
+		myResourceType = theResourceType;
+		myFhirId = theFhirId;
 		myResourcePid = theResourcePid;
 		myDeletedAt = theDeletedAt;
 		myPartitionablePartitionId = thePartitionablePartitionId;
@@ -50,16 +68,18 @@ public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 	}
 
 	@Override
+	public String getFhirId() {
+		return myFhirId;
+	}
+
+	@Override
 	public Date getDeleted() {
 		return myDeletedAt;
 	}
 
 	@Override
 	public JpaPid getPersistentId() {
-		JpaPid jpaPid = JpaPid.fromId(myResourcePid);
-		jpaPid.setPartitionablePartitionId(myPartitionablePartitionId);
-
-		return jpaPid;
+		return myResourcePid;
 	}
 
 	@Override

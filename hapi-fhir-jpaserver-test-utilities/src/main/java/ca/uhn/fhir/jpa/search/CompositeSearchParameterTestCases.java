@@ -223,7 +223,7 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		searchParameter.addComponent(
 				componentFrom("http://hl7.org/fhir/SearchParameter/RiskAssessment-probability", "RiskAssessment"));
 		searchParameter.setExtension(List.of(theExtension));
-		doCreateResource(searchParameter);
+		ourLog.info("Created SP: {}", doCreateResource(searchParameter).toUnqualifiedVersionless());
 
 		// enable this sp.
 		myTestDaoSearch.getSearchParamRegistry().forceRefresh();

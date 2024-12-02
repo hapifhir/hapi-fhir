@@ -895,7 +895,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		String resultingQueryNotFormatted = queries.get(0);
 		assertThat(StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization")).as(resultingQueryNotFormatted).isEqualTo(1);
-		assertThat(resultingQueryNotFormatted).contains("TARGET_RESOURCE_ID IN ('" + ids.get(0) + "','" + ids.get(1) + "','" + ids.get(2) + "','" + ids.get(3) + "','" + ids.get(4) + "')");
+		assertThat(resultingQueryNotFormatted).matches("^SELECT .* WHERE .*TARGET_RESOURCE_ID IN \\(.*\\)$");
 
 		// Ensure that the search actually worked
 		assertEquals(5, search.size().intValue());
@@ -958,7 +958,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertThat(selectQuery).contains("where rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B'");
+			assertThat(selectQuery).contains("where (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B')");
 			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
 			assertThat(selectQuery).contains("where (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='A')");
 			assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
@@ -977,7 +977,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertThat(outcome.getResources(0, 999)).hasSize(2);
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertThat(selectQuery).contains("where (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='A' or rt1_0.RES_ID='" + obs2id + "')");
+			assertThat(selectQuery).containsAnyOf(
+				"where (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='A' or rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='" + obs2id + "')",
+				"where (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='" + obs2id + "' or rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='A')"
+			);
 			assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		}
 

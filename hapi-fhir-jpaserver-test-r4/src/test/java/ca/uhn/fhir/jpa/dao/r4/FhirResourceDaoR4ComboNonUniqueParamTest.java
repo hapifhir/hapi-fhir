@@ -423,8 +423,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 		myCaptureQueriesListener.logSelectQueries();
 		String expected;
-		expected = "select rt1_0.RES_ID,rt1_0.RES_TYPE,rt1_0.FHIR_ID from HFJ_RESOURCE rt1_0 where rt1_0.FHIR_ID='my-org'";
-		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false)).contains("where (rt1_0.FHIR_ID='my-org')");
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
 		assertThat(sql).contains("SP_VALUE_NORMALIZED LIKE 'FAMILY1%'");
 		assertThat(sql).contains("t1.TARGET_RESOURCE_ID");

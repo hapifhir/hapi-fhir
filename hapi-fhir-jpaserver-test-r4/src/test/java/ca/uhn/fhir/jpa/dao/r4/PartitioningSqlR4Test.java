@@ -429,7 +429,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, tags.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_VER
-			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(patientId, 1L);
+			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(patientId, 1L);
 			assertEquals(myPartitionId, version.getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, version.getPartitionId().getPartitionDate());
 
@@ -438,11 +438,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(1, historyTags.size());
 			assertEquals(myPartitionId, historyTags.get(0).getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, historyTags.get(0).getPartitionId().getPartitionDate());
-
-			// HFJ_RES_VER_PROV
-			assertNotNull(version.getProvenance());
-			assertEquals(myPartitionId, version.getProvenance().getPartitionId().getPartitionId().intValue());
-			assertLocalDateFromDbMatches(myPartitionDate, version.getProvenance().getPartitionId().getPartitionDate());
 
 			// HFJ_SPIDX_STRING
 			List<ResourceIndexedSearchParamString> strings = myResourceIndexedSearchParamStringDao.findAllForResourceId(patientId);
@@ -517,7 +512,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, tags.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_VER
-			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(patientId, 1L);
+			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(patientId, 1L);
             assertNull(version.getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, version.getPartitionId().getPartitionDate());
 
@@ -526,11 +521,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(1, historyTags.size());
             assertNull(historyTags.get(0).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, historyTags.get(0).getPartitionId().getPartitionDate());
-
-			// HFJ_RES_VER_PROV
-			assertNotNull(version.getProvenance());
-            assertNull(version.getProvenance().getPartitionId().getPartitionId());
-			assertLocalDateFromDbMatches(myPartitionDate, version.getProvenance().getPartitionId().getPartitionDate());
 
 			// HFJ_SPIDX_STRING
 			List<ResourceIndexedSearchParamString> strings = myResourceIndexedSearchParamStringDao.findAllForResourceId(patientId);
@@ -778,7 +768,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 			// HFJ_RES_VER
 			int version = 2;
-			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(patientId, version);
+			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersion(patientId, version);
 			assertEquals(myPartitionId, resVer.getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, resVer.getPartitionId().getPartitionDate());
 
@@ -789,12 +779,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, historyTags.get(0).getPartitionId().getPartitionDate());
 			assertEquals(myPartitionId, historyTags.get(1).getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, historyTags.get(1).getPartitionId().getPartitionDate());
-
-			// HFJ_RES_VER_PROV
-			assertNotNull(resVer.getProvenance());
-			assertNotNull(resVer.getPartitionId());
-			assertEquals(myPartitionId, resVer.getProvenance().getPartitionId().getPartitionId().intValue());
-			assertLocalDateFromDbMatches(myPartitionDate, resVer.getProvenance().getPartitionId().getPartitionDate());
 
 			// HFJ_SPIDX_STRING
 			List<ResourceIndexedSearchParamString> strings = myResourceIndexedSearchParamStringDao.findAllForResourceId(patientId);
@@ -856,7 +840,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 			// HFJ_RES_VER
 			int version = 2;
-			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(patientId, version);
+			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersion(patientId, version);
 			assertEquals(myPartitionId, resVer.getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, resVer.getPartitionId().getPartitionDate());
 
@@ -2923,7 +2907,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(4, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		/*
 		 * Third time with mass ingestion mode enabled
@@ -2940,6 +2924,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		myCaptureQueriesListener.logDeleteQueries();
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		/*
@@ -3003,7 +2988,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(26, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(326, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(326, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 

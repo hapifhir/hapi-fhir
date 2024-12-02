@@ -1,0 +1,11 @@
+---
+type: perf
+issue: 6409
+title: "The JPA server will no longer use the HFJ_RES_VER_PROV table to store and index values from
+    the `Resource.meta.source` element. Beginning in HAPI FHIR 6.8.0 (and Smile CDR 2023.08.R01), a
+    new pair of columns have been used to store data for this element, so this change only affects
+    data which was stored in HAPI FHIR prior to version 6.8.0 (released August 2023). If you have
+    FHIR resources which were stored in a JPA server prior to this version, and you use the
+    Resource.meta.source element and/or the `_source` search parameter, you should perform a complete
+    reindex of your server to ensure that data is not lost. See the upgrade notes for more information.
+    "
