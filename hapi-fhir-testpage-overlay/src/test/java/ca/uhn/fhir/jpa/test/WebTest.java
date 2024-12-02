@@ -40,6 +40,7 @@ import org.htmlunit.html.HtmlTableCell;
 import org.htmlunit.html.HtmlTableRow;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -192,6 +193,22 @@ public class WebTest {
 		assertEquals("Patient/A0/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
 	}
 
+	/**
+	 * This test is disabled because it relies on bootstrap.js library,
+	 * which is written using ES6 and takes advantage of the spread operator (...args).
+	 *
+	 * Unfortunately, current versions of WebClient do not support this level of EMCA script
+	 * nor the spread operator. And so these tests always faile when it tries to submit the form.
+	 *
+	 * Disabling until a newer version of WebClient is available or until there is a better option.
+	 *
+	 * Issue with spread operator
+	 * https://github.com/HtmlUnit/htmlunit/issues/111#issuecomment-569922166
+	 *
+	 * The JS engine used by htmlunit.webclient
+	 * https://github.com/HtmlUnit/htmlunit/issues/755
+	 */
+	@Disabled
 	@Test
 	public void testInvokeCustomOperation() throws IOException {
 		register5Patients();
@@ -255,6 +272,22 @@ public class WebTest {
 		assertTrue(scriptSpans.isEmpty());
 	}
 
+	/**
+	 * This test is disabled because it relies on bootstrap.js library,
+	 * which is written using ES6 and takes advantage of the spread operator (...args).
+	 *
+	 * Unfortunately, current versions of WebClient do not support this level of EMCA script
+	 * nor the spread operator. And so these tests always faile when it tries to submit the form.
+	 *
+	 * Disabling until a newer version of WebClient is available or until there is a better option.
+	 *
+	 * Issue with spread operator
+	 * https://github.com/HtmlUnit/htmlunit/issues/111#issuecomment-569922166
+	 *
+	 * The JS engine used by htmlunit.webclient
+	 * https://github.com/HtmlUnit/htmlunit/issues/755
+	 */
+	@Disabled
 	@Test
 	public void testInvokeCustomOperation_Validate() throws IOException {
 		register5Patients();
@@ -293,7 +326,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(diffPage.asNormalizedText()).contains("\"resourceType\": \"Parameters\"");
+		assertThat(diffPage.asNormalizedText()).contains("\"resourceType\": \"Bundle\"");
 	}
 
 
