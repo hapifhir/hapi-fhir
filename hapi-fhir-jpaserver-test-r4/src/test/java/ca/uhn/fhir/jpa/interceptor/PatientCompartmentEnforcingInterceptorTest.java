@@ -43,20 +43,25 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		myPartitionSettings.setDefaultPartitionId(ALTERNATE_DEFAULT_ID);
 	}
 
+	@Override
 	@AfterEach
-	public void after() {
+	public void after() throws Exception {
+		super.after();
 		myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorRegistry.unregisterInterceptor(myForceOffsetSearchModeInterceptor);
 		myInterceptorRegistry.unregisterInterceptor(mySvc);
 
 		myPartitionSettings.setPartitioningEnabled(false);
-		myPartitionSettings.setUnnamedPartitionMode(new PartitionSettings().isUnnamedPartitionMode());
-		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
+		PartitionSettings defaultPartitionSettings = new PartitionSettings();
+		myPartitionSettings.setUnnamedPartitionMode(defaultPartitionSettings.isUnnamedPartitionMode());
+		myPartitionSettings.setDefaultPartitionId(defaultPartitionSettings.getDefaultPartitionId());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultPartitionSettings.getAllowReferencesAcrossPartitions());
 	}
 
 
 	@Test
 	public void testUpdateResource_whenCrossingPatientCompartment_throws() {
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		createPatientA();
 		createPatientB();
 

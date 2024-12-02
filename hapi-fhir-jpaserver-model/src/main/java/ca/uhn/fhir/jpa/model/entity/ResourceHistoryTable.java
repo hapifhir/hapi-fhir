@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import jakarta.annotation.Nonnull;
@@ -109,7 +110,7 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	@AttributeOverride(
 			name = "myPartitionIdValue",
 			column = @Column(name = "PARTITION_ID", insertable = false, updatable = false))
-	private JpaPid myResourcePid;
+	private JpaPidNonPk myResourcePid;
 
 	/**
 	 * This is here for sorting only, don't get or set this value
@@ -260,24 +261,35 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 
 	@Override
 	public JpaPid getResourceId() {
+		initializeResourceId();
+		JpaPid retVal = myResourcePid.toJpaPid();
+		retVal.setVersion(myResourceVersion);
+		retVal.setResourceType(myResourceType);
+		if (retVal.getPartitionId() == null) {
+			retVal.setPartitionId(myPartitionIdValue);
+		}
+		return retVal;
+	}
+
+	private void initializeResourceId() {
 		if (myResourcePid == null) {
-			myResourcePid = new JpaPid();
+			myResourcePid = new JpaPidNonPk();
 		}
-		myResourcePid.setVersion(myResourceVersion);
-		myResourcePid.setResourceType(myResourceType);
-		if (myResourcePid.getPartitionId() == null) {
-			myResourcePid.setPartitionId(myPartitionIdValue);
-		}
-		return myResourcePid;
 	}
 
 	public void setResourceId(Long theResourceId) {
-		getResourceId().setId(theResourceId);
+		initializeResourceId();
+		myResourcePid.setId(theResourceId);
 	}
 
 	@Override
 	public String getResourceType() {
 		return myResourceType;
+	}
+
+	@Override
+	public String getFhirId() {
+		return getIdDt().getIdPart();
 	}
 
 	public void setResourceType(String theResourceType) {
@@ -363,6 +375,8 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	}
 
 	public void setTransientForcedId(String theTransientForcedId) {
+		assert theTransientForcedId == null || !theTransientForcedId.contains("/")
+				: "Invalid FHIR ID: " + theTransientForcedId;
 		myTransientForcedId = theTransientForcedId;
 	}
 

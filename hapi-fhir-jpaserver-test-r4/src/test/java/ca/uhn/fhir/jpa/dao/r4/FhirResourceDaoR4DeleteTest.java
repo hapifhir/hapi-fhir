@@ -5,13 +5,16 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import jakarta.persistence.Id;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -34,6 +37,24 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4DeleteTest.class);
 
 	@Test
+	public void testPreventUnDeleteIfDeletesDisabled() {
+		// Setup
+		createPatient(withId("A"), withActiveTrue());
+		myPatientDao.delete(new IdType("Patient/A"), mySrd);
+
+		// Test
+		myStorageSettings.setDeleteEnabled(false);
+		try {
+			createPatient(withId("A"), withActiveFalse());
+			fail();
+		} catch (InvalidRequestException e) {
+			// Verify
+			assertThat(e.getMessage()).contains("HAPI-2573: Unable to restore previously deleted resource as deletes are disabled");
+		}
+	}
+
+
+	@Test
 	public void testDeleteMarksResourceAndVersionAsDeleted() {
 
 		Patient p = new Patient();
@@ -50,12 +71,12 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		// Current version should be marked as deleted
 		runInTransaction(() -> {
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPid.fromId(id.getIdPartAsLong()), 1);
+			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromId(id.getIdPartAsLong()), 1);
 			assertNull(resourceTable.getDeleted());
 			assertNotNull(resourceTable.getPersistentId());
 		});
 		runInTransaction(() -> {
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPid.fromId(id.getIdPartAsLong()), 2);
+			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromId(id.getIdPartAsLong()), 2);
 			assertNotNull(resourceTable.getDeleted());
 		});
 
@@ -192,7 +213,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		// Mark the current history version as not-deleted even though the actual resource
 		// table entry is marked deleted
 		runInTransaction(() -> {
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPid.fromId(id.getIdPartAsLong()), 2);
+			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromId(id.getIdPartAsLong()), 2);
 			resourceTable.setDeleted(null);
 			myResourceHistoryTableDao.save(resourceTable);
 		});

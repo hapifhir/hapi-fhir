@@ -161,6 +161,18 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setHasLinks(myLinks.isEmpty() == false);
 	}
 
+	public void populateResourceTableParamCollections(ResourceTable theEntity) {
+		theEntity.setParamsString(myStringParams);
+		theEntity.setParamsToken(myTokenParams);
+		theEntity.setParamsNumber(myNumberParams);
+		theEntity.setParamsQuantity(myQuantityParams);
+		theEntity.setParamsQuantityNormalized(myQuantityNormalizedParams);
+		theEntity.setParamsDate(myDateParams);
+		theEntity.setParamsUri(myUriParams);
+		theEntity.setParamsCoords(myCoordsParams);
+		theEntity.setResourceLinks(myLinks);
+	}
+
 	public void updateSpnamePrefixForIndexOnUpliftedChain(String theContainingType, String theSpnamePrefix) {
 		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myNumberParams, theSpnamePrefix);
 		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myQuantityParams, theSpnamePrefix);
@@ -292,24 +304,6 @@ public final class ResourceIndexedSearchParams {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Replaces the index parameters collections on the given ResourceTable entity with the copies
-	 * from this param set
-	 */
-	public void applyToEntity(ResourceTable theEntity) {
-		theEntity.setParamsString(myStringParams);
-		theEntity.setParamsToken(myTokenParams);
-		theEntity.setParamsCoords(myCoordsParams);
-		theEntity.setParamsDate(myDateParams);
-		theEntity.setParamsNumber(myNumberParams);
-		theEntity.setParamsQuantity(myQuantityParams);
-		theEntity.setParamsQuantityNormalized(myQuantityNormalizedParams);
-		theEntity.setParamsUri(myUriParams);
-		theEntity.setParamsComboStringUnique(myComboStringUniques);
-		theEntity.setParamsComboTokensNonUnique(myComboTokenNonUnique);
-		theEntity.setResourceLinks(myLinks);
 	}
 
 	public static boolean isMatchSearchParam(

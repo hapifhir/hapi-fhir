@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -312,7 +313,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 			res = myResourceTableDao.findById(patientId.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
 			assertNotNull(res.getDeleted());
-			versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(JpaPid.fromId(patientId.getIdPartAsLong()));
+			versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(JpaPidNonPk.fromId(patientId.getIdPartAsLong()));
 			assertEquals(2, versions.size());
 			assertEquals(1L, versions.get(0).getVersion());
 			assertNull(versions.get(0).getDeleted());
@@ -321,7 +322,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 			res = myResourceTableDao.findById(organizationId.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
 			assertNotNull(res.getDeleted());
-			versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(JpaPid.fromId(organizationId.getIdPartAsLong()));
+			versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(JpaPidNonPk.fromId(organizationId.getIdPartAsLong()));
 			assertEquals(2, versions.size());
 			assertEquals(1L, versions.get(0).getVersion());
 			assertNull(versions.get(0).getDeleted());

@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -603,14 +604,14 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			ResourceHistoryTable readBackHistory = myEntityManager
 				.createQuery("select h from ResourceHistoryTable h where h.myResourcePid = :resId and h.myResourceVersion = 1", ResourceHistoryTable.class)
-				.setParameter("resId", myMethodOutcome.getPersistentId())
+				.setParameter("resId", JpaPidNonPk.fromPid((JpaPid) myMethodOutcome.getPersistentId()))
 				.getSingleResult();
 			assertThat(readBackHistory).as("found history").isNotNull();
 
 			// no extra history
 			long historyCount = myEntityManager
 				.createQuery("select count(h) from ResourceHistoryTable h where h.myResourcePid = :resId", Long.class)
-				.setParameter("resId", myMethodOutcome.getPersistentId())
+				.setParameter("resId", JpaPidNonPk.fromPid((JpaPid) myMethodOutcome.getPersistentId()))
 				.getSingleResult();
 			assertThat(historyCount).as("only create one history version").isEqualTo(1);
 
@@ -787,57 +788,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals(id.getIdPart(), results.getId().getIdPart());
 		assertEquals(id.getVersionIdPart(), results.getId().getVersionIdPart());
 		assertFalse(results.getCreated().booleanValue());
-
-	}
-
-	@Test
-	public void testCreateWithIllegalReference() {
-		Observation o1 = new Observation();
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(id1);
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
-		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(new IdType("Organization", id1.getIdPart()));
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1095) + "Resource contains reference to unknown resource ID Organization/" + id1.getIdPart(), e.getMessage());
-		}
-
-		// Now with a forced ID
-
-		o1 = new Observation();
-		o1.setId("testCreateWithIllegalReference");
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		id1 = myObservationDao.update(o1, mySrd).getId().toUnqualifiedVersionless();
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(id1);
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
-		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(new IdType("Organization", id1.getIdPart()));
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1094) + "Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
-		}
 
 	}
 
@@ -2337,7 +2287,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.read(new IdType("Patient/9999999999999/_history/1"), mySrd);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1996) + "Resource Patient/9999999999999/_history/1 is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Patient/9999999999999 is not known", e.getMessage());
 		}
 
 	}

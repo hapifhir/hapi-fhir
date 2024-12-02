@@ -135,12 +135,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public ExtendedHSearchIndexData extractLuceneIndexData(
-			IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
+			IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(resourceType);
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
+				resourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 				myStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
-		return extractor.extract(theResource, theNewParams);
+		return extractor.extract(theResource, theEntity, theNewParams);
 	}
 
 	@Override
@@ -514,8 +515,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	 */
 	@SuppressWarnings("rawtypes")
 	private void logQuery(SearchQueryOptionsStep theQuery, RequestDetails theRequestDetails) {
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 			StorageProcessingMessage storageProcessingMessage = new StorageProcessingMessage();
 			String queryString = theQuery.toQuery().queryString();
 			storageProcessingMessage.setMessage(queryString);
@@ -523,8 +525,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(StorageProcessingMessage.class, storageProcessingMessage);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
+			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 		}
 	}
 

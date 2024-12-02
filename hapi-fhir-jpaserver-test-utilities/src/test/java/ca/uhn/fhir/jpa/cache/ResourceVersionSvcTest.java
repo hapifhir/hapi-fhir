@@ -5,8 +5,11 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,6 +73,7 @@ public class ResourceVersionSvcTest {
 
 		for (ResourceIdPackage pack : theResourcePacks) {
 			resourcePersistentIds.add(pack.myPid);
+			pack.myPid.setAssociatedResourceId(pack.MyResourceId);
 
 			matches.add(getResourceTableRecordForResourceTypeAndPid(
 				pack.myPid,
@@ -78,8 +83,20 @@ public class ResourceVersionSvcTest {
 			));
 		}
 
-		when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any())).thenReturn(resourcePersistentIds);
-		when(myResourceTableDao.getResourceVersionsForPid(any())).thenReturn(matches);
+		IResourcePersistentId<Long> first = resourcePersistentIds.remove(0);
+		if (resourcePersistentIds.isEmpty()) {
+			when(myIdHelperService.resolveResourceIdentities(any(), any(), any()))
+				.thenReturn(Map.of(first.getAssociatedResourceId(), new JpaResourceLookup(first.getResourceType(), first.getAssociatedResourceId().getIdPart(), (JpaPid) first, null, null)));
+		} else {
+
+			HashMap<IIdType, IResourceLookup<JpaPid>> map = new HashMap<>();
+			for (var next : resourcePersistentIds) {
+				map.put(next.getAssociatedResourceId(), new JpaResourceLookup(next.getResourceType(),next.getAssociatedResourceId().getIdPart() ,(JpaPid) next, null, null));
+			}
+
+			when(myIdHelperService.resolveResourceIdentities(any(), any(), any()))
+				.thenReturn(map);
+		}
 	}
 
 	@Test

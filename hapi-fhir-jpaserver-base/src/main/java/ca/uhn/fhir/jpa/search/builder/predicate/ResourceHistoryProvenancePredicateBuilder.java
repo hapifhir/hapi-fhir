@@ -88,7 +88,7 @@ public class ResourceHistoryProvenancePredicateBuilder extends BaseJoiningPredic
 				case CONTAINS:
 					return createPredicateSourceContains(theStorageSetting, theSourceUri);
 				default:
-					throw new InvalidRequestException(Msg.code(2418)
+					throw new InvalidRequestException(Msg.code(2569)
 							+ String.format(
 									"Unsupported qualifier specified, qualifier=%s",
 									theQueryParameter.getQueryParameterQualifier()));
@@ -117,7 +117,7 @@ public class ResourceHistoryProvenancePredicateBuilder extends BaseJoiningPredic
 			String containsLikeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
 			return BinaryCondition.like(upperFunction, generatePlaceholder(containsLikeExpression));
 		} else {
-			throw new MethodNotAllowedException(Msg.code(2417) + ":contains modifier is disabled on this server");
+			throw new MethodNotAllowedException(Msg.code(2570) + ":contains modifier is disabled on this server");
 		}
 	}
 

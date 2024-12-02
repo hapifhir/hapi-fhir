@@ -43,6 +43,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -146,6 +147,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	@Test
 	public void testBatchWithGetHardLimitLargeSynchronous() {
 		List<String> ids = create20Patients();
+		ids.sort(Comparator.naturalOrder());
 
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);

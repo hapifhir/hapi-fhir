@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.mdm.helper;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMLinkResults;
@@ -21,20 +20,22 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Service
 public class MdmLinkHelper {
+
+	public static final String SERVER_ASSIGNED_PREFIX = "SERVER_ASSIGNED_";
+
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkHelper.class);
 
 	private enum Side {
@@ -42,17 +43,18 @@ public class MdmLinkHelper {
 		RHS // right hand side; practically speaking, this is the SourceResource of the link
 	}
 
-	@Autowired
-   private IMdmLinkDao myMdmLinkRepo;
-	@Autowired
-	private IFhirResourceDao<Patient> myPatientDao;
-	@Autowired
-	private MdmLinkDaoSvc<JpaPid, MdmLink> myMdmLinkDaoSvc;
-	@SuppressWarnings("rawtypes")
-	@Autowired
-	private IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
-	@Autowired
-	private IdHelperService myIdHelperService;
+	private final IMdmLinkDao<JpaPid, MdmLink> myMdmLinkRepo;
+	private final IFhirResourceDao<Patient> myPatientDao;
+	private final MdmLinkDaoSvc<JpaPid, MdmLink> myMdmLinkDaoSvc;
+
+	/**
+	 * Constructor
+	 */
+	public MdmLinkHelper(IMdmLinkDao<JpaPid, MdmLink> theMdmLinkRepo, IFhirResourceDao<Patient> thePatientDao, MdmLinkDaoSvc<JpaPid, MdmLink> theMdmLinkDaoSvc) {
+		myMdmLinkRepo = theMdmLinkRepo;
+		myPatientDao = thePatientDao;
+		myMdmLinkDaoSvc = theMdmLinkDaoSvc;
+	}
 
 	@Transactional
 	public void logMdmLinks() {
@@ -91,7 +93,7 @@ public class MdmLinkHelper {
 		}
 
 		// create all the links
-		for (MdmTestLinkExpression inputExpression : theState.getParsedInputState()) {
+		for (MdmTestLinkExpression inputExpression : inputExpressions) {
 			ourLog.info(inputExpression.getLinkExpression());
 
 			Patient goldenResource = theState.getParameter(inputExpression.getLeftSideResourceIdentifier());
@@ -106,7 +108,7 @@ public class MdmLinkHelper {
 			);
 			matchOutcome.setMatchResultEnum(matchResultType);
 
-			MdmLink link = (MdmLink) myMdmLinkDaoSvc.createOrUpdateLinkEntity(
+			MdmLink link = myMdmLinkDaoSvc.createOrUpdateLinkEntity(
 				goldenResource, // golden
 				targetResource, // source
 				matchOutcome, // match outcome
@@ -130,13 +132,21 @@ public class MdmLinkHelper {
 	}
 
 	private Patient createPatientAndTags(String theId, MDMState<Patient, JpaPid> theState) {
+		boolean serverAssignedId = theId.startsWith(SERVER_ASSIGNED_PREFIX);
+		boolean previouslyExisting = false;
+
 		Patient patient = new Patient();
 		patient.setActive(true); // all mdm patients must be active
 
 		// we add an identifier and use a forced id
 		// to make test debugging a little simpler
 		patient.addIdentifier(new Identifier().setValue(theId));
-		patient.setId(theId);
+		if (serverAssignedId && theState.getForcedIdForConditionalIdPlaceholder(theId) != null) {
+			patient.setId(theState.getForcedIdForConditionalIdPlaceholder(theId));
+			previouslyExisting = true;
+		} else if (!serverAssignedId) {
+			patient.setId(theId);
+		}
 
 		// Golden patients will be "GP#"
 		if (theId.length() >= 2 && theId.charAt(0) == 'G') {
@@ -145,10 +155,20 @@ public class MdmLinkHelper {
 		}
 		MdmResourceUtil.setMdmManaged(patient);
 
-		DaoMethodOutcome outcome = myPatientDao.update(patient,
-			SystemRequestDetails.forAllPartitions());
+		SystemRequestDetails srd = SystemRequestDetails.forAllPartitions();
+		DaoMethodOutcome outcome;
+		if (serverAssignedId && !previouslyExisting) {
+			outcome = myPatientDao.create(patient, srd);
+		} else {
+			outcome = myPatientDao.update(patient, srd);
+		}
 		Patient outputPatient = (Patient) outcome.getResource();
 		theState.addPID(theId, (JpaPid) outcome.getPersistentId());
+
+		if (serverAssignedId) {
+			theState.addConditionalIdPlaceholderToForcedId(theId, outputPatient.getIdPart());
+		}
+
 		return outputPatient;
 	}
 
@@ -209,9 +229,7 @@ public class MdmLinkHelper {
 	}
 
 	public List<MdmLink> getAllMdmLinks(Patient theGoldenPatient) {
-		return myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theGoldenPatient).stream()
-			.map( link -> (MdmLink) link)
-			.collect(Collectors.toList());
+		return new ArrayList<>(myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theGoldenPatient));
 	}
 
 	private boolean isResourcePartOfLink(

@@ -192,7 +192,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 		HapiTransactionService.requireTransaction();
 		List<JpaPid> pids = theResolvedIds.stream().map(t -> ((JpaPid) t)).collect(Collectors.toList());
 
-		new QueryChunker<JpaPid>().chunk(pids, idChunk -> {
+		QueryChunker.chunk(pids, idChunk -> {
 
 			/*
 			 * Pre-fetch the resources we're touching in this transaction in mass - this reduced the
@@ -205,7 +205,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			 *
 			 * However, for realistic average workloads, this should reduce the number of round trips.
 			 */
-			if (idChunk.size() >= 2) {
+			if (!idChunk.isEmpty()) {
 				List<ResourceTable> entityChunk = prefetchResourceTableAndHistory(idChunk);
 
 				if (thePreFetchIndexes) {

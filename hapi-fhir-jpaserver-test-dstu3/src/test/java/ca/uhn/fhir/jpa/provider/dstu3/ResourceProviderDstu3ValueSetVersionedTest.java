@@ -964,6 +964,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		ValueSet updatedValueSet_v1 = valueSet_v1;
 		updatedValueSet_v1.setName(valueSet_v1.getName().concat(" - MODIFIED"));
 
+		logAllValueSets();
+
 		String url = myClient.getServerBase().concat("/").concat(myExtensionalVsId_v1.getValueAsString());
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
@@ -996,7 +998,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.PUT)
 			.setUrl("ValueSet/" + updatedValueSet_v2.getIdElement().getIdPart());
-		ourLog.debug("Transaction Bundle:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info("Transaction Bundle:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myClient.transaction().withBundle(bundle).execute();
 
 		updatedValueSet_v2 = myValueSetDao.read(myExtensionalVsId_v2);

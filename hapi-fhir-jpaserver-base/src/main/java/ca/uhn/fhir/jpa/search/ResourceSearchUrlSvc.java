@@ -34,7 +34,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 /**
  * This service ensures uniqueness of resources during create or create-on-update
@@ -83,6 +85,15 @@ public class ResourceSearchUrlSvc {
 	 */
 	public void deleteByResId(JpaPid theResId) {
 		myResourceSearchUrlDao.deleteByResId(theResId.getId());
+	}
+
+	/**
+	 * Once a resource is updated or deleted, we can trust that future match checks will find the committed resource in the db.
+	 * The use of the constraint table is done, and we can delete it to keep the table small.
+	 */
+	public void deleteByResIds(Collection<JpaPid> theResId) {
+		myResourceSearchUrlDao.deleteByResIds(
+				theResId.stream().map(JpaPid::getId).collect(Collectors.toList()));
 	}
 
 	/**

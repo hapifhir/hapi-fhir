@@ -145,6 +145,7 @@ public interface IResourceTableDao
 	 * This query will return rows with the following values:
 	 * Id (JpaPid), FhirId, ResourceType (Patient, etc), version (long)
 	 * Order matters!
+	 *
 	 * @param pid - list of pids to get versions for
 	 */
 	@Query("SELECT t.myPid, t.myResourceType, t.myFhirId, t.myVersion FROM ResourceTable t WHERE t.myPid IN ( :pid )")

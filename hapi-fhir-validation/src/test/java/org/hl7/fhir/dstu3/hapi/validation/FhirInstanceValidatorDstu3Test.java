@@ -15,7 +15,6 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
@@ -58,7 +57,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -116,7 +114,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 	private HashMap<String, CodeSystem> myCodeSystems;
 	private HashMap<String, ValueSet> myValueSets;
 	private HashMap<String, Questionnaire> myQuestionnaires;
-	private CachingValidationSupport myValidationSupport;
+	private ValidationSupportChain myValidationSupport;
 
 	private void addValidConcept(String theSystem, String theCode) {
 		addValidConcept(theSystem, theCode, true);
@@ -140,12 +138,12 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		IValidationSupport mockSupport = mock(IValidationSupport.class, withSettings().strictness(Strictness.LENIENT));
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
-		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(
+		myValidationSupport = new ValidationSupportChain(
 			mockSupport,
 			myDefaultValidationSupport,
 			new InMemoryTerminologyServerValidationSupport(ourCtx),
 			new CommonCodeSystemsTerminologyService(ourCtx),
-			new SnapshotGeneratingValidationSupport(ourCtx)));
+			new SnapshotGeneratingValidationSupport(ourCtx));
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
@@ -229,10 +227,10 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
 					final String message = "Unknown code (for '" + system + "#" + code + "')";
-					retVal = new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.IssueSeverity.ERROR, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
+					retVal = new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage(message).setIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.IssueSeverity.ERROR, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
 				} else if (myValidSystemsNotReturningIssues.contains(system)) {
 					final String message = "Unknown code (for '" + system + "#" + code + "')";
-					retVal = new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message);
+					retVal = new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage(message);
 				} else if (myCodeSystems.containsKey(system)) {
 					CodeSystem cs = myCodeSystems.get(system);
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
@@ -700,10 +698,14 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 					} else if (t.getMessage().equals("The nominated WG 'rcrim' is unknown")) {
 						//The rcrim workgroup is now brr http://www.hl7.org/Special/committees/rcrim/index.cfm
 						return false;
+					} else if (t.getMessage().contains("which is experimental, but this structure is not labeled as experimental")
+						//DSTU3 resources will not pass validation with this new business rule (2024-09-17) https://github.com/hapifhir/org.hl7.fhir.core/commit/7d05d38509895ddf8614b35ffb51b1f5363f394c
+					) {
+						return false;
 					} else if (t.getSeverity() == ResultSeverityEnum.WARNING
-						&& ( t.getMessageId().equals("VALIDATION_HL7_PUBLISHER_MISMATCH")
-						|| t.getMessageId().equals("VALIDATION_HL7_PUBLISHER_MISMATCH2")
-						|| t.getMessageId().equals("VALIDATION_HL7_WG_URL")
+						&& ( "VALIDATION_HL7_PUBLISHER_MISMATCH".equals(t.getMessageId())
+						|| "VALIDATION_HL7_PUBLISHER_MISMATCH2".equals(t.getMessageId())
+						|| "VALIDATION_HL7_WG_URL".equals(t.getMessageId())
 					)) {
 						// Workgroups have been updated and have slightly different naming conventions and URLs.
 						return false;
@@ -768,8 +770,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 	}
 
 	/**
-	 * See #851
-	 */
+     * See #851
+     */
 	@Test
 	public void testValidateCoding() {
 		ImagingStudy is = new ImagingStudy();
@@ -787,8 +789,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 	}
 
 	/**
-	 * FHIRPathEngine was throwing Error...
-	 */
+     * FHIRPathEngine was throwing Error...
+     */
 	@Test
 	public void testValidateCrucibleCarePlan() throws Exception {
 		org.hl7.fhir.dstu3.model.Bundle bundle;
@@ -913,8 +915,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 
 	/**
-	 * See #739
-	 */
+     * See #739
+     */
 	@Test
 	public void testValidateMedicationIngredient() throws IOException {
 		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3/bug739.json"), Charsets.UTF_8);

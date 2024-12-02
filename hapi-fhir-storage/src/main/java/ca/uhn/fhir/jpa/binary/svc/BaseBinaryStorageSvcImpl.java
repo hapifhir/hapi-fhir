@@ -174,13 +174,16 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	@Nullable
 	private String callBinaryContentIdPointcut(
 			byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+
 		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period.
 		// Deprecated in 7.2.0.
-		boolean hasStorageBinaryAssignBlobIdPrefixHooks = CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequestDetails);
+		boolean hasStorageBinaryAssignBlobIdPrefixHooks =
+				compositeBroadcaster.hasHooks(Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX);
 
-		boolean hasStorageBinaryAssignBinaryContentIdPrefixHooks = CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX, myInterceptorBroadcaster, theRequestDetails);
+		boolean hasStorageBinaryAssignBinaryContentIdPrefixHooks =
+				compositeBroadcaster.hasHooks(Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX);
 
 		if (!(hasStorageBinaryAssignBlobIdPrefixHooks || hasStorageBinaryAssignBinaryContentIdPrefixHooks)) {
 			return null;
@@ -201,8 +204,7 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			pointcutToInvoke = Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX;
 		}
 
-		return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-				myInterceptorBroadcaster, theRequestDetails, pointcutToInvoke, hookParams);
+		return (String) compositeBroadcaster.callHooksAndReturnObject(pointcutToInvoke, hookParams);
 	}
 
 	@Override

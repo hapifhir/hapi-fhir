@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -168,8 +169,9 @@ public class HistoryBuilder {
 					// For that reason, strip the prefix before setting the transientForcedId below.
 					// If not stripped this messes up the id of the resource as the resourceType would be repeated
 					// twice like Patient/Patient/1234 in the resource constructed
-					if (resourceId.startsWith(myResourceType + "/")) {
-						resourceId = resourceId.substring(myResourceType.length() + 1);
+					int slashIdx = resourceId.indexOf('/');
+					if (slashIdx != -1) {
+						resourceId = resourceId.substring(slashIdx + 1);
 					}
 				} else {
 					resourceId = Long.toString(nextResourceId.getId());
@@ -258,7 +260,7 @@ public class HistoryBuilder {
 		 * figure out. But I've added a ton of logging to the error it fails with and I noticed that
 		 * we emit SQL along the lines of
 		 *   select coalesce(max(rht2_0.RES_UPDATED), timestamp with time zone '2024-10-05 18:24:48.172000000Z')
-		 * for this date, and all other dates are in GMT so this is an expeiment. If nothing changes,
+		 * for this date, and all other dates are in GMT so this is an experiment. If nothing changes,
 		 * we can roll this back to
 		 *   theCriteriaBuilder.literal(myRangeStartInclusive)
 		 * JA 20241005
@@ -274,7 +276,8 @@ public class HistoryBuilder {
 				.where(
 						theCriteriaBuilder.lessThanOrEqualTo(
 								subQueryResourceHistory.get("myUpdated"), myRangeStartInclusive),
-						theCriteriaBuilder.equal(subQueryResourceHistory.get("myResourcePid"), myResourceId));
+						theCriteriaBuilder.equal(
+								subQueryResourceHistory.get("myResourcePid"), JpaPidNonPk.fromPid(myResourceId)));
 
 		Predicate updatedDatePredicate =
 				theCriteriaBuilder.greaterThanOrEqualTo(theFrom.get("myUpdated"), pastDateSubQuery);

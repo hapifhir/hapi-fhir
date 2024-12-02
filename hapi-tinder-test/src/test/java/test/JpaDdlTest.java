@@ -47,7 +47,7 @@ public class JpaDdlTest {
 			assertThat(sql).contains("primary key (RES_ID)");
 			assertThat(sql).contains("constraint IDX_RES_TYPE_FHIR_ID unique (RES_TYPE, FHIR_ID)");
 		} else {
-			assertThat(sql).contains("primary key (PARTITION_ID, RES_ID)");
+			assertThat(sql).contains("primary key (RES_ID, PARTITION_ID)");
 			assertThat(sql).contains("constraint IDX_RES_TYPE_FHIR_ID unique (PARTITION_ID, RES_TYPE, FHIR_ID)");
 		}
 

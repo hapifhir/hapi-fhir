@@ -352,6 +352,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 		myPartitionId = theResourceId != null ? theResourceId.getPartitionId() : null;
 	}
 
+	@Override
 	public String getResourceType() {
 		return myResourceType;
 	}

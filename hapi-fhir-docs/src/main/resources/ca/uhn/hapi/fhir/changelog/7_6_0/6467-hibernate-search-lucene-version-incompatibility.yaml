@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6467
+title: "Fixed an incompatibility between Hibernate Search and Lucene versions that caused ValueSet expansion to fail 
+when Hibernate Search was configured to use Lucene."

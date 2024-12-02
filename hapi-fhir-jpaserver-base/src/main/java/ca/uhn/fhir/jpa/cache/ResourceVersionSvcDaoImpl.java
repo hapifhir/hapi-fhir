@@ -23,7 +23,9 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -38,7 +40,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -91,20 +92,9 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	public ResourcePersistentIdMap getLatestVersionIdsForResourceIds(
 			RequestPartitionId theRequestPartitionId, List<IIdType> theIds) {
 		ResourcePersistentIdMap idToPID = new ResourcePersistentIdMap();
-		HashMap<String, List<IIdType>> resourceTypeToIds = new HashMap<>();
 
-		for (IIdType id : theIds) {
-			String resourceType = id.getResourceType();
-			if (!resourceTypeToIds.containsKey(resourceType)) {
-				resourceTypeToIds.put(resourceType, new ArrayList<>());
-			}
-			resourceTypeToIds.get(resourceType).add(id);
-		}
-
-		for (List<IIdType> nextIds : resourceTypeToIds.values()) {
-			ResourcePersistentIdMap idAndPID = getIdsOfExistingResources(theRequestPartitionId, nextIds);
-			idToPID.putAll(idAndPID);
-		}
+		ResourcePersistentIdMap idAndPID = getIdsOfExistingResources(theRequestPartitionId, theIds);
+		idToPID.putAll(idAndPID);
 
 		return idToPID;
 	}
@@ -125,25 +115,39 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 			return retVal;
 		}
 
-		Map<String, IIdType> idValueToId = theIds.stream()
-				.collect(Collectors.toMap(t -> t.toUnqualifiedVersionless().getValue(), t -> t));
+		Map<IIdType, IResourceLookup<JpaPid>> identities = myIdHelperService.resolveResourceIdentities(
+				thePartitionId,
+				new ArrayList<>(theIds),
+				ResolveIdentityMode.includeDeleted().cacheOk());
 
-		List<JpaPid> jpaPids =
-				myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId, new ArrayList<>(theIds));
+		Map<String, JpaPid> entriesWithoutVersion = new HashMap<>(identities.size());
 
-		Collection<Object[]> resourceEntries = myResourceTableDao.getResourceVersionsForPid(jpaPids);
+		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> entry : identities.entrySet()) {
+			IResourceLookup<JpaPid> lookup = entry.getValue();
+			JpaPid persistentId = lookup.getPersistentId();
+			retVal.put(entry.getKey(), persistentId);
+			if (persistentId.getVersion() == null) {
+				entriesWithoutVersion.put(
+						entry.getKey().toUnqualifiedVersionless().getValue(), persistentId);
+			}
+		}
 
-		for (Object[] nextRecord : resourceEntries) {
-			// order matters!
-			JpaPid retPid = (JpaPid) nextRecord[0];
-			String resType = (String) nextRecord[1];
-			String fhirId = (String) nextRecord[2];
-			Long version = (Long) nextRecord[3];
+		// set any versions we don't already have
+		if (!entriesWithoutVersion.isEmpty()) {
+			Collection<Object[]> resourceEntries =
+					myResourceTableDao.getResourceVersionsForPid(entriesWithoutVersion.values());
 
-			retPid.setVersion(version);
-
-			IIdType originalId = idValueToId.get(resType + "/" + fhirId);
-			retVal.put(originalId, retPid);
+			for (Object[] nextRecord : resourceEntries) {
+				// order matters!
+				JpaPid retPid = (JpaPid) nextRecord[0];
+				String resType = (String) nextRecord[1];
+				String fhirId = (String) nextRecord[2];
+				Long version = (Long) nextRecord[3];
+				JpaPid jpaPid = entriesWithoutVersion.get(resType + "/" + fhirId);
+				if (jpaPid != null) {
+					jpaPid.setVersion(version);
+				}
+			}
 		}
 
 		return retVal;

@@ -160,7 +160,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
-		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", null).getSearchParamNames());
 		logAllTokenIndexes();
 
 
@@ -197,7 +197,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
-		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", null).getSearchParamNames());
 		logAllTokenIndexes();
 
 		runInTransaction(() -> {
@@ -225,7 +225,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		doCreateResource(reindexTestHelper.buildObservationWithAlleleExtension(Observation.ObservationStatus.CANCELLED));
 
 		reindexTestHelper.createAlleleSearchParameter();
-		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", null).getSearchParamNames());
 
 		// The searchparam value is on the observation, but it hasn't been indexed yet
 		myTenantClientInterceptor.setTenantId(TENANT_A);

@@ -90,7 +90,7 @@ public class TestR5Config {
 		 * so 2 will be our limit
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 2;
+			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
 
 			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;

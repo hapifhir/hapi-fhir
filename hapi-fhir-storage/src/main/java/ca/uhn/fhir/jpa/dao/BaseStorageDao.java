@@ -335,14 +335,17 @@ public abstract class BaseStorageDao {
 		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
 		if (outcome.getResource() != null) {
 			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(outcome.getResource());
-			HookParams params = new HookParams()
-					.add(IPreResourceAccessDetails.class, accessDetails)
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-			if (accessDetails.isDontReturnResourceAtIndex(0)) {
-				outcome.setResource(null);
+			IInterceptorBroadcaster compositeBroadcaster =
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(getInterceptorBroadcaster(), theRequest);
+			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+				HookParams params = new HookParams()
+						.add(IPreResourceAccessDetails.class, accessDetails)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+				if (accessDetails.isDontReturnResourceAtIndex(0)) {
+					outcome.setResource(null);
+				}
 			}
 		}
 
@@ -352,14 +355,17 @@ public abstract class BaseStorageDao {
 		// outcome.fireResourceViewCallback())
 		outcome.registerResourceViewCallback(() -> {
 			if (outcome.getResource() != null) {
-				SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
-				HookParams params = new HookParams()
-						.add(IPreResourceShowDetails.class, showDetails)
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-				outcome.setResource(showDetails.getResource(0));
+				IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+						getInterceptorBroadcaster(), theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
+					SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
+					HookParams params = new HookParams()
+							.add(IPreResourceShowDetails.class, showDetails)
+							.add(RequestDetails.class, theRequest)
+							.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+					outcome.setResource(showDetails.getResource(0));
+				}
 			}
 		});
 
@@ -378,16 +384,19 @@ public abstract class BaseStorageDao {
 		outcome.setEntitySupplierUseCallback(() -> {
 			// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
 			if (outcome.getResource() != null) {
-				SimplePreResourceAccessDetails accessDetails =
-						new SimplePreResourceAccessDetails(outcome.getResource());
-				HookParams params = new HookParams()
-						.add(IPreResourceAccessDetails.class, accessDetails)
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-				if (accessDetails.isDontReturnResourceAtIndex(0)) {
-					outcome.setResource(null);
+				IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+						getInterceptorBroadcaster(), theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+					SimplePreResourceAccessDetails accessDetails =
+							new SimplePreResourceAccessDetails(outcome.getResource());
+					HookParams params = new HookParams()
+							.add(IPreResourceAccessDetails.class, accessDetails)
+							.add(RequestDetails.class, theRequest)
+							.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+					if (accessDetails.isDontReturnResourceAtIndex(0)) {
+						outcome.setResource(null);
+					}
 				}
 			}
 
@@ -397,14 +406,19 @@ public abstract class BaseStorageDao {
 			// outcome.fireResourceViewCallback())
 			outcome.registerResourceViewCallback(() -> {
 				if (outcome.getResource() != null) {
-					SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
-					HookParams params = new HookParams()
-							.add(IPreResourceShowDetails.class, showDetails)
-							.add(RequestDetails.class, theRequest)
-							.addIfMatchesType(ServletRequestDetails.class, theRequest);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-					outcome.setResource(showDetails.getResource(0));
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									getInterceptorBroadcaster(), theRequest);
+					if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
+						SimplePreResourceShowDetails showDetails =
+								new SimplePreResourceShowDetails(outcome.getResource());
+						HookParams params = new HookParams()
+								.add(IPreResourceShowDetails.class, showDetails)
+								.add(RequestDetails.class, theRequest)
+								.addIfMatchesType(ServletRequestDetails.class, theRequest);
+						compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+						outcome.setResource(showDetails.getResource(0));
+					}
 				}
 			});
 		});
@@ -420,8 +434,9 @@ public abstract class BaseStorageDao {
 		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts(thePointcut)) {
 			theTransactionDetails.addDeferredInterceptorBroadcast(thePointcut, theParams);
 		} else {
-			CompositeInterceptorBroadcaster.doCallHooks(
-					getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
+			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+					getInterceptorBroadcaster(), theRequestDetails);
+			compositeBroadcaster.callHooks(thePointcut, theParams);
 		}
 	}
 
@@ -519,29 +534,48 @@ public abstract class BaseStorageDao {
 			return;
 		}
 
-		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(getResourceName());
+		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(
+				getResourceName(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 		Set<String> paramNames = theSource.keySet();
 		for (String nextParamName : paramNames) {
 			QualifierDetails qualifiedParamName = QualifierDetails.extractQualifiersFromParameterName(nextParamName);
 			RuntimeSearchParam param = searchParams.get(qualifiedParamName.getParamName());
 			if (param == null) {
-				Collection<String> validNames =
-						mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName());
-				String msg = getContext()
-						.getLocalizer()
-						.getMessageSanitized(
-								BaseStorageDao.class,
-								"invalidSearchParameter",
-								qualifiedParamName.getParamName(),
-								getResourceName(),
-								validNames);
-				throw new InvalidRequestException(Msg.code(524) + msg);
+				Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(
+						getResourceName(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+				RuntimeSearchParam notEnabledForSearchParam = mySearchParamRegistry.getActiveSearchParam(
+						getResourceName(),
+						qualifiedParamName.getParamName(),
+						ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
+				if (notEnabledForSearchParam != null) {
+					String msg = getContext()
+							.getLocalizer()
+							.getMessageSanitized(
+									BaseStorageDao.class,
+									"invalidSearchParameterNotEnabledForSearch",
+									qualifiedParamName.getParamName(),
+									getResourceName(),
+									validNames);
+					throw new InvalidRequestException(Msg.code(2539) + msg);
+				} else {
+					String msg = getContext()
+							.getLocalizer()
+							.getMessageSanitized(
+									BaseStorageDao.class,
+									"invalidSearchParameter",
+									qualifiedParamName.getParamName(),
+									getResourceName(),
+									validNames);
+					throw new InvalidRequestException(Msg.code(524) + msg);
+				}
 			}
 
 			// Should not be null since the check above would have caught it
-			RuntimeSearchParam paramDef =
-					mySearchParamRegistry.getActiveSearchParam(getResourceName(), qualifiedParamName.getParamName());
+			RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(
+					getResourceName(),
+					qualifiedParamName.getParamName(),
+					ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 			for (String nextValue : theSource.get(nextParamName)) {
 				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(

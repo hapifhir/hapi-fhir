@@ -180,15 +180,15 @@ public class BulkDataExportProvider {
 		expandParameters(theRequestDetails, theOptions);
 
 		// permission check
-		HookParams initiateBulkExportHookParams = (new HookParams())
-				.add(BulkExportJobParameters.class, theOptions)
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				this.myInterceptorBroadcaster,
-				theRequestDetails,
-				Pointcut.STORAGE_INITIATE_BULK_EXPORT,
-				initiateBulkExportHookParams);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_INITIATE_BULK_EXPORT)) {
+			HookParams initiateBulkExportHookParams = (new HookParams())
+					.add(BulkExportJobParameters.class, theOptions)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_INITIATE_BULK_EXPORT, initiateBulkExportHookParams);
+		}
 
 		// get cache boolean
 		boolean useCache = shouldUseCache(theRequestDetails);
@@ -227,15 +227,15 @@ public class BulkDataExportProvider {
 		theOptions.setPartitionId(partitionId);
 
 		// call hook so any other parameter manipulation can be done
-		HookParams preInitiateBulkExportHookParams = new HookParams();
-		preInitiateBulkExportHookParams.add(BulkExportJobParameters.class, theOptions);
-		preInitiateBulkExportHookParams.add(RequestDetails.class, theRequestDetails);
-		preInitiateBulkExportHookParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster,
-				theRequestDetails,
-				Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT,
-				preInitiateBulkExportHookParams);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT)) {
+			HookParams preInitiateBulkExportHookParams = new HookParams();
+			preInitiateBulkExportHookParams.add(BulkExportJobParameters.class, theOptions);
+			preInitiateBulkExportHookParams.add(RequestDetails.class, theRequestDetails);
+			preInitiateBulkExportHookParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT, preInitiateBulkExportHookParams);
+		}
 	}
 
 	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {

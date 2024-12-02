@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
@@ -264,6 +265,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
 
+
+
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
@@ -354,7 +357,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IFhirResourceDao<SearchParameter> searchParameterDao = myDaoRegistry.getResourceDao(SearchParameter.class);
 		searchParameterDao.create(searchParameter, (RequestDetails) null);
 
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile");
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile", null);
 		assertNotNull(sp);
 
 		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
@@ -2365,18 +2368,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id = idCreated.toUnqualifiedVersionless();
 
 		for (int i = 0; i < 10; i++) {
-			sleepOneClick();
+			sleepAtLeast(100);
 			preDates.add(new Date());
-			sleepOneClick();
+			sleepAtLeast(100);
 			patient.setId(id);
 			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
-			sleepOneClick();
 		}
 
 		List<String> idValues;
 
+		myCaptureQueriesListener.clear();
 		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + id.getIdPart() + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
+		myCaptureQueriesListener.logSelectQueries();
 		assertThat(idValues).as(idValues.toString()).containsExactly(ids.get(3), ids.get(2), ids.get(1), ids.get(0));
 
 		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
@@ -3368,7 +3372,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPid.fromId(id1.getIdPartAsLong()), 1);
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromId(id1.getIdPartAsLong(), null), 1);
 				myResourceHistoryTableDao.delete(version);
 			}
 		});
@@ -3393,7 +3397,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPid.fromId(id1.getIdPartAsLong()), 1);
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromId(id1.getIdPartAsLong(), null), 1);
 				myResourceHistoryTableDao.delete(version);
 			}
 		});
@@ -5810,14 +5814,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			myClient.update().resource(p2).withId("Organization/" + p1id.getIdPart()).execute();
 			fail();
-		} catch (UnprocessableEntityException e) {
+		} catch (InvalidRequestException e) {
 			// good
 		}
 
 		try {
 			myClient.update().resource(p2).withId("Patient/" + p1id.getIdPart()).execute();
 			fail();
-		} catch (UnprocessableEntityException e) {
+		} catch (InvalidRequestException e) {
 			// good
 		}
 

@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
@@ -154,7 +155,8 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		Slice<ResourceHistoryTablePk> ids;
 		if (theJpaPid != null && theJpaPid.getId() != null) {
 			if (theJpaPid.getVersion() != null) {
-				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersion(theJpaPid, theJpaPid.getVersion()));
+				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersion(
+						JpaPidNonPk.fromPid(theJpaPid), theJpaPid.getVersion()));
 			} else {
 				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theJpaPid);
 			}
@@ -253,8 +255,9 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			ResourceHistoryTable theVersion,
 			IdDt theId) {
 		final AtomicInteger counter = new AtomicInteger();
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myInterceptorBroadcaster, theRequestDetails)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)) {
 			IBaseResource resource = myJpaStorageResourceParser.toResource(theVersion, false);
 			HookParams params = new HookParams()
 					.add(AtomicInteger.class, counter)
@@ -262,8 +265,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 					.add(IBaseResource.class, resource)
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, params);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, params);
 		}
 		theRemainingCount.addAndGet(-1 * counter.get());
 	}
@@ -300,8 +302,8 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
-		ResourceHistoryTable currentVersion =
-				myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
+		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(
+				JpaPidNonPk.fromPid(resource.getId()), resource.getVersion());
 		if (currentVersion != null) {
 			expungeHistoricalVersion(theRequestDetails, currentVersion.getId(), theRemainingCount);
 		}
@@ -375,8 +377,8 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			page = PageRequest.of(0, theRemainingCount.get());
 		}
 
-		Slice<ResourceHistoryTablePk> versionIds =
-				myResourceHistoryTableDao.findForResourceId(page, theResource.getId(), theResource.getVersion());
+		Slice<ResourceHistoryTablePk> versionIds = myResourceHistoryTableDao.findForResourceId(
+				page, JpaPidNonPk.fromPid(theResource.getId()), theResource.getVersion());
 		ourLog.debug(
 				"Found {} versions of resource {} to expunge",
 				versionIds.getNumberOfElements(),

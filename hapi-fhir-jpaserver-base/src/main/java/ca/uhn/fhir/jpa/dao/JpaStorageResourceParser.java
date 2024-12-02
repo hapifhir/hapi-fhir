@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -72,7 +73,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -128,7 +128,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		byte[] resourceBytes;
 		String resourceText;
 		ResourceEncodingEnum resourceEncoding;
-		@Nullable Collection<? extends BaseTag> tagList = Collections.emptyList();
+		@Nullable Collection<? extends BaseTag> tagList;
 		long version;
 		String provenanceSourceUri = null;
 		String provenanceRequestId = null;
@@ -182,13 +182,15 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 				history = resource.getCurrentVersionEntity();
 			} else {
 				version = theEntity.getVersion();
-				history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getResourceId(), version);
+				history = myResourceHistoryTableDao.findForIdAndVersion(
+						JpaPidNonPk.fromPid(theEntity.getResourceId()), version);
 				((ResourceTable) theEntity).setCurrentVersionEntity(history);
 
 				while (history == null) {
 					if (version > 1L) {
 						version--;
-						history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getResourceId(), version);
+						history = myResourceHistoryTableDao.findForIdAndVersion(
+								JpaPidNonPk.fromPid(theEntity.getResourceId()), version);
 					} else {
 						return null;
 					}
@@ -203,9 +205,12 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 				case NON_VERSIONED:
 					if (resource.isHasTags()) {
 						tagList = resource.getTags();
+					} else {
+						tagList = List.of();
 					}
 					break;
 				case INLINE:
+				default:
 					tagList = null;
 					break;
 			}
@@ -530,8 +535,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 		theResourceTarget.setId(id);
 		if (theResourceTarget instanceof IResource) {
-			ResourceMetadataKeyEnum.VERSION.put((IResource) theResourceTarget, id.getVersionIdPart());
-			ResourceMetadataKeyEnum.UPDATED.put((IResource) theResourceTarget, theEntitySource.getUpdated());
+			ResourceMetadataKeyEnum.VERSION.put(theResourceTarget, id.getVersionIdPart());
+			ResourceMetadataKeyEnum.UPDATED.put(theResourceTarget, theEntitySource.getUpdated());
 		} else {
 			IBaseMetaType meta = theResourceTarget.getMeta();
 			meta.setVersionId(id.getVersionIdPart());

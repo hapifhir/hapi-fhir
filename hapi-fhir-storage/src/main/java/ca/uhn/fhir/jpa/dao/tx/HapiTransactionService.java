@@ -364,19 +364,21 @@ public class HapiTransactionService implements IHapiTransactionService {
 						}
 
 						if (maxRetries == 0) {
-							HookParams params = new HookParams()
-									.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
-									.addIfMatchesType(
-											ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
-							ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
-									(ResourceVersionConflictResolutionStrategy)
-											CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-													myInterceptorBroadcaster,
-													theExecutionBuilder.myRequestDetails,
-													Pointcut.STORAGE_VERSION_CONFLICT,
-													params);
-							if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
-								maxRetries = conflictResolutionStrategy.getMaxRetries();
+							IInterceptorBroadcaster compositeBroadcaster =
+									CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+											myInterceptorBroadcaster, theExecutionBuilder.myRequestDetails);
+							if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_VERSION_CONFLICT)) {
+								HookParams params = new HookParams()
+										.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
+										.addIfMatchesType(
+												ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
+								ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
+										(ResourceVersionConflictResolutionStrategy)
+												compositeBroadcaster.callHooksAndReturnObject(
+														Pointcut.STORAGE_VERSION_CONFLICT, params);
+								if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
+									maxRetries = conflictResolutionStrategy.getMaxRetries();
+								}
 							}
 						}
 
@@ -578,7 +580,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	/**
-	 * Returns true if we alreadyt have an active transaction associated with the current thread, AND
+	 * Returns true if we already have an active transaction associated with the current thread, AND
 	 * either it's non-read-only or we only need a read-only transaction, AND
 	 * the newly requested transaction has a propagation of REQUIRED
 	 */

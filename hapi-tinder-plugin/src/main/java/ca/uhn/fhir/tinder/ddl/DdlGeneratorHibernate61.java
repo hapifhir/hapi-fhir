@@ -58,11 +58,11 @@ public class DdlGeneratorHibernate61 {
 	private final List<GenerateDdlMojo.Dialect> myDialects = new ArrayList<>();
 	private File myOutputDirectory;
 	private MavenProject myProject;
-	private HapiHibernateDialectSettingsService myHapiHibernateDialectSettingsService =
+	private final HapiHibernateDialectSettingsService myHapiHibernateDialectSettingsService =
 			new HapiHibernateDialectSettingsService();
 
 	public void addPackage(String thePackage) {
-		Validate.notNull(thePackage);
+		Validate.notNull(thePackage, "thePackage must not be null");
 		myPackages.add(thePackage);
 	}
 
@@ -77,7 +77,7 @@ public class DdlGeneratorHibernate61 {
 	}
 
 	public void setOutputDirectory(File theOutputDirectory) {
-		Validate.notNull(theOutputDirectory);
+		Validate.notNull(theOutputDirectory, "theOutputDirectory must not be null");
 		myOutputDirectory = theOutputDirectory;
 	}
 

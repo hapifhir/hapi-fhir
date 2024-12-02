@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -24,7 +25,7 @@ public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 	@Test
 	public void testRetrieveNonInlinedResource() {
 		IIdType id = createPatient(withActiveTrue());
-		JpaPid pid = JpaPid.fromId(id.getIdPartAsLong());
+		JpaPidNonPk pid = JpaPidNonPk.fromId(id.getIdPartAsLong());
 
 		relocateResourceTextToCompressedColumn(pid, 1L);
 

@@ -66,6 +66,7 @@ public class TransactionDetails {
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Supplier<IBaseResource>> myResolvedResources = Collections.emptyMap();
 	private Set<IResourcePersistentId> myDeletedResourceIds = Collections.emptySet();
+	private Set<IResourcePersistentId> myUpdatedResourceIds = Collections.emptySet();
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
@@ -119,8 +120,39 @@ public class TransactionDetails {
 	}
 
 	/**
+	 * @since 7.6.0
+	 */
+	@SuppressWarnings("rawtypes")
+	public void addUpdatedResourceId(@Nonnull IResourcePersistentId theResourceId) {
+		Validate.notNull(theResourceId, "theResourceId must not be null");
+		if (myUpdatedResourceIds.isEmpty()) {
+			myUpdatedResourceIds = new HashSet<>();
+		}
+		myUpdatedResourceIds.add(theResourceId);
+	}
+
+	/**
+	 * @since 7.6.0
+	 */
+	@SuppressWarnings("rawtypes")
+	public void addUpdatedResourceIds(Collection<? extends IResourcePersistentId> theResourceIds) {
+		for (IResourcePersistentId id : theResourceIds) {
+			addUpdatedResourceId(id);
+		}
+	}
+
+	/**
+	 * @since 7.6.0
+	 */
+	@SuppressWarnings("rawtypes")
+	public Set<IResourcePersistentId> getUpdatedResourceIds() {
+		return myUpdatedResourceIds;
+	}
+
+	/**
 	 * @since 6.8.0
 	 */
+	@SuppressWarnings("rawtypes")
 	public void addDeletedResourceId(@Nonnull IResourcePersistentId theResourceId) {
 		Validate.notNull(theResourceId, "theResourceId must not be null");
 		if (myDeletedResourceIds.isEmpty()) {
@@ -132,6 +164,7 @@ public class TransactionDetails {
 	/**
 	 * @since 6.8.0
 	 */
+	@SuppressWarnings("rawtypes")
 	public void addDeletedResourceIds(Collection<? extends IResourcePersistentId> theResourceIds) {
 		for (IResourcePersistentId<?> next : theResourceIds) {
 			addDeletedResourceId(next);
@@ -141,6 +174,7 @@ public class TransactionDetails {
 	/**
 	 * @since 6.8.0
 	 */
+	@SuppressWarnings("rawtypes")
 	@Nonnull
 	public Set<IResourcePersistentId> getDeletedResourceIds() {
 		return Collections.unmodifiableSet(myDeletedResourceIds);

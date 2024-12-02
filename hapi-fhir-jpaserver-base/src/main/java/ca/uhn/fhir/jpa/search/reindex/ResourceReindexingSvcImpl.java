@@ -23,7 +23,6 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -107,9 +106,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
-
-	@Autowired
-	private DaoRegistry myDaoRegistry;
 
 	@Autowired
 	private FhirContext myContext;
@@ -262,10 +258,10 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 	private int runReindexJobs() {
 		Collection<ResourceReindexJobEntity> jobs = getResourceReindexJobEntities();
 
-		if (jobs.size() > 0) {
+		if (!jobs.isEmpty()) {
 			ourLog.info("Running {} reindex jobs: {}", jobs.size(), jobs);
 		} else {
-			ourLog.debug("Running {} reindex jobs: {}", jobs.size(), jobs);
+			ourLog.debug("Running 0 reindex jobs");
 			return 0;
 		}
 

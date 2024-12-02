@@ -395,9 +395,6 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	private transient ResourceHistoryTable myCurrentVersionEntity;
 
 	@Transient
-	private transient ResourceHistoryTable myNewVersionEntity;
-
-	@Transient
 	private transient boolean myVersionUpdatedInCurrentTransaction;
 
 	@Transient
@@ -699,10 +696,6 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		myVersion = 1;
 	}
 
-	/**
-	 * Don't call this in any JPA environments, the version will be ignored
-	 * since this field is managed by hibernate
-	 */
 	@VisibleForTesting
 	public void setVersionForUnitTest(long theVersion) {
 		myVersion = theVersion;
@@ -875,16 +868,8 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	 * multiple {@link ResourceHistoryTable} entities will result in a constraint error.
 	 */
 	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {
-		boolean createVersionTags = theCreateVersionTags;
 
-		ResourceHistoryTable retVal = myNewVersionEntity;
-		if (retVal == null) {
-			retVal = new ResourceHistoryTable();
-			myNewVersionEntity = retVal;
-		} else {
-			// Tags should already be set
-			createVersionTags = false;
-		}
+		ResourceHistoryTable retVal = new ResourceHistoryTable();
 
 		retVal.setResourceId(myPid.getId());
 		retVal.setResourceType(myResourceType);
@@ -894,10 +879,18 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		retVal.setPartitionId(getPartitionId());
 
 		retVal.setHasTags(isHasTags());
-		if (isHasTags() && createVersionTags) {
+		if (isHasTags() && theCreateVersionTags) {
 			for (ResourceTag next : getTags()) {
 				retVal.addTag(next);
 			}
+		}
+
+		// If we've deleted and updated the same resource in the same transaction,
+		// we need to actually create 2 distinct versions
+		if (getCurrentVersionEntity() != null
+				&& getCurrentVersionEntity().getId() != null
+				&& getVersion() == getCurrentVersionEntity().getVersion()) {
+			myVersion++;
 		}
 
 		populateHistoryEntityVersionAndDates(retVal);
@@ -1028,6 +1021,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	 * @return the resource id, or null if the resource doesn't have a client-assigned id,
 	 * and hasn't been saved to the db to get a server-assigned id yet.
 	 */
+	@Override
 	public String getFhirId() {
 		return myFhirId;
 	}

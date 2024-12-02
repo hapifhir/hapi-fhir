@@ -76,7 +76,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	public void before() throws Exception {
 		super.before();
 		myStorageSettings.setMaximumExpansionSize(5000);
-		myCachingValidationSupport.invalidateCaches();
+		myValidationSupport.invalidateCaches();
 	}
 
 	private CodeSystem createExternalCs() {

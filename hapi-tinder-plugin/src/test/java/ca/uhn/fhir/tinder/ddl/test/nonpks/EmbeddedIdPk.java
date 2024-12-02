@@ -11,8 +11,6 @@ import jakarta.persistence.SequenceGenerator;
 @Embeddable
 public class EmbeddedIdPk {
 
-	@SequenceGenerator(name = "SEQ_COMPLEX_PARENT_ID", sequenceName = "SEQ_COMPLEX_PARENT_ID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_COMPLEX_PARENT_ID")
 	@Column(name = "PID")
 	private Long myId;
 

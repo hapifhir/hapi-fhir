@@ -38,6 +38,7 @@ import ch.qos.logback.classic.Level;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -115,6 +116,10 @@ import static org.mockito.Mockito.when;
 
 public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ValidateTest.class);
+
+	@RegisterExtension
+	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
+
 	@Autowired
 	private IValidatorModule myValidatorModule;
 	@Autowired
@@ -129,9 +134,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
 	@Autowired
 	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
-
-	@RegisterExtension
-	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
 
 	@AfterEach
 	public void after() {
@@ -1490,6 +1492,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 					return (OperationOutcome) e.getOperationOutcome();
 				}
 				break;
+			case RDF:
+				break;
+			case NDJSON:
+				break;
 		}
 
 		throw new IllegalStateException(); // shouldn't get here
@@ -2234,6 +2240,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			createStructureDefinitionInDao();
 
 			// execute
+			((ValidationSupportChain)myValidationSupport).invalidateExpiringCaches();
 			final String outcomePatientValidateAfterStructDef = validate(PATIENT_WITH_REAL_URL);
 
 			// verify

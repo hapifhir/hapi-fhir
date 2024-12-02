@@ -298,7 +298,12 @@ public class JpaModelScannerAndVerifier {
 	}
 
 	private static void addColumnName(Map<String, Integer> columnNameToLength, Field nextField, int columnLength, String columnName) {
-		if (nextField.getType().isAssignableFrom(String.class)) {
+		if (nextField.getType().equals(Integer.class) || nextField.getType().isPrimitive()) {
+			// This is pretty imprecise and probably an overestimation, but we use it
+			// only for calculating max column length so it's better to be over than
+			// under
+			columnLength = 16;
+		} else if (nextField.getType().isAssignableFrom(String.class)) {
 			// MySQL treats each char as the max possible byte count in UTF-8 for its calculations
 			columnLength = columnLength * 4;
 		}

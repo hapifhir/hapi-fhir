@@ -127,12 +127,15 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		final AtomicInteger counter = new AtomicInteger();
 
 		// Notify Interceptors about pre-action call
-		HookParams hooks = new HookParams()
-				.add(AtomicInteger.class, counter)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, hooks);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING)) {
+			HookParams hooks = new HookParams()
+					.add(AtomicInteger.class, counter)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, hooks);
+		}
 
 		ourLog.info("BEGINNING GLOBAL $expunge");
 		Propagation propagation = Propagation.REQUIRES_NEW;

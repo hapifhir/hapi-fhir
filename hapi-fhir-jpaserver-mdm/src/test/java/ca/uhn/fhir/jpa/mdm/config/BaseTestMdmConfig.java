@@ -1,11 +1,17 @@
 package ca.uhn.fhir.jpa.mdm.config;
 
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,7 +51,7 @@ public abstract class BaseTestMdmConfig {
 	}
 
 	@Bean
-	MdmLinkHelper mdmLinkHelper() {
-		return new MdmLinkHelper();
+	MdmLinkHelper mdmLinkHelper(IMdmLinkDao<JpaPid, MdmLink> theMdmLinkRepo, IFhirResourceDao<Patient> thePatientDao, MdmLinkDaoSvc<JpaPid, MdmLink> theMdmLinkDaoSvc) {
+		return new MdmLinkHelper(theMdmLinkRepo, thePatientDao, theMdmLinkDaoSvc);
 	}
 }

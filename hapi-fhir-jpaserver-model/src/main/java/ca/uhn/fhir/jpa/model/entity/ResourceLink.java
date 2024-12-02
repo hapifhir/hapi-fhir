@@ -32,6 +32,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -125,6 +126,9 @@ public class ResourceLink extends BaseResourceIndex {
 			foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
 	private ResourceTable myTargetResource;
 
+	@Transient
+	private ResourceTable myTransientTargetResource;
+
 	@Column(name = TARGET_RESOURCE_ID, insertable = true, updatable = true, nullable = true)
 	@FullTextField
 	private Long myTargetResourcePid;
@@ -170,7 +174,7 @@ public class ResourceLink extends BaseResourceIndex {
 	}
 
 	public String getTargetResourceId() {
-		if (myTargetResourceId == null && myTargetResource != null) {
+		if (myTargetResourceId == null && getTargetResource() != null) {
 			myTargetResourceId = getTargetResource().getIdDt().getIdPart();
 		}
 		return myTargetResourceId;
@@ -213,11 +217,21 @@ public class ResourceLink extends BaseResourceIndex {
 		return b.isEquals();
 	}
 
+	/**
+	 * ResourceLink.myTargetResource field is immutable.Transient ResourceLink.myTransientTargetResource property
+	 * is used instead, allowing it to be updated via the ResourceLink#copyMutableValuesFrom method
+	 * when ResourceLink table row is reused.
+	 */
+	@PostLoad
+	public void postLoad() {
+		myTransientTargetResource = myTargetResource;
+	}
+
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
 		ResourceLink source = (ResourceLink) theSource;
 		mySourcePath = source.getSourcePath();
-		myTargetResource = source.getTargetResource();
+		myTransientTargetResource = source.getTargetResource();
 		myTargetResourceId = source.getTargetResourceId();
 		myTargetResourcePid = source.getTargetResourcePid();
 		myTargetResourceType = source.getTargetResourceType();
@@ -378,7 +392,7 @@ public class ResourceLink extends BaseResourceIndex {
 	}
 
 	public ResourceTable getTargetResource() {
-		return myTargetResource;
+		return myTransientTargetResource;
 	}
 
 	/**
@@ -396,8 +410,8 @@ public class ResourceLink extends BaseResourceIndex {
 		retVal.myTargetResourceType = myTargetResourceType;
 		if (myTargetResourceId != null) {
 			retVal.myTargetResourceId = myTargetResourceId;
-		} else if (myTargetResource != null) {
-			retVal.myTargetResourceId = myTargetResource.getIdDt().getIdPart();
+		} else if (getTargetResource() != null) {
+			retVal.myTargetResourceId = getTargetResource().getIdDt().getIdPart();
 		}
 		retVal.myTargetResourceUrl = myTargetResourceUrl;
 		retVal.myTargetResourceVersion = myTargetResourceVersion;

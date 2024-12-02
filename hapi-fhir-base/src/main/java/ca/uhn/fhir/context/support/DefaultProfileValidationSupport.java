@@ -23,7 +23,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.ILockable;
 import ca.uhn.fhir.util.ReflectionUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -48,6 +50,13 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	private static final Map<FhirVersionEnum, IValidationSupport> ourImplementations =
 			Collections.synchronizedMap(new HashMap<>());
+
+	/**
+	 * Userdata key indicating the source package ID for this package
+	 */
+	public static final String SOURCE_PACKAGE_ID =
+			DefaultProfileValidationSupport.class.getName() + "_SOURCE_PACKAGE_ID";
+
 	private final FhirContext myCtx;
 	/**
 	 * This module just delegates all calls to a concrete implementation which will
@@ -62,7 +71,8 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	 *
 	 * @param theFhirContext The context to use
 	 */
-	public DefaultProfileValidationSupport(FhirContext theFhirContext) {
+	public DefaultProfileValidationSupport(@Nonnull FhirContext theFhirContext) {
+		Validate.notNull(theFhirContext, "FhirContext must not be null");
 		myCtx = theFhirContext;
 
 		IValidationSupport strategy;
@@ -106,33 +116,45 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
-		return myDelegate.fetchAllConformanceResources();
+		List<IBaseResource> retVal = myDelegate.fetchAllConformanceResources();
+		addPackageInformation(retVal);
+		return retVal;
 	}
 
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
-		return myDelegate.fetchAllStructureDefinitions();
+		List<T> retVal = myDelegate.fetchAllStructureDefinitions();
+		addPackageInformation(retVal);
+		return retVal;
 	}
 
 	@Nullable
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
-		return myDelegate.fetchAllNonBaseStructureDefinitions();
+		List<T> retVal = myDelegate.fetchAllNonBaseStructureDefinitions();
+		addPackageInformation(retVal);
+		return retVal;
 	}
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		return myDelegate.fetchCodeSystem(theSystem);
+		IBaseResource retVal = myDelegate.fetchCodeSystem(theSystem);
+		addPackageInformation(retVal);
+		return retVal;
 	}
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
-		return myDelegate.fetchStructureDefinition(theUrl);
+		IBaseResource retVal = myDelegate.fetchStructureDefinition(theUrl);
+		addPackageInformation(retVal);
+		return retVal;
 	}
 
 	@Override
 	public IBaseResource fetchValueSet(String theUrl) {
-		return myDelegate.fetchValueSet(theUrl);
+		IBaseResource retVal = myDelegate.fetchValueSet(theUrl);
+		addPackageInformation(retVal);
+		return retVal;
 	}
 
 	public void flush() {
@@ -157,5 +179,44 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 			urlValueString = urlValueType.getValueAsString();
 		}
 		return urlValueString;
+	}
+
+	private <T extends IBaseResource> void addPackageInformation(List<T> theResources) {
+		if (theResources != null) {
+			theResources.forEach(this::addPackageInformation);
+		}
+	}
+
+	private void addPackageInformation(IBaseResource theResource) {
+		if (theResource != null) {
+			String sourcePackageId = null;
+			switch (myCtx.getVersion().getVersion()) {
+				case DSTU2:
+				case DSTU2_HL7ORG:
+					sourcePackageId = "hl7.fhir.r2.core";
+					break;
+				case DSTU2_1:
+					return;
+				case DSTU3:
+					sourcePackageId = "hl7.fhir.r3.core";
+					break;
+				case R4:
+					sourcePackageId = "hl7.fhir.r4.core";
+					break;
+				case R4B:
+					sourcePackageId = "hl7.fhir.r4b.core";
+					break;
+				case R5:
+					sourcePackageId = "hl7.fhir.r5.core";
+					break;
+			}
+
+			Validate.notNull(
+					sourcePackageId,
+					"Don't know how to handle package ID: %s",
+					myCtx.getVersion().getVersion());
+
+			theResource.setUserData(SOURCE_PACKAGE_ID, sourcePackageId);
+		}
 	}
 }
