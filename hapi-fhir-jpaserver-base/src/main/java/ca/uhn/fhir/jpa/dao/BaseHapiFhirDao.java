@@ -1316,24 +1316,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			historyEntry = theEntity.toHistory(versionedTags && theEntity.getDeleted() == null);
 		}
 
-		// FIXME: remove?
-		/*
-		 * If a resource was modified multiple times within the same transaction,
-		 * then the toHistory method above will increment the version automatically.
-		 * But because myVersion is annotated with @Version, manual changes to it
-		 * are not flushed to the DB. So we do that manually here. This isn't
-		 * almost ever going to happen in the real world, so the extra SQL write
-		 * isn't a big deal here. Essentially this can only happen if someone
-		 * starts a DB transaction in java code, and then called
-		 * BaseHapiFhirDao#update() on the same resource multime times before
-		 * closing the transaction.
-		 */
-		//		long newVersion = theEntity.getVersion();
-		//		if (newVersion != previousVersion) {
-		//			myResourceTableDao.updateResourceVersion(theEntity.getId(), previousVersion, newVersion);
-		//			theEntity.setVersionForUnitTest(newVersion);
-		//		}
-
 		historyEntry.setEncoding(theChanged.getEncoding());
 		historyEntry.setResource(theChanged.getResourceBinary());
 		historyEntry.setResourceTextVc(theChanged.getResourceText());

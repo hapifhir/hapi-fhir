@@ -2641,23 +2641,6 @@
 					</configuration>
 				</plugin>
 
-				<!-- Generate the DDL schema files -->
-				<!--<plugin> // FIXME: remove?
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>hapi-tinder-plugin</artifactId>
-					<version>7.7.9-SNAPSHOT</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>generate-ddl</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<skip>true</skip>
-					</configuration>
-				</plugin>-->
-
 				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
