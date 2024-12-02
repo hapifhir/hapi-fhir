@@ -1919,7 +1919,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(3, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 		assertEquals(4, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
 
 		// DateRangeParam
