@@ -41,7 +41,7 @@ public class PatientMatchProvider {
 	 * @param theRequestDetails - the request details
 	 * @return - any matches to the provided patient resource
 	 */
-	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
+	@Operation(name = ProviderConstants.PATIENT_MATCH, typeName = "Patient")
 	public IBaseBundle match(
 			@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient")
 					IAnyResource thePatient,

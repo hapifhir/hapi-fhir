@@ -74,5 +74,7 @@ public interface IMdmSettings {
 	}
 
 	// In MATCH_ONLY mode, the Patient/$match operation is available, but no mdm processing takes place.
-	MdmModeEnum getMode();
+	default MdmModeEnum getMode() {
+		return MdmModeEnum.MATCH_AND_LINK;
+	}
 }
