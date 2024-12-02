@@ -782,7 +782,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		} else {
 			assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_LINK t0 ON (t1.RES_ID = t0.TARGET_RESOURCE_ID) ");
 			if (myIncludePartitionIdsInSql) {
-				assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.PARTITION_ID = '1') AND (t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND (t0.SRC_RESOURCE_ID = '" + listIdLong + "'))");
+				assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.PARTITION_ID = '1') AND (t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND (t0.SRC_RESOURCE_ID = '" + listIdLong + "')) fetch first '10000' rows only");
 			} else {
 				assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND (t0.SRC_RESOURCE_ID = '" + listIdLong + "'))");
 			}
@@ -816,7 +816,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') )) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST", getSelectSql(0));
 			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in (('" + id0.getIdPartAsLong() + "','1'),('" + id1.getIdPartAsLong() + "','2'),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL)) and mrt1_0.RES_VER=rht1_0.RES_VER");
 		} else if (myIncludePartitionIdsInSql) {
-			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') )) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST", getSelectSql(0));
+			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') )) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first '10000' rows only", getSelectSql(0));
 			assertThat(getSelectSql(1)).contains(" where rht1_0.RES_ID in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
 		} else {
 			assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE ((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST", getSelectSql(0));
@@ -870,9 +870,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			}
 		} else if (myIncludePartitionIdsInSql) {
 			if (theAccessMetaSourceInformationFromProvenanceTable) {
-				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER_PROV t1 ON (t0.RES_ID = t1.RES_PID) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo'))", getSelectSql(0));
+				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER_PROV t1 ON (t0.RES_ID = t1.RES_PID) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo')) fetch first '10000' rows only", getSelectSql(0));
 			} else {
-				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER t1 ON (t0.RES_ID = t1.RES_ID) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo'))", getSelectSql(0));
+				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER t1 ON (t0.RES_ID = t1.RES_ID) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo')) fetch first '10000' rows only", getSelectSql(0));
 			}
 		} else {
 			if (theAccessMetaSourceInformationFromProvenanceTable) {
@@ -1003,7 +1003,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.PARTITION_ID = '1') AND (t0.HASH_VALUE = '7943378963388545453'))");
+			assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.PARTITION_ID = '1') AND (t0.HASH_VALUE = '7943378963388545453')) fetch first '10000' rows only");
 		} else {
 			assertThat(getSelectSql(0)).endsWith(" WHERE (t0.HASH_VALUE = '7943378963388545453')");
 		}
@@ -1066,7 +1066,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
 		if (myIncludePartitionIdsInSql) {
-			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = '1'))");
+			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = '1')) fetch first '10000' rows only");
 		} else {
 			assertThat(sql).isEqualTo("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL))");
 		}
@@ -1130,7 +1130,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
 		if (myIncludePartitionIdsInSql) {
-			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'QuestionnaireResponse') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = '1'))");
+			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'QuestionnaireResponse') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = '1')) fetch first '10000' rows only");
 		} else {
 			assertThat(sql).isEqualTo("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'QuestionnaireResponse') AND (t0.RES_DELETED_AT IS NULL))");
 		}
@@ -1177,7 +1177,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
 		if (myIncludePartitionIdsInSql) {
-			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = '1'))");
+			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = '1')) fetch first '10000' rows only");
 		} else {
 			assertThat(sql).isEqualTo("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL))");
 		}
@@ -1335,7 +1335,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		if (myIncludePartitionIdsInSql && myPartitionSettings.getDefaultPartitionId() == null) {
 			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Organization') AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID IS NULL) AND (t0.RES_ID = '" + ids.parentOrgPid() + "')))");
 		} else if (myIncludePartitionIdsInSql) {
-			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Organization') AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID = '0') AND (t0.RES_ID = '" + ids.parentOrgPid() + "')))");
+			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Organization') AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID = '0') AND (t0.RES_ID = '" + ids.parentOrgPid() + "'))) fetch first '10000' rows only");
 		} else {
 			assertThat(sql).isEqualTo("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Organization') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID = '" + ids.parentOrgPid() + "'))");
 		}
@@ -1402,7 +1402,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		if (myIncludePartitionIdsInSql && myPartitionSettings.getDefaultPartitionId() == null) {
 			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Organization') AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID IS NULL) AND (t0.RES_ID = '" + ids.parentOrgPid() + "')))");
 		} else if (myIncludePartitionIdsInSql) {
-			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Organization') AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID = '0') AND (t0.RES_ID = '" + ids.parentOrgPid() + "')))");
+			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Organization') AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID = '0') AND (t0.RES_ID = '" + ids.parentOrgPid() + "'))) fetch first '10000' rows only");
 		} else {
 			assertThat(sql).isEqualTo("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Organization') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID = '" + ids.parentOrgPid() + "'))");
 		}
@@ -1762,8 +1762,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			RequestPartitionId.allPartitions(),
 			"single string - no hfj_resource root - all partitions",
 				"Patient?name=FOO",
-				"SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))",
-				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))",
+				"SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) fetch first ? rows only",
+				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) fetch first ? rows only",
 				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))"
 		);
 		SearchMultiPartitionTestCase.add(
@@ -1771,8 +1771,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			RequestPartitionId.fromPartitionIds(PARTITION_1, PARTITION_2),
 			"single string - no hfj_resource root - multiple partitions",
 				"Patient?name=FOO",
-				"SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))",
-				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.PARTITION_ID IN (?,?) ) AND ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)))",
+				"SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) fetch first ? rows only",
+				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.PARTITION_ID IN (?,?) ) AND ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))) fetch first ? rows only",
 				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.PARTITION_ID IN (?,?) ) AND ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)))"
 		);
 
@@ -1781,8 +1781,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			RequestPartitionId.allPartitions(),
 			"two regular params - should use hfj_resource as root - all partitions",
 			"Patient?name=smith&active=true",
-			"SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_VALUE = ?))",
-			"SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_VALUE = ?))",
+			"SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_VALUE = ?)) fetch first ? rows only",
+			"SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_VALUE = ?)) fetch first ? rows only",
 			"SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON ((t1.PARTITION_ID = t0.PARTITION_ID) AND (t1.RES_ID = t0.RES_ID)) INNER JOIN HFJ_SPIDX_TOKEN t2 ON ((t1.PARTITION_ID = t2.PARTITION_ID) AND (t1.RES_ID = t2.RES_ID)) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_VALUE = ?))"
 		);
 		SearchMultiPartitionTestCase.add(
@@ -1790,8 +1790,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			RequestPartitionId.fromPartitionIds(PARTITION_1, PARTITION_2),
 			"two regular params - should use hfj_resource as root - multiple partitions",
 			"Patient?name=smith&active=true",
-			"SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_VALUE = ?))",
-			"SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.PARTITION_ID IN (?,?) ) AND ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))) AND ((t2.PARTITION_ID IN (?,?) ) AND (t2.HASH_VALUE = ?)))",
+			"SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_VALUE = ?)) fetch first ? rows only",
+			"SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.PARTITION_ID IN (?,?) ) AND ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))) AND ((t2.PARTITION_ID IN (?,?) ) AND (t2.HASH_VALUE = ?))) fetch first ? rows only",
 			"SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON ((t1.PARTITION_ID = t0.PARTITION_ID) AND (t1.RES_ID = t0.RES_ID)) INNER JOIN HFJ_SPIDX_TOKEN t2 ON ((t1.PARTITION_ID = t2.PARTITION_ID) AND (t1.RES_ID = t2.RES_ID)) WHERE (((t0.PARTITION_ID IN (?,?) ) AND ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))) AND ((t2.PARTITION_ID IN (?,?) ) AND (t2.HASH_VALUE = ?)))"
 		);
 
@@ -1800,8 +1800,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			RequestPartitionId.allPartitions(),
 			"token not as a NOT IN subselect - all partitions",
 			"Encounter?class:not=not-there",
-			"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))",
-			"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))",
+			"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )) fetch first ? rows only",
+			"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )) fetch first ? rows only",
 			"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID,t0.RES_ID) NOT IN (SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))"
 		);
 		SearchMultiPartitionTestCase.add(
@@ -1809,8 +1809,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			RequestPartitionId.fromPartitionIds(PARTITION_1, PARTITION_2),
 			"token not as a NOT IN subselect - multiple partitions",
 			"Encounter?class:not=not-there",
-			"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))",
-			"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID IN (?,?) ) AND ((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )))",
+			"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )) fetch first ? rows only",
+			"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID IN (?,?) ) AND ((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))) fetch first ? rows only",
 			"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID IN (?,?) ) AND ((t0.PARTITION_ID,t0.RES_ID) NOT IN (SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )))"
 		);
 
@@ -1819,8 +1819,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			RequestPartitionId.allPartitions(),
 			"token not on chain join - NOT IN from hfj_res_link target columns - all partitions",
 			"Observation?encounter.class:not=not-there",
-			"SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))",
-			"SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))",
+			"SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )) fetch first ? rows only",
+			"SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )) fetch first ? rows only",
 			"SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))"
 		);
 		SearchMultiPartitionTestCase.add(
@@ -1828,8 +1828,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			RequestPartitionId.fromPartitionIds(PARTITION_1, PARTITION_2),
 			"token not on chain join - NOT IN from hfj_res_link target columns - multiple partitions",
 			"Observation?encounter.class:not=not-there",
-			"SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))",
-			"SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.PARTITION_ID IN (?,?) ) AND ((t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )))",
+			"SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )) fetch first ? rows only",
+			"SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.PARTITION_ID IN (?,?) ) AND ((t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))) fetch first ? rows only",
 			"SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.PARTITION_ID IN (?,?) ) AND ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )))"
 		);
 
@@ -1848,22 +1848,22 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			new SqlGenerationTestCase(
 				"bare sort",
 				"Patient?_sort=name",
-				"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = ?)) WHERE ((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST",
-				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = ?)) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = ?)) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST",
+				"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = ?)) WHERE ((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first ? rows only",
+				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = ?)) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = ?)) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first ? rows only",
 				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = ?)) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = ?)) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST"
 			)
 			, new SqlGenerationTestCase(
 				"sort with predicate",
 				"Patient?active=true&_sort=name",
-				"SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_TOKEN t0 ON (t1.RES_ID = t0.RES_ID) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.RES_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE (t0.HASH_VALUE = ?) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST",
-				"SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_TOKEN t0 ON (t1.RES_ID = t0.RES_ID) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.RES_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE ((t0.PARTITION_ID = ?) AND (t0.HASH_VALUE = ?)) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST",
+				"SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_TOKEN t0 ON (t1.RES_ID = t0.RES_ID) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.RES_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE (t0.HASH_VALUE = ?) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first ? rows only",
+				"SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_TOKEN t0 ON (t1.RES_ID = t0.RES_ID) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.RES_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE ((t0.PARTITION_ID = ?) AND (t0.HASH_VALUE = ?)) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first ? rows only",
 				"SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_TOKEN t0 ON ((t1.PARTITION_ID = t0.PARTITION_ID) AND (t1.RES_ID = t0.RES_ID)) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.PARTITION_ID = t2.PARTITION_ID) AND (t1.RES_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE ((t0.PARTITION_ID = ?) AND (t0.HASH_VALUE = ?)) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST"
 			)
 			, new SqlGenerationTestCase(
 				"chained sort",
 				"Patient?_sort=Practitioner:general-practitioner.name",
-				"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_RES_LINK t1 ON ((t0.RES_ID = t1.SRC_RESOURCE_ID) AND (t1.SRC_PATH = ?)) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.TARGET_RESOURCE_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE ((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST",
-				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_RES_LINK t1 ON ((t0.RES_ID = t1.SRC_RESOURCE_ID) AND (t1.SRC_PATH = ?)) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.TARGET_RESOURCE_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = ?)) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST",
+				"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_RES_LINK t1 ON ((t0.RES_ID = t1.SRC_RESOURCE_ID) AND (t1.SRC_PATH = ?)) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.TARGET_RESOURCE_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE ((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first ? rows only",
+				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_RES_LINK t1 ON ((t0.RES_ID = t1.SRC_RESOURCE_ID) AND (t1.SRC_PATH = ?)) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.TARGET_RESOURCE_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = ?)) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first ? rows only",
 				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_RES_LINK t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.SRC_RESOURCE_ID) AND (t1.SRC_PATH = ?)) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.TARGET_RES_PARTITION_ID = t2.PARTITION_ID) AND (t1.TARGET_RESOURCE_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = ?)) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST"
 			)
 		);

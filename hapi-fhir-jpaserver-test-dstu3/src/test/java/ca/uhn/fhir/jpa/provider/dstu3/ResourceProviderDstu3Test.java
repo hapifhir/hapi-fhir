@@ -2490,7 +2490,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(1, resp.getTotal());
 	}
 
-//	@Disabled
 	@Test
 	public void testMetaOperations() {
 		String methodName = "testMetaOperations";
