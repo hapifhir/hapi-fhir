@@ -2536,6 +2536,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * duplicate index violations if we try to add another (after this create/update)
 		 */
 		ResourceTable entity = (ResourceTable) theEntity;
+
+		/*
+		 * If we read back the entity from hibernate, and it's already saying
+		 * it's been updated in this transaction, then someone is probably
+		 * doing multiple modifications of the same resource within the same
+		 * database transaction. The only way for this to work cleanly is for
+		 * us to flush hibernate now. That way we can increment the version
+		 * a second time, create multiple history entries, etc.
+		 */
+		if (entity != null && entity.isVersionUpdatedInCurrentTransaction()) {
+			myEntityManager.flush();
+		}
+
 		if (entity.isSearchUrlPresent()) {
 			JpaPid persistentId = entity.getResourceId();
 			theTransactionDetails.addUpdatedResourceId(persistentId);
