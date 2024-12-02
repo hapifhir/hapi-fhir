@@ -50,7 +50,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	@Override
 	public IBaseParameters replaceReferences(
-		IIdType theCurrentTargetId, String theNewTargetId, RequestDetails theRequest) {
+			IIdType theCurrentTargetId, String theNewTargetId, RequestDetails theRequest) {
 
 		validateParameters(theCurrentTargetId, theNewTargetId, theRequest);
 		IIdType newTargetId = new IdDt(theNewTargetId);
@@ -167,7 +167,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return myDaoRegistry.getResourceDao(theResourceName);
 	}
 
-	private void validateParameters(IIdType theCurrentTargetIdParam, String theNewTargetIdParam, RequestDetails theRequest) {
+	private void validateParameters(
+			IIdType theCurrentTargetIdParam, String theNewTargetIdParam, RequestDetails theRequest) {
 		if (theCurrentTargetIdParam == null) {
 			throw new InvalidParameterException(Msg.code(2583) + "Parameter 'theCurrentTargetIdParam' is null");
 		}
