@@ -1379,6 +1379,15 @@ public class JsonParserR4Test extends BaseTest {
 		assertThat(patientString).doesNotContain("fhir_comment");
 	}
 
+	@Test
+	public void testContainedResourceIdIsReadWithoutAddingHash() throws IOException {
+		String text = loadResource("/observation-with-contained-specimen.json");
+
+		Observation observation = ourCtx.newJsonParser().parseResource(Observation.class, text);
+		assertThat(observation.getSpecimen().getReference()).isEqualTo("#contained-id");
+		assertThat(observation.getContained().get(0).getId()).isEqualTo("contained-id");
+	}
+
 	@DatatypeDef(
 		name = "UnknownPrimitiveType"
 	)

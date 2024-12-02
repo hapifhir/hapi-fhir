@@ -439,7 +439,7 @@ class ParserState<T> {
 				// need an ID to be referred to)
 				myErrorHandler.containedResourceWithNoId(null);
 			} else {
-				res.getIdElement().setValue('#' + res.getIdElement().getIdPart());
+				res.getIdElement().setValue(res.getIdElement().getIdPart());
 				getPreResourceState()
 						.getContainedResources()
 						.put(res.getIdElement().getValue(), res);

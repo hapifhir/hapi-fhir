@@ -50,18 +50,19 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 		o.setSpecimen(new Reference(specimen));
 
 		IParser p = ourCtx.newJsonParser();
-		o = (Observation) p.parseResource(p.encodeResourceToString(o));
+		String encodedResource = p.encodeResourceToString(o);
+		Observation parsedResource = (Observation) p.parseResource(encodedResource);
 
 		List<Base> value;
 
 
-		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen", Base.class);
+		value = ourCtx.newFhirPath().evaluate(parsedResource, "Observation.specimen", Base.class);
 		assertThat(value).hasSize(1);
-		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve()", Base.class);
+		value = ourCtx.newFhirPath().evaluate(parsedResource, "Observation.specimen.resolve()", Base.class);
 		assertThat(value).hasSize(1);
 
 
-		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve().receivedTime", Base.class);
+		value = ourCtx.newFhirPath().evaluate(parsedResource, "Observation.specimen.resolve().receivedTime", Base.class);
 		assertThat(value).hasSize(1);
 		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
 	}
