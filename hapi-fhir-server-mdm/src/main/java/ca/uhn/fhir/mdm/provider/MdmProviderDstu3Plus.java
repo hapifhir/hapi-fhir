@@ -106,6 +106,8 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	/**
 	 * Searches for matches for the provided patient resource
 	 * @param thePatient - the patient resource
+	 * @param theOnlyCertainMatches - (ignored by this implementation)
+	 * @param theCount - (ignored by this implementation)
 	 * @param theRequestDetails - the request details
 	 * @return - any matches to the provided patient resource
 	 */
@@ -113,6 +115,10 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseBundle match(
 			@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient")
 					IAnyResource thePatient,
+            @OperationParam(name = ProviderConstants.MDM_MATCH_ONLY_CERTAIN_MATCHES, min = 0, max = 1, typeName = "boolean")
+                    IPrimitiveType<Boolean> theOnlyCertainMatches,
+            @OperationParam(name = ProviderConstants.MDM_MATCH_COUNT, min = 0, max = 1, typeName = "integer")
+                    IPrimitiveType<Integer> theCount,
 			RequestDetails theRequestDetails) {
 		if (thePatient == null) {
 			throw new InvalidRequestException(Msg.code(1498) + "resource may not be null");
