@@ -44,12 +44,10 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -100,13 +98,6 @@ public class BulkDataExportProvider {
 	public static final String UNSUPPORTED_BINARY_TYPE = "Binary";
 
 	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
-	private static final Set<FhirVersionEnum> PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE = Set.of(
-			FhirVersionEnum.DSTU2,
-			FhirVersionEnum.DSTU2_1,
-			FhirVersionEnum.DSTU2_HL7ORG,
-			FhirVersionEnum.DSTU3,
-			FhirVersionEnum.R4,
-			FhirVersionEnum.R4B);
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -160,7 +151,7 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theExportId,
 			ServletRequestDetails theRequestDetails) {
 		// JPA export provider
-		validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		BulkExportJobParameters BulkExportJobParameters = buildSystemBulkExportOptions(
 				theOutputFormat, theType, theSince, theTypeFilter, theExportId, theTypePostFetchFilterUrl);
@@ -281,7 +272,7 @@ public class BulkDataExportProvider {
 		ourLog.debug("_typeFilter={}", theTypeFilter);
 		ourLog.debug("_mdm={}", theMdm);
 
-		validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		// verify the Group exists before starting the job
 		validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
@@ -360,8 +351,8 @@ public class BulkDataExportProvider {
 		if (myCompartmentResources == null) {
 			myCompartmentResources =
 					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext));
-			if (isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
-					theFhirContext.getVersion().getVersion())) {
+			FhirVersionEnum fhirVersionEnum = theFhirContext.getVersion().getVersion();
+			if (BulkDataExportUtil.isDeviceResourceSupportedForPatientCompartmentForFhirVersion(fhirVersionEnum)) {
 				myCompartmentResources.add("Device");
 			}
 		}
@@ -472,7 +463,7 @@ public class BulkDataExportProvider {
 			List<IPrimitiveType<String>> theTypeFilter,
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			List<IPrimitiveType<String>> thePatientIds) {
-		validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		validateTargetsExists(
 				theRequestDetails,
@@ -812,16 +803,4 @@ public class BulkDataExportProvider {
 		myDaoRegistry = theDaoRegistry;
 	}
 
-	public static void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails, String theOperationName) {
-		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
-		if (!prefer.getRespondAsync()) {
-			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
-		}
-	}
-
-	private static boolean isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
-			FhirVersionEnum theFhirVersionEnum) {
-		return PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE.contains(theFhirVersionEnum);
-	}
 }
