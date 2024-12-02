@@ -125,6 +125,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init700();
 		init720();
 		init740();
+		init760();
 		init780();
 	}
 
@@ -152,6 +153,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.modifyColumn("20241023.50", "PACKAGE_DESC")
 				.nullable()
 				.withType(ColumnTypeEnum.STRING, 512);
+	}
+
+	/**
+	 * Built at 2024.11.02 to be backported to version 7.6
+	 */
+	protected void init760() {
+		final Builder version = forVersion(VersionEnum.V7_6_0);
+
+		version.onTable("HFJ_RES_VER")
+				.modifyColumn("20241102.10", "SOURCE_URI")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 768)
+				.failureAllowed();
 	}
 
 	protected void init740() {
