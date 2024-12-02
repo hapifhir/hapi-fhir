@@ -634,7 +634,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private void doCreateChunkedQueries(
 			SearchParameterMap theParams,
-			List<Long> thePids,
+			List<JpaPid> thePids,
 			SearchQueryProperties theSearchQueryProperties,
 			RequestDetails theRequest,
 			ArrayList<ISearchQueryExecutor> theQueries) {
@@ -698,7 +698,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		if (myParams.getEverythingMode() != null) {
-			createChunkedQueryForEverythingSearch(theParams, theSearchProperties, thePidList, theSearchQueryExecutors);
+			createChunkedQueryForEverythingSearch(
+					theRequest, theParams, theSearchProperties, thePidList, theSearchQueryExecutors);
 		} else {
 			createChunkedQueryNormalSearch(
 					theParams, theSearchProperties, theRequest, thePidList, theSearchQueryExecutors);
@@ -842,7 +843,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			RequestDetails theRequest,
 			SearchParameterMap theParams,
 			SearchQueryProperties theSearchQueryProperties,
-			List<Long> thePidList,
+			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
@@ -2736,7 +2737,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							callPerformanceTracingHook(nextPid);
 						}
 
-						if (nextLong != null) {
+						if (nextPid != null) {
 							if (!myPidSet.contains(nextPid)) {
 								if (!mySearchProperties.isDeduplicateInDBFlag()) {
 									/*
