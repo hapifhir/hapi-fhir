@@ -21,6 +21,7 @@ package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
@@ -85,6 +86,13 @@ public interface ITestDataBuilder {
 	 */
 	default ICreationArgument withLanguage(String theLanguage) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "language", "string", theLanguage);
+	}
+
+	/**
+	 * List.entry.item
+	 */
+	default ICreationArgument withListItem(IIdType theReference) {
+		return withElementAt("entry", withReference("item", theReference));
 	}
 
 	/**
@@ -239,6 +247,10 @@ public interface ITestDataBuilder {
 		return buildResource("Patient", theModifiers);
 	}
 
+	default IIdType createList(ICreationArgument... theModifiers) {
+		return createResource("List", theModifiers);
+	}
+
 	default IIdType createPatient(ICreationArgument... theModifiers) {
 		return createResource("Patient", theModifiers);
 	}
@@ -321,7 +333,7 @@ public interface ITestDataBuilder {
 				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
 				reference.setReference(theReferenceValue.getValue());
 
-				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition((IBaseResource) t);
+				BaseRuntimeElementDefinition<?> resourceDef = getFhirContext().getElementDefinition(t.getClass());
 				resourceDef.getChildByName(theReferenceName).getMutator().addValue(t, reference);
 			}
 		};

@@ -43,6 +43,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class MdmSearchExpansionSvc {
 	private static final String EXPANSION_RESULTS = MdmSearchExpansionSvc.class.getName() + "_EXPANSION_RESULTS";
 	private static final String RESOURCE_NAME = MdmSearchExpansionSvc.class.getName() + "_RESOURCE_NAME";
@@ -75,6 +77,7 @@ public class MdmSearchExpansionSvc {
 	 * @since 8.0.0
 	 */
 	public MdmSearchExpansionResults expandSearchAndStoreInRequestDetails(
+			String theResourceName,
 			@Nullable RequestDetails theRequestDetails,
 			@Nonnull SearchParameterMap theSearchParameterMap,
 			IParamTester theParamTester) {
@@ -113,12 +116,7 @@ public class MdmSearchExpansionSvc {
 				// here we will know if it's an _id param or not
 				// from theSearchParameterMap.keySet()
 				expandAnyReferenceParameters(
-						requestPartitionId,
-						theRequestDetails.getResourceName(),
-						paramName,
-						orList,
-						theParamTester,
-						expansionResults);
+						requestPartitionId, theResourceName, paramName, orList, theParamTester, expansionResults);
 			}
 		}
 
@@ -128,9 +126,8 @@ public class MdmSearchExpansionSvc {
 		 * Note: Do this at the end so that the query string reflects the post-translated
 		 * query string
 		 */
-		String resourceName = theRequestDetails.getResourceName();
 		String queryString = theSearchParameterMap.toNormalizedQueryString(myFhirContext);
-		theRequestDetails.getUserData().put(RESOURCE_NAME, resourceName);
+		theRequestDetails.getUserData().put(RESOURCE_NAME, theResourceName);
 		theRequestDetails.getUserData().put(QUERY_STRING, queryString);
 
 		return expansionResults;
@@ -195,7 +192,7 @@ public class MdmSearchExpansionSvc {
 	}
 
 	private String addResourceTypeIfNecessary(String theResourceType, String theResourceId) {
-		if (theResourceId.contains("/")) {
+		if (theResourceId.contains("/") || isBlank(theResourceType)) {
 			return theResourceId;
 		} else {
 			return theResourceType + "/" + theResourceId;

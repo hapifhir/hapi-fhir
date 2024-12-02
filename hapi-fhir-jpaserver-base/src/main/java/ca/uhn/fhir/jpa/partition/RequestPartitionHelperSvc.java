@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.partition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;
@@ -36,17 +37,27 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	@Autowired
 	IPartitionLookupSvc myPartitionConfigSvc;
 
+	@Autowired
+	PartitionSettings myPartitionSettings;
+
 	public RequestPartitionHelperSvc() {}
 
 	@Override
 	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
 		List<String> names = null;
+		List<Integer> partitionIds = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionIds().size(); i++) {
 
 			PartitionEntity partition;
 			Integer id = theRequestPartitionId.getPartitionIds().get(i);
 			if (id == null) {
 				partition = null;
+				if (myPartitionSettings.getDefaultPartitionId() != null) {
+					if (partitionIds == null) {
+						partitionIds = new ArrayList<>(theRequestPartitionId.getPartitionIds());
+					}
+					partitionIds.set(i, myPartitionSettings.getDefaultPartitionId());
+				}
 			} else {
 				try {
 					partition = myPartitionConfigSvc.getPartitionById(id);
@@ -88,8 +99,12 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 		}
 
 		if (names != null) {
+			List<Integer> partitionIdsToUse = theRequestPartitionId.getPartitionIds();
+			if (partitionIds != null) {
+				partitionIdsToUse = partitionIds;
+			}
 			return RequestPartitionId.forPartitionIdsAndNames(
-					names, theRequestPartitionId.getPartitionIds(), theRequestPartitionId.getPartitionDate());
+					names, partitionIdsToUse, theRequestPartitionId.getPartitionDate());
 		}
 
 		return theRequestPartitionId;

@@ -40,7 +40,7 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftAndRightMatchLikeExpression;
 import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftMatchLikeExpression;
 
-public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
+public class ResourceHistoryPredicateBuilder extends BaseJoiningPredicateBuilder implements ISourcePredicateBuilder {
 
 	private final DbColumn myColumnSourceUri;
 	private final DbColumn myColumnRequestId;
@@ -49,10 +49,10 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 	/**
 	 * Constructor
 	 */
-	public SourcePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER_PROV"));
+	public ResourceHistoryPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER"));
 
-		myResourceIdColumn = getTable().addColumn("RES_PID");
+		myResourceIdColumn = getTable().addColumn("RES_ID");
 		myColumnSourceUri = getTable().addColumn("SOURCE_URI");
 		myColumnRequestId = getTable().addColumn("REQUEST_ID");
 	}
@@ -62,14 +62,17 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 		return myResourceIdColumn;
 	}
 
+	@Override
 	public Condition createPredicateSourceUri(String theSourceUri) {
 		return BinaryCondition.equalTo(myColumnSourceUri, generatePlaceholder(theSourceUri));
 	}
 
+	@Override
 	public Condition createPredicateMissingSourceUri() {
 		return UnaryCondition.isNull(myColumnSourceUri);
 	}
 
+	@Override
 	public Condition createPredicateSourceUriWithModifiers(
 			IQueryParameterType theQueryParameter, JpaStorageSettings theStorageSetting, String theSourceUri) {
 		if (theQueryParameter.getMissing() != null && !theQueryParameter.getMissing()) {
@@ -117,6 +120,7 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 		}
 	}
 
+	@Override
 	public Condition createPredicateRequestId(String theRequestId) {
 		return BinaryCondition.equalTo(myColumnRequestId, generatePlaceholder(theRequestId));
 	}

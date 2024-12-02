@@ -30,11 +30,11 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -87,10 +87,16 @@ public abstract class BaseCaptureQueriesListener
 					&& next.getParametersList().get(0).size() > 0) {
 				size = next.getParametersList().size();
 				List<ParameterSetOperation> values = next.getParametersList().get(0);
-				params = values.stream()
-						.map(t -> t.getArgs()[1])
-						.map(t -> t != null ? t.toString() : "NULL")
-						.collect(Collectors.toList());
+				params = new ArrayList<>();
+				for (ParameterSetOperation t : values) {
+					if (t.getMethod().getName().equals("setNull")) {
+						params.add(null);
+					} else {
+						Object arg = t.getArgs()[1];
+						String s = arg != null ? arg.toString() : null;
+						params.add(s);
+					}
+				}
 			} else {
 				params = Collections.emptyList();
 				size = next.getParametersList().size();

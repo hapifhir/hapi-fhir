@@ -1356,7 +1356,8 @@ public abstract class BaseTransactionProcessor {
 						}
 
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
-						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
+						IIdType patchId =
+								myContext.getVersion().newIdType(parts.getResourceType(), parts.getResourceId());
 
 						String conditionalUrl;
 						if (isNull(patchId.getIdPart())) {
@@ -1407,6 +1408,8 @@ public abstract class BaseTransactionProcessor {
 
 				theTransactionStopWatch.endCurrentTask();
 			}
+
+			postTransactionProcess(theTransactionDetails);
 
 			/*
 			 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
@@ -1514,6 +1517,13 @@ public abstract class BaseTransactionProcessor {
 	 * with a given verb.
 	 */
 	protected void handleVerbChangeInTransactionWriteOperations() {
+		// nothing
+	}
+
+	/**
+	 * Implement to handle post transaction processing
+	 */
+	protected void postTransactionProcess(TransactionDetails theTransactionDetails) {
 		// nothing
 	}
 

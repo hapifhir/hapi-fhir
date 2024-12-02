@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 6522
+title: "Several memory caches in various parts of the JPA server have been removed in an
+   effort to consolidate caching in this system to two places: The MemoryCacheService, and
+   ValidationSupportChain. This should make management of the system easier."
+

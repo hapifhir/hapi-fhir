@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ValidateUtil;
-import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
@@ -313,38 +312,6 @@ public class TermConceptMappingSvcImpl extends TermConceptClientMappingSvcImpl i
 			myConceptMapDao.deleteTermConceptMapById(existingTermConceptMap.getId());
 			ourLog.info("Done deleting existing TermConceptMap[{}] and its children.", existingTermConceptMap.getId());
 		}
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting
-	public static void clearOurLastResultsFromTranslationCache() {
-		ourLastResultsFromTranslationCache = false;
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting
-	public static void clearOurLastResultsFromTranslationWithReverseCache() {
-		ourLastResultsFromTranslationWithReverseCache = false;
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting
-	static boolean isOurLastResultsFromTranslationCache() {
-		return ourLastResultsFromTranslationCache;
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting
-	static boolean isOurLastResultsFromTranslationWithReverseCache() {
-		return ourLastResultsFromTranslationWithReverseCache;
 	}
 
 	public static Parameters toParameters(TranslateConceptResults theTranslationResult) {

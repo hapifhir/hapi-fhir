@@ -68,7 +68,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 
 					ourLog.debug("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
 
-					return JpaPid.fromLongList(retVal);
+					return ISearchResultDao.toJpaPidList(retVal);
 				});
 	}
 
@@ -81,7 +81,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 				.execute(() -> {
 					List<Long> retVal = mySearchResultDao.findWithSearchPidOrderIndependent(theSearch.getId());
 					ourLog.trace("fetchAllResultPids returned {} pids", retVal.size());
-					return JpaPid.fromLongList(retVal);
+					return ISearchResultDao.toJpaPidList(retVal);
 				});
 	}
 
