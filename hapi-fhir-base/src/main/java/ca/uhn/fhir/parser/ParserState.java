@@ -399,7 +399,7 @@ class ParserState<T> {
 				myErrorHandler.containedResourceWithNoId(null);
 			} else {
 				if (!res.getId().isLocal()) {
-					res.setId(new IdDt('#' + res.getId().getIdPart()));
+					res.setId(new IdDt(res.getId().getIdPart()));
 				}
 				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
 			}
