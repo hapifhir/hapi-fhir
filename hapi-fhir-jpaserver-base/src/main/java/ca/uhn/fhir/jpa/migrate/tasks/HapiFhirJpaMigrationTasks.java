@@ -126,8 +126,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init700();
 		init720();
 		init740();
-        init760();
-        init780();
+		init760();
+		init780();
 	}
 
 	protected Set<FlagEnum> getFlags() {
