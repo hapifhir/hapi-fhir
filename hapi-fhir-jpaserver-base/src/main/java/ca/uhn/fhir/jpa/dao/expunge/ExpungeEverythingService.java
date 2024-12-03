@@ -92,7 +92,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.util.comparator.Comparators;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -308,25 +311,57 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 						Metamodel metamodel = myEntityManager.getMetamodel();
 						EntityType<T> entity = metamodel.entity(theEntityType);
 						Set<SingularAttribute<? super T, ?>> singularAttributes = entity.getSingularAttributes();
-						String idProperty = null;
+						List<String> idProperty = new ArrayList<>();
 						for (SingularAttribute<? super T, ?> singularAttribute : singularAttributes) {
 							if (singularAttribute.isId()) {
-								idProperty = singularAttribute.getName();
-								break;
+								idProperty.add(singularAttribute.getName());
 							}
 						}
+						idProperty.sort(Comparators.comparable());
+						String idPropertyNames = String.join(",", idProperty);
 
 						Query nativeQuery = myEntityManager.createQuery(
-								"SELECT " + idProperty + " FROM " + theEntityType.getSimpleName());
-						nativeQuery.setMaxResults(800);
+								"SELECT (" + idPropertyNames + ") FROM " + theEntityType.getSimpleName());
+						nativeQuery.setMaxResults(400);
 						List pids = nativeQuery.getResultList();
-
-						if (!pids.isEmpty()) {
-							nativeQuery = myEntityManager.createQuery("DELETE FROM " + theEntityType.getSimpleName()
-									+ " WHERE " + idProperty + " IN (:pids)");
-							nativeQuery.setParameter("pids", pids);
-							nativeQuery.executeUpdate();
+						if (pids.isEmpty()) {
+							return 0;
 						}
+
+						List<Object> values = new ArrayList<>();
+
+						StringBuilder deleteBuilder = new StringBuilder();
+						deleteBuilder.append("DELETE FROM ");
+						deleteBuilder.append(theEntityType.getSimpleName());
+						deleteBuilder.append(" WHERE (");
+						deleteBuilder.append(idPropertyNames);
+						deleteBuilder.append(") IN ");
+						if (idProperty.size() > 1) {
+							deleteBuilder.append('(');
+							for (Iterator<Object> iter = pids.iterator(); iter.hasNext(); ) {
+								Object[] pid = (Object[]) iter.next();
+								deleteBuilder.append('(');
+								for (int i = 0; i < pid.length; i++) {
+									if (i > 0) {
+										deleteBuilder.append(',');
+									}
+									deleteBuilder.append(pid[i]);
+								}
+								deleteBuilder.append(')');
+								if (iter.hasNext()) {
+									deleteBuilder.append(',');
+								}
+							}
+							deleteBuilder.append(')');
+						} else {
+							deleteBuilder.append("(:pids)");
+						}
+						String deleteSql = deleteBuilder.toString();
+						nativeQuery = myEntityManager.createQuery(deleteSql);
+						if (idProperty.size() == 1) {
+							nativeQuery.setParameter("pids", pids);
+						}
+						nativeQuery.executeUpdate();
 						return pids.size();
 					});
 

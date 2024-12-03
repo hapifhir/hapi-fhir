@@ -177,7 +177,13 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 */
 	Set<String> translatePidsToFhirResourceIds(Set<T> thePids);
 
+	/**
+	 * @deprecated Use {@link #newPid(Object, Integer)}
+	 */
+	@Deprecated
 	T newPid(Object thePid);
 
-	T newPidFromStringIdAndResourceName(String thePid, String theResourceType);
+	T newPid(Object thePid, Integer thePartitionId);
+
+	T newPidFromStringIdAndResourceName(Integer thePartitionId, String thePid, String theResourceType);
 }

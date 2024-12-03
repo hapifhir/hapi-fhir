@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
@@ -29,8 +31,10 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -51,7 +55,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 			@Index(name = "IDX_CNCPT_MP_GRP_ELM_TGT_CD", columnList = "TARGET_CODE"),
 			@Index(name = "FK_TCMGETARGET_ELEMENT", columnList = "CONCEPT_MAP_GRP_ELM_PID")
 		})
-public class TermConceptMapGroupElementTarget implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermConceptMapGroupElementTarget extends BasePartitionable implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	static final int MAX_EQUIVALENCE_LENGTH = 50;
@@ -63,10 +68,21 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	private Long myId;
 
 	@ManyToOne()
-	@JoinColumn(
-			name = "CONCEPT_MAP_GRP_ELM_PID",
-			nullable = false,
-			referencedColumnName = "PID",
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CONCEPT_MAP_GRP_ELM_PID",
+						insertable = true,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "PID"),
+//				@JoinColumn(
+//						name = "PARTITION_ID",
+//						referencedColumnName = "PARTITION_ID",
+//						insertable = true,
+//						updatable = false,
+//						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_TCMGETARGET_ELEMENT"))
 	private TermConceptMapGroupElement myConceptMapGroupElement;
 
@@ -112,6 +128,7 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 
 	public void setConceptMapGroupElement(TermConceptMapGroupElement theTermConceptMapGroupElement) {
 		myConceptMapGroupElement = theTermConceptMapGroupElement;
+		setPartitionId(theTermConceptMapGroupElement.getPartitionId());
 	}
 
 	public String getConceptMapUrl() {

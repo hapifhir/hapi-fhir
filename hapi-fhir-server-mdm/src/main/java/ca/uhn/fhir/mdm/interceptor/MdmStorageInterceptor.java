@@ -332,7 +332,8 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	private IResourcePersistentId extractGoldenPid(IBaseResource theResource, IMdmLink theMdmLink) {
 		IResourcePersistentId goldenPid = theMdmLink.getGoldenResourcePersistenceId();
-		goldenPid = myIdHelperSvc.newPidFromStringIdAndResourceName(goldenPid.toString(), theResource.fhirType());
+		goldenPid = myIdHelperSvc.newPidFromStringIdAndResourceName(
+				goldenPid.getPartitionId(), goldenPid.getId().toString(), theResource.fhirType());
 		return goldenPid;
 	}
 
