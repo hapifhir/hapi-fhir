@@ -23,6 +23,7 @@ import java.util.Optional;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -99,7 +100,7 @@ public class TermDeferredStorageSvcImplTest {
 		svc.setTransactionManagerForUnitTest(myTxManager);
 		svc.setTermConceptDaoSvc(myTermConceptDaoSvc);
 
-		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.of(myTermCodeSystemVersion));
+		when(myTermCodeSystemVersionDao.findById(any())).thenReturn(Optional.of(myTermCodeSystemVersion));
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
 		svc.setProcessDeferred(true);
 		svc.addConceptToStorageQueue(concept);
@@ -122,7 +123,7 @@ public class TermDeferredStorageSvcImplTest {
 		svc.setTransactionManagerForUnitTest(myTxManager);
 		svc.setTermConceptDaoSvc(myTermConceptDaoSvc);
 
-		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.empty());
+		when(myTermCodeSystemVersionDao.findById(any())).thenReturn(Optional.empty());
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
 		svc.setProcessDeferred(true);
 		svc.addConceptToStorageQueue(concept);
@@ -148,7 +149,7 @@ public class TermDeferredStorageSvcImplTest {
 		svc.setTermConceptDaoSvc(myTermConceptDaoSvc);
 
 		// Simulate the case where an exception is thrown despite a valid code system version.
-		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.of(myTermCodeSystemVersion));
+		when(myTermCodeSystemVersionDao.findById(any())).thenReturn(Optional.of(myTermCodeSystemVersion));
 		when(myTermConceptDaoSvc.saveConcept(concept)).thenThrow(new RuntimeException("Foreign Constraint Violation"));
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
 		svc.setProcessDeferred(true);

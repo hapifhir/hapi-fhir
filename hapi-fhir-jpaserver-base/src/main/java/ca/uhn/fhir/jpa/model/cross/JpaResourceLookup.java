@@ -45,8 +45,7 @@ public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 		myDeletedAt = theDeletedAt;
 		myPartitionablePartitionId = thePartitionablePartitionId;
 
-		myResourcePid = JpaPid.fromId(theResourcePid);
-		myResourcePid.setPartitionablePartitionId(myPartitionablePartitionId);
+		myResourcePid = JpaPid.fromId(theResourcePid, myPartitionablePartitionId);
 	}
 
 	public JpaResourceLookup(
@@ -90,5 +89,10 @@ public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 				.append("deletedAt", myDeletedAt)
 				.append("partId", myPartitionablePartitionId)
 				.toString();
+	}
+
+	@Override
+	public PartitionablePartitionId getPartitionId() {
+		return myPartitionablePartitionId;
 	}
 }

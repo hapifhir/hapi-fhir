@@ -50,9 +50,11 @@ import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
@@ -87,7 +89,6 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -313,11 +314,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
-			Condition predicate = theQueryStack.searchForIdsWithAndOr(with().setResourceName(myResourceName)
-					.setParamName(nextParamName)
-					.setAndOrParams(andOrParams)
-					.setRequest(theRequest)
-					.setRequestPartitionId(myRequestPartitionId));
+			Condition predicate = theQueryStack.searchForIdsWithAndOr(
+					theRequest,
+					with().setResourceName(myResourceName)
+							.setParamName(nextParamName)
+							.setAndOrParams(andOrParams)
+							.setRequest(theRequest)
+							.setRequestPartitionId(myRequestPartitionId));
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
@@ -412,7 +415,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<JpaPid> fulltextMatchIds = null;
 			int resultCount = 0;
 			if (myParams.isLastN()) {
-				fulltextMatchIds = executeLastNAgainstIndex(theMaximumResults);
+				fulltextMatchIds = executeLastNAgainstIndex(theRequest, theMaximumResults);
 				resultCount = fulltextMatchIds.size();
 			} else if (myParams.getEverythingMode() != null) {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids(theRequest);
@@ -541,15 +544,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private List<JpaPid> executeLastNAgainstIndex(Integer theMaximumResults) {
+	private List<JpaPid> executeLastNAgainstIndex(RequestDetails theRequestDetails, Integer theMaximumResults) {
 		// Can we use our hibernate search generated index on resource to support lastN?:
 		if (myStorageSettings.isAdvancedHSearchIndexing()) {
 			if (myFulltextSearchSvc == null) {
 				throw new InvalidRequestException(Msg.code(2027)
 						+ "LastN operation is not enabled on this service, can not process this request");
 			}
-			List<IResourcePersistentId> persistentIds = myFulltextSearchSvc.lastN(myParams, theMaximumResults);
-			return persistentIds.stream().map(t -> (JpaPid) t).collect(Collectors.toList());
+			return myFulltextSearchSvc.lastN(myParams, theMaximumResults).stream()
+					.map(t -> (JpaPid) t)
+					.collect(Collectors.toList());
 		} else {
 			throw new InvalidRequestException(
 					Msg.code(2033) + "LastN operation is not enabled on this service, can not process this request");
@@ -1188,7 +1192,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Load the resource bodies
 		List<ResourceHistoryTable> resourceSearchViewList =
 				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(
-						JpaPid.toLongList(versionlessPids));
+						JpaPidNonPk.fromPids(versionlessPids));
 
 		/*
 		 * If we have specific versions to load, replace the history entries with the
@@ -1206,8 +1210,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				Long version = resourcePidToVersion.get(resourceId);
 				resourceId.setVersion(version);
 				if (version != null && !version.equals(next.getVersion())) {
-					ResourceHistoryTable replacement =
-							myResourceHistoryTableDao.findForIdAndVersion(next.getResourceId(), version);
+					ResourceHistoryTable replacement = myResourceHistoryTableDao.findForIdAndVersion(
+							JpaPidNonPk.fromPid(next.getResourceId()), version);
 					resourceSearchViewList.set(i, replacement);
 				}
 			}
@@ -1234,7 +1238,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			IBaseResource resource = null;
 			if (next != null) {
 				resource = myJpaStorageResourceParser.toResource(
-						resourceType, next, tagMap.get(JpaPid.fromId(next.getResourceId())), theForHistoryOperation);
+						resourceType, next, tagMap.get(next.getResourceId()), theForHistoryOperation);
 			}
 			if (resource == null) {
 				if (next != null) {
@@ -1281,7 +1285,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	@Nonnull
 	private Map<JpaPid, Collection<BaseTag>> getPidToTagMapVersioned(
 			Collection<ResourceHistoryTable> theHistoryTables) {
-		List<Long> idList = new ArrayList<>(theHistoryTables.size());
+		List<ResourceHistoryTablePk> idList = new ArrayList<>(theHistoryTables.size());
 
 		// -- find all resource has tags
 		for (ResourceHistoryTable resource : theHistoryTables) {
@@ -1305,7 +1309,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Collection<BaseTag> tagCol;
 		for (ResourceHistoryTag tag : tagList) {
 
-			resourceId = JpaPid.fromId(tag.getResourceId());
+			resourceId = tag.getResourcePid();
 			tagCol = tagMap.get(resourceId);
 			if (tagCol == null) {
 				tagCol = new ArrayList<>();
@@ -1327,7 +1331,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// -- find all resource has tags
 		for (ResourceHistoryTable resource : theHistoryTables) {
 			if (resource.isHasTags()) {
-				idList.add(JpaPid.fromId(resource.getResourceId()));
+				idList.add(resource.getResourceId());
 			}
 		}
 
@@ -1339,14 +1343,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// -- get all tags for the idList
-		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(JpaPid.toLongList(idList));
+		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(idList);
 
 		// -- build the map, key = resourceId, value = list of ResourceTag
 		JpaPid resourceId;
 		Collection<BaseTag> tagCol;
 		for (ResourceTag tag : tagList) {
 
-			resourceId = JpaPid.fromId(tag.getResourceId());
+			resourceId = tag.getResourceId();
 			tagCol = tagMap.get(resourceId);
 			if (tagCol == null) {
 				tagCol = new ArrayList<>();
@@ -1395,11 +1399,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// We only chunk because some jdbc drivers can't handle long param lists.
-		new QueryChunker<JpaPid>()
-				.chunk(
-						thePids,
-						t -> doLoadPids(
-								t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+		QueryChunker.chunk(
+				thePids,
+				t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
 	}
 
 	/**

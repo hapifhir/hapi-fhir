@@ -33,6 +33,8 @@ import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -112,13 +114,13 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	public IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation) {
 		RuntimeResourceDefinition type = myFhirContext.getResourceDefinition(theEntity.getResourceType());
 		Class<? extends IBaseResource> resourceType = type.getImplementingClass();
-		return toResource(resourceType, (IBaseResourceEntity) theEntity, null, theForHistoryOperation);
+		return toResource(resourceType, (IBaseResourceEntity<JpaPid>) theEntity, null, theForHistoryOperation);
 	}
 
 	@Override
 	public <R extends IBaseResource> R toResource(
 			Class<R> theResourceType,
-			IBaseResourceEntity theEntity,
+			IBaseResourceEntity<?> theEntity,
 			Collection<BaseTag> theTagList,
 			boolean theForHistoryOperation) {
 
@@ -164,8 +166,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			provenanceRequestId = history.getRequestId();
 			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId)) {
 				if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
-					Optional<ResourceHistoryProvenanceEntity> provenanceOpt =
-							myResourceHistoryProvenanceDao.findById(history.getId());
+					Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceDao.findById(
+							history.getId().asIdAndPartitionId());
 					if (provenanceOpt.isPresent()) {
 						ResourceHistoryProvenanceEntity provenance = provenanceOpt.get();
 						provenanceRequestId = provenance.getRequestId();
@@ -180,13 +182,15 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 				history = resource.getCurrentVersionEntity();
 			} else {
 				version = theEntity.getVersion();
-				history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getResourceId(), version);
+				history = myResourceHistoryTableDao.findForIdAndVersion(
+						JpaPidNonPk.fromPid(theEntity.getResourceId()), version);
 				((ResourceTable) theEntity).setCurrentVersionEntity(history);
 
 				while (history == null) {
 					if (version > 1L) {
 						version--;
-						history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getResourceId(), version);
+						history = myResourceHistoryTableDao.findForIdAndVersion(
+								JpaPidNonPk.fromPid(theEntity.getResourceId()), version);
 					} else {
 						return null;
 					}
@@ -215,8 +219,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			provenanceRequestId = history.getRequestId();
 			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId)) {
 				if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
-					Optional<ResourceHistoryProvenanceEntity> provenanceOpt =
-							myResourceHistoryProvenanceDao.findById(history.getId());
+					Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceDao.findById(
+							history.getId().asIdAndPartitionId());
 					if (provenanceOpt.isPresent()) {
 						ResourceHistoryProvenanceEntity provenance = provenanceOpt.get();
 						provenanceRequestId = provenance.getRequestId();
@@ -269,7 +273,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 	@SuppressWarnings("unchecked")
 	private <R extends IBaseResource> R parseResource(
-			IBaseResourceEntity theEntity,
+			IBaseResourceEntity<?> theEntity,
 			ResourceEncodingEnum theResourceEncoding,
 			String theDecodedResourceText,
 			Class<R> theResourceType) {
@@ -346,7 +350,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <R extends IBaseResource> R populateResourceMetadata(
-			IBaseResourceEntity theEntitySource,
+			IBaseResourceEntity<?> theEntitySource,
 			boolean theForHistoryOperation,
 			@Nullable Collection<? extends BaseTag> tagList,
 			long theVersion,
@@ -365,7 +369,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 	@SuppressWarnings("unchecked")
 	private <R extends IResource> R populateResourceMetadataHapi(
-			IBaseResourceEntity theEntity,
+			IBaseResourceEntity<?> theEntity,
 			@Nullable Collection<? extends BaseTag> theTagList,
 			boolean theForHistoryOperation,
 			R res,
@@ -519,7 +523,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	}
 
 	@Override
-	public void updateResourceMetadata(IBaseResourceEntity theEntitySource, IBaseResource theResourceTarget) {
+	public void updateResourceMetadata(IBaseResourceEntity<?> theEntitySource, IBaseResource theResourceTarget) {
 		IIdType id = theEntitySource.getIdDt();
 		if (myFhirContext.getVersion().getVersion().isRi()) {
 			id = myFhirContext.getVersion().newIdType().setValue(id.getValue());

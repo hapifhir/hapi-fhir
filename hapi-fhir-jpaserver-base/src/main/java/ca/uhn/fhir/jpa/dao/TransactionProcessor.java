@@ -89,8 +89,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TransactionProcessor extends BaseTransactionProcessor {
 
 	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]+[?][a-z0-9-]+=[^&,]+$");
-	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
 	public static final int CONDITIONAL_URL_FETCH_CHUNK_SIZE = 100;
+	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
@@ -229,12 +229,12 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		systemDao.preFetchResources(JpaPid.fromLongList(idsToPreFetch), true);
 	}
 
+	@Override
 	@SuppressWarnings("rawtypes")
 	protected void postTransactionProcess(TransactionDetails theTransactionDetails) {
 		Set<IResourcePersistentId> resourceIds = theTransactionDetails.getUpdatedResourceIds();
 		if (resourceIds != null && !resourceIds.isEmpty()) {
-			List<Long> ids = resourceIds.stream().map(r -> (Long) r.getId()).collect(Collectors.toList());
-
+			List<JpaPid> ids = resourceIds.stream().map(r -> (JpaPid) r).collect(Collectors.toList());
 			myResourceSearchUrlSvc.deleteByResIds(ids);
 		}
 	}
