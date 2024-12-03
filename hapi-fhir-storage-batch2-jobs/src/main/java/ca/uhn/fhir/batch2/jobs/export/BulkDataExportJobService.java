@@ -49,8 +49,8 @@ public class BulkDataExportJobService {
 	}
 
 	public void startJob(
-		@Nonnull ServletRequestDetails theRequestDetails,
-		@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
+			@Nonnull ServletRequestDetails theRequestDetails,
+			@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
 		// parameter massaging
 		expandParameters(theRequestDetails, theBulkExportJobParameters);
 
@@ -83,8 +83,8 @@ public class BulkDataExportJobService {
 	 * so that later steps in the export do not have to handle them.
 	 */
 	private void expandParameters(
-		@Nonnull ServletRequestDetails theRequestDetails,
-		@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
+			@Nonnull ServletRequestDetails theRequestDetails,
+			@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
 		// Set the original request URL as part of the job information, as this is used in the poll-status-endpoint, and
 		// is needed for the report.
 		theBulkExportJobParameters.setOriginalRequestUrl(theRequestDetails.getCompleteUrl());
@@ -122,8 +122,7 @@ public class BulkDataExportJobService {
 	}
 
 	private void writePollingLocationToResponseHeaders(
-		@Nonnull ServletRequestDetails theRequestDetails,
-		@Nonnull String theInstanceId) {
+			@Nonnull ServletRequestDetails theRequestDetails, @Nonnull String theInstanceId) {
 		String serverBase = BulkDataExportUtil.getServerBase(theRequestDetails);
 		if (serverBase == null) {
 			throw new InternalErrorException(Msg.code(2136) + "Unable to get the server base.");
