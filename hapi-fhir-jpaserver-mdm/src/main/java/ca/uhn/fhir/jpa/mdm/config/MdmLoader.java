@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,12 @@ public class MdmLoader {
 	@Order(IHapiBootOrder.AFTER_SUBSCRIPTION_INITIALIZED)
 	public void updateSubscriptions() {
 		if (!myMdmSettings.isEnabled()) {
+			return;
+		}
+
+		myMdmProviderLoader.loadPatientMatchProvider();
+
+		if (myMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY) {
 			return;
 		}
 
