@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Charsets;
+import jakarta.persistence.Id;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -16,6 +17,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -33,6 +35,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -44,18 +47,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PatientMergeR4Test extends BaseResourceProviderR4Test {
+	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PatientMergeR4Test.class);
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PatientMergeR4Test.class);
-	private String orgId;
-	private String sourcePatId;
-	private String taskId;
-	private String encId1;
-	private String encId2;
-	private ArrayList<String> myObsIds;
-	private String targetPatId;
-	private String targetEnc1;
+	static final Identifier pat1IdentifierA = new Identifier().setSystem("SYS1A").setValue("VAL1A");
+	static final Identifier pat1IdentifierB = new Identifier().setSystem("SYS1B").setValue("VAL1B");
+	static final Identifier pat2IdentifierA = new Identifier().setSystem("SYS2A").setValue("VAL2A");
+	static final Identifier pat2IdentifierB = new Identifier().setSystem("SYS2B").setValue("VAL2B");
+
+	String orgId;
+	String sourcePatId;
+	String taskId;
+	String encId1;
+	String encId2;
+	ArrayList<String> myObsIds;
+	String targetPatId;
+	String targetEnc1;
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
@@ -83,11 +92,15 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		orgId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
 		ourLog.info("OrgId: {}", orgId);
 
-		Patient patient = new Patient();
-		patient.getManagingOrganization().setReference(orgId);
-		sourcePatId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		Patient patient1 = new Patient();
+		patient1.getManagingOrganization().setReference(orgId);
+		patient1.addIdentifier(pat1IdentifierA);
+		patient1.addIdentifier(pat1IdentifierB);
+		sourcePatId = myClient.create().resource(patient1).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Patient patient2 = new Patient();
+		patient2.addIdentifier(pat2IdentifierA);
+		patient2.addIdentifier(pat2IdentifierB);
 		patient2.getManagingOrganization().setReference(orgId);
 		targetPatId = myClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless().getValue();
 
@@ -127,24 +140,40 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testMerge(boolean withDelete) throws Exception {
+	public void testMergeWithoutResult(boolean withDelete) throws Exception {
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
 		inParams.sourcePatient = new Reference().setReference(sourcePatId);
 		inParams.targetPatient = new Reference().setReference(targetPatId);
 		inParams.deleteSource = withDelete;
 
 		IGenericClient client = myFhirContext.newRestfulGenericClient(myServerBase);
+		Parameters inParameters = inParams.asParametersResource();
 		Parameters outParams = client.operation()
 			.onType("Patient")
 			.named(OPERATION_MERGE)
-			.withParameters(inParams.asParametersResource())
+			.withParameters(inParameters)
 			.returnResourceType(Parameters.class)
 			.execute();
 
+		OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		List<OperationOutcome.OperationOutcomeIssueComponent> issues = outcome.getIssue();
+		assertThat(issues).hasSize(1);
+		OperationOutcome.OperationOutcomeIssueComponent issue = issues.get(0);
+		assertEquals("Merge operation completed successfully.", issue.getDiagnostics());
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+
+		Patient mergedPatient = (Patient) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
+
+		// FIXME KHS change assert order once it stops failing here.
+		List<Identifier> identifiers = mergedPatient.getIdentifier();
+		assertThat(identifiers).hasSize(4);
+
+		// FIXME KHS assert on identifier contents
+
 		assertThat(outParams.getParameter()).hasSize(3);
 		Parameters input = (Parameters) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_INPUT).getResource();
-		OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
-		Patient mergedPatient = (Patient) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
+
+		assertTrue(input.equalsDeep(inParameters));
 
 		// FIXME KHS assert on these three
 
