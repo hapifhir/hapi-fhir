@@ -40,6 +40,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +53,7 @@ import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTIT
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 
 public class ResourceMergeService {
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceMergeService.class);
 
 	IFhirResourceDaoPatient<Patient> myDao;
 	FhirContext myFhirContext;
@@ -77,6 +80,7 @@ public class ResourceMergeService {
 		try {
 			doMerge(theMergeOperationParameters, theRequestDetails, mergeOutcome);
 		} catch (Exception e) {
+			ourLog.error("Resource merge failed", e);
 			if (e instanceof BaseServerResponseException) {
 				mergeOutcome.setHttpStatusCode(((BaseServerResponseException) e).getStatusCode());
 			} else {

@@ -27,6 +27,8 @@ import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -119,11 +121,13 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@Test
-	public void testMerge() throws Exception {
-		OperationParameters params = new OperationParameters();
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testMerge(boolean withDelete) throws Exception {
+		PatientMergeInputParameters params = new PatientMergeInputParameters();
 		params.sourcePatient = new Reference().setReference(sourcePatId);
 		params.targetPatient = new Reference().setReference(targetPatId);
+		params.deleteSource = withDelete;
 
 		IGenericClient client = myFhirContext.newRestfulGenericClient(myServerBase);
 		Parameters outParams = client.operation()
@@ -146,8 +150,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Found IDs: {}", actual);
 
-		// FIXME KHS parameterize this based on delete-source=true
-//		assertThat(actual).doesNotContain(sourcePatId);
+		if (withDelete) {
+			assertThat(actual).doesNotContain(sourcePatId);
+		}
 		assertThat(actual).contains(encId1);
 		assertThat(actual).contains(encId2);
 		assertThat(actual).contains(orgId);
@@ -192,13 +197,14 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 
 
-	private static class OperationParameters {
+	private static class PatientMergeInputParameters {
 		Type sourcePatient;
 		Type sourcePatientIdentifier;
 		Type targetPatient;
 		Type targetPatientIdentifier;
 		Patient resultResource;
 		Boolean preview;
+		Boolean deleteSource;
 
 		public Parameters asParametersResource() {
 			Parameters inParams = new Parameters();
@@ -219,6 +225,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			}
 			if (preview != null) {
 				inParams.addParameter().setName("preview").setValue(new BooleanType(preview));
+			}
+			if (deleteSource != null) {
+				inParams.addParameter().setName("delete-source").setValue(new BooleanType(deleteSource));
 			}
 			return inParams;
 		}
