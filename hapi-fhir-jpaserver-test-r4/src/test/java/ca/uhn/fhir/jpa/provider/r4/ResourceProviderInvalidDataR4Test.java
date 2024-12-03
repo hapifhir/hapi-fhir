@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import org.apache.commons.io.IOUtils;
@@ -35,7 +36,7 @@ public class ResourceProviderInvalidDataR4Test extends BaseResourceProviderR4Tes
 
 		// Manually set the value to be an invalid decimal number
 		runInTransaction(() -> {
-			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersion(id, 1);
+			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromId(id), 1);
 			String resourceText = resVer.getResourceTextVc();
 			resourceText = resourceText.replace("100", "-.100");
 			resVer.setResourceTextVc(resourceText);

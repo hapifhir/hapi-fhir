@@ -342,7 +342,6 @@ public class TermConcept implements Serializable {
 			myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 			assert myCodeSystemVersionPid != null;
 			myPartitionIdValue = theCodeSystemVersion.getPartitionId().getPartitionId();
-			getPid().myPartitionIdValue = myPartitionIdValue;
 		}
 		return this;
 	}
@@ -589,9 +588,6 @@ public class TermConcept implements Serializable {
 		@GenericField(projectable = Projectable.YES)
 		private Long myId;
 
-		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
-		private Integer myPartitionIdValue;
-
 		/**
 		 * Constructor
 		 */
@@ -604,15 +600,6 @@ public class TermConcept implements Serializable {
 		 */
 		public TermConceptPk(Long theId, Integer thePartitionId) {
 			myId = theId;
-			myPartitionIdValue = thePartitionId;
-		}
-
-		public Integer getPartitionIdValue() {
-			return myPartitionIdValue;
-		}
-
-		public void setPartitionIdValue(Integer thePartitionIdValue) {
-			myPartitionIdValue = thePartitionIdValue;
 		}
 
 		@Override
@@ -624,17 +611,17 @@ public class TermConcept implements Serializable {
 				return false;
 			}
 			TermConceptPk that = (TermConceptPk) theO;
-			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
+			return Objects.equals(myId, that.myId);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(myId, myPartitionIdValue);
+			return Objects.hash(myId);
 		}
 
 		@Override
 		public String toString() {
-			return myPartitionIdValue + "/" + myId;
+			return String.valueOf(myId);
 		}
 	}
 }

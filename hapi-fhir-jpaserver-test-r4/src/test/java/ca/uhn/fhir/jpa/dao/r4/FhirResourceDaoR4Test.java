@@ -11,9 +11,9 @@ import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -126,7 +126,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -145,7 +144,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -164,9 +162,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4Test extends BaseJpaR4Test {
-
-	@Autowired
-	IHapiTransactionService myHapiTransactionService;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
 
@@ -190,7 +185,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	private List<String> extractNames(IBundleProvider theSearch) {
 		ArrayList<String> retVal = new ArrayList<>();
-		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
+		for (IBaseResource next : theSearch.getResources(0, theSearch.sizeOrThrowNpe())) {
 			Patient nextPt = (Patient) next;
 			retVal.add(nextPt.getName().get(0).getNameAsSingleString());
 		}
@@ -204,7 +199,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	private void sort(ArrayList<Coding> thePublished) {
-		ArrayList<Coding> tags = new ArrayList<Coding>(thePublished);
+		ArrayList<Coding> tags = new ArrayList<>(thePublished);
 		Collections.sort(tags, new Comparator<Coding>() {
 			@Override
 			public int compare(Coding theO1, Coding theO2) {
@@ -240,6 +235,69 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		});
 		return retVal;
 	}
+
+	@Test
+	public void testUpdateResourceTwiceInSameTransaction() {
+		// Update with a string param that changes, and a token param that does not
+		runInTransaction(()->{
+			createOrganization(withId("A"), withName("1"), withActiveTrue());
+			createOrganization(withId("A"), withName("2"), withActiveTrue());
+		});
+
+		assertEquals("2", myOrganizationDao.read(new IdType("Organization/A"), mySrd).getName());
+		assertTrue(myOrganizationDao.read(new IdType("Organization/A"), mySrd).getActive());
+
+		logAllStringIndexes();
+		runInTransaction(()->{
+			List<String> stringIndexes = getAllStringIndexes("name")
+				.stream().map(ResourceIndexedSearchParamString::getValueExact).toList();
+			assertThat(stringIndexes).asList().containsExactly("2");
+			List<String> tokenIndexes = getAllTokenIndexes("active")
+				.stream().map(ResourceIndexedSearchParamToken::getValue).toList();
+			assertThat(tokenIndexes).asList().containsExactly("true");
+		});
+
+		runInTransaction(()->{
+			assertEquals(1, myResourceTableDao.count());
+			assertThat(myResourceHistoryTableDao.findAll().stream().map(t->t.getVersion()).sorted().toList())
+				.asList()
+				.containsExactly(1L, 2L);
+			assertEquals(2L, myResourceTableDao.findAll().iterator().next().getVersion());
+		});
+
+		myCaptureQueriesListener.clear();
+		runInTransaction(()->{
+			createOrganization(withId("A"), withName("3"), withActiveTrue());
+			createOrganization(withId("A"), withName("4"), withActiveTrue());
+		});
+		myCaptureQueriesListener.logUpdateQueries();
+
+		runInTransaction(()->{
+			assertEquals(1, myResourceTableDao.count());
+			assertThat(myResourceHistoryTableDao.findAll().stream().map(t->t.getVersion()).sorted().toList())
+				.asList()
+				.containsExactly(1L, 2L, 3L, 4L);
+			assertEquals(4L, myResourceTableDao.findAll().iterator().next().getVersion());
+		});
+
+		assertEquals("4", myOrganizationDao.read(new IdType("Organization/A"), mySrd).getName());
+		for (int i = 1; i <= 4; i++) {
+			assertEquals(Integer.toString(i), myOrganizationDao.read(new IdType("Organization/A/_history/" + i), mySrd).getName());
+		}
+		assertEquals("4", myOrganizationDao.read(new IdType("Organization/A"), mySrd).getIdElement().getVersionIdPart());
+		assertTrue(myOrganizationDao.read(new IdType("Organization/A"), mySrd).getActive());
+
+
+		runInTransaction(()->{
+			List<String> stringIndexes = getAllStringIndexes("name")
+				.stream().map(ResourceIndexedSearchParamString::getValueExact).toList();
+			assertThat(stringIndexes).asList().containsExactly("4");
+			List<String> tokenIndexes = getAllTokenIndexes("active")
+				.stream().map(ResourceIndexedSearchParamToken::getValue).toList();
+			assertThat(tokenIndexes).asList().containsExactly("true");
+		});
+	}
+
 
 	@Test
 	public void testUpdateResource_whenTokenPropertyAssignedTooLargeValue_willTruncateLargeValueOnUpdate(){
@@ -288,7 +346,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isGreaterThan(0);
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(id1.getIdPartAsLong()))).isGreaterThan(0);
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
@@ -302,7 +360,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			table.setDeleted(new Date());
 			table = myResourceTableDao.saveAndFlush(table);
 			ResourceHistoryTable newHistory = table.toHistory(true);
-			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersion(table.getId(), 1L);
+			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromPid(table.getId()), 1L);
 			newHistory.setEncoding(currentHistory.getEncoding());
 			newHistory.setResourceTextVc(currentHistory.getResourceTextVc());
 			myResourceHistoryTableDao.save(newHistory);
@@ -315,7 +373,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isLessThanOrEqualTo(0);
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(id1.getIdPartAsLong()))).isLessThanOrEqualTo(0);
 		});
 	}
 
@@ -398,7 +456,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isGreaterThan(0);
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(id1.getIdPartAsLong()))).isGreaterThan(0);
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
@@ -425,7 +483,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isLessThanOrEqualTo(0);
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(id1.getIdPartAsLong()))).isLessThanOrEqualTo(0);
 		});
 
 
@@ -1109,9 +1167,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		runInTransaction(()->{
 			List<ResourceTable> resourceTables = myResourceTableDao.findAll();
 			assertEquals(1, resourceTables.size());
-			assertEquals(2, resourceTables.get(0).getVersion());
+			assertEquals(3, resourceTables.get(0).getVersion());
 
-			List<ResourceHistoryTable> versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(resourceTables.get(0).getResourceId());
+			List<ResourceHistoryTable> versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(JpaPidNonPk.fromPid(resourceTables.get(0).getResourceId()));
 			assertThat(versions.stream().map(ResourceHistoryTable::getVersion).toList()).asList().containsExactly(1L, 2L, 3L);
 		});
 
@@ -1430,8 +1488,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	/**
-	 * See #773
-	 */
+     * See #773
+     */
 	@Test
 	public void testDeleteResourceWithOutboundDeletedResources() {
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
@@ -2387,8 +2445,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	/**
-	 * See #196
-	 */
+     * See #196
+     */
 	@Test
 	public void testInvalidChainNames() {
 		ReferenceParam param = null;
@@ -2432,8 +2490,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	/**
-	 * See #534
-	 */
+     * See #534
+     */
 	@Test
 	public void testLogicalReferencesAreSearchable() {
 		myStorageSettings.setTreatReferencesAsLogical(null);
@@ -2508,10 +2566,10 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		// then
 		runInTransaction(() -> {
-			Long obsertionId = idDt.getIdPartAsLong();
-			Long resourceCurrentVersion = myResourceTableDao.findCurrentVersionByPid(obsertionId);
-			int resourceVersionCount = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(obsertionId).size();
-			int indexedTokenCount = myResourceIndexedSearchParamTokenDao.countForResourceId(obsertionId);
+			JpaPid observationId = JpaPid.fromId(idDt.getIdPartAsLong());
+			Long resourceCurrentVersion = myResourceTableDao.findCurrentVersionByPid(observationId);
+			int resourceVersionCount = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(JpaPidNonPk.fromPid(observationId)).size();
+			int indexedTokenCount = myResourceIndexedSearchParamTokenDao.countForResourceId(observationId);
 
 			assertEquals(2L, resourceCurrentVersion);
 			assertEquals(2, resourceVersionCount);
@@ -2934,7 +2992,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		tx.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 1L);
+				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromId(id.getIdPartAsLong(), null), 1L);
 				String newContent = myFhirContext.newJsonParser().encodeResourceToString(p);
 				newContent = newContent.replace("male", "foo");
 				table.setResourceTextVc(newContent);

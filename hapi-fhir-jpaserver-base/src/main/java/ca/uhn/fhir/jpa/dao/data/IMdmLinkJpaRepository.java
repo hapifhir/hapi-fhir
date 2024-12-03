@@ -64,7 +64,7 @@ public interface IMdmLinkJpaRepository
 			"SELECT lookup_links.myGoldenResourcePid as goldenPid, gld_rt.myPartitionIdValue as goldenPartitionId, lookup_links.mySourcePid as sourcePid, lookup_links.myPartitionIdValue as sourcePartitionId "
 					+ "FROM MdmLink lookup_links "
 					+ "INNER JOIN ResourceTable gld_rt "
-					+ "on lookup_links.myGoldenResourcePid=gld_rt.myId "
+					+ "on lookup_links.myGoldenResource=gld_rt "
 					+ "WHERE lookup_links.myMatchResult=:matchResult "
 					+ "AND lookup_links.myGoldenResourcePid IN ("
 					+ "SELECT inner_mdm_link.myGoldenResourcePid FROM MdmLink inner_mdm_link "

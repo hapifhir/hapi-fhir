@@ -36,7 +36,6 @@ import java.time.LocalDate;
 public abstract class BasePartitionable implements Serializable {
 
 	@SuppressWarnings("unused")
-	@Id
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
 	Integer myPartitionIdValue;
 
