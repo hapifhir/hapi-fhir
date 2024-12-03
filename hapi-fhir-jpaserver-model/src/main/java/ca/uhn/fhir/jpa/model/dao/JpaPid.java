@@ -107,7 +107,7 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 		return new PartitionablePartitionId(myPartitionIdValue, null);
 	}
 
-	public JpaPid  setPartitionablePartitionId(PartitionablePartitionId thePartitionablePartitionId) {
+	public JpaPid setPartitionablePartitionId(PartitionablePartitionId thePartitionablePartitionId) {
 		myPartitionIdValue = thePartitionablePartitionId != null ? thePartitionablePartitionId.getPartitionId() : null;
 		return this;
 	}

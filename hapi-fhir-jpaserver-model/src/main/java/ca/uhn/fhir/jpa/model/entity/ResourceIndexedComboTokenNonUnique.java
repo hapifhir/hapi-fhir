@@ -77,12 +77,12 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 						insertable = false,
 						updatable = false,
 						nullable = true),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						updatable = false,
-//						nullable = true)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = true)
 			},
 			foreignKey = @ForeignKey(name = "FK_IDXCMBTOKNU_RES_ID"))
 	private ResourceTable myResource;

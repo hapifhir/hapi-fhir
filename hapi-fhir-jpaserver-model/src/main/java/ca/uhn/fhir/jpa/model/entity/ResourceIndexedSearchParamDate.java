@@ -127,12 +127,12 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 						insertable = false,
 						updatable = false,
 						nullable = false),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						updatable = false,
-//						nullable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_SP_DATE_RES"))
 	private ResourceTable myResource;

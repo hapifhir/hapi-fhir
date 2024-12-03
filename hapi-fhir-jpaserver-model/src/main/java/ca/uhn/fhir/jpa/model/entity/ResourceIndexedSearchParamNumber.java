@@ -88,12 +88,12 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 						insertable = false,
 						updatable = false,
 						nullable = false),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						updatable = false,
-//						nullable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_SP_NUMBER_RES"))
 	private ResourceTable myResource;

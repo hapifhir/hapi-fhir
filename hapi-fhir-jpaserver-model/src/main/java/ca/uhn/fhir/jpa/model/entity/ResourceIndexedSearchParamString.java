@@ -100,12 +100,12 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 						insertable = false,
 						updatable = false,
 						nullable = false),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						updatable = false,
-//						nullable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
 	private ResourceTable myResource;

@@ -100,12 +100,12 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 						insertable = false,
 						updatable = false,
 						nullable = false),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						updatable = false,
-//						nullable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_SP_QUANTITY_RES"))
 	private ResourceTable myResource;

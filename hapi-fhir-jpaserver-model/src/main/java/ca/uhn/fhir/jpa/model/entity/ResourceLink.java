@@ -90,12 +90,12 @@ public class ResourceLink extends BaseResourceIndex {
 						insertable = false,
 						updatable = false,
 						nullable = false),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						updatable = false,
-//						nullable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_RESLINK_SOURCE"))
 	private ResourceTable mySourceResource;
@@ -116,12 +116,12 @@ public class ResourceLink extends BaseResourceIndex {
 						nullable = true,
 						insertable = false,
 						updatable = false),
-//				@JoinColumn(
-//						name = TARGET_RES_PARTITION_ID,
-//						referencedColumnName = "PARTITION_ID",
-//						nullable = true,
-//						insertable = false,
-//						updatable = false),
+				//				@JoinColumn(
+				//						name = TARGET_RES_PARTITION_ID,
+				//						referencedColumnName = "PARTITION_ID",
+				//						nullable = true,
+				//						insertable = false,
+				//						updatable = false),
 			},
 			foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
 	private ResourceTable myTargetResource;
