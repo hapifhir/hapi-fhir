@@ -768,7 +768,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Update that resource
 		addCreatePartition(myPartitionId);
 		patient = new Patient();
-		patient.setId("Patient/" + patientId);
+		patient.setId("Patient/" + patientId.getId());
 		patient.setActive(false);
 		myPatientDao.update(patient, mySrd);
 
@@ -837,7 +837,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		p.addIdentifier().setValue("12345");
 		JpaPid patientId2 = JpaPid.fromId(myPatientDao.update(p, "Patient?identifier=12345", mySrd).getId().getIdPartAsLong());
 
-		assertEquals(patientId, patientId2);
+		assertEquals(patientId.getId(), patientId2.getId());
 
 		logAllResourceVersions();
 
