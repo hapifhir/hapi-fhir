@@ -30,19 +30,16 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public abstract class BaseResourcePidList implements IResourcePidList {
+public abstract class BaseResourcePidList<T extends IResourcePersistentId<?>> implements IResourcePidList<T> {
 
-	final List<IResourcePersistentId> myIds = new ArrayList<>();
+	final List<T> myIds = new ArrayList<>();
 
 	@Nullable
 	final Date myLastDate;
 
 	private final RequestPartitionId myRequestPartitionId;
 
-	BaseResourcePidList(
-			Collection<? extends IResourcePersistentId> theIds,
-			Date theLastDate,
-			RequestPartitionId theRequestPartitionId) {
+	BaseResourcePidList(Collection<T> theIds, @Nullable Date theLastDate, RequestPartitionId theRequestPartitionId) {
 		myIds.addAll(theIds);
 		myLastDate = theLastDate;
 		myRequestPartitionId = theRequestPartitionId;
@@ -53,6 +50,7 @@ public abstract class BaseResourcePidList implements IResourcePidList {
 		return myRequestPartitionId;
 	}
 
+	@Nullable
 	@Override
 	public Date getLastDate() {
 		return myLastDate;
@@ -79,11 +77,11 @@ public abstract class BaseResourcePidList implements IResourcePidList {
 	}
 
 	@Override
-	public List<IResourcePersistentId> getIds() {
+	public List<T> getIds() {
 		return Collections.unmodifiableList(myIds);
 	}
 
-	public IResourcePersistentId getId(int theIndex) {
+	public T getId(int theIndex) {
 		return myIds.get(theIndex);
 	}
 
