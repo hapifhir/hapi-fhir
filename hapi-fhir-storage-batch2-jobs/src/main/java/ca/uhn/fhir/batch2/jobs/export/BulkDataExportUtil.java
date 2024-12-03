@@ -7,10 +7,15 @@ import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Set;
 
 public class BulkDataExportUtil {
+	/**
+	 * Bulk data $export does not include the Binary type
+	 */
+	public static final String UNSUPPORTED_BINARY_TYPE = "Binary";
 
 	private BulkDataExportUtil() {}
 
@@ -33,5 +38,9 @@ public class BulkDataExportUtil {
 	public static boolean isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
 			FhirVersionEnum theFhirVersionEnum) {
 		return PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE.contains(theFhirVersionEnum);
+	}
+
+	public static String getServerBase(ServletRequestDetails theRequestDetails) {
+		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
 	}
 }
