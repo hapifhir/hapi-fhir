@@ -37,6 +37,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -131,7 +132,7 @@ public class TermConceptParentChildLink implements Serializable {
 	@EmbeddedId
 	private TermConceptParentChildLinkPk myId;
 
-	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = true, updatable = false)
 	private Integer myPartitionIdValue;
 
 	@Enumerated(EnumType.ORDINAL)
@@ -263,19 +264,19 @@ public class TermConceptParentChildLink implements Serializable {
 	}
 
 	@Embeddable
-	public static class TermConceptParentChildLinkPk {
+	public static class TermConceptParentChildLinkPk implements Serializable {
 
 		@SequenceGenerator(name = "SEQ_CONCEPT_PC_PID", sequenceName = "SEQ_CONCEPT_PC_PID")
 		@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PC_PID")
 		@Column(name = "PID")
 		private Long myId;
 
-		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
+		@Transient
 		private Integer myPartitionIdValue;
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(myId, myPartitionIdValue);
+			return Objects.hash(myId);
 		}
 
 		@Override
@@ -287,7 +288,7 @@ public class TermConceptParentChildLink implements Serializable {
 				return false;
 			}
 			TermConceptParentChildLinkPk that = (TermConceptParentChildLinkPk) theO;
-			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
+			return Objects.equals(myId, that.myId);
 		}
 
 		@Override
