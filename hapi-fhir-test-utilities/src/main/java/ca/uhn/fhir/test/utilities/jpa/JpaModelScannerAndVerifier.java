@@ -40,6 +40,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -222,6 +223,7 @@ public class JpaModelScannerAndVerifier {
 			if (!isTransient) {
 				boolean hasColumn = nextField.getAnnotation(Column.class) != null;
 				boolean hasJoinColumn = nextField.getAnnotation(JoinColumn.class) != null;
+				boolean hasJoinColumns = nextField.getAnnotation(JoinColumns.class) != null;
 				boolean hasEmbeddedId = nextField.getAnnotation(EmbeddedId.class) != null;
 				boolean hasEmbedded = nextField.getAnnotation(Embedded.class) != null;
 				OneToMany oneToMany = nextField.getAnnotation(OneToMany.class);
@@ -234,6 +236,7 @@ public class JpaModelScannerAndVerifier {
 				Validate.isTrue(
 					hasEmbedded ||
 						hasColumn ||
+						hasJoinColumns ||
 						hasJoinColumn ||
 						isOtherSideOfOneToManyMapping ||
 						isOtherSideOfOneToOneMapping ||
@@ -263,12 +266,15 @@ public class JpaModelScannerAndVerifier {
 				}
 
 				if (columnName != null) {
-					if (nextField.getType().isAssignableFrom(String.class)) {
-						// MySQL treats each char as the max possible byte count in UTF-8 for its calculations
-						columnLength = columnLength * 4;
-					}
+					addColumnName(columnNameToLength, nextField, columnLength, columnName);
+				}
 
-					columnNameToLength.put(columnName, columnLength);
+				if (hasJoinColumns) {
+					JoinColumns joinColumns = nextField.getAnnotation(JoinColumns.class);
+					for (JoinColumn joinColumn : joinColumns.value()) {
+						columnName = joinColumn.name();
+						addColumnName(columnNameToLength, nextField, columnLength, columnName);
+					}
 				}
 
 			}
@@ -289,6 +295,20 @@ public class JpaModelScannerAndVerifier {
 		}
 
 		scanClassOrSuperclass(theNames, theClazz.getSuperclass(), true, columnNameToLength);
+	}
+
+	private static void addColumnName(Map<String, Integer> columnNameToLength, Field nextField, int columnLength, String columnName) {
+		if (nextField.getType().equals(Integer.class) || nextField.getType().isPrimitive()) {
+			// This is pretty imprecise and probably an overestimation, but we use it
+			// only for calculating max column length so it's better to be over than
+			// under
+			columnLength = 16;
+		} else if (nextField.getType().isAssignableFrom(String.class)) {
+			// MySQL treats each char as the max possible byte count in UTF-8 for its calculations
+			columnLength = columnLength * 4;
+		}
+
+		columnNameToLength.put(columnName, columnLength);
 	}
 
 	private void scan(AnnotatedElement theAnnotatedElement, Set<String> theNames, boolean theIsSuperClass, boolean theIsView) {
