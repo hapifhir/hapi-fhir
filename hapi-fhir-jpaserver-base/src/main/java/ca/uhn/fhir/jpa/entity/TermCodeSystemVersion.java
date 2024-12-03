@@ -89,12 +89,12 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 						nullable = false,
 						insertable = false,
 						updatable = false),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						nullable = false,
-//						insertable = false,
-//						updatable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						nullable = false,
+				//						insertable = false,
+				//						updatable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
@@ -118,12 +118,12 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 						insertable = false,
 						updatable = false,
 						nullable = true),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						nullable = true,
-//						updatable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						nullable = true,
+				//						updatable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;

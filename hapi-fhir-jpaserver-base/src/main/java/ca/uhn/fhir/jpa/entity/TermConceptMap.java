@@ -90,12 +90,12 @@ public class TermConceptMap extends BasePartitionable implements Serializable {
 						nullable = false,
 						insertable = false,
 						updatable = false),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						nullable = false,
-//						insertable = false,
-//						updatable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						nullable = false,
+				//						insertable = false,
+				//						updatable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TRMCONCEPTMAP_RES"))
 	private ResourceTable myResource;

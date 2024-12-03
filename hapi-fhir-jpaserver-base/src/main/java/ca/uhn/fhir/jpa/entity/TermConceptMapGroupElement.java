@@ -75,12 +75,12 @@ public class TermConceptMapGroupElement extends BasePartitionable implements Ser
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = true,
-//						updatable = false,
-//						nullable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = true,
+				//						updatable = false,
+				//						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TCMGELEMENT_GROUP"))
 	private TermConceptMapGroup myConceptMapGroup;

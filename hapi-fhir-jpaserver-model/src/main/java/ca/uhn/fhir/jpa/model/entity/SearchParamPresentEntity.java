@@ -79,12 +79,12 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 						insertable = false,
 						updatable = false,
 						nullable = false),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						updatable = false,
-//						nullable = false),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false),
 			},
 			foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
 	private ResourceTable myResource;

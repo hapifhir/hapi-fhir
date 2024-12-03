@@ -68,12 +68,12 @@ public class TermConceptParentChildLink implements Serializable {
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						updatable = false,
-//						nullable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CHILD"))
 	private TermConcept myChild;
@@ -90,12 +90,12 @@ public class TermConceptParentChildLink implements Serializable {
 						insertable = false,
 						updatable = false,
 						nullable = false),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						updatable = false,
-//						nullable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CS"))
 	private TermCodeSystemVersion myCodeSystem;
@@ -115,12 +115,12 @@ public class TermConceptParentChildLink implements Serializable {
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						updatable = false,
-//						nullable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_PARENT"))
 	private TermConcept myParent;

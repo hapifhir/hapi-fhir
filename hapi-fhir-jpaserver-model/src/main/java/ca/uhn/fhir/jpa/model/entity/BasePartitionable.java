@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
-import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
 import java.io.Serializable;

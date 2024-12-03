@@ -74,12 +74,12 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 						insertable = false,
 						updatable = false,
 						nullable = false),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						updatable = false,
-//						nullable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CONCEPT"))
 	private TermConcept myConcept;
@@ -124,12 +124,12 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = true,
-//						updatable = false,
-//						nullable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = true,
+				//						updatable = false,
+				//						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CSV"))
 	private TermCodeSystemVersion myCodeSystemVersion;

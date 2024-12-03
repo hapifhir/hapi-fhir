@@ -1007,7 +1007,7 @@ public class QueryStack {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
 				return theQueryStack3.createPredicateResourceId(
-					null,
+						null,
 						Collections.singletonList(Collections.singletonList(param)),
 						theResourceName,
 						theFilter.getOperation(),
@@ -1934,11 +1934,7 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId) {
 		ResourceIdPredicateBuilder builder = mySqlBuilder.newResourceIdBuilder();
 		return builder.createPredicateResourceId(
-			theSourceJoinColumn,
-				theResourceName,
-				theValues,
-				theOperation,
-				theRequestPartitionId);
+				theSourceJoinColumn, theResourceName, theValues, theOperation, theRequestPartitionId);
 	}
 
 	private Condition createPredicateSourceForAndList(
@@ -2409,7 +2405,7 @@ public class QueryStack {
 		switch (theSearchForIdsParams.myParamName) {
 			case IAnyResource.SP_RES_ID:
 				return createPredicateResourceId(
-					theSearchForIdsParams.mySourceJoinColumn,
+						theSearchForIdsParams.mySourceJoinColumn,
 						theSearchForIdsParams.myAndOrParams,
 						theSearchForIdsParams.myResourceName,
 						null,

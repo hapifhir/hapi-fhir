@@ -84,12 +84,12 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 						insertable = false,
 						updatable = false,
 						nullable = true),
-//				@JoinColumn(
-//						name = "CURRENT_VERSION_PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						insertable = false,
-//						updatable = false,
-//						nullable = true)
+				//				@JoinColumn(
+				//						name = "CURRENT_VERSION_PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = true)
 			},
 			foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_CURVER"))
 	private TermCodeSystemVersion myCurrentVersion;
@@ -115,12 +115,12 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 						nullable = false,
 						updatable = false,
 						insertable = false),
-//				@JoinColumn(
-//						name = "PARTITION_ID",
-//						referencedColumnName = "PARTITION_ID",
-//						nullable = false,
-//						updatable = false,
-//						insertable = false)
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						nullable = false,
+				//						updatable = false,
+				//						insertable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_RES"))
 	private ResourceTable myResource;
