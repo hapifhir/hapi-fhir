@@ -30,7 +30,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
-import ca.uhn.fhir.util.IdentifierUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -56,8 +55,8 @@ import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 public class ResourceMergeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceMergeService.class);
 
-	private IFhirResourceDaoPatient<Patient> myDao;
-	private FhirContext myFhirContext;
+	private final IFhirResourceDaoPatient<Patient> myDao;
+	private final FhirContext myFhirContext;
 
 	public ResourceMergeService(IFhirResourceDaoPatient<Patient> thePatientDao) {
 		myDao = thePatientDao;
@@ -66,8 +65,9 @@ public class ResourceMergeService {
 
 	/**
 	 * Implementation of the $merge operation for resources
-	 * @param theMergeOperationParameters	the merge operation parameters
-	 * @param theRequestDetails	the request details
+	 *
+	 * @param theMergeOperationParameters the merge operation parameters
+	 * @param theRequestDetails           the request details
 	 * @return the merge outcome containing OperationOutcome and HTTP status code
 	 */
 	public MergeOperationOutcome merge(
@@ -134,9 +134,14 @@ public class ResourceMergeService {
 			return;
 		}
 
+		Patient resultResource = (Patient) theMergeOperationParameters.getResultResource();
 		if (theMergeOperationParameters.getPreview()) {
+			// in preview mode, we should also return how the target would look like
+			Patient targetPatientAsIfUpdated = prepareTargetPatientForUpdate(
+					targetResource, sourceResource, resultResource, theMergeOperationParameters.getDeleteSource());
+			theMergeOutcome.setUpdatedTargetResource(targetPatientAsIfUpdated);
+
 			addInfoToOperationOutcome(operationOutcome, "Preview only merge operation - no issues detected");
-			// TODO we should also return the resulting target patient in the response
 			return;
 		}
 
@@ -145,17 +150,14 @@ public class ResourceMergeService {
 		if (theMergeOperationParameters.getDeleteSource()) {
 			deleteResource(sourceResource, theRequestDetails);
 		} else {
-			updateSourceResourceAfterRefsUpdated(sourceResource, targetResource, theRequestDetails);
+			prepareSourceResourceForUpdate(sourceResource, targetResource);
+			updateResource(sourceResource, theRequestDetails);
 		}
 
+		Patient patientToUpdate = prepareTargetPatientForUpdate(
+				targetResource, sourceResource, resultResource, theMergeOperationParameters.getDeleteSource());
 		// update the target patient resource after the references are updated
-		Patient resultResource = (Patient) theMergeOperationParameters.getResultResource();
-		Patient targetPatientAfterUpdate = updateTargetResourceAfterRefsUpdated(
-				targetResource,
-				sourceResource,
-				resultResource,
-				theRequestDetails,
-				theMergeOperationParameters.getDeleteSource());
+		Patient targetPatientAfterUpdate = updateResource(patientToUpdate, theRequestDetails);
 		theMergeOutcome.setUpdatedTargetResource(targetPatientAfterUpdate);
 
 		addInfoToOperationOutcome(operationOutcome, "Merge operation completed successfully.");
@@ -301,20 +303,26 @@ public class ResourceMergeService {
 		return true;
 	}
 
-	private Patient updateTargetResourceAfterRefsUpdated(
+	private void prepareSourceResourceForUpdate(Patient theSourceResource, Patient theTargetResource) {
+		theSourceResource.setActive(false);
+		theSourceResource
+				.addLink()
+				.setType(Patient.LinkType.REPLACEDBY)
+				.setOther(new Reference(theTargetResource.getId()));
+	}
+
+	private Patient prepareTargetPatientForUpdate(
 			Patient theTargetResource,
 			Patient theSourceResource,
 			@Nullable Patient theResultResource,
-			RequestDetails theRequestDetails,
 			boolean theDeleteSource) {
 
 		// if the client provided a result resource as input then use it to update the target resource
 		if (theResultResource != null) {
-			DaoMethodOutcome outcome = myDao.update(theResultResource, theRequestDetails);
-			return (Patient) outcome.getResource();
+			return theResultResource;
 		}
 
-		// client did not provide a result resource, update the target resource,
+		// client did not provide a result resource, we should update the target resource,
 		// after adding the replaces link to the target resource, if the source resource is not to be deleted
 		if (!theDeleteSource) {
 			// add the replaces link only if the source is not deleted
@@ -324,7 +332,11 @@ public class ResourceMergeService {
 					.setOther(new Reference(theSourceResource.getId()));
 		}
 
-		DaoMethodOutcome outcome = myDao.update(theTargetResource, theRequestDetails);
+		return theTargetResource;
+	}
+
+	private Patient updateResource(Patient theResource, RequestDetails theRequestDetails) {
+		DaoMethodOutcome outcome = myDao.update(theResource, theRequestDetails);
 		return (Patient) outcome.getResource();
 	}
 
@@ -332,20 +344,11 @@ public class ResourceMergeService {
 		myDao.delete(theResource.getIdElement(), theRequestDetails);
 	}
 
-	private void updateSourceResourceAfterRefsUpdated(
-			Patient theSourceResource, Patient theTargetResource, RequestDetails theRequestDetails) {
-		theSourceResource.setActive(false);
-		theSourceResource
-				.addLink()
-				.setType(Patient.LinkType.REPLACEDBY)
-				.setOther(new Reference(theTargetResource.getId()));
-		myDao.update(theSourceResource, theRequestDetails);
-	}
-
 	/**
 	 * Validates the merge operation parameters and adds validation errors to the outcome
+	 *
 	 * @param theMergeOperationParameters the merge operation parameters
-	 * @param theOutcome the outcome to add validation errors to
+	 * @param theOutcome                  the outcome to add validation errors to
 	 * @return true if the parameters are valid, false otherwise
 	 */
 	private boolean validateMergeOperationParameters(
@@ -386,6 +389,22 @@ public class ResourceMergeService {
 					"Target resource must be provided either by '%s' or by '%s', not both.",
 					theMergeOperationParameters.getTargetResourceParameterName(),
 					theMergeOperationParameters.getTargetIdentifiersParameterName());
+			errorMessages.add(msg);
+		}
+
+		Reference sourceRef = (Reference) theMergeOperationParameters.getSourceResource();
+		if (sourceRef != null && !sourceRef.hasReference()) {
+			String msg = String.format(
+					"Reference specified in '%s' parameter does not have a reference element.",
+					theMergeOperationParameters.getSourceResourceParameterName());
+			errorMessages.add(msg);
+		}
+
+		Reference targetRef = (Reference) theMergeOperationParameters.getTargetResource();
+		if (targetRef != null && !targetRef.hasReference()) {
+			String msg = String.format(
+					"Reference specified in '%s' parameter does not have a reference element.",
+					theMergeOperationParameters.getTargetResourceParameterName());
 			errorMessages.add(msg);
 		}
 
@@ -471,42 +490,30 @@ public class ResourceMergeService {
 		// casting it to r4.Reference for now
 		Reference r4ref = (Reference) theReference;
 
-		if (r4ref.hasReferenceElement()) {
-
-			IIdType theResourceId = new IdType(r4ref.getReferenceElement().getValue());
-			IBaseResource resource;
-			try {
-				resource = myDao.read(theResourceId.toVersionless(), theRequestDetails);
-			} catch (ResourceNotFoundException e) {
-				String msg = String.format(
-						"Resource not found for the reference specified in '%s' parameter", theOperationParameterName);
-				addErrorToOperationOutcome(theOutcome, msg, "not-found");
-				return null;
-			}
-
-			if (theResourceId.hasVersionIdPart()
-					&& !theResourceId
-							.getVersionIdPart()
-							.equals(resource.getIdElement().getVersionIdPart())) {
-				String msg = String.format(
-						"The reference in '%s' parameter has a version specified, "
-								+ "but it is not the latest version of the resource",
-						theOperationParameterName);
-				addErrorToOperationOutcome(theOutcome, msg, "conflict");
-				return null;
-			}
-
-			return resource;
+		IIdType theResourceId = new IdType(r4ref.getReferenceElement().getValue());
+		IBaseResource resource;
+		try {
+			resource = myDao.read(theResourceId.toVersionless(), theRequestDetails);
+		} catch (ResourceNotFoundException e) {
+			String msg = String.format(
+					"Resource not found for the reference specified in '%s' parameter", theOperationParameterName);
+			addErrorToOperationOutcome(theOutcome, msg, "not-found");
+			return null;
 		}
 
-		// reference may have a identifier
-		if (r4ref.hasIdentifier()) {
-			Identifier identifier = r4ref.getIdentifier();
-			CanonicalIdentifier canonicalIdentifier = IdentifierUtil.identifierDtFromIdentifier(identifier);
-			return resolveResourceByIdentifiers(
-					List.of(canonicalIdentifier), theRequestDetails, theOutcome, theOperationParameterName);
+		if (theResourceId.hasVersionIdPart()
+				&& !theResourceId
+						.getVersionIdPart()
+						.equals(resource.getIdElement().getVersionIdPart())) {
+			String msg = String.format(
+					"The reference in '%s' parameter has a version specified, "
+							+ "but it is not the latest version of the resource",
+					theOperationParameterName);
+			addErrorToOperationOutcome(theOutcome, msg, "conflict");
+			return null;
 		}
-		return null;
+
+		return resource;
 	}
 
 	private IBaseResource resolveResource(
