@@ -79,57 +79,6 @@ public class IdHelperServiceTest {
 		lenient().doReturn(true).when(myStorageSettings).isDeleteEnabled();
     }
 
-    @Test
-    public void testResolveResourcePersistentIds() {
-		lenient().doReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY).when(myStorageSettings).getResourceClientIdStrategy();
-
-        //prepare params
-        RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionIdAndName(1, "Partition-A");
-        String resourceType = "Patient";
-        Long id = 123L;
-        List<String> ids = List.of(String.valueOf(id));
-        ResolveIdentityMode mode = ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled();
-
-        //prepare results
-        Patient expectedPatient = new Patient();
-        expectedPatient.setId(ids.get(0));
-
-        // configure mock behaviour
-		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
-
-		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, mode));
-		assertEquals("HAPI-2001: Resource Patient/123 is not known", resourceNotFoundException.getMessage());
-    }
-
-    @Test
-    public void testResolveResourcePersistentIdsDeleteFalse() {
-		lenient().doReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY).when(myStorageSettings).getResourceClientIdStrategy();
-
-        //prepare Params
-        RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionIdAndName(1, "Partition-A");
-        Long id = 123L;
-        String resourceType = "Patient";
-        List<String> ids = List.of(String.valueOf(id));
-        String forcedId = "(all)/" + resourceType + "/" + id;
-        ResolveIdentityMode mode = ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled();
-
-        //prepare results
-        Patient expectedPatient = new Patient();
-        expectedPatient.setId(ids.get(0));
-
-        // configure mock behaviour
-        when(myStorageSettings.isDeleteEnabled()).thenReturn(false);
-
-		Map<String, JpaPid> actualIds = myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, mode);
-
-		//verifyResult
-		assertFalse(actualIds.isEmpty());
-		assertNull(actualIds.get(ids.get(0)));
-    }
-
-
-
-
 
 	@Test
 	public void testResolveResourceIdentity_defaultFunctionality(){

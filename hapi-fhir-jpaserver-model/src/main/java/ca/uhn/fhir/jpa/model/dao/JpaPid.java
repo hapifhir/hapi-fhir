@@ -21,22 +21,36 @@ package ca.uhn.fhir.jpa.model.dao;
 
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import jakarta.annotation.Nonnull;
+import org.apache.commons.collections4.ComparatorUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 /**
  * JPA implementation of IResourcePersistentId.  JPA uses a Long as the primary key.  This class should be used in any
  * context where the pid is known to be a Long.
  */
-public class JpaPid extends BaseResourcePersistentId<Long> {
+public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable<JpaPid> {
 	private final Long myId;
 	private PartitionablePartitionId myPartitionablePartitionId;
+
+	private static final Comparator<JpaPid> COMPARATOR;
+
+	static {
+		Comparator<JpaPid> partitionComparator =
+				Comparator.comparing(t -> defaultIfNull(t.getPartitionId(), Integer.MIN_VALUE));
+		Comparator<JpaPid> idComparator = Comparator.comparing(t -> t.myId);
+		COMPARATOR = ComparatorUtils.chainedComparator(List.of(partitionComparator, idComparator));
+	}
 
 	private JpaPid(Long theId) {
 		super(null);
@@ -65,6 +79,13 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	public JpaPid setPartitionablePartitionId(PartitionablePartitionId thePartitionablePartitionId) {
 		myPartitionablePartitionId = thePartitionablePartitionId;
 		return this;
+	}
+
+	public void setPartitionId(Integer thePartitionId) {
+		if (myPartitionablePartitionId == null) {
+			myPartitionablePartitionId = new PartitionablePartitionId();
+		}
+		myPartitionablePartitionId.setPartitionId(thePartitionId);
 	}
 
 	public static List<Long> toLongList(JpaPid[] thePids) {
@@ -99,6 +120,12 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 		return new JpaPid(theId);
 	}
 
+	public static JpaPid fromId(Long theId, Integer thePartitionId) {
+		JpaPid retVal = new JpaPid(theId);
+		retVal.setPartitionablePartitionId(PartitionablePartitionId.with(thePartitionId, null));
+		return retVal;
+	}
+
 	public static JpaPid fromIdAndVersion(Long theId, Long theVersion) {
 		return new JpaPid(theId, theVersion);
 	}
@@ -115,14 +142,13 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
 		if (theO == null || getClass() != theO.getClass()) return false;
-		if (!super.equals(theO)) return false;
 		JpaPid jpaPid = (JpaPid) theO;
 		return myId.equals(jpaPid.myId);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), myId);
+		return Objects.hash(myId);
 	}
 
 	@Override
@@ -135,9 +161,15 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 		return myId.toString();
 	}
 
+	@Override
+	public int compareTo(@Nonnull JpaPid theOther) {
+		return COMPARATOR.compare(this, theOther);
+	}
+
 	public Integer getPartitionId() {
-		// wipmb should we return null instead?
-		assert getPartitionablePartitionId() != null;
+		if (getPartitionablePartitionId() == null) {
+			return null;
+		}
 		return getPartitionablePartitionId().getPartitionId();
 	}
 }

@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.7.10-SNAPSHOT</version>
+	<version>7.7.9-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1171,6 +1171,11 @@
 				<version>${caffeine_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.github.jsqlparser</groupId>
+				<artifactId>jsqlparser</artifactId>
+				<version>5.0</version>
+			</dependency>
+			<dependency>
 				<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
 				<artifactId>owasp-java-html-sanitizer</artifactId>
 				<version>20211018.2</version>
@@ -1361,7 +1366,7 @@
 			<dependency>
 				<groupId>org.jetbrains</groupId>
 				<artifactId>annotations</artifactId>
-				<version>23.0.0</version>
+				<version>24.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
@@ -2634,7 +2639,7 @@
 				<plugin>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-tinder-plugin</artifactId>
-					<version>7.7.10-SNAPSHOT</version>
+					<version>7.7.9-SNAPSHOT</version>
 					<executions>
 						<execution>
 							<goals>

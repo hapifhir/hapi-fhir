@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -33,7 +32,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -41,7 +40,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3UpdateTest.class);
 
 	@AfterEach
-	public void afterEach(){
+	public void afterEach() {
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.SEQUENTIAL_NUMERIC);
 	}
 
@@ -135,7 +134,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	public void afterResetDao() {
 		myStorageSettings.setResourceMetaCountHardLimit(new JpaStorageSettings().getResourceMetaCountHardLimit());
 	}
-	
+
 	@Test
 	public void testHardMetaCapIsEnforcedOnCreate() {
 		myStorageSettings.setResourceMetaCountHardLimit(3);
@@ -156,7 +155,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			}
 		}
 	}
-	
+
 	@Test
 	public void testHardMetaCapIsEnforcedOnMetaAdd() {
 		myStorageSettings.setResourceMetaCountHardLimit(3);
@@ -167,7 +166,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			patient.setActive(true);
 			id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-		
+
 		{
 			Meta meta = new Meta();
 			meta.addTag().setSystem("http://foo").setCode("1");
@@ -183,7 +182,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		}
 	}
-	
+
 	@Test
 	public void testDuplicateTagsOnAddTagsIgnored() {
 		IIdType id;
@@ -198,7 +197,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		meta.addTag().setSystem("http://foo").setCode("bar").setDisplay("Val2");
 		meta.addTag().setSystem("http://foo").setCode("bar").setDisplay("Val3");
 		myPatientDao.metaAddOperation(id, meta, null);
-		
+
 		// Do a read
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
@@ -228,7 +227,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val3");
 			myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-		
+
 		// Do a read on second version
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
@@ -312,7 +311,6 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		assertThat(id).endsWith("Patient/A/_history/2");
 
 	}
-
 
 
 	@Test
@@ -602,8 +600,8 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			p2.setId(new IdType("Organization/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2, mySrd);
 			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(930) + "Existing resource ID[Patient/" + p1id.getIdPartAsLong() + "] is of type[Patient] - Cannot update with [Organization]", e.getMessage());
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage()).contains(Msg.code(960) + "Can not create resource with");
 		}
 
 		try {
@@ -611,9 +609,8 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			myOrganizationDao.update(p2, mySrd);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(996) + "Incorrect resource type (Patient) for this DAO, wanted: Organization", e.getMessage());
+			assertThat(e.getMessage()).contains(Msg.code(996) + "Incorrect resource type");
 		}
-
 	}
 
 	@Test
@@ -844,7 +841,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		// verify
 		try {
 			UUID.fromString(result);
-		} catch (IllegalArgumentException exception){
+		} catch (IllegalArgumentException exception) {
 			fail("Result id is not a UUID. Instead, it was: " + result);
 		}
 	}

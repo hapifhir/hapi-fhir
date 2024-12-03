@@ -21,6 +21,8 @@ package ca.uhn.fhir.rest.server.util;
 
 public interface ICachedSearchDetails {
 
+	String getResourceType();
+
 	String getUuid();
 
 	void setUuid(String theUuid);

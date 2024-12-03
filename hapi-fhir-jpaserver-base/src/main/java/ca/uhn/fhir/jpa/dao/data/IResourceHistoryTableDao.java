@@ -38,10 +38,8 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :resId ORDER BY t.myResourceVersion ASC")
 	List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(@Param("resId") Long theId);
 
-	@Query(
-			"SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :id AND t.myResourceVersion = :version")
-	ResourceHistoryTable findForIdAndVersionAndFetchProvenance(
-			@Param("id") long theId, @Param("version") long theVersion);
+	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :id AND t.myResourceVersion = :version")
+	ResourceHistoryTable findForIdAndVersion(@Param("id") long theId, @Param("version") long theVersion);
 
 	@Query(
 			"SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourceId = :resId AND t.myResourceVersion <> :dontWantVersion")
@@ -49,8 +47,8 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 			Pageable thePage, @Param("resId") Long theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query(
-			"SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :resId AND t.myResourceVersion <> :dontWantVersion")
-	Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(
+			"SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :resId AND t.myResourceVersion <> :dontWantVersion")
+	Slice<ResourceHistoryTable> findAllVersionsExceptSpecificForResourcePid(
 			Pageable thePage, @Param("resId") Long theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
@@ -91,4 +89,10 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	@Query(
 			"UPDATE ResourceHistoryTable r SET r.myResourceTextVc = null, r.myResource = :text, r.myEncoding = 'JSONC' WHERE r.myId = :pid")
 	void updateNonInlinedContents(@Param("text") byte[] theText, @Param("pid") long thePid);
+
+	@Query("SELECT v FROM ResourceHistoryTable v " + "JOIN FETCH v.myResourceTable t "
+			+ "WHERE v.myResourceId IN (:pids) "
+			+ "AND t.myVersion = v.myResourceVersion")
+	List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(
+			@Param("pids") List<Long> theVersionlessPids);
 }
