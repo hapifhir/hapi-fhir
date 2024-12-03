@@ -27,18 +27,20 @@ import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.listener.MethodExecutionContext;
 import net.ttddyy.dsproxy.proxy.ParameterSetOperation;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseCaptureQueriesListener
 		implements ProxyDataSourceBuilder.SingleQueryExecution, ProxyDataSourceBuilder.SingleMethodExecution {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseCaptureQueriesListener.class);
 	private boolean myCaptureQueryStackTrace = false;
 
 	/**
@@ -85,10 +87,16 @@ public abstract class BaseCaptureQueriesListener
 					&& next.getParametersList().get(0).size() > 0) {
 				size = next.getParametersList().size();
 				List<ParameterSetOperation> values = next.getParametersList().get(0);
-				params = values.stream()
-						.map(t -> t.getArgs()[1])
-						.map(t -> t != null ? t.toString() : "NULL")
-						.collect(Collectors.toList());
+				params = new ArrayList<>();
+				for (ParameterSetOperation t : values) {
+					if (t.getMethod().getName().equals("setNull")) {
+						params.add(null);
+					} else {
+						Object arg = t.getArgs()[1];
+						String s = arg != null ? arg.toString() : null;
+						params.add(s);
+					}
+				}
 			} else {
 				params = Collections.emptyList();
 				size = next.getParametersList().size();
@@ -113,6 +121,9 @@ public abstract class BaseCaptureQueriesListener
 	protected abstract AtomicInteger provideCommitCounter();
 
 	@Nullable
+	protected abstract AtomicInteger provideGetConnectionCounter();
+
+	@Nullable
 	protected abstract AtomicInteger provideRollbackCounter();
 
 	@Override
@@ -125,6 +136,9 @@ public abstract class BaseCaptureQueriesListener
 			case "rollback":
 				counter = provideRollbackCounter();
 				break;
+			case "getConnection":
+				counter = provideGetConnectionCounter();
+				break;
 		}
 
 		if (counter != null) {
@@ -132,10 +146,23 @@ public abstract class BaseCaptureQueriesListener
 		}
 	}
 
+	/**
+	 * @return Returns the number of times the connection pool was asked for a new connection
+	 */
+	public int countGetConnections() {
+		return provideGetConnectionCounter().get();
+	}
+
+	/**
+	 * @return Returns the number of DB commits which have happened against connections from the pool
+	 */
 	public int countCommits() {
 		return provideCommitCounter().get();
 	}
 
+	/**
+	 * @return Returns the number of DB rollbacks which have happened against connections from the pool
+	 */
 	public int countRollbacks() {
 		return provideRollbackCounter().get();
 	}

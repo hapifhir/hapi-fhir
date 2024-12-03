@@ -32,6 +32,7 @@ import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -90,7 +91,10 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	@Hook(
 			value = Pointcut.STORAGE_PRESEARCH_REGISTERED,
 			order = MdmConstants.ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR)
-	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
+	public void preSearchRegistered(
+			RequestDetails theRequestDetails,
+			SearchParameterMap theSearchParameterMap,
+			ICachedSearchDetails theSearchDetails) {
 		ourMdmTroubleshootingLog
 				.atTrace()
 				.setMessage("MDM virtualization original search: {}{}")
@@ -98,14 +102,16 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
 				.log();
 
+		String resourceType = theSearchDetails.getResourceType();
+
 		if (theSearchParameterMap.hasIncludes() || theSearchParameterMap.hasRevIncludes()) {
 			myMdmSearchExpansionSvc.expandSearchAndStoreInRequestDetails(
-					theRequestDetails, theSearchParameterMap, PARAM_TESTER_ALL);
+					resourceType, theRequestDetails, theSearchParameterMap, PARAM_TESTER_ALL);
 		} else {
 			// If we don't have any includes, it's not worth auto-expanding the _id parameter since we'll only end
 			// up filtering out the extra resources afterward
 			myMdmSearchExpansionSvc.expandSearchAndStoreInRequestDetails(
-					theRequestDetails, theSearchParameterMap, PARAM_TESTER_NO_RES_ID);
+					resourceType, theRequestDetails, theSearchParameterMap, PARAM_TESTER_NO_RES_ID);
 		}
 
 		ourMdmTroubleshootingLog
@@ -116,7 +122,6 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 				.log();
 	}
 
-	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShowResources(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
 		MdmSearchExpansionResults expansionResults = MdmSearchExpansionSvc.getCachedExpansionResults(theRequestDetails);

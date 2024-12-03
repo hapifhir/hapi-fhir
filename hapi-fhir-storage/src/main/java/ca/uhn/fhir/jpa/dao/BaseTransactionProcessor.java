@@ -359,14 +359,14 @@ public abstract class BaseTransactionProcessor {
 		try {
 
 			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
-			if (CompositeInterceptorBroadcaster.hasHooks(
-					Pointcut.STORAGE_TRANSACTION_PROCESSING, myInterceptorBroadcaster, theRequestDetails)) {
+			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+					myInterceptorBroadcaster, theRequestDetails);
+			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
 				HookParams params = new HookParams()
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequest)
 						.add(IBaseBundle.class, theRequest);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
 			}
 
 			return processTransaction(theRequestDetails, theRequest, theActionName, theNestedMode);
@@ -561,8 +561,9 @@ public abstract class BaseTransactionProcessor {
 				theRequestDetails, response, getEntries, originalRequestOrder, transactionStopWatch, theNestedMode);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 			String taskDurations = transactionStopWatch.formatTaskDurations();
 			StorageProcessingMessage message = new StorageProcessingMessage();
 			message.setMessage("Transaction timing:\n" + taskDurations);
@@ -570,8 +571,7 @@ public abstract class BaseTransactionProcessor {
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(StorageProcessingMessage.class, message);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
+			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 		}
 
 		return response;
@@ -821,12 +821,10 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
-		return CompositeInterceptorBroadcaster.hasHooks(
-						Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE, myInterceptorBroadcaster, theRequestDetails)
-				|| CompositeInterceptorBroadcaster.hasHooks(
-						Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST,
-						myInterceptorBroadcaster,
-						theRequestDetails);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		return compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE)
+				|| compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST);
 	}
 
 	private void callWriteOperationsHook(
@@ -834,10 +832,14 @@ public abstract class BaseTransactionProcessor {
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			TransactionWriteOperationsDetails theWriteOperationsDetails) {
-		HookParams params = new HookParams()
-				.add(TransactionDetails.class, theTransactionDetails)
-				.add(TransactionWriteOperationsDetails.class, theWriteOperationsDetails);
-		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, thePointcut, params);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(thePointcut)) {
+			HookParams params = new HookParams()
+					.add(TransactionDetails.class, theTransactionDetails)
+					.add(TransactionWriteOperationsDetails.class, theWriteOperationsDetails);
+			compositeBroadcaster.callHooks(thePointcut, params);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -967,18 +969,16 @@ public abstract class BaseTransactionProcessor {
 									+ " as it contained a duplicate conditional " + verb;
 							ourLog.info(msg);
 							// Interceptor broadcast: JPA_PERFTRACE_INFO
-							if (CompositeInterceptorBroadcaster.hasHooks(
-									Pointcut.JPA_PERFTRACE_WARNING, myInterceptorBroadcaster, theRequestDetails)) {
+							IInterceptorBroadcaster compositeBroadcaster =
+									CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+											myInterceptorBroadcaster, theRequestDetails);
+							if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_WARNING)) {
 								StorageProcessingMessage message = new StorageProcessingMessage().setMessage(msg);
 								HookParams params = new HookParams()
 										.add(RequestDetails.class, theRequestDetails)
 										.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 										.add(StorageProcessingMessage.class, message);
-								CompositeInterceptorBroadcaster.doCallHooks(
-										myInterceptorBroadcaster,
-										theRequestDetails,
-										Pointcut.JPA_PERFTRACE_INFO,
-										params);
+								compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 							}
 
 							theEntries.remove(index);
@@ -1356,7 +1356,8 @@ public abstract class BaseTransactionProcessor {
 						}
 
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
-						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
+						IIdType patchId =
+								myContext.getVersion().newIdType(parts.getResourceType(), parts.getResourceId());
 
 						String conditionalUrl;
 						if (isNull(patchId.getIdPart())) {
@@ -1407,6 +1408,8 @@ public abstract class BaseTransactionProcessor {
 
 				theTransactionStopWatch.endCurrentTask();
 			}
+
+			postTransactionProcess(theTransactionDetails);
 
 			/*
 			 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
@@ -1475,13 +1478,14 @@ public abstract class BaseTransactionProcessor {
 				}
 			}
 
+			IInterceptorBroadcaster compositeBroadcaster =
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 			ListMultimap<Pointcut, HookParams> deferredBroadcastEvents =
 					theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			for (Map.Entry<Pointcut, HookParams> nextEntry : deferredBroadcastEvents.entries()) {
 				Pointcut nextPointcut = nextEntry.getKey();
 				HookParams nextParams = nextEntry.getValue();
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, theRequest, nextPointcut, nextParams);
+				compositeBroadcaster.callHooks(nextPointcut, nextParams);
 			}
 
 			DeferredInterceptorBroadcasts deferredInterceptorBroadcasts =
@@ -1492,8 +1496,7 @@ public abstract class BaseTransactionProcessor {
 					.add(DeferredInterceptorBroadcasts.class, deferredInterceptorBroadcasts)
 					.add(TransactionDetails.class, theTransactionDetails)
 					.add(IBaseBundle.class, theResponse);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_TRANSACTION_PROCESSED, params);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSED, params);
 
 			theTransactionDetails.deferredBroadcastProcessingFinished();
 
@@ -1514,6 +1517,13 @@ public abstract class BaseTransactionProcessor {
 	 * with a given verb.
 	 */
 	protected void handleVerbChangeInTransactionWriteOperations() {
+		// nothing
+	}
+
+	/**
+	 * Implement to handle post transaction processing
+	 */
+	protected void postTransactionProcess(TransactionDetails theTransactionDetails) {
 		// nothing
 	}
 

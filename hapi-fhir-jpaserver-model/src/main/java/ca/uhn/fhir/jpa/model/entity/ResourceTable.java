@@ -988,6 +988,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * @return the resource id, or null if the resource doesn't have a client-assigned id,
 	 * and hasn't been saved to the db to get a server-assigned id yet.
 	 */
+	@Override
 	public String getFhirId() {
 		return myFhirId;
 	}

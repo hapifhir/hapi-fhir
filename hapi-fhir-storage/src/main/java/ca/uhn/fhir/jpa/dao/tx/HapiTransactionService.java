@@ -364,19 +364,21 @@ public class HapiTransactionService implements IHapiTransactionService {
 						}
 
 						if (maxRetries == 0) {
-							HookParams params = new HookParams()
-									.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
-									.addIfMatchesType(
-											ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
-							ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
-									(ResourceVersionConflictResolutionStrategy)
-											CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-													myInterceptorBroadcaster,
-													theExecutionBuilder.myRequestDetails,
-													Pointcut.STORAGE_VERSION_CONFLICT,
-													params);
-							if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
-								maxRetries = conflictResolutionStrategy.getMaxRetries();
+							IInterceptorBroadcaster compositeBroadcaster =
+									CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+											myInterceptorBroadcaster, theExecutionBuilder.myRequestDetails);
+							if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_VERSION_CONFLICT)) {
+								HookParams params = new HookParams()
+										.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
+										.addIfMatchesType(
+												ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
+								ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
+										(ResourceVersionConflictResolutionStrategy)
+												compositeBroadcaster.callHooksAndReturnObject(
+														Pointcut.STORAGE_VERSION_CONFLICT, params);
+								if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
+									maxRetries = conflictResolutionStrategy.getMaxRetries();
+								}
 							}
 						}
 

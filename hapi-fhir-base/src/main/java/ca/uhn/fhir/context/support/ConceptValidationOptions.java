@@ -22,10 +22,25 @@ package ca.uhn.fhir.context.support;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Objects;
+
 public class ConceptValidationOptions {
 
 	private boolean myValidateDisplay;
 	private boolean myInferSystem;
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (!(theO instanceof ConceptValidationOptions)) return false;
+		ConceptValidationOptions that = (ConceptValidationOptions) theO;
+		return myValidateDisplay == that.myValidateDisplay && myInferSystem == that.myInferSystem;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(myValidateDisplay, myInferSystem);
+	}
 
 	public boolean isInferSystem() {
 		return myInferSystem;

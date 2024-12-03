@@ -294,6 +294,20 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 
+	@Test
+	public void testNoOpUpdateDoesNotModifyLastUpdated() throws InterruptedException {
+		myStorageSettings.setAdvancedHSearchIndexing(true);
+		Patient patient = new Patient();
+		patient.getNameFirstRep().setFamily("graham").addGiven("gary");
+
+		patient = (Patient) myPatientDao.create(patient).getResource();
+		Date originalLastUpdated = patient.getMeta().getLastUpdated();
+
+		patient = (Patient) myPatientDao.update(patient).getResource();
+		Date newLastUpdated = patient.getMeta().getLastUpdated();
+
+		assertThat(originalLastUpdated).isEqualTo(newLastUpdated);
+	}
 
 	@Test
 	public void testFullTextSearchesArePerformanceLogged() {
@@ -1804,68 +1818,52 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@Test
 		public void eq() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=eq" + myOldLastUpdatedDateTime);
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId);
 		}
 
 		@Test
 		public void eqLessPrecisionRequest() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=eq2017-03-24");
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId);
 		}
 
 		@Test
 		public void ne() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=ne" + myOldLastUpdatedDateTime);
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myNewObsId);
 		}
 
 		@Test
 		void gt() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=gt2018-01-01");
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myNewObsId);
 		}
 
 		@Test
 		public void ge() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=ge" + myOldLastUpdatedDateTime);
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId, myNewObsId);
 		}
 
 		@Test
 		void lt() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=lt2018-01-01");
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId);
 		}
 
 		@Test
 		public void le() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=le" + myOldLastUpdatedDateTime);
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId);
 		}
-
-
 	}
 
 	@Nested

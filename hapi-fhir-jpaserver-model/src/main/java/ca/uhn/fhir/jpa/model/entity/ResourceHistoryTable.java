@@ -37,7 +37,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
@@ -66,7 +65,7 @@ import java.util.Collection;
 		})
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
-	public static final int SOURCE_URI_LENGTH = 100;
+	public static final int SOURCE_URI_LENGTH = ResourceIndexedSearchParamString.MAX_LENGTH;
 	/**
 	 * @see ResourceEncodingEnum
 	 */
@@ -119,10 +118,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OptimisticLock(excluded = true)
 	private ResourceEncodingEnum myEncoding;
 
-	@OneToOne(
-			mappedBy = "myResourceHistoryTable",
-			cascade = {CascadeType.REMOVE})
-	private ResourceHistoryProvenanceEntity myProvenance;
 	// TODO: This was added in 6.8.0 - In the future we should drop ResourceHistoryProvenanceEntity
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
 	private String mySourceUri;
@@ -178,10 +173,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public void setResourceTextVc(String theResourceTextVc) {
 		myResourceTextVc = theResourceTextVc;
-	}
-
-	public ResourceHistoryProvenanceEntity getProvenance() {
-		return myProvenance;
 	}
 
 	public void addTag(ResourceTag theTag) {
@@ -249,6 +240,11 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Override
 	public String getResourceType() {
 		return myResourceType;
+	}
+
+	@Override
+	public String getFhirId() {
+		return getIdDt().getIdPart();
 	}
 
 	public void setResourceType(String theResourceType) {

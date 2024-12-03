@@ -33,8 +33,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
@@ -44,20 +42,23 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
+import ca.uhn.fhir.jpa.model.entity.BaseTag;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
@@ -99,11 +100,14 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.MultimapBuilder;
 import com.healthmarketscience.sqlbuilder.Condition;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -114,6 +118,7 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -125,11 +130,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -169,14 +171,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public static final int MAXIMUM_PAGE_SIZE = SearchConstants.MAX_PAGE_SIZE;
 
 	public static final String RESOURCE_ID_ALIAS = "resource_id";
+	public static final String PARTITION_ID_ALIAS = "partition_id";
 	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static final JpaPid NO_MORE = JpaPid.fromId(-1L);
-	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
 	private static final String MY_SOURCE_RESOURCE_PID = "mySourceResourcePid";
-	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
+	private static final String MY_SOURCE_RESOURCE_PARTITION_ID = "myPartitionIdValue";
 	private static final String MY_SOURCE_RESOURCE_TYPE = "mySourceResourceType";
+	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
+	private static final String MY_TARGET_RESOURCE_PARTITION_ID = "myTargetResourcePartitionId";
+	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
+	public static final JpaPid[] EMPTY_JPA_PID_ARRAY = new JpaPid[0];
+	public static boolean myUseMaxPageSize50ForTest = false;
 	public static Integer myMaxPageSizeForTests = null;
 	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
 	protected final IResourceTagDao myResourceTagDao;
@@ -188,11 +195,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final PartitionSettings myPartitionSettings;
 	private final DaoRegistry myDaoRegistry;
-	private final IResourceSearchViewDao myResourceSearchViewDao;
 	private final FhirContext myContext;
 	private final IIdHelperService<JpaPid> myIdHelperService;
 	private final JpaStorageSettings myStorageSettings;
-	private final IDao myCallingDao;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -215,12 +220,20 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
+	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
+
+	@Autowired
+	private IResourceHistoryTagDao myResourceHistoryTagDao;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myPartitionHelperSvc;
+
 	/**
 	 * Constructor
 	 */
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public SearchBuilder(
-			IDao theDao,
 			String theResourceName,
 			JpaStorageSettings theStorageSettings,
 			HapiFhirLocalContainerEntityManagerFactoryBean theEntityManagerFactory,
@@ -231,11 +244,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			IInterceptorBroadcaster theInterceptorBroadcaster,
 			IResourceTagDao theResourceTagDao,
 			DaoRegistry theDaoRegistry,
-			IResourceSearchViewDao theResourceSearchViewDao,
 			FhirContext theContext,
 			IIdHelperService theIdHelperService,
 			Class<? extends IBaseResource> theResourceType) {
-		myCallingDao = theDao;
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
 		myStorageSettings = theStorageSettings;
@@ -248,7 +259,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myResourceTagDao = theResourceTagDao;
 		myDaoRegistry = theDaoRegistry;
-		myResourceSearchViewDao = theResourceSearchViewDao;
 		myContext = theContext;
 		myIdHelperService = theIdHelperService;
 	}
@@ -343,7 +353,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (queries.isEmpty()) {
 			return 0L;
 		} else {
-			return queries.get(0).next();
+			JpaPid jpaPid = queries.get(0).next();
+			return jpaPid.getId();
 		}
 	}
 
@@ -426,15 +437,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			if (theSearchRuntimeDetails != null) {
 				theSearchRuntimeDetails.setFoundIndexMatchesCount(resultCount);
-				HookParams params = new HookParams()
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest)
-						.add(SearchRuntimeDetails.class, theSearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster,
-						theRequest,
-						Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE,
-						params);
+				IInterceptorBroadcaster compositeBroadcaster =
+						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE)) {
+					HookParams params = new HookParams()
+							.add(RequestDetails.class, theRequest)
+							.addIfMatchesType(ServletRequestDetails.class, theRequest)
+							.add(SearchRuntimeDetails.class, theSearchRuntimeDetails);
+					compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
+				}
 			}
 
 			// can we skip the database entirely and return the pid list from here?
@@ -466,7 +477,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				ourLog.trace("Query needs db after HSearch.  Chunking.");
 				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
-				new QueryChunker<Long>()
+				new QueryChunker<JpaPid>()
 						.chunk(
 								fulltextExecutor,
 								SearchBuilder.getMaximumPageSize(),
@@ -572,7 +583,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private void doCreateChunkedQueries(
 			SearchParameterMap theParams,
-			List<Long> thePids,
+			List<JpaPid> thePids,
 			Integer theOffset,
 			SortSpec sort,
 			boolean theCount,
@@ -588,7 +599,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	/**
 	 * Combs through the params for any _id parameters and extracts the PIDs for them
 	 */
-	private void extractTargetPidsFromIdParams(Set<Long> theTargetPids) {
+	private void extractTargetPidsFromIdParams(Set<JpaPid> theTargetPids) {
 		// get all the IQueryParameterType objects
 		// for _id -> these should all be StringParam values
 		HashSet<IIdType> ids = new HashSet<>();
@@ -625,8 +636,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				ResolveIdentityMode.failOnDeleted().noCacheUnlessDeletesDisabled());
 
 		// add the pids to targetPids
-		for (IResourceLookup pid : idToIdentity.values()) {
-			theTargetPids.add((Long) pid.getPersistentId().getId());
+		for (IResourceLookup<JpaPid> pid : idToIdentity.values()) {
+			theTargetPids.add(pid.getPersistentId());
 		}
 	}
 
@@ -637,11 +648,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Integer theMaximumResults,
 			boolean theCountOnlyFlag,
 			RequestDetails theRequest,
-			List<Long> thePidList,
+			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		if (myParams.getEverythingMode() != null) {
 			createChunkedQueryForEverythingSearch(
-					theParams, theOffset, theMaximumResults, theCountOnlyFlag, thePidList, theSearchQueryExecutors);
+					theRequest,
+					theParams,
+					theOffset,
+					theMaximumResults,
+					theCountOnlyFlag,
+					thePidList,
+					theSearchQueryExecutors);
 		} else {
 			createChunkedQueryNormalSearch(
 					theParams, sort, theOffset, theCountOnlyFlag, theRequest, thePidList, theSearchQueryExecutors);
@@ -654,7 +671,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Integer theOffset,
 			boolean theCountOnlyFlag,
 			RequestDetails theRequest,
-			List<Long> thePidList,
+			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
 				myContext,
@@ -666,7 +683,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myDialectProvider,
 				theCountOnlyFlag);
 		QueryStack queryStack3 = new QueryStack(
-				theParams, myStorageSettings, myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
+				theRequest,
+				theParams,
+				myStorageSettings,
+				myContext,
+				sqlBuilder,
+				mySearchParamRegistry,
+				myPartitionSettings);
 
 		if (theParams.keySet().size() > 1
 				|| theParams.getSort() != null
@@ -772,11 +795,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private void createChunkedQueryForEverythingSearch(
+			RequestDetails theRequest,
 			SearchParameterMap theParams,
 			Integer theOffset,
 			Integer theMaximumResults,
 			boolean theCountOnlyFlag,
-			List<Long> thePidList,
+			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
@@ -790,11 +814,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				theCountOnlyFlag);
 
 		QueryStack queryStack3 = new QueryStack(
-				theParams, myStorageSettings, myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
+				theRequest,
+				theParams,
+				myStorageSettings,
+				myContext,
+				sqlBuilder,
+				mySearchParamRegistry,
+				myPartitionSettings);
 
 		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theMaximumResults);
 
-		Set<Long> targetPids = new HashSet<>();
+		Set<JpaPid> targetPids = new HashSet<>();
 		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 
 			extractTargetPidsFromIdParams(targetPids);
@@ -820,16 +850,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			String sql = allTargetsSql.getSql();
 			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 
-			List<Long> output = jdbcTemplate.query(sql, args, new RowMapper<Long>() {
-				@Override
-				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-					if (myPartitionSettings.isPartitioningEnabled()) {
-						return rs.getLong(2);
-					} else {
-						return rs.getLong(1);
-					}
-				}
-			});
+			List<JpaPid> output =
+					jdbcTemplate.query(sql, args, new JpaPidRowMapper(myPartitionSettings.isPartitioningEnabled()));
 
 			// we add a search executor to fetch unlinked patients first
 			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
@@ -841,7 +863,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		queryStack3.addPredicateEverythingOperation(
-				myResourceName, typeSourceResources, targetPids.toArray(new Long[0]));
+				myResourceName, typeSourceResources, targetPids.toArray(EMPTY_JPA_PID_ARRAY));
 
 		// Add PID list predicate for full text search and/or lastn operation
 		addPidListPredicate(thePidList, sqlBuilder);
@@ -862,7 +884,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		executeSearch(theOffset, theSearchQueryExecutors, sqlBuilder);
 	}
 
-	private void addPidListPredicate(List<Long> thePidList, SearchQueryBuilder theSqlBuilder) {
+	private void addPidListPredicate(List<JpaPid> thePidList, SearchQueryBuilder theSqlBuilder) {
 		if (thePidList != null && !thePidList.isEmpty()) {
 			theSqlBuilder.addResourceIdsPredicate(thePidList);
 		}
@@ -1146,31 +1168,55 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Collection<JpaPid> theIncludedPids,
 			List<IBaseResource> theResourceListToPopulate,
 			boolean theForHistoryOperation,
-			Map<JpaPid, Integer> thePosition) {
+			Map<Long, Integer> thePosition) {
 
-		Map<Long, Long> resourcePidToVersion = null;
+		Map<JpaPid, Long> resourcePidToVersion = null;
 		for (JpaPid next : thePids) {
 			if (next.getVersion() != null && myStorageSettings.isRespectVersionsForSearchIncludes()) {
 				if (resourcePidToVersion == null) {
 					resourcePidToVersion = new HashMap<>();
 				}
-				resourcePidToVersion.put((next).getId(), next.getVersion());
+				resourcePidToVersion.put(next, next.getVersion());
 			}
 		}
 
-		List<Long> versionlessPids = JpaPid.toLongList(thePids);
+		List<JpaPid> versionlessPids = new ArrayList<>(thePids);
 		if (versionlessPids.size() < getMaximumPageSize()) {
 			versionlessPids = normalizeIdListForInClause(versionlessPids);
 		}
 
-		// -- get the resource from the searchView
-		Collection<ResourceSearchView> resourceSearchViewList =
-				myResourceSearchViewDao.findByResourceIds(versionlessPids);
+		// Load the resource bodies
+		List<ResourceHistoryTable> resourceSearchViewList =
+				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(
+						JpaPid.toLongList(versionlessPids));
+
+		/*
+		 * If we have specific versions to load, replace the history entries with the
+		 * correct ones
+		 *
+		 * TODO: this could definitely be made more efficient, probably by not loading the wrong
+		 * version entity first, and by batching the fetches. But this is a fairly infrequently
+		 * used feature, and loading history entities by PK is a very efficient query so it's
+		 * not the end of the world
+		 */
+		if (resourcePidToVersion != null) {
+			for (int i = 0; i < resourceSearchViewList.size(); i++) {
+				ResourceHistoryTable next = resourceSearchViewList.get(i);
+				JpaPid resourceId = next.getPersistentId();
+				Long version = resourcePidToVersion.get(resourceId);
+				resourceId.setVersion(version);
+				if (version != null && !version.equals(next.getVersion())) {
+					ResourceHistoryTable replacement =
+							myResourceHistoryTableDao.findForIdAndVersion(next.getResourceId(), version);
+					resourceSearchViewList.set(i, replacement);
+				}
+			}
+		}
 
 		// -- preload all tags with tag definition if any
-		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
+		Map<JpaPid, Collection<BaseTag>> tagMap = getResourceTagMap(resourceSearchViewList);
 
-		for (IBaseResourceEntity next : resourceSearchViewList) {
+		for (ResourceHistoryTable next : resourceSearchViewList) {
 			if (next.getDeleted() != null) {
 				continue;
 			}
@@ -1178,29 +1224,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Class<? extends IBaseResource> resourceType =
 					myContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
 
-			JpaPid resourceId = JpaPid.fromId(next.getResourceId());
+			JpaPid resourceId = next.getPersistentId();
 
-			/*
-			 * If a specific version is requested via an include, we'll replace the current version
-			 * with the specific desired version. This is not the most efficient thing, given that
-			 * we're loading the current version and then turning around and throwing it away again.
-			 * This could be optimized and probably should be, but it's not critical given that
-			 * this only applies to includes, which don't tend to be massive in numbers.
-			 */
 			if (resourcePidToVersion != null) {
-				Long version = resourcePidToVersion.get(next.getResourceId());
+				Long version = resourcePidToVersion.get(resourceId);
 				resourceId.setVersion(version);
-				if (version != null && !version.equals(next.getVersion())) {
-					IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
-					next = (IBaseResourceEntity)
-							dao.readEntity(next.getIdDt().withVersion(Long.toString(version)), null);
-				}
 			}
 
 			IBaseResource resource = null;
 			if (next != null) {
 				resource = myJpaStorageResourceParser.toResource(
-						resourceType, next, tagMap.get(next.getId()), theForHistoryOperation);
+						resourceType, next, tagMap.get(JpaPid.fromId(next.getResourceId())), theForHistoryOperation);
 			}
 			if (resource == null) {
 				if (next != null) {
@@ -1215,7 +1249,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				continue;
 			}
 
-			Integer index = thePosition.get(resourceId);
+			Integer index = thePosition.get(resourceId.getId());
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", resourceId);
 				continue;
@@ -1231,40 +1265,93 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private Map<Long, Collection<ResourceTag>> getResourceTagMap(
-			Collection<? extends IBaseResourceEntity> theResourceSearchViewList) {
+	private Map<JpaPid, Collection<BaseTag>> getResourceTagMap(Collection<ResourceHistoryTable> theHistoryTables) {
 
-		List<Long> idList = new ArrayList<>(theResourceSearchViewList.size());
-
-		// -- find all resource has tags
-		for (IBaseResourceEntity resource : theResourceSearchViewList) {
-			if (resource.isHasTags()) idList.add(resource.getId());
+		switch (myStorageSettings.getTagStorageMode()) {
+			case VERSIONED:
+				return getPidToTagMapVersioned(theHistoryTables);
+			case NON_VERSIONED:
+				return getPidToTagMapUnversioned(theHistoryTables);
+			case INLINE:
+			default:
+				return Map.of();
 		}
-
-		return getPidToTagMap(idList);
 	}
 
 	@Nonnull
-	private Map<Long, Collection<ResourceTag>> getPidToTagMap(List<Long> thePidList) {
-		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<>();
+	private Map<JpaPid, Collection<BaseTag>> getPidToTagMapVersioned(
+			Collection<ResourceHistoryTable> theHistoryTables) {
+		List<Long> idList = new ArrayList<>(theHistoryTables.size());
+
+		// -- find all resource has tags
+		for (ResourceHistoryTable resource : theHistoryTables) {
+			if (resource.isHasTags()) {
+				idList.add(resource.getId());
+			}
+		}
+
+		Map<JpaPid, Collection<BaseTag>> tagMap = new HashMap<>();
 
 		// -- no tags
-		if (thePidList.isEmpty()) return tagMap;
+		if (idList.isEmpty()) {
+			return tagMap;
+		}
 
 		// -- get all tags for the idList
-		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(thePidList);
+		Collection<ResourceHistoryTag> tagList = myResourceHistoryTagDao.findByVersionIds(idList);
 
 		// -- build the map, key = resourceId, value = list of ResourceTag
 		JpaPid resourceId;
-		Collection<ResourceTag> tagCol;
-		for (ResourceTag tag : tagList) {
+		Collection<BaseTag> tagCol;
+		for (ResourceHistoryTag tag : tagList) {
 
 			resourceId = JpaPid.fromId(tag.getResourceId());
-			tagCol = tagMap.get(resourceId.getId());
+			tagCol = tagMap.get(resourceId);
 			if (tagCol == null) {
 				tagCol = new ArrayList<>();
 				tagCol.add(tag);
-				tagMap.put(resourceId.getId(), tagCol);
+				tagMap.put(resourceId, tagCol);
+			} else {
+				tagCol.add(tag);
+			}
+		}
+
+		return tagMap;
+	}
+
+	@Nonnull
+	private Map<JpaPid, Collection<BaseTag>> getPidToTagMapUnversioned(
+			Collection<ResourceHistoryTable> theHistoryTables) {
+		List<JpaPid> idList = new ArrayList<>(theHistoryTables.size());
+
+		// -- find all resource has tags
+		for (ResourceHistoryTable resource : theHistoryTables) {
+			if (resource.isHasTags()) {
+				idList.add(JpaPid.fromId(resource.getResourceId()));
+			}
+		}
+
+		Map<JpaPid, Collection<BaseTag>> tagMap = new HashMap<>();
+
+		// -- no tags
+		if (idList.isEmpty()) {
+			return tagMap;
+		}
+
+		// -- get all tags for the idList
+		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(JpaPid.toLongList(idList));
+
+		// -- build the map, key = resourceId, value = list of ResourceTag
+		JpaPid resourceId;
+		Collection<BaseTag> tagCol;
+		for (ResourceTag tag : tagList) {
+
+			resourceId = JpaPid.fromId(tag.getResourceId());
+			tagCol = tagMap.get(resourceId);
+			if (tagCol == null) {
+				tagCol = new ArrayList<>();
+				tagCol.add(tag);
+				tagMap.put(resourceId, tagCol);
 			} else {
 				tagCol.add(tag);
 			}
@@ -1288,9 +1375,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// when running asserts
 		assert new HashSet<>(thePids).size() == thePids.size() : "PID list contains duplicates: " + thePids;
 
-		Map<JpaPid, Integer> position = new HashMap<>();
+		Map<Long, Integer> position = new HashMap<>();
 		for (JpaPid next : thePids) {
-			position.put(next, theResourceListToPopulate.size());
+			position.put(next.getId(), theResourceListToPopulate.size());
 			theResourceListToPopulate.add(null);
 		}
 
@@ -1393,8 +1480,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		String searchIdOrDescription = theParameters.getSearchIdOrDescription();
 		List<String> desiredResourceTypes = theParameters.getDesiredResourceTypes();
 		boolean hasDesiredResourceTypes = desiredResourceTypes != null && !desiredResourceTypes.isEmpty();
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, theParameters.getRequestDetails())) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, request);
+
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL)) {
 			CurrentThreadCaptureQueriesListener.startCapturing();
 		}
 		if (matches.isEmpty()) {
@@ -1404,7 +1493,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			return new HashSet<>();
 		}
 		String searchPidFieldName = reverseMode ? MY_TARGET_RESOURCE_PID : MY_SOURCE_RESOURCE_PID;
+		String searchPartitionIdFieldName =
+				reverseMode ? MY_TARGET_RESOURCE_PARTITION_ID : MY_SOURCE_RESOURCE_PARTITION_ID;
 		String findPidFieldName = reverseMode ? MY_SOURCE_RESOURCE_PID : MY_TARGET_RESOURCE_PID;
+		String findPartitionIdFieldName =
+				reverseMode ? MY_SOURCE_RESOURCE_PARTITION_ID : MY_TARGET_RESOURCE_PARTITION_ID;
 		String findResourceTypeFieldName = reverseMode ? MY_SOURCE_RESOURCE_TYPE : MY_TARGET_RESOURCE_TYPE;
 		String findVersionFieldName = null;
 		if (!reverseMode && myStorageSettings.isRespectVersionsForSearchIncludes()) {
@@ -1446,9 +1539,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				if (matchAll) {
 					loadIncludesMatchAll(
 							findPidFieldName,
+							findPartitionIdFieldName,
 							findResourceTypeFieldName,
 							findVersionFieldName,
 							searchPidFieldName,
+							searchPartitionIdFieldName,
 							wantResourceType,
 							reverseMode,
 							hasDesiredResourceTypes,
@@ -1463,13 +1558,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							nextInclude,
 							fhirContext,
 							findPidFieldName,
+							findPartitionIdFieldName,
 							findVersionFieldName,
 							searchPidFieldName,
+							searchPartitionIdFieldName,
 							reverseMode,
 							nextRoundMatches,
 							entityManager,
 							maxCount,
-							pidsToInclude);
+							pidsToInclude,
+							request);
 				}
 			}
 
@@ -1498,17 +1596,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				w.getMillisAndRestart(),
 				searchIdOrDescription);
 
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, request)) {
-			callRawSqlHookWithCurrentThreadQueries(request);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL)) {
+			callRawSqlHookWithCurrentThreadQueries(request, compositeBroadcaster);
 		}
+
 		// Interceptor call: STORAGE_PREACCESS_RESOURCES
 		// This can be used to remove results from the search result details before
 		// the user has a chance to know that they were in the results
 		if (!allAdded.isEmpty()) {
 
-			if (CompositeInterceptorBroadcaster.hasHooks(
-					Pointcut.STORAGE_PREACCESS_RESOURCES, myInterceptorBroadcaster, request)) {
+			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
 				List<JpaPid> includedPidList = new ArrayList<>(allAdded);
 				JpaPreResourceAccessDetails accessDetails =
 						new JpaPreResourceAccessDetails(includedPidList, () -> this);
@@ -1516,8 +1613,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						.add(IPreResourceAccessDetails.class, accessDetails)
 						.add(RequestDetails.class, request)
 						.addIfMatchesType(ServletRequestDetails.class, request);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, request, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 				for (int i = includedPidList.size() - 1; i >= 0; i--) {
 					if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -1537,13 +1633,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Include nextInclude,
 			FhirContext fhirContext,
 			String findPidFieldName,
+			String findPartitionFieldName,
 			String findVersionFieldName,
 			String searchPidFieldName,
+			String searchPartitionFieldName,
 			boolean reverseMode,
 			List<JpaPid> nextRoundMatches,
 			EntityManager entityManager,
 			Integer maxCount,
-			HashSet<JpaPid> pidsToInclude) {
+			HashSet<JpaPid> pidsToInclude,
+			RequestDetails theRequest) {
 		List<String> paths;
 
 		// Start replace
@@ -1582,6 +1681,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (findVersionFieldName != null) {
 				fieldsToLoad += ", r.target_resource_version AS " + RESOURCE_VERSION_ALIAS;
 			}
+			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+				fieldsToLoad += ", r.";
+				fieldsToLoad += findPartitionFieldName.equals(MY_SOURCE_RESOURCE_PARTITION_ID)
+						? "partition_id"
+						: "target_res_partition_id";
+				fieldsToLoad += " as " + PARTITION_ID_ALIAS;
+			}
 
 			// Query for includes lookup has 2 cases
 			// Case 1: Where target_resource_id is available in hfj_res_link table for local references
@@ -1593,30 +1699,45 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			String searchPidFieldSqlColumn =
 					searchPidFieldName.equals(MY_TARGET_RESOURCE_PID) ? "target_resource_id" : "src_resource_id";
-			StringBuilder localReferenceQuery = new StringBuilder("SELECT " + fieldsToLoad + " FROM hfj_res_link r "
-					+ " WHERE r.src_path = :src_path AND "
-					+ " r.target_resource_id IS NOT NULL AND "
-					+ " r."
-					+ searchPidFieldSqlColumn + " IN (:target_pids) ");
+			StringBuilder localReferenceQuery = new StringBuilder();
+			localReferenceQuery.append("SELECT ").append(fieldsToLoad);
+			localReferenceQuery.append(" FROM hfj_res_link r ");
+			localReferenceQuery.append("WHERE r.src_path = :src_path");
+			if (!"target_resource_id".equals(searchPidFieldSqlColumn)) {
+				localReferenceQuery.append(" AND r.target_resource_id IS NOT NULL");
+			}
+			localReferenceQuery
+					.append(" AND r.")
+					.append(searchPidFieldSqlColumn)
+					.append(" IN (:target_pids) ");
+			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+				String partitionFieldToSearch = findPartitionFieldName.equals(MY_SOURCE_RESOURCE_PARTITION_ID)
+						? "target_res_partition_id"
+						: "partition_id";
+				localReferenceQuery
+						.append("AND r.")
+						.append(partitionFieldToSearch)
+						.append(" = :search_partition_id ");
+			}
 			localReferenceQueryParams.put("src_path", nextPath);
 			// we loop over target_pids later.
 			if (targetResourceTypes != null) {
 				if (targetResourceTypes.size() == 1) {
-					localReferenceQuery.append(" AND r.target_resource_type = :target_resource_type ");
+					localReferenceQuery.append("AND r.target_resource_type = :target_resource_type ");
 					localReferenceQueryParams.put(
 							"target_resource_type",
 							targetResourceTypes.iterator().next());
 				} else {
-					localReferenceQuery.append(" AND r.target_resource_type in (:target_resource_types) ");
+					localReferenceQuery.append("AND r.target_resource_type in (:target_resource_types) ");
 					localReferenceQueryParams.put("target_resource_types", targetResourceTypes);
 				}
 			}
 
 			// Case 2:
 			Pair<String, Map<String, Object>> canonicalQuery =
-					buildCanonicalUrlQuery(findVersionFieldName, targetResourceTypes, reverseMode);
+					buildCanonicalUrlQuery(findVersionFieldName, targetResourceTypes, reverseMode, theRequest);
 
-			String sql = localReferenceQuery + " UNION " + canonicalQuery.getLeft();
+			String sql = localReferenceQuery + "UNION " + canonicalQuery.getLeft();
 
 			Map<String, Object> limitParams = new HashMap<>();
 			if (maxCount != null) {
@@ -1641,10 +1762,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				sql = sb.toString();
 			}
 
-			List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());
+			List<Collection<JpaPid>> partitions = partitionBySizeAndPartitionId(nextRoundMatches, getMaximumPageSize());
 			for (Collection<JpaPid> nextPartition : partitions) {
 				Query q = entityManager.createNativeQuery(sql, Tuple.class);
 				q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
+				if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+					q.setParameter(
+							"search_partition_id",
+							nextPartition.iterator().next().getPartitionId());
+				}
 				localReferenceQueryParams.forEach(q::setParameter);
 				canonicalQuery.getRight().forEach(q::setParameter);
 				limitParams.forEach(q::setParameter);
@@ -1659,7 +1785,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							resourceVersion =
 									NumberUtils.createLong(String.valueOf(result.get(RESOURCE_VERSION_ALIAS)));
 						}
-						pidsToInclude.add(JpaPid.fromIdAndVersion(resourceId, resourceVersion));
+						Integer partitionId = null;
+						if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+							partitionId = result.get(PARTITION_ID_ALIAS, Integer.class);
+						}
+
+						JpaPid pid = JpaPid.fromIdAndVersion(resourceId, resourceVersion);
+						pid.setPartitionId(partitionId);
+						pidsToInclude.add(pid);
 					}
 				}
 			}
@@ -1668,9 +1801,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private void loadIncludesMatchAll(
 			String findPidFieldName,
+			String findPartitionFieldName,
 			String findResourceTypeFieldName,
 			String findVersionFieldName,
 			String searchPidFieldName,
+			String searchPartitionFieldName,
 			String wantResourceType,
 			boolean reverseMode,
 			boolean hasDesiredResourceTypes,
@@ -1687,10 +1822,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (findVersionFieldName != null) {
 			sqlBuilder.append(", r.").append(findVersionFieldName);
 		}
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			sqlBuilder.append(", r.").append(findPartitionFieldName);
+		}
 		sqlBuilder.append(" FROM ResourceLink r WHERE ");
 
-		sqlBuilder.append("r.");
-		sqlBuilder.append(searchPidFieldName); // (rev mode) target_resource_id | source_resource_id
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			sqlBuilder.append("r.").append(searchPartitionFieldName);
+			sqlBuilder.append(" = :target_partition_id AND ");
+		}
+
+		sqlBuilder.append("r.").append(searchPidFieldName);
 		sqlBuilder.append(" IN (:target_pids)");
 
 		/*
@@ -1730,10 +1872,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		String sql = sqlBuilder.toString();
-		List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());
+		List<Collection<JpaPid>> partitions = partitionBySizeAndPartitionId(nextRoundMatches, getMaximumPageSize());
 		for (Collection<JpaPid> nextPartition : partitions) {
 			TypedQuery<?> q = entityManager.createQuery(sql, Object[].class);
 			q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
+			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+				q.setParameter(
+						"target_partition_id", nextPartition.iterator().next().getPartitionId());
+			}
 			if (wantResourceType != null) {
 				q.setParameter("want_resource_type", wantResourceType);
 			}
@@ -1756,12 +1902,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				Long resourceId = (Long) ((Object[]) nextRow)[0];
 				String resourceType = (String) ((Object[]) nextRow)[1];
 				String resourceCanonicalUrl = (String) ((Object[]) nextRow)[2];
+				Integer partitionId = null;
+				int offset = 0;
 				if (findVersionFieldName != null) {
 					version = (Long) ((Object[]) nextRow)[3];
+					offset++;
+				}
+				if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+					partitionId = ((Integer) ((Object[]) nextRow)[3 + offset]);
 				}
 
 				if (resourceId != null) {
 					JpaPid pid = JpaPid.fromIdAndVersionAndResourceType(resourceId, version, resourceType);
+					pid.setPartitionId(partitionId);
 					pidsToInclude.add(pid);
 				} else if (resourceCanonicalUrl != null) {
 					if (canonicalUrls == null) {
@@ -1775,23 +1928,30 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				String message =
 						"Search with _include=* can be inefficient when references using canonical URLs are detected. Use more specific _include values instead.";
 				firePerformanceWarning(request, message);
-				loadCanonicalUrls(canonicalUrls, entityManager, pidsToInclude, reverseMode);
+				loadCanonicalUrls(request, canonicalUrls, entityManager, pidsToInclude, reverseMode);
 			}
 		}
 	}
 
 	private void loadCanonicalUrls(
+			RequestDetails theRequestDetails,
 			Set<String> theCanonicalUrls,
 			EntityManager theEntityManager,
 			HashSet<JpaPid> thePidsToInclude,
 			boolean theReverse) {
 		StringBuilder sqlBuilder;
-		Set<Long> identityHashesForTypes = calculateIndexUriIdentityHashesForResourceTypes(null, theReverse);
-		List<Collection<String>> canonicalUrlPartitions =
-				partition(theCanonicalUrls, getMaximumPageSize() - identityHashesForTypes.size());
+		CanonicalUrlTargets canonicalUrlTargets =
+				calculateIndexUriIdentityHashesForResourceTypes(theRequestDetails, null, theReverse);
+		List<List<String>> canonicalUrlPartitions = ListUtils.partition(
+				List.copyOf(theCanonicalUrls), getMaximumPageSize() - canonicalUrlTargets.myHashIdentityValues.size());
 
 		sqlBuilder = new StringBuilder();
-		sqlBuilder.append("SELECT i.myResourcePid ");
+		sqlBuilder.append("SELECT ");
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			sqlBuilder.append("i.myPartitionIdValue, ");
+		}
+		sqlBuilder.append("i.myResourcePid ");
+
 		sqlBuilder.append("FROM ResourceIndexedSearchParamUri i ");
 		sqlBuilder.append("WHERE i.myHashIdentity IN (:hash_identity) ");
 		sqlBuilder.append("AND i.myUri IN (:uris)");
@@ -1799,13 +1959,23 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		String canonicalResSql = sqlBuilder.toString();
 
 		for (Collection<String> nextCanonicalUrlList : canonicalUrlPartitions) {
-			TypedQuery<Long> canonicalResIdQuery = theEntityManager.createQuery(canonicalResSql, Long.class);
-			canonicalResIdQuery.setParameter("hash_identity", identityHashesForTypes);
+			TypedQuery<Object[]> canonicalResIdQuery = theEntityManager.createQuery(canonicalResSql, Object[].class);
+			canonicalResIdQuery.setParameter("hash_identity", canonicalUrlTargets.myHashIdentityValues);
 			canonicalResIdQuery.setParameter("uris", nextCanonicalUrlList);
-			List<Long> resIds = canonicalResIdQuery.getResultList();
-			for (var next : resIds) {
+			List<Object[]> results = canonicalResIdQuery.getResultList();
+			for (var next : results) {
 				if (next != null) {
-					thePidsToInclude.add(JpaPid.fromId(next));
+					Integer partitionId = null;
+					Long pid;
+					if (next.length == 1) {
+						pid = (Long) next[0];
+					} else {
+						partitionId = (Integer) ((Object[]) next)[0];
+						pid = (Long) ((Object[]) next)[1];
+					}
+					if (pid != null) {
+						thePidsToInclude.add(JpaPid.fromId(pid, partitionId));
+					}
 				}
 			}
 		}
@@ -1813,17 +1983,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	/**
 	 * Calls Performance Trace Hook
-	 * @param request the request deatils
-	 * Sends a raw SQL query to the Pointcut for raw SQL queries.
+	 *
+	 * @param request                 the request deatils
+	 *                                Sends a raw SQL query to the Pointcut for raw SQL queries.
 	 */
-	private void callRawSqlHookWithCurrentThreadQueries(RequestDetails request) {
+	private void callRawSqlHookWithCurrentThreadQueries(
+			RequestDetails request, IInterceptorBroadcaster theCompositeBroadcaster) {
 		SqlQueryList capturedQueries = CurrentThreadCaptureQueriesListener.getCurrentQueueAndStopCapturing();
 		HookParams params = new HookParams()
 				.add(RequestDetails.class, request)
 				.addIfMatchesType(ServletRequestDetails.class, request)
 				.add(SqlQueryList.class, capturedQueries);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, request, Pointcut.JPA_PERFTRACE_RAW_SQL, params);
+		theCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, params);
 	}
 
 	@Nullable
@@ -1844,46 +2015,80 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Nonnull
 	private Pair<String, Map<String, Object>> buildCanonicalUrlQuery(
-			String theVersionFieldName, Set<String> theTargetResourceTypes, boolean theReverse) {
+			String theVersionFieldName,
+			Set<String> theTargetResourceTypes,
+			boolean theReverse,
+			RequestDetails theRequest) {
 		String fieldsToLoadFromSpidxUriTable = theReverse ? "r.src_resource_id" : "rUri.res_id";
 		if (theVersionFieldName != null) {
 			// canonical-uri references aren't versioned, but we need to match the column count for the UNION
 			fieldsToLoadFromSpidxUriTable += ", NULL";
 		}
+
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			if (theReverse) {
+				fieldsToLoadFromSpidxUriTable += ", r.partition_id as " + PARTITION_ID_ALIAS;
+			} else {
+				fieldsToLoadFromSpidxUriTable += ", rUri.partition_id as " + PARTITION_ID_ALIAS;
+			}
+		}
+
 		// The logical join will be by hfj_spidx_uri on sp_name='uri' and sp_uri=target_resource_url.
 		// But sp_name isn't indexed, so we use hash_identity instead.
-		Set<Long> identityHashesForTypes =
-				calculateIndexUriIdentityHashesForResourceTypes(theTargetResourceTypes, theReverse);
+		CanonicalUrlTargets canonicalUrlTargets =
+				calculateIndexUriIdentityHashesForResourceTypes(theRequest, theTargetResourceTypes, theReverse);
 
 		Map<String, Object> canonicalUriQueryParams = new HashMap<>();
-		StringBuilder canonicalUrlQuery = new StringBuilder(
-				"SELECT " + fieldsToLoadFromSpidxUriTable + " FROM hfj_res_link r " + " JOIN hfj_spidx_uri rUri ON ( ");
-		// join on hash_identity and sp_uri - indexed in IDX_SP_URI_HASH_IDENTITY_V2
-		if (theTargetResourceTypes != null && theTargetResourceTypes.size() == 1) {
-			canonicalUrlQuery.append("   rUri.hash_identity = :uri_identity_hash ");
-			canonicalUriQueryParams.put(
-					"uri_identity_hash", identityHashesForTypes.iterator().next());
-		} else {
-			canonicalUrlQuery.append("   rUri.hash_identity in (:uri_identity_hashes) ");
-			canonicalUriQueryParams.put("uri_identity_hashes", identityHashesForTypes);
-		}
+		StringBuilder canonicalUrlQuery = new StringBuilder();
+		canonicalUrlQuery
+				.append("SELECT ")
+				.append(fieldsToLoadFromSpidxUriTable)
+				.append(' ');
+		canonicalUrlQuery.append("FROM hfj_res_link r ");
 
-		canonicalUrlQuery.append(" AND r.target_resource_url = rUri.sp_uri  )");
-		canonicalUrlQuery.append(" WHERE r.src_path = :src_path AND ");
-		canonicalUrlQuery.append(" r.target_resource_id IS NULL ");
-		canonicalUrlQuery.append(" AND ");
-		if (theReverse) {
-			canonicalUrlQuery.append("rUri.res_id");
-		} else {
-			canonicalUrlQuery.append("r.src_resource_id");
+		// join on hash_identity and sp_uri - indexed in IDX_SP_URI_HASH_IDENTITY_V2
+		canonicalUrlQuery.append("JOIN hfj_spidx_uri rUri ON (");
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			canonicalUrlQuery.append("rUri.partition_id IN (:uri_partition_id) AND ");
+			canonicalUriQueryParams.put("uri_partition_id", canonicalUrlTargets.myPartitionIds);
 		}
-		canonicalUrlQuery.append(" IN (:target_pids) ");
+		if (canonicalUrlTargets.myHashIdentityValues.size() == 1) {
+			canonicalUrlQuery.append("rUri.hash_identity = :uri_identity_hash");
+			canonicalUriQueryParams.put(
+					"uri_identity_hash",
+					canonicalUrlTargets.myHashIdentityValues.iterator().next());
+		} else {
+			canonicalUrlQuery.append("rUri.hash_identity in (:uri_identity_hashes)");
+			canonicalUriQueryParams.put("uri_identity_hashes", canonicalUrlTargets.myHashIdentityValues);
+		}
+		canonicalUrlQuery.append(" AND r.target_resource_url = rUri.sp_uri");
+		canonicalUrlQuery.append(")");
+
+		canonicalUrlQuery.append(" WHERE r.src_path = :src_path AND");
+		canonicalUrlQuery.append(" r.target_resource_id IS NULL");
+		canonicalUrlQuery.append(" AND");
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			if (theReverse) {
+				canonicalUrlQuery.append(" rUri.partition_id");
+			} else {
+				canonicalUrlQuery.append(" r.partition_id");
+			}
+			canonicalUrlQuery.append(" = :search_partition_id");
+			canonicalUrlQuery.append(" AND");
+		}
+		if (theReverse) {
+			canonicalUrlQuery.append(" rUri.res_id");
+		} else {
+			canonicalUrlQuery.append(" r.src_resource_id");
+		}
+		canonicalUrlQuery.append(" IN (:target_pids)");
 
 		return Pair.of(canonicalUrlQuery.toString(), canonicalUriQueryParams);
 	}
 
 	@Nonnull
-	Set<Long> calculateIndexUriIdentityHashesForResourceTypes(Set<String> theTargetResourceTypes, boolean theReverse) {
+	CanonicalUrlTargets calculateIndexUriIdentityHashesForResourceTypes(
+			RequestDetails theRequestDetails, Set<String> theTargetResourceTypes, boolean theReverse) {
 		Set<String> targetResourceTypes = theTargetResourceTypes;
 		if (targetResourceTypes == null) {
 			/*
@@ -1952,34 +2157,92 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 		assert !targetResourceTypes.isEmpty();
 
-		return targetResourceTypes.stream()
-				.map(type -> BaseResourceIndexedSearchParam.calculateHashIdentity(
-						myPartitionSettings, myRequestPartitionId, type, "url"))
-				.collect(Collectors.toSet());
-	}
+		Set<Long> hashIdentityValues = new HashSet<>();
+		Set<Integer> partitionIds = new HashSet<>();
+		for (String type : targetResourceTypes) {
 
-	private <T> List<Collection<T>> partition(Collection<T> theNextRoundMatches, int theMaxLoad) {
-		if (theNextRoundMatches.size() <= theMaxLoad) {
-			return Collections.singletonList(theNextRoundMatches);
-		} else {
-
-			List<Collection<T>> retVal = new ArrayList<>();
-			Collection<T> current = null;
-			for (T next : theNextRoundMatches) {
-				if (current == null) {
-					current = new ArrayList<>(theMaxLoad);
-					retVal.add(current);
-				}
-
-				current.add(next);
-
-				if (current.size() >= theMaxLoad) {
-					current = null;
-				}
+			RequestPartitionId readPartition;
+			if (myPartitionSettings.isPartitioningEnabled()) {
+				readPartition =
+						myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, type);
+			} else {
+				readPartition = RequestPartitionId.defaultPartition();
+			}
+			if (readPartition.hasPartitionIds()) {
+				partitionIds.addAll(readPartition.getPartitionIds());
 			}
 
-			return retVal;
+			Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+					myPartitionSettings, readPartition, type, "url");
+			hashIdentityValues.add(hashIdentity);
 		}
+
+		return new CanonicalUrlTargets(hashIdentityValues, partitionIds);
+	}
+
+	static class CanonicalUrlTargets {
+
+		@Nonnull
+		final Set<Long> myHashIdentityValues;
+
+		@Nonnull
+		final Set<Integer> myPartitionIds;
+
+		public CanonicalUrlTargets(@Nonnull Set<Long> theHashIdentityValues, @Nonnull Set<Integer> thePartitionIds) {
+			myHashIdentityValues = theHashIdentityValues;
+			myPartitionIds = thePartitionIds;
+		}
+	}
+
+	/**
+	 * This method takes in a list of {@link JpaPid}'s and returns a series of sublists containing
+	 * those pids where:
+	 * <ul>
+	 *     <li>No single list is most than {@literal theMaxLoad} entries</li>
+	 *     <li>Each list only contains JpaPids with the same partition ID</li>
+	 * </ul>
+	 */
+	static List<Collection<JpaPid>> partitionBySizeAndPartitionId(List<JpaPid> theNextRoundMatches, int theMaxLoad) {
+
+		if (theNextRoundMatches.size() <= theMaxLoad) {
+			boolean allSamePartition = true;
+			for (int i = 1; i < theNextRoundMatches.size(); i++) {
+				if (!Objects.equals(
+						theNextRoundMatches.get(i - 1).getPartitionId(),
+						theNextRoundMatches.get(i).getPartitionId())) {
+					allSamePartition = false;
+					break;
+				}
+			}
+			if (allSamePartition) {
+				return Collections.singletonList(theNextRoundMatches);
+			}
+		}
+
+		// Break into partitioned sublists
+		ListMultimap<String, JpaPid> lists =
+				MultimapBuilder.hashKeys().arrayListValues().build();
+		for (JpaPid nextRoundMatch : theNextRoundMatches) {
+			String partitionId = nextRoundMatch.getPartitionId() != null
+					? nextRoundMatch.getPartitionId().toString()
+					: "";
+			lists.put(partitionId, nextRoundMatch);
+		}
+
+		List<Collection<JpaPid>> retVal = new ArrayList<>();
+		for (String key : lists.keySet()) {
+			List<List<JpaPid>> nextPartition = Lists.partition(lists.get(key), theMaxLoad);
+			retVal.addAll(nextPartition);
+		}
+
+		// In unit test mode, we sort the results just for unit test predictability
+		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+			retVal = retVal.stream()
+					.map(t -> t.stream().sorted().collect(Collectors.toList()))
+					.collect(Collectors.toList());
+		}
+
+		return retVal;
 	}
 
 	private void attemptComboUniqueSpProcessing(
@@ -2095,16 +2358,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		indexStrings.sort(Comparator.naturalOrder());
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
-		String indexStringForLog = indexStrings.size() > 1 ? indexStrings.toString() : indexStrings.get(0);
-		StorageProcessingMessage msg = new StorageProcessingMessage()
-				.setMessage("Using " + theComboParam.getComboSearchParamType() + " index(es) for query for search: "
-						+ indexStringForLog);
-		HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest)
-				.add(StorageProcessingMessage.class, msg);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
+			String indexStringForLog = indexStrings.size() > 1 ? indexStrings.toString() : indexStrings.get(0);
+			StorageProcessingMessage msg = new StorageProcessingMessage()
+					.setMessage("Using " + theComboParam.getComboSearchParamType() + " index(es) for query for search: "
+							+ indexStringForLog);
+			HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(StorageProcessingMessage.class, msg);
+			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
+		}
 
 		switch (requireNonNull(theComboParam.getComboSearchParamType())) {
 			case UNIQUE:
@@ -2330,6 +2596,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		private final boolean myHavePerfTraceFoundIdHook;
 		private final SortSpec mySort;
 		private final Integer myOffset;
+		private final IInterceptorBroadcaster myCompositeBroadcaster;
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		/**
@@ -2368,16 +2635,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			mySort = myParams.getSort();
 			myOffset = myParams.getOffset();
 			myRequest = theRequest;
+			myCompositeBroadcaster =
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 
 			// everything requires fetching recursively all related resources
 			if (myParams.getEverythingMode() != null) {
 				myFetchIncludesForEverythingOperation = true;
 			}
 
-			myHavePerfTraceFoundIdHook = CompositeInterceptorBroadcaster.hasHooks(
-					Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
-			myHaveRawSqlHooks = CompositeInterceptorBroadcaster.hasHooks(
-					Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
+			myHavePerfTraceFoundIdHook = myCompositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID);
+			myHaveRawSqlHooks = myCompositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL);
 		}
 
 		private void fetchNext() {
@@ -2421,15 +2688,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							break;
 						}
 
-						Long nextLong = myResultsIterator.next();
+						JpaPid nextPid = myResultsIterator.next();
 						if (myHavePerfTraceFoundIdHook) {
-							callPerformanceTracingHook(nextLong);
+							callPerformanceTracingHook(nextPid);
 						}
 
-						if (nextLong != null) {
-							JpaPid next = JpaPid.fromId(nextLong);
-							if (myPidSet.add(next) && doNotSkipNextPidForEverything()) {
-								myNext = next;
+						if (nextPid != null) {
+							if (myPidSet.add(nextPid) && doNotSkipNextPidForEverything()) {
+								myNext = nextPid;
 								myNonSkipCount++;
 								break;
 							} else {
@@ -2479,7 +2745,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			} finally {
 				// search finished - fire hooks
 				if (myHaveRawSqlHooks) {
-					callRawSqlHookWithCurrentThreadQueries(myRequest);
+					callRawSqlHookWithCurrentThreadQueries(myRequest, myCompositeBroadcaster);
 				}
 			}
 
@@ -2488,8 +2754,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
+				myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
 				myFirst = false;
 			}
 
@@ -2498,8 +2763,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
+				myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
 			}
 		}
 
@@ -2519,12 +2783,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			return !(myParams.getEverythingMode() != null && (myOffset != null && myOffset >= myPidSet.size()));
 		}
 
-		private void callPerformanceTracingHook(Long theNextLong) {
+		private void callPerformanceTracingHook(JpaPid theNextPid) {
 			HookParams params = new HookParams()
 					.add(Integer.class, System.identityHashCode(this))
-					.add(Object.class, theNextLong);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
+					.add(Object.class, theNextPid);
+			myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
 		}
 
 		private void sendProcessingMsgAndFirePerformanceHook() {
@@ -2627,14 +2890,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		firePerformanceMessage(theRequest, theMessage, Pointcut.JPA_PERFTRACE_WARNING);
 	}
 
-	private void firePerformanceMessage(RequestDetails theRequest, String theMessage, Pointcut pointcut) {
-		StorageProcessingMessage message = new StorageProcessingMessage();
-		message.setMessage(theMessage);
-		HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest)
-				.add(StorageProcessingMessage.class, message);
-		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, pointcut, params);
+	private void firePerformanceMessage(RequestDetails theRequest, String theMessage, Pointcut thePointcut) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(thePointcut)) {
+			StorageProcessingMessage message = new StorageProcessingMessage();
+			message.setMessage(theMessage);
+			HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(StorageProcessingMessage.class, message);
+			compositeBroadcaster.callHooks(thePointcut, params);
+		}
 	}
 
 	public static int getMaximumPageSize() {
