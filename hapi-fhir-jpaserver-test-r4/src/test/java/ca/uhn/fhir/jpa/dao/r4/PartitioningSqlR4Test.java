@@ -950,7 +950,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Two partitions - Found
 		{
 			myCaptureQueriesListener.clear();
-			myPartitionInterceptor.assertNoRemainingIds();
+			assertNoRemainingPartitionIds();
 			myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
 			IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);

@@ -143,7 +143,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 			valueBridge = @ValueBridgeRef(type = JpaPidValueBridge.class))
 	private JpaPid myPid;
 
-	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = true, updatable = false)
 	private Integer myPartitionIdValue;
 
 	@Column(name = PartitionablePartitionId.PARTITION_DATE, nullable = true)
