@@ -89,7 +89,7 @@ public class IdHelperServiceTest {
 		String resourceForcedId = "AAA";
 
 		Object[] tuple = new Object[] {
-			1L,
+			JpaPid.fromId(1L),
 			"Patient",
 			"AAA",
 			new Date(),
@@ -102,7 +102,7 @@ public class IdHelperServiceTest {
 		));
 
 		IResourceLookup<JpaPid> result = myHelperSvc.resolveResourceIdentity(partitionId, resourceType, resourceForcedId, ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled());
-		assertEquals(tuple[0], result.getPersistentId().getId());
+		assertEquals(tuple[0], result.getPersistentId());
 		assertEquals(tuple[1], result.getResourceType());
 		assertEquals(tuple[3], result.getDeleted());
 	}
