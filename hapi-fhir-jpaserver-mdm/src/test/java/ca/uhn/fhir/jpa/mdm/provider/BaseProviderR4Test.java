@@ -6,6 +6,7 @@ import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
+import ca.uhn.fhir.mdm.provider.PatientMatchProvider;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.MessageHelper;
@@ -28,6 +29,7 @@ import java.util.List;
 
 public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	protected MdmProviderDstu3Plus myMdmProvider;
+	protected PatientMatchProvider myPatientMatchProvider;
 	@Autowired
 	protected IMdmControllerSvc myMdmControllerSvc;
 	@Autowired
@@ -64,6 +66,7 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 			myMdmSubmitSvc,
 			myInterceptorBroadcaster,
 			myMdmSettings);
+		myPatientMatchProvider = new PatientMatchProvider(myMdmHelper);
 		defaultScript = myMdmSettings.getScriptText();
 	}
 

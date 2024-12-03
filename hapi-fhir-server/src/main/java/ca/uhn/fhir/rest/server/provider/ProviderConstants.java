@@ -67,9 +67,9 @@ public class ProviderConstants {
 	public static final String DIFF_INCLUDE_META_PARAMETER = "includeMeta";
 
 	/**
-	 * EMPI Operations
+	 * MDM Operations
 	 */
-	public static final String EMPI_MATCH = "$match";
+	public static final String PATIENT_MATCH = "$match";
 
 	public static final String MDM_MATCH = "$mdm-match";
 	public static final String MDM_MATCH_RESOURCE = "resource";
