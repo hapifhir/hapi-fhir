@@ -1238,12 +1238,13 @@ class ParserState<T> {
 				String ref = nextRef.getReferenceElement().getValue();
 				if (isNotBlank(ref)) {
 					if (ref.startsWith("#") && ref.length() > 1) {
-						IBaseResource target = myContainedResources.get(ref);
+						String refId = ref.substring(1);
+						IBaseResource target = myContainedResources.get(refId);
 						if (target != null) {
-							ourLog.debug("Resource contains local ref {}", ref);
+							ourLog.debug("Resource contains local ref {}", refId);
 							nextRef.setResource(target);
 						} else {
-							myErrorHandler.unknownReference(null, ref);
+							myErrorHandler.unknownReference(null, refId);
 						}
 					}
 				}
