@@ -166,6 +166,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.withType(ColumnTypeEnum.STRING, 768)
 				.failureAllowed();
+
+		version.onTable("HFJ_RES_VER_PROV")
+				.modifyColumn("20241102.20", "SOURCE_URI")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 768)
+				.failureAllowed();
 	}
 
 	protected void init740() {
