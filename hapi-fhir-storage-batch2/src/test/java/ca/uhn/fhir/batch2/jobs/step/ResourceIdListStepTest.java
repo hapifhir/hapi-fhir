@@ -107,7 +107,7 @@ class ResourceIdListStepTest {
 		List<IResourcePersistentId<JpaPid>> idList = new ArrayList<>();
 		for (long id = 0; id < theListSize; id++) {
 			IResourcePersistentId<JpaPid> theId = mock(IResourcePersistentId.class);
-			when(theId.getId()).thenReturn(JpaPid.fromId((id + 1), null));
+			when(theId.getId()).thenReturn(JpaPid.fromId((id + 1)));
 			idList.add(theId);
 		}
 		return idList;

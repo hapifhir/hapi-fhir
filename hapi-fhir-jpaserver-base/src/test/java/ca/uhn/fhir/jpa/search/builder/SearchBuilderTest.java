@@ -85,10 +85,10 @@ class SearchBuilderTest {
 	@Test
 	void testPartitionBySizeAndPartitionId_Partitioned() {
 		List<JpaPid> input = List.of(
-			JpaPid.fromId(0L, null),
-			JpaPid.fromId(1L, null),
-			JpaPid.fromId(2L, null),
-			JpaPid.fromId(3L, null),
+			JpaPid.fromId(0L),
+			JpaPid.fromId(1L),
+			JpaPid.fromId(2L),
+			JpaPid.fromId(3L),
 			JpaPid.fromId(100L, 1),
 			JpaPid.fromId(101L, 1),
 			JpaPid.fromId(102L, 1),
@@ -105,11 +105,11 @@ class SearchBuilderTest {
 		// Verify
 		assertThat(actual).asList().containsExactlyInAnyOrder(
 			List.of(
-				JpaPid.fromId(0L, null),
-				JpaPid.fromId(1L, null),
-				JpaPid.fromId(2L, null)),
+				JpaPid.fromId(0L),
+				JpaPid.fromId(1L),
+				JpaPid.fromId(2L)),
 			List.of(
-				JpaPid.fromId(3L, null)),
+				JpaPid.fromId(3L)),
 			List.of(
 				JpaPid.fromId(100L, 1),
 				JpaPid.fromId(101L, 1),

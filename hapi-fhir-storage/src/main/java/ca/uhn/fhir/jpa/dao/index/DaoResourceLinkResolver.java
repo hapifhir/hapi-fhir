@@ -187,8 +187,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			if (resolvedResource.getPartitionId() != null) {
 				partitionId = resolvedResource.getPartitionId().getPartitionId();
 			}
-			persistentId =
-					myIdHelperService.newPid(id, partitionId);
+			persistentId = myIdHelperService.newPid(id, partitionId);
 			persistentId.setAssociatedResourceId(targetResourceId);
 			if (theTransactionDetails != null) {
 				theTransactionDetails.addResolvedResourceId(targetResourceId, persistentId);
