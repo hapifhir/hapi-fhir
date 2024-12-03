@@ -69,7 +69,7 @@ import java.util.Collection;
 		})
 public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk> implements Serializable {
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
-	public static final int SOURCE_URI_LENGTH = 100;
+	public static final int SOURCE_URI_LENGTH = ResourceIndexedSearchParamString.MAX_LENGTH;
 	/**
 	 * @see ResourceEncodingEnum
 	 */
