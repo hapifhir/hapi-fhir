@@ -261,9 +261,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			 * tries to create a duplicate codesystem.
 			 */
 			myEntityManager.flush();
-
 		}
-
 
 		return retVal;
 	}
