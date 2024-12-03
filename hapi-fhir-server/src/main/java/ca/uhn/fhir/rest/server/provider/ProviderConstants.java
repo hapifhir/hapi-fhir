@@ -259,4 +259,7 @@ public class ProviderConstants {
 	public static final String OPERATION_MERGE_RESULT_PATIENT = "result-patient";
 	public static final String OPERATION_MERGE_PREVIEW = "preview";
 	public static final String OPERATION_MERGE_DELETE_SOURCE = "delete-source";
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_INPUT = "input";
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_OUTCOME = "outcome";
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_RESULT = "result";
 }

@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -36,6 +37,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -124,20 +128,25 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testMerge(boolean withDelete) throws Exception {
-		PatientMergeInputParameters params = new PatientMergeInputParameters();
-		params.sourcePatient = new Reference().setReference(sourcePatId);
-		params.targetPatient = new Reference().setReference(targetPatId);
-		params.deleteSource = withDelete;
+		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
+		inParams.sourcePatient = new Reference().setReference(sourcePatId);
+		inParams.targetPatient = new Reference().setReference(targetPatId);
+		inParams.deleteSource = withDelete;
 
 		IGenericClient client = myFhirContext.newRestfulGenericClient(myServerBase);
 		Parameters outParams = client.operation()
 			.onType("Patient")
 			.named(OPERATION_MERGE)
-			.withParameters(params.asParametersResource())
+			.withParameters(inParams.asParametersResource())
 			.returnResourceType(Parameters.class)
 			.execute();
 
-		// FIXME KHS validate outParams
+		assertThat(outParams.getParameter()).hasSize(3);
+		Parameters input = (Parameters) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_INPUT).getResource();
+		OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		Patient mergedPatient = (Patient) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
+
+		// FIXME KHS assert on these three
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + targetPatId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
