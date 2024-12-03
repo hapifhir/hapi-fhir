@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.merge;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -31,7 +32,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.IdentifierUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -55,8 +56,8 @@ import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 public class ResourceMergeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceMergeService.class);
 
-	IFhirResourceDaoPatient<Patient> myDao;
-	FhirContext myFhirContext;
+	private IFhirResourceDaoPatient<Patient> myDao;
+	private FhirContext myFhirContext;
 
 	public ResourceMergeService(IFhirResourceDaoPatient<Patient> thePatientDao) {
 		myDao = thePatientDao;
@@ -69,9 +70,10 @@ public class ResourceMergeService {
 	 * @param theRequestDetails	the request details
 	 * @return the merge outcome containing OperationOutcome and HTTP status code
 	 */
-	public MergeOutcome merge(MergeOperationParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
+	public MergeOperationOutcome merge(
+			MergeOperationParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
 
-		MergeOutcome mergeOutcome = new MergeOutcome();
+		MergeOperationOutcome mergeOutcome = new MergeOperationOutcome();
 		IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
 		mergeOutcome.setOperationOutcome(operationOutcome);
 		// default to 200 OK, would be changed to another code during processing as required
@@ -94,7 +96,7 @@ public class ResourceMergeService {
 	private void doMerge(
 			MergeOperationParameters theMergeOperationParameters,
 			RequestDetails theRequestDetails,
-			MergeOutcome theMergeOutcome) {
+			MergeOperationOutcome theMergeOutcome) {
 
 		IBaseOperationOutcome operationOutcome = theMergeOutcome.getOperationOutcome();
 
@@ -140,25 +142,23 @@ public class ResourceMergeService {
 
 		// TODO Emre: do the actual ref updates
 
-		// update resources after the refs update is completed
-		if (theMergeOperationParameters.getResultResource() != null) {
-			Patient resultResource = (Patient) theMergeOperationParameters.getResultResource();
-			updateTargetResourceBasedOnResultResource(resultResource, theRequestDetails);
-		} else {
-			updateTargetResourceAfterRefsUpdated(targetResource, sourceResource, theRequestDetails);
-		}
-
 		if (theMergeOperationParameters.getDeleteSource()) {
-			deleteSourceResourceAfterRefsUpdated(sourceResource, theRequestDetails);
+			deleteResource(sourceResource, theRequestDetails);
 		} else {
 			updateSourceResourceAfterRefsUpdated(sourceResource, targetResource, theRequestDetails);
 		}
 
-		addInfoToOperationOutcome(operationOutcome, "Merge operation completed successfully.");
-	}
+		// update the target patient resource after the references are updated
+		Patient resultResource = (Patient) theMergeOperationParameters.getResultResource();
+		Patient targetPatientAfterUpdate = updateTargetResourceAfterRefsUpdated(
+				targetResource,
+				sourceResource,
+				resultResource,
+				theRequestDetails,
+				theMergeOperationParameters.getDeleteSource());
+		theMergeOutcome.setUpdatedTargetResource(targetPatientAfterUpdate);
 
-	private void updateTargetResourceBasedOnResultResource(Patient resultResource, RequestDetails theRequestDetails) {
-		myDao.update(resultResource, theRequestDetails);
+		addInfoToOperationOutcome(operationOutcome, "Merge operation completed successfully.");
 	}
 
 	private boolean validateResultResourceIfExists(
@@ -198,11 +198,14 @@ public class ResourceMergeService {
 			isValid = false;
 		}
 
-		if (!validateResultResourceHasReplacesLinkToSourceResource(
-				theResultResource,
-				theResolvedSourceResource,
-				theMergeOperationParameters.getResultResourceParameterName(),
-				theOperationOutcome)) {
+		// if the source resource is not being deleted, the result resource must have a replaces link to the source
+		// resource
+		if (!theMergeOperationParameters.getDeleteSource()
+				&& !validateResultResourceHasReplacesLinkToSourceResource(
+						theResultResource,
+						theResolvedSourceResource,
+						theMergeOperationParameters.getResultResourceParameterName(),
+						theOperationOutcome)) {
 			isValid = false;
 		}
 
@@ -270,21 +273,6 @@ public class ResourceMergeService {
 		return links;
 	}
 
-	@VisibleForTesting
-	protected boolean hasReplacedByLink(Patient theResource) {
-		if (theResource.hasLink()) {
-			for (Patient.PatientLinkComponent link : theResource.getLink()) {
-				if (Patient.LinkType.REPLACEDBY.equals(link.getType())) {
-					if (link.hasOther()) {
-						String otherReference = link.getOther().getReference();
-						return otherReference != null;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
 	private boolean validateSourceAndTargetAreMergable(
 			Patient theSourceResource, Patient theTargetResource, IBaseOperationOutcome outcome) {
 
@@ -301,7 +289,8 @@ public class ResourceMergeService {
 			return false;
 		}
 
-		if (hasReplacedByLink(theTargetResource)) {
+		List<Reference> replacedByLinks = getLinksOfType(theTargetResource, Patient.LinkType.REPLACEDBY);
+		if (!replacedByLinks.isEmpty()) {
 			String msg = "Target resource was previously replaced by another resource, it is not a suitable target "
 					+ "for merging.";
 			addErrorToOperationOutcome(outcome, msg, "invalid");
@@ -312,19 +301,35 @@ public class ResourceMergeService {
 		return true;
 	}
 
-	private void updateTargetResourceAfterRefsUpdated(
-			Patient theTargetResource, Patient theSourceResource, RequestDetails theRequestDetails) {
-		theTargetResource
-				.addLink()
-				.setType(Patient.LinkType.REPLACES)
-				.setOther(new Reference(theSourceResource.getId()));
+	private Patient updateTargetResourceAfterRefsUpdated(
+			Patient theTargetResource,
+			Patient theSourceResource,
+			@Nullable Patient theResultResource,
+			RequestDetails theRequestDetails,
+			boolean theDeleteSource) {
 
-		myDao.update(theTargetResource, theRequestDetails);
+		// if the client provided a result resource as input then use it to update the target resource
+		if (theResultResource != null) {
+			DaoMethodOutcome outcome = myDao.update(theResultResource, theRequestDetails);
+			return (Patient) outcome.getResource();
+		}
+
+		// client did not provide a result resource, update the target resource,
+		// after adding the replaces link to the target resource, if the source resource is not to be deleted
+		if (!theDeleteSource) {
+			// add the replaces link only if the source is not deleted
+			theTargetResource
+					.addLink()
+					.setType(Patient.LinkType.REPLACES)
+					.setOther(new Reference(theSourceResource.getId()));
+		}
+
+		DaoMethodOutcome outcome = myDao.update(theTargetResource, theRequestDetails);
+		return (Patient) outcome.getResource();
 	}
 
-	private void deleteSourceResourceAfterRefsUpdated(Patient theSourceResource, RequestDetails theRequestDetails) {
-		// TODO: handle errors
-		myDao.delete(theSourceResource.getIdElement(), theRequestDetails);
+	private void deleteResource(Patient theResource, RequestDetails theRequestDetails) {
+		myDao.delete(theResource.getIdElement(), theRequestDetails);
 	}
 
 	private void updateSourceResourceAfterRefsUpdated(
@@ -526,26 +531,5 @@ public class ResourceMergeService {
 
 	private void addErrorToOperationOutcome(IBaseOperationOutcome theOutcome, String theMsg, String theCode) {
 		OperationOutcomeUtil.addIssue(myFhirContext, theOutcome, "error", theMsg, null, theCode);
-	}
-
-	public static class MergeOutcome {
-		private IBaseOperationOutcome myOperationOutcome;
-		private int myHttpStatusCode;
-
-		public IBaseOperationOutcome getOperationOutcome() {
-			return myOperationOutcome;
-		}
-
-		public void setOperationOutcome(IBaseOperationOutcome theOperationOutcome) {
-			this.myOperationOutcome = theOperationOutcome;
-		}
-
-		public int getHttpStatusCode() {
-			return myHttpStatusCode;
-		}
-
-		public void setHttpStatusCode(int theHttpStatusCode) {
-			this.myHttpStatusCode = theHttpStatusCode;
-		}
 	}
 }

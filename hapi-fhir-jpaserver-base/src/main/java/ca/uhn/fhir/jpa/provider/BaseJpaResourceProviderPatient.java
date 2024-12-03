@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
+import ca.uhn.fhir.jpa.dao.merge.MergeOperationOutcome;
 import ca.uhn.fhir.jpa.dao.merge.MergeOperationParameters;
 import ca.uhn.fhir.jpa.dao.merge.PatientMergeOperationParameters;
 import ca.uhn.fhir.jpa.dao.merge.ResourceMergeService;
@@ -297,17 +298,26 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 
 			FhirContext fhirContext = dao.getContext();
 
-			ResourceMergeService.MergeOutcome mergeOutcome =
+			MergeOperationOutcome mergeOutcome =
 					resourceMergeService.merge(mergeOperationParameters, theRequestDetails);
 
-			IBaseParameters retVal = ParametersUtil.newInstance(fhirContext);
-			ParametersUtil.addParameterToParameters(fhirContext, retVal, "outcome", mergeOutcome.getOperationOutcome());
-
 			theServletResponse.setStatus(mergeOutcome.getHttpStatusCode());
-
+			IBaseParameters retVal = ParametersUtil.newInstance(fhirContext);
+			addMergeOutcomeToOutputParameters(retVal, fhirContext, mergeOutcome);
 			return retVal;
 		} finally {
 			endRequest(theServletRequest);
+		}
+	}
+
+	private void addMergeOutcomeToOutputParameters(
+			IBaseParameters theParameters, FhirContext theFhirContext, MergeOperationOutcome theMergeOutcome) {
+
+		ParametersUtil.addParameterToParameters(
+				theFhirContext, theParameters, "outcome", theMergeOutcome.getOperationOutcome());
+		if (theMergeOutcome.getUpdatedTargetResource() != null) {
+			ParametersUtil.addParameterToParameters(
+					theFhirContext, theParameters, "result", theMergeOutcome.getUpdatedTargetResource());
 		}
 	}
 

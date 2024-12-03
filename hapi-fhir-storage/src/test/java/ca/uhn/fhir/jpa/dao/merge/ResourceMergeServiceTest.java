@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.merge;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -22,7 +23,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.OngoingStubbing;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -48,10 +48,15 @@ public class ResourceMergeServiceTest {
 		"Target resource must be provided either by 'target-patient' or by 'target-patient-identifier', not both.";
 	private static final String SUCCESSFUL_MERGE_MSG = "Merge operation completed successfully";
 
+	private static final String SRC_PATIENT_TEST_ID = "Patient/123";
+	private static final String TGT_PATIENT_TEST_ID = "Patient/456";
+
 	@Mock
 	private IFhirResourceDaoPatient<Patient> myDaoMock;
 	@Mock
 	RequestDetails myRequestDetailsMock;
+
+
 
 	private ResourceMergeService myResourceMergeService;
 
@@ -62,6 +67,70 @@ public class ResourceMergeServiceTest {
 		when(myDaoMock.getContext()).thenReturn(myFhirContext);
 		myResourceMergeService = new ResourceMergeService(myDaoMock);
 	}
+
+
+
+	// SUCCESS CASES
+	@Test
+	void testMerge_WithoutResultResource_Success() {
+		// Given
+		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
+		mergeOperationParameters.setSourceResource(new Reference(SRC_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TGT_PATIENT_TEST_ID));
+		Patient sourcePatient = createPatient(SRC_PATIENT_TEST_ID);
+		Patient targetPatient = createPatient(TGT_PATIENT_TEST_ID);
+		setupDaoMockForSuccessfulRead(sourcePatient);
+		setupDaoMockForSuccessfulRead(targetPatient);
+
+		setupDaoMockForSuccessfulSourcePatientUpdate(sourcePatient, new Patient());
+		Patient patientReturnedFromDaoAfterTargetUpdate = new Patient();
+		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientReturnedFromDaoAfterTargetUpdate);
+
+		// When
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+
+		// Then
+		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
+		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(200);
+		assertThat(mergeOutcome.getUpdatedTargetResource()).isEqualTo(patientReturnedFromDaoAfterTargetUpdate);
+		assertThat(operationOutcome.getIssue()).hasSize(1);
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+		assertThat(issue.getDiagnostics()).contains(SUCCESSFUL_MERGE_MSG);
+
+		verifyNoMoreInteractions(myDaoMock);
+	}
+
+
+	@Test
+	void testMerge_ResolvesResourcesByReferenceThatHasVersions_CurrentResourceVersionAreTheSame_Success() {
+		// Given
+		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
+		mergeOperationParameters.setSourceResource(new Reference("Patient/123/_history/2"));
+		mergeOperationParameters.setTargetResource(new Reference("Patient/345/_history/2"));
+		Patient sourcePatient = createPatient("Patient/123/_history/2");
+		Patient targetPatient = createPatient("Patient/345/_history/2");
+		setupDaoMockForSuccessfulRead(sourcePatient);
+		setupDaoMockForSuccessfulRead(targetPatient);
+		when(myDaoMock.update(any(), eq(myRequestDetailsMock))).thenReturn(new DaoMethodOutcome());
+
+		// When
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+
+		// Then
+		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
+		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(200);
+
+		assertThat(operationOutcome.getIssue()).hasSize(1);
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+		assertThat(issue.getDiagnostics()).contains(SUCCESSFUL_MERGE_MSG);
+
+		verifyNoMoreInteractions(myDaoMock);
+	}
+
+	//  ERROR CASES
+
 
 	@Test
 	void testMerge_UnhandledServerResponseExceptionThrown_UsesStatusCodeOfTheException() {
@@ -74,7 +143,7 @@ public class ResourceMergeServiceTest {
 		when(myDaoMock.read(any(), eq(myRequestDetailsMock))).thenThrow(ex);
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -99,7 +168,7 @@ public class ResourceMergeServiceTest {
 		when(myDaoMock.read(any(), eq(myRequestDetailsMock))).thenThrow(ex);
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -120,7 +189,7 @@ public class ResourceMergeServiceTest {
 		mergeOperationParameters.setTargetResource(new Reference("Patient/123"));
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -143,7 +212,7 @@ public class ResourceMergeServiceTest {
 		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -165,7 +234,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -192,7 +261,7 @@ public class ResourceMergeServiceTest {
 		mergeOperationParameters.setSourceResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue( "val")));
 		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -218,7 +287,7 @@ public class ResourceMergeServiceTest {
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue( "val")));
 		mergeOperationParameters.setSourceResource(new Reference("Patient/345"));
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -243,7 +312,7 @@ public class ResourceMergeServiceTest {
 		when(myDaoMock.read(new IdType("Patient/123"), myRequestDetailsMock)).thenThrow(ResourceNotFoundException.class);
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -269,7 +338,7 @@ public class ResourceMergeServiceTest {
 		when(myDaoMock.read(new IdType("Patient/345"), myRequestDetailsMock)).thenThrow(ResourceNotFoundException.class);
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -293,7 +362,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockSearchForIdentifiers(List.of(Collections.emptyList()));
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		verifySearchParametersOnDaoSearchInvocations(List.of(List.of("sys|val")));
@@ -320,7 +389,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockSearchForIdentifiers(List.of(Collections.emptyList()));
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		verifySearchParametersOnDaoSearchInvocations(List.of(List.of("sys|val")));
@@ -349,7 +418,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockSearchForIdentifiers(List.of(Collections.emptyList()));
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		verifySearchParametersOnDaoSearchInvocations(List.of(List.of("sys|val1","sys|val2")));
@@ -380,7 +449,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulRead(sourcePatient);
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		verifySearchParametersOnDaoSearchInvocations(List.of(List.of("sys|val1", "sys|val2")));
@@ -408,7 +477,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulRead(sourcePatient);
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -435,7 +504,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulRead(targetPatient);
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -453,32 +522,7 @@ public class ResourceMergeServiceTest {
 
 
 
-	@Test
-	void testMerge_ResolvesResourcesByReferenceThatHasVersions_CurrentResourceVersionAreTheSame_NoErrorsReturned() {
-		// Given
-		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123/_history/2"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345/_history/2"));
-		Patient sourcePatient = createPatient("Patient/123/_history/2");
-		Patient targetPatient = createPatient("Patient/345/_history/2");
-		setupDaoMockForSuccessfulRead(sourcePatient);
-		setupDaoMockForSuccessfulRead(targetPatient);
 
-		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
-
-		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(200);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-		assertThat(issue.getDiagnostics()).contains(SUCCESSFUL_MERGE_MSG);
-
-		//TODO: enable this
-		//verifyNoMoreInteractions(myDaoMock);
-	}
 
 	@Test
 	void testMerge_SourceAndTargetResolvesToSameResource_ReturnsErrorWith422Status() {
@@ -491,7 +535,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockSearchForIdentifiers(List.of(List.of(sourcePatient), List.of(targetPatient)));
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 
@@ -521,7 +565,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulRead(targetPatient);
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -548,7 +592,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulRead(targetPatient);
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -578,7 +622,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulRead(targetPatient);
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -614,7 +658,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockSearchForIdentifiers(List.of(List.of(targetPatient)));
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -644,7 +688,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulRead(targetPatient);
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -677,7 +721,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulRead(targetPatient);
 
 		// When
-		ResourceMergeService.MergeOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
 		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
@@ -734,6 +778,39 @@ public class ResourceMergeServiceTest {
 	}
 
 
+	private void setupDaoMockForSuccessfulSourcePatientUpdate(Patient thePatientExpectedAsInput,
+															  Patient thePatientToReturnInDaoOutcome) {
+		DaoMethodOutcome daoMethodOutcome = new DaoMethodOutcome();
+		daoMethodOutcome.setResource(thePatientToReturnInDaoOutcome);
+		when(myDaoMock.update(thePatientExpectedAsInput, myRequestDetailsMock))
+			.thenAnswer(t -> {
+				Patient capturedSourcePatient = t.getArgument(0);
+				assertThat(capturedSourcePatient.getLink()).hasSize(1);
+				assertThat(capturedSourcePatient.getLinkFirstRep().getType()).isEqualTo(Patient.LinkType.REPLACEDBY);
+				assertThat(capturedSourcePatient.getLinkFirstRep().getOther().getReference()).isEqualTo(TGT_PATIENT_TEST_ID);
+
+				DaoMethodOutcome outcome = new DaoMethodOutcome();
+				outcome.setResource(thePatientToReturnInDaoOutcome);
+				return outcome;
+			});
+	}
+
+	private void setupDaoMockForSuccessfulTargetPatientUpdate(Patient thePatientExpectedAsInput,
+															  Patient thePatientToReturnInDaoOutcome) {
+		DaoMethodOutcome daoMethodOutcome = new DaoMethodOutcome();
+		daoMethodOutcome.setResource(thePatientToReturnInDaoOutcome);
+		when(myDaoMock.update(thePatientExpectedAsInput, myRequestDetailsMock))
+			.thenAnswer(t -> {
+				Patient capturedTargetPatient = t.getArgument(0);
+				assertThat(capturedTargetPatient.getLink()).hasSize(1);
+				assertThat(capturedTargetPatient.getLinkFirstRep().getType()).isEqualTo(Patient.LinkType.REPLACES);
+				assertThat(capturedTargetPatient.getLinkFirstRep().getOther().getReference()).isEqualTo(SRC_PATIENT_TEST_ID);
+
+				DaoMethodOutcome outcome = new DaoMethodOutcome();
+				outcome.setResource(thePatientToReturnInDaoOutcome);
+				return outcome;
+			});
+	}
 
 	private void verifySearchParametersOnDaoSearchInvocations(List<List<String>> theExpectedIdentifierParams) {
 		ArgumentCaptor<SearchParameterMap> captor = ArgumentCaptor.forClass(SearchParameterMap.class);
