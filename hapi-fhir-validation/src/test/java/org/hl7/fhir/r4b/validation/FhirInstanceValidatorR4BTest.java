@@ -126,132 +126,6 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 	@BeforeEach
 	public void before() {
 		buildValidationSupportWithLogicalAndSupport(false);
-
-		// FIXME: remove?
-//		mySupportedCodeSystemsForExpansion = new HashMap<>();
-//
-//		myValidConcepts = new ArrayList<>();
-//
-//		when(myMockSupport.expandValueSet(any(), nullable(ValueSetExpansionOptions.class), any(IBaseResource.class))).thenAnswer(t -> {
-//			ValueSet arg = (ValueSet) t.getArgument(2, IBaseResource.class);
-//			ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
-//			if (retVal == null) {
-//				IBaseResource outcome = myDefaultValidationSupport.expandValueSet(new ValidationSupportContext(myDefaultValidationSupport), null, arg).getValueSet();
-//				return outcome;
-//			}
-//			ourLog.debug("expandValueSet({}) : {}", new Object[]{t.getArguments()[0], retVal});
-//
-//			ValueSet valueset = new ValueSet();
-//			valueset.setExpansion(retVal);
-//			return new ValueSetExpander.ValueSetExpansionOutcome(valueset);
-//		});
-//		when(myMockSupport.isCodeSystemSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
-//			@Override
-//			public Boolean answer(InvocationOnMock theInvocation) {
-//				String argument = theInvocation.getArgument(1, String.class);
-//				boolean retVal = myValidSystems.contains(argument);
-//				ourLog.debug("isCodeSystemSupported({}) : {}", argument, retVal);
-//				return retVal;
-//			}
-//		});
-//		when(myMockSupport.fetchResource(nullable(Class.class), nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
-//			@Override
-//			public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
-//				IBaseResource retVal;
-//				Class<IBaseResource> clazz = (Class<IBaseResource>) theInvocation.getArguments()[0];
-//				String id = theInvocation.getArgument(1, String.class);
-//				if (myStructureDefinitionMap.containsKey(id)) {
-//					retVal = myStructureDefinitionMap.get(id);
-//				} else if ("Questionnaire/q_jon".equals(id)) {
-//					retVal = ourCtx.newJsonParser().parseResource(loadResource("/q_jon.json"));
-//				} else {
-//					retVal = myDefaultValidationSupport.fetchResource(clazz, id);
-//				}
-//				ourLog.debug("fetchResource({}, {}) : {}", clazz, id, retVal);
-//				return retVal;
-//			}
-//		});
-//		when(myMockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IValidationSupport.CodeValidationResult>() {
-//			@Override
-//			public IValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
-//				ConceptValidationOptions options = theInvocation.getArgument(1, ConceptValidationOptions.class);
-//				String system = theInvocation.getArgument(2, String.class);
-//				String code = theInvocation.getArgument(3, String.class);
-//				String display = theInvocation.getArgument(4, String.class);
-//				String valueSetUrl = theInvocation.getArgument(5, String.class);
-//				IValidationSupport.CodeValidationResult retVal;
-//				if (myValidConcepts.contains(system + "___" + code)) {
-//					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
-//				} else if (myValidSystems.contains(system)) {
-//					final String message = "Unknown code (for '" + system + "#" + code + "')";
-//					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage(message).setIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.IssueSeverity.ERROR, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
-//				} else {
-//					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
-//				}
-//				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
-//				return retVal;
-//			}
-//		});
-//		when(myMockSupport.fetchCodeSystem(nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
-//			@Override
-//			public CodeSystem answer(InvocationOnMock theInvocation) {
-//				String system = theInvocation.getArgument(0, String.class);
-//				if ("http://loinc.org".equals(system)
-//				) {
-//					CodeSystem retVal = new CodeSystem();
-//					retVal.setUrl(system);
-//					retVal.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-//					ourLog.debug("fetchCodeSystem({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
-//					return retVal;
-//				}
-//
-//				CodeSystem retVal = (CodeSystem) myDefaultValidationSupport.fetchCodeSystem(system);
-//				ourLog.debug("fetchCodeSystem({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
-//				return retVal;
-//			}
-//		});
-//		when(myMockSupport.fetchStructureDefinition(nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
-//			@Override
-//			public IBaseResource answer(InvocationOnMock theInvocation) {
-//				String id = (String) theInvocation.getArguments()[0];
-//				IBaseResource retVal;
-//				if (myStructureDefinitionMap.containsKey(id)) {
-//					retVal = myStructureDefinitionMap.get(id);
-//				} else {
-//					retVal = myDefaultValidationSupport.fetchStructureDefinition(id);
-//				}
-//				ourLog.debug("fetchStructureDefinition({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
-//				return retVal;
-//			}
-//		});
-//		when(myMockSupport.fetchAllStructureDefinitions()).thenAnswer(new Answer<List<StructureDefinition>>() {
-//			@Override
-//			public List<StructureDefinition> answer(InvocationOnMock theInvocation) {
-//				List<StructureDefinition> retVal = new ArrayList<>(myDefaultValidationSupport.fetchAllStructureDefinitions());
-//				retVal.addAll(myStructureDefinitionMap.values());
-//				ourLog.debug("fetchAllStructureDefinitions()", new Object[]{});
-//				return retVal;
-//			}
-//		});
-//		when(myMockSupport.lookupCode(any(), any())).thenAnswer(t -> {
-//			LookupCodeRequest request = t.getArgument(1, LookupCodeRequest.class);
-//			String system = request.getSystem();
-//			String code = request.getCode();
-//			if (myValidConcepts.contains(system + "___" + code)) {
-//				return new IValidationSupport.LookupCodeResult().setFound(true);
-//			} else {
-//				return null;
-//			}
-//		});
-//		when(myMockSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> {
-//			String system = t.getArgument(2, String.class);
-//			String code = t.getArgument(3, String.class);
-//			if (myValidConcepts.contains(system + "___" + code)) {
-//				return new IValidationSupport.CodeValidationResult().setCode(code).setDisplay(code);
-//			}
-//			return null;
-//		});
-
 	}
 
 	private Object defaultString(Integer theLocationLine) {
@@ -643,6 +517,7 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 
 	@Test
 	public void testLargeBase64() throws IOException {
+		myMockSupport.addValidValueSet("http://hl7.org/fhir/ValueSet/report-codes");
 		myMockSupport.addValidConcept("http://loinc.org", "1-8");
 
 		String input = IOUtils.toString(FhirInstanceValidatorR4BTest.class.getResourceAsStream("/r4/diagnosticreport-example-gingival-mass.json"), Constants.CHARSET_UTF8);
@@ -1335,6 +1210,8 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 
 	@Test
 	public void testValidateWithUcum() throws IOException {
+		myMockSupport.addValidValueSet("http://hl7.org/fhir/ValueSet/observation-vitalsignresult");
+		myMockSupport.addValidValueSet("http://hl7.org/fhir/ValueSet/report-codes");
 		myMockSupport.addValidConcept("http://loinc.org", "8310-5");
 
 		Observation input = loadResource(ourCtx, Observation.class, "/r4/observation-with-body-temp-ucum.json");
@@ -1403,7 +1280,6 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		when(policyAdvisor.policyForElement(any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
 		when(policyAdvisor.policyForCodedContent(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
 
-		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		when(policyAdvisor.policyForContained(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(ContainedReferenceValidationPolicy.CHECK_TYPE);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
@@ -1638,11 +1514,10 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		// This is only used if the validation is performed with validationOptions.isConcurrentBundleValidation = true
 		myFhirValidator.setExecutorService(Executors.newFixedThreadPool(4));
 
-		when(myMockSupport.getFhirContext()).thenReturn(ourCtx);
 		ValidationSupportChain chain = new ValidationSupportChain(
 			myMockSupport,
-			ourCtx.getValidationSupport(),
 			new CommonCodeSystemsTerminologyService(ourCtx),
+			ourCtx.getValidationSupport(),
 			new InMemoryTerminologyServerValidationSupport(ourCtx),
 			new SnapshotGeneratingValidationSupport(ourCtx));
 		myValidationSupport = chain.setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(theLogicalAnd);

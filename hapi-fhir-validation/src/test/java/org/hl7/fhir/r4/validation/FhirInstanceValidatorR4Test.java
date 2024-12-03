@@ -1495,9 +1495,10 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"}";
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.size()).as(errors.toString()).isEqualTo(2);
-		assertThat(errors.get(0).getMessage()).contains("Unknown code 'urn:iso:std:iso:4217#BLAH'");
-		assertThat(errors.get(1).getMessage()).contains("The value provided ('BLAH') was not found in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.0.1)");
+		assertThat(errors.size()).as(errors.toString()).isEqualTo(3);
+		assertThat(errors.get(1).getMessage()).contains("Unknown code 'urn:iso:std:iso:4217#BLAH'");
+		assertThat(errors.get(2).getMessage()).contains("The value provided ('BLAH') was not found in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.0.1)");
+		assertThat(errors.get(2).getMessage()).contains("error message = Unknown code \"urn:iso:std:iso:4217#BLAH\"");
 
 
 	}
@@ -1755,8 +1756,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationSupportChain chain = new ValidationSupportChain(
 			myMockSupport,
-			ourCtx.getValidationSupport(),
 			new CommonCodeSystemsTerminologyService(ourCtx),
+			ourCtx.getValidationSupport(),
 			new InMemoryTerminologyServerValidationSupport(ourCtx),
 			new SnapshotGeneratingValidationSupport(ourCtx));
 		myValidationSupport = chain.setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(theLogicalAnd);
