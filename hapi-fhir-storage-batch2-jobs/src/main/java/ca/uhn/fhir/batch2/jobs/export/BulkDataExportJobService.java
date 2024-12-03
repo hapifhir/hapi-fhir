@@ -48,7 +48,9 @@ public class BulkDataExportJobService {
 		myStorageSettings = theStorageSettings;
 	}
 
-	public void startJob(ServletRequestDetails theRequestDetails, BulkExportJobParameters theBulkExportJobParameters) {
+	public void startJob(
+		@Nonnull ServletRequestDetails theRequestDetails,
+		@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
 		// parameter massaging
 		expandParameters(theRequestDetails, theBulkExportJobParameters);
 
@@ -81,7 +83,8 @@ public class BulkDataExportJobService {
 	 * so that later steps in the export do not have to handle them.
 	 */
 	private void expandParameters(
-			ServletRequestDetails theRequestDetails, BulkExportJobParameters theBulkExportJobParameters) {
+		@Nonnull ServletRequestDetails theRequestDetails,
+		@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
 		// Set the original request URL as part of the job information, as this is used in the poll-status-endpoint, and
 		// is needed for the report.
 		theBulkExportJobParameters.setOriginalRequestUrl(theRequestDetails.getCompleteUrl());
@@ -112,13 +115,15 @@ public class BulkDataExportJobService {
 		}
 	}
 
-	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
+	private boolean shouldUseCache(@Nonnull ServletRequestDetails theRequestDetails) {
 		CacheControlDirective cacheControlDirective =
 				new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
 		return myStorageSettings.getEnableBulkExportJobReuse() && !cacheControlDirective.isNoCache();
 	}
 
-	private void writePollingLocationToResponseHeaders(ServletRequestDetails theRequestDetails, String theInstanceId) {
+	private void writePollingLocationToResponseHeaders(
+		@Nonnull ServletRequestDetails theRequestDetails,
+		@Nonnull String theInstanceId) {
 		String serverBase = BulkDataExportUtil.getServerBase(theRequestDetails);
 		if (serverBase == null) {
 			throw new InternalErrorException(Msg.code(2136) + "Unable to get the server base.");
