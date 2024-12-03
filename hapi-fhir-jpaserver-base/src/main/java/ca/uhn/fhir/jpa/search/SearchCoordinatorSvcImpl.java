@@ -402,14 +402,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				}
 			}
 
-			// we set a max to fetch from the db for synchronous searches;
-			// otherwise, we would have to load everything into memory (or force the db to do so);
-			// So let's set a max value here
-			Integer maxToLoad = ObjectUtils.firstNonNull(
-					loadSynchronousUpTo,
-					theParams.getCount() != null ? theParams.getCount() + 1 : null,
-					myStorageSettings.getFetchSizeDefaultMaximum(),
-					myStorageSettings.getInternalSynchronousSearchSize());
+			// we need a max to fetch for synchronous searches;
+			// otherwise we'll explode memory.
+			Integer maxToLoad = getSynchronousMaxResultsToFetch(theParams, loadSynchronousUpTo);
 			ourLog.debug("Setting a max fetch value of {} for synchronous search", maxToLoad);
 			sb.setMaxResultsToFetch(maxToLoad);
 
@@ -444,6 +439,35 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				theCallingDao, theParams, theResourceType, theRequestDetails, sb, theRequestPartitionId, search);
 		retVal.setCacheStatus(cacheStatus);
 		return retVal;
+	}
+
+	/**
+	 * 	The max results to return if this is a synchronous search.
+	 *
+	 * We'll look in this order:
+	 * * load synchronous up to (on params)
+	 * * param count (+ offset)
+	 * * StorageSettings fetch size default max
+	 * *
+	 */
+	private Integer getSynchronousMaxResultsToFetch(SearchParameterMap theParams, Integer theLoadSynchronousUpTo) {
+		if (theLoadSynchronousUpTo != null) {
+			return theLoadSynchronousUpTo;
+		}
+
+		if (theParams.getCount() != null) {
+			int valToReturn = theParams.getCount() + 1;
+			if (theParams.getOffset() != null) {
+				valToReturn += theParams.getOffset();
+			}
+			return valToReturn;
+		}
+
+		if (myStorageSettings.getFetchSizeDefaultMaximum() != null) {
+			return myStorageSettings.getFetchSizeDefaultMaximum();
+		}
+
+		return myStorageSettings.getInternalSynchronousSearchSize();
 	}
 
 	private void validateSearch(SearchParameterMap theParams) {

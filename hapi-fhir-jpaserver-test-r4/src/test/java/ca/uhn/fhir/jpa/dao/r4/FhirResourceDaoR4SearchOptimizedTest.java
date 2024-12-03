@@ -853,14 +853,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	}
 
-
 	/**
 	 * A search with a big list of OR clauses for references should use a single SELECT ... WHERE .. IN
 	 * and not a whole bunch of SQL ORs.
 	 */
 	@Test
 	public void testReferenceOrLinksUseInList() {
-
 		List<Long> ids = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
 			Organization org = new Organization();
@@ -872,7 +870,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			pt.setManagingOrganization(new Reference("Organization/" + ids.get(i)));
 			myPatientDao.create(pt).getId().getIdPartAsLong();
 		}
-
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -895,7 +892,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		String resultingQueryNotFormatted = queries.get(0);
 		assertThat(StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization")).as(resultingQueryNotFormatted).isEqualTo(1);
-		assertThat(resultingQueryNotFormatted).matches("^SELECT .* WHERE .*TARGET_RESOURCE_ID IN \\(.*\\)$");
+		assertThat(resultingQueryNotFormatted).matches("^SELECT .* WHERE .*TARGET_RESOURCE_ID IN \\(.*\\) .* fetch first '10000' rows only$");
 
 		// Ensure that the search actually worked
 		assertEquals(5, search.size().intValue());
