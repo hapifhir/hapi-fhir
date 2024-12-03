@@ -383,12 +383,18 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	public void setPartitionId(PartitionablePartitionId thePartitionablePartitionId) {
 		if (thePartitionablePartitionId != null) {
 			getId().setPartitionIdValue(thePartitionablePartitionId.getPartitionId());
-			getResourceId().setPartitionId(thePartitionablePartitionId.getPartitionId());
+
+			initializeResourceId();
+			myResourcePid.setPartitionId(thePartitionablePartitionId.getPartitionId());
+
 			myPartitionIdValue = thePartitionablePartitionId.getPartitionId();
 			myPartitionDateValue = thePartitionablePartitionId.getPartitionDate();
 		} else {
 			getId().setPartitionIdValue(null);
-			getResourceId().setPartitionId(null);
+
+			initializeResourceId();
+			myResourcePid.setPartitionId(null);
+
 			myPartitionIdValue = null;
 			myPartitionDateValue = null;
 		}

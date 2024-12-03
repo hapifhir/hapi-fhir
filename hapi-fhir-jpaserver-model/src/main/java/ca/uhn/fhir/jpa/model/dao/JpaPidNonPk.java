@@ -76,7 +76,7 @@ public class JpaPidNonPk implements Serializable {
 		myId = theId;
 	}
 
-	private void setPartitionId(Integer thePartitionId) {
+	public void setPartitionId(Integer thePartitionId) {
 		myPartitionIdValue = thePartitionId;
 	}
 

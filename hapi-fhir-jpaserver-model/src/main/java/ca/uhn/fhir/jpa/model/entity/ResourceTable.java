@@ -469,13 +469,10 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		if (myPid == null) {
 			myPid = new JpaPid();
 		}
-		JpaPid retVal = JpaPid.fromIdAndVersionAndResourceType(myPid.getId(), myVersion, myResourceType);
-		if (myPid.getPartitionId() != null) {
-			retVal.setPartitionId(myPid.getPartitionId());
-		} else {
-			retVal.setPartitionId(myPartitionIdValue);
-		}
-		return retVal;
+		myPid.setVersion(myVersion);
+		myPid.setPartitionIdIfNotAlreadySet(myPartitionIdValue);
+		myPid.setResourceType(myResourceType);
+		return myPid;
 	}
 
 	public void setId(JpaPid thePid) {

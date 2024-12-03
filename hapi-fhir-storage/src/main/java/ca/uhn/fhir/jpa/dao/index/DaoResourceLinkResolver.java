@@ -182,8 +182,13 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		}
 
 		if (persistentId == null) {
+			Object id = resolvedResource.getPersistentId().getId();
+			Integer partitionId = null;
+			if (resolvedResource.getPartitionId() != null) {
+				partitionId = resolvedResource.getPartitionId().getPartitionId();
+			}
 			persistentId =
-					myIdHelperService.newPid(resolvedResource.getPersistentId().getId());
+					myIdHelperService.newPid(id, partitionId);
 			persistentId.setAssociatedResourceId(targetResourceId);
 			if (theTransactionDetails != null) {
 				theTransactionDetails.addResolvedResourceId(targetResourceId, persistentId);

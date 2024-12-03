@@ -369,6 +369,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			Date deletedAd = nextId.get(3, Date.class);
 			Integer partitionId = nextId.get(4, Integer.class);
 			if (resourcePid != null) {
+				if (resourcePid.getPartitionId() == null && partitionId != null) {
+					resourcePid.setPartitionId(partitionId);
+				}
 				JpaResourceLookup lookup = new JpaResourceLookup(
 						resourceType, fhirId, resourcePid, deletedAd, PartitionablePartitionId.with(partitionId, null));
 
@@ -641,6 +644,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	public JpaPid newPid(Object thePid) {
 		return JpaPid.fromId((Long) thePid);
+	}
+
+	@Override
+	public JpaPid newPid(Object thePid, Integer thePartitionId) {
+		return JpaPid.fromId((Long) thePid, thePartitionId);
 	}
 
 	@Override

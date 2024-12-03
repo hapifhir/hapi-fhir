@@ -67,7 +67,7 @@ public class InClauseNormalizer {
 		}
 
 		while (retVal.size() < preferredListSize) {
-			retVal.add(JpaPid.fromId(-1L, null));
+			retVal.add(JpaPid.fromId(-1L, (Integer)null));
 		}
 
 		return retVal;
