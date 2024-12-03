@@ -17,24 +17,22 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.model.cross;
+package ca.uhn.fhir.jpa.model.dao;
 
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
+import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeFromIndexedValueContext;
+import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValueContext;
 
-import java.util.Date;
+// TODO: JA2 make this partition aware
+public class JpaPidValueBridge implements ValueBridge<JpaPid, Long> {
 
-public interface IResourceLookup<T extends IResourcePersistentId<?>> {
-	String getResourceType();
+	@Override
+	public Long toIndexedValue(JpaPid value, ValueBridgeToIndexedValueContext context) {
+		return value.getId();
+	}
 
-	String getFhirId();
-
-	/**
-	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwise, returns <code>null</code>
-	 */
-	Date getDeleted();
-
-	T getPersistentId();
-
-	PartitionablePartitionId getPartitionId();
+	@Override
+	public JpaPid fromIndexedValue(Long value, ValueBridgeFromIndexedValueContext context) {
+		return JpaPid.fromId(value);
+	}
 }

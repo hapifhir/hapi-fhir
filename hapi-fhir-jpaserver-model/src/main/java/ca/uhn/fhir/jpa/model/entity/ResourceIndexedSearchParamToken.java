@@ -34,8 +34,10 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -73,6 +75,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 					name = "IDX_SP_TOKEN_RESID_V2",
 					columnList = "RES_ID,HASH_SYS_AND_VALUE,HASH_VALUE,HASH_SYS,HASH_IDENTITY,PARTITION_ID")
 		})
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 200;
@@ -94,6 +97,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_TOKEN")
 	@Column(name = "SP_ID")
 	private Long myId;
+
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
@@ -114,12 +118,26 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumn(
-			foreignKey = @ForeignKey(name = "FK_SP_TOKEN_RES"),
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+//				@JoinColumn(
+//						name = "PARTITION_ID",
+//						referencedColumnName = "PARTITION_ID",
+//						insertable = false,
+//						updatable = false,
+//						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_SP_TOKEN_RES"))
 	private ResourceTable myResource;
+
+	@Column(name = "RES_ID", nullable = false)
+	private Long myResourceId;
 
 	/**
 	 * Constructor
@@ -170,6 +188,11 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		myHashSystemAndValue = source.getHashSystemAndValue();
 		myHashValue = source.myHashValue;
 		myHashIdentity = source.myHashIdentity;
+	}
+
+	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	@Override
@@ -419,7 +442,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	@Override
 	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
-		myResource = theResource;
 		setResourceType(theResource.getResourceType());
 		return this;
 	}

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Model
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
@@ -17,24 +17,6 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.model.cross;
+package ca.uhn.fhir.rest.api.server.storage;
 
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-
-import java.util.Date;
-
-public interface IResourceLookup<T extends IResourcePersistentId<?>> {
-	String getResourceType();
-
-	String getFhirId();
-
-	/**
-	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwise, returns <code>null</code>
-	 */
-	Date getDeleted();
-
-	T getPersistentId();
-
-	PartitionablePartitionId getPartitionId();
-}
+public interface IResourceVersionPersistentId {}

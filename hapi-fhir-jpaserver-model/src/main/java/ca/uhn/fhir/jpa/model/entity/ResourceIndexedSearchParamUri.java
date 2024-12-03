@@ -33,8 +33,10 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
@@ -60,6 +62,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 			// for index create/delete
 			@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
 		})
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
 
 	/*
@@ -80,6 +83,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_URI")
 	@Column(name = "SP_ID")
 	private Long myId;
+
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
@@ -90,12 +94,26 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumn(
-			foreignKey = @ForeignKey(name = "FKGXSREUTYMMFJUWDSWV3Y887DO"),
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+//				@JoinColumn(
+//						name = "PARTITION_ID",
+//						referencedColumnName = "PARTITION_ID",
+//						insertable = false,
+//						updatable = false,
+//						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FKGXSREUTYMMFJUWDSWV3Y887DO"))
 	private ResourceTable myResource;
+
+	@Column(name = "RES_ID", nullable = false)
+	private Long myResourceId;
 
 	/**
 	 * Constructor
@@ -123,6 +141,11 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		myUri = source.myUri;
 		myHashUri = source.myHashUri;
 		myHashIdentity = source.myHashIdentity;
+	}
+
+	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	@Override
@@ -253,7 +276,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 
 	@Override
 	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
-		myResource = theResource;
 		setResourceType(theResource.getResourceType());
 		return this;
 	}
