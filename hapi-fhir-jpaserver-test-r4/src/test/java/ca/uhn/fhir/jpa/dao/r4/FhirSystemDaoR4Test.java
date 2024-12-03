@@ -3221,7 +3221,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		patient = myPatientDao.read(new IdType(id));
 
 		assertThat(patient.getManagingOrganization().getReference()).containsPattern(HASH_UUID_PATTERN);
-		assertEquals(patient.getManagingOrganization().getReference(), patient.getContained().get(0).getId());
+		assertEquals(patient.getManagingOrganization().getReference(), "#" + patient.getContained().get(0).getId());
 	}
 
 	@Nonnull

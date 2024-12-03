@@ -451,11 +451,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
-    List<T> res = new ArrayList<>();
-    if (theClass == StructureDefinition.class) {
-      res.addAll((Collection<? extends T>) getStructures());
-    }
-    return res;
+		List<T> res = new ArrayList<>();
+		if (theClass == StructureDefinition.class) {
+			res.addAll((Collection<? extends T>) getStructures());
+		}
+		return res;
 	}
 
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri, Resource source) {
