@@ -2193,7 +2193,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
-		// FIXME: why changed from master?
 		assertEquals(7, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(7, myCaptureQueriesListener.countInsertQueries());
@@ -3260,7 +3259,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		}
 
 		assertEquals(17, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-        // FIXME: check for separate
 		assertEquals(6189, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
