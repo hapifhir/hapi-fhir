@@ -134,8 +134,8 @@ public class MemoryCacheService {
 
 	public <K, V> void put(CacheEnum theCache, K theKey, V theValue) {
 		assert theCache.getKeyType().isAssignableFrom(theKey.getClass())
-			: "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache "
-			+ theCache;
+				: "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache "
+						+ theCache;
 		doPut(theCache, theKey, theValue);
 	}
 
@@ -156,8 +156,8 @@ public class MemoryCacheService {
 	 */
 	public <K, V> void putAfterCommit(CacheEnum theCache, K theKey, V theValue) {
 		assert theCache.getKeyType().isAssignableFrom(theKey.getClass())
-			: "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache "
-			+ theCache;
+				: "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache "
+						+ theCache;
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
@@ -238,19 +238,19 @@ public class MemoryCacheService {
 		private Boolean myUserSelected;
 
 		public TagDefinitionCacheKey(
-			TagTypeEnum theType, String theSystem, String theCode, String theVersion, Boolean theUserSelected) {
+				TagTypeEnum theType, String theSystem, String theCode, String theVersion, Boolean theUserSelected) {
 			myType = theType;
 			mySystem = theSystem;
 			myCode = theCode;
 			myVersion = theVersion;
 			myUserSelected = theUserSelected;
 			myHashCode = new HashCodeBuilder(17, 37)
-				.append(myType)
-				.append(mySystem)
-				.append(myCode)
-				.append(myVersion)
-				.append(myUserSelected)
-				.toHashCode();
+					.append(myType)
+					.append(mySystem)
+					.append(myCode)
+					.append(myVersion)
+					.append(myUserSelected)
+					.toHashCode();
 		}
 
 		@Override
@@ -260,10 +260,10 @@ public class MemoryCacheService {
 				TagDefinitionCacheKey that = (TagDefinitionCacheKey) theO;
 
 				retVal = new EqualsBuilder()
-					.append(myType, that.myType)
-					.append(mySystem, that.mySystem)
-					.append(myCode, that.myCode)
-					.isEquals();
+						.append(myType, that.myType)
+						.append(mySystem, that.mySystem)
+						.append(myCode, that.myCode)
+						.isEquals();
 			}
 			return retVal;
 		}
@@ -290,10 +290,10 @@ public class MemoryCacheService {
 				myPartitionId = null;
 			}
 			myHashCode = new HashCodeBuilder()
-				.append(myTypeName)
-				.append(myInstanceId)
-				.append(myPartitionId)
-				.toHashCode();
+					.append(myTypeName)
+					.append(myInstanceId)
+					.append(myPartitionId)
+					.toHashCode();
 		}
 
 		@Override
@@ -302,9 +302,9 @@ public class MemoryCacheService {
 			if (theO instanceof HistoryCountKey) {
 				HistoryCountKey that = (HistoryCountKey) theO;
 				retVal = new EqualsBuilder()
-					.append(myTypeName, that.myTypeName)
-					.append(myInstanceId, that.myInstanceId)
-					.isEquals();
+						.append(myTypeName, that.myTypeName)
+						.append(myInstanceId, that.myInstanceId)
+						.isEquals();
 			}
 			return retVal;
 		}
@@ -336,9 +336,9 @@ public class MemoryCacheService {
 		private final int myHashCode;
 
 		public ForcedIdCacheKey(
-			@Nullable String theResourceType,
-			@Nonnull String theResourceId,
-			@Nonnull RequestPartitionId theRequestPartitionId) {
+				@Nullable String theResourceType,
+				@Nonnull String theResourceId,
+				@Nonnull RequestPartitionId theRequestPartitionId) {
 			myResourceType = theResourceType;
 			myResourceId = theResourceId;
 			if (theRequestPartitionId.hasPartitionIds()) {
@@ -352,10 +352,10 @@ public class MemoryCacheService {
 		@Override
 		public String toString() {
 			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("resType", myResourceType)
-				.append("resId", myResourceId)
-				.append("partId", myRequestPartitionIds)
-				.toString();
+					.append("resType", myResourceType)
+					.append("resId", myResourceId)
+					.append("partId", myRequestPartitionIds)
+					.toString();
 		}
 
 		@Override
@@ -368,8 +368,8 @@ public class MemoryCacheService {
 			}
 			ForcedIdCacheKey that = (ForcedIdCacheKey) theO;
 			return Objects.equals(myResourceType, that.myResourceType)
-				&& Objects.equals(myResourceId, that.myResourceId)
-				&& Objects.equals(myRequestPartitionIds, that.myRequestPartitionIds);
+					&& Objects.equals(myResourceId, that.myResourceId)
+					&& Objects.equals(myRequestPartitionIds, that.myRequestPartitionIds);
 		}
 
 		@Override
@@ -383,6 +383,5 @@ public class MemoryCacheService {
 		public IIdType toIdType(FhirContext theFhirCtx) {
 			return theFhirCtx.getVersion().newIdType(myResourceType, myResourceId);
 		}
-
 	}
 }

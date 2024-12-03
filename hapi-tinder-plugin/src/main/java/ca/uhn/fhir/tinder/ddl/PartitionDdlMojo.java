@@ -2,7 +2,6 @@ package ca.uhn.fhir.tinder.ddl;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
-import ca.uhn.fhir.util.FileUtil;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
@@ -38,15 +37,17 @@ import static org.springframework.util.ResourceUtils.FILE_URL_PREFIX;
  * unit tests and examples.
  */
 @Mojo(
-	name = "partition-ddl",
-	defaultPhase = LifecyclePhase.PROCESS_CLASSES,
-	requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
-	requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
-	threadSafe = true,
-	requiresProject = true)
+		name = "partition-ddl",
+		defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+		requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
+		requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+		threadSafe = true,
+		requiresProject = true)
 public class PartitionDdlMojo extends AbstractMojo {
 
-	private static final Pattern CREATE_TABLE = Pattern.compile("create table ([a-zA-Z0-9_]+) .* primary key \\(([a-zA-Z_, ]+)\\).*", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+	private static final Pattern CREATE_TABLE = Pattern.compile(
+			"create table ([a-zA-Z0-9_]+) .* primary key \\(([a-zA-Z_, ]+)\\).*",
+			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionDdlMojo.class);
 
 	@Parameter(required = true)
@@ -78,7 +79,6 @@ public class PartitionDdlMojo extends AbstractMojo {
 		List<String> originalStatements = SqlUtil.splitSqlFileIntoStatements(input);
 		List<String> newStatements = applyPostgresPartitioning(originalStatements);
 		writeStatementsToTarget(newStatements);
-
 	}
 
 	@Nonnull
@@ -137,8 +137,8 @@ public class PartitionDdlMojo extends AbstractMojo {
 					retVal.add("-- Create " + numPartitions + " partitions for table " + tableName);
 					for (int partIndex = 0; partIndex < numPartitions; partIndex++) {
 						String newTableName = createPartitionedTableName(tableName, partIndex);
-						String partitionedTable = "CREATE TABLE " + newTableName + " PARTITION OF " + tableName + " " +
-							"FOR VALUES WITH (MODULUS " + numPartitions + ", REMAINDER " + partIndex + ")";
+						String partitionedTable = "CREATE TABLE " + newTableName + " PARTITION OF " + tableName + " "
+								+ "FOR VALUES WITH (MODULUS " + numPartitions + ", REMAINDER " + partIndex + ")";
 						retVal.add(partitionedTable + ";");
 					}
 
@@ -151,14 +151,13 @@ public class PartitionDdlMojo extends AbstractMojo {
 									tuneCommentAdded = true;
 								}
 								String newTableName = createPartitionedTableName(tableName, partIndex);
-								String modifiedStatsStatment = nextStatsStatement.replace(" " + tableName + " ", " " + newTableName + " ");
+								String modifiedStatsStatment =
+										nextStatsStatement.replace(" " + tableName + " ", " " + newTableName + " ");
 								retVal.add(modifiedStatsStatment + ";");
 							}
 						}
 					}
-
 				}
-
 			}
 
 			if (!partitioned) {
@@ -167,7 +166,6 @@ public class PartitionDdlMojo extends AbstractMojo {
 
 			// Add an empty line between unrelated statements
 			retVal.add(null);
-
 		}
 		return retVal;
 	}
@@ -176,5 +174,4 @@ public class PartitionDdlMojo extends AbstractMojo {
 	private static String createPartitionedTableName(String tableName, int partIndex) {
 		return (tableName + "_PART" + partIndex).toUpperCase(Locale.US);
 	}
-
 }
