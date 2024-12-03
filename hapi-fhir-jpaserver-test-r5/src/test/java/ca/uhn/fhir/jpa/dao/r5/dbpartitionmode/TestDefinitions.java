@@ -415,13 +415,13 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		}
 
 		if (myIncludePartitionIdsInSql) {
-			assertEquals("select count(rht1_0.PID) from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1') and rht1_0.RES_ID='" + id.getIdPartAsLong() + "'", getSelectSql(1));
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' and rht1_0.PARTITION_ID='1'", getSelectSql(1));
 		} else {
-			assertEquals("select count(rht1_0.PID) from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "'", getSelectSql(1));
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "'", getSelectSql(1));
 		}
 
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(2)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1') and rht1_0.RES_ID='" + id.getIdPartAsLong() + "'");
+			assertThat(getSelectSql(2)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' and rht1_0.PARTITION_ID='1'");
 		} else {
 			assertThat(getSelectSql(2)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' ");
 		}
@@ -458,9 +458,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(actualIds).asList().containsExactlyInAnyOrder("Patient/" + id.getIdPart() + "/_history/3", "Patient/" + id.getIdPart() + "/_history/2", "Patient/" + id.getIdPart() + "/_history/1");
 
 		if (myIncludePartitionIdsInSql) {
-			assertEquals("select count(rht1_0.PID) from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1') and rht1_0.RES_TYPE='Patient'", getSelectSql(0));
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1') and rht1_0.RES_TYPE='Patient'", getSelectSql(0));
 		} else {
-			assertEquals("select count(rht1_0.PID) from HFJ_RES_VER rht1_0 where rht1_0.RES_TYPE='Patient'", getSelectSql(0));
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.RES_TYPE='Patient'", getSelectSql(0));
 		}
 
 		if (myIncludePartitionIdsInSql) {
@@ -501,9 +501,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(actualIds).asList().containsExactlyInAnyOrder("Patient/" + id.getIdPart() + "/_history/3", "Patient/" + id.getIdPart() + "/_history/2", "Patient/" + id.getIdPart() + "/_history/1");
 
 		if (myIncludePartitionIdsInSql) {
-			assertEquals("select count(rht1_0.PID) from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1')", getSelectSql(0));
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1')", getSelectSql(0));
 		} else {
-			assertEquals("select count(rht1_0.PID) from HFJ_RES_VER rht1_0", getSelectSql(0));
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0", getSelectSql(0));
 		}
 
 		assertThat(getSelectSql(1)).contains(" from HFJ_RES_VER rht1_0 ");
@@ -532,38 +532,43 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		List<String> actualIds = toUnqualifiedVersionlessIdValues(outcome);
 		assertThat(actualIds).asList().containsExactlyInAnyOrder(ids.allIdValues().toArray(new String[0]));
 
+		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).startsWith("SELECT DISTINCT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
+			assertThat(getSelectSql(0)).endsWith(" where rt1_0.PARTITION_ID='1' and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='" + ids.patientPid + "')");
 		} else {
-			assertThat(getSelectSql(0)).startsWith("SELECT DISTINCT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
+			assertThat(getSelectSql(0)).endsWith(" where (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='" + ids.patientPid + "')");
+		}
+
+		if (myIncludePartitionIdsInSql) {
+			assertThat(getSelectSql(1)).startsWith("SELECT DISTINCT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
+		} else {
+			assertThat(getSelectSql(1)).startsWith("SELECT DISTINCT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
 		}
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(0)).contains("WHERE ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
-			assertThat(getSelectSql(0)).contains("GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
-			assertThat(getSelectSql(0)).endsWith("ORDER BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID");
-			assertThat(getSelectSql(1)).containsAnyOf(
+			assertThat(getSelectSql(1)).contains("WHERE ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
+			assertThat(getSelectSql(1)).contains("GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
+			assertThat(getSelectSql(1)).endsWith("ORDER BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID");
+			assertThat(getSelectSql(2)).containsAnyOf(
 				"from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() + "','" + ids.encounterPid() + "') ",
 				"from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.encounterPid() + "','" + ids.patientPid() + "') "
 			);
-			assertThat(getSelectSql(2)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
-			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
+			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
+			assertThat(getSelectSql(4)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
 		} else {
-			assertThat(getSelectSql(0)).contains("WHERE (t0.TARGET_RESOURCE_ID = '" + ids.patientPid() + "') ");
+			assertThat(getSelectSql(1)).contains("WHERE (t0.TARGET_RESOURCE_ID = '" + ids.patientPid() + "') ");
 			if (myIncludePartitionIdsInSql) {
-				assertThat(getSelectSql(0)).contains(" GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
+				assertThat(getSelectSql(1)).contains(" GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
 			} else {
-				assertThat(getSelectSql(0)).contains(" GROUP BY t0.SRC_RESOURCE_ID ");
+				assertThat(getSelectSql(1)).contains(" GROUP BY t0.SRC_RESOURCE_ID ");
 			}
-			assertThat(getSelectSql(0)).endsWith(" ORDER BY t0.SRC_RESOURCE_ID");
-			assertThat(getSelectSql(1)).containsAnyOf(
+			assertThat(getSelectSql(1)).endsWith(" ORDER BY t0.SRC_RESOURCE_ID");
+			assertThat(getSelectSql(2)).containsAnyOf(
 				"from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() + "','" + ids.encounterPid() + "') ",
 				"from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.encounterPid() + "','" + ids.patientPid() + "') "
 			);
-			assertThat(getSelectSql(2)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
-			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
+			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
+			assertThat(getSelectSql(4)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
 		}
-
-		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 
 	}
 
@@ -585,9 +590,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		// Select HFJ_SPIDX_TOKEN
 		List<SqlQuery> selectTokenQueries = getSqlSelectQueriesWithString(" HFJ_SPIDX_TOKEN ");
 		if (myIncludePartitionIdsInPks) {
-			sql = "select rispt1_0.SP_ID,rispt1_0.PARTITION_ID from HFJ_SPIDX_TOKEN rispt1_0 fetch first '800' rows only";
+			sql = "select rispt1_0.SP_ID,rispt1_0.PARTITION_ID from HFJ_SPIDX_TOKEN rispt1_0 fetch first '400' rows only";
 		} else {
-			sql = "select rispt1_0.SP_ID from HFJ_SPIDX_TOKEN rispt1_0 fetch first '800' rows only";
+			sql = "select rispt1_0.SP_ID from HFJ_SPIDX_TOKEN rispt1_0 fetch first '400' rows only";
 		}
 		assertThat(selectTokenQueries.get(0).getSql(true, false)).isEqualTo(sql);
 		assertThat(selectTokenQueries.get(1).getSql(true, false)).isEqualTo(sql);
@@ -607,7 +612,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		if (myIncludePartitionIdsInPks) {
 			sql = "select rht1_0.PARTITION_ID,rht1_0.PID from HFJ_RES_VER rht1_0 fetch first '400' rows only";
 		} else {
-			sql = "select rht1_0.PID from HFJ_RES_VER rht1_0 fetch first '800' rows only";
+			sql = "select rht1_0.PID from HFJ_RES_VER rht1_0 fetch first '400' rows only";
 		}
 		assertThat(selectResVerQueries.get(0).getSql(true, false)).isEqualTo(sql);
 		assertThat(selectResVerQueries.get(1).getSql(true, false)).isEqualTo(sql);
@@ -618,7 +623,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		if (myIncludePartitionIdsInPks) {
 			assertThat(deleteResVerQueries.get(0).getSql(true, false)).startsWith("delete from HFJ_RES_VER where (PARTITION_ID,PID) in ");
 		} else {
-			assertThat(deleteResVerQueries.get(0).getSql(true, false)).startsWith("delete from HFJ_RES_VER where PID in ");
+			assertThat(deleteResVerQueries.get(0).getSql(true, false)).startsWith("delete from HFJ_RES_VER where (PID) in ");
 		}
 		assertEquals(1, deleteResVerQueries.size());
 	}
