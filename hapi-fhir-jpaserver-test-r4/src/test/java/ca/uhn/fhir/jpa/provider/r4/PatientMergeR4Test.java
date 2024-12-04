@@ -14,6 +14,7 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.assertj.core.api.Assertions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -188,12 +189,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 
 		Parameters inParameters = inParams.asParametersResource();
-		Parameters outParams = myFhirClient.operation()
-			.onType("Patient")
-			.named(OPERATION_MERGE)
-			.withParameters(inParameters)
-			.returnResourceType(Parameters.class)
-			.execute();
+		Parameters outParams = callMergeOperation(inParameters);
 
 		assertThat(outParams.getParameter()).hasSize(3);
 
@@ -315,7 +311,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		Parameters inParameters = inParams.asParametersResource();
 
-		assertUnprocessibleEntityWithMessage(myFhirClient, inParameters, "Multiple resources found matching the identifier(s) specified in 'target-patient-identifier'");
+		assertUnprocessibleEntityWithMessage(inParameters, "Multiple resources found matching the identifier(s) specified in 'target-patient-identifier'");
 	}
 
 
@@ -345,31 +341,29 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		Parameters inParameters = inParams.asParametersResource();
 
-		assertUnprocessibleEntityWithMessage(myFhirClient, inParameters, "Multiple resources found matching the identifier(s) specified in 'source-patient-identifier'");
+		assertUnprocessibleEntityWithMessage(inParameters, "Multiple resources found matching the identifier(s) specified in 'source-patient-identifier'");
 	}
 
-	private static void assertUnprocessibleEntityWithMessage(IGenericClient client, Parameters inParameters, String theExpectedMessage) {
+	private void assertUnprocessibleEntityWithMessage(Parameters inParameters, String theExpectedMessage) {
 		assertThatThrownBy(() ->
-			client.operation()
-				.onType("Patient")
-				.named(OPERATION_MERGE)
-				.withParameters(inParameters)
-				.execute())
+			callMergeOperation(inParameters))
 			.isInstanceOf(UnprocessableEntityException.class)
 			.extracting(e -> extractFailureMessage((UnprocessableEntityException) e))
 			.isEqualTo(theExpectedMessage);
 	}
 
-	@Test
-	void test_MissingRequiredParameters_Returns400BadRequest() {
-		Parameters inParams = new Parameters();
-
-		assertThatThrownBy(() -> myFhirClient.operation()
+	private Parameters callMergeOperation(Parameters inParameters) {
+		return myClient.operation()
 			.onType("Patient")
 			.named(OPERATION_MERGE)
-			.withParameters(inParams)
+			.withParameters(inParameters)
 			.returnResourceType(Parameters.class)
-			.execute()
+			.execute();
+	}
+
+	@Test
+	void test_MissingRequiredParameters_Returns400BadRequest() {
+		assertThatThrownBy(() -> callMergeOperation(new Parameters())
 		).isInstanceOf(InvalidRequestException.class)
 			.extracting(e -> ((InvalidRequestException) e).getStatusCode())
 			.isEqualTo(400);
