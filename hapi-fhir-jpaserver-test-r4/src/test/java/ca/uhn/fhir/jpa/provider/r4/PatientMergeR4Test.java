@@ -56,6 +56,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	static final Identifier pat1IdentifierB = new Identifier().setSystem("SYS1B").setValue("VAL1B");
 	static final Identifier pat2IdentifierA = new Identifier().setSystem("SYS2A").setValue("VAL2A");
 	static final Identifier pat2IdentifierB = new Identifier().setSystem("SYS2B").setValue("VAL2B");
+	static final Identifier patBothIdentifierC = new Identifier().setSystem("SYSC").setValue("VALC");
 
 	String orgId;
 	String sourcePatId;
@@ -96,11 +97,13 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		patient1.getManagingOrganization().setReference(orgId);
 		patient1.addIdentifier(pat1IdentifierA);
 		patient1.addIdentifier(pat1IdentifierB);
+		patient1.addIdentifier(patBothIdentifierC);
 		sourcePatId = myClient.create().resource(patient1).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Patient patient2 = new Patient();
 		patient2.addIdentifier(pat2IdentifierA);
 		patient2.addIdentifier(pat2IdentifierB);
+		patient1.addIdentifier(patBothIdentifierC);
 		patient2.getManagingOrganization().setReference(orgId);
 		targetPatId = myClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless().getValue();
 
@@ -166,7 +169,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// FIXME KHS change assert order once it stops failing here.
 		List<Identifier> identifiers = mergedPatient.getIdentifier();
-		assertThat(identifiers).hasSize(4);
+		assertThat(identifiers).hasSize(5);
 
 		// FIXME KHS assert on identifier contents
 
