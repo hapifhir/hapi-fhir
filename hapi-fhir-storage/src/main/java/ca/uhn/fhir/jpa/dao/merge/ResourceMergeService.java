@@ -71,7 +71,7 @@ public class ResourceMergeService {
 	 * @return the merge outcome containing OperationOutcome and HTTP status code
 	 */
 	public MergeOperationOutcome merge(
-			MergeOperationParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
+			MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
 
 		MergeOperationOutcome mergeOutcome = new MergeOperationOutcome();
 		IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
@@ -94,7 +94,7 @@ public class ResourceMergeService {
 	}
 
 	private void doMerge(
-			MergeOperationParameters theMergeOperationParameters,
+			MergeOperationInputParameters theMergeOperationParameters,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
@@ -164,7 +164,7 @@ public class ResourceMergeService {
 	}
 
 	private boolean validateResultResourceIfExists(
-			MergeOperationParameters theMergeOperationParameters,
+			MergeOperationInputParameters theMergeOperationParameters,
 			Patient theResolvedTargetResource,
 			Patient theResolvedSourceResource,
 			IBaseOperationOutcome theOperationOutcome) {
@@ -352,7 +352,7 @@ public class ResourceMergeService {
 	 * @return true if the parameters are valid, false otherwise
 	 */
 	private boolean validateMergeOperationParameters(
-			MergeOperationParameters theMergeOperationParameters, IBaseOperationOutcome theOutcome) {
+			MergeOperationInputParameters theMergeOperationParameters, IBaseOperationOutcome theOutcome) {
 		List<String> errorMessages = new ArrayList<>();
 		if (!theMergeOperationParameters.hasAtLeastOneSourceIdentifier()
 				&& theMergeOperationParameters.getSourceResource() == null) {
@@ -421,7 +421,7 @@ public class ResourceMergeService {
 	}
 
 	private IBaseResource resolveSourceResource(
-			MergeOperationParameters theOperationParameters,
+			MergeOperationInputParameters theOperationParameters,
 			RequestDetails theRequestDetails,
 			IBaseOperationOutcome theOutcome) {
 		return resolveResource(
@@ -434,7 +434,7 @@ public class ResourceMergeService {
 	}
 
 	private IBaseResource resolveTargetResource(
-			MergeOperationParameters theOperationParameters,
+			MergeOperationInputParameters theOperationParameters,
 			RequestDetails theRequestDetails,
 			IBaseOperationOutcome theOutcome) {
 		return resolveResource(

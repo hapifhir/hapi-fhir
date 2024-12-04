@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
+import ca.uhn.fhir.jpa.dao.merge.MergeOperationInputParameters;
 import ca.uhn.fhir.jpa.dao.merge.MergeOperationOutcome;
-import ca.uhn.fhir.jpa.dao.merge.MergeOperationParameters;
-import ca.uhn.fhir.jpa.dao.merge.PatientMergeOperationParameters;
+import ca.uhn.fhir.jpa.dao.merge.PatientMergeOperationInputParameters;
 import ca.uhn.fhir.jpa.dao.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -63,6 +63,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
@@ -284,7 +285,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 
 		startRequest(theServletRequest);
 		try {
-			MergeOperationParameters mergeOperationParameters = createMergeOperationParameters(
+			MergeOperationInputParameters mergeOperationParameters = buildMergeOperationInputParameters(
 					theSourcePatientIdentifier,
 					theTargetPatientIdentifier,
 					theSourcePatient,
@@ -302,26 +303,36 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					resourceMergeService.merge(mergeOperationParameters, theRequestDetails);
 
 			theServletResponse.setStatus(mergeOutcome.getHttpStatusCode());
-			IBaseParameters retVal = ParametersUtil.newInstance(fhirContext);
-			addMergeOutcomeToOutputParameters(retVal, fhirContext, mergeOutcome);
-			return retVal;
+			return buildMergeOperationOutputParameters(fhirContext, mergeOutcome, theRequestDetails.getResource());
 		} finally {
 			endRequest(theServletRequest);
 		}
 	}
 
-	private void addMergeOutcomeToOutputParameters(
-			IBaseParameters theParameters, FhirContext theFhirContext, MergeOperationOutcome theMergeOutcome) {
+	private IBaseParameters buildMergeOperationOutputParameters(
+			FhirContext theFhirContext, MergeOperationOutcome theMergeOutcome, IBaseResource theInputParameters) {
+
+		IBaseParameters retVal = ParametersUtil.newInstance(theFhirContext);
+		ParametersUtil.addParameterToParameters(
+				theFhirContext, retVal, ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT, theInputParameters);
 
 		ParametersUtil.addParameterToParameters(
-				theFhirContext, theParameters, "outcome", theMergeOutcome.getOperationOutcome());
+				theFhirContext,
+				retVal,
+				ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME,
+				theMergeOutcome.getOperationOutcome());
+
 		if (theMergeOutcome.getUpdatedTargetResource() != null) {
 			ParametersUtil.addParameterToParameters(
-					theFhirContext, theParameters, "result", theMergeOutcome.getUpdatedTargetResource());
+					theFhirContext,
+					retVal,
+					OPERATION_MERGE_OUTPUT_PARAM_RESULT,
+					theMergeOutcome.getUpdatedTargetResource());
 		}
+		return retVal;
 	}
 
-	private MergeOperationParameters createMergeOperationParameters(
+	private MergeOperationInputParameters buildMergeOperationInputParameters(
 			List<Identifier> theSourcePatientIdentifier,
 			List<Identifier> theTargetPatientIdentifier,
 			IBaseReference theSourcePatient,
@@ -329,7 +340,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			IPrimitiveType<Boolean> thePreview,
 			IPrimitiveType<Boolean> theDeleteSource,
 			IBaseResource theResultPatient) {
-		MergeOperationParameters mergeOperationParameters = new PatientMergeOperationParameters();
+		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters();
 		if (theSourcePatientIdentifier != null) {
 			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourcePatientIdentifier.stream()
 					.map(IdentifierUtil::identifierDtFromIdentifier)

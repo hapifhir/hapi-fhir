@@ -25,7 +25,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 
-public abstract class MergeOperationParameters {
+public abstract class MergeOperationInputParameters {
 
 	private List<CanonicalIdentifier> mySourceResourceIdentifiers;
 	private List<CanonicalIdentifier> myTargetResourceIdentifiers;
