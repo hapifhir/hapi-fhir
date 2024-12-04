@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import com.ibm.icu.impl.number.parse.PaddingMatcher;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -57,6 +58,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		IIdType sourceRefId = new IdDt(theSourceRefId);
 		IIdType targetRefId = new IdDt(theTargetRefId);
 
+//		todo jm: this could be problematic depending on referenceing object set size, however we are adding
+//			batch job option to handle that case as part of this feature
 		List<? extends IBaseResource> referencingResources = findReferencingResourceIds(sourceRefId, theRequest);
 
 		return replaceReferencesInTransaction(referencingResources, sourceRefId, targetRefId, theRequest);
