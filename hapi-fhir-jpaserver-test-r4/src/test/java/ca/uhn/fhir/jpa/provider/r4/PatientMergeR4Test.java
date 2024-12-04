@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Charsets;
-import jakarta.persistence.Id;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -32,14 +31,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT;
@@ -60,14 +58,15 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	static final Identifier pat2IdentifierB = new Identifier().setSystem("SYS2B").setValue("VAL2B");
 	static final Identifier patBothIdentifierC = new Identifier().setSystem("SYSC").setValue("VALC");
 
-	IIdType orgId;
-	IIdType sourcePatId;
-	IIdType taskId;
-	IIdType encId1;
-	IIdType encId2;
+	IIdType myOrgId;
+	IIdType mySourcePatId;
+	IIdType myTaskId;
+	IIdType myEncId1;
+	IIdType myEncId2;
 	ArrayList<IIdType> myObsIds;
-	IIdType targetPatId;
-	IIdType targetEnc1;
+	IIdType myTargetPatId;
+	IIdType myTargetEnc1;
+	Patient myResultPatient;
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
@@ -92,64 +91,75 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		Organization org = new Organization();
 		org.setName("an org");
-		orgId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
-		ourLog.info("OrgId: {}", orgId);
+		myOrgId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		ourLog.info("OrgId: {}", myOrgId);
 
 		Patient patient1 = new Patient();
-		patient1.getManagingOrganization().setReferenceElement(orgId);
+		patient1.getManagingOrganization().setReferenceElement(myOrgId);
 		patient1.addIdentifier(pat1IdentifierA);
 		patient1.addIdentifier(pat1IdentifierB);
 		patient1.addIdentifier(patBothIdentifierC);
-		sourcePatId = myClient.create().resource(patient1).execute().getId().toUnqualifiedVersionless();
+		mySourcePatId = myClient.create().resource(patient1).execute().getId().toUnqualifiedVersionless();
 
 		Patient patient2 = new Patient();
 		patient2.addIdentifier(pat2IdentifierA);
 		patient2.addIdentifier(pat2IdentifierB);
-		patient1.addIdentifier(patBothIdentifierC);
-		patient2.getManagingOrganization().setReferenceElement(orgId);
-		targetPatId = myClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless();
+		patient2.addIdentifier(patBothIdentifierC);
+		patient2.getManagingOrganization().setReferenceElement(myOrgId);
+		myTargetPatId = myClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc1 = new Encounter();
 		enc1.setStatus(EncounterStatus.CANCELLED);
-		enc1.getSubject().setReferenceElement(sourcePatId);
-		enc1.getServiceProvider().setReferenceElement(orgId);
-		encId1 = myClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless();
+		enc1.getSubject().setReferenceElement(mySourcePatId);
+		enc1.getServiceProvider().setReferenceElement(myOrgId);
+		myEncId1 = myClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc2 = new Encounter();
 		enc2.setStatus(EncounterStatus.ARRIVED);
-		enc2.getSubject().setReferenceElement(sourcePatId);
-		enc2.getServiceProvider().setReferenceElement(orgId);
-		encId2 = myClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless();
+		enc2.getSubject().setReferenceElement(mySourcePatId);
+		enc2.getServiceProvider().setReferenceElement(myOrgId);
+		myEncId2 = myClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless();
 
 		Task task = new Task();
 		task.setStatus(Task.TaskStatus.COMPLETED);
-		task.getOwner().setReferenceElement(sourcePatId);
-		taskId = myClient.create().resource(task).execute().getId().toUnqualifiedVersionless();
+		task.getOwner().setReferenceElement(mySourcePatId);
+		myTaskId = myClient.create().resource(task).execute().getId().toUnqualifiedVersionless();
 
 		Encounter targetEnc1 = new Encounter();
 		targetEnc1.setStatus(EncounterStatus.ARRIVED);
-		targetEnc1.getSubject().setReferenceElement(targetPatId);
-		targetEnc1.getServiceProvider().setReferenceElement(orgId);
-		this.targetEnc1 = myClient.create().resource(targetEnc1).execute().getId().toUnqualifiedVersionless();
+		targetEnc1.getSubject().setReferenceElement(myTargetPatId);
+		targetEnc1.getServiceProvider().setReferenceElement(myOrgId);
+		this.myTargetEnc1 = myClient.create().resource(targetEnc1).execute().getId().toUnqualifiedVersionless();
 
 		myObsIds = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
 			Observation obs = new Observation();
-			obs.getSubject().setReferenceElement(sourcePatId);
+			obs.getSubject().setReferenceElement(mySourcePatId);
 			obs.setStatus(ObservationStatus.FINAL);
 			IIdType obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 			myObsIds.add(obsId);
 		}
 
+		myResultPatient = new Patient();
+		myResultPatient.addIdentifier(pat1IdentifierA);
 	}
 
 	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testMergeWithoutResult(boolean withDelete) throws Exception {
+	@CsvSource({
+		// withDelete, withInputResultPatient
+		"true, true",
+		"true, false",
+		"false, true",
+		"false, false",
+	})
+	public void testMergeWithoutResult(boolean withDelete, boolean withInputResultPatient) throws Exception {
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
-		inParams.sourcePatient = new Reference().setReferenceElement(sourcePatId);
-		inParams.targetPatient = new Reference().setReferenceElement(targetPatId);
+		inParams.sourcePatient = new Reference().setReferenceElement(mySourcePatId);
+		inParams.targetPatient = new Reference().setReferenceElement(myTargetPatId);
 		inParams.deleteSource = withDelete;
+		if (withInputResultPatient) {
+			inParams.resultPatient = myResultPatient;
+		}
 
 		IGenericClient client = myFhirContext.newRestfulGenericClient(myServerBase);
 		Parameters inParameters = inParams.asParametersResource();
@@ -180,28 +190,33 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		// Assert Merged Patient
 		Patient mergedPatient = (Patient) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
 		List<Identifier> identifiers = mergedPatient.getIdentifier();
-		assertThat(identifiers).hasSize(5);
-		assertThat(identifiers)
-			.extracting(Identifier::getSystem)
-			.containsExactlyInAnyOrder("SYS1A", "SYS1B", "SYS2A", "SYS2B", "SYSC");
-		assertThat(identifiers)
-			.extracting(Identifier::getValue)
-			.containsExactlyInAnyOrder("VAL1A", "VAL1B", "VAL2A", "VAL2B", "VALC");
-
+		if (withInputResultPatient) {
+			assertThat(identifiers).hasSize(1);
+			assertThat(identifiers.get(0).getSystem()).isEqualTo("SYS1A");
+			assertThat(identifiers.get(0).getValue()).isEqualTo("VAL1A");
+		} else {
+			assertThat(identifiers).hasSize(5);
+			assertThat(identifiers)
+				.extracting(Identifier::getSystem)
+				.containsExactlyInAnyOrder("SYS1A", "SYS1B", "SYS2A", "SYS2B", "SYSC");
+			assertThat(identifiers)
+				.extracting(Identifier::getValue)
+				.containsExactlyInAnyOrder("VAL1A", "VAL1B", "VAL2A", "VAL2B", "VALC");
+		}
 		if (!withDelete) {
 			// assert source has link to target
-			Patient source = myPatientDao.read(sourcePatId, mySrd);
+			Patient source = myPatientDao.read(mySourcePatId, mySrd);
 			assertThat(source.getLink())
 				.hasSize(1)
 				.element(0)
 				.extracting(link -> link.getOther().getReferenceElement())
-				.isEqualTo(targetPatId);
+				.isEqualTo(myTargetPatId);
 		}
 
 
 		// FIXME KHS assert on these three
 
-		Bundle bundle = fetchBundle(myServerBase + "/" + targetPatId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(myServerBase + "/" + myTargetPatId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
 		assertNull(bundle.getLink("next"));
 
@@ -213,15 +228,15 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Found IDs: {}", actual);
 
 		if (withDelete) {
-			assertThat(actual).doesNotContain(sourcePatId);
+			assertThat(actual).doesNotContain(mySourcePatId);
 		}
-		assertThat(actual).contains(encId1);
-		assertThat(actual).contains(encId2);
-		assertThat(actual).contains(orgId);
-		assertThat(actual).contains(taskId);
+		assertThat(actual).contains(myEncId1);
+		assertThat(actual).contains(myEncId2);
+		assertThat(actual).contains(myOrgId);
+		assertThat(actual).contains(myTaskId);
 		assertThat(actual).containsAll(myObsIds);
-		assertThat(actual).contains(targetPatId);
-		assertThat(actual).contains(targetEnc1);
+		assertThat(actual).contains(myTargetPatId);
+		assertThat(actual).contains(myTargetEnc1);
 	}
 
 	@Test
@@ -264,7 +279,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		Type sourcePatientIdentifier;
 		Type targetPatient;
 		Type targetPatientIdentifier;
-		Patient resultResource;
+		Patient resultPatient;
 		Boolean preview;
 		Boolean deleteSource;
 
@@ -282,8 +297,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			if (targetPatientIdentifier != null) {
 				inParams.addParameter().setName("target-patient-identifier").setValue(targetPatientIdentifier);
 			}
-			if (resultResource != null) {
-				inParams.addParameter().setName("result-patient").setResource(resultResource);
+			if (resultPatient != null) {
+				inParams.addParameter().setName("result-patient").setResource(resultPatient);
 			}
 			if (preview != null) {
 				inParams.addParameter().setName("preview").setValue(new BooleanType(preview));
