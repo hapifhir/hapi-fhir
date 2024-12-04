@@ -337,9 +337,37 @@ public class ResourceMergeService {
 		return theTargetResource;
 	}
 
+	/**
+	 * Checks if theIdentifiers contains theIdentifier using equalsDeep
+	 * @param theIdentifiers the list of identifiers
+	 * @param theIdentifier the identifier to check
+	 * @return true if theIdentifiers contains theIdentifier, false otherwise
+	 */
+	private boolean containsIdentifier(List<Identifier> theIdentifiers, Identifier theIdentifier) {
+		for (Identifier identifier : theIdentifiers) {
+			if (identifier.equalsDeep(theIdentifier)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Copies each identifier from theSourceResource to theTargetResource, after checking that theTargetResource does
+	 * not already contain the source identifier
+	 * @param theSourceResource the source resource to copy identifiers from
+	 * @param theTargetResource the target resource to copy identifiers to
+	 */
 	private void copyIdentifiers(Patient theSourceResource, Patient theTargetResource) {
-		// should we check if the target already has the identifier we are copying to not duplicate it?
-		theSourceResource.getIdentifier().forEach(theTargetResource::addIdentifier);
+		if (theSourceResource.hasIdentifier()) {
+			List<Identifier> sourceIdentifiers = theSourceResource.getIdentifier();
+			List<Identifier> targetIdentifiers = theTargetResource.getIdentifier();
+			for (Identifier sourceIdentifier : sourceIdentifiers) {
+				if (!containsIdentifier(targetIdentifiers, sourceIdentifier)) {
+					theTargetResource.addIdentifier(sourceIdentifier);
+				}
+			}
+		}
 	}
 
 	private Patient updateResource(Patient theResource, RequestDetails theRequestDetails) {
