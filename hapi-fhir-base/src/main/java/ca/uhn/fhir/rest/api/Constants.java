@@ -344,8 +344,6 @@ public class Constants {
 
 	public static final String OPENTELEMETRY_BASE_NAME = "io.hapifhir";
 
-	public static final String PARAM_NEW_REFERENCE_TARGET_ID = "newReferenceTargetId";
-
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
 		CHARSET_US_ASCII = StandardCharsets.ISO_8859_1;
