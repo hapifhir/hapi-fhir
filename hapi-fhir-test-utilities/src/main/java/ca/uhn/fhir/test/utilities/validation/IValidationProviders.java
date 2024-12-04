@@ -85,8 +85,12 @@ public interface IValidationProviders {
 			myTerminologyResourceMap.put(theUrl, theResource);
 		}
 
+		protected void addVersionedTerminologyResource(String theUrl, String theVersion, T theResource) {
+			myTerminologyResourceMap.put(theUrl + "|" + theVersion, theResource);
+		}
 		public abstract T addTerminologyResource(String theUrl);
 
+		public abstract T addTerminologyResource(String theUrl, String theVersion);
 		protected IBaseParameters getTerminologyResponse(String theOperation, String theUrl, String theCode) throws Exception {
 			String inputKey = getInputKey(theOperation, theUrl, theCode);
 			if (myExceptionMap.containsKey(inputKey)) {

@@ -94,7 +94,7 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		final String classSystem = "http://terminology.hl7.org/CodeSystem/v3-ActCode";
 		final String identifierTypeSystem = "http://terminology.hl7.org/CodeSystem/v2-0203";
 
-		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/encounter-status", "http://hl7.org/fhir/encounter-status", statusCode, "validation/encounter/validateCode-ValueSet-encounter-status.json");
+		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/encounter-status",  "4.0.1","http://hl7.org/fhir/encounter-status", statusCode, "validation/encounter/validateCode-ValueSet-encounter-status.json");
 		setupValueSetValidateCode("http://terminology.hl7.org/ValueSet/v3-ActEncounterCode", "http://terminology.hl7.org/CodeSystem/v3-ActCode", classCode, "validation/encounter/validateCode-ValueSet-v3-ActEncounterCode.json");
 		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/identifier-type", "http://hl7.org/fhir/identifier-type", identifierTypeCode, "validation/encounter/validateCode-ValueSet-identifier-type.json");
 
@@ -138,7 +138,7 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		final String loincSystem = "http://loinc.org";
 		final String system = "http://fhir.infoway-inforoute.ca/io/psca/CodeSystem/ICD9CM";
 
-		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/observation-status", statusSystem, statusCode, "validation/observation/validateCode-ValueSet-observation-status.json");
+		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/observation-status", "4.0.1", statusSystem, statusCode, "validation/observation/validateCode-ValueSet-observation-status.json");
 		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/observation-codes", loincSystem, statusCode, "validation/observation/validateCode-ValueSet-codes.json");
 
 		setupCodeSystemValidateCode(statusSystem, statusCode, "validation/observation/validateCode-CodeSystem-observation-status.json");
@@ -171,7 +171,7 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		final String statusSystem = "http://hl7.org/fhir/event-status";
 		final String snomedSystem = "http://snomed.info/sct";
 
-		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/event-status", statusSystem, statusCode, "validation/procedure/validateCode-ValueSet-event-status.json");
+		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/event-status", "4.0.1", statusSystem, statusCode, "validation/procedure/validateCode-ValueSet-event-status.json");
 		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/procedure-code", snomedSystem, procedureCode1, "validation/procedure/validateCode-ValueSet-procedure-code-valid.json");
 		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/procedure-code", snomedSystem, procedureCode2, "validation/procedure/validateCode-ValueSet-procedure-code-invalid.json");
 
@@ -213,7 +213,7 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		final String snomedSystem = "http://snomed.info/sct";
 		final String absentUnknownSystem = "http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips";
 
-		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/event-status", statusSystem, statusCode, "validation/procedure/validateCode-ValueSet-event-status.json");
+		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/event-status", "4.0.1", statusSystem, statusCode, "validation/procedure/validateCode-ValueSet-event-status.json");
 		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/procedure-code", snomedSystem, procedureCode, "validation/procedure/validateCode-ValueSet-procedure-code-invalid-slice.json");
 		setupValueSetValidateCode("http://hl7.org/fhir/uv/ips/ValueSet/absent-or-unknown-procedures-uv-ips", absentUnknownSystem, procedureCode, "validation/procedure/validateCode-ValueSet-absent-or-unknown-procedure.json");
 
@@ -245,6 +245,13 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		// which also attempts a validateCode against the CodeSystem after the validateCode against the ValueSet
 	}
 
+	private void setupValueSetValidateCode(String theUrl, String theVersion, String theSystem, String theCode, String theTerminologyResponseFile) {
+		ValueSet valueSet = myValueSetProvider.addTerminologyResource(theUrl, theVersion);
+		myValueSetProvider.addTerminologyResource(theSystem, theVersion);
+		myValueSetProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, valueSet.getUrl(), theCode, ourCtx, theTerminologyResponseFile);
+
+		valueSet.getCompose().addInclude().setSystem(theSystem);
+	}
 	private void setupCodeSystemValidateCode(String theUrl, String theCode, String theTerminologyResponseFile) {
 		CodeSystem codeSystem = myCodeSystemProvider.addTerminologyResource(theUrl);
 		myCodeSystemProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, codeSystem.getUrl(), theCode, ourCtx, theTerminologyResponseFile);
