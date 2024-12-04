@@ -239,8 +239,24 @@ public class ProviderConstants {
 	 * Operation name for the "$export-poll-status" operation
 	 */
 	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
+
 	/**
 	 * Operation name for the "$export" operation
 	 */
 	public static final String OPERATION_EXPORT = "$export";
+
+	/**
+	 * Operation name for the "$replace-references" operation
+	 */
+	public static final String OPERATION_REPLACE_REFERENCES = "$replace-references";
+
+	/**
+	 * Parameter for source reference of the "$replace-references" operation
+	 */
+	public static final String PARAM_SOURCE_REFERENCE_ID = "sourceReferenceId";
+
+	/**
+	 * Parameter for target reference of the "$replace-references" operation
+	 */
+	public static final String PARAM_TARGET_REFERENCE_ID = "targetReferenceId";
 }
