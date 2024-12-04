@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -30,6 +31,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +54,7 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_RESULT_PATIENT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -81,10 +84,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	@RegisterExtension
 	static MyExceptionHandler ourExceptionHandler = new MyExceptionHandler();
 
-	@BeforeEach
-	public void beforeDisableResultReuse() {
-		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
-	}
+	IGenericClient myFhirClient;
 
 	@Override
 	@AfterEach
@@ -98,13 +98,15 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setAllowMultipleDelete(true);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
-		myStorageSettings.setAllowMultipleDelete(true);
+		myFhirClient = myFhirContext.newRestfulGenericClient(myServerBase);
 
 		Organization org = new Organization();
 		org.setName("an org");
-		myOrgId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		myOrgId = myFhirClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
 		ourLog.info("OrgId: {}", myOrgId);
 
 		Patient patient1 = new Patient();
@@ -112,44 +114,44 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		patient1.addIdentifier(pat1IdentifierA);
 		patient1.addIdentifier(pat1IdentifierB);
 		patient1.addIdentifier(patBothIdentifierC);
-		mySourcePatId = myClient.create().resource(patient1).execute().getId().toUnqualifiedVersionless();
+		mySourcePatId = myFhirClient.create().resource(patient1).execute().getId().toUnqualifiedVersionless();
 
 		Patient patient2 = new Patient();
 		patient2.addIdentifier(pat2IdentifierA);
 		patient2.addIdentifier(pat2IdentifierB);
 		patient2.addIdentifier(patBothIdentifierC);
 		patient2.getManagingOrganization().setReferenceElement(myOrgId);
-		myTargetPatId = myClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless();
+		myTargetPatId = myFhirClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc1 = new Encounter();
 		enc1.setStatus(EncounterStatus.CANCELLED);
 		enc1.getSubject().setReferenceElement(mySourcePatId);
 		enc1.getServiceProvider().setReferenceElement(myOrgId);
-		mySourceEncId1 = myClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless();
+		mySourceEncId1 = myFhirClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc2 = new Encounter();
 		enc2.setStatus(EncounterStatus.ARRIVED);
 		enc2.getSubject().setReferenceElement(mySourcePatId);
 		enc2.getServiceProvider().setReferenceElement(myOrgId);
-		mySourceEncId2 = myClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless();
+		mySourceEncId2 = myFhirClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless();
 
 		Task task = new Task();
 		task.setStatus(Task.TaskStatus.COMPLETED);
 		task.getOwner().setReferenceElement(mySourcePatId);
-		mySourceTaskId = myClient.create().resource(task).execute().getId().toUnqualifiedVersionless();
+		mySourceTaskId = myFhirClient.create().resource(task).execute().getId().toUnqualifiedVersionless();
 
 		Encounter targetEnc1 = new Encounter();
 		targetEnc1.setStatus(EncounterStatus.ARRIVED);
 		targetEnc1.getSubject().setReferenceElement(myTargetPatId);
 		targetEnc1.getServiceProvider().setReferenceElement(myOrgId);
-		this.myTargetEnc1 = myClient.create().resource(targetEnc1).execute().getId().toUnqualifiedVersionless();
+		this.myTargetEnc1 = myFhirClient.create().resource(targetEnc1).execute().getId().toUnqualifiedVersionless();
 
 		mySourceObsIds = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
 			Observation obs = new Observation();
 			obs.getSubject().setReferenceElement(mySourcePatId);
 			obs.setStatus(ObservationStatus.FINAL);
-			IIdType obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
+			IIdType obsId = myFhirClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 			mySourceObsIds.add(obsId);
 		}
 
@@ -185,9 +187,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			inParams.preview = true;
 		}
 
-		IGenericClient client = myFhirContext.newRestfulGenericClient(myServerBase);
 		Parameters inParameters = inParams.asParametersResource();
-		Parameters outParams = client.operation()
+		Parameters outParams = myFhirClient.operation()
 			.onType("Patient")
 			.named(OPERATION_MERGE)
 			.withParameters(inParameters)
@@ -287,21 +288,91 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@ParameterizedTest
+	@CsvSource({
+		// withDelete, withInputResultPatient, withPreview
+		"true, true, true",
+		"true, false, true",
+		"false, true, true",
+		"false, false, true",
+		"true, true, false",
+		"true, false, false",
+		"false, true, false",
+		"false, false, false",
+	})
+	public void testMultipleTargetMatchesFails(boolean withDelete, boolean withInputResultPatient, boolean withPreview) throws Exception {
+		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
+		inParams.sourcePatient = new Reference().setReferenceElement(mySourcePatId);
+		inParams.targetPatientIdentifier = patBothIdentifierC;
+		inParams.deleteSource = withDelete;
+		if (withInputResultPatient) {
+			inParams.resultPatient = myResultPatient;
+		}
+		if (withPreview) {
+			inParams.preview = true;
+		}
+
+
+		Parameters inParameters = inParams.asParametersResource();
+
+		assertUnprocessibleEntityWithMessage(myFhirClient, inParameters, "Multiple resources found matching the identifier(s) specified in 'target-patient-identifier'");
+	}
+
+
+	@ParameterizedTest
+	@CsvSource({
+		// withDelete, withInputResultPatient, withPreview
+		"true, true, true",
+		"true, false, true",
+		"false, true, true",
+		"false, false, true",
+		"true, true, false",
+		"true, false, false",
+		"false, true, false",
+		"false, false, false",
+	})
+	public void testMultipleSourceMatchesFails(boolean withDelete, boolean withInputResultPatient, boolean withPreview) throws Exception {
+		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
+		inParams.sourcePatientIdentifier = patBothIdentifierC;
+		inParams.targetPatient = new Reference().setReferenceElement(mySourcePatId);
+		inParams.deleteSource = withDelete;
+		if (withInputResultPatient) {
+			inParams.resultPatient = myResultPatient;
+		}
+		if (withPreview) {
+			inParams.preview = true;
+		}
+
+		Parameters inParameters = inParams.asParametersResource();
+
+		assertUnprocessibleEntityWithMessage(myFhirClient, inParameters, "Multiple resources found matching the identifier(s) specified in 'source-patient-identifier'");
+	}
+
+	private static void assertUnprocessibleEntityWithMessage(IGenericClient client, Parameters inParameters, String theExpectedMessage) {
+		assertThatThrownBy(() ->
+			client.operation()
+				.onType("Patient")
+				.named(OPERATION_MERGE)
+				.withParameters(inParameters)
+				.execute())
+			.isInstanceOf(UnprocessableEntityException.class)
+			.extracting(e -> extractFailureMessage((UnprocessableEntityException) e))
+			.isEqualTo(theExpectedMessage);
+	}
+
 	@Test
 	void test_MissingRequiredParameters_Returns400BadRequest() {
 		Parameters inParams = new Parameters();
 
-		IGenericClient client = myFhirContext.newRestfulGenericClient(myServerBase);
-
-		InvalidRequestException thrown = assertThrows(InvalidRequestException.class, () -> client.operation()
+		assertThatThrownBy(() -> myFhirClient.operation()
 			.onType("Patient")
 			.named(OPERATION_MERGE)
 			.withParameters(inParams)
 			.returnResourceType(Parameters.class)
 			.execute()
-		);
-
-		assertThat(thrown.getStatusCode()).isEqualTo(400);
+		).isInstanceOf(InvalidRequestException.class)
+			.extracting(e -> ((InvalidRequestException) e).getStatusCode())
+			.isEqualTo(400);
 	}
 
 	// FIXME KHS look at PatientEverythingR4Test for ideas for other tests
@@ -362,13 +433,18 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		@Override
 		public void handleTestExecutionException(ExtensionContext theExtensionContext, Throwable theThrowable) throws Throwable {
 			if (theThrowable instanceof BaseServerResponseException ex) {
-				String body = ex.getResponseBody();
-				Parameters outParams = ourFhirContext.newJsonParser().parseResource(Parameters.class, body);
-				OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
-				String message = outcome.getIssue().stream().map(issue -> issue.getDiagnostics()).collect(Collectors.joining(", "));
-				throw InvalidRequestException.class.getDeclaredConstructor(String.class, Throwable.class).newInstance(message, ex);
+				String message = extractFailureMessage(ex);
+				throw ex.getClass().getDeclaredConstructor(String.class, Throwable.class).newInstance(message, ex);
 			}
 			throw theThrowable;
 		}
+	}
+
+	private static @NotNull String extractFailureMessage(BaseServerResponseException ex) {
+		String body = ex.getResponseBody();
+		Parameters outParams = ourFhirContext.newJsonParser().parseResource(Parameters.class, body);
+		OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		String message = outcome.getIssue().stream().map(issue -> issue.getDiagnostics()).collect(Collectors.joining(", "));
+		return message;
 	}
 }
