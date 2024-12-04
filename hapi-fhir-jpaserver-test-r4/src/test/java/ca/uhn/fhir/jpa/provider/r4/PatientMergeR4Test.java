@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -35,6 +36,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -58,14 +60,14 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	static final Identifier pat2IdentifierB = new Identifier().setSystem("SYS2B").setValue("VAL2B");
 	static final Identifier patBothIdentifierC = new Identifier().setSystem("SYSC").setValue("VALC");
 
-	String orgId;
-	String sourcePatId;
-	String taskId;
-	String encId1;
-	String encId2;
-	ArrayList<String> myObsIds;
-	String targetPatId;
-	String targetEnc1;
+	IIdType orgId;
+	IIdType sourcePatId;
+	IIdType taskId;
+	IIdType encId1;
+	IIdType encId2;
+	ArrayList<IIdType> myObsIds;
+	IIdType targetPatId;
+	IIdType targetEnc1;
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
@@ -90,52 +92,52 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		Organization org = new Organization();
 		org.setName("an org");
-		orgId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
+		orgId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
 		ourLog.info("OrgId: {}", orgId);
 
 		Patient patient1 = new Patient();
-		patient1.getManagingOrganization().setReference(orgId);
+		patient1.getManagingOrganization().setReferenceElement(orgId);
 		patient1.addIdentifier(pat1IdentifierA);
 		patient1.addIdentifier(pat1IdentifierB);
 		patient1.addIdentifier(patBothIdentifierC);
-		sourcePatId = myClient.create().resource(patient1).execute().getId().toUnqualifiedVersionless().getValue();
+		sourcePatId = myClient.create().resource(patient1).execute().getId().toUnqualifiedVersionless();
 
 		Patient patient2 = new Patient();
 		patient2.addIdentifier(pat2IdentifierA);
 		patient2.addIdentifier(pat2IdentifierB);
 		patient1.addIdentifier(patBothIdentifierC);
-		patient2.getManagingOrganization().setReference(orgId);
-		targetPatId = myClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless().getValue();
+		patient2.getManagingOrganization().setReferenceElement(orgId);
+		targetPatId = myClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc1 = new Encounter();
 		enc1.setStatus(EncounterStatus.CANCELLED);
-		enc1.getSubject().setReference(sourcePatId);
-		enc1.getServiceProvider().setReference(orgId);
-		encId1 = myClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless().getValue();
+		enc1.getSubject().setReferenceElement(sourcePatId);
+		enc1.getServiceProvider().setReferenceElement(orgId);
+		encId1 = myClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc2 = new Encounter();
 		enc2.setStatus(EncounterStatus.ARRIVED);
-		enc2.getSubject().setReference(sourcePatId);
-		enc2.getServiceProvider().setReference(orgId);
-		encId2 = myClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless().getValue();
+		enc2.getSubject().setReferenceElement(sourcePatId);
+		enc2.getServiceProvider().setReferenceElement(orgId);
+		encId2 = myClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless();
 
 		Task task = new Task();
 		task.setStatus(Task.TaskStatus.COMPLETED);
-		task.getOwner().setReference(sourcePatId);
-		taskId = myClient.create().resource(task).execute().getId().toUnqualifiedVersionless().getValue();
+		task.getOwner().setReferenceElement(sourcePatId);
+		taskId = myClient.create().resource(task).execute().getId().toUnqualifiedVersionless();
 
 		Encounter targetEnc1 = new Encounter();
 		targetEnc1.setStatus(EncounterStatus.ARRIVED);
-		targetEnc1.getSubject().setReference(targetPatId);
-		targetEnc1.getServiceProvider().setReference(orgId);
-		this.targetEnc1 = myClient.create().resource(targetEnc1).execute().getId().toUnqualifiedVersionless().getValue();
+		targetEnc1.getSubject().setReferenceElement(targetPatId);
+		targetEnc1.getServiceProvider().setReferenceElement(orgId);
+		this.targetEnc1 = myClient.create().resource(targetEnc1).execute().getId().toUnqualifiedVersionless();
 
 		myObsIds = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
 			Observation obs = new Observation();
-			obs.getSubject().setReference(sourcePatId);
+			obs.getSubject().setReferenceElement(sourcePatId);
 			obs.setStatus(ObservationStatus.FINAL);
-			String obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
+			IIdType obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 			myObsIds.add(obsId);
 		}
 
@@ -145,8 +147,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testMergeWithoutResult(boolean withDelete) throws Exception {
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
-		inParams.sourcePatient = new Reference().setReference(sourcePatId);
-		inParams.targetPatient = new Reference().setReference(targetPatId);
+		inParams.sourcePatient = new Reference().setReferenceElement(sourcePatId);
+		inParams.targetPatient = new Reference().setReferenceElement(targetPatId);
 		inParams.deleteSource = withDelete;
 
 		IGenericClient client = myFhirContext.newRestfulGenericClient(myServerBase);
@@ -158,6 +160,14 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.returnResourceType(Parameters.class)
 			.execute();
 
+		assertThat(outParams.getParameter()).hasSize(3);
+
+		// Assert income
+		Parameters input = (Parameters) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_INPUT).getResource();
+		assertTrue(input.equalsDeep(inParameters));
+
+
+		// Assert outcome
 		OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
 		List<OperationOutcome.OperationOutcomeIssueComponent> issues = outcome.getIssue();
 		assertThat(issues).hasSize(1);
@@ -165,18 +175,22 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertEquals("Merge operation completed successfully.", issue.getDiagnostics());
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
 
+		// Assert Merged Patient
 		Patient mergedPatient = (Patient) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
-
-		// FIXME KHS change assert order once it stops failing here.
 		List<Identifier> identifiers = mergedPatient.getIdentifier();
 		assertThat(identifiers).hasSize(5);
 
 		// FIXME KHS assert on identifier contents
 
-		assertThat(outParams.getParameter()).hasSize(3);
-		Parameters input = (Parameters) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_INPUT).getResource();
+		if (!withDelete) {
+			// assert source has link to target
+			Patient source = myPatientDao.read(sourcePatId, mySrd);
+			List<Patient.PatientLinkComponent> links = source.getLink();
+			assertThat(links).hasSize(1);
+			Patient.PatientLinkComponent link = links.get(0);
+			assertThat(link.getOther().getReferenceElement()).isEqualTo(targetPatId);
+		}
 
-		assertTrue(input.equalsDeep(inParameters));
 
 		// FIXME KHS assert on these three
 
@@ -184,9 +198,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		assertNull(bundle.getLink("next"));
 
-		Set<String> actual = new TreeSet<>();
+		Set<IIdType> actual = new HashSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
-			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless());
 		}
 
 		ourLog.info("Found IDs: {}", actual);
@@ -198,7 +212,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual).contains(encId2);
 		assertThat(actual).contains(orgId);
 		assertThat(actual).contains(taskId);
-		assertThat(actual).contains(myObsIds.toArray(new String[0]));
+		assertThat(actual).containsAll(myObsIds);
 		assertThat(actual).contains(targetPatId);
 		assertThat(actual).contains(targetEnc1);
 	}
