@@ -51,8 +51,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	}
 
 	@Override
-	public IBaseParameters replaceReferences(
-		String theSourceRefId, String theTargetRefId, RequestDetails theRequest) {
+	public IBaseParameters replaceReferences(String theSourceRefId, String theTargetRefId, RequestDetails theRequest) {
 
 		validateParameters(theSourceRefId, theTargetRefId);
 		IIdType sourceRefId = new IdDt(theSourceRefId);
@@ -118,18 +117,30 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 			for (ResourceReferenceInfo refInfo :
 					myFhirContext.newTerser().getAllResourceReferences(referencingResource)) {
 
-				addReferenceToMapIfForSource(theCurrentReferencedResourceId, theNewReferencedResourceId, referencingResource, refInfo, paramsMap);
+				addReferenceToMapIfForSource(
+						theCurrentReferencedResourceId,
+						theNewReferencedResourceId,
+						referencingResource,
+						refInfo,
+						paramsMap);
 			}
 		}
 		return paramsMap;
 	}
 
-	private void addReferenceToMapIfForSource(IIdType theCurrentReferencedResourceId, IIdType theNewReferencedResourceId, IBaseResource referencingResource, ResourceReferenceInfo refInfo, Map<String, Map<IIdType, Parameters>> paramsMap) {
+	private void addReferenceToMapIfForSource(
+			IIdType theCurrentReferencedResourceId,
+			IIdType theNewReferencedResourceId,
+			IBaseResource referencingResource,
+			ResourceReferenceInfo refInfo,
+			Map<String, Map<IIdType, Parameters>> paramsMap) {
 		if (!refInfo.getResourceReference()
 				.getReferenceElement()
 				.toUnqualifiedVersionless()
 				.getValueAsString()
-				.equals(theCurrentReferencedResourceId.toUnqualifiedVersionless().getValueAsString())) {
+				.equals(theCurrentReferencedResourceId
+						.toUnqualifiedVersionless()
+						.getValueAsString())) {
 
 			// not a reference to the resource being replaced
 			return;
@@ -137,9 +148,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		Parameters.ParametersParameterComponent paramComponent = createReplaceReferencePatchOperation(
 				referencingResource.fhirType() + "." + refInfo.getName(),
-				new Reference(theNewReferencedResourceId
-						.toUnqualifiedVersionless()
-						.getValueAsString()));
+				new Reference(
+						theNewReferencedResourceId.toUnqualifiedVersionless().getValueAsString()));
 
 		paramsMap
 				// preserve order, in case it could matter
@@ -160,11 +170,12 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return operation;
 	}
 
-	private List<? extends IBaseResource> findReferencingResourceIds(IIdType theSourceRefIdParam, RequestDetails theRequest) {
+	private List<? extends IBaseResource> findReferencingResourceIds(
+			IIdType theSourceRefIdParam, RequestDetails theRequest) {
 		IFhirResourceDao<?> dao = getDao(theSourceRefIdParam.getResourceType());
 		if (dao == null) {
 			throw new InternalErrorException(
-				Msg.code(2582) + "Couldn't obtain DAO for resource type" + theSourceRefIdParam.getResourceType());
+					Msg.code(2582) + "Couldn't obtain DAO for resource type" + theSourceRefIdParam.getResourceType());
 		}
 
 		SearchParameterMap parameterMap = new SearchParameterMap();
@@ -177,14 +188,15 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return myDaoRegistry.getResourceDao(theResourceName);
 	}
 
-	private void validateParameters(
-		String theSourceRefIdParam, String theTargetRefIdParam) {
+	private void validateParameters(String theSourceRefIdParam, String theTargetRefIdParam) {
 		if (isBlank(theSourceRefIdParam)) {
-			throw new InvalidParameterException(Msg.code(2583) + "Parameter '" + PARAM_SOURCE_REFERENCE_ID + "' is blank");
+			throw new InvalidParameterException(
+					Msg.code(2583) + "Parameter '" + PARAM_SOURCE_REFERENCE_ID + "' is blank");
 		}
 
 		if (isBlank(theTargetRefIdParam)) {
-			throw new InvalidParameterException(Msg.code(2584) + "Parameter '" + PARAM_TARGET_REFERENCE_ID + "' is blank");
+			throw new InvalidParameterException(
+					Msg.code(2584) + "Parameter '" + PARAM_TARGET_REFERENCE_ID + "' is blank");
 		}
 
 		IIdType sourceId = new IdDt(theSourceRefIdParam);
