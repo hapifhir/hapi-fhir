@@ -248,7 +248,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			}
 
 			if (output.size() < remainingIds.size()) {
-				throw new ResourceNotFoundException("");
+				throw new ResourceNotFoundException(Msg.code(1100) + remainingIds.get(0));
 			}
 		}
 
