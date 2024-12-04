@@ -7,6 +7,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -32,7 +33,6 @@ import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -70,10 +70,10 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	IIdType myOrgId;
 	IIdType mySourcePatId;
-	IIdType myTaskId;
-	IIdType myEncId1;
-	IIdType myEncId2;
-	ArrayList<IIdType> myObsIds;
+	IIdType mySourceTaskId;
+	IIdType mySourceEncId1;
+	IIdType mySourceEncId2;
+	ArrayList<IIdType> mySourceObsIds;
 	IIdType myTargetPatId;
 	IIdType myTargetEnc1;
 	Patient myResultPatient;
@@ -125,18 +125,18 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		enc1.setStatus(EncounterStatus.CANCELLED);
 		enc1.getSubject().setReferenceElement(mySourcePatId);
 		enc1.getServiceProvider().setReferenceElement(myOrgId);
-		myEncId1 = myClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless();
+		mySourceEncId1 = myClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc2 = new Encounter();
 		enc2.setStatus(EncounterStatus.ARRIVED);
 		enc2.getSubject().setReferenceElement(mySourcePatId);
 		enc2.getServiceProvider().setReferenceElement(myOrgId);
-		myEncId2 = myClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless();
+		mySourceEncId2 = myClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless();
 
 		Task task = new Task();
 		task.setStatus(Task.TaskStatus.COMPLETED);
 		task.getOwner().setReferenceElement(mySourcePatId);
-		myTaskId = myClient.create().resource(task).execute().getId().toUnqualifiedVersionless();
+		mySourceTaskId = myClient.create().resource(task).execute().getId().toUnqualifiedVersionless();
 
 		Encounter targetEnc1 = new Encounter();
 		targetEnc1.setStatus(EncounterStatus.ARRIVED);
@@ -144,13 +144,13 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		targetEnc1.getServiceProvider().setReferenceElement(myOrgId);
 		this.myTargetEnc1 = myClient.create().resource(targetEnc1).execute().getId().toUnqualifiedVersionless();
 
-		myObsIds = new ArrayList<>();
+		mySourceObsIds = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
 			Observation obs = new Observation();
 			obs.getSubject().setReferenceElement(mySourcePatId);
 			obs.setStatus(ObservationStatus.FINAL);
 			IIdType obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
-			myObsIds.add(obsId);
+			mySourceObsIds.add(obsId);
 		}
 
 		myResultPatient = new Patient();
@@ -163,19 +163,26 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@CsvSource({
-		// withDelete, withInputResultPatient
-		"true, true",
-		"true, false",
-		"false, true",
-		"false, false",
+		// withDelete, withInputResultPatient, withPreview
+		"true, true, true",
+		"true, false, true",
+		"false, true, true",
+		"false, false, true",
+		"true, true, false",
+		"true, false, false",
+		"false, true, false",
+		"false, false, false",
 	})
-	public void testMergeWithoutResult(boolean withDelete, boolean withInputResultPatient) throws Exception {
+	public void testMergeWithoutResult(boolean withDelete, boolean withInputResultPatient, boolean withPreview) throws Exception {
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
 		inParams.sourcePatient = new Reference().setReferenceElement(mySourcePatId);
 		inParams.targetPatient = new Reference().setReferenceElement(myTargetPatId);
 		inParams.deleteSource = withDelete;
 		if (withInputResultPatient) {
 			inParams.resultPatient = myResultPatient;
+		}
+		if (withPreview) {
+			inParams.preview = true;
 		}
 
 		IGenericClient client = myFhirContext.newRestfulGenericClient(myServerBase);
@@ -191,7 +198,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Assert income
 		Parameters input = (Parameters) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_INPUT).getResource();
-		if (withInputResultPatient)	{ // if the following assert fails, check that these two patients are identical
+		if (withInputResultPatient) { // if the following assert fails, check that these two patients are identical
 			Patient p1 = (Patient) inParameters.getParameter(OPERATION_MERGE_RESULT_PATIENT).getResource();
 			Patient p2 = (Patient) input.getParameter(OPERATION_MERGE_RESULT_PATIENT).getResource();
 			ourLog.info(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
@@ -201,13 +208,23 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Assert outcome
 		OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
-		assertThat(outcome.getIssue())
-			.hasSize(1)
-			.element(0)
-			.satisfies(issue -> {
-				assertThat(issue.getDiagnostics()).isEqualTo("Merge operation completed successfully.");
-				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-			});
+		if (withPreview) {
+			assertThat(outcome.getIssue())
+				.hasSize(1)
+				.element(0)
+				.satisfies(issue -> {
+					assertThat(issue.getDiagnostics()).isEqualTo("Preview only merge operation - no issues detected");
+					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+				});
+		} else {
+			assertThat(outcome.getIssue())
+				.hasSize(1)
+				.element(0)
+				.satisfies(issue -> {
+					assertThat(issue.getDiagnostics()).isEqualTo("Merge operation completed successfully.");
+					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+				});
+		}
 
 		// Assert Merged Patient
 		Patient mergedPatient = (Patient) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
@@ -225,7 +242,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 				.extracting(Identifier::getValue)
 				.containsExactlyInAnyOrder("VAL1A", "VAL1B", "VAL2A", "VAL2B", "VALC");
 		}
-		if (!withDelete) {
+		if (!withPreview && !withDelete) {
 			// assert source has link to target
 			Patient source = myPatientDao.read(mySourcePatId, mySrd);
 			assertThat(source.getLink())
@@ -246,16 +263,27 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Found IDs: {}", actual);
 
-		if (withDelete) {
+		if (withPreview) {
 			assertThat(actual).doesNotContain(mySourcePatId);
+			assertThat(actual).doesNotContain(mySourceEncId1);
+			assertThat(actual).doesNotContain(mySourceEncId2);
+			assertThat(actual).contains(myOrgId);
+			assertThat(actual).doesNotContain(mySourceTaskId);
+			assertThat(actual).doesNotContainAnyElementsOf(mySourceObsIds);
+			assertThat(actual).contains(myTargetPatId);
+			assertThat(actual).contains(myTargetEnc1);
+		} else {
+			if (withDelete) {
+				assertThat(actual).doesNotContain(mySourcePatId);
+			}
+			assertThat(actual).contains(mySourceEncId1);
+			assertThat(actual).contains(mySourceEncId2);
+			assertThat(actual).contains(myOrgId);
+			assertThat(actual).contains(mySourceTaskId);
+			assertThat(actual).containsAll(mySourceObsIds);
+			assertThat(actual).contains(myTargetPatId);
+			assertThat(actual).contains(myTargetEnc1);
 		}
-		assertThat(actual).contains(myEncId1);
-		assertThat(actual).contains(myEncId2);
-		assertThat(actual).contains(myOrgId);
-		assertThat(actual).contains(myTaskId);
-		assertThat(actual).containsAll(myObsIds);
-		assertThat(actual).contains(myTargetPatId);
-		assertThat(actual).contains(myTargetEnc1);
 	}
 
 	@Test
@@ -332,7 +360,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	static class MyExceptionHandler implements TestExecutionExceptionHandler {
 		@Override
 		public void handleTestExecutionException(ExtensionContext theExtensionContext, Throwable theThrowable) throws Throwable {
-			if (theThrowable instanceof InvalidRequestException ex) {
+			if (theThrowable instanceof BaseServerResponseException ex) {
 				String body = ex.getResponseBody();
 				Parameters outParams = ourFhirContext.newJsonParser().parseResource(Parameters.class, body);
 				OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
