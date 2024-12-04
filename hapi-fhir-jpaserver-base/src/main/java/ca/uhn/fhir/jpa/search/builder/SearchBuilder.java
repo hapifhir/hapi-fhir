@@ -2894,7 +2894,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						.setOffset(offset)
 						.setMaxResultsRequested(theMaxResultsToFetch)
 						.setDoCountOnlyFlag(false)
-						.setDeduplicateInDBFlag(offset != null);
+						.setDeduplicateInDBFlag(properties.isDeduplicateInDBFlag() || offset != null);
 				myQueryList = createQuery(myParams, properties, myRequest, mySearchRuntimeDetails);
 			}
 
