@@ -421,6 +421,8 @@ class ModelScanner {
 				}
 				Set<String> providesMembershipInCompartments;
 				providesMembershipInCompartments = new HashSet<>();
+				//FIXME GGG/JA, this is all hardcoded from the core. Once Runtime Sps are loaded, we are kinda hosed...
+
 				for (Compartment next : searchParam.providesMembershipIn()) {
 					if (paramType != RestSearchParameterTypeEnum.REFERENCE) {
 						StringBuilder b = new StringBuilder();
@@ -439,6 +441,11 @@ class ModelScanner {
 						name = name.substring("Base FHIR compartment definition for ".length());
 					}
 					providesMembershipInCompartments.add(name);
+				}
+
+				//TODO GGG: Write a good javadoc about why we do this at all.
+				if (searchParam.name().equals("patient") && searchParam.path().equals("Device.patient")) {
+					providesMembershipInCompartments.add("Patient");
 				}
 
 				List<RuntimeSearchParam.Component> components = null;
