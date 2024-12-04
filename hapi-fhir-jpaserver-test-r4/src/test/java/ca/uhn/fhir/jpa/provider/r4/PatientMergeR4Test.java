@@ -191,7 +191,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Assert income
 		Parameters input = (Parameters) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_INPUT).getResource();
-		{ // if the following assert fails, check that these two patients are identical
+		if (withInputResultPatient)	{ // if the following assert fails, check that these two patients are identical
 			Patient p1 = (Patient) inParameters.getParameter(OPERATION_MERGE_RESULT_PATIENT).getResource();
 			Patient p2 = (Patient) input.getParameter(OPERATION_MERGE_RESULT_PATIENT).getResource();
 			ourLog.info(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
@@ -236,8 +236,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 				.isEqualTo(myTargetPatId);
 		}
 
-
-		// FIXME KHS assert on these three
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + myTargetPatId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
