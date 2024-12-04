@@ -69,12 +69,19 @@ public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProv
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 
+	@Autowired
+	private IReplaceReferencesSvc myReplaceReferencesSvc;
+
 	public BaseJpaSystemProvider() {
 		// nothing
 	}
 
 	protected IResourceReindexingSvc getResourceReindexingSvc() {
 		return myResourceReindexingSvc;
+	}
+
+	public IReplaceReferencesSvc getReplaceReferencesSvc() {
+		return myReplaceReferencesSvc;
 	}
 
 	@History
