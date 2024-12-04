@@ -58,6 +58,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.List;
@@ -67,6 +68,9 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
+
+	@Autowired
+	private IReplaceReferencesSvc myReplaceReferencesSvc;
 
 	/**
 	 * Patient/123/$everything
@@ -295,7 +299,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					theResultPatient);
 
 			IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) getDao();
-			ResourceMergeService resourceMergeService = new ResourceMergeService(dao);
+			ResourceMergeService resourceMergeService = new ResourceMergeService(dao, myReplaceReferencesSvc);
 
 			FhirContext fhirContext = dao.getContext();
 
@@ -359,8 +363,8 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 		mergeOperationParameters.setDeleteSource(theDeleteSource != null && theDeleteSource.getValue());
 
 		if (theResultPatient != null) {
-			// pass in a copy of the result patient as we don't want it to be modified as it will be
-			// returned back to the client
+			// pass in a copy of the result patient as we don't want it to be modified. It will be
+			// returned back to the client as part of the response.
 			mergeOperationParameters.setResultResource(((Patient) theResultPatient).copy());
 		}
 

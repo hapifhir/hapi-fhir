@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.merge;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -56,10 +57,13 @@ public class ResourceMergeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceMergeService.class);
 
 	private final IFhirResourceDaoPatient<Patient> myDao;
+	private final IReplaceReferencesSvc myReplaceReferencesSvc;
 	private final FhirContext myFhirContext;
 
-	public ResourceMergeService(IFhirResourceDaoPatient<Patient> thePatientDao) {
+	public ResourceMergeService(
+			IFhirResourceDaoPatient<Patient> thePatientDao, IReplaceReferencesSvc theReplaceReferencesSvc) {
 		myDao = thePatientDao;
+		myReplaceReferencesSvc = theReplaceReferencesSvc;
 		myFhirContext = myDao.getContext();
 	}
 
@@ -145,7 +149,7 @@ public class ResourceMergeService {
 			return;
 		}
 
-		// TODO Emre: do the actual ref updates
+		myReplaceReferencesSvc.replaceReferences(sourceResource.getId(), targetResource.getId(), theRequestDetails);
 
 		Patient patientToUpdate = prepareTargetPatientForUpdate(
 				targetResource, sourceResource, resultResource, theMergeOperationParameters.getDeleteSource());

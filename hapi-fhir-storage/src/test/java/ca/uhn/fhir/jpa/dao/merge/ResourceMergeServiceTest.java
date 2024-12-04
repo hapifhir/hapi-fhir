@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.merge;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -51,6 +52,10 @@ public class ResourceMergeServiceTest {
 
 	@Mock
 	private IFhirResourceDaoPatient<Patient> myDaoMock;
+
+	@Mock
+	IReplaceReferencesSvc myReplaceReferencesSvcMock;
+
 	@Mock
 	RequestDetails myRequestDetailsMock;
 
@@ -61,7 +66,7 @@ public class ResourceMergeServiceTest {
 	@BeforeEach
 	void setup() {
 		when(myDaoMock.getContext()).thenReturn(myFhirContext);
-		myResourceMergeService = new ResourceMergeService(myDaoMock);
+		myResourceMergeService = new ResourceMergeService(myDaoMock, myReplaceReferencesSvcMock);
 	}
 
 	// SUCCESS CASES
