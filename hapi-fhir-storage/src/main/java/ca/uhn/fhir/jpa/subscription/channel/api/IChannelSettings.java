@@ -24,5 +24,5 @@ public interface IChannelSettings {
 
 	boolean isUseJacksonMessageConverter();
 
-	boolean isUsePrefixChannelName();
+	boolean isUseChannelNamePrefix();
 }
