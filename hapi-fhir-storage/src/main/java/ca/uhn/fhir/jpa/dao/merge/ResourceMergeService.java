@@ -147,18 +147,18 @@ public class ResourceMergeService {
 
 		// TODO Emre: do the actual ref updates
 
+		Patient patientToUpdate = prepareTargetPatientForUpdate(
+				targetResource, sourceResource, resultResource, theMergeOperationParameters.getDeleteSource());
+		// update the target patient resource after the references are updated
+		Patient targetPatientAfterUpdate = updateResource(patientToUpdate, theRequestDetails);
+		theMergeOutcome.setUpdatedTargetResource(targetPatientAfterUpdate);
+
 		if (theMergeOperationParameters.getDeleteSource()) {
 			deleteResource(sourceResource, theRequestDetails);
 		} else {
 			prepareSourceResourceForUpdate(sourceResource, targetResource);
 			updateResource(sourceResource, theRequestDetails);
 		}
-
-		Patient patientToUpdate = prepareTargetPatientForUpdate(
-				targetResource, sourceResource, resultResource, theMergeOperationParameters.getDeleteSource());
-		// update the target patient resource after the references are updated
-		Patient targetPatientAfterUpdate = updateResource(patientToUpdate, theRequestDetails);
-		theMergeOutcome.setUpdatedTargetResource(targetPatientAfterUpdate);
 
 		addInfoToOperationOutcome(operationOutcome, "Merge operation completed successfully.");
 	}
@@ -323,16 +323,23 @@ public class ResourceMergeService {
 		}
 
 		// client did not provide a result resource, we should update the target resource,
-		// after adding the replaces link to the target resource, if the source resource is not to be deleted
+		// add the replaces link to the target resource, if the source resource is not to be deleted
 		if (!theDeleteSource) {
-			// add the replaces link only if the source is not deleted
 			theTargetResource
 					.addLink()
 					.setType(Patient.LinkType.REPLACES)
 					.setOther(new Reference(theSourceResource.getId()));
 		}
 
+		// copy all identifiers from the source to the target
+		copyIdentifiers(theSourceResource, theTargetResource);
+
 		return theTargetResource;
+	}
+
+	private void copyIdentifiers(Patient theSourceResource, Patient theTargetResource) {
+		// should we check if the target already has the identifier we are copying to not duplicate it?
+		theSourceResource.getIdentifier().forEach(theTargetResource::addIdentifier);
 	}
 
 	private Patient updateResource(Patient theResource, RequestDetails theRequestDetails) {
