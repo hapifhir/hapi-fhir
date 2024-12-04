@@ -146,7 +146,7 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 	@Operation(name = ProviderConstants.OPERATION_REPLACE_REFERENCES, global = true)
 	@Description(
 			value =
-					"This operation replaces referenced resources by a target resource instance of the same previously pointed type.",
+					"This operation searches for all references matching the provided id and updates them to references to the provided newReferenceTargetId.",
 			shortDefinition = "Repoints referencing resources to another resources instance")
 	public IBaseParameters replaceReferences(
 			@OperationParam(name = ProviderConstants.PARAM_SOURCE_REFERENCE_ID) String theSourceId,
