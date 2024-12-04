@@ -59,7 +59,6 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -214,35 +213,42 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		Validate.isTrue(!theIds.isEmpty(), "theIds must not be empty");
 
 		Map<String, JpaPid> retVals = new HashMap<>();
-		for (String id : theIds) {
-			JpaPid retVal;
-			if (!idRequiresForcedId(id)) {
+
+		ArrayList<IIdType> remainingIds = new ArrayList<>();
+		for (Iterator<String> iter = theIds.iterator(); iter.hasNext(); ) {
+			String nextId = iter.next();
+			IIdType nextIdType = myFhirCtx.getVersion().newIdType();
+			nextIdType.setValue(theResourceType + "/" + nextId);
+
+			if (!theExcludeDeleted && !idRequiresForcedId(nextId)) {
 				// is already a PID
-				retVal = JpaPid.fromId(Long.parseLong(id));
-				retVals.put(id, retVal);
-			} else {
-				// is a forced id
-				// we must resolve!
-				if (myStorageSettings.isDeleteEnabled()) {
-					retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theExcludeDeleted)
-							.getPersistentId();
-					retVals.put(id, retVal);
-				} else {
-					// fetch from cache... adding to cache if not available
-					String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, id);
-					retVal = myMemoryCacheService.getThenPutAfterCommit(
-							MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, t -> {
-								List<IIdType> ids = Collections.singletonList(new IdType(theResourceType, id));
-								// fetches from cache using a function that checks cache first...
-								List<JpaPid> resolvedIds =
-										resolveResourcePersistentIdsWithCache(theRequestPartitionId, ids);
-								if (resolvedIds.isEmpty()) {
-									throw new ResourceNotFoundException(Msg.code(1100) + ids.get(0));
-								}
-								return resolvedIds.get(0);
-							});
-					retVals.put(id, retVal);
+				JpaPid pid = JpaPid.fromId(Long.parseLong(nextId));
+				pid.setAssociatedResourceId(nextIdType);
+				retVals.put(nextId, pid);
+				continue;
+			} else if (!myStorageSettings.isDeleteEnabled()) {
+				String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, nextId);
+				JpaPid pid = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key);
+				if (pid != null) {
+					pid.setAssociatedResourceId(nextIdType);
+					retVals.put(nextId, pid);
+					continue;
 				}
+			}
+
+			remainingIds.add(nextIdType);
+		}
+
+		if (!remainingIds.isEmpty()) {
+			List<JpaPid> output = new ArrayList<>();
+			doResolvePersistentIds(theRequestPartitionId, remainingIds, output);
+			for (JpaPid next : output) {
+				assert next.getAssociatedResourceId() != null;
+				retVals.put(next.getAssociatedResourceId().getIdPart(), next);
+			}
+
+			if (output.size() < remainingIds.size()) {
+				throw new ResourceNotFoundException("");
 			}
 		}
 

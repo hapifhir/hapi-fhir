@@ -1133,6 +1133,7 @@ public abstract class BaseTransactionProcessor {
 			 * Loop through the request and process any entries of type
 			 * PUT, POST or DELETE
 			 */
+			String previousVerb = null;
 			for (int i = 0; i < theEntries.size(); i++) {
 				if (i % 250 == 0) {
 					ourLog.debug("Processed {} non-GET entries out of {} in transaction", i, theEntries.size());
@@ -1144,6 +1145,11 @@ public abstract class BaseTransactionProcessor {
 				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds);
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
+				if (previousVerb != null && !previousVerb.equals(verb)) {
+					handleVerbChangeInTransactionWriteOperations();
+				}
+				previousVerb = verb;
+
 				String resourceType = res != null ? myContext.getResourceType(res) : null;
 				Integer order = theOriginalRequestOrder.get(nextReqEntry);
 				IBase nextRespEntry =
@@ -1402,6 +1408,8 @@ public abstract class BaseTransactionProcessor {
 				theTransactionStopWatch.endCurrentTask();
 			}
 
+			postTransactionProcess(theTransactionDetails);
+
 			/*
 			 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
 			 * if something else has a reference to it.. Unless the thing that has a reference to it
@@ -1500,6 +1508,22 @@ public abstract class BaseTransactionProcessor {
 				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}
 		}
+	}
+
+	/**
+	 * Subclasses may override this in order to invoke specific operations when
+	 * we're finished handling all the write entries in the transaction bundle
+	 * with a given verb.
+	 */
+	protected void handleVerbChangeInTransactionWriteOperations() {
+		// nothing
+	}
+
+	/**
+	 * Implement to handle post transaction processing
+	 */
+	protected void postTransactionProcess(TransactionDetails theTransactionDetails) {
+		// nothing
 	}
 
 	/**

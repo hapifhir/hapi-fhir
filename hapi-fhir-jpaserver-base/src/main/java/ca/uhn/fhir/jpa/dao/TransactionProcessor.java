@@ -30,21 +30,23 @@ import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.PersistenceException;
@@ -83,6 +85,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]+[?][a-z0-9-]+=[^&,]+$");
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
+	public static final int CONDITIONAL_URL_FETCH_CHUNK_SIZE = 100;
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
@@ -107,9 +110,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
-
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionSvc;
 
 	public void setEntityManagerForUnitTest(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
@@ -146,25 +146,51 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			List<IBase> theEntries,
 			StopWatch theTransactionStopWatch) {
 
-		ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
-		RequestPartitionId requestPartitionId =
-				super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
+		/*
+		 * We temporarily set the flush mode for the duration of the DB transaction
+		 * from the default of AUTO to the temporary value of COMMIT here. We do this
+		 * because in AUTO mode, if any SQL SELECTs are required during the
+		 * processing of an individual transaction entry, the server will flush the
+		 * pending INSERTs/UPDATEs to the database before executing the SELECT.
+		 * This hurts performance since we don't get the benefit of batching those
+		 * write operations as much as possible. The tradeoff here is that we
+		 * could theoretically have transaction operations which try to read
+		 * data previously written in the same transaction, and they won't see it.
+		 * This shouldn't actually be an issue anyhow - we pre-fetch conditional
+		 * URLs and reference targets at the start of the transaction. But this
+		 * tradeoff still feels worth it, since the most common use of transactions
+		 * is for fast writing of data.
+		 *
+		 * Note that it's probably not necessary to reset it back, it should
+		 * automatically go back to the default value after the transaction but
+		 * we reset it just to be safe.
+		 */
+		FlushModeType initialFlushMode = myEntityManager.getFlushMode();
+		try {
+			myEntityManager.setFlushMode(FlushModeType.COMMIT);
 
-		if (requestPartitionId != null) {
-			preFetch(theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
+			ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
+			RequestPartitionId requestPartitionId =
+					super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
+
+			if (requestPartitionId != null) {
+				preFetch(theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
+			}
+
+			return super.doTransactionWriteOperations(
+					theRequest,
+					theActionName,
+					theTransactionDetails,
+					theAllIds,
+					theIdSubstitutions,
+					theIdToPersistedOutcome,
+					theResponse,
+					theOriginalRequestOrder,
+					theEntries,
+					theTransactionStopWatch);
+		} finally {
+			myEntityManager.setFlushMode(initialFlushMode);
 		}
-
-		return super.doTransactionWriteOperations(
-				theRequest,
-				theActionName,
-				theTransactionDetails,
-				theAllIds,
-				theIdSubstitutions,
-				theIdToPersistedOutcome,
-				theResponse,
-				theOriginalRequestOrder,
-				theEntries,
-				theTransactionStopWatch);
 	}
 
 	private void preFetch(
@@ -199,24 +225,60 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			RequestPartitionId theRequestPartitionId,
 			Set<String> foundIds,
 			List<Long> idsToPreFetch) {
-		List<IIdType> idsToPreResolve = new ArrayList<>();
+
+		FhirTerser terser = myFhirContext.newTerser();
+
+		Set<IIdType> idsToPreResolve = new HashSet<>();
+		Set<IIdType> idsToPreResolveIdOnly = new HashSet<>();
+
 		for (IBase nextEntry : theEntries) {
 			IBaseResource resource = theVersionAdapter.getResource(nextEntry);
 			if (resource != null) {
 				String verb = theVersionAdapter.getEntryRequestVerb(myFhirContext, nextEntry);
+
+				/*
+				 * Pre-fetch any resources that are potentially being directly updated by ID
+				 */
 				if ("PUT".equals(verb) || "PATCH".equals(verb)) {
 					String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
-					if (countMatches(requestUrl, '/') == 1 && countMatches(requestUrl, '?') == 0) {
+					if (countMatches(requestUrl, '?') == 0) {
 						IIdType id = myFhirContext.getVersion().newIdType();
 						id.setValue(requestUrl);
-						idsToPreResolve.add(id);
+						IIdType unqualifiedVersionless = id.toUnqualifiedVersionless();
+						idsToPreResolve.add(unqualifiedVersionless);
+					}
+				}
+
+				/*
+				 * Pre-fetch any resources that are referred to directly by ID (don't replace
+				 * the TRUE flag with FALSE in case we're updating a resource but also
+				 * pointing to that resource elsewhere in the bundle)
+				 */
+				if ("PUT".equals(verb) || "POST".equals(verb)) {
+					for (ResourceReferenceInfo referenceInfo : terser.getAllResourceReferences(resource)) {
+						IIdType reference = referenceInfo.getResourceReference().getReferenceElement();
+						if (reference != null
+								&& !reference.isLocal()
+								&& !reference.isUuid()
+								&& reference.hasResourceType()
+								&& reference.hasIdPart()
+								&& !reference.getValue().contains("?")) {
+							idsToPreResolveIdOnly.add(reference.toUnqualifiedVersionless());
+						}
 					}
 				}
 			}
 		}
-		List<JpaPid> outcome =
-				myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, idsToPreResolve).stream()
-						.collect(Collectors.toList());
+
+		idsToPreResolveIdOnly.removeAll(idsToPreResolve);
+
+		/*
+		 * Pre-resolve any IDs that we'll need to prefetch entirely (this applies to
+		 * resources that are being updated by the transaction itself, so we need to
+		 * load everything about the resource)
+		 */
+		List<JpaPid> outcome = myIdHelperService.resolveResourcePersistentIdsWithCache(
+				theRequestPartitionId, List.copyOf(idsToPreResolve));
 		for (JpaPid next : outcome) {
 			foundIds.add(
 					next.getAssociatedResourceId().toUnqualifiedVersionless().getValue());
@@ -231,6 +293,38 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				theTransactionDetails.addResolvedResourceId(next.toUnqualifiedVersionless(), null);
 			}
 		}
+
+		/*
+		 * Pre-resolve any IDs that are references to other resources outside of the
+		 * transaction bundle. These ones don't need to be fully loaded since we're not
+		 * updating them, we just need to verify that they exist and aren't deleted
+		 * so that we know we can link against them. Doing this here means that
+		 * we're not resolving them one-by-one.
+		 */
+		ListMultimap<String, String> typeToIds =
+				MultimapBuilder.hashKeys().arrayListValues().build();
+		for (IIdType next : idsToPreResolveIdOnly) {
+			typeToIds.put(next.getResourceType(), next.getIdPart());
+		}
+		for (String resourceType : typeToIds.keySet()) {
+			List<String> ids = typeToIds.get(resourceType);
+			Map<String, JpaPid> resolvedIds =
+					myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, resourceType, ids, true);
+			for (Map.Entry<String, JpaPid> entries : resolvedIds.entrySet()) {
+				IIdType id = myFhirContext.getVersion().newIdType();
+				id.setValue(resourceType + "/" + entries.getKey());
+				JpaPid pid = entries.getValue();
+				pid.setAssociatedResourceId(id);
+				theTransactionDetails.addResolvedResourceId(id, pid);
+			}
+		}
+	}
+
+	@Override
+	protected void handleVerbChangeInTransactionWriteOperations() {
+		super.handleVerbChangeInTransactionWriteOperations();
+
+		myEntityManager.flush();
 	}
 
 	private void preFetchConditionalUrls(
@@ -274,10 +368,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 		}
 
-		new QueryChunker<MatchUrlToResolve>()
+		new TaskChunker<MatchUrlToResolve>()
 				.chunk(
 						searchParameterMapsToResolve,
-						100,
+						CONDITIONAL_URL_FETCH_CHUNK_SIZE,
 						map -> preFetchSearchParameterMaps(
 								theTransactionDetails, theRequestPartitionId, map, idsToPreFetch));
 	}

@@ -100,6 +100,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -246,6 +247,68 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
 
+	}
+
+	@Test
+	public void testTransactionWithManyResourceLinks() {
+		// Setup
+		List<IIdType> patientIds = new ArrayList<>();
+		List<IIdType> orgIds = new ArrayList<>();
+		List<IIdType> coverageIds = new ArrayList<>();
+		AtomicInteger counter = new AtomicInteger(0);
+		for (int i = 0; i < 10; i++) {
+			// Server-assigned numeric ID
+			coverageIds.add(createResource("Coverage", withStatus("active")));
+			// Client-assigned string ID
+			patientIds.add(createPatient(withId(UUID.randomUUID().toString()), withActiveTrue()));
+			orgIds.add(createOrganization(withId(UUID.randomUUID().toString()), withName("FOO")));
+		}
+
+		Supplier<ExplanationOfBenefit> creator = () -> {
+			int nextCount = counter.getAndIncrement();
+			assert nextCount < coverageIds.size();
+
+			ExplanationOfBenefit retVal = new ExplanationOfBenefit();
+			retVal.getMeta().addTag().setSystem("http://foo").setCode(Integer.toString(nextCount % 3));
+			retVal.setId(UUID.randomUUID().toString());
+			retVal.setPatient(new Reference(patientIds.get(nextCount)));
+			retVal.setInsurer(new Reference(orgIds.get(nextCount)));
+			retVal.addInsurance().setCoverage(new Reference(coverageIds.get(nextCount)));
+			return retVal;
+		};
+
+		Supplier<Bundle> transactionCreator = () -> {
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			bb.addTransactionUpdateEntry(creator.get());
+			bb.addTransactionUpdateEntry(creator.get());
+			bb.addTransactionUpdateEntry(creator.get());
+			bb.addTransactionUpdateEntry(creator.get());
+			bb.addTransactionUpdateEntry(creator.get());
+			return bb.getBundleTyped();
+		};
+
+		// Test
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, transactionCreator.get());
+		myCaptureQueriesListener.logInsertQueries();
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		assertEquals(33, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(7, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		// Test again
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, transactionCreator.get());
+
+		// Verify again
+		assertEquals(30, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesRepeated());
 	}
 
 	/*
@@ -2793,15 +2856,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		Bundle output = mySystemDao.transaction(mySrd, input);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		// Lookup the two existing IDs to make sure they are legit
+		// No lookups expected because deletes are disabled
+
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(10, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
-		// Do the same a second time - Deletes are enabled so we expect to have to resolve the
-		// targets again to make sure they weren't deleted
+		// Do the same a second time
 
 		input = new Bundle();
 
@@ -2866,7 +2929,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(10, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
@@ -3164,7 +3227,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		mySystemDao.transaction(mySrd, inputBundle);
 		assertEquals(21, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
-		assertEquals(78, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(7, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 
 		// Now run the transaction again - It should not need too many SELECTs
