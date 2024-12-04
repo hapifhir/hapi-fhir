@@ -169,26 +169,33 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Assert outcome
 		OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
-		List<OperationOutcome.OperationOutcomeIssueComponent> issues = outcome.getIssue();
-		assertThat(issues).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = issues.get(0);
-		assertEquals("Merge operation completed successfully.", issue.getDiagnostics());
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+		assertThat(outcome.getIssue())
+			.hasSize(1)
+			.element(0)
+			.satisfies(issue -> {
+				assertThat(issue.getDiagnostics()).isEqualTo("Merge operation completed successfully.");
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+			});
 
 		// Assert Merged Patient
 		Patient mergedPatient = (Patient) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
 		List<Identifier> identifiers = mergedPatient.getIdentifier();
 		assertThat(identifiers).hasSize(5);
-
-		// FIXME KHS assert on identifier contents
+		assertThat(identifiers)
+			.extracting(Identifier::getSystem)
+			.containsExactlyInAnyOrder("SYS1A", "SYS1B", "SYS2A", "SYS2B", "SYSC");
+		assertThat(identifiers)
+			.extracting(Identifier::getValue)
+			.containsExactlyInAnyOrder("VAL1A", "VAL1B", "VAL2A", "VAL2B", "VALC");
 
 		if (!withDelete) {
 			// assert source has link to target
 			Patient source = myPatientDao.read(sourcePatId, mySrd);
-			List<Patient.PatientLinkComponent> links = source.getLink();
-			assertThat(links).hasSize(1);
-			Patient.PatientLinkComponent link = links.get(0);
-			assertThat(link.getOther().getReferenceElement()).isEqualTo(targetPatId);
+			assertThat(source.getLink())
+				.hasSize(1)
+				.element(0)
+				.extracting(link -> link.getOther().getReferenceElement())
+				.isEqualTo(targetPatId);
 		}
 
 
