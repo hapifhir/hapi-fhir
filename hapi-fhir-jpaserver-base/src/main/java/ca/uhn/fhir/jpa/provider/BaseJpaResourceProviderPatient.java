@@ -357,7 +357,12 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 		mergeOperationParameters.setTargetResource(theTargetPatient);
 		mergeOperationParameters.setPreview(thePreview != null && thePreview.getValue());
 		mergeOperationParameters.setDeleteSource(theDeleteSource != null && theDeleteSource.getValue());
-		mergeOperationParameters.setResultResource(theResultPatient);
+
+		if (theResultPatient != null) {
+			// pass in a copy of the result patient as we don't want it to be modified as it will be
+			// returned back to the client
+			mergeOperationParameters.setResultResource(((Patient) theResultPatient).copy());
+		}
 
 		return mergeOperationParameters;
 	}
