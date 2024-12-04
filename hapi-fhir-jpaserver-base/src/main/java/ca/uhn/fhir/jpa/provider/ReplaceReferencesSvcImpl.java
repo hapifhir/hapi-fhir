@@ -36,6 +36,8 @@ import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_PATH;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_TYPE;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_VALUE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.PARAM_SOURCE_REFERENCE_ID;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.PARAM_TARGET_REFERENCE_ID;
 import static software.amazon.awssdk.utils.StringUtils.isBlank;
 
 public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
@@ -50,14 +52,15 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	@Override
 	public IBaseParameters replaceReferences(
-			IIdType theCurrentTargetId, String theNewTargetId, RequestDetails theRequest) {
+		String theSourceRefId, String theTargetRefId, RequestDetails theRequest) {
 
-		validateParameters(theCurrentTargetId, theNewTargetId, theRequest);
-		IIdType newTargetId = new IdDt(theNewTargetId);
+		validateParameters(theSourceRefId, theTargetRefId);
+		IIdType sourceRefId = new IdDt(theSourceRefId);
+		IIdType targetRefId = new IdDt(theTargetRefId);
 
-		List<? extends IBaseResource> referencingResources = findReferencingResourceIds(theCurrentTargetId, theRequest);
+		List<? extends IBaseResource> referencingResources = findReferencingResourceIds(sourceRefId, theRequest);
 
-		return replaceReferencesInTransaction(referencingResources, theCurrentTargetId, newTargetId, theRequest);
+		return replaceReferencesInTransaction(referencingResources, sourceRefId, targetRefId, theRequest);
 	}
 
 	private IBaseParameters replaceReferencesInTransaction(
@@ -114,26 +117,35 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 			// resource can have more than one reference to the same target resource
 			for (ResourceReferenceInfo refInfo :
 					myFhirContext.newTerser().getAllResourceReferences(referencingResource)) {
-				// is this a reference to the target resource?
-				if (refInfo.getResourceReference()
-						.getReferenceElement()
-						.equals(theCurrentReferencedResourceId.toUnqualifiedVersionless())) {
 
-					Parameters.ParametersParameterComponent paramComponent = createReplaceReferencePatchOperation(
-							referencingResource.fhirType() + "." + refInfo.getName(),
-							new Reference(theNewReferencedResourceId
-									.toUnqualifiedVersionless()
-									.getValueAsString()));
-
-					paramsMap
-							// preserve order, in case it could matter
-							.computeIfAbsent(referencingResource.fhirType(), k -> new LinkedHashMap<>())
-							.computeIfAbsent(referencingResource.getIdElement(), k -> new Parameters())
-							.addParameter(paramComponent);
-				}
+				addReferenceToMapIfForSource(theCurrentReferencedResourceId, theNewReferencedResourceId, referencingResource, refInfo, paramsMap);
 			}
 		}
 		return paramsMap;
+	}
+
+	private void addReferenceToMapIfForSource(IIdType theCurrentReferencedResourceId, IIdType theNewReferencedResourceId, IBaseResource referencingResource, ResourceReferenceInfo refInfo, Map<String, Map<IIdType, Parameters>> paramsMap) {
+		if (!refInfo.getResourceReference()
+				.getReferenceElement()
+				.toUnqualifiedVersionless()
+				.getValueAsString()
+				.equals(theCurrentReferencedResourceId.toUnqualifiedVersionless().getValueAsString())) {
+
+			// not a reference to the resource being replaced
+			return;
+		}
+
+		Parameters.ParametersParameterComponent paramComponent = createReplaceReferencePatchOperation(
+				referencingResource.fhirType() + "." + refInfo.getName(),
+				new Reference(theNewReferencedResourceId
+						.toUnqualifiedVersionless()
+						.getValueAsString()));
+
+		paramsMap
+				// preserve order, in case it could matter
+				.computeIfAbsent(referencingResource.fhirType(), k -> new LinkedHashMap<>())
+				.computeIfAbsent(referencingResource.getIdElement(), k -> new Parameters())
+				.addParameter(paramComponent);
 	}
 
 	@Nonnull
@@ -148,17 +160,15 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return operation;
 	}
 
-	private List<? extends IBaseResource> findReferencingResourceIds(
-			IIdType theCurrentTargetIdParam, RequestDetails theRequest) {
-
-		IFhirResourceDao<?> dao = getDao(theRequest.getResourceName());
+	private List<? extends IBaseResource> findReferencingResourceIds(IIdType theSourceRefIdParam, RequestDetails theRequest) {
+		IFhirResourceDao<?> dao = getDao(theSourceRefIdParam.getResourceType());
 		if (dao == null) {
 			throw new InternalErrorException(
-					Msg.code(2582) + "Couldn't obtain DAO for resource type" + theRequest.getResourceName());
+				Msg.code(2582) + "Couldn't obtain DAO for resource type" + theSourceRefIdParam.getResourceType());
 		}
 
 		SearchParameterMap parameterMap = new SearchParameterMap();
-		parameterMap.add(PARAM_ID, new StringParam(theCurrentTargetIdParam.getValue()));
+		parameterMap.add(PARAM_ID, new StringParam(theSourceRefIdParam.getValue()));
 		parameterMap.addRevInclude(new Include("*"));
 		return dao.search(parameterMap, theRequest).getAllResources();
 	}
@@ -168,27 +178,30 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	}
 
 	private void validateParameters(
-			IIdType theCurrentTargetIdParam, String theNewTargetIdParam, RequestDetails theRequest) {
-		if (theCurrentTargetIdParam == null) {
-			throw new InvalidParameterException(Msg.code(2583) + "Parameter 'theCurrentTargetIdParam' is null");
+		String theSourceRefIdParam, String theTargetRefIdParam) {
+		if (isBlank(theSourceRefIdParam)) {
+			throw new InvalidParameterException(Msg.code(2583) + "Parameter '" + PARAM_SOURCE_REFERENCE_ID + "' is blank");
 		}
 
-		if (isBlank(theNewTargetIdParam)) {
-			throw new InvalidParameterException(Msg.code(2584) + "Parameter 'theNewTargetIdParam' is blank");
+		if (isBlank(theTargetRefIdParam)) {
+			throw new InvalidParameterException(Msg.code(2584) + "Parameter '" + PARAM_TARGET_REFERENCE_ID + "' is blank");
 		}
 
-		IIdType targetId = new IdDt(theNewTargetIdParam);
+		IIdType sourceId = new IdDt(theSourceRefIdParam);
+		if (isBlank(sourceId.getResourceType())) {
+			throw new InvalidParameterException(
+					Msg.code(2585) + "'" + PARAM_SOURCE_REFERENCE_ID + "' must be a resource type qualified id");
+		}
+
+		IIdType targetId = new IdDt(theTargetRefIdParam);
 		if (isBlank(targetId.getResourceType())) {
 			throw new InvalidParameterException(
-					Msg.code(2585) + "New reference id parameter must be a resource type qualified id");
-		}
-		if (!targetId.getResourceType().equals(theCurrentTargetIdParam.getResourceType())) {
-			throw new InvalidParameterException(
-					Msg.code(2586) + "Current and new references must be for the same resource type");
+					Msg.code(2586) + "'" + PARAM_TARGET_REFERENCE_ID + "' must be a resource type qualified id");
 		}
 
-		if (isBlank(theRequest.getResourceName())) {
-			throw new InvalidParameterException(Msg.code(2587) + "RequestDetails.resourceName must must be provided");
+		if (!targetId.getResourceType().equals(sourceId.getResourceType())) {
+			throw new InvalidParameterException(
+					Msg.code(2587) + "Source and target id parameters must be for the same resource type");
 		}
 	}
 }

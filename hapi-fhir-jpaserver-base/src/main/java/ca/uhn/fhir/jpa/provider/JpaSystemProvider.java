@@ -23,7 +23,6 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -35,7 +34,6 @@ import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.Collections;
@@ -151,10 +149,10 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 					"This operation replaces referenced resources by a target resource instance of the same previously pointed type.",
 			shortDefinition = "Repoints referencing resources to another resources instance")
 	public IBaseParameters replaceReferences(
-			@IdParam IIdType theId,
-			@OperationParam(name = ProviderConstants.PARAM_NEW_REFERENCE_TARGET_ID) String theNewId,
+			@OperationParam(name = ProviderConstants.PARAM_SOURCE_REFERENCE_ID) String theSourceId,
+			@OperationParam(name = ProviderConstants.PARAM_TARGET_REFERENCE_ID) String theTargetId,
 			RequestDetails theRequest) {
 
-		return getReplaceReferencesSvc().replaceReferences(theId, theNewId, theRequest);
+		return getReplaceReferencesSvc().replaceReferences(theSourceId, theTargetId, theRequest);
 	}
 }

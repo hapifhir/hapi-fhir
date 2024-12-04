@@ -251,8 +251,13 @@ public class ProviderConstants {
 	public static final String OPERATION_REPLACE_REFERENCES = "$replace-references";
 
 	/**
-	 * Parameter for the "$replace-references" operation
+	 * Parameter for source reference of the "$replace-references" operation
 	 */
-	public static final String PARAM_NEW_REFERENCE_TARGET_ID = "newReferenceTargetId";
+	public static final String PARAM_SOURCE_REFERENCE_ID = "sourceReferenceId";
+
+	/**
+	 * Parameter for target reference of the "$replace-references" operation
+	 */
+	public static final String PARAM_TARGET_REFERENCE_ID = "targetReferenceId";
 
 }
