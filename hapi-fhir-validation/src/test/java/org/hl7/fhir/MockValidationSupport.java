@@ -8,7 +8,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,28 +17,30 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+/**
+ * This class is a mock implementation of {@link IValidationSupport}. It is used
+ * in favour of Mockito mocks because the validator makes many many many (many) calls
+ * to the validation support module, and Mockito keeps details about each call in a
+ * threadlocal, leading to occasional OOM errors.
+ */
 public class MockValidationSupport implements IValidationSupport {
 	private static final Logger ourLog = LoggerFactory.getLogger(MockValidationSupport.class);
-	private final IValidationSupport myDefaultValidationSupport;
 	private final FhirContext myFhirContext;
 	private final ArrayList<String> myValidConcepts = new ArrayList<>();
 	private final Set<String> myValidSystems = new HashSet<>();
 	private final Set<String> myValidSystemsNotReturningIssues = new HashSet<>();
-	private final Map<String, ValueSet.ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion = new HashMap<>();
-	private HashMap<String, IBaseResource> myStructureDefinitions = new HashMap<>();
-	private HashMap<String, IBaseResource> myCodeSystems = new HashMap<>();
-	private HashMap<String, IBaseResource> myValueSets = new HashMap<>();
-	private HashMap<String, IBaseResource> myQuestionnaires = new HashMap<>();
-	private Set<String> mySupportedValueSets = new HashSet<>();
+	private final HashMap<String, IBaseResource> myStructureDefinitions = new HashMap<>();
+	private final HashMap<String, IBaseResource> myCodeSystems = new HashMap<>();
+	private final HashMap<String, IBaseResource> myValueSets = new HashMap<>();
+	private final HashMap<String, IBaseResource> myQuestionnaires = new HashMap<>();
+	private final Set<String> mySupportedValueSets = new HashSet<>();
 	private int myCountValidateCodeInValueSet;
 	private int myCountValidateCode;
 
 	public MockValidationSupport(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
-		myDefaultValidationSupport = myFhirContext.getValidationSupport();
 	}
 
 	@Override
@@ -72,10 +73,7 @@ public class MockValidationSupport implements IValidationSupport {
 
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
-		boolean retVal = false;
-		if (mySupportedValueSets.contains(theValueSetUrl)) {
-			retVal = true;
-		}
+		boolean retVal = mySupportedValueSets.contains(theValueSetUrl);
 		if (myValueSets.containsKey(theValueSetUrl)) {
 			retVal = true;
 		}
@@ -88,20 +86,6 @@ public class MockValidationSupport implements IValidationSupport {
 	public IBaseResource fetchValueSet(String theValueSetUrl) {
 		return myValueSets.get(theValueSetUrl);
 	}
-
-	//	@Nullable
-//	@Override
-//	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
-//		ValueSet arg = (ValueSet) theValueSetToExpand;
-//		ValueSet.ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
-//		if (retVal == null) {
-//			ValueSet expandedVs = (ValueSet) myDefaultValidationSupport.expandValueSet(new ValidationSupportContext(myDefaultValidationSupport), null, arg).getValueSet();
-//			retVal = expandedVs.getExpansion();
-//		}
-//		return new ValueSetExpansionOutcome(retVal);
-//
-//	}
-
 
 	@Nullable
 	@Override
@@ -154,12 +138,14 @@ public class MockValidationSupport implements IValidationSupport {
 		return myStructureDefinitions.get(theUrl);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Nullable
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
 		return (List<T>) new ArrayList<>(myStructureDefinitions.values());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Nullable
 	@Override
 	public <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
@@ -167,7 +153,7 @@ public class MockValidationSupport implements IValidationSupport {
 
 		String type = theClass != null ? myFhirContext.getResourceType(theClass) : null;
 
-		if (retVal == null && ("StructureDefinition".equals(type) || type == null)) {
+		if ("StructureDefinition".equals(type) || type == null) {
 			retVal = myStructureDefinitions.get(theUri);
 		}
 		if (retVal == null && ("ValueSet".equals(type) || type == null)) {
