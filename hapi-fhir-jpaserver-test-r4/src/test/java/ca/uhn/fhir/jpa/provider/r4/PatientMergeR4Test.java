@@ -199,7 +199,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 		assertTrue(input.equalsDeep(inParameters));
 
-
 		// Assert outcome
 		OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
 		assertThat(outcome.getIssue())
@@ -235,7 +234,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 				.extracting(link -> link.getOther().getReferenceElement())
 				.isEqualTo(myTargetPatId);
 		}
-
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + myTargetPatId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
