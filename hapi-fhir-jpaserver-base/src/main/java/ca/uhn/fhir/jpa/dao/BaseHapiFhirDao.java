@@ -53,7 +53,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -128,6 +127,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Repository;
 
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.XMLEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -138,8 +139,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
-import javax.xml.stream.events.Characters;
-import javax.xml.stream.events.XMLEvent;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEqualCollection;
@@ -561,7 +560,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				ResourceHistoryTable currentHistoryVersion = theEntity.getCurrentVersionEntity();
 				if (currentHistoryVersion == null) {
 					currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersion(
-							JpaPidNonPk.fromPid(theEntity.getId()), theEntity.getVersion());
+							theEntity.getId().toFk(), theEntity.getVersion());
 				}
 				if (currentHistoryVersion == null || !currentHistoryVersion.hasResource()) {
 					changed = true;
@@ -1296,7 +1295,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			 * in which case we'll still create a new one
 			 */
 			historyEntry = myResourceHistoryTableDao.findForIdAndVersion(
-					JpaPidNonPk.fromPid(theEntity.getResourceId()), resourceVersion - 1);
+					theEntity.getResourceId().toFk(), resourceVersion - 1);
 			if (historyEntry != null) {
 				theEntity.populateHistoryEntityVersionAndDates(historyEntry);
 				if (versionedTags && theEntity.isHasTags()) {

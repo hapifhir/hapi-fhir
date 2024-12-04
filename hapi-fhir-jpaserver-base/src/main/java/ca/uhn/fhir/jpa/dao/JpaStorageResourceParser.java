@@ -34,7 +34,7 @@ import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -183,14 +183,14 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			} else {
 				version = theEntity.getVersion();
 				history = myResourceHistoryTableDao.findForIdAndVersion(
-						JpaPidNonPk.fromPid(theEntity.getResourceId()), version);
+						theEntity.getResourceId().toFk(), version);
 				((ResourceTable) theEntity).setCurrentVersionEntity(history);
 
 				while (history == null) {
 					if (version > 1L) {
 						version--;
 						history = myResourceHistoryTableDao.findForIdAndVersion(
-								JpaPidNonPk.fromPid(theEntity.getResourceId()), version);
+								theEntity.getResourceId().toFk(), version);
 					} else {
 						return null;
 					}

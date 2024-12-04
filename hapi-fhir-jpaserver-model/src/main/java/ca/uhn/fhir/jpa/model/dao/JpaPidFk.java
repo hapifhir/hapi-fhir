@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * the {@literal @Id} or related annotations.
  */
 @Embeddable
-public class JpaPidNonPk implements Serializable {
+public class JpaPidFk implements Serializable {
 
 	@Column(name = "RES_ID", nullable = false)
 	private Long myId;
@@ -50,10 +50,10 @@ public class JpaPidNonPk implements Serializable {
 		if (this == theO) {
 			return true;
 		}
-		if (!(theO instanceof JpaPidNonPk)) {
+		if (!(theO instanceof JpaPidFk)) {
 			return false;
 		}
-		JpaPidNonPk jpaPid = (JpaPidNonPk) theO;
+		JpaPidFk jpaPid = (JpaPidFk) theO;
 		return Objects.equals(myId, jpaPid.myId) && Objects.equals(myPartitionIdValue, jpaPid.myPartitionIdValue);
 	}
 
@@ -78,25 +78,25 @@ public class JpaPidNonPk implements Serializable {
 		myPartitionIdValue = thePartitionId;
 	}
 
-	public static List<JpaPidNonPk> fromPids(List<JpaPid> thePids) {
-		return thePids.stream().map(JpaPidNonPk::fromPid).collect(Collectors.toList());
+	public static List<JpaPidFk> fromPids(List<JpaPid> thePids) {
+		return thePids.stream().map(JpaPid::toFk).collect(Collectors.toList());
 	}
 
-	public static JpaPidNonPk fromPid(JpaPid thePid) {
-		JpaPidNonPk retVal = new JpaPidNonPk();
+	public static JpaPidFk fromPid(JpaPid thePid) {
+		JpaPidFk retVal = new JpaPidFk();
 		retVal.setId(thePid.getId());
 		retVal.setPartitionId(thePid.getPartitionId());
 		return retVal;
 	}
 
-	public static JpaPidNonPk fromId(Long theId, Integer thePartitionId) {
-		JpaPidNonPk retVal = new JpaPidNonPk();
+	public static JpaPidFk fromId(Long theId, Integer thePartitionId) {
+		JpaPidFk retVal = new JpaPidFk();
 		retVal.setId(theId);
 		retVal.setPartitionId(thePartitionId);
 		return retVal;
 	}
 
-	public static JpaPidNonPk fromId(Long theId) {
+	public static JpaPidFk fromId(Long theId) {
 		return fromId(theId, null);
 	}
 }

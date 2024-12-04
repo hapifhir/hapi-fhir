@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -942,14 +942,14 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			ResourceTable table = myResourceTableDao.getReferenceById(JpaPid.fromId(idFoo, 1));
 			ResourceHistoryProvenanceEntity prov = new ResourceHistoryProvenanceEntity();
 			prov.setResourceTable(table);
-			prov.setResourceHistoryTable(myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromPid(table.getResourceId()), 1));
+			prov.setResourceHistoryTable(myResourceHistoryTableDao.findForIdAndVersion(table.getResourceId().toFk(), 1));
 			prov.setSourceUri("http://foo");
 			myResourceHistoryProvenanceTableDao.save(prov);
 
 			table = myResourceTableDao.getReferenceById(JpaPid.fromId(idBar, 1));
 			prov = new ResourceHistoryProvenanceEntity();
 			prov.setResourceTable(table);
-			prov.setResourceHistoryTable(myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromPid(table.getResourceId()), 1));
+			prov.setResourceHistoryTable(myResourceHistoryTableDao.findForIdAndVersion(table.getResourceId().toFk(), 1));
 			prov.setSourceUri("http://bar");
 			myResourceHistoryProvenanceTableDao.save(prov);
 		});

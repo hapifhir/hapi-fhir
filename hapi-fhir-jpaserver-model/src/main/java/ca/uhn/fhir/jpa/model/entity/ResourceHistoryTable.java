@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import jakarta.annotation.Nonnull;
@@ -110,7 +110,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	// @AttributeOverride(
 	//		name = "myPartitionIdValue",
 	//		column = @Column(name = "PARTITION_ID", insertable = false, updatable = false))
-	private JpaPidNonPk myResourcePid;
+	private JpaPidFk myResourcePid;
 
 	/**
 	 * This is here for sorting only, don't get or set this value
@@ -273,7 +273,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	private void initializeResourceId() {
 		if (myResourcePid == null) {
-			myResourcePid = new JpaPidNonPk();
+			myResourcePid = new JpaPidFk();
 		}
 	}
 

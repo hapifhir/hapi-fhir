@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -79,7 +79,7 @@ public class ResourceReindexer {
 					resource.getIdElement().getVersionIdPart(),
 					expectedVersion);
 			myResourceHistoryTableDao.updateVersion(
-					JpaPidNonPk.fromPid(theResourceTable.getId()), actualVersion, expectedVersion);
+					theResourceTable.getId().toFk(), actualVersion, expectedVersion);
 		}
 
 		doReindex(theResourceTable, resource);
