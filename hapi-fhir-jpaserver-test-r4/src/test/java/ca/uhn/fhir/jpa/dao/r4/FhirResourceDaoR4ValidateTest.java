@@ -1492,6 +1492,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 					return (OperationOutcome) e.getOperationOutcome();
 				}
 				break;
+			case RDF:
+				break;
+			case NDJSON:
+				break;
 		}
 
 		throw new IllegalStateException(); // shouldn't get here
@@ -1501,8 +1505,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	public void validateResource_withUnknownMetaProfileurl_validatesButLogsWarning() {
 		// setup
 		IParser parser = myFhirContext.newJsonParser();
-
-		myLogbackTestExtension.setUp(Level.WARN);
 
 		String obsStr ="""
 					{

@@ -157,6 +157,8 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, null);
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
+		logAllConcepts();
+		logAllConceptProperties();
 
 		Optional<Coding> propertyValue = findProperty(parameters, "SCALE_TYP");
 		assertThat(propertyValue).isPresent();

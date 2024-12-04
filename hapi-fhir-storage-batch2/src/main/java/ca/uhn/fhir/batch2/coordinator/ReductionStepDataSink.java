@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.progress.InstanceProgress;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
@@ -66,9 +67,10 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 		boolean changed = myJobPersistence.updateInstance(instanceId, instance -> {
 			Validate.validState(
 					StatusEnum.FINALIZE.equals(instance.getStatus()),
-					"Job %s must be in FINALIZE state.  In %s",
+					"Job %s must be in FINALIZE state.  In %s with update time %s",
 					instanceId,
-					instance.getStatus());
+					instance.getStatus(),
+					new InstantDt(instance.getUpdateTime()));
 
 			if (instance.getReport() != null) {
 				// last in wins - so we won't throw

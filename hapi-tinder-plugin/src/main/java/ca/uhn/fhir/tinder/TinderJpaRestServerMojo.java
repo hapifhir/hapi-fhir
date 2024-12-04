@@ -130,7 +130,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			baseResourceNames.removeAll(excludeResourceNames);
 		}
 
-		ourLog.info("Including the following resources: {}", baseResourceNames);
+		ourLog.debug("Including the following resources: {}", baseResourceNames);
 
 		File configPackageDirectoryBase =
 				new File(targetDirectory, configPackageBase.replace(".", File.separatorChar + ""));

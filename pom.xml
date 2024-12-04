@@ -125,7 +125,8 @@
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
 		<module>hapi-fhir-server-cds-hooks</module>
-	</modules>
+        <module>hapi-fhir-jpa-hibernate-services</module>
+    </modules>
 
 	<dependencies>
 		<dependency>
@@ -2637,23 +2638,6 @@
 							<exclude>ca/uhn/fhir/jpa/rp/dstu3/*.class</exclude>
 							<exclude>ca/uhn/fhir/jpa/rp/dstu2/*.class</exclude>
 						</excludes>
-					</configuration>
-				</plugin>
-
-				<!-- Generate the DDL schema files -->
-				<plugin>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>hapi-tinder-plugin</artifactId>
-					<version>7.7.10-SNAPSHOT</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>generate-ddl</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<skip>true</skip>
 					</configuration>
 				</plugin>
 

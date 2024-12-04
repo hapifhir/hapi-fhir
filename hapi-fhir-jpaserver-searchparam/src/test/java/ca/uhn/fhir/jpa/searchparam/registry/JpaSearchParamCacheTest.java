@@ -155,6 +155,14 @@ public class JpaSearchParamCacheTest {
 	}
 
 	private static class TestableJpaSearchParamCache extends JpaSearchParamCache {
+
+		/**
+		 * Constructor
+		 */
+		public TestableJpaSearchParamCache() {
+			super(new PartitionSettings());
+		}
+
 		public void setActiveComboSearchParams(Map<String, List<RuntimeSearchParam>> theActiveComboSearchParams){
 			myActiveComboSearchParams = theActiveComboSearchParams;
 		}

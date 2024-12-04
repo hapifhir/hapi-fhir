@@ -31,6 +31,10 @@ public interface IResourcePersistentId<T> {
 
 	T getId();
 
+	default Integer getPartitionId() {
+		return null;
+	}
+
 	Long getVersion();
 
 	/**

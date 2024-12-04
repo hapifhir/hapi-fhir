@@ -287,8 +287,8 @@ public class TermConceptMappingSvcImpl extends TermConceptClientMappingSvcImpl i
 
 	public void deleteConceptMap(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
-		Optional<TermConceptMap> optionalExistingTermConceptMapById =
-				myConceptMapDao.findTermConceptMapByResourcePid(theResourceTable.getId());
+		Optional<TermConceptMap> optionalExistingTermConceptMapById = myConceptMapDao.findTermConceptMapByResourcePid(
+				theResourceTable.getId().getId());
 
 		if (optionalExistingTermConceptMapById.isPresent()) {
 			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapById.get();

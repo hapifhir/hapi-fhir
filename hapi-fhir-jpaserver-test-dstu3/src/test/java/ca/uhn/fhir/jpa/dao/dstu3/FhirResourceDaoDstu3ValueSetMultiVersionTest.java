@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
@@ -20,7 +18,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -89,26 +88,26 @@ public class FhirResourceDaoDstu3ValueSetMultiVersionTest extends BaseJpaDstu3Te
 
 		Optional<TermValueSet> optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET));
 		assertThat(optionalTermValueSet).isPresent();
-		Long nullVersion_resid = ((ResourceTable)myValueSets.get(ValueSetVersions.NULL).getEntity()).getId();
+		Long nullVersion_resid = ((ResourceTable)myValueSets.get(ValueSetVersions.NULL).getEntity()).getId().getId();
 		assertNotNull(nullVersion_resid);
 		assertNotNull(optionalTermValueSet.get().getResource());
-		assertEquals(nullVersion_resid, optionalTermValueSet.get().getResource().getId());
+		assertEquals(nullVersion_resid, optionalTermValueSet.get().getResource().getId().getId());
 		assertEquals("ValueSet_noVersion", optionalTermValueSet.get().getName());
 
 		optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v1"));
 		assertThat(optionalTermValueSet).isPresent();
-		Long v1Version_resid = ((ResourceTable)myValueSets.get(ValueSetVersions.V1).getEntity()).getId();
+		Long v1Version_resid = ((ResourceTable)myValueSets.get(ValueSetVersions.V1).getEntity()).getId().getId();
 		assertNotNull(v1Version_resid);
 		assertNotNull(optionalTermValueSet.get().getResource());
-		assertEquals(v1Version_resid, optionalTermValueSet.get().getResource().getId());
+		assertEquals(v1Version_resid, optionalTermValueSet.get().getResource().getId().getId());
 		assertEquals("ValueSet_v1", optionalTermValueSet.get().getName());
 
 		optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2"));
 		assertThat(optionalTermValueSet).isPresent();
-		Long v2Version_resid = ((ResourceTable)myValueSets.get(ValueSetVersions.V2).getEntity()).getId();
+		Long v2Version_resid = ((ResourceTable)myValueSets.get(ValueSetVersions.V2).getEntity()).getId().getId();
 		assertNotNull(v2Version_resid);
 		assertNotNull(optionalTermValueSet.get().getResource());
-		assertEquals(v2Version_resid, optionalTermValueSet.get().getResource().getId());
+		assertEquals(v2Version_resid, optionalTermValueSet.get().getResource().getId().getId());
 		assertEquals("ValueSet_v2", optionalTermValueSet.get().getName());
 
 	}
@@ -132,17 +131,17 @@ public class FhirResourceDaoDstu3ValueSetMultiVersionTest extends BaseJpaDstu3Te
 		ValueSet updated = (ValueSet)myValueSets.get(ValueSetVersions.NULL).getResource();
 		updated.setName("ValueSet_noVersion_updated");
 		DaoMethodOutcome nullVersion_update_outcome = myValueSetDao.update(updated);
-		Long nullVersion_resid = ((ResourceTable)nullVersion_update_outcome.getEntity()).getId();
+		Long nullVersion_resid = ((ResourceTable)nullVersion_update_outcome.getEntity()).getId().getId();
 
 		updated = (ValueSet)myValueSets.get(ValueSetVersions.V1).getResource();
 		updated.setName("ValueSet_v1_updated");
 		DaoMethodOutcome v1Version_update_outcome = myValueSetDao.update(updated);
-		Long v1Version_resid = ((ResourceTable)v1Version_update_outcome.getEntity()).getId();
+		Long v1Version_resid = ((ResourceTable)v1Version_update_outcome.getEntity()).getId().getId();
 
 		updated = (ValueSet)myValueSets.get(ValueSetVersions.V2).getResource();
 		updated.setName("ValueSet_v2_updated");
 		DaoMethodOutcome v2Version_update_outcome = myValueSetDao.update(updated);
-		Long v2Version_resid = ((ResourceTable)v2Version_update_outcome.getEntity()).getId();
+		Long v2Version_resid = ((ResourceTable)v2Version_update_outcome.getEntity()).getId().getId();
 
 		// Verify that ValueSets were updated.
 		assertEquals(3, runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 10), URL_MY_VALUE_SET).size()));
@@ -150,19 +149,19 @@ public class FhirResourceDaoDstu3ValueSetMultiVersionTest extends BaseJpaDstu3Te
 		termValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET).orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " with null version")));
 		assertNotNull(nullVersion_resid);
 		assertNotNull(termValueSet.getResource());
-		assertEquals(nullVersion_resid, termValueSet.getResource().getId());
+		assertEquals(nullVersion_resid, termValueSet.getResource().getId().getId());
 		assertEquals("ValueSet_noVersion_updated", termValueSet.getName());
 
 		termValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v1").orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " version v1")));
 		assertNotNull(v1Version_resid);
 		assertNotNull(termValueSet.getResource());
-		assertEquals(v1Version_resid, termValueSet.getResource().getId());
+		assertEquals(v1Version_resid, termValueSet.getResource().getId().getId());
 		assertEquals("ValueSet_v1_updated", termValueSet.getName());
 
 		termValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2").orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " version v2")));
 		assertNotNull(v2Version_resid);
 		assertNotNull(termValueSet.getResource());
-		assertEquals(v2Version_resid, termValueSet.getResource().getId());
+		assertEquals(v2Version_resid, termValueSet.getResource().getId().getId());
 		assertEquals("ValueSet_v2_updated", termValueSet.getName());
 
 	}

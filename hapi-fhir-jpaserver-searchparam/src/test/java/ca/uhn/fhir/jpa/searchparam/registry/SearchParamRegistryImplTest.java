@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -91,6 +92,8 @@ public class SearchParamRegistryImplTest {
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 
 	@MockBean
+	private PartitionSettings myPartitionSettings;
+	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
 	@MockBean
 	private ISearchParamProvider mySearchParamProvider;
@@ -110,7 +113,7 @@ public class SearchParamRegistryImplTest {
 	private static ResourceTable createEntity(long theId, int theVersion) {
 		ResourceTable searchParamEntity = new ResourceTable();
 		searchParamEntity.setResourceType("SearchParameter");
-		searchParamEntity.setId(theId);
+		searchParamEntity.setIdForUnitTest(theId);
 		searchParamEntity.setVersionForUnitTest(theVersion);
 		return searchParamEntity;
 	}

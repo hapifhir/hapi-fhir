@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -13,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,8 +129,13 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 	public void testReadAcrossTenants_Allowed() {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
-		IIdType patientId = createPatient(withTenant(TENANT_A), withActiveTrue());
-		createObservation(withTenant(TENANT_B), withSubject(patientId.toUnqualifiedVersionless()));
+		IIdType patientId = createPatient(withTenant(TENANT_A), withActiveTrue()).toUnqualifiedVersionless();
+		IIdType id = createObservation(withTenant(TENANT_B)).toUnqualifiedVersionless();
+
+		Observation obs = myClient.read().resource(Observation.class).withId(id).execute();
+		obs.setSubject(new Reference(patientId));
+		myTenantClientInterceptor.setTenantId(ProviderConstants.ALL_PARTITIONS_TENANT_NAME);
+		myClient.update().resource(obs).execute();
 
 		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds(TENANT_A, TENANT_B)
@@ -149,8 +156,13 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 	public void testReadAcrossTenants_Blocked() {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
-		IIdType patientId = createPatient(withTenant(TENANT_A), withActiveTrue());
-		createObservation(withTenant(TENANT_B), withSubject(patientId.toUnqualifiedVersionless()));
+		IIdType patientId = createPatient(withTenant(TENANT_A), withActiveTrue()).toUnqualifiedVersionless();
+		IIdType id = createObservation(withTenant(TENANT_B)).toUnqualifiedVersionless();
+
+		Observation obs = myClient.read().resource(Observation.class).withId(id).execute();
+		obs.setSubject(new Reference(patientId));
+		myTenantClientInterceptor.setTenantId(ProviderConstants.ALL_PARTITIONS_TENANT_NAME);
+		myClient.update().resource(obs).execute();
 
 		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds(TENANT_A)
@@ -181,8 +193,13 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		List<IIdType> observationIds = Lists.newArrayList();
 		for (int i = 1; i <= 9; i++) {
 			IIdType subject = i == 9 ? patientIdB : patientIdA;
-			IIdType id = createObservation(withTenant(TENANT_A), withIdentifier("foo" + i, "val" + i), withStatus("final"), withSubject(subject)).toUnqualifiedVersionless();
+			IIdType id = createObservation(withTenant(TENANT_A), withIdentifier("foo" + i, "val" + i), withStatus("final")).toUnqualifiedVersionless();
 			observationIds.add(id);
+
+			Observation obs = myClient.read().resource(Observation.class).withId(id).execute();
+			obs.setSubject(new Reference(subject));
+			myTenantClientInterceptor.setTenantId(ProviderConstants.ALL_PARTITIONS_TENANT_NAME);
+			myClient.update().resource(obs).execute();
 		}
 
 		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()

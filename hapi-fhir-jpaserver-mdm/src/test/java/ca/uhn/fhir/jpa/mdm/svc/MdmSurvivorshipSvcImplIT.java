@@ -82,7 +82,7 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, frankPatient1, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, frankPatient2, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
-		myMdmSurvivorshipService.rebuildGoldenResourceWithSurvivorshipRules(goldenPatient, new MdmTransactionContext(MdmTransactionContext.OperationType.UPDATE_LINK));
+		myMdmSurvivorshipService.rebuildGoldenResourceWithSurvivorshipRules(mySrd, goldenPatient, new MdmTransactionContext(MdmTransactionContext.OperationType.UPDATE_LINK));
 	}
 
 	@Test
@@ -169,7 +169,7 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 			}
 
 			// test
-			myMdmSurvivorshipService.rebuildGoldenResourceWithSurvivorshipRules(goldenPatient, transactionContext);
+			myMdmSurvivorshipService.rebuildGoldenResourceWithSurvivorshipRules(mySrd, goldenPatient, transactionContext);
 
 			IBundleProvider provider = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true),
 				new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions()));

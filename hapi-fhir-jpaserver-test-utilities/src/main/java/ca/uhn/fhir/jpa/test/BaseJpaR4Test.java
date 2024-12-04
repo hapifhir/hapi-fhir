@@ -84,6 +84,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -578,6 +579,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
+		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
+		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().isMatchUrlCacheEnabled());
+		myStorageSettings.setStoreMetaSourceInformation(new JpaStorageSettings().getStoreMetaSourceInformation());
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
@@ -701,7 +705,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		return myTxManager;
 	}
 
-	protected void relocateResourceTextToCompressedColumn(Long theResourcePid, Long theVersion) {
+	protected void relocateResourceTextToCompressedColumn(JpaPidNonPk theResourcePid, Long theVersion) {
 		runInTransaction(()->{
 			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersion(theResourcePid, theVersion);
 			byte[] contents = GZipUtil.compress(historyEntity.getResourceTextVc());

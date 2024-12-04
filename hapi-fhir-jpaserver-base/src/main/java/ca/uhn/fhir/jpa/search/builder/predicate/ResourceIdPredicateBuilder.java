@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -64,6 +65,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 	@Nullable
 	public Condition createPredicateResourceId(
+			RequestDetails theRequestDetails,
 			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			List<List<IQueryParameterType>> theValues,

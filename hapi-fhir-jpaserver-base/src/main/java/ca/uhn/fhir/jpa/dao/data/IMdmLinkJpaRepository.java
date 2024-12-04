@@ -38,17 +38,17 @@ import java.util.Optional;
 public interface IMdmLinkJpaRepository
 		extends RevisionRepository<MdmLink, Long, Long>, JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
 	@Modifying
-	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid = :pid OR mySourcePid = :pid")
+	@Query("DELETE FROM MdmLink f WHERE f.myGoldenResourcePid = :pid OR f.mySourcePid = :pid")
 	int deleteWithAnyReferenceToPid(@Param("pid") Long thePid);
 
 	@Modifying
 	@Query(
-			"DELETE FROM MdmLink f WHERE (myGoldenResourcePid = :pid OR mySourcePid = :pid) AND myMatchResult <> :matchResult")
+			"DELETE FROM MdmLink f WHERE (f.myGoldenResourcePid = :pid OR f.mySourcePid = :pid) AND f.myMatchResult <> :matchResult")
 	int deleteWithAnyReferenceToPidAndMatchResultNot(
 			@Param("pid") Long thePid, @Param("matchResult") MdmMatchResultEnum theMatchResult);
 
 	@Modifying
-	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid IN (:goldenPids) OR mySourcePid IN (:goldenPids)")
+	@Query("DELETE FROM MdmLink f WHERE f.myGoldenResourcePid IN (:goldenPids) OR f.mySourcePid IN (:goldenPids)")
 	void deleteLinksWithAnyReferenceToPids(@Param("goldenPids") List<Long> theResourcePids);
 
 	@Modifying
@@ -64,7 +64,7 @@ public interface IMdmLinkJpaRepository
 			"SELECT lookup_links.myGoldenResourcePid as goldenPid, gld_rt.myPartitionIdValue as goldenPartitionId, lookup_links.mySourcePid as sourcePid, lookup_links.myPartitionIdValue as sourcePartitionId "
 					+ "FROM MdmLink lookup_links "
 					+ "INNER JOIN ResourceTable gld_rt "
-					+ "on lookup_links.myGoldenResourcePid=gld_rt.myId "
+					+ "on lookup_links.myGoldenResource=gld_rt "
 					+ "WHERE lookup_links.myMatchResult=:matchResult "
 					+ "AND lookup_links.myGoldenResourcePid IN ("
 					+ "SELECT inner_mdm_link.myGoldenResourcePid FROM MdmLink inner_mdm_link "
@@ -97,7 +97,7 @@ public interface IMdmLinkJpaRepository
 					+ "INNER JOIN MdmLink gld_link "
 					+ "on lookup_link.myGoldenResourcePid=gld_link.myGoldenResourcePid "
 					+ "INNER JOIN ResourceTable gld_rt "
-					+ "on gld_link.myGoldenResourcePid=gld_rt.myId "
+					+ "on gld_link.myGoldenResource=gld_rt "
 					+ "WHERE gld_link.mySourcePid=:sourcePid "
 					+ "AND gld_link.myMatchResult=:matchResult "
 					+ "AND lookup_link.myMatchResult=:matchResult")
@@ -117,7 +117,7 @@ public interface IMdmLinkJpaRepository
 			"SELECT lookup_link.myGoldenResourcePid as goldenPid, gld_rt.myPartitionIdValue as goldenPartitionId, lookup_link.mySourcePid as sourcePid, lookup_link.myPartitionIdValue as sourcePartitionId "
 					+ "FROM MdmLink lookup_link "
 					+ "INNER JOIN ResourceTable gld_rt "
-					+ "on lookup_link.myGoldenResourcePid=gld_rt.myId "
+					+ "on lookup_link.myGoldenResource=gld_rt "
 					+ "WHERE lookup_link.myGoldenResourcePid = :goldenPid "
 					+ "AND lookup_link.myMatchResult = :matchResult")
 	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(
@@ -127,7 +127,7 @@ public interface IMdmLinkJpaRepository
 			"SELECT lookup_link.myGoldenResourcePid as goldenPid, gld_rt.myPartitionIdValue as goldenPartitionId, lookup_link.mySourcePid as sourcePid, lookup_link.myPartitionIdValue as sourcePartitionId "
 					+ "FROM MdmLink lookup_link "
 					+ "INNER JOIN ResourceTable gld_rt "
-					+ "on lookup_link.myGoldenResourcePid=gld_rt.myId "
+					+ "on lookup_link.myGoldenResource=gld_rt "
 					+ "WHERE "
 					+ "   (lookup_link.myGoldenResourcePid IN (:pids) "
 					+ "    OR"

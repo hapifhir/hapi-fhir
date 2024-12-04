@@ -22,7 +22,7 @@ public class ResourceIndexedSearchParamNumberTest {
 	@BeforeEach
 	void setUp() {
 		final ResourceTable resourceTable = new ResourceTable();
-		resourceTable.setId(1L);
+		resourceTable.setIdForUnitTest(1L);
 		PARAM_VALUE_10_FIRST = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(10));
 		PARAM_VALUE_10_SECOND = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(10));
 		PARAM_VALUE_12_FIRST = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(12));

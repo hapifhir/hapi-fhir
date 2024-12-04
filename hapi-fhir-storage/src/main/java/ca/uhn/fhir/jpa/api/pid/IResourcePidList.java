@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * List of IResourcePersistentId along with a resource type each id
  */
-public interface IResourcePidList {
+public interface IResourcePidList<T extends IResourcePersistentId<?>> {
 
 	RequestPartitionId getRequestPartitionId();
 
@@ -42,7 +42,7 @@ public interface IResourcePidList {
 
 	String getResourceType(int i);
 
-	List<IResourcePersistentId> getIds();
+	List<T> getIds();
 
 	boolean isEmpty();
 }
