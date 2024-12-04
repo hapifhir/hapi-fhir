@@ -72,7 +72,8 @@ public class BulkExportJobParametersBuilder {
 	}
 
 	public BulkExportJobParametersBuilder expandMdm(IPrimitiveType<Boolean> theExpandMdm) {
-		myExpandMdm = DatatypeUtil.toBooleanValue(theExpandMdm);
+		final Boolean booleanValue = DatatypeUtil.toBooleanValue(theExpandMdm);
+		myExpandMdm = booleanValue != null && booleanValue;
 		return this;
 	}
 
