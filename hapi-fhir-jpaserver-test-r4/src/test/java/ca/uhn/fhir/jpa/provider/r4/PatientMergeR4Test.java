@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -17,6 +18,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -30,14 +32,19 @@ import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.Extension;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT;
@@ -51,6 +58,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PatientMergeR4Test.class);
+
+	static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 
 	static final Identifier pat1IdentifierA = new Identifier().setSystem("SYS1A").setValue("VAL1A");
 	static final Identifier pat1IdentifierB = new Identifier().setSystem("SYS1B").setValue("VAL1B");
@@ -67,6 +76,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	IIdType myTargetPatId;
 	IIdType myTargetEnc1;
 	Patient myResultPatient;
+
+	@RegisterExtension
+	static MyExceptionHandler ourExceptionHandler = new MyExceptionHandler();
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
@@ -141,7 +153,11 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 
 		myResultPatient = new Patient();
+		myResultPatient.setIdElement((IdType) myTargetPatId);
 		myResultPatient.addIdentifier(pat1IdentifierA);
+		Patient.PatientLinkComponent link = myResultPatient.addLink();
+		link.setOther(new Reference(mySourcePatId));
+		link.setType(Patient.LinkType.REPLACES);
 	}
 
 	@ParameterizedTest
@@ -273,7 +289,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	}
 
 
-
 	private static class PatientMergeInputParameters {
 		Type sourcePatient;
 		Type sourcePatientIdentifier;
@@ -288,7 +303,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			if (sourcePatient != null) {
 				inParams.addParameter().setName("source-patient").setValue(sourcePatient);
 			}
-			if (sourcePatientIdentifier!= null) {
+			if (sourcePatientIdentifier != null) {
 				inParams.addParameter().setName("source-patient-identifier").setValue(sourcePatientIdentifier);
 			}
 			if (targetPatient != null) {
@@ -311,4 +326,17 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	}
 
 
+	static class MyExceptionHandler implements TestExecutionExceptionHandler {
+		@Override
+		public void handleTestExecutionException(ExtensionContext theExtensionContext, Throwable theThrowable) throws Throwable {
+			if (theThrowable instanceof InvalidRequestException ex) {
+				String body = ex.getResponseBody();
+				Parameters outParams = ourFhirContext.newJsonParser().parseResource(Parameters.class, body);
+				OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+				String message = outcome.getIssue().stream().map(issue -> issue.getDiagnostics()).collect(Collectors.joining(", "));
+				throw InvalidRequestException.class.getDeclaredConstructor(String.class, Throwable.class).newInstance(message, ex);
+			}
+			throw theThrowable;
+		}
+	}
 }
