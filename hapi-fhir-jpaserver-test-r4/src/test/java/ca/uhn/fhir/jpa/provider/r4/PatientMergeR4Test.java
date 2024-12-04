@@ -213,16 +213,17 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 				.hasSize(1)
 				.element(0)
 				.satisfies(issue -> {
-					assertThat(issue.getDiagnostics()).isEqualTo("Preview only merge operation - no issues detected");
 					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+					assertThat(issue.getDetails().getText()).isEqualTo("Preview only merge operation - no issues detected");
+					assertThat(issue.getDiagnostics()).isEqualTo("Merge would update 25 resources");
 				});
 		} else {
 			assertThat(outcome.getIssue())
 				.hasSize(1)
 				.element(0)
 				.satisfies(issue -> {
-					assertThat(issue.getDiagnostics()).isEqualTo("Merge operation completed successfully.");
 					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+					assertThat(issue.getDiagnostics()).isEqualTo("Merge operation completed successfully.");
 				});
 		}
 
