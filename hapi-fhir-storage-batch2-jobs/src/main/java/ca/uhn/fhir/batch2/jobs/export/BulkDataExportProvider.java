@@ -136,14 +136,14 @@ public class BulkDataExportProvider {
 		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
-			.outputFormat(theOutputFormat)
-			.resourceTypes(theType)
-			.since(theSince)
-			.filters(theTypeFilter)
-			.exportIdentifier(theExportId)
-			.exportStyle(ExportStyle.SYSTEM)
-			.postFetchFilterUrl(theTypePostFetchFilterUrl)
-			.build();
+				.outputFormat(theOutputFormat)
+				.resourceTypes(theType)
+				.since(theSince)
+				.filters(theTypeFilter)
+				.exportIdentifier(theExportId)
+				.exportStyle(ExportStyle.SYSTEM)
+				.postFetchFilterUrl(theTypePostFetchFilterUrl)
+				.build();
 
 		getBulkDataExportJobService().startJob(theRequestDetails, bulkExportJobParameters);
 	}
@@ -194,16 +194,16 @@ public class BulkDataExportProvider {
 		validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
 
 		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
-			.outputFormat(theOutputFormat)
-			.resourceTypes(theType)
-			.since(theSince)
-			.filters(theTypeFilter)
-			.exportIdentifier(theExportIdentifier)
-			.exportStyle(ExportStyle.GROUP)
-			.postFetchFilterUrl(theTypePostFetchFilterUrl)
-			.groupId(theIdParam)
-			.expandMdm(theMdm)
-			.build();
+				.outputFormat(theOutputFormat)
+				.resourceTypes(theType)
+				.since(theSince)
+				.filters(theTypeFilter)
+				.exportIdentifier(theExportIdentifier)
+				.exportStyle(ExportStyle.GROUP)
+				.postFetchFilterUrl(theTypePostFetchFilterUrl)
+				.groupId(theIdParam)
+				.expandMdm(theMdm)
+				.build();
 
 		if (CollectionUtils.isNotEmpty(bulkExportJobParameters.getResourceTypes())) {
 			validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
@@ -389,20 +389,19 @@ public class BulkDataExportProvider {
 				thePatientIds.stream().map(c -> new IdType(c.getValue())).collect(Collectors.toList()));
 
 		// set resourceTypes to all patient compartment resources if it is null
-		IPrimitiveType<String> resourceTypes = theType == null
-				? new StringDt(String.join(",", getPatientCompartmentResources()))
-				: theType;
+		IPrimitiveType<String> resourceTypes =
+				theType == null ? new StringDt(String.join(",", getPatientCompartmentResources())) : theType;
 
 		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
-			.outputFormat(theOutputFormat)
-			.resourceTypes(resourceTypes)
-			.since(theSince)
-			.filters(theTypeFilter)
-			.exportIdentifier(theExportIdentifier)
-			.exportStyle(ExportStyle.PATIENT)
-			.postFetchFilterUrl(theTypePostFetchFilterUrl)
-			.patientIds(thePatientIds)
-			.build();
+				.outputFormat(theOutputFormat)
+				.resourceTypes(resourceTypes)
+				.since(theSince)
+				.filters(theTypeFilter)
+				.exportIdentifier(theExportIdentifier)
+				.exportStyle(ExportStyle.PATIENT)
+				.postFetchFilterUrl(theTypePostFetchFilterUrl)
+				.patientIds(thePatientIds)
+				.build();
 
 		validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
 
