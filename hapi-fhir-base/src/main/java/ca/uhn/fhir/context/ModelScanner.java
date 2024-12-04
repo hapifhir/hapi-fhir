@@ -443,7 +443,10 @@ class ModelScanner {
 					providesMembershipInCompartments.add(name);
 				}
 
-				//TODO GGG: Write a good javadoc about why we do this at all.
+				/**
+				 * N.B. As of 8.0.0, we have decided that Device is in the patient compartment via the `Device.patient` Search Parameter.
+				 * See https://github.com/hapifhir/hapi-fhir/issues/6536 for more information.
+				 */
 				if (searchParam.name().equals("patient") && searchParam.path().equals("Device.patient")) {
 					providesMembershipInCompartments.add("Patient");
 				}

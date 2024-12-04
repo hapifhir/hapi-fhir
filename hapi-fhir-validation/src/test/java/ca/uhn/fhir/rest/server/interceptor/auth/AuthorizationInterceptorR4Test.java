@@ -415,8 +415,46 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
-
 	}
+
+	@Test
+	public void testDeviceIsNativelyInPatientCompartmentForAuthorizationPurposes() throws Exception {
+		//Given
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				List<IdType> relatedIds = new ArrayList<>();
+				relatedIds.add(new IdType("Patient/123"));
+				return new RuleBuilder()
+					.allow().read().allResources()
+					.inCompartment("Patient", relatedIds)
+					.andThen().denyAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+
+		Patient patient;
+		patient = new Patient();
+		patient.setId("Patient/123");
+		Device d = new Device();
+		d.getPatient().setResource(patient);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(d);
+
+		//When
+		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Device/124456");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+
+		//Then
+		assertTrue(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+	}
+
 
 	@Test
 	public void testCustomCompartmentSpsOnMultipleInstances() throws Exception {
@@ -424,14 +462,12 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
-				additionalCompartmentSearchParameters.addSearchParameters("Device:patient");
 				List<IdType> relatedIds = new ArrayList<>();
 				relatedIds.add(new IdType("Patient/123"));
 				relatedIds.add(new IdType("Patient/456"));
 				return new RuleBuilder()
 					.allow().read().allResources()
-					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, additionalCompartmentSearchParameters)
+					.inCompartment("Patient", relatedIds)
 					.andThen().denyAll()
 					.build();
 			}
