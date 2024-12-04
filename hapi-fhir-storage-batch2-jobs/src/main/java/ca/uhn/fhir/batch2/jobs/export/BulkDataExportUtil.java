@@ -17,7 +17,9 @@ public class BulkDataExportUtil {
 	 */
 	public static final String UNSUPPORTED_BINARY_TYPE = "Binary";
 
-	private BulkDataExportUtil() {}
+	private BulkDataExportUtil() {
+		// non-instantiable
+	}
 
 	private static final Set<FhirVersionEnum> PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE = Set.of(
 			FhirVersionEnum.DSTU2,
