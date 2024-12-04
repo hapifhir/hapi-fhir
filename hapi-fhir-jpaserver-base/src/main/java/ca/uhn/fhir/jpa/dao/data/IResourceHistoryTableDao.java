@@ -48,12 +48,12 @@ public interface IResourceHistoryTableDao
 	@Query(
 			"SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourcePid = :resId AND t.myResourceVersion <> :dontWantVersion")
 	Slice<ResourceHistoryTablePk> findForResourceId(
-		Pageable thePage, @Param("resId") JpaPidFk theId, @Param("dontWantVersion") Long theDontWantVersion);
+			Pageable thePage, @Param("resId") JpaPidFk theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query(
 			"SELECT t FROM ResourceHistoryTable t WHERE t.myResourcePid = :resId AND t.myResourceVersion <> :dontWantVersion")
 	Slice<ResourceHistoryTable> findAllVersionsExceptSpecificForResourcePid(
-		Pageable thePage, @Param("resId") JpaPidFk theId, @Param("dontWantVersion") Long theDontWantVersion);
+			Pageable thePage, @Param("resId") JpaPidFk theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query("SELECT v.myId FROM ResourceHistoryTable v "
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "

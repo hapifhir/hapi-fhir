@@ -43,7 +43,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
@@ -155,8 +154,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		Slice<ResourceHistoryTablePk> ids;
 		if (theJpaPid != null && theJpaPid.getId() != null) {
 			if (theJpaPid.getVersion() != null) {
-				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersion(
-						theJpaPid.toFk(), theJpaPid.getVersion()));
+				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersion(theJpaPid.toFk(), theJpaPid.getVersion()));
 			} else {
 				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theJpaPid);
 			}
@@ -302,8 +300,8 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
-		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(
-				resource.getId().toFk(), resource.getVersion());
+		ResourceHistoryTable currentVersion =
+				myResourceHistoryTableDao.findForIdAndVersion(resource.getId().toFk(), resource.getVersion());
 		if (currentVersion != null) {
 			expungeHistoricalVersion(theRequestDetails, currentVersion.getId(), theRemainingCount);
 		}
