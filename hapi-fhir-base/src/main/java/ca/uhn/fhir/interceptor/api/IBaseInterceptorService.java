@@ -48,6 +48,11 @@ public interface IBaseInterceptorService<POINTCUT extends IPointcut> extends IBa
 	 */
 	List<Object> getAllRegisteredInterceptors();
 
+	default boolean hasRegisteredInterceptor(Class<?> theInterceptorClass) {
+		return getAllRegisteredInterceptors().stream()
+				.anyMatch(t -> t.getClass().equals(theInterceptorClass));
+	}
+
 	/**
 	 * Unregisters all registered interceptors.
 	 */
