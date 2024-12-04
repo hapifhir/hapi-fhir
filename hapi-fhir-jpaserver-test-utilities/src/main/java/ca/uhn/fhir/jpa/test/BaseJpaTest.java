@@ -705,7 +705,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(getTxManager());
-		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		retVal.afterPropertiesSet();
 		return retVal;
 	}
