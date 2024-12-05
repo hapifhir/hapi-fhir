@@ -188,8 +188,9 @@ public class JpaStorageSettings extends StorageSettings {
 
 	// start with a tiny number so our first page always loads quickly.
 	// If they fetch the second page, fetch more.
-	// Use prime sizes to avoid empty next links.
-	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(13, 503, 2003, -1);
+	// we'll only fetch (by default) up to 1 million records, because after that, deduplication in local memory is
+	// prohibitive
+	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(13, 503, 2003, 1000003, -1);
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
