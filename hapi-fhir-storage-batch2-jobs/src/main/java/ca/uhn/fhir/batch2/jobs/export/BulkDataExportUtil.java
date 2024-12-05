@@ -9,9 +9,13 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Set;
 
 public class BulkDataExportUtil {
+	public static final List<String> PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES =
+		List.of("Practitioner", "Organization");
+
 	/**
 	 * Bulk data $export does not include the Binary type
 	 */

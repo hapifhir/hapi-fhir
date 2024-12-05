@@ -71,8 +71,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class BulkDataExportProvider {
-	public static final List<String> PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES =
-			List.of("Practitioner", "Organization");
 
 	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
 
@@ -206,7 +204,7 @@ public class BulkDataExportProvider {
 			Set<String> groupTypes = new HashSet<>(getBulkDataExportValidator().getPatientCompartmentResources());
 
 			// Add the forward reference resource types from the patients, e.g. Practitioner, Organization
-			groupTypes.addAll(PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES);
+			groupTypes.addAll(BulkDataExportUtil.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES);
 
 			groupTypes.removeIf(t -> !myDaoRegistry.isResourceTypeSupported(t));
 			bulkExportJobParameters.setResourceTypes(groupTypes);

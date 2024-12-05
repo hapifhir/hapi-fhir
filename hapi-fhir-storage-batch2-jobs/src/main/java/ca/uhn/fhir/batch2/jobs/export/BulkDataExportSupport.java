@@ -79,7 +79,7 @@ public class BulkDataExportSupport {
 		if (theResourceTypes != null) {
 			List<String> badResourceTypes = theResourceTypes.stream()
 					.filter(resourceType ->
-							!BulkDataExportProvider.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(
+							!BulkDataExportUtil.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(
 									resourceType))
 					.filter(resourceType -> !getPatientCompartmentResources().contains(resourceType))
 					.collect(Collectors.toList());
