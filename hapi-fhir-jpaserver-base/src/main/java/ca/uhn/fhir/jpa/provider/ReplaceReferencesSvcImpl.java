@@ -64,6 +64,22 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return replaceReferencesInTransaction(referencingResources, sourceRefId, targetRefId, theRequest);
 	}
 
+	@Override
+	public List<? extends IBaseResource> findReferencingResourceIds(
+			IIdType theSourceRefIdParam, RequestDetails theRequest) {
+		IFhirResourceDao<?> dao = getDao(theSourceRefIdParam.getResourceType());
+		if (dao == null) {
+			throw new InternalErrorException(
+					Msg.code(2582) + "Couldn't obtain DAO for resource type" + theSourceRefIdParam.getResourceType());
+		}
+
+		SearchParameterMap parameterMap = new SearchParameterMap();
+		parameterMap.add(PARAM_ID, new StringParam(theSourceRefIdParam.getValue()));
+		parameterMap.addRevInclude(new Include("*"));
+
+		return dao.search(parameterMap, theRequest).getAllResources();
+	}
+
 	private IBaseParameters replaceReferencesInTransaction(
 			List<? extends IBaseResource> theReferencingResources,
 			IIdType theCurrentTargetId,
@@ -170,20 +186,6 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		operation.addPart().setName(PARAMETER_PATH).setValue(new StringType(thePath));
 		operation.addPart().setName(PARAMETER_VALUE).setValue(theValue);
 		return operation;
-	}
-
-	private List<? extends IBaseResource> findReferencingResourceIds(
-			IIdType theSourceRefIdParam, RequestDetails theRequest) {
-		IFhirResourceDao<?> dao = getDao(theSourceRefIdParam.getResourceType());
-		if (dao == null) {
-			throw new InternalErrorException(
-					Msg.code(2582) + "Couldn't obtain DAO for resource type" + theSourceRefIdParam.getResourceType());
-		}
-
-		SearchParameterMap parameterMap = new SearchParameterMap();
-		parameterMap.add(PARAM_ID, new StringParam(theSourceRefIdParam.getValue()));
-		parameterMap.addRevInclude(new Include("*"));
-		return dao.search(parameterMap, theRequest).getAllResources();
 	}
 
 	private IFhirResourceDao<?> getDao(String theResourceName) {

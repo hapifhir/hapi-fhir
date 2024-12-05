@@ -11,8 +11,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -95,7 +97,7 @@ public class ResourceMergeServiceTest {
 		assertThat(operationOutcome.getIssue()).hasSize(1);
 		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-		assertThat(issue.getDiagnostics()).contains(SUCCESSFUL_MERGE_MSG);
+		assertThat(issue.getDetails().getText()).contains(SUCCESSFUL_MERGE_MSG);
 
 		verifyNoMoreInteractions(myDaoMock);
 	}
@@ -129,7 +131,7 @@ public class ResourceMergeServiceTest {
 		assertThat(operationOutcome.getIssue()).hasSize(1);
 		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-		assertThat(issue.getDiagnostics()).contains(SUCCESSFUL_MERGE_MSG);
+		assertThat(issue.getDetails().getText()).contains(SUCCESSFUL_MERGE_MSG);
 
 		verifyNoMoreInteractions(myDaoMock);
 	}
@@ -160,7 +162,7 @@ public class ResourceMergeServiceTest {
 		assertThat(operationOutcome.getIssue()).hasSize(1);
 		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-		assertThat(issue.getDiagnostics()).contains(SUCCESSFUL_MERGE_MSG);
+		assertThat(issue.getDetails().getText()).contains(SUCCESSFUL_MERGE_MSG);
 
 		verifyNoMoreInteractions(myDaoMock);
 	}
@@ -177,6 +179,10 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 
+		List<Observation> referencingResources = List.of(new Observation(), new Observation());
+		when(myReplaceReferencesSvcMock.findReferencingResourceIds(new IdType(SOURCE_PATIENT_TEST_ID),
+			myRequestDetailsMock)).thenAnswer(invocation -> referencingResources);
+
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
@@ -187,7 +193,8 @@ public class ResourceMergeServiceTest {
 		assertThat(operationOutcome.getIssue()).hasSize(1);
 		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-		assertThat(issue.getDiagnostics()).contains("Preview only merge operation - no issues detected");
+		assertThat(issue.getDetails().getText()).contains("Preview only merge operation - no issues detected");
+		assertThat(issue.getDiagnostics()).contains("Merge would update 2 resources");
 
 		verifyNoMoreInteractions(myDaoMock);
 	}
@@ -214,7 +221,7 @@ public class ResourceMergeServiceTest {
 		assertThat(operationOutcome.getIssue()).hasSize(1);
 		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-		assertThat(issue.getDiagnostics()).contains(SUCCESSFUL_MERGE_MSG);
+		assertThat(issue.getDetails().getText()).contains(SUCCESSFUL_MERGE_MSG);
 
 		verifyNoMoreInteractions(myDaoMock);
 	}
