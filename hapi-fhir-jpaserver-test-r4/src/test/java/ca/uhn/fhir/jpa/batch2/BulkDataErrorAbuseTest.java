@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
@@ -206,7 +207,8 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 				// we either do this, or shutdown the completion service in an
 				// "inelegant" manner, dropping all threads (which we aren't doing)
 				ourLog.error("Failed after checking " + count + " futures");
-				errors.add(ex.getMessage());
+				String[] frames = ExceptionUtils.getRootCauseStackTrace(ex);
+				errors.add(ex + "\n" + String.join("\n   ", frames));
 			}
 		}
 
