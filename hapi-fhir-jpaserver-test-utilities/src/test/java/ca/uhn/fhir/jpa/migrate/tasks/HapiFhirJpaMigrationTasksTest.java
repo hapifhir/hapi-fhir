@@ -1,15 +1,16 @@
 package ca.uhn.fhir.jpa.migrate.tasks;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,11 @@ public class HapiFhirJpaMigrationTasksTest {
 
 	@RegisterExtension
 	private LoggingExtension myLoggingExtension = new LoggingExtension();
+
+	@BeforeAll
+	public static void beforeEach() {
+		HapiSystemProperties.enableUnitTestMode();
+	}
 
 	@Test
 	@Order(0)
@@ -88,7 +94,7 @@ public class HapiFhirJpaMigrationTasksTest {
 
 		// Run a second time to run the 7.4.0 migrations
 		MigrationTaskList allTasks = tasks.getAllTasks(VersionEnum.V7_3_0, VersionEnum.V7_4_0);
-		migrator.addTasks(allTasks);
+		migrator.addAllTasksForUnitTest(allTasks);
 		migrator.migrate();
 
 		// Create a unique index row with no hashes populated
