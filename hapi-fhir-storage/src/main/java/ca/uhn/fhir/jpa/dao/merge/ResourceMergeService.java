@@ -206,13 +206,13 @@ public class ResourceMergeService {
 			isValid = false;
 		}
 
-		// if the source resource is not being deleted, the result resource must have a replaces link to the source
-		// resource
-		if (!theMergeOperationParameters.getDeleteSource()
-				&& !validateResultResourceHasReplacesLinkToSourceResource(
+		// if the source resource is not being deleted, the result resource must have a replaces link to the source resource
+		// if the source resource is being deleted, the result resource must not have a replaces link to the source resource
+		if (!validateResultResourceReplacesLinkToSourceResource(
 						theResultResource,
 						theResolvedSourceResource,
 						theMergeOperationParameters.getResultResourceParameterName(),
+						theMergeOperationParameters.getDeleteSource(),
 						theOperationOutcome)) {
 			isValid = false;
 		}
@@ -236,35 +236,77 @@ public class ResourceMergeService {
 		return true;
 	}
 
-	protected boolean validateResultResourceHasReplacesLinkToSourceResource(
-			Patient theResultResource,
-			Patient theResolvedSourceResource,
-			String theResultResourceParameterName,
-			IBaseOperationOutcome theOperationOutcome) {
-		// the result resource must have the replaces link set to the source resource
-		List<Reference> replacesLinks = getLinksOfType(theResultResource, Patient.LinkType.REPLACES);
-		List<Reference> replacesLinkToSourceResource = replacesLinks.stream()
+
+	private List<Reference> getLinksToResource(Patient theResource,
+																				  Patient.LinkType theLinkType,
+																				  IIdType theResourceId) {
+		List<Reference> links = getLinksOfType(theResource, theLinkType);
+		return links.stream()
 				.filter(r -> r.getReference() != null
-						&& r.getReference()
-								.equals(theResolvedSourceResource
-										.getIdElement()
-										.toVersionless()
-										.getValue()))
+					&& r.getReference()
+					.equals(theResourceId
+						.toVersionless()
+						.getValue()))
 				.collect(Collectors.toList());
 
-		if (replacesLinkToSourceResource.isEmpty()) {
+	}
+
+	private boolean validateResultResourceDoesNotHaveReplacesLinkToSourceResource(
+		Patient theResultResource,
+		Patient theResolvedSourceResource,
+		String theResultResourceParameterName,
+		IBaseOperationOutcome theOperationOutcome) {
+
+		List<Reference> replacesLinkToSourceResource = getLinksToResource(
+			theResultResource, Patient.LinkType.REPLACES, theResolvedSourceResource.getIdElement());
+
+		if (!replacesLinkToSourceResource.isEmpty()) {
 			String msg = String.format(
-					"'%s' must have a 'replaces' link to the source resource.", theResultResourceParameterName);
+				"'%s' must have a 'replaces' link to the source resource.", theResultResourceParameterName);
 			addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
 			return false;
 		}
 
-		if (replacesLinkToSourceResource.size() > 1) {
-			String msg = String.format(
+		return true;
+
+	}
+
+	private boolean validateResultResourceReplacesLinkToSourceResource(
+			Patient theResultResource,
+			Patient theResolvedSourceResource,
+			String theResultResourceParameterName,
+			boolean theDeleteSource,
+			IBaseOperationOutcome theOperationOutcome) {
+		// the result resource must have the replaces link set to the source resource
+		List<Reference> replacesLinkToSourceResource = getLinksToResource(
+				theResultResource, Patient.LinkType.REPLACES, theResolvedSourceResource.getIdElement());
+
+		if (theDeleteSource) {
+			if (!replacesLinkToSourceResource.isEmpty()) {
+				String msg = String.format(
+					"'%s' must not have a 'replaces' link to the source resource " +
+						"when the source resource will be deleted, as the link may prevent deleting the source " +
+						"resource.",
+					theResultResourceParameterName);
+				addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
+				return false;
+			}
+		}
+		else {
+			if (replacesLinkToSourceResource.isEmpty()) {
+				String msg = String.format(
+					"'%s' must have a 'replaces' link to the source resource.", theResultResourceParameterName);
+				addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
+				return false;
+			}
+
+			if (replacesLinkToSourceResource.size() > 1) {
+				String msg = String.format(
 					"'%s' has multiple 'replaces' links to the source resource. There should be only one.",
 					theResultResourceParameterName);
-			addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
-			return false;
+				addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
+				return false;
+			}
 		}
 		return true;
 	}

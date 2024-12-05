@@ -855,6 +855,38 @@ public class ResourceMergeServiceTest {
 		verifyNoMoreInteractions(myDaoMock);
 	}
 
+
+	@Test
+	void testMerge_ValidatesResultResource_ResultResourceHasReplacesLinkAndDeleteSourceIsTrue_ReturnsErrorWith400Status() {
+		// Given
+		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters();
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+		mergeOperationParameters.setDeleteSource(true);
+
+		Patient resultPatient = createPatient(TARGET_PATIENT_TEST_ID);
+		addReplacesLink(resultPatient, SOURCE_PATIENT_TEST_ID);
+		mergeOperationParameters.setResultResource(resultPatient);
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID);
+		setupDaoMockForSuccessfulRead(sourcePatient);
+		setupDaoMockForSuccessfulRead(targetPatient);
+
+		// When
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+
+		// Then
+		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
+		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
+
+		assertThat(operationOutcome.getIssue()).hasSize(1);
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue.getDiagnostics()).contains("'result-patient' must not have a 'replaces' link to the source resource when the source resource will be deleted, as the link may prevent deleting the source resource.");
+
+		verifyNoMoreInteractions(myDaoMock);
+	}
+
 	@Test
 	void testMerge_ValidatesResultResource_ResultResourceHasRedundantReplacesLinksToSource_ReturnsErrorWith400Status() {
 		// Given
