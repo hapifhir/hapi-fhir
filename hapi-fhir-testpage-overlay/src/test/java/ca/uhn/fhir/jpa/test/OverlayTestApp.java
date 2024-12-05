@@ -11,7 +11,11 @@ import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -66,7 +70,7 @@ public class OverlayTestApp {
 			FhirContext ctx = FhirContext.forR4Cached();
 			RestfulServer restfulServer = new RestfulServer(ctx);
 			restfulServer.registerProvider(new ProviderWithRequiredAndOptional());
-			restfulServer.registerProvider(new HashMapResourceProvider<>(ctx, Patient.class));
+			restfulServer.registerProvider(new PatientTestResourceProvider(ctx));
 			restfulServer.registerProvider(new HfqlRestProvider(hfqlExecutor));
 
 			ServletContextHandler proxyHandler = new ServletContextHandler();
@@ -218,6 +222,33 @@ public class OverlayTestApp {
 		@Override
 		public Class<DiagnosticReport> getResourceType() {
 			return DiagnosticReport.class;
+		}
+
+	}
+
+	public static class PatientTestResourceProvider extends HashMapResourceProvider<Patient> {
+
+		/**
+		 * Constructor
+		 *
+		 * @param theFhirContext The FHIR context
+		 */
+		public PatientTestResourceProvider(FhirContext theFhirContext) {
+			super(theFhirContext, Patient.class);
+		}
+
+		@Description(shortDefinition = "This is a provider endpoint with parameters for searching on patients to display")
+		@Search
+		public IBundleProvider findPatients(@RequiredParam(name = Patient.SP_ACTIVE) TokenAndListParam theType,
+											@Description(shortDefinition = "A portion of the given name of the patient")
+											@OptionalParam(name = "given")
+											StringAndListParam theGiven,
+											@Description(shortDefinition = "A portion of the family name of the patient")
+											@OptionalParam(name = "family")
+											StringAndListParam theFamily,
+											RequestDetails theRequestDetails
+		) throws Exception {
+			return searchAll(theRequestDetails);
 		}
 
 	}
