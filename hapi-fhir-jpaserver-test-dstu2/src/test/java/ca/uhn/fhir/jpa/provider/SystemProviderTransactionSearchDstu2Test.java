@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -201,6 +202,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testTransactionWithGetHardLimitLargeSynchronous() {
 		List<String> ids = create20Patients();
+		ids.sort(Comparator.naturalOrder());
 
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.TRANSACTION);

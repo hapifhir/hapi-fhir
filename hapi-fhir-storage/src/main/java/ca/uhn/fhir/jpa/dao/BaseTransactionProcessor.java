@@ -158,7 +158,7 @@ public abstract class BaseTransactionProcessor {
 
 	@Autowired
 	@SuppressWarnings("rawtypes")
-	private ITransactionProcessorVersionAdapter myVersionAdapter;
+	protected ITransactionProcessorVersionAdapter myVersionAdapter;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;

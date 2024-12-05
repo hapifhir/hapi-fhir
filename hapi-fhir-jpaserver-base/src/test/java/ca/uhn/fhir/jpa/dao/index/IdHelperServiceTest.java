@@ -11,12 +11,15 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -60,13 +64,19 @@ public class IdHelperServiceTest {
     @Mock
     private MemoryCacheService myMemoryCacheService;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private EntityManager myEntityManager;
 
     @Mock
     private PartitionSettings myPartitionSettings;
 
-    @BeforeEach
+	@Mock
+	private TypedQuery myQuery;
+
+	@Mock
+	private Tuple myTuple;
+
+	@BeforeEach
     void setUp() {
         myHelperSvc.setDontCheckActiveTransactionForUnitTest(true);
 
@@ -90,9 +100,11 @@ public class IdHelperServiceTest {
 
         // configure mock behaviour
 		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
+		when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(myQuery);
+		when(myQuery.getResultList()).thenReturn(List.of());
 
 		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted));
-		assertEquals("HAPI-2001: Resource Patient/123 is not known", resourceNotFoundException.getMessage());
+		assertEquals("HAPI-1100: Resource Patient/123 is not known", resourceNotFoundException.getMessage());
     }
 
     @Test
@@ -111,29 +123,18 @@ public class IdHelperServiceTest {
 
         // configure mock behaviour
         when(myStorageSettings.isDeleteEnabled()).thenReturn(false);
+		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
+		when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(myQuery);
+		when(myQuery.getResultList()).thenReturn(List.of(myTuple));
+		when(myTuple.get(eq(0), eq(Long.class))).thenReturn(id);
+		when(myTuple.get(eq(1), eq(String.class))).thenReturn(resourceType);
+		when(myTuple.get(eq(2), eq(String.class))).thenReturn(Long.toString(id));
 
 		Map<String, JpaPid> actualIds = myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted);
 
 		//verifyResult
 		assertFalse(actualIds.isEmpty());
-		assertNull(actualIds.get(ids.get(0)));
+		assertEquals(JpaPid.fromId(123L), actualIds.get(ids.get(0)));
     }
 
-
-    private Root<ResourceTable> getMockedFrom() {
-        @SuppressWarnings("unchecked")
-        Path<Object> path = mock(Path.class);
-        @SuppressWarnings("unchecked")
-        Root<ResourceTable> from = mock(Root.class);
-        when(from.get(ArgumentMatchers.<String>any())).thenReturn(path);
-        return from;
-    }
-
-    private List<Tuple> getMockedTupleList(Long idNumber, String resourceType, String id) {
-        Tuple tuple = mock(Tuple.class);
-        when(tuple.get(eq(0), eq(Long.class))).thenReturn(idNumber);
-        when(tuple.get(eq(1), eq(String.class))).thenReturn(resourceType);
-        when(tuple.get(eq(2), eq(String.class))).thenReturn(id);
-        return List.of(tuple);
-    }
 }

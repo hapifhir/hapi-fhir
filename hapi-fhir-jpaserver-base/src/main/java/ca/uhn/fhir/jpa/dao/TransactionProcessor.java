@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
@@ -165,9 +166,25 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * automatically go back to the default value after the transaction but
 		 * we reset it just to be safe.
 		 */
+		FlushModeType flushMode = FlushModeType.COMMIT;
+		for (IBase entry : theEntries) {
+			IBaseResource res = myVersionAdapter.getResource(entry);
+			if (res != null) {
+				String type = myFhirContext.getResourceType(res);
+				// These types write additional tables during the entity write
+				if ("ValueSet".equals(type)
+						|| "CodeSystem".equals(type)
+						|| "Subscription".equals(type)
+						|| "ConceptMap".equals(type)) {
+					flushMode = FlushModeType.AUTO;
+					break;
+				}
+			}
+		}
+
 		FlushModeType initialFlushMode = myEntityManager.getFlushMode();
 		try {
-			myEntityManager.setFlushMode(FlushModeType.COMMIT);
+			myEntityManager.setFlushMode(flushMode);
 
 			ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
 			RequestPartitionId requestPartitionId =
@@ -308,14 +325,18 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 		for (String resourceType : typeToIds.keySet()) {
 			List<String> ids = typeToIds.get(resourceType);
-			Map<String, JpaPid> resolvedIds =
-					myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, resourceType, ids, true);
-			for (Map.Entry<String, JpaPid> entries : resolvedIds.entrySet()) {
-				IIdType id = myFhirContext.getVersion().newIdType();
-				id.setValue(resourceType + "/" + entries.getKey());
-				JpaPid pid = entries.getValue();
-				pid.setAssociatedResourceId(id);
-				theTransactionDetails.addResolvedResourceId(id, pid);
+			try {
+				Map<String, JpaPid> resolvedIds =
+						myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, resourceType, ids, true);
+				for (Map.Entry<String, JpaPid> entries : resolvedIds.entrySet()) {
+					IIdType id = myFhirContext.getVersion().newIdType();
+					id.setValue(resourceType + "/" + entries.getKey());
+					JpaPid pid = entries.getValue();
+					pid.setAssociatedResourceId(id);
+					theTransactionDetails.addResolvedResourceId(id, pid);
+				}
+			} catch (ResourceNotFoundException e) {
+				ourLog.debug("Ignoring not found exception, it will be surfaced later in the processing", e);
 			}
 		}
 	}
