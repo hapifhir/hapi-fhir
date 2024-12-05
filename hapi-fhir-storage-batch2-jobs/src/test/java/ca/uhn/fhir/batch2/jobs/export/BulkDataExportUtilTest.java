@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 @ExtendWith(MockitoExtension.class)
 class BulkDataExportUtilTest {
 	private static final String URL = "http://localhost:8080";
+	private static final String OPERATION_NAME = "Operation Name";
 
 	@Mock
 	private ServletRequestDetails theRequestDetails;
@@ -32,13 +33,23 @@ class BulkDataExportUtilTest {
 
 	@ParameterizedTest
 	@EnumSource(value = PreferReturnEnum.class)
-	void validatePreferAsyncHeader(PreferReturnEnum thePreferReturnEnum) {
+	void validatePreferAsyncHeaderShouldThrowException(PreferReturnEnum thePreferReturnEnum) {
 		// Arrange
 		doReturn(thePreferReturnEnum.getHeaderValue()).when(theRequestDetails).getHeader(Constants.HEADER_PREFER);
 		// Act
-		assertThatThrownBy(() -> BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, "Operation Name"))
+		assertThatThrownBy(() -> BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, OPERATION_NAME))
 			.isInstanceOf(InvalidRequestException.class)
-			.hasMessageContaining("Must request async processing for Operation Name");
+			.hasMessageContaining("Must request async processing for " + OPERATION_NAME);
+		// Assert
+		verify(theRequestDetails).getHeader(Constants.HEADER_PREFER);
+	}
+
+	@Test
+	void validatePreferAsyncHeaderShouldNotThrowException() {
+		// Arrange
+		doReturn(Constants.HEADER_PREFER_RESPOND_ASYNC).when(theRequestDetails).getHeader(Constants.HEADER_PREFER);
+		// Act
+		assertThatNoException().isThrownBy(() -> BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, OPERATION_NAME));
 		// Assert
 		verify(theRequestDetails).getHeader(Constants.HEADER_PREFER);
 	}

@@ -531,7 +531,7 @@ public class BulkDataExportProvider {
 	private BulkDataExportJobService myBulkDataExportJobService;
 
 	private BulkDataExportJobService getBulkDataExportJobService() {
-		if (myBulkDataExportSupport == null) {
+		if (myBulkDataExportJobService == null) {
 			myBulkDataExportJobService = new BulkDataExportJobService(
 					myInterceptorBroadcaster,
 					myJobCoordinator,
