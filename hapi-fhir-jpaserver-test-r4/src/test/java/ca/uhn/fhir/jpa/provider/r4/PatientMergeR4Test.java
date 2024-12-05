@@ -7,6 +7,8 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -19,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.IdType;
@@ -30,6 +33,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.jetbrains.annotations.NotNull;
@@ -49,13 +53,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
+import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_RESULT_PATIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -166,17 +174,28 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@CsvSource({
-		// withDelete, withInputResultPatient, withPreview
-		"true, true, true",
-		"true, false, true",
-		"false, true, true",
-		"false, false, true",
-		"true, true, false",
-		"true, false, false",
-		"false, true, false",
-		"false, false, false",
+		// withDelete, withInputResultPatient, withPreview, isAsync
+		"true, true, true, false",
+		"true, false, true, false",
+		"false, true, true, false",
+		"false, false, true, false",
+		"true, true, false, false",
+		"true, false, false, false",
+		"false, true, false, false",
+		"false, false, false, false",
+
+		"true, true, true, true",
+		"true, false, true, true",
+		"false, true, true, true",
+		"false, false, true, true",
+		"true, true, false, true",
+		"true, false, false, true",
+		"false, true, false, true",
+		"false, false, false, true",
 	})
-	public void testMergeWithoutResult(boolean withDelete, boolean withInputResultPatient, boolean withPreview) throws Exception {
+	public void testMergeWithoutResult(boolean withDelete, boolean withInputResultPatient, boolean withPreview, boolean isAsync) throws Exception {
+		// setup
+
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
 		inParams.sourcePatient = new Reference().setReferenceElement(mySourcePatId);
 		inParams.targetPatient = new Reference().setReferenceElement(myTargetPatId);
@@ -189,11 +208,14 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 
 		Parameters inParameters = inParams.asParametersResource();
-		Parameters outParams = callMergeOperation(inParameters);
 
+		// exec
+		Parameters outParams = callMergeOperation(inParameters, isAsync);
+
+		// validate
 		assertThat(outParams.getParameter()).hasSize(3);
 
-		// Assert income
+		// Assert input
 		Parameters input = (Parameters) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_INPUT).getResource();
 		if (withInputResultPatient) { // if the following assert fails, check that these two patients are identical
 			Patient p1 = (Patient) inParameters.getParameter(OPERATION_MERGE_RESULT_PATIENT).getResource();
@@ -204,7 +226,37 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertTrue(input.equalsDeep(inParameters));
 
 		// Assert outcome
-		OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		OperationOutcome outcome;
+
+		// Assert Task
+		if (isAsync) {
+			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+			await().until(() -> task.getStatus() == Task.TaskStatus.COMPLETED);
+
+			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
+
+			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
+
+			// Assert on the output type
+			Coding taskType = taskOutput.getType().getCodingFirstRep();
+			assertEquals("http://hl7.org/fhir/ValueSet/resource-types", taskType.getSystem());
+			assertEquals("OperationOutcome", taskType.getCode());
+
+			List<Resource> containedResources = taskWithOutput.getContained();
+			assertThat(containedResources)
+				.hasSize(1)
+				.element(0)
+				.isInstanceOf(OperationOutcome.class);
+
+			OperationOutcome containedOutcome = (OperationOutcome) containedResources.get(0);
+
+			Reference outputRef = (Reference) taskOutput.getValue();
+			outcome = (OperationOutcome) outputRef.getResource();
+			assertTrue(containedOutcome.equalsDeep(outcome));
+		} else {
+			outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		}
+
 		if (withPreview) {
 			assertThat(outcome.getIssue())
 				.hasSize(1)
@@ -249,6 +301,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 				.extracting(link -> link.getOther().getReferenceElement())
 				.isEqualTo(myTargetPatId);
 		}
+
+		// Check that the linked resources were updated
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + myTargetPatId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
@@ -353,10 +407,20 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private Parameters callMergeOperation(Parameters inParameters) {
-		return myClient.operation()
+		return this.callMergeOperation(inParameters, false);
+	}
+
+	private Parameters callMergeOperation(Parameters inParameters, boolean isAsync) {
+		IOperationUntypedWithInput<Parameters> request = myClient.operation()
 			.onType("Patient")
 			.named(OPERATION_MERGE)
-			.withParameters(inParameters)
+			.withParameters(inParameters);
+
+		if (isAsync) {
+			request.withAdditionalHeader(HEADER_PREFER, HEADER_PREFER_RESPOND_ASYNC);
+		}
+
+		return request
 			.returnResourceType(Parameters.class)
 			.execute();
 	}

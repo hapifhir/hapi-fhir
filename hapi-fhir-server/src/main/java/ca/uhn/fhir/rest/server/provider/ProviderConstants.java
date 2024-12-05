@@ -278,4 +278,5 @@ public class ProviderConstants {
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_INPUT = "input";
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_OUTCOME = "outcome";
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_RESULT = "result";
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_TASK = "task";
 }
