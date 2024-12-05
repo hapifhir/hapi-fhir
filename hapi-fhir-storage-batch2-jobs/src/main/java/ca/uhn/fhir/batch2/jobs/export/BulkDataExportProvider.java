@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -40,15 +39,12 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
@@ -63,7 +59,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -83,8 +78,6 @@ public class BulkDataExportProvider {
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
-
-	private Set<String> myCompartmentResources;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -191,7 +184,7 @@ public class BulkDataExportProvider {
 		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		// verify the Group exists before starting the job
-		validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
+		getBulkDataExportValidator().validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
 
 		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
 				.outputFormat(theOutputFormat)
@@ -206,10 +199,10 @@ public class BulkDataExportProvider {
 				.build();
 
 		if (CollectionUtils.isNotEmpty(bulkExportJobParameters.getResourceTypes())) {
-			validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
+			getBulkDataExportValidator().validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
 		} else {
 			// all patient resource types
-			Set<String> groupTypes = new HashSet<>(getPatientCompartmentResources());
+			Set<String> groupTypes = new HashSet<>(getBulkDataExportValidator().getPatientCompartmentResources());
 
 			// Add the forward reference resource types from the patients, e.g. Practitioner, Organization
 			groupTypes.addAll(PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES);
@@ -221,60 +214,9 @@ public class BulkDataExportProvider {
 		getBulkDataExportJobService().startJob(theRequestDetails, bulkExportJobParameters);
 	}
 
-	/**
-	 * Throw ResourceNotFound if the target resources don't exist.
-	 * Otherwise, we start a bulk-export job which then fails, reporting a 500.
-	 *
-	 * @param theRequestDetails     the caller details
-	 * @param theTargetResourceName the type of the target
-	 * @param theIdParams           the id(s) to verify exist
-	 */
-	private void validateTargetsExists(
-			RequestDetails theRequestDetails, String theTargetResourceName, Iterable<IIdType> theIdParams) {
-		if (theIdParams.iterator().hasNext()) {
-			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-					theRequestDetails,
-					theTargetResourceName,
-					theIdParams.iterator().next());
-			SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
-			for (IIdType nextId : theIdParams) {
-				myDaoRegistry.getResourceDao(theTargetResourceName).read(nextId, requestDetails);
-			}
-		}
-	}
-
-	private void validateResourceTypesAllContainPatientSearchParams(Collection<String> theResourceTypes) {
-		if (theResourceTypes != null) {
-			List<String> badResourceTypes = theResourceTypes.stream()
-					.filter(resourceType ->
-							!PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resourceType))
-					.filter(resourceType -> !getPatientCompartmentResources().contains(resourceType))
-					.collect(Collectors.toList());
-
-			if (!badResourceTypes.isEmpty()) {
-				throw new InvalidRequestException(Msg.code(512)
-						+ String.format(
-								"Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.",
-								String.join(",", badResourceTypes)));
-			}
-		}
-	}
-
-	private Set<String> getPatientCompartmentResources() {
-		return getPatientCompartmentResources(myFhirContext);
-	}
-
 	@VisibleForTesting
 	Set<String> getPatientCompartmentResources(FhirContext theFhirContext) {
-		if (myCompartmentResources == null) {
-			myCompartmentResources =
-					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext));
-			FhirVersionEnum fhirVersionEnum = theFhirContext.getVersion().getVersion();
-			if (BulkDataExportUtil.isDeviceResourceSupportedForPatientCompartmentForFhirVersion(fhirVersionEnum)) {
-				myCompartmentResources.add("Device");
-			}
-		}
-		return myCompartmentResources;
+		return getBulkDataExportValidator().getPatientCompartmentResources(theFhirContext);
 	}
 
 	/**
@@ -383,14 +325,15 @@ public class BulkDataExportProvider {
 			List<IPrimitiveType<String>> thePatientIds) {
 		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
-		validateTargetsExists(
+		getBulkDataExportValidator().validateTargetsExists(
 				theRequestDetails,
 				"Patient",
 				thePatientIds.stream().map(c -> new IdType(c.getValue())).collect(Collectors.toList()));
 
 		// set resourceTypes to all patient compartment resources if it is null
-		IPrimitiveType<String> resourceTypes =
-				theType == null ? new StringDt(String.join(",", getPatientCompartmentResources())) : theType;
+		IPrimitiveType<String> resourceTypes = theType == null
+			? new StringDt(String.join(",", getBulkDataExportValidator().getPatientCompartmentResources()))
+			: theType;
 
 		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
 				.outputFormat(theOutputFormat)
@@ -403,7 +346,7 @@ public class BulkDataExportProvider {
 				.patientIds(thePatientIds)
 				.build();
 
-		validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
+		getBulkDataExportValidator().validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
 
 		getBulkDataExportJobService().startJob(theRequestDetails, bulkExportJobParameters);
 	}
@@ -585,7 +528,7 @@ public class BulkDataExportProvider {
 	private BulkDataExportJobService myBulkDataExportJobService;
 
 	private BulkDataExportJobService getBulkDataExportJobService() {
-		if (myBulkDataExportJobService == null) {
+		if (myBulkDataExportSupport == null) {
 			myBulkDataExportJobService = new BulkDataExportJobService(
 					myInterceptorBroadcaster,
 					myJobCoordinator,
@@ -595,4 +538,16 @@ public class BulkDataExportProvider {
 		}
 		return myBulkDataExportJobService;
 	}
+
+	// Do not use this variable directly, use getBulkDataExportSupport() instead
+	private BulkDataExportSupport myBulkDataExportSupport;
+
+	private BulkDataExportSupport getBulkDataExportValidator() {
+		if (myBulkDataExportSupport == null) {
+			myBulkDataExportSupport =
+				new BulkDataExportSupport(myFhirContext, myDaoRegistry, myRequestPartitionHelperService);
+		}
+		return myBulkDataExportSupport;
+	}
+
 }
