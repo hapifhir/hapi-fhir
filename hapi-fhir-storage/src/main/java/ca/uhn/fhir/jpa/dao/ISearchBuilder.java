@@ -77,7 +77,7 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 
 	void setMaxResultsToFetch(Integer theMaxResultsToFetch);
 
-	void setShouldDeduplicateInDB(boolean theShouldDeduplicateInDB);
+	void setDeduplicateInDatabase(boolean theShouldDeduplicateInDB);
 
 	void setRequireTotal(boolean theRequireTotal);
 

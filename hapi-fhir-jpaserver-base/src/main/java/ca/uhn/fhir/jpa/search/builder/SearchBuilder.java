@@ -211,23 +211,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private boolean myRequiresTotal;
 
 	/**
-	 * Set of PIDs of results that have already been returned in a search.
-	 *
-	 * Searches use pre-fetch thresholds to avoid returning every result in the db
-	 * (see {@link JpaStorageSettings mySearchPreFetchThresholds}). These threshold values
-	 * dictate the usage of this set.
-	 *
-	 * Results from searches returning *less* than a prefetch threshold are put into this set
-	 * for 2 purposes:
-	 * 1) skipping already seen resources. ie, client requesting next "page" of
-	 *    results should skip previously returned results
-	 * 2) deduplication of returned results. ie, searches can return duplicate resources (due to
-	 *    sort and filter criteria), so this set will be used to avoid returning duplicate results.
-	 *
-	 * NOTE: if a client requests *more* resources than *all* prefetch thresholds,
-	 * we push the work of "deduplication" to the database. No newly seen resource
-	 * will be stored in this set (to avoid this set exploding in size and the JVM running out memory).
-	 * We will, however, still use it to skip previously seen results.
+	 * @see SearchBuilder#setDeduplicateInDatabase(boolean)
 	 */
 	private Set<JpaPid> myPidSet;
 
@@ -300,8 +284,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		mySearchProperties.setMaxResultsRequested(theMaxResultsToFetch);
 	}
 
-	public void setShouldDeduplicateInDB(boolean theShouldDeduplicateInDB) {
-		mySearchProperties.setDeduplicateInDBFlag(theShouldDeduplicateInDB);
+	public void setDeduplicateInDatabase(boolean theShouldDeduplicateInDB) {
+		mySearchProperties.setDeduplicateInDatabase(theShouldDeduplicateInDB);
 	}
 
 	@Override
@@ -803,7 +787,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * if the MaxResultsToFetch is null, we are requesting "everything",
 		 * so we'll let the db do the deduplication (instead of in-memory)
 		 */
-		if (theSearchProperties.isDeduplicateInDBFlag()) {
+		if (theSearchProperties.isDeduplicateInDatabase()) {
 			queryStack3.addGrouping();
 			queryStack3.setUseAggregate(true);
 		}
@@ -2739,7 +2723,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						if (nextPid != null) {
 							if (!myPidSet.contains(nextPid)) {
-								if (!mySearchProperties.isDeduplicateInDBFlag()) {
+								if (!mySearchProperties.isDeduplicateInDatabase()) {
 									/*
 									 * We only add to the map if we aren't fetching "everything";
 									 * otherwise, we let the de-duplication happen in the database
@@ -2768,7 +2752,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									int maxResults = mySearchProperties.getMaxResultsRequested() + 1000;
 									mySearchProperties.setMaxResultsRequested(maxResults);
 
-									if (!mySearchProperties.isDeduplicateInDBFlag()) {
+									if (!mySearchProperties.isDeduplicateInDatabase()) {
 										// if we're not using the database to deduplicate
 										// we should recheck our memory usage
 										// the prefetch size check is future proofing
@@ -2780,7 +2764,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 															.getSearchPreFetchThresholds()
 															.get(prefetchSize - 1)
 													< mySearchProperties.getMaxResultsRequested()) {
-												mySearchProperties.setDeduplicateInDBFlag(true);
+												mySearchProperties.setDeduplicateInDatabase(true);
 											}
 										}
 									}
@@ -2894,7 +2878,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						.setOffset(offset)
 						.setMaxResultsRequested(theMaxResultsToFetch)
 						.setDoCountOnlyFlag(false)
-						.setDeduplicateInDBFlag(properties.isDeduplicateInDBFlag() || offset != null);
+						.setDeduplicateInDatabase(properties.isDeduplicateInDatabase() || offset != null);
 				myQueryList = createQuery(myParams, properties, myRequest, mySearchRuntimeDetails);
 			}
 

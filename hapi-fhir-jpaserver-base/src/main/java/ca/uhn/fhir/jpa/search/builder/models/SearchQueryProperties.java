@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.builder.models;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.rest.api.SortSpec;
 
 public class SearchQueryProperties {
@@ -17,7 +18,7 @@ public class SearchQueryProperties {
 	 *
 	 * True means use the database
 	 */
-	private boolean myDeduplicateInDBFlag;
+	private boolean myDeduplicateInDB;
 
 	/**
 	 * The maximum number of results to fetch (when we want it limited).
@@ -45,12 +46,31 @@ public class SearchQueryProperties {
 		return this;
 	}
 
-	public boolean isDeduplicateInDBFlag() {
-		return myDeduplicateInDBFlag;
+	public boolean isDeduplicateInDatabase() {
+		return myDeduplicateInDB;
 	}
 
-	public SearchQueryProperties setDeduplicateInDBFlag(boolean theDeduplicateInDBFlag) {
-		myDeduplicateInDBFlag = theDeduplicateInDBFlag;
+	/**
+	 * Set of PIDs of results that have already been returned in a search.
+	 *
+	 * Searches use pre-fetch thresholds to avoid returning every result in the db
+	 * (see {@link JpaStorageSettings mySearchPreFetchThresholds}). These threshold values
+	 * dictate the usage of this set.
+	 *
+	 * Results from searches returning *less* than a prefetch threshold are put into this set
+	 * for 2 purposes:
+	 * 1) skipping already seen resources. ie, client requesting next "page" of
+	 *    results should skip previously returned results
+	 * 2) deduplication of returned results. ie, searches can return duplicate resources (due to
+	 *    sort and filter criteria), so this set will be used to avoid returning duplicate results.
+	 *
+	 * NOTE: if a client requests *more* resources than *all* prefetch thresholds,
+	 * we push the work of "deduplication" to the database. No newly seen resource
+	 * will be stored in this set (to avoid this set exploding in size and the JVM running out memory).
+	 * We will, however, still use it to skip previously seen results.
+	 */
+	public SearchQueryProperties setDeduplicateInDatabase(boolean theDeduplicateInDBFlag) {
+		myDeduplicateInDB = theDeduplicateInDBFlag;
 		return this;
 	}
 
@@ -99,6 +119,6 @@ public class SearchQueryProperties {
 				.setSortSpec(mySortSpec)
 				.setOffset(myOffset)
 				.setDoCountOnlyFlag(myDoCountOnlyFlag)
-				.setDeduplicateInDBFlag(myDeduplicateInDBFlag);
+				.setDeduplicateInDatabase(myDeduplicateInDB);
 	}
 }

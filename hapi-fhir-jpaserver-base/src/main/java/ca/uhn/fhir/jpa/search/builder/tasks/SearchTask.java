@@ -593,7 +593,14 @@ public class SearchTask implements Callable<Void> {
 
 			if (next == -1) {
 				sb.setMaxResultsToFetch(null);
-				sb.setShouldDeduplicateInDB(true);
+				/*
+				 * If we're past the last prefetch threshold then
+				 * we're potentially fetiching unlimited amounts of data.
+				 * We'll move responsibility for deduplication to the database in this case
+				 * so that we don't run the risk of blowing out the memory
+				 * in the app server
+				 */
+				sb.setDeduplicateInDatabase(true);
 			} else {
 				// we want at least 1 more than our requested amount
 				// so we know that there are other results
