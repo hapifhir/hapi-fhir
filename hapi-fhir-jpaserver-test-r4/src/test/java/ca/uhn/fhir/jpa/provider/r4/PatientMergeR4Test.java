@@ -275,7 +275,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 				.element(0)
 				.satisfies(issue -> {
 					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-					assertThat(issue.getDiagnostics()).isEqualTo("Merge operation completed successfully.");
+					assertThat(issue.getDetails().getText()).isEqualTo("Merge operation completed successfully.");
 				});
 		}
 

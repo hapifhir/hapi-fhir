@@ -90,6 +90,16 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		}
 	}
 
+	@Override
+	public Integer countResourcesReferencingResource(IIdType theResourceId, RequestDetails theRequestDetails) {
+		return myHapiTransactionService.withRequest(theRequestDetails).execute(
+			() -> {
+				// FIXME KHS get partition from request
+				JpaPid sourcePid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResourceId);
+				return myResourceLinkDao.countResourcesTargetingPid(sourcePid.getId());
+			});
+	}
+
 	private IBaseParameters replaceReferencesPreferAsync(ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 		// FIXME KHS
 		return null;
