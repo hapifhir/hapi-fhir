@@ -73,6 +73,9 @@ public class NpmPackageVersionResourceEntity {
 			foreignKey = @ForeignKey(name = "FK_NPM_PKVR_RESID"))
 	private ResourceTable myResourceBinary;
 
+	@Column(name = "PARTITION_ID", nullable = true)
+	private Integer myPartitionId;
+
 	@Column(name = "FILE_DIR", length = 200)
 	private String myDirectory;
 
