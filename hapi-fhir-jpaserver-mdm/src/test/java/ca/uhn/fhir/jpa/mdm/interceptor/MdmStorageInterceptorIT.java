@@ -1,13 +1,17 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
+import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
+import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
@@ -20,6 +24,7 @@ import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
@@ -31,10 +36,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -47,6 +55,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED;
@@ -75,7 +84,13 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
 	@Autowired
 	private IMdmLinkCreateSvc myMdmCreateSvc;
+	@Autowired
+	private MdmLinkHelper myMdmLinkHelper;
+	@Autowired
+	private CascadingDeleteInterceptor myDeleteInterceptor;
 
+	@Autowired
+	private IInterceptorService myInterceptorService;
 
 	@Override
 	public void beforeUnregisterAllSubscriptions() {
@@ -107,6 +122,101 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		Patient sourcePatient = getOnlyGoldenPatient();
 		myPatientDao.delete(sourcePatient.getIdElement());
 		assertLinkCount(0);
+	}
+
+	@Test
+	public void deleteLastResource_withDeleteCascade_works() throws InterruptedException {
+		// setup
+		boolean allowMultipleDelete = myStorageSettings.isAllowMultipleDelete();
+		// we need the request details to specify it is a cascade delete
+		RequestDetails details = createDeleteCascadeRequestDetails();
+
+		try {
+			myStorageSettings.setAllowMultipleDelete(true);
+
+			myInterceptorService.registerInterceptor(myDeleteInterceptor);
+
+			// create a patient with an encounter that references that patient
+			MdmHelperR4.OutcomeAndLogMessageWrapper result = myMdmHelper.createWithLatch(buildJanePatient());
+			IIdType patientId = result.getDaoMethodOutcome().getId();
+			Encounter encounter = new Encounter();
+			encounter.setSubject(
+				new Reference().setReference(patientId.getValue())
+			);
+			myEncounterDao.create(encounter, new SystemRequestDetails());
+
+			// sanity check - verify we have an mdm link
+			List<MdmLink> links = myMdmLinkDao.findAll();
+			assertEquals(1, links.size());
+
+			// test
+			// delete the patient
+			DaoMethodOutcome outcome = myPatientDao.delete(patientId, details);
+			assertTrue(outcome.getOperationOutcome() instanceof OperationOutcome);
+			OperationOutcome out = (OperationOutcome) outcome.getOperationOutcome();
+			assertTrue(out.getIssue().stream()
+				.anyMatch(f -> f.getDiagnostics().toLowerCase().contains("successfully deleted 1 resource(s)")));
+			assertTrue(myMdmLinkDao.findAll().isEmpty());
+
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			IBundleProvider encounters = myEncounterDao.search(map, details);
+			assertTrue(encounters.isEmpty());
+			IBundleProvider patients = myPatientDao.search(map, details);
+			assertTrue(patients.isEmpty());
+		} finally {
+			myStorageSettings.setAllowMultipleDelete(allowMultipleDelete);
+			myInterceptorService.unregisterInterceptor(myDeleteInterceptor);
+		}
+	}
+
+	@Test
+	public void deleteLinkedPatients_withReferenceEncountersAndCascadingDelete_deletesSuccessfully() {
+		// setup
+		boolean allowMultipleDelete = myStorageSettings.isAllowMultipleDelete();
+		// we need the request details to specify it is a cascade delete
+		RequestDetails details = createDeleteCascadeRequestDetails();
+
+		MDMState<Patient, JpaPid> state = new MDMState<>();
+		String startingState = """
+   			GP1, AUTO, MATCH, P1
+   			GP1, AUTO, MATCH, P2
+		""";
+		state.setInputState(startingState);
+		myMdmLinkHelper.setup(state);
+
+		// link some encounters
+		for (String id : new String[] { "P1", "P2" }) {
+			Encounter enc = new Encounter();
+			enc.setSubject(new Reference("Patient/" + id));
+			myEncounterDao.create(enc, new SystemRequestDetails());
+		}
+
+		try {
+			myStorageSettings.setAllowMultipleDelete(true);
+
+			myInterceptorService.registerInterceptor(myDeleteInterceptor);
+
+			// test
+			// delete the patient
+			DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?_id=P1,P2", details);
+
+			assertTrue(outcome.getOperationOutcome() instanceof OperationOutcome);
+			OperationOutcome out = (OperationOutcome) outcome.getOperationOutcome();
+			assertTrue(out.getIssue().stream()
+				.anyMatch(f -> f.getDiagnostics().toLowerCase().contains("successfully deleted 2 resource(s)")));
+			assertTrue(myMdmLinkDao.findAll().isEmpty());
+
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			IBundleProvider encounters = myEncounterDao.search(map, details);
+			assertTrue(encounters.isEmpty());
+			IBundleProvider patients = myPatientDao.search(map, details);
+			assertTrue(patients.isEmpty());
+		} finally {
+			myStorageSettings.setAllowMultipleDelete(allowMultipleDelete);
+			myInterceptorService.unregisterInterceptor(myDeleteInterceptor);
+		}
 	}
 
 	@ParameterizedTest
@@ -603,11 +713,19 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	}
 
 	private void setPreventEidUpdates(boolean thePrevent) {
-		((MdmSettings) myMdmSettings).setPreventEidUpdates(thePrevent);
+		myMdmSettings.setPreventEidUpdates(thePrevent);
 	}
 
 	private void setPreventMultipleEids(boolean thePrevent) {
-		((MdmSettings) myMdmSettings).setPreventMultipleEids(thePrevent);
+		myMdmSettings.setPreventMultipleEids(thePrevent);
 	}
 
+	private RequestDetails createDeleteCascadeRequestDetails() {
+		RequestDetails details = new SystemRequestDetails();
+		HashMap<String, String[]> reqParams = new HashMap<>();
+		reqParams.put(Constants.PARAMETER_CASCADE_DELETE,
+			new String[] { Constants.CASCADE_DELETE });
+		details.setParameters(reqParams);
+		return details;
+	}
 }

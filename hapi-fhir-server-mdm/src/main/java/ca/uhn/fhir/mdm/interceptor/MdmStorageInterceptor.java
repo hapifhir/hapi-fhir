@@ -65,6 +65,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -199,26 +200,43 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
 	public void deletePostCommit(
 			RequestDetails theRequest, IBaseResource theResource, TransactionDetails theTransactionDetails) {
-		Set<IResourcePersistentId> goldenResourceIds = theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
+		if (!myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
+			// if it's not an mdm supported type, leave immediately;
+			// we're only deleting goldenids / links if the source ids (which are mdm supported)
+			// are being deleted
+			return;
+		}
 
-		if (goldenResourceIds != null) {
-			for (IResourcePersistentId goldenPid : goldenResourceIds) {
-				if (!theTransactionDetails.getDeletedResourceIds().contains(goldenPid)) {
-					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
-					deleteGoldenResource(goldenPid, dao, theRequest);
-					/*
-					 * We will add the removed id to the deleted list so that
-					 * the deletedResourceId list is accurte for what has been
-					 * deleted.
-					 *
-					 * This benefits other interceptor writers who might want
-					 * to do their own resource deletion on this same pre-commit
-					 * hook (and wouldn't be aware if we did this deletion already).
-					 */
-					theTransactionDetails.addDeletedResourceId(goldenPid);
+		Map<IResourcePersistentId, Set<IResourcePersistentId>> goldenResourceIds2linkedSourceIds = theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
+		if (goldenResourceIds2linkedSourceIds != null) {
+			IResourcePersistentId sourcePid =
+				myIdHelperSvc.getPidOrNull(RequestPartitionId.allPartitions(), theResource);
+			if (sourcePid != null) {
+				for (IResourcePersistentId goldenPid : goldenResourceIds2linkedSourceIds.keySet()) {
+					if (goldenResourceIds2linkedSourceIds.get(goldenPid).contains(sourcePid)) {
+						// we only delete the golden resource if it's matched to a source id;
+						// there could be multiple of these, so we only delete the first
+						if (!theTransactionDetails.getDeletedResourceIds().contains(goldenPid)) {
+							IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
+							deleteGoldenResource(goldenPid, dao, theRequest);
+							/*
+							 * We will add the removed id to the deleted list so that
+							 * the deletedResourceId list is accurate for what has been
+							 * deleted.
+							 *
+							 * This benefits other interceptor writers who might want
+							 * to do their own resource deletion on this same pre-commit
+							 * hook (and wouldn't be aware if we did this deletion already).
+							 */
+							theTransactionDetails.addDeletedResourceId(goldenPid);
+							// remove the golden resource id so it won't be 're-deleted'
+							// if a second id related to this golden id (linked in some way)
+							// is processed
+							goldenResourceIds2linkedSourceIds.remove(goldenPid);
+						}
+					}
 				}
 			}
-			theTransactionDetails.putUserData(GOLDEN_RESOURCES_TO_DELETE, null);
 		}
 	}
 
@@ -254,25 +272,32 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 				IResourcePersistentId goldenPid = extractGoldenPid(theResource, matches.get(0));
 				if (!theTransactionDetails.getDeletedResourceIds().contains(goldenPid)) {
 					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
-
 					cleanUpPossibleMatches(possibleMatches, dao, goldenPid, theRequest);
-
 					IAnyResource goldenResource = (IAnyResource) dao.readByPid(goldenPid);
 					myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(goldenResource);
-
 					/*
 					 * Mark the golden resource for deletion.
 					 * We won't do it yet, because there might be additional deletes coming
 					 * that include this exact golden resource
 					 * (eg, if delete is done by a filter and multiple delete is enabled)
 					 */
-					Set<IResourcePersistentId> goldenIdsToDelete =
-							theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
-					if (goldenIdsToDelete == null) {
-						goldenIdsToDelete = new HashSet<>();
+					Map<IResourcePersistentId, Set<IResourcePersistentId>> goldenIdsToDelete2linkedSrcIds = theTransactionDetails
+						.getUserData(GOLDEN_RESOURCES_TO_DELETE);
+					if (goldenIdsToDelete2linkedSrcIds == null) {
+						goldenIdsToDelete2linkedSrcIds = new ConcurrentHashMap<>();
 					}
-					goldenIdsToDelete.add(goldenPid);
-					theTransactionDetails.putUserData(GOLDEN_RESOURCES_TO_DELETE, goldenIdsToDelete);
+					if (!goldenIdsToDelete2linkedSrcIds.containsKey(goldenPid)) {
+						goldenIdsToDelete2linkedSrcIds.put(goldenPid, new HashSet<>());
+					}
+					goldenIdsToDelete2linkedSrcIds.get(goldenPid).add(sourcePid);
+					theTransactionDetails.putUserData(GOLDEN_RESOURCES_TO_DELETE, goldenIdsToDelete2linkedSrcIds);
+//					Set<IResourcePersistentId> goldenIdsToDelete =
+//							theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
+//					if (goldenIdsToDelete == null) {
+//						goldenIdsToDelete = new HashSet<>();
+//					}
+//					goldenIdsToDelete.add(goldenPid);
+//					theTransactionDetails.putUserData(GOLDEN_RESOURCES_TO_DELETE, goldenIdsToDelete);
 				}
 			}
 			myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
@@ -298,7 +323,6 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 					theRequest,
 					new TransactionDetails());
 		}
-
 		resetLinksDeletedBeforehand();
 	}
 
