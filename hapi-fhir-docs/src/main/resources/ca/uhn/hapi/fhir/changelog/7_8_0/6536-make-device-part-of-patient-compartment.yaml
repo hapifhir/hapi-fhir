@@ -1,6 +1,6 @@
 ---
 type: add
-JIRA: SMILE-9260
+jira: SMILE-9260
 title: "The `patient` search parameter for the `Device` resource has been added to the Patient Compartment for the purposes of: 
 
 - AuthorizationInterceptor

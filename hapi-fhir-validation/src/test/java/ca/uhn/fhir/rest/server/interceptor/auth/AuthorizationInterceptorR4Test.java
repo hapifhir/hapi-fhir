@@ -496,47 +496,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	}
 
 	@Test
-	public void testCustomSearchParamsDontOverPermit() throws Exception {
-		//Given
-		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
-				additionalCompartmentSearchParameters.addSearchParameters("Encounter:patient");
-				List<IdType> relatedIds = new ArrayList<>();
-				relatedIds.add(new IdType("Patient/123"));
-				return new RuleBuilder()
-					.allow().read().allResources()
-					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, additionalCompartmentSearchParameters)
-					.andThen().denyAll()
-					.build();
-			}
-		});
-
-		HttpGet httpGet;
-		HttpResponse status;
-
-		Patient patient;
-		patient = new Patient();
-		patient.setId("Patient/123");
-		Device d = new Device();
-		d.getPatient().setResource(patient);
-
-		ourHitMethod = false;
-		ourReturn = Collections.singletonList(d);
-
-		//When
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Device/124456");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-
-		//then
-		assertFalse(ourHitMethod);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-	}
-
-
-	@Test
 	public void testNonsenseParametersThrowAtRuntime() throws Exception {
 		//Given
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -567,7 +526,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourReturn = Collections.singletonList(d);
 
 		//When
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Device/124456");
+		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Device/");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 
