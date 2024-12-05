@@ -442,7 +442,11 @@ class ModelScanner {
 				}
 
 				/**
-				 * N.B. As of 8.0.0, we have decided that Device is in the patient compartment via the `Device.patient` Search Parameter.
+				 * In the base FHIR R4 specification, the Device resource is not a part of the Patient compartment.
+				 * However, it is a patient-specific resource that most users expect to be, and several derivative
+				 * specifications including g(10) testing expect it to be, and the fact that it is not has led to many
+				 * bug reports in HAPI FHIR. As of HAPI FHIR 8.0.0 it is being manually added in response to those
+				 * requests.
 				 * See https://github.com/hapifhir/hapi-fhir/issues/6536 for more information.
 				 */
 				if (searchParam.name().equals("patient") && searchParam.path().equals("Device.patient")) {
