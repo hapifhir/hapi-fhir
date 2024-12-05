@@ -363,21 +363,21 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		myCaptureQueriesListener.logSelectQueries();
 		if (theTargetAlreadyExists) {
 			if (theResourceChanges) {
-				assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			} else {
-				assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			}
 		} else {
 			if (theResourceChanges) {
-				assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(7, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			} else {
-				assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(7, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			}
@@ -505,11 +505,11 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/3");
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/4");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		actual = myPatientDao.read(resourceId, mySrd);
-		assertEquals("3", actual.getIdElement().getVersionIdPart());
+		assertEquals("4", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 	}
@@ -655,13 +655,13 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		outcome = mySystemDao.transaction(mySrd, createBundleWithDeleteAndUpdateOnSameResource(myFhirContext));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertEquals("Patient/P/_history/3", outcome.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Patient/P/_history/4", outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertEquals("Patient/P/_history/3", outcome.getEntry().get(1).getResponse().getLocation());
+		assertEquals("Patient/P/_history/4", outcome.getEntry().get(1).getResponse().getLocation());
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		actual = myPatientDao.read(resourceId, mySrd);
-		assertEquals("3", actual.getIdElement().getVersionIdPart());
+		assertEquals("4", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 

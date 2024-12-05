@@ -632,12 +632,12 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public FlushModeType getFlushMode() {
-			throw new UnsupportedOperationException();
+			return FlushModeType.AUTO;
 		}
 
 		@Override
 		public void setFlushMode(FlushModeType flushMode) {
-			throw new UnsupportedOperationException();
+			// ignore
 		}
 
 		@Override

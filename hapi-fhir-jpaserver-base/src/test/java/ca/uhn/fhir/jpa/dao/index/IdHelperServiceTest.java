@@ -123,7 +123,6 @@ public class IdHelperServiceTest {
 
         // configure mock behaviour
         when(myStorageSettings.isDeleteEnabled()).thenReturn(false);
-		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
 		when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(myQuery);
 		when(myQuery.getResultList()).thenReturn(List.of(myTuple));
 		when(myTuple.get(eq(0), eq(Long.class))).thenReturn(id);
