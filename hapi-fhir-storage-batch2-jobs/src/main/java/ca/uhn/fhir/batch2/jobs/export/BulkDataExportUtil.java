@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class BulkDataExportUtil {
 	public static final List<String> PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES =
-		List.of("Practitioner", "Organization");
+			List.of("Practitioner", "Organization");
 
 	/**
 	 * Bulk data $export does not include the Binary type
