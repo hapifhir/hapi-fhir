@@ -673,7 +673,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDontStripVersionsFromRefsAtPaths_inTransactionBundle_shouldPreserveVersion() {
+	public void testDontStripVersionsFromRefsAtPaths_inTransactionBundle_shouldPreserveVersion() throws IOException {
 		Set<String> referencePaths = Set.of("AuditEvent.entity.what","MessageHeader.focus","Provenance.target","Provenance.entity.what");
 
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(referencePaths);
@@ -685,7 +685,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDontStripVersionsFromRefsAtAllPaths_inTransactionBundle_shouldPreserveVersion() {
+	public void testDontStripVersionsFromRefsAtAllPaths_inTransactionBundle_shouldPreserveVersion() throws IOException {
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myStorageSettings.setAutoVersionReferenceAtPaths("Encounter.subject");
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
@@ -695,7 +695,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDontStripVersionsFromRefsAtPaths_withTransactionBundleAndAutoVersionSet_shouldPreserveVersion() {
+	public void testDontStripVersionsFromRefsAtPaths_withTransactionBundleAndAutoVersionSet_shouldPreserveVersion() throws IOException {
 		Set<String> referencePaths = Set.of("AuditEvent.entity.what","MessageHeader.focus","Provenance.target","Provenance.entity.what");
 
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(referencePaths);
@@ -710,10 +710,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference.json");
 	}
 
-	private Provenance postBundleAndAssertProvenanceRefsPreserved(String theBundlePath) {
-		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class,
-			new InputStreamReader(
-				FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream(theBundlePath)));
+	private Provenance postBundleAndAssertProvenanceRefsPreserved(String theBundlePath) throws IOException {
+		Bundle bundle = loadResourceFromClasspath(Bundle.class, theBundlePath);
 
 		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), bundle);
 
@@ -726,7 +724,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDontStripVersionsFromRefsAtPathsAndAutoVersionSameTransaction_withTransactionBundle_shouldPreserveVersion() {
+	public void testDontStripVersionsFromRefsAtPathsAndAutoVersionSameTransaction_withTransactionBundle_shouldPreserveVersion() throws IOException {
 		Set<String> referencePaths = Set.of("AuditEvent.entity.what","MessageHeader.focus","Provenance.target","Provenance.entity.what", "Provenance.agent.who");
 
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(referencePaths);
@@ -739,7 +737,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDontStripVersionsFromRefsAtPaths_withTransactionBundleAndPreExistingReference_shouldPreserveVersion() {
+	public void testDontStripVersionsFromRefsAtPaths_withTransactionBundleAndPreExistingReference_shouldPreserveVersion() throws IOException {
 		Set<String> referencePaths = Set.of("AuditEvent.entity.what","MessageHeader.focus","Provenance.target","Provenance.entity.what");
 
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(referencePaths);
