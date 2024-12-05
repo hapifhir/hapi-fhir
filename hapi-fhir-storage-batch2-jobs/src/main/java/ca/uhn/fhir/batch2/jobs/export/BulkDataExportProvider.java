@@ -199,7 +199,8 @@ public class BulkDataExportProvider {
 				.build();
 
 		if (CollectionUtils.isNotEmpty(bulkExportJobParameters.getResourceTypes())) {
-			getBulkDataExportValidator().validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
+			getBulkDataExportValidator()
+					.validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
 		} else {
 			// all patient resource types
 			Set<String> groupTypes = new HashSet<>(getBulkDataExportValidator().getPatientCompartmentResources());
@@ -325,15 +326,18 @@ public class BulkDataExportProvider {
 			List<IPrimitiveType<String>> thePatientIds) {
 		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
-		getBulkDataExportValidator().validateTargetsExists(
-				theRequestDetails,
-				"Patient",
-				thePatientIds.stream().map(c -> new IdType(c.getValue())).collect(Collectors.toList()));
+		getBulkDataExportValidator()
+				.validateTargetsExists(
+						theRequestDetails,
+						"Patient",
+						thePatientIds.stream()
+								.map(c -> new IdType(c.getValue()))
+								.collect(Collectors.toList()));
 
 		// set resourceTypes to all patient compartment resources if it is null
 		IPrimitiveType<String> resourceTypes = theType == null
-			? new StringDt(String.join(",", getBulkDataExportValidator().getPatientCompartmentResources()))
-			: theType;
+				? new StringDt(String.join(",", getBulkDataExportValidator().getPatientCompartmentResources()))
+				: theType;
 
 		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
 				.outputFormat(theOutputFormat)
@@ -346,7 +350,8 @@ public class BulkDataExportProvider {
 				.patientIds(thePatientIds)
 				.build();
 
-		getBulkDataExportValidator().validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
+		getBulkDataExportValidator()
+				.validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
 
 		getBulkDataExportJobService().startJob(theRequestDetails, bulkExportJobParameters);
 	}
@@ -545,9 +550,8 @@ public class BulkDataExportProvider {
 	private BulkDataExportSupport getBulkDataExportValidator() {
 		if (myBulkDataExportSupport == null) {
 			myBulkDataExportSupport =
-				new BulkDataExportSupport(myFhirContext, myDaoRegistry, myRequestPartitionHelperService);
+					new BulkDataExportSupport(myFhirContext, myDaoRegistry, myRequestPartitionHelperService);
 		}
 		return myBulkDataExportSupport;
 	}
-
 }

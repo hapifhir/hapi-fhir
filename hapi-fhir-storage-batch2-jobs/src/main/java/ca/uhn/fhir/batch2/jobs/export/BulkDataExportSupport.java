@@ -44,9 +44,9 @@ public class BulkDataExportSupport {
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	public BulkDataExportSupport(
-		@Nonnull FhirContext theFhirContext,
-		@Nonnull DaoRegistry theDaoRegistry,
-		@Nonnull IRequestPartitionHelperSvc theRequestPartitionHelperService) {
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull DaoRegistry theDaoRegistry,
+			@Nonnull IRequestPartitionHelperSvc theRequestPartitionHelperService) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myRequestPartitionHelperService = theRequestPartitionHelperService;
@@ -78,16 +78,17 @@ public class BulkDataExportSupport {
 	public void validateResourceTypesAllContainPatientSearchParams(Collection<String> theResourceTypes) {
 		if (theResourceTypes != null) {
 			List<String> badResourceTypes = theResourceTypes.stream()
-				.filter(resourceType ->
-					!BulkDataExportProvider.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resourceType))
-				.filter(resourceType -> !getPatientCompartmentResources().contains(resourceType))
-				.collect(Collectors.toList());
+					.filter(resourceType ->
+							!BulkDataExportProvider.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(
+									resourceType))
+					.filter(resourceType -> !getPatientCompartmentResources().contains(resourceType))
+					.collect(Collectors.toList());
 
 			if (!badResourceTypes.isEmpty()) {
 				throw new InvalidRequestException(Msg.code(512)
-					+ String.format(
-					"Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.",
-					String.join(",", badResourceTypes)));
+						+ String.format(
+								"Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.",
+								String.join(",", badResourceTypes)));
 			}
 		}
 	}
@@ -97,10 +98,11 @@ public class BulkDataExportSupport {
 	}
 
 	private Set<String> myCompartmentResources;
+
 	Set<String> getPatientCompartmentResources(FhirContext theFhirContext) {
 		if (myCompartmentResources == null) {
 			myCompartmentResources =
-				new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext));
+					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext));
 			FhirVersionEnum fhirVersionEnum = theFhirContext.getVersion().getVersion();
 			if (BulkDataExportUtil.isDeviceResourceSupportedForPatientCompartmentForFhirVersion(fhirVersionEnum)) {
 				myCompartmentResources.add("Device");
@@ -108,5 +110,4 @@ public class BulkDataExportSupport {
 		}
 		return myCompartmentResources;
 	}
-
 }
