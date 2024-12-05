@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.tasks;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.MigrationResult;
@@ -68,6 +69,15 @@ public class HapiFhirJpaMigrationTasksTest {
 		// Create migrator and initialize schema using a static version
 		// of the schema from the 7.2.0 release
 		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Set.of());
+
+		// This is just logging to try and track down an intermittent failure
+		for (VersionEnum next : VersionEnum.values()) {
+			int size = tasks.getAllTasks(next).size();
+			if (size > 0) {
+				ourLog.info("Version {} has {} tasks", next, size);
+			}
+		}
+
 		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
 		migrator.addTask(new InitializeSchemaTask("7.2.0",				"20180115.0",
 			new SchemaInitializationProvider(
