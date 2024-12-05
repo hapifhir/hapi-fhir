@@ -207,10 +207,11 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 			return;
 		}
 
-		Map<IResourcePersistentId, Set<IResourcePersistentId>> goldenResourceIds2linkedSourceIds = theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
+		Map<IResourcePersistentId, Set<IResourcePersistentId>> goldenResourceIds2linkedSourceIds =
+				theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
 		if (goldenResourceIds2linkedSourceIds != null) {
 			IResourcePersistentId sourcePid =
-				myIdHelperSvc.getPidOrNull(RequestPartitionId.allPartitions(), theResource);
+					myIdHelperSvc.getPidOrNull(RequestPartitionId.allPartitions(), theResource);
 			if (sourcePid != null) {
 				for (IResourcePersistentId goldenPid : goldenResourceIds2linkedSourceIds.keySet()) {
 					if (goldenResourceIds2linkedSourceIds.get(goldenPid).contains(sourcePid)) {
@@ -281,8 +282,8 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 					 * that include this exact golden resource
 					 * (eg, if delete is done by a filter and multiple delete is enabled)
 					 */
-					Map<IResourcePersistentId, Set<IResourcePersistentId>> goldenIdsToDelete2linkedSrcIds = theTransactionDetails
-						.getUserData(GOLDEN_RESOURCES_TO_DELETE);
+					Map<IResourcePersistentId, Set<IResourcePersistentId>> goldenIdsToDelete2linkedSrcIds =
+							theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
 					if (goldenIdsToDelete2linkedSrcIds == null) {
 						goldenIdsToDelete2linkedSrcIds = new ConcurrentHashMap<>();
 					}
@@ -291,13 +292,13 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 					}
 					goldenIdsToDelete2linkedSrcIds.get(goldenPid).add(sourcePid);
 					theTransactionDetails.putUserData(GOLDEN_RESOURCES_TO_DELETE, goldenIdsToDelete2linkedSrcIds);
-//					Set<IResourcePersistentId> goldenIdsToDelete =
-//							theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
-//					if (goldenIdsToDelete == null) {
-//						goldenIdsToDelete = new HashSet<>();
-//					}
-//					goldenIdsToDelete.add(goldenPid);
-//					theTransactionDetails.putUserData(GOLDEN_RESOURCES_TO_DELETE, goldenIdsToDelete);
+					//					Set<IResourcePersistentId> goldenIdsToDelete =
+					//							theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
+					//					if (goldenIdsToDelete == null) {
+					//						goldenIdsToDelete = new HashSet<>();
+					//					}
+					//					goldenIdsToDelete.add(goldenPid);
+					//					theTransactionDetails.putUserData(GOLDEN_RESOURCES_TO_DELETE, goldenIdsToDelete);
 				}
 			}
 			myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
