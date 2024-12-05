@@ -178,11 +178,15 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			 *  1. There are two resources with the exact same resource type and forced id
 			 *  2. The unique constraint on this column-pair has been dropped
 			 */
-			String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
-			throw new PreconditionFailedException(Msg.code(1099) + msg);
+			throwNonUniqueForcedId();
 		}
 
 		return matches.get(resourceIdToUse).get(0);
+	}
+
+	private void throwNonUniqueForcedId() {
+		String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
+		throw new PreconditionFailedException(Msg.code(1099) + msg);
 	}
 
 	/**
@@ -241,7 +245,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		if (!remainingIds.isEmpty()) {
 			List<JpaPid> output = new ArrayList<>();
-			doResolvePersistentIds(theRequestPartitionId, remainingIds, output);
+			doResolvePersistentIds(theRequestPartitionId, remainingIds, output, theExcludeDeleted);
 			for (JpaPid next : output) {
 				assert next.getAssociatedResourceId() != null;
 				retVals.put(next.getAssociatedResourceId().getIdPart(), next);
@@ -370,14 +374,17 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					.chunk(
 							idsToCheck,
 							SearchBuilder.getMaximumPageSize() / 2,
-							ids -> doResolvePersistentIds(theRequestPartitionId, ids, retVal));
+							ids -> doResolvePersistentIds(theRequestPartitionId, ids, retVal, false));
 		}
 
 		return retVal;
 	}
 
 	private void doResolvePersistentIds(
-			RequestPartitionId theRequestPartitionId, List<IIdType> theIds, List<JpaPid> theOutputListToPopulate) {
+			RequestPartitionId theRequestPartitionId,
+			List<IIdType> theIds,
+			List<JpaPid> theOutputListToPopulate,
+			boolean theExcludeDeleted) {
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
 		Root<ResourceTable> from = criteriaQuery.from(ResourceTable.class);
@@ -403,6 +410,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			Predicate idCriteria = cb.equal(from.get("myFhirId"), next.getIdPart());
 			andPredicates.add(idCriteria);
 			getOptionalPartitionPredicate(theRequestPartitionId, cb, from).ifPresent(andPredicates::add);
+
+			if (theExcludeDeleted) {
+				cb.isNull(from.get("myDeleted"));
+			}
+
 			predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
 		}
 
@@ -411,15 +423,21 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		TypedQuery<Tuple> query = myEntityManager.createQuery(criteriaQuery);
 		List<Tuple> results = query.getResultList();
+		Set<String> foundIds = new HashSet<>();
 		for (Tuple nextId : results) {
 			// Check if the nextId has a resource ID. It may have a null resource ID if a commit is still pending.
 			Long resourceId = nextId.get(0, Long.class);
 			String resourceType = nextId.get(1, String.class);
 			String forcedId = nextId.get(2, String.class);
 			if (resourceId != null) {
+
 				JpaPid jpaPid = JpaPid.fromId(resourceId);
 				populateAssociatedResourceId(resourceType, forcedId, jpaPid);
 				theOutputListToPopulate.add(jpaPid);
+
+				if (!foundIds.add(resourceType + "/" + forcedId)) {
+					throwNonUniqueForcedId();
+				}
 
 				String key = toForcedIdToPidKey(theRequestPartitionId, resourceType, forcedId);
 				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, jpaPid);
