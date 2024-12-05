@@ -9,7 +9,10 @@ import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +36,7 @@ import java.util.UUID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class HapiFhirJpaMigrationTasksTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirJpaMigrationTasksTest.class);
@@ -44,6 +48,7 @@ public class HapiFhirJpaMigrationTasksTest {
 	private LoggingExtension myLoggingExtension = new LoggingExtension();
 
 	@Test
+	@Order(0)
 	public void testCreate() {
 		new HapiFhirJpaMigrationTasks(Collections.emptySet());
 	}
@@ -54,6 +59,7 @@ public class HapiFhirJpaMigrationTasksTest {
 	 * added in 7.4.0 so this backfills them.
 	 */
 	@Test
+	@Order(1)
 	public void testCreateUniqueComboParamHashes() {
 		/*
 		 * Setup
