@@ -485,7 +485,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual).contains(myTargetEnc1);
 	}
 
-// FIXME KHS look at PatientEverythingR4Test for ideas for other tests
+	// FIXME KHS look at PatientEverythingR4Test for ideas for other tests
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
 		Bundle bundle;
@@ -500,7 +500,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		return bundle;
 	}
-
 
 	private static class PatientMergeInputParameters {
 		Type sourcePatient;
@@ -554,7 +553,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		String body = ex.getResponseBody();
 		Parameters outParams = ourFhirContext.newJsonParser().parseResource(Parameters.class, body);
 		OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
-		String message = outcome.getIssue().stream().map(issue -> issue.getDiagnostics()).collect(Collectors.joining(", "));
-		return message;
+		return outcome.getIssue().stream()
+			.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+			.collect(Collectors.joining(", "));
 	}
 }

@@ -253,12 +253,12 @@ public class ProviderConstants {
 	/**
 	 * Parameter for source reference of the "$replace-references" operation
 	 */
-	public static final String PARAM_SOURCE_REFERENCE_ID = "sourceReferenceId";
+	public static final String PARAM_SOURCE_REFERENCE_ID = "source-reference-id";
 
 	/**
 	 * Parameter for target reference of the "$replace-references" operation
 	 */
-	public static final String PARAM_TARGET_REFERENCE_ID = "targetReferenceId";
+	public static final String PARAM_TARGET_REFERENCE_ID = "target-reference-id";
 	/**
 	 * Operation name for the Resource "$merge" operation
 	 * Hapi-fhir use is based on https://www.hl7.org/fhir/patient-operation-merge.html
