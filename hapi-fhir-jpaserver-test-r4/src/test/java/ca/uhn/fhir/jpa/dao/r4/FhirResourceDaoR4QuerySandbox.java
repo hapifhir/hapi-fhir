@@ -142,6 +142,8 @@ public class FhirResourceDaoR4QuerySandbox extends BaseJpaTest {
 
 	@Test
 	void testChainedSort() {
+		// LUKETODO:  presentation:  https://gitlab.com/simpatico.ai/cdr/-/issues/6039  https://github.com/hapifhir/hapi-fhir/pull/5903
+		// https://github.com/hapifhir/hapi-fhir/pull/5917/files#diff-a2b40bac7b992c54fc0b27004df9a219bbc36897ebb75932fccde41c51ee5910
 		final IIdType practitionerId = myDataBuilder.createPractitioner(myDataBuilder.withFamily("Jones"));
 
 		final String id1 = myDataBuilder.createPatient(myDataBuilder.withFamily("Smithy")).getIdPart();
@@ -160,6 +162,31 @@ public class FhirResourceDaoR4QuerySandbox extends BaseJpaTest {
 
 		final List<String> actualIds = allResources.stream().map(IBaseResource::getIdElement).map(IIdType::getIdPart).toList();
 		assertTrue(actualIds.containsAll(List.of(id1, id2, id3)));
+
+		/*
+		>>> ensure that hash_identity is in the OUTER JOIN, not the WHERE
+		SELECT t0.RES_ID
+		FROM HFJ_RESOURCE t0
+		LEFT OUTER JOIN
+			HFJ_RES_LINK t1
+				ON ((t0.RES_ID = t1.SRC_RESOURCE_ID)
+				AND (t1.SRC_PATH = 'Patient.generalPractitioner'))
+		LEFT OUTER JOIN
+			HFJ_SPIDX_STRING t2
+				ON ((t1.TARGET_RESOURCE_ID = t2.RES_ID)
+				AND (t2.HASH_IDENTITY = '4400083668656880465'))
+		WHERE
+			(
+				(
+					t0.RES_TYPE = 'Patient'
+				)
+				AND (
+					t0.RES_DELETED_AT IS NULL
+				)
+			)
+		ORDER BY
+			t2.SP_VALUE_NORMALIZED ASC NULLS LAST
+		 */
 	}
 
 	public static final class TestDirtiesContextTestExecutionListener extends DirtiesContextTestExecutionListener {
