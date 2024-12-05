@@ -292,13 +292,6 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 					}
 					goldenIdsToDelete2linkedSrcIds.get(goldenPid).add(sourcePid);
 					theTransactionDetails.putUserData(GOLDEN_RESOURCES_TO_DELETE, goldenIdsToDelete2linkedSrcIds);
-					//					Set<IResourcePersistentId> goldenIdsToDelete =
-					//							theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
-					//					if (goldenIdsToDelete == null) {
-					//						goldenIdsToDelete = new HashSet<>();
-					//					}
-					//					goldenIdsToDelete.add(goldenPid);
-					//					theTransactionDetails.putUserData(GOLDEN_RESOURCES_TO_DELETE, goldenIdsToDelete);
 				}
 			}
 			myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
