@@ -421,7 +421,7 @@ class ModelScanner {
 				}
 				Set<String> providesMembershipInCompartments;
 				providesMembershipInCompartments = new HashSet<>();
-				//FIXME GGG/JA, this is all hardcoded from the core. Once Runtime Sps are loaded, we are kinda hosed...
+				// FIXME GGG/JA, this is all hardcoded from the core. Once Runtime Sps are loaded, we are kinda hosed...
 
 				for (Compartment next : searchParam.providesMembershipIn()) {
 					if (paramType != RestSearchParameterTypeEnum.REFERENCE) {

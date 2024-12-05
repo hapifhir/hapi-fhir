@@ -304,13 +304,13 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
-	public void testNarrowCompartment_DevicesByPatientContext_ClientRequestedNoParams() {
+	public void testNarrowCompartment_DevicesByPatientContext_ClientRequestedWithParams() {
 		ourNextAuthorizedList = new AuthorizedList()
-			 .addCompartments("Patient/123", "Patient/456");
+			 .addCompartments("Patient/123");
 
 		myClient
 			 .search()
-			 .forResource("Device")
+			 .byUrl("Device?patient=Patient/123")
 			 .execute();
 
 		assertEquals("Device.search", ourLastHitMethod);
@@ -318,13 +318,9 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastCodeParam);
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
-		assertThat(toStrings(ourLastPatientParam)).containsExactly("Patient/123,Patient/456");
+		assertThat(toStrings(ourLastPatientParam)).containsExactly("Patient/123");
 	}
 
-	@Test
-	public void testNarrowCompartment_DevicesByPatientContext_ClientRequestedBundleNoParams() {
-
-	}
 	@Test
 	public void testNarrowCompartment_ObservationsByPatientContext_ClientRequestedNoParams() {
 		ourNextAuthorizedList = new AuthorizedList()
