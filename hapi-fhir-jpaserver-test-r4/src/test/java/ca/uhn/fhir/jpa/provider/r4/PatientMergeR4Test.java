@@ -8,19 +8,19 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.assertj.core.api.Assertions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.jetbrains.annotations.NotNull;
@@ -51,6 +52,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
@@ -61,6 +63,7 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_RESULT_PATIENT;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
@@ -82,7 +85,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	IIdType myOrgId;
 	IIdType mySourcePatId;
-	IIdType mySourceTaskId;
+	IIdType mySourceCarePlanId;
 	IIdType mySourceEncId1;
 	IIdType mySourceEncId2;
 	ArrayList<IIdType> mySourceObsIds;
@@ -144,10 +147,10 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		enc2.getServiceProvider().setReferenceElement(myOrgId);
 		mySourceEncId2 = myFhirClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless();
 
-		Task task = new Task();
-		task.setStatus(Task.TaskStatus.COMPLETED);
-		task.getOwner().setReferenceElement(mySourcePatId);
-		mySourceTaskId = myFhirClient.create().resource(task).execute().getId().toUnqualifiedVersionless();
+		CarePlan carePlan = new CarePlan();
+		carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
+		carePlan.getSubject().setReferenceElement(mySourcePatId);
+		mySourceCarePlanId = myFhirClient.create().resource(carePlan).execute().getId().toUnqualifiedVersionless();
 
 		Encounter targetEnc1 = new Encounter();
 		targetEnc1.setStatus(EncounterStatus.ARRIVED);
@@ -320,7 +323,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			assertThat(actual).doesNotContain(mySourceEncId1);
 			assertThat(actual).doesNotContain(mySourceEncId2);
 			assertThat(actual).contains(myOrgId);
-			assertThat(actual).doesNotContain(mySourceTaskId);
+			assertThat(actual).doesNotContain(mySourceCarePlanId);
 			assertThat(actual).doesNotContainAnyElementsOf(mySourceObsIds);
 			assertThat(actual).contains(myTargetPatId);
 			assertThat(actual).contains(myTargetEnc1);
@@ -331,7 +334,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			assertThat(actual).contains(mySourceEncId1);
 			assertThat(actual).contains(mySourceEncId2);
 			assertThat(actual).contains(myOrgId);
-			assertThat(actual).contains(mySourceTaskId);
+			assertThat(actual).contains(mySourceCarePlanId);
 			assertThat(actual).containsAll(mySourceObsIds);
 			assertThat(actual).contains(myTargetPatId);
 			assertThat(actual).contains(myTargetEnc1);
@@ -402,7 +405,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertThatThrownBy(() ->
 			callMergeOperation(inParameters))
 			.isInstanceOf(UnprocessableEntityException.class)
-			.extracting(e -> extractFailureMessage((UnprocessableEntityException) e))
+			.extracting(UnprocessableEntityException.class::cast)
+			.extracting(PatientMergeR4Test::extractFailureMessage)
 			.isEqualTo(theExpectedMessage);
 	}
 
@@ -433,7 +437,55 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.isEqualTo(400);
 	}
 
-	// FIXME KHS look at PatientEverythingR4Test for ideas for other tests
+	@Test
+	void testReplaceReferences() throws IOException {
+		// exec
+		Parameters outParams = myClient.operation()
+			.onServer()
+			.named(OPERATION_REPLACE_REFERENCES)
+			.withParameter(Parameters.class, ProviderConstants.PARAM_SOURCE_REFERENCE_ID, new StringType(mySourcePatId.getValue()))
+			.andParameter(ProviderConstants.PARAM_TARGET_REFERENCE_ID, new StringType(myTargetPatId.getValue()))
+			.returnResourceType(Parameters.class)
+			.execute();
+
+		// validate
+		Pattern expectedPatchIssuePattern = Pattern.compile("Successfully patched resource \"(Observation|Encounter|CarePlan)/\\d+/_history/\\d+\"\\. Took \\d+ms\\.");
+		assertThat(outParams.getParameter())
+			.hasSize(23)
+			.allSatisfy(component ->
+				assertThat(component.getResource())
+					.isInstanceOf(OperationOutcome.class)
+					.extracting(OperationOutcome.class::cast)
+					.extracting(OperationOutcome::getIssue)
+					.satisfies(issues ->
+						assertThat(issues).hasSize(1)
+							.element(0)
+							.extracting(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+							.satisfies(diagnostics -> assertThat(diagnostics).matches(expectedPatchIssuePattern))));
+
+		// Check that the linked resources were updated
+
+		Bundle bundle = fetchBundle(myServerBase + "/" + myTargetPatId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+
+		assertNull(bundle.getLink("next"));
+
+		Set<IIdType> actual = new HashSet<>();
+		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
+			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless());
+		}
+
+		ourLog.info("Found IDs: {}", actual);
+
+		assertThat(actual).contains(mySourceEncId1);
+		assertThat(actual).contains(mySourceEncId2);
+		assertThat(actual).contains(myOrgId);
+		assertThat(actual).contains(mySourceCarePlanId);
+		assertThat(actual).containsAll(mySourceObsIds);
+		assertThat(actual).contains(myTargetPatId);
+		assertThat(actual).contains(myTargetEnc1);
+	}
+
+// FIXME KHS look at PatientEverythingR4Test for ideas for other tests
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
 		Bundle bundle;
