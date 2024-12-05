@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -42,6 +43,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -65,6 +68,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
 		myStorageSettings.setRespectVersionsForSearchIncludes(new JpaStorageSettings().isRespectVersionsForSearchIncludes());
 		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
 	}
 
 	@Nested
@@ -665,6 +670,88 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Read back
 		observation = myObservationDao.read(observationId, mySrd);
 		assertEquals(patientIdString, observation.getSubject().getReference());
+	}
+
+	@Test
+	public void testDontStripVersionsFromRefsAtPaths_inTransactionBundle_shouldPreserveVersion() {
+		Set<String> referencePaths = Set.of("AuditEvent.entity.what","MessageHeader.focus","Provenance.target","Provenance.entity.what");
+
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(referencePaths);
+		myStorageSettings.setAutoVersionReferenceAtPaths("Encounter.subject");
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+
+		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference.json");
+	}
+
+	@Test
+	public void testDontStripVersionsFromRefsAtAllPaths_inTransactionBundle_shouldPreserveVersion() {
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
+		myStorageSettings.setAutoVersionReferenceAtPaths("Encounter.subject");
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+
+		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference.json");
+	}
+
+	@Test
+	public void testDontStripVersionsFromRefsAtPaths_withTransactionBundleAndAutoVersionSet_shouldPreserveVersion() {
+		Set<String> referencePaths = Set.of("AuditEvent.entity.what","MessageHeader.focus","Provenance.target","Provenance.entity.what");
+
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(referencePaths);
+		myStorageSettings.setAutoVersionReferenceAtPaths("Provenance.entity.what");
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+
+		Encounter encounter = new Encounter();
+		encounter.setId("242976");
+		myEncounterDao.update(encounter);
+
+		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference.json");
+	}
+
+	private Provenance postBundleAndAssertProvenanceRefsPreserved(String theBundlePath) {
+		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class,
+			new InputStreamReader(
+				FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream(theBundlePath)));
+
+		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), bundle);
+
+		Optional<Bundle.BundleEntryComponent> provenanceEntry = transaction.getEntry().stream().filter(entry -> entry.getResponse().getLocation().contains("Provenance")).findFirst();
+		assertThat(provenanceEntry).isPresent();
+		String provenanceLocation = provenanceEntry.get().getResponse().getLocation();
+		Provenance provenance = myProvenanceDao.read(new IdDt(provenanceLocation));
+		assertThat(provenance.getEntity().get(0).getWhat().getReference()).isEqualTo("Encounter/242976/_history/1");
+		return provenance;
+	}
+
+	@Test
+	public void testDontStripVersionsFromRefsAtPathsAndAutoVersionSameTransaction_withTransactionBundle_shouldPreserveVersion() {
+		Set<String> referencePaths = Set.of("AuditEvent.entity.what","MessageHeader.focus","Provenance.target","Provenance.entity.what", "Provenance.agent.who");
+
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(referencePaths);
+		myStorageSettings.setAutoVersionReferenceAtPaths("Provenance.agent.who");
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+
+		Provenance provenance = postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-assigned-version-reference-and-auto-version-field.json");
+		assertThat(provenance.getAgent().get(0).getWho().getReference()).isEqualTo("Patient/237643/_history/1");
+	}
+
+	@Test
+	public void testDontStripVersionsFromRefsAtPaths_withTransactionBundleAndPreExistingReference_shouldPreserveVersion() {
+		Set<String> referencePaths = Set.of("AuditEvent.entity.what","MessageHeader.focus","Provenance.target","Provenance.entity.what");
+
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(referencePaths);
+		myStorageSettings.setAutoVersionReferenceAtPaths("Provenance.entity.what");
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+
+		Encounter encounter = new Encounter();
+		encounter.setId("242976");
+		myEncounterDao.update(encounter);
+
+		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference-and-pre-existing-ref.json");
 	}
 
 	@Test
