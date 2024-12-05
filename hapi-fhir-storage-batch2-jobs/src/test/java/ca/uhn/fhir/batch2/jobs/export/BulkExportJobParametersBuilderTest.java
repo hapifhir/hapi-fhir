@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
@@ -30,6 +31,14 @@ class BulkExportJobParametersBuilderTest {
 	}
 
 	@Test
+	void resourceTypesWhenNull() {
+		// Act
+		myFixture.resourceTypes(null);
+		// Assert
+		assertThat(myFixture.build().getResourceTypes()).isEmpty();
+	}
+
+	@Test
 	void since() {
 		// Arrange
 		final Date expected = new Date();
@@ -52,14 +61,30 @@ class BulkExportJobParametersBuilderTest {
 	}
 
 	@Test
+	void filtersWhenNull() {
+		// Act
+		myFixture.filters(null);
+		// Assert
+		assertThat(myFixture.build().getFilters()).isEmpty();
+	}
+
+	@Test
 	void outputFormat() {
 		// Arrange
-		final String expected = "application/fhir+ndjson";
+		final String expected = "some value";
 		final IPrimitiveType<String> outputFormat = new StringDt(expected);
 		// Act
 		myFixture.outputFormat(outputFormat);
 		// Assert
 		assertThat(myFixture.build().getOutputFormat()).isEqualTo(expected);
+	}
+
+	@Test
+	void outputFormatWhenNull() {
+		// Act
+		myFixture.outputFormat(null);
+		// Assert
+		assertThat(myFixture.build().getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 	}
 
 	@Test
@@ -84,6 +109,14 @@ class BulkExportJobParametersBuilderTest {
 	}
 
 	@Test
+	void patientIdsWhenNull() {
+		// Act
+		myFixture.patientIds(null);
+		// Assert
+		assertThat(myFixture.build().getPatientIds()).isEmpty();
+	}
+
+	@Test
 	void groupId() {
 		// Arrange
 		final String expected = "GROUP_ID";
@@ -102,6 +135,14 @@ class BulkExportJobParametersBuilderTest {
 		myFixture.expandMdm(expandMdm);
 		// Assert
 		assertThat(myFixture.build().isExpandMdm()).isTrue();
+	}
+
+	@Test
+	void expandMdmWhenNull() {
+		// Act
+		myFixture.expandMdm(null);
+		// Assert
+		assertThat(myFixture.build().isExpandMdm()).isFalse();
 	}
 
 	@Test
@@ -134,6 +175,14 @@ class BulkExportJobParametersBuilderTest {
 		myFixture.postFetchFilterUrl(postFetchFilterUrls);
 		// Assert
 		assertThat(myFixture.build().getPostFetchFilterUrls()).containsAll(expected);
+	}
+
+	@Test
+	void postFetchFilterUrlWhenNull() {
+		// Act
+		myFixture.postFetchFilterUrl(null);
+		// Assert
+		assertThat(myFixture.build().getPostFetchFilterUrls()).isEmpty();
 	}
 
 }
