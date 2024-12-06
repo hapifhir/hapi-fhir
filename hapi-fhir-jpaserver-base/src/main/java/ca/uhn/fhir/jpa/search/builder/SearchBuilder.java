@@ -61,6 +61,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
+import ca.uhn.fhir.jpa.search.builder.models.SearchQueryProperties;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
@@ -206,10 +207,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private SearchParameterMap myParams;
 	private String mySearchUuid;
 	private int myFetchSize;
-	private Integer myMaxResultsToFetch;
+
+	private boolean myRequiresTotal;
+
+	/**
+	 * @see SearchBuilder#setDeduplicateInDatabase(boolean)
+	 */
 	private Set<JpaPid> myPidSet;
+
 	private boolean myHasNextIteratorQuery = false;
 	private RequestPartitionId myRequestPartitionId;
+
+	private SearchQueryProperties mySearchProperties;
 
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
@@ -261,6 +270,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myDaoRegistry = theDaoRegistry;
 		myContext = theContext;
 		myIdHelperService = theIdHelperService;
+
+		mySearchProperties = new SearchQueryProperties();
 	}
 
 	@VisibleForTesting
@@ -270,7 +281,21 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Override
 	public void setMaxResultsToFetch(Integer theMaxResultsToFetch) {
-		myMaxResultsToFetch = theMaxResultsToFetch;
+		mySearchProperties.setMaxResultsRequested(theMaxResultsToFetch);
+	}
+
+	public void setDeduplicateInDatabase(boolean theShouldDeduplicateInDB) {
+		mySearchProperties.setDeduplicateInDatabase(theShouldDeduplicateInDB);
+	}
+
+	@Override
+	public void setRequireTotal(boolean theRequireTotal) {
+		myRequiresTotal = theRequireTotal;
+	}
+
+	@Override
+	public boolean requiresTotal() {
+		return myRequiresTotal;
 	}
 
 	private void searchForIdsWithAndOr(
@@ -279,6 +304,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			@Nonnull SearchParameterMap theParams,
 			RequestDetails theRequest) {
 		myParams = theParams;
+		mySearchProperties.setSortSpec(myParams.getSort());
 
 		// Remove any empty parameters
 		theParams.clean();
@@ -349,7 +375,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			return myFulltextSearchSvc.count(myResourceName, theParams.clone());
 		}
 
-		List<ISearchQueryExecutor> queries = createQuery(theParams.clone(), null, null, null, true, theRequest, null);
+		SearchQueryProperties properties = mySearchProperties.clone();
+		properties.setDoCountOnlyFlag(true);
+		properties.setSortSpec(null); // counts don't require sorts
+		properties.setMaxResultsRequested(null);
+		properties.setOffset(null);
+		List<ISearchQueryExecutor> queries = createQuery(theParams.clone(), properties, theRequest, null);
 		if (queries.isEmpty()) {
 			return 0L;
 		} else {
@@ -389,19 +420,24 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
 		// we mutate the params.  Make a private copy.
 		myParams = theParams.clone();
+		mySearchProperties.setSortSpec(myParams.getSort());
 		mySearchUuid = theSearchUuid;
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
+	/**
+	 * The query created can be either a count query or the
+	 * actual query.
+	 * This is why it takes a SearchQueryProperties object
+	 * (and doesn't use the local version of it).
+	 * The properties may differ slightly for whichever
+	 * query this is.
+	 */
 	private List<ISearchQueryExecutor> createQuery(
 			SearchParameterMap theParams,
-			SortSpec sort,
-			Integer theOffset,
-			Integer theMaximumResults,
-			boolean theCountOnlyFlag,
+			SearchQueryProperties theSearchProperties,
 			RequestDetails theRequest,
 			SearchRuntimeDetails theSearchRuntimeDetails) {
-
 		ArrayList<ISearchQueryExecutor> queries = new ArrayList<>();
 
 		if (checkUseHibernateSearch()) {
@@ -412,7 +448,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<JpaPid> fulltextMatchIds = null;
 			int resultCount = 0;
 			if (myParams.isLastN()) {
-				fulltextMatchIds = executeLastNAgainstIndex(theMaximumResults);
+				fulltextMatchIds = executeLastNAgainstIndex(theSearchProperties.getMaxResultsRequested());
 				resultCount = fulltextMatchIds.size();
 			} else if (myParams.getEverythingMode() != null) {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids(theRequest);
@@ -469,8 +505,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			if (canSkipDatabase) {
 				ourLog.trace("Query finished after HSearch.  Skip db query phase");
-				if (theMaximumResults != null) {
-					fulltextExecutor = SearchQueryExecutors.limited(fulltextExecutor, theMaximumResults);
+				if (theSearchProperties.hasMaxResultsRequested()) {
+					fulltextExecutor = SearchQueryExecutors.limited(
+							fulltextExecutor, theSearchProperties.getMaxResultsRequested());
 				}
 				queries.add(fulltextExecutor);
 			} else {
@@ -483,13 +520,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 								SearchBuilder.getMaximumPageSize(),
 								// for each list of (SearchBuilder.getMaximumPageSize())
 								// we create a chunked query and add it to 'queries'
-								t -> doCreateChunkedQueries(
-										theParams, t, theOffset, sort, theCountOnlyFlag, theRequest, queries));
+								t -> doCreateChunkedQueries(theParams, t, theSearchProperties, theRequest, queries));
 			}
 		} else {
 			// do everything in the database.
-			createChunkedQuery(
-					theParams, sort, theOffset, theMaximumResults, theCountOnlyFlag, theRequest, null, queries);
+			createChunkedQuery(theParams, theSearchProperties, theRequest, null, queries);
 		}
 
 		return queries;
@@ -584,16 +619,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private void doCreateChunkedQueries(
 			SearchParameterMap theParams,
 			List<JpaPid> thePids,
-			Integer theOffset,
-			SortSpec sort,
-			boolean theCount,
+			SearchQueryProperties theSearchQueryProperties,
 			RequestDetails theRequest,
 			ArrayList<ISearchQueryExecutor> theQueries) {
 
 		if (thePids.size() < getMaximumPageSize()) {
 			thePids = normalizeIdListForInClause(thePids);
 		}
-		createChunkedQuery(theParams, sort, theOffset, thePids.size(), theCount, theRequest, thePids, theQueries);
+		theSearchQueryProperties.setMaxResultsRequested(thePids.size());
+		createChunkedQuery(theParams, theSearchQueryProperties, theRequest, thePids, theQueries);
 	}
 
 	/**
@@ -643,33 +677,22 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private void createChunkedQuery(
 			SearchParameterMap theParams,
-			SortSpec sort,
-			Integer theOffset,
-			Integer theMaximumResults,
-			boolean theCountOnlyFlag,
+			SearchQueryProperties theSearchProperties,
 			RequestDetails theRequest,
 			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		if (myParams.getEverythingMode() != null) {
 			createChunkedQueryForEverythingSearch(
-					theRequest,
-					theParams,
-					theOffset,
-					theMaximumResults,
-					theCountOnlyFlag,
-					thePidList,
-					theSearchQueryExecutors);
+					theRequest, theParams, theSearchProperties, thePidList, theSearchQueryExecutors);
 		} else {
 			createChunkedQueryNormalSearch(
-					theParams, sort, theOffset, theCountOnlyFlag, theRequest, thePidList, theSearchQueryExecutors);
+					theParams, theSearchProperties, theRequest, thePidList, theSearchQueryExecutors);
 		}
 	}
 
 	private void createChunkedQueryNormalSearch(
 			SearchParameterMap theParams,
-			SortSpec sort,
-			Integer theOffset,
-			boolean theCountOnlyFlag,
+			SearchQueryProperties theSearchProperties,
 			RequestDetails theRequest,
 			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
@@ -681,7 +704,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myResourceName,
 				mySqlBuilderFactory,
 				myDialectProvider,
-				theCountOnlyFlag);
+				theSearchProperties.isDoCountOnlyFlag());
 		QueryStack queryStack3 = new QueryStack(
 				theRequest,
 				theParams,
@@ -759,9 +782,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		/*
-		 * If offset is present, we want deduplicate the results by using GROUP BY
+		 * If offset is present, we want to deduplicate the results by using GROUP BY;
+		 * OR
+		 * if the MaxResultsToFetch is null, we are requesting "everything",
+		 * so we'll let the db do the deduplication (instead of in-memory)
 		 */
-		if (theOffset != null) {
+		if (theSearchProperties.isDeduplicateInDatabase()) {
 			queryStack3.addGrouping();
 			queryStack3.setUseAggregate(true);
 		}
@@ -772,24 +798,27 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * If we have a sort, we wrap the criteria search (the search that actually
 		 * finds the appropriate resources) in an outer search which is then sorted
 		 */
-		if (sort != null) {
-			assert !theCountOnlyFlag;
+		if (theSearchProperties.hasSort()) {
+			assert !theSearchProperties.isDoCountOnlyFlag();
 
-			createSort(queryStack3, sort, theParams);
+			createSort(queryStack3, theSearchProperties.getSortSpec(), theParams);
 		}
 
 		/*
 		 * Now perform the search
 		 */
-		executeSearch(theOffset, theSearchQueryExecutors, sqlBuilder);
+		executeSearch(theSearchProperties, theSearchQueryExecutors, sqlBuilder);
 	}
 
 	private void executeSearch(
-			Integer theOffset, List<ISearchQueryExecutor> theSearchQueryExecutors, SearchQueryBuilder sqlBuilder) {
-		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
+			SearchQueryProperties theProperties,
+			List<ISearchQueryExecutor> theSearchQueryExecutors,
+			SearchQueryBuilder sqlBuilder) {
+		GeneratedSql generatedSql =
+				sqlBuilder.generate(theProperties.getOffset(), theProperties.getMaxResultsRequested());
 		if (!generatedSql.isMatchNothing()) {
 			SearchQueryExecutor executor =
-					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
+					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, theProperties.getMaxResultsRequested());
 			theSearchQueryExecutors.add(executor);
 		}
 	}
@@ -797,9 +826,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private void createChunkedQueryForEverythingSearch(
 			RequestDetails theRequest,
 			SearchParameterMap theParams,
-			Integer theOffset,
-			Integer theMaximumResults,
-			boolean theCountOnlyFlag,
+			SearchQueryProperties theSearchQueryProperties,
 			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 
@@ -811,7 +838,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				null,
 				mySqlBuilderFactory,
 				myDialectProvider,
-				theCountOnlyFlag);
+				theSearchQueryProperties.isDoCountOnlyFlag());
 
 		QueryStack queryStack3 = new QueryStack(
 				theRequest,
@@ -822,7 +849,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				mySearchParamRegistry,
 				myPartitionSettings);
 
-		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theMaximumResults);
+		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theSearchQueryProperties.getMaxResultsRequested());
 
 		Set<JpaPid> targetPids = new HashSet<>();
 		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
@@ -845,8 +872,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					myResourceName,
 					mySqlBuilderFactory,
 					myDialectProvider,
-					theCountOnlyFlag);
-			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
+					theSearchQueryProperties.isDoCountOnlyFlag());
+			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(
+					theSearchQueryProperties.getOffset(), mySearchProperties.getMaxResultsRequested());
 			String sql = allTargetsSql.getSql();
 			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 
@@ -872,7 +900,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * If offset is present, we want deduplicate the results by using GROUP BY
 		 * ORDER BY is required to make sure we return unique results for each page
 		 */
-		if (theOffset != null) {
+		if (theSearchQueryProperties.hasOffset()) {
 			queryStack3.addGrouping();
 			queryStack3.addOrdering();
 			queryStack3.setUseAggregate(true);
@@ -881,7 +909,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		/*
 		 * Now perform the search
 		 */
-		executeSearch(theOffset, theSearchQueryExecutors, sqlBuilder);
+		executeSearch(theSearchQueryProperties, theSearchQueryExecutors, sqlBuilder);
 	}
 
 	private void addPidListPredicate(List<JpaPid> thePidList, SearchQueryBuilder theSqlBuilder) {
@@ -2655,15 +2683,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 				// If we don't have a query yet, create one
 				if (myResultsIterator == null) {
-					if (myMaxResultsToFetch == null) {
-						myMaxResultsToFetch = calculateMaxResultsToFetch();
+					if (!mySearchProperties.hasMaxResultsRequested()) {
+						mySearchProperties.setMaxResultsRequested(calculateMaxResultsToFetch());
 					}
 
 					/*
 					 * assigns the results iterator
 					 * and populates the myQueryList.
 					 */
-					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
+					initializeIteratorQuery(myOffset, mySearchProperties.getMaxResultsRequested());
 				}
 
 				if (myNext == null) {
@@ -2694,23 +2722,54 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						}
 
 						if (nextPid != null) {
-							if (myPidSet.add(nextPid) && doNotSkipNextPidForEverything()) {
-								myNext = nextPid;
-								myNonSkipCount++;
-								break;
+							if (!myPidSet.contains(nextPid)) {
+								if (!mySearchProperties.isDeduplicateInDatabase()) {
+									/*
+									 * We only add to the map if we aren't fetching "everything";
+									 * otherwise, we let the de-duplication happen in the database
+									 * (see createChunkedQueryNormalSearch above), because it
+									 * saves memory that way.
+									 */
+									myPidSet.add(nextPid);
+								}
+								if (doNotSkipNextPidForEverything()) {
+									myNext = nextPid;
+									myNonSkipCount++;
+									break;
+								}
 							} else {
 								mySkipCount++;
 							}
 						}
 
 						if (!myResultsIterator.hasNext()) {
-							if (myMaxResultsToFetch != null && (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
+							if (mySearchProperties.hasMaxResultsRequested()
+									&& (mySkipCount + myNonSkipCount == mySearchProperties.getMaxResultsRequested())) {
 								if (mySkipCount > 0 && myNonSkipCount == 0) {
-
 									sendProcessingMsgAndFirePerformanceHook();
+									// need the next iterator; increase the maxsize
+									// (we should always do this)
+									int maxResults = mySearchProperties.getMaxResultsRequested() + 1000;
+									mySearchProperties.setMaxResultsRequested(maxResults);
 
-									myMaxResultsToFetch += 1000;
-									initializeIteratorQuery(myOffset, myMaxResultsToFetch);
+									if (!mySearchProperties.isDeduplicateInDatabase()) {
+										// if we're not using the database to deduplicate
+										// we should recheck our memory usage
+										// the prefetch size check is future proofing
+										int prefetchSize = myStorageSettings
+												.getSearchPreFetchThresholds()
+												.size();
+										if (prefetchSize > 0) {
+											if (myStorageSettings
+															.getSearchPreFetchThresholds()
+															.get(prefetchSize - 1)
+													< mySearchProperties.getMaxResultsRequested()) {
+												mySearchProperties.setDeduplicateInDatabase(true);
+											}
+										}
+									}
+
+									initializeIteratorQuery(myOffset, mySearchProperties.getMaxResultsRequested());
 								}
 							}
 						}
@@ -2740,7 +2799,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					}
 				}
 
-				mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
+				if (!mySearchProperties.hasMaxResultsRequested()) {
+					mySearchRuntimeDetails.setFoundIndexMatchesCount(myNonSkipCount);
+				} else {
+					mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
+				}
 
 			} finally {
 				// search finished - fire hooks
@@ -2794,7 +2857,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			String msg = "Pass completed with no matching results seeking rows "
 					+ myPidSet.size() + "-" + mySkipCount
 					+ ". This indicates an inefficient query! Retrying with new max count of "
-					+ myMaxResultsToFetch;
+					+ mySearchProperties.getMaxResultsRequested();
 			firePerformanceWarning(myRequest, msg);
 		}
 
@@ -2809,8 +2872,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				if (myParams.getEverythingMode() != null) {
 					offset = 0;
 				}
-				myQueryList = createQuery(
-						myParams, mySort, offset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
+
+				SearchQueryProperties properties = mySearchProperties.clone();
+				properties
+						.setOffset(offset)
+						.setMaxResultsRequested(theMaxResultsToFetch)
+						.setDoCountOnlyFlag(false)
+						.setDeduplicateInDatabase(properties.isDeduplicateInDatabase() || offset != null);
+				myQueryList = createQuery(myParams, properties, myRequest, mySearchRuntimeDetails);
 			}
 
 			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());

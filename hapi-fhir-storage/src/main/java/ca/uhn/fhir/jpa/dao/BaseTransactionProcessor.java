@@ -274,19 +274,20 @@ public abstract class BaseTransactionProcessor {
 
 	@SuppressWarnings("unchecked")
 	private void handleTransactionCreateOrUpdateOutcome(
-			IdSubstitutionMap idSubstitutions,
-			Map<IIdType, DaoMethodOutcome> idToPersistedOutcome,
-			IIdType nextResourceId,
-			DaoMethodOutcome outcome,
-			IBase newEntry,
+			IdSubstitutionMap theIdSubstitutions,
+			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
+			IIdType theNextResourceId,
+			DaoMethodOutcome theOutcome,
+			IBase theNewEntry,
 			String theResourceType,
 			IBaseResource theRes,
 			RequestDetails theRequestDetails) {
-		IIdType newId = outcome.getId().toUnqualified();
-		IIdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
-		if (newId.equals(resourceId) == false) {
-			if (!nextResourceId.isEmpty()) {
-				idSubstitutions.put(resourceId, newId);
+		IIdType newId = theOutcome.getId().toUnqualified();
+		IIdType resourceId =
+				isPlaceholder(theNextResourceId) ? theNextResourceId : theNextResourceId.toUnqualifiedVersionless();
+		if (!newId.equals(resourceId)) {
+			if (!theNextResourceId.isEmpty()) {
+				theIdSubstitutions.put(resourceId, newId);
 			}
 			if (isPlaceholder(resourceId)) {
 				/*
@@ -294,27 +295,27 @@ public abstract class BaseTransactionProcessor {
 				 */
 				IIdType id = myContext.getVersion().newIdType();
 				id.setValue(theResourceType + '/' + resourceId.getValue());
-				idSubstitutions.put(id, newId);
+				theIdSubstitutions.put(id, newId);
 			}
 		}
 
-		populateIdToPersistedOutcomeMap(idToPersistedOutcome, newId, outcome);
+		populateIdToPersistedOutcomeMap(theIdToPersistedOutcome, newId, theOutcome);
 
-		if (shouldSwapBinaryToActualResource(theRes, theResourceType, nextResourceId)) {
-			theRes = idToPersistedOutcome.get(newId).getResource();
+		if (shouldSwapBinaryToActualResource(theRes, theResourceType, theNextResourceId)) {
+			theRes = theIdToPersistedOutcome.get(newId).getResource();
 		}
 
-		if (outcome.getCreated()) {
-			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
+		if (theOutcome.getCreated()) {
+			myVersionAdapter.setResponseStatus(theNewEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
 		} else {
-			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
+			myVersionAdapter.setResponseStatus(theNewEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
 		}
 
 		Date lastModified = getLastModified(theRes);
-		myVersionAdapter.setResponseLastModified(newEntry, lastModified);
+		myVersionAdapter.setResponseLastModified(theNewEntry, lastModified);
 
-		if (outcome.getOperationOutcome() != null) {
-			myVersionAdapter.setResponseOutcome(newEntry, outcome.getOperationOutcome());
+		if (theOutcome.getOperationOutcome() != null) {
+			myVersionAdapter.setResponseOutcome(theNewEntry, theOutcome.getOperationOutcome());
 		}
 
 		if (theRequestDetails != null) {
@@ -323,9 +324,9 @@ public abstract class BaseTransactionProcessor {
 					RestfulServerUtils.parsePreferHeader(null, prefer).getReturn();
 			if (preferReturn != null) {
 				if (preferReturn == PreferReturnEnum.REPRESENTATION) {
-					if (outcome.getResource() != null) {
-						outcome.fireResourceViewCallbacks();
-						myVersionAdapter.setResource(newEntry, outcome.getResource());
+					if (theOutcome.getResource() != null) {
+						theOutcome.fireResourceViewCallbacks();
+						myVersionAdapter.setResource(theNewEntry, theOutcome.getResource());
 					}
 				}
 			}
@@ -1685,9 +1686,9 @@ public abstract class BaseTransactionProcessor {
 			IdSubstitutionMap theIdSubstitutions,
 			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 			StopWatch theTransactionStopWatch,
-			EntriesToProcessMap entriesToProcess,
-			Set<IIdType> nonUpdatedEntities,
-			Set<IBasePersistedResource> updatedEntities) {
+			EntriesToProcessMap theEntriesToProcess,
+			Set<IIdType> theNonUpdatedEntities,
+			Set<IBasePersistedResource> theUpdatedEntities) {
 		FhirTerser terser = myContext.newTerser();
 		theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
 		IdentityHashMap<DaoMethodOutcome, Set<IBaseReference>> deferredIndexesForAutoVersioning = null;
@@ -1712,6 +1713,9 @@ public abstract class BaseTransactionProcessor {
 
 			Set<IBaseReference> referencesToAutoVersion =
 					BaseStorageDao.extractReferencesToAutoVersion(myContext, myStorageSettings, nextResource);
+			Set<IBaseReference> referencesToKeepClientSuppliedVersion =
+					BaseStorageDao.extractReferencesToAvoidReplacement(myContext, nextResource);
+
 			if (referencesToAutoVersion.isEmpty()) {
 				// no references to autoversion - we can do the resolve and save now
 				resolveReferencesThenSaveAndIndexResource(
@@ -1719,13 +1723,14 @@ public abstract class BaseTransactionProcessor {
 						theTransactionDetails,
 						theIdSubstitutions,
 						theIdToPersistedOutcome,
-						entriesToProcess,
-						nonUpdatedEntities,
-						updatedEntities,
+						theEntriesToProcess,
+						theNonUpdatedEntities,
+						theUpdatedEntities,
 						terser,
 						nextOutcome,
 						nextResource,
-						referencesToAutoVersion); // this is empty
+						referencesToAutoVersion, // this is empty
+						referencesToKeepClientSuppliedVersion);
 			} else {
 				// we have autoversioned things to defer until later
 				if (deferredIndexesForAutoVersioning == null) {
@@ -1742,19 +1747,22 @@ public abstract class BaseTransactionProcessor {
 				DaoMethodOutcome nextOutcome = nextEntry.getKey();
 				Set<IBaseReference> referencesToAutoVersion = nextEntry.getValue();
 				IBaseResource nextResource = nextOutcome.getResource();
+				Set<IBaseReference> referencesToKeepClientSuppliedVersion =
+						BaseStorageDao.extractReferencesToAvoidReplacement(myContext, nextResource);
 
 				resolveReferencesThenSaveAndIndexResource(
 						theRequest,
 						theTransactionDetails,
 						theIdSubstitutions,
 						theIdToPersistedOutcome,
-						entriesToProcess,
-						nonUpdatedEntities,
-						updatedEntities,
+						theEntriesToProcess,
+						theNonUpdatedEntities,
+						theUpdatedEntities,
 						terser,
 						nextOutcome,
 						nextResource,
-						referencesToAutoVersion);
+						referencesToAutoVersion,
+						referencesToKeepClientSuppliedVersion);
 			}
 		}
 	}
@@ -1764,15 +1772,16 @@ public abstract class BaseTransactionProcessor {
 			TransactionDetails theTransactionDetails,
 			IdSubstitutionMap theIdSubstitutions,
 			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
-			EntriesToProcessMap entriesToProcess,
-			Set<IIdType> nonUpdatedEntities,
-			Set<IBasePersistedResource> updatedEntities,
-			FhirTerser terser,
+			EntriesToProcessMap theEntriesToProcess,
+			Set<IIdType> theNonUpdatedEntities,
+			Set<IBasePersistedResource> theUpdatedEntities,
+			FhirTerser theTerser,
 			DaoMethodOutcome theDaoMethodOutcome,
 			IBaseResource theResource,
-			Set<IBaseReference> theReferencesToAutoVersion) {
+			Set<IBaseReference> theReferencesToAutoVersion,
+			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion) {
 		// References
-		List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(theResource);
+		List<ResourceReferenceInfo> allRefs = theTerser.getAllResourceReferences(theResource);
 		for (ResourceReferenceInfo nextRef : allRefs) {
 			IBaseReference resourceReference = nextRef.getResourceReference();
 			IIdType nextId = resourceReference.getReferenceElement();
@@ -1794,16 +1803,18 @@ public abstract class BaseTransactionProcessor {
 				}
 			}
 			if (newId != null || theIdSubstitutions.containsSource(nextId)) {
-				if (newId == null) {
-					newId = theIdSubstitutions.getForSource(nextId);
-				}
-				if (newId != null) {
-					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
-
-					if (theReferencesToAutoVersion.contains(resourceReference)) {
-						replaceResourceReference(newId, resourceReference, theTransactionDetails);
-					} else {
-						replaceResourceReference(newId.toVersionless(), resourceReference, theTransactionDetails);
+				if (shouldReplaceResourceReference(
+						theReferencesToAutoVersion, theReferencesToKeepClientSuppliedVersion, resourceReference)) {
+					if (newId == null) {
+						newId = theIdSubstitutions.getForSource(nextId);
+					}
+					if (newId != null) {
+						ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
+						if (theReferencesToAutoVersion.contains(resourceReference)) {
+							replaceResourceReference(newId, resourceReference, theTransactionDetails);
+						} else {
+							replaceResourceReference(newId.toVersionless(), resourceReference, theTransactionDetails);
+						}
 					}
 				}
 			} else if (nextId.getValue().startsWith("urn:")) {
@@ -1858,7 +1869,7 @@ public abstract class BaseTransactionProcessor {
 		// URIs
 		Class<? extends IPrimitiveType<?>> uriType = (Class<? extends IPrimitiveType<?>>)
 				myContext.getElementDefinition("uri").getImplementingClass();
-		List<? extends IPrimitiveType<?>> allUris = terser.getAllPopulatedChildElementsOfType(theResource, uriType);
+		List<? extends IPrimitiveType<?>> allUris = theTerser.getAllPopulatedChildElementsOfType(theResource, uriType);
 		for (IPrimitiveType<?> nextRef : allUris) {
 			if (nextRef instanceof IIdType) {
 				continue; // No substitution on the resource ID itself!
@@ -1886,7 +1897,7 @@ public abstract class BaseTransactionProcessor {
 		IJpaDao jpaDao = (IJpaDao) dao;
 
 		IBasePersistedResource updateOutcome = null;
-		if (updatedEntities.contains(theDaoMethodOutcome.getEntity())) {
+		if (theUpdatedEntities.contains(theDaoMethodOutcome.getEntity())) {
 			boolean forceUpdateVersion = !theReferencesToAutoVersion.isEmpty();
 			String matchUrl = theDaoMethodOutcome.getMatchUrl();
 			RestOperationTypeEnum operationType = theDaoMethodOutcome.getOperationType();
@@ -1903,7 +1914,7 @@ public abstract class BaseTransactionProcessor {
 					theTransactionDetails);
 			updateOutcome = daoMethodOutcome.getEntity();
 			theDaoMethodOutcome = daoMethodOutcome;
-		} else if (!nonUpdatedEntities.contains(theDaoMethodOutcome.getId())) {
+		} else if (!theNonUpdatedEntities.contains(theDaoMethodOutcome.getId())) {
 			updateOutcome = jpaDao.updateEntity(
 					theRequest,
 					theResource,
@@ -1920,7 +1931,7 @@ public abstract class BaseTransactionProcessor {
 		if (updateOutcome != null) {
 			IIdType newId = updateOutcome.getIdDt();
 
-			IIdType entryId = entriesToProcess.getIdWithVersionlessComparison(newId);
+			IIdType entryId = theEntriesToProcess.getIdWithVersionlessComparison(newId);
 			if (entryId != null && !StringUtils.equals(entryId.getValue(), newId.getValue())) {
 				entryId.setValue(newId.getValue());
 			}
@@ -1930,10 +1941,30 @@ public abstract class BaseTransactionProcessor {
 			theIdSubstitutions.updateTargets(newId);
 
 			if (theDaoMethodOutcome.getOperationOutcome() != null) {
-				IBase responseEntry = entriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
+				IBase responseEntry = theEntriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
 				myVersionAdapter.setResponseOutcome(responseEntry, theDaoMethodOutcome.getOperationOutcome());
 			}
 		}
+	}
+
+	/**
+	 * We should replace the references when
+	 * 1. It is not a reference we should keep the client-supplied version for as configured by `DontStripVersionsFromReferences` or
+	 * 2. It is a reference that has been identified for auto versioning or
+	 * 3. Is a placeholder reference
+	 * @param theReferencesToAutoVersion list of references identified for auto versioning
+	 * @param theReferencesToKeepClientSuppliedVersion list of references that we should not strip the version for
+	 * @param theResourceReference the resource reference
+	 * @return true if we should replace the resource reference, false if we should keep the client provided reference
+	 */
+	private boolean shouldReplaceResourceReference(
+			Set<IBaseReference> theReferencesToAutoVersion,
+			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion,
+			IBaseReference theResourceReference) {
+		return (!theReferencesToKeepClientSuppliedVersion.contains(theResourceReference)
+						&& myContext.getParserOptions().isStripVersionsFromReferences())
+				|| theReferencesToAutoVersion.contains(theResourceReference)
+				|| isPlaceholder(theResourceReference.getReferenceElement());
 	}
 
 	private void replaceResourceReference(
