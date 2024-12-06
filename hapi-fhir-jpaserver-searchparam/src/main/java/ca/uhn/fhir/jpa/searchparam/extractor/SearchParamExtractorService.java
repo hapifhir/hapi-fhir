@@ -461,9 +461,16 @@ public class SearchParamExtractorService {
 
 	private IBaseResource findContainedResource(Collection<IBaseResource> resources, IBaseReference reference) {
 		for (IBaseResource resource : resources) {
-			if (resource.getIdElement().equals(reference.getReferenceElement())) return resource;
+			String idElementId = resource.getIdElement().getValueAsString();
+			String referenceElementId = reference.getReferenceElement().getValueAsString();
+			if (containedResourceEquals(idElementId, referenceElementId)) return resource;
 		}
 		return null;
+	}
+
+	private static boolean containedResourceEquals(String idElementId, String referenceElementId) {
+		String normalizedIdElementId = idElementId.startsWith("#") ? idElementId : "#" + idElementId;
+		return StringUtils.equals(normalizedIdElementId, referenceElementId);
 	}
 
 	private void mergeParams(ResourceIndexedSearchParams theSrcParams, ResourceIndexedSearchParams theTargetParams) {
