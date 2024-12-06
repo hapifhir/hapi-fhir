@@ -71,11 +71,13 @@
 									</div>
 								    <div class="row">
 								    	<div class="col-sm-3 form-group">
-											<a type="button" id="fetch-conformance-btn"
-												class="btn btn-primary btn-block">
-                                    <i class="far fa-dot-circle"></i>
-												Conformance
-											</a>
+											<div class="d-grid gap-2">
+												<a type="button" id="fetch-conformance-btn"
+													class="btn btn-primary">
+													<i class="far fa-dot-circle"></i>
+													Conformance
+												</a>
+											</div>
 											<script type="text/javascript">
 												$('#fetch-conformance-btn').click(
 													function() {
@@ -97,32 +99,34 @@
 									</div>
 								    <div class="row top-buffer">
 								    	<div class="col-sm-3">
-										<button type="button" id="server-history-btn" class="btn btn-primary btn-block">
-                                 <i class="far fa-calendar-alt"></i>
-											History
-										</button>
+											<div class="d-grid gap-29">
+												<button type="button" id="server-history-btn" class="btn btn-primary">
+													<i class="far fa-calendar-alt"></i>
+													History
+												</button>
+											</div>
 								    	</div>
 								        <div class='col-sm-5'>
 								            <div class="form-group">
-								                <div class='input-group date' id='server-history-datetime' data-date-format="YYYY-MM-DDTHH:mm:ss">
-                                           <div class="input-group-prepend">
+								                <div class='input-group date' id='server-history-datetime' data-bs-toggledate-format="YYYY-MM-DDTHH:mm:ss">
+                                           <div>
                                                <span class="input-group-text">
       								                    Since
                                                </span>
 								                    </div>
 								                    <input type='text' class="form-control" id="server-history-since"/>
-                                           <div class="input-group-append input-group-addon"> <!-- input-group-addon is from Bootstrap3 but the time picker needs it there -->
+                                           <div class=" input-group-addon"> <!-- input-group-addon is from Bootstrap3 but the time picker needs it there -->
                                                <span class="input-group-text">
 								                           <i class="far fa-calendar-alt"></i>
                                                </span>
 								                    </div>
 								                </div>
 								            </div>
-								        </div>								        
+								        </div>
 										<div class='col-sm-3'>
 								            <div class="form-group">
 								                <div class='input-group'>
-                                           <div class="input-group-prepend">
+                                           <div>
                                                <span class="input-group-text">
 								                           Limit #
                                                </span>
@@ -164,10 +168,12 @@
 									</div>
 								    <div class="row">
 								    	<div class="col-sm-3">
-											<button type="button" id="transaction-btn" class="btn btn-primary btn-block">
-                                    <i class="fas fa-file-archive"></i>
-												Transaction
-											</button>
+											<div class="d-grid gap-2">
+												<button type="button" id="transaction-btn" class="btn btn-primary">
+													<i class="fas fa-file-archive"></i>
+													Transaction
+												</button>
+											</div>
 										</div>
 										<div class='col-sm-9'>
 								            <div class="form-group">

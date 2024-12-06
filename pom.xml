@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.7.10-SNAPSHOT</version>
+	<version>7.7.11-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1898,7 +1898,7 @@
 			<dependency>
 				<groupId>org.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>
-				<version>3.11.0</version>
+				<version>4.6.0</version>
 				<exclusions>
 					<exclusion>
 						<!-- Don't let HTMLUnit bring in Jetty 9 -->
@@ -2191,14 +2191,14 @@
 				<version>${thymeleaf-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.webjars.npm</groupId>
-				<artifactId>ace-builds</artifactId>
-				<version>1.22.0</version>
+				<groupId>org.webjars</groupId>
+				<artifactId>bootstrap</artifactId>
+				<version>5.3.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.npm</groupId>
-				<artifactId>bootstrap</artifactId>
-				<version>4.5.2</version>
+				<artifactId>ace-builds</artifactId>
+				<version>1.22.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
@@ -2248,9 +2248,9 @@
 				<version>2.29.4</version>
 			</dependency>
 			<dependency>
-				<groupId>org.webjars.npm</groupId>
+				<groupId>org.webjars</groupId>
 				<artifactId>popper.js</artifactId>
-				<version>1.16.1</version>
+				<version>2.11.7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
@@ -2659,7 +2659,7 @@
 				<plugin>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-tinder-plugin</artifactId>
-					<version>7.7.10-SNAPSHOT</version>
+					<version>7.7.11-SNAPSHOT</version>
 					<executions>
 						<execution>
 							<goals>
