@@ -74,7 +74,6 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	// FIXME remove
 	private final ExecutorService myFakeExecutor = Executors.newSingleThreadExecutor();
 
-
 	// FIXME remove
 	@PreDestroy
 	public void preDestroy() {
@@ -82,11 +81,11 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	}
 
 	public ReplaceReferencesSvcImpl(
-		FhirContext theFhirContext,
-		DaoRegistry theDaoRegistry,
-		HapiTransactionService theHapiTransactionService,
-		IdHelperService theIdHelperService,
-		IResourceLinkDao theResourceLinkDao) {
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			IdHelperService theIdHelperService,
+			IResourceLinkDao theResourceLinkDao) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
@@ -96,7 +95,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	@Override
 	public IBaseParameters replaceReferences(
-		ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 		theReplaceReferenceRequest.validateOrThrowInvalidParameterException();
 
 		if (theRequestDetails.isPreferAsync()) {
@@ -111,13 +110,13 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
 			// FIXME KHS get partition from request
 			JpaPid sourcePid =
-				myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResourceId);
+					myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResourceId);
 			return myResourceLinkDao.countResourcesTargetingPid(sourcePid.getId());
 		});
 	}
 
 	private IBaseParameters replaceReferencesPreferAsync(
-		ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 		// FIXME KHS actually start the job
 		Task task = new Task();
 		task.setStatus(Task.TaskStatus.INPROGRESS);
@@ -129,8 +128,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		returnedTask.getMeta().setVersionId(null);
 		Parameters retval = new Parameters();
 		retval.addParameter()
-			.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
-			.setResource(returnedTask);
+				.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
+				.setResource(returnedTask);
 
 		fakeBackgroundTaskUpdate(task);
 		return retval;
@@ -155,12 +154,12 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	 */
 	@Nonnull
 	private IBaseParameters replaceReferencesPreferSync(
-		ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 
 		// TODO KHS get partition from request
 		StopLimitAccumulator<JpaPid> accumulator = myHapiTransactionService
-			.withRequest(theRequestDetails)
-			.execute(() -> getAllPidsWithLimit(theReplaceReferenceRequest));
+				.withRequest(theRequestDetails)
+				.execute(() -> getAllPidsWithLimit(theReplaceReferenceRequest));
 
 		if (accumulator.isTruncated()) {
 			ourLog.warn("Too many results. Switching to asynchronous reference replacement.");
@@ -174,72 +173,72 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		Parameters retval = new Parameters();
 		retval.addParameter()
-			.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME)
-			.setResource(result);
+				.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME)
+				.setResource(result);
 		return retval;
 	}
 
 	private @NotNull StopLimitAccumulator<JpaPid> getAllPidsWithLimit(
-		ReplaceReferenceRequest theReplaceReferenceRequest) {
+			ReplaceReferenceRequest theReplaceReferenceRequest) {
 		JpaPid sourcePid = myIdHelperService.getPidOrThrowException(
-			RequestPartitionId.allPartitions(), theReplaceReferenceRequest.sourceId);
+				RequestPartitionId.allPartitions(), theReplaceReferenceRequest.sourceId);
 
 		Stream<JpaPid> pidStream = myResourceLinkDao
-			.streamSourcePidsForTargetPid(sourcePid.getId())
-			.map(JpaPid::fromId);
+				.streamSourcePidsForTargetPid(sourcePid.getId())
+				.map(JpaPid::fromId);
 		StopLimitAccumulator<JpaPid> accumulator =
-			StopLimitAccumulator.fromStreamAndLimit(pidStream, theReplaceReferenceRequest.batchSize);
+				StopLimitAccumulator.fromStreamAndLimit(pidStream, theReplaceReferenceRequest.batchSize);
 		return accumulator;
 	}
 
 	private Bundle buildPatchBundle(
-		ReplaceReferenceRequest theReplaceReferenceRequest,
-		RequestDetails theRequestDetails,
-		StopLimitAccumulator<JpaPid> accumulator) {
+			ReplaceReferenceRequest theReplaceReferenceRequest,
+			RequestDetails theRequestDetails,
+			StopLimitAccumulator<JpaPid> accumulator) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
 		accumulator.getItemList().stream()
-			.map(myIdHelperService::translatePidIdToForcedIdWithCache)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.map(IdDt::new)
-			.forEach(referencingResourceId -> {
-				IFhirResourceDao<?> dao = getDao(referencingResourceId.getResourceType());
-				IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
-				Parameters patchParams = buildPatchParams(theReplaceReferenceRequest, resource);
-				IIdType resourceId = resource.getIdElement();
-				bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
-			});
+				.map(myIdHelperService::translatePidIdToForcedIdWithCache)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.map(IdDt::new)
+				.forEach(referencingResourceId -> {
+					IFhirResourceDao<?> dao = getDao(referencingResourceId.getResourceType());
+					IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
+					Parameters patchParams = buildPatchParams(theReplaceReferenceRequest, resource);
+					IIdType resourceId = resource.getIdElement();
+					bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
+				});
 		Bundle patchBundle = bundleBuilder.getBundleTyped();
 		return patchBundle;
 	}
 
 	private @NotNull Parameters buildPatchParams(
-		ReplaceReferenceRequest theReplaceReferenceRequest, IBaseResource referencingResource) {
+			ReplaceReferenceRequest theReplaceReferenceRequest, IBaseResource referencingResource) {
 		Parameters params = new Parameters();
 
 		myFhirContext.newTerser().getAllResourceReferences(referencingResource).stream()
-			.filter(refInfo -> matches(
-				refInfo,
-				theReplaceReferenceRequest.sourceId)) // We only care about references to our source resource
-			.map(refInfo -> createReplaceReferencePatchOperation(
-				referencingResource.fhirType() + "." + refInfo.getName(),
-				new Reference(theReplaceReferenceRequest.targetId.getValueAsString())))
-			.forEach(params::addParameter); // Add each operation to parameters
+				.filter(refInfo -> matches(
+						refInfo,
+						theReplaceReferenceRequest.sourceId)) // We only care about references to our source resource
+				.map(refInfo -> createReplaceReferencePatchOperation(
+						referencingResource.fhirType() + "." + refInfo.getName(),
+						new Reference(theReplaceReferenceRequest.targetId.getValueAsString())))
+				.forEach(params::addParameter); // Add each operation to parameters
 		return params;
 	}
 
 	private static boolean matches(ResourceReferenceInfo refInfo, IIdType theSourceId) {
 		return refInfo.getResourceReference()
-			.getReferenceElement()
-			.toUnqualifiedVersionless()
-			.getValueAsString()
-			.equals(theSourceId.getValueAsString());
+				.getReferenceElement()
+				.toUnqualifiedVersionless()
+				.getValueAsString()
+				.equals(theSourceId.getValueAsString());
 	}
 
 	@Nonnull
 	private Parameters.ParametersParameterComponent createReplaceReferencePatchOperation(
-		String thePath, Type theValue) {
+			String thePath, Type theValue) {
 
 		Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
 		operation.setName(PARAMETER_OPERATION);
