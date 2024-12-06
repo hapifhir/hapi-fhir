@@ -236,6 +236,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		// Assert Task
 		if (isAsync) {
 			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+			ourLog.info("Got task {}", task.getId());
 			await().until(() -> taskCompleted(task.getIdElement()));
 
 			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
@@ -343,8 +344,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private Boolean taskCompleted(IdType theTask) {
-		Task updatedTask = myTaskDao.read(theTask, mySrd);
+	private Boolean taskCompleted(IdType theTaskId) {
+		Task updatedTask = myTaskDao.read(theTaskId, mySrd);
+		ourLog.info("Task {} status is {}", theTaskId, updatedTask.getStatus());
 		return updatedTask.getStatus() == Task.TaskStatus.COMPLETED;
 	}
 
@@ -467,7 +469,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		if (isAsync) {
 			Task task = (Task) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).getResource();
-
+			assertNull(task.getIdElement().getVersionIdPart());
+			ourLog.info("Got task {}", task.getId());
 			await().until(() -> taskCompleted(task.getIdElement()));
 
 			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
