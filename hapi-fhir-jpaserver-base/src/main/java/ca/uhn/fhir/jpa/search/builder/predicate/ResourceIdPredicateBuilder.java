@@ -124,7 +124,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 			List<Long> resourceIds = JpaPid.toLongList(allOrPids);
 			if (theSourceJoinColumn == null) {
-				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable(!allIdsAreForcedIds);
+				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable(true);
 				Condition predicate;
 				switch (operation) {
 					default:

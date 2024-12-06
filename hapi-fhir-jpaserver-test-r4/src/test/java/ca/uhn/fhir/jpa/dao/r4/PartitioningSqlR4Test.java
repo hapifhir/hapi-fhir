@@ -1273,7 +1273,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			ourLog.info("Search SQL:\n{}", searchSql);
 
 			// Only the read columns should be used, no criteria use partition
-			assertThat(searchSql).as(searchSql).contains("PARTITION_ID='1'");
+			assertThat(searchSql).as(searchSql).contains("PARTITION_ID = '1'");
 		}
 
 		// Read in null Partition
@@ -1324,7 +1324,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			ourLog.info("Search SQL:\n{}", searchSql);
 
 			// Only the read columns should be used, no criteria use partition
-			assertThat(searchSql).as(searchSql).contains("PARTITION_ID='1'");
+			assertThat(searchSql).as(searchSql).contains("PARTITION_ID = '1'");
 		}
 
 		// Read in null Partition

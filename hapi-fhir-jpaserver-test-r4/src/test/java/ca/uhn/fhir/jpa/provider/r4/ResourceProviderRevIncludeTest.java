@@ -145,7 +145,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
 		//Ensure that the revincludes are included in the query list of the sql trace.
 		//TODO GGG/KHS reduce this to something less than 6 by smarter iterating and getting the resource types earlier when needed.
-		assertThat(sqlCapturingInterceptor.getQueryList()).hasSize(6);
+		assertThat(sqlCapturingInterceptor.getQueryList()).hasSize(5);
 		myInterceptorRegistry.unregisterInterceptor(sqlCapturingInterceptor);
 	}
 

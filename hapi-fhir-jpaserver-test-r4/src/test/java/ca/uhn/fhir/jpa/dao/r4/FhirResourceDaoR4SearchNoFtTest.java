@@ -1743,13 +1743,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.clear();
 			myPatientDao.search(params).size();
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-			assertThat(selectQueries).hasSize(3);
+			assertThat(selectQueries).hasSize(2);
 
-			String sqlQuery = selectQueries.get(1).getSql(true, true).toLowerCase();
+			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
 			ourLog.info("SQL Query:\n{}", sqlQuery);
 			assertThat(countMatches(sqlQuery, "res_id = '" + id.getIdPart() + "'")).as(sqlQuery).isEqualTo(1);
-			assertThat(countMatches(sqlQuery, "join")).as(sqlQuery).isEqualTo(0);
-			assertThat(countMatches(sqlQuery, "res_type = 'patient'")).as(sqlQuery).isEqualTo(1);
+			assertThat(countMatches(sqlQuery, "res_deleted_at is null")).as(sqlQuery).isEqualTo(1);
 		}
 		// With an _id parameter and a standard search param
 		{
@@ -1760,9 +1759,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.clear();
 			myPatientDao.search(params).sizeOrThrowNpe();
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-			assertThat(selectQueries).hasSize(2);
+			assertThat(selectQueries).hasSize(1);
 
-			String sqlQuery = selectQueries.get(1).getSql(true, true).toLowerCase();
+			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
 			ourLog.info("SQL Query:\n{}", sqlQuery);
 			assertThat(countMatches(sqlQuery, "res_id = '" + id.getIdPart() + "'")).as(sqlQuery).isEqualTo(1);
 			assertThat(countMatches(sqlQuery, "join")).as(sqlQuery).isEqualTo(1);
@@ -1781,13 +1780,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		myDiagnosticReportDao.search(params).size();
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-		assertThat(selectQueries).hasSize(2);
+		assertThat(selectQueries).hasSize(1);
 
-		String sqlQuery = selectQueries.get(1).getSql(true, true).toLowerCase();
+		String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
 		ourLog.info("SQL Query:\n{}", sqlQuery);
-		assertThat(countMatches(sqlQuery, "fhir_id='123'")).as(sqlQuery).isEqualTo(1);
-		assertThat(countMatches(sqlQuery, "join")).as(sqlQuery).isEqualTo(0);
-		assertThat(countMatches(sqlQuery, "res_type='diagnosticreport'")).as(sqlQuery).isEqualTo(1);
+		assertThat(countMatches(sqlQuery, "res_id = '123'")).as(sqlQuery).isEqualTo(1);
+		assertThat(countMatches(sqlQuery, "res_deleted_at is null")).as(sqlQuery).isEqualTo(1);
 	}
 
 	@Test
