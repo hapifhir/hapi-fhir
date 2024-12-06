@@ -54,7 +54,7 @@
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
 			<scope>test</scope>
-			<version>10.16.1.1</version>
+			<version>10.17.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
