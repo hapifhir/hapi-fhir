@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
-// FIXME KHS test
 class StopLimitAccumulator<T> {
 	private final boolean isTruncated;
 	private final List<T> myList;
@@ -19,6 +18,7 @@ class StopLimitAccumulator<T> {
 	}
 
 	static <T> StopLimitAccumulator<T> fromStreamAndLimit(@Nonnull Stream<T> thePidStream, int theLimit) {
+		assert theLimit > 0;
 		AtomicBoolean isBeyondLimit = new AtomicBoolean(false);
 		List<T> accumulator = new ArrayList<>();
 
