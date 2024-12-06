@@ -159,7 +159,10 @@ public class ResourceMergeService {
 			return;
 		}
 
-		ReplaceReferenceRequest replaceReferenceRequest = new ReplaceReferenceRequest(sourceResource.getIdElement(), targetResource.getIdElement(), theMergeOperationParameters.getBatchSize());
+		ReplaceReferenceRequest replaceReferenceRequest = new ReplaceReferenceRequest(
+				sourceResource.getIdElement(),
+				targetResource.getIdElement(),
+				theMergeOperationParameters.getBatchSize());
 		myReplaceReferencesSvc.replaceReferences(replaceReferenceRequest, theRequestDetails);
 
 		Patient patientToUpdate = prepareTargetPatientForUpdate(

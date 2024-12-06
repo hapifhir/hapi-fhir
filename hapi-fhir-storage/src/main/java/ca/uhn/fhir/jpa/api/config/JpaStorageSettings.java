@@ -385,6 +385,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	@Beta
 	private boolean myIncludeHashIdentityForTokenSearches = false;
+
 	private int myMaxTransactionEntriesForWrite = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE;
 
 	/**

@@ -154,13 +154,18 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 					"This operation searches for all references matching the provided id and updates them to references to the provided newReferenceTargetId.",
 			shortDefinition = "Repoints referencing resources to another resources instance")
 	public IBaseParameters replaceReferences(
-		@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID) String theSourceId,
-		@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID) String theTargetId,
-		@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PAGE_SIZE, typeName = "unsignedInt") IPrimitiveType<Integer> theBatchSize,
+			@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID)
+					String theSourceId,
+			@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID)
+					String theTargetId,
+			@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PAGE_SIZE, typeName = "unsignedInt")
+					IPrimitiveType<Integer> theBatchSize,
 			RequestDetails theRequestDetails) {
 		validateReplaceReferencesParams(theSourceId, theTargetId);
-		Integer batchSize = defaultIfNull(IPrimitiveType.toValueOrNull(theBatchSize), myStorageSettings.getMaxTransactionEntriesForWrite());
-		ReplaceReferenceRequest replaceReferenceRequest = new ReplaceReferenceRequest(new IdDt(theSourceId), new IdDt(theTargetId), batchSize);
+		Integer batchSize = defaultIfNull(
+				IPrimitiveType.toValueOrNull(theBatchSize), myStorageSettings.getMaxTransactionEntriesForWrite());
+		ReplaceReferenceRequest replaceReferenceRequest =
+				new ReplaceReferenceRequest(new IdDt(theSourceId), new IdDt(theTargetId), batchSize);
 		return getReplaceReferencesSvc().replaceReferences(replaceReferenceRequest, theRequestDetails);
 	}
 

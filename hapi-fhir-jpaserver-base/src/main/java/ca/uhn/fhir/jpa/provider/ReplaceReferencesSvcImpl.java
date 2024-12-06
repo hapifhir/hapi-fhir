@@ -135,8 +135,11 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		JpaPid sourcePid = myIdHelperService.getPidOrThrowException(
 				RequestPartitionId.allPartitions(), theReplaceReferenceRequest.sourceId);
 
-		Stream<JpaPid> pidStream = myResourceLinkDao.streamSourcePidsForTargetPid(sourcePid.getId()).map(JpaPid::fromId);
-		StopLimitAccumulator<JpaPid> accumulator = StopLimitAccumulator.fromStreamAndLimit(pidStream, theReplaceReferenceRequest.batchSize);
+		Stream<JpaPid> pidStream = myResourceLinkDao
+				.streamSourcePidsForTargetPid(sourcePid.getId())
+				.map(JpaPid::fromId);
+		StopLimitAccumulator<JpaPid> accumulator =
+				StopLimitAccumulator.fromStreamAndLimit(pidStream, theReplaceReferenceRequest.batchSize);
 
 		if (accumulator.isTruncated()) {
 			ourLog.info("Too many results. Switching to asynchronous reference replacement.");
@@ -165,18 +168,21 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 			String fhirType = referencingResource.fhirType();
 			myFhirContext.newTerser().getAllResourceReferences(referencingResource).stream()
-				.filter(refInfo -> matches(refInfo, theReplaceReferenceRequest.sourceId)) // We only care about references to our source resource
-				.map(refInfo -> createReplaceReferencePatchOperation(
-					fhirType + "." + refInfo.getName(),
-					new Reference(theReplaceReferenceRequest.targetId.getValueAsString())))
-				.forEach(params::addParameter); // Add each operation to parameters
+					.filter(refInfo -> matches(
+							refInfo,
+							theReplaceReferenceRequest
+									.sourceId)) // We only care about references to our source resource
+					.map(refInfo -> createReplaceReferencePatchOperation(
+							fhirType + "." + refInfo.getName(),
+							new Reference(theReplaceReferenceRequest.targetId.getValueAsString())))
+					.forEach(params::addParameter); // Add each operation to parameters
 
 			IFhirResourceDao<?> resDao = myDaoRegistry.getResourceDao(fhirType);
 
 			IIdType resourceId = referencingResource.getIdElement();
 
 			MethodOutcome result =
-				resDao.patch(resourceId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, params, theRequestDetails);
+					resDao.patch(resourceId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, params, theRequestDetails);
 
 			resultParams.addParameter().setResource((Resource) result.getOperationOutcome());
 		});
@@ -184,27 +190,27 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return resultParams;
 	}
 
-private static boolean matches(ResourceReferenceInfo refInfo, IIdType theSourceId) {
-	return refInfo.getResourceReference()
-		.getReferenceElement()
-		.toUnqualifiedVersionless()
-		.getValueAsString()
-		.equals(theSourceId.getValueAsString());
-}
+	private static boolean matches(ResourceReferenceInfo refInfo, IIdType theSourceId) {
+		return refInfo.getResourceReference()
+				.getReferenceElement()
+				.toUnqualifiedVersionless()
+				.getValueAsString()
+				.equals(theSourceId.getValueAsString());
+	}
 
-@Nonnull
-private Parameters.ParametersParameterComponent createReplaceReferencePatchOperation(
-	String thePath, Type theValue) {
+	@Nonnull
+	private Parameters.ParametersParameterComponent createReplaceReferencePatchOperation(
+			String thePath, Type theValue) {
 
-	Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
-	operation.setName(PARAMETER_OPERATION);
-	operation.addPart().setName(PARAMETER_TYPE).setValue(new CodeType(OPERATION_REPLACE));
-	operation.addPart().setName(PARAMETER_PATH).setValue(new StringType(thePath));
-	operation.addPart().setName(PARAMETER_VALUE).setValue(theValue);
-	return operation;
-}
+		Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
+		operation.setName(PARAMETER_OPERATION);
+		operation.addPart().setName(PARAMETER_TYPE).setValue(new CodeType(OPERATION_REPLACE));
+		operation.addPart().setName(PARAMETER_PATH).setValue(new StringType(thePath));
+		operation.addPart().setName(PARAMETER_VALUE).setValue(theValue);
+		return operation;
+	}
 
-private IFhirResourceDao<?> getDao(String theResourceName) {
-	return myDaoRegistry.getResourceDao(theResourceName);
-}
+	private IFhirResourceDao<?> getDao(String theResourceName) {
+		return myDaoRegistry.getResourceDao(theResourceName);
+	}
 }

@@ -254,11 +254,11 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			everythingParams.setMdmExpand(resolveNullValue(theMdmExpand));
 
 			return ((IFhirResourceDaoPatient<?>) getDao())
-				.patientTypeEverything(
-					theServletRequest,
-					theRequestDetails,
-					everythingParams,
-					toFlattenedPatientIdTokenParamList(theId));
+					.patientTypeEverything(
+							theServletRequest,
+							theRequestDetails,
+							everythingParams,
+							toFlattenedPatientIdTokenParamList(theId));
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -268,40 +268,43 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 	 * /Patient/$merge
 	 */
 	@Operation(
-		name = ProviderConstants.OPERATION_MERGE,
-		canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-merge")
+			name = ProviderConstants.OPERATION_MERGE,
+			canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-merge")
 	public IBaseParameters patientMerge(
-		HttpServletRequest theServletRequest,
-		HttpServletResponse theServletResponse,
-		ServletRequestDetails theRequestDetails,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER)
-		List<Identifier> theSourcePatientIdentifier,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER)
-		List<Identifier> theTargetPatientIdentifier,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT, max = 1)
-		IBaseReference theSourcePatient,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_TARGET_PATIENT, max = 1)
-		IBaseReference theTargetPatient,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_PREVIEW, typeName = "boolean", max = 1)
-		IPrimitiveType<Boolean> thePreview,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_DELETE_SOURCE, typeName = "boolean", max = 1)
-		IPrimitiveType<Boolean> theDeleteSource,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_RESULT_PATIENT, max = 1)
-		IBaseResource theResultPatient,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_BATCH_SIZE, typeName = "unsignedInt") IPrimitiveType<Integer> theBatchSize) {
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse,
+			ServletRequestDetails theRequestDetails,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER)
+					List<Identifier> theSourcePatientIdentifier,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER)
+					List<Identifier> theTargetPatientIdentifier,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT, max = 1)
+					IBaseReference theSourcePatient,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_TARGET_PATIENT, max = 1)
+					IBaseReference theTargetPatient,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PREVIEW, typeName = "boolean", max = 1)
+					IPrimitiveType<Boolean> thePreview,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_DELETE_SOURCE, typeName = "boolean", max = 1)
+					IPrimitiveType<Boolean> theDeleteSource,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_RESULT_PATIENT, max = 1)
+					IBaseResource theResultPatient,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_BATCH_SIZE, typeName = "unsignedInt")
+					IPrimitiveType<Integer> theBatchSize) {
 
 		startRequest(theServletRequest);
-		@Nonnull Integer batchSize = defaultIfNull(IPrimitiveType.toValueOrNull(theBatchSize), myStorageSettings.getMaxTransactionEntriesForWrite());
+		@Nonnull
+		Integer batchSize = defaultIfNull(
+				IPrimitiveType.toValueOrNull(theBatchSize), myStorageSettings.getMaxTransactionEntriesForWrite());
 		try {
 			MergeOperationInputParameters mergeOperationParameters = buildMergeOperationInputParameters(
-				theSourcePatientIdentifier,
-				theTargetPatientIdentifier,
-				theSourcePatient,
-				theTargetPatient,
-				thePreview,
-				theDeleteSource,
-				theResultPatient,
-				batchSize);
+					theSourcePatientIdentifier,
+					theTargetPatientIdentifier,
+					theSourcePatient,
+					theTargetPatient,
+					thePreview,
+					theDeleteSource,
+					theResultPatient,
+					batchSize);
 
 			IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) getDao();
 			ResourceMergeService resourceMergeService = new ResourceMergeService(dao, myReplaceReferencesSvc);
@@ -309,7 +312,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			FhirContext fhirContext = dao.getContext();
 
 			MergeOperationOutcome mergeOutcome =
-				resourceMergeService.merge(mergeOperationParameters, theRequestDetails);
+					resourceMergeService.merge(mergeOperationParameters, theRequestDetails);
 
 			theServletResponse.setStatus(mergeOutcome.getHttpStatusCode());
 			return buildMergeOperationOutputParameters(fhirContext, mergeOutcome, theRequestDetails.getResource());
@@ -349,7 +352,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			IPrimitiveType<Boolean> thePreview,
 			IPrimitiveType<Boolean> theDeleteSource,
 			IBaseResource theResultPatient,
-		int theBatchSize) {
+			int theBatchSize) {
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(theBatchSize);
 		if (theSourcePatientIdentifier != null) {
 			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourcePatientIdentifier.stream()
