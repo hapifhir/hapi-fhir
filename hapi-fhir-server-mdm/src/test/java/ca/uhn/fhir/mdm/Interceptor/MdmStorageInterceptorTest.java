@@ -58,7 +58,5 @@ public class MdmStorageInterceptorTest {
 			.filter(event -> Level.WARN.equals(event.getLevel()))
 			.toList();
 		assertThat(warningLogs).isEmpty();
-
 	}
-
 }
