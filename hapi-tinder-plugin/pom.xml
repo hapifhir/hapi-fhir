@@ -41,10 +41,10 @@
 		</dependency>
 		<!--
 		Because Tinder is a part of the HAPI FHIR build process (it generates
-		a bunch of the actual HAPI structure code), but also uses HAPI FHIR 
+		a bunch of the actual HAPI structure code), but also uses HAPI FHIR
 		in order to run (e.g. to load ValueSet resources), we keep the dependencies
 		for the structures
-		a version behind the main library. This is weird, but it works. 
+		a version behind the main library. This is weird, but it works.
 		-->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -162,9 +162,11 @@
 
 		<!-- Maven -->
 <!--		TODO GGG Maybe reinstate?-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.maven</groupId>-->
-<!--			<artifactId>maven-project</artifactId>-->
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-core</artifactId>
+		<version>3.9.9</version>
+		</dependency>
 			<!--
 		<exclusions>
 			<exclusion>
