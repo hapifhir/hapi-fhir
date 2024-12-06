@@ -17,8 +17,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class ReplaceReferenceRequest {
 	@Nonnull
 	public final IIdType sourceId;
+
 	@Nonnull
 	public final IIdType targetId;
+
 	@Nonnull
 	public final int batchSize;
 
@@ -31,21 +33,23 @@ public class ReplaceReferenceRequest {
 	public void validateOrThrowInvalidParameterException() {
 		if (isBlank(sourceId.getResourceType())) {
 			throw new InvalidParameterException(
-				Msg.code(2585) + "'" + OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID + "' must be a resource type qualified id");
+					Msg.code(2585) + "'" + OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID
+							+ "' must be a resource type qualified id");
 		}
 
 		if (isBlank(targetId.getResourceType())) {
 			throw new InvalidParameterException(
-				Msg.code(2586) + "'" + OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID + "' must be a resource type qualified id");
+					Msg.code(2586) + "'" + OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID
+							+ "' must be a resource type qualified id");
 		}
 
 		if (!targetId.getResourceType().equals(sourceId.getResourceType())) {
 			throw new InvalidParameterException(
-				Msg.code(2587) + "Source and target id parameters must be for the same resource type");
+					Msg.code(2587) + "Source and target id parameters must be for the same resource type");
 		}
 	}
 
-// FIXME KHS remove
+	// FIXME KHS remove
 	public SearchParameterMap getSearchParameterMap() {
 		SearchParameterMap retval = SearchParameterMap.newSynchronous();
 		retval.add(PARAM_ID, new StringParam(sourceId.getValue()));

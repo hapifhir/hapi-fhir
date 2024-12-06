@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -141,12 +142,20 @@ public class ResourceMergeService {
 
 		Patient resultResource = (Patient) theMergeOperationParameters.getResultResource();
 		if (theMergeOperationParameters.getPreview()) {
+			Integer referencingResourceCount = myReplaceReferencesSvc.countResourcesReferencingResource(
+					sourceResource.getIdElement(), theRequestDetails);
+
 			// in preview mode, we should also return how the target would look like
 			Patient targetPatientAsIfUpdated = prepareTargetPatientForUpdate(
 					targetResource, sourceResource, resultResource, theMergeOperationParameters.getDeleteSource());
 			theMergeOutcome.setUpdatedTargetResource(targetPatientAsIfUpdated);
 
-			addInfoToOperationOutcome(operationOutcome, "Preview only merge operation - no issues detected");
+			// adding +2 because the source and the target resources themselved would be updated as well
+			// TODO: but what if target resource is already referencing source resource as a link? how do we handle
+			// that case?
+			String diagnosticsMsg = String.format("Merge would update %d resources", referencingResourceCount + 2);
+			String detailsText = "Preview only merge operation - no issues detected";
+			addInfoToOperationOutcome(operationOutcome, diagnosticsMsg, detailsText);
 			return;
 		}
 
@@ -166,7 +175,8 @@ public class ResourceMergeService {
 			updateResource(sourceResource, theRequestDetails);
 		}
 
-		addInfoToOperationOutcome(operationOutcome, "Merge operation completed successfully.");
+		String detailsText = "Merge operation completed successfully.";
+		addInfoToOperationOutcome(operationOutcome, null, detailsText);
 	}
 
 	private boolean validateResultResourceIfExists(
@@ -208,12 +218,14 @@ public class ResourceMergeService {
 
 		// if the source resource is not being deleted, the result resource must have a replaces link to the source
 		// resource
-		if (!theMergeOperationParameters.getDeleteSource()
-				&& !validateResultResourceHasReplacesLinkToSourceResource(
-						theResultResource,
-						theResolvedSourceResource,
-						theMergeOperationParameters.getResultResourceParameterName(),
-						theOperationOutcome)) {
+		// if the source resource is being deleted, the result resource must not have a replaces link to the source
+		// resource
+		if (!validateResultResourceReplacesLinkToSourceResource(
+				theResultResource,
+				theResolvedSourceResource,
+				theMergeOperationParameters.getResultResourceParameterName(),
+				theMergeOperationParameters.getDeleteSource(),
+				theOperationOutcome)) {
 			isValid = false;
 		}
 
@@ -236,35 +248,69 @@ public class ResourceMergeService {
 		return true;
 	}
 
-	protected boolean validateResultResourceHasReplacesLinkToSourceResource(
+	private List<Reference> getLinksToResource(
+			Patient theResource, Patient.LinkType theLinkType, IIdType theResourceId) {
+		List<Reference> links = getLinksOfType(theResource, theLinkType);
+		return links.stream()
+				.filter(r -> r.getReference() != null
+						&& r.getReference().equals(theResourceId.toVersionless().getValue()))
+				.collect(Collectors.toList());
+	}
+
+	private boolean validateResultResourceDoesNotHaveReplacesLinkToSourceResource(
 			Patient theResultResource,
 			Patient theResolvedSourceResource,
 			String theResultResourceParameterName,
 			IBaseOperationOutcome theOperationOutcome) {
-		// the result resource must have the replaces link set to the source resource
-		List<Reference> replacesLinks = getLinksOfType(theResultResource, Patient.LinkType.REPLACES);
-		List<Reference> replacesLinkToSourceResource = replacesLinks.stream()
-				.filter(r -> r.getReference() != null
-						&& r.getReference()
-								.equals(theResolvedSourceResource
-										.getIdElement()
-										.toVersionless()
-										.getValue()))
-				.collect(Collectors.toList());
 
-		if (replacesLinkToSourceResource.isEmpty()) {
+		List<Reference> replacesLinkToSourceResource = getLinksToResource(
+				theResultResource, Patient.LinkType.REPLACES, theResolvedSourceResource.getIdElement());
+
+		if (!replacesLinkToSourceResource.isEmpty()) {
 			String msg = String.format(
 					"'%s' must have a 'replaces' link to the source resource.", theResultResourceParameterName);
 			addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
 			return false;
 		}
 
-		if (replacesLinkToSourceResource.size() > 1) {
-			String msg = String.format(
-					"'%s' has multiple 'replaces' links to the source resource. There should be only one.",
-					theResultResourceParameterName);
-			addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
-			return false;
+		return true;
+	}
+
+	private boolean validateResultResourceReplacesLinkToSourceResource(
+			Patient theResultResource,
+			Patient theResolvedSourceResource,
+			String theResultResourceParameterName,
+			boolean theDeleteSource,
+			IBaseOperationOutcome theOperationOutcome) {
+		// the result resource must have the replaces link set to the source resource
+		List<Reference> replacesLinkToSourceResource = getLinksToResource(
+				theResultResource, Patient.LinkType.REPLACES, theResolvedSourceResource.getIdElement());
+
+		if (theDeleteSource) {
+			if (!replacesLinkToSourceResource.isEmpty()) {
+				String msg = String.format(
+						"'%s' must not have a 'replaces' link to the source resource "
+								+ "when the source resource will be deleted, as the link may prevent deleting the source "
+								+ "resource.",
+						theResultResourceParameterName);
+				addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
+				return false;
+			}
+		} else {
+			if (replacesLinkToSourceResource.isEmpty()) {
+				String msg = String.format(
+						"'%s' must have a 'replaces' link to the source resource.", theResultResourceParameterName);
+				addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
+				return false;
+			}
+
+			if (replacesLinkToSourceResource.size() > 1) {
+				String msg = String.format(
+						"'%s' has multiple 'replaces' links to the source resource. There should be only one.",
+						theResultResourceParameterName);
+				addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
+				return false;
+			}
 		}
 		return true;
 	}
@@ -573,11 +619,14 @@ public class ResourceMergeService {
 				theIdentifiers, theRequestDetails, theOutcome, theOperationIdentifiersParameterName);
 	}
 
-	private void addInfoToOperationOutcome(IBaseOperationOutcome theOutcome, String theMsg) {
-		OperationOutcomeUtil.addIssue(myFhirContext, theOutcome, "information", theMsg, null, null);
+	private void addInfoToOperationOutcome(
+			IBaseOperationOutcome theOutcome, String theDiagnosticMsg, String theDetailsText) {
+		IBase issue =
+				OperationOutcomeUtil.addIssue(myFhirContext, theOutcome, "information", theDiagnosticMsg, null, null);
+		OperationOutcomeUtil.addDetailsToIssue(myFhirContext, issue, null, null, theDetailsText);
 	}
 
-	private void addErrorToOperationOutcome(IBaseOperationOutcome theOutcome, String theMsg, String theCode) {
-		OperationOutcomeUtil.addIssue(myFhirContext, theOutcome, "error", theMsg, null, theCode);
+	private void addErrorToOperationOutcome(IBaseOperationOutcome theOutcome, String theDiagnosticMsg, String theCode) {
+		OperationOutcomeUtil.addIssue(myFhirContext, theOutcome, "error", theDiagnosticMsg, null, theCode);
 	}
 }

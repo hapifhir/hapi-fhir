@@ -23,14 +23,14 @@ public class StopLimitAccumulator<T> {
 		List<T> accumulator = new ArrayList<>();
 
 		thePidStream
-			.limit(theLimit + 1) // Fetch one extra item to see if there are more items past our limit
-			.forEach(item -> {
-				if (accumulator.size() < theLimit) {
-					accumulator.add(item);
-				} else {
-					isBeyondLimit.set(true);
-				}
-			});
+				.limit(theLimit + 1) // Fetch one extra item to see if there are more items past our limit
+				.forEach(item -> {
+					if (accumulator.size() < theLimit) {
+						accumulator.add(item);
+					} else {
+						isBeyondLimit.set(true);
+					}
+				});
 		return new StopLimitAccumulator<>(accumulator, isBeyondLimit.get());
 	}
 

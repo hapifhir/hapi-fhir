@@ -270,6 +270,7 @@ public class ProviderConstants {
 	 * $replace-references output Parameters names
 	 */
 	public static final String OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK = "task";
+
 	public static final String OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME = "outcome";
 
 	/**

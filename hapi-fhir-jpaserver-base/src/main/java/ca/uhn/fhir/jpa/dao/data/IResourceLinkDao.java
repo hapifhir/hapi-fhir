@@ -50,4 +50,6 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 	@Query("SELECT DISTINCT t.mySourceResourcePid FROM ResourceLink t WHERE t.myTargetResourcePid = :resId")
 	Stream<Long> streamSourcePidsForTargetPid(@Param("resId") Long theTargetPid);
 
+	@Query("SELECT COUNT(DISTINCT t.mySourceResourcePid) FROM ResourceLink t WHERE t.myTargetResourcePid = :resId")
+	Integer countResourcesTargetingPid(@Param("resId") Long theTargetPid);
 }

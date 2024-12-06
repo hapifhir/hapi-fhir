@@ -801,7 +801,7 @@ public class RestfulServerUtils {
 	}
 
 	@Nonnull
-	public  static PreferHeader parsePreferHeader(String theValue) {
+	public static PreferHeader parsePreferHeader(String theValue) {
 		PreferHeader retVal = new PreferHeader();
 
 		if (isNotBlank(theValue)) {
