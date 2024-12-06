@@ -2863,6 +2863,7 @@ public class QueryStack {
 			if (indexOnContainedResources) {
 				return EmbeddedChainedSearchModeEnum.UPLIFTED_AND_REF_JOIN;
 			}
+			ourLog.debug("Search on {}.{} uses an uplifted refchain.", theResourceType, theParameterName);
 			return EmbeddedChainedSearchModeEnum.UPLIFTED_ONLY;
 		} else {
 			return EmbeddedChainedSearchModeEnum.REF_JOIN_ONLY;
