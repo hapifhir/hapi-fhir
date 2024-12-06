@@ -12,7 +12,7 @@ class StopLimitAccumulator<T> {
 	private final boolean isTruncated;
 	private final List<T> myList;
 
-	StopLimitAccumulator(List<T> theList, boolean theIsTruncated) {
+	private StopLimitAccumulator(List<T> theList, boolean theIsTruncated) {
 		myList = Collections.unmodifiableList(theList);
 		isTruncated = theIsTruncated;
 	}
