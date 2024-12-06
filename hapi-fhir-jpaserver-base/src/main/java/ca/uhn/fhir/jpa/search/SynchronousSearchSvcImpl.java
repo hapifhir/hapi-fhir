@@ -27,7 +27,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -181,12 +180,16 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 					}
 
 					JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> theSb);
-					HookParams params = new HookParams()
-							.add(IPreResourceAccessDetails.class, accessDetails)
-							.add(RequestDetails.class, theRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									myInterceptorBroadcaster, theRequestDetails);
+					if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+						HookParams params = new HookParams()
+								.add(IPreResourceAccessDetails.class, accessDetails)
+								.add(RequestDetails.class, theRequestDetails)
+								.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+						compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+					}
 
 					for (int i = pids.size() - 1; i >= 0; i--) {
 						if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -246,7 +249,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 							resources, theRequestDetails, myInterceptorBroadcaster);
 
 					SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
-					if (hasACount) {
+					if (hasACount && theSb.requiresTotal()) {
 						bundleProvider.setTotalResourcesRequestedReturned(receivedResourceCount);
 					}
 					if (theParams.isOffsetQuery()) {
@@ -279,12 +282,9 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 			RequestPartitionId theRequestPartitionId) {
 		final String searchUuid = UUID.randomUUID().toString();
 
-		IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(theResourceType);
-
 		Class<? extends IBaseResource> resourceTypeClass =
 				myContext.getResourceDefinition(theResourceType).getImplementingClass();
-		final ISearchBuilder sb =
-				mySearchBuilderFactory.newSearchBuilder(callingDao, theResourceType, resourceTypeClass);
+		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 		return executeQuery(
 				theSearchParameterMap,

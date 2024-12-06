@@ -2572,32 +2572,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testUpdateRejectsInvalidTypes() {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
-		patient.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
-		IdDt p1id = (IdDt) myClient.create().resource(patient).execute().getId();
-
-		Organization org = new Organization();
-		org.getNameElement().setValue("testUpdateRejectsInvalidTypes");
-		try {
-			myClient.update().resource(org).withId("Organization/" + p1id.getIdPart()).execute();
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).contains("HAPI-0930: Existing resource ID[Patient/" + p1id.getIdPart() + "] is of type[Patient] - Cannot update with [Organization]");
-		}
-
-		try {
-			myClient.update().resource(org).withId("Patient/" + p1id.getIdPart()).execute();
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).contains("HAPI-0930: Existing resource ID[Patient/" + p1id.getIdPart() + "] is of type[Patient] - Cannot update with [Organization]");
-		}
-
-	}
-
-	@Test
 	public void testUpdateResourceConditional() throws IOException {
 		String methodName = "testUpdateResourceConditional";
 

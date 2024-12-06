@@ -20,7 +20,6 @@ import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
@@ -118,7 +117,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 	private ArrayList<String> myValidConcepts;
 	private Set<String> myValidSystems = new HashSet<>();
 	private Map<String, StructureDefinition> myStructureDefinitionMap = new HashMap<>();
-	private CachingValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 	private IValidationSupport myMockSupport;
 
 	private void addValidConcept(String theSystem, String theCode) {
@@ -812,7 +811,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
-		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)), false);
+		ValidationSupportChain support = new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)).setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(false);
 
 		// Prepopulate SDs
 		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-profile.xml"));
@@ -1372,7 +1371,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		// so first error has `Unknown code for ValueSet` error message
 		assertThat(all.get(0).getMessage()).contains("The Coding provided (http://unitsofmeasure.org#Heck) was not found in the value set 'Vital Signs Units' " +
 			"(http://hl7.org/fhir/ValueSet/ucum-vitals-common|4.3.0), and a code should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable). " +
-			" (error message = Unknown code 'http://unitsofmeasure.org#Heck' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/ucum-vitals-common')");
+			" (error message = Unknown code 'http://unitsofmeasure.org#Heck' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/ucum-vitals-common'");
 		assertThat(all.get(0).getLocationString()).contains("Observation.value.ofType(Quantity)");
 		// validate second error
 		assertThat(all.get(1).getMessage()).contains("Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck')");
@@ -1694,7 +1693,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 			new CommonCodeSystemsTerminologyService(ourCtx),
 			new InMemoryTerminologyServerValidationSupport(ourCtx),
 			new SnapshotGeneratingValidationSupport(ourCtx));
-		myValidationSupport = new CachingValidationSupport(chain, theLogicalAnd);
+		myValidationSupport = chain.setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(theLogicalAnd);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 		myFhirValidator.registerValidatorModule(myInstanceVal);
 	}

@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -42,6 +43,8 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
+import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
+import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -64,6 +67,7 @@ import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
@@ -78,7 +82,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -121,7 +124,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -282,9 +285,11 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			inverse = true;
 		}
 
-		List<JpaPid> targetPids =
-				myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, targetIds);
-		List<Long> targetPidList = JpaPid.toLongList(targetPids);
+		List<JpaPid> pids = myIdHelperService.resolveResourcePids(
+				theRequestPartitionId,
+				targetIds,
+				ResolveIdentityMode.includeDeleted().cacheOk());
+		List<Long> targetPidList = pids.stream().map(JpaPid::getId).collect(Collectors.toList());
 
 		if (targetPidList.isEmpty() && targetQualifiedUrls.isEmpty()) {
 			setMatchNothing();
@@ -407,12 +412,16 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 		String message = builder.toString();
 		StorageProcessingMessage msg = new StorageProcessingMessage().setMessage(message);
-		HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest)
-				.add(StorageProcessingMessage.class, msg);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
+
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_WARNING)) {
+			HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(StorageProcessingMessage.class, msg);
+			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
+		}
 	}
 
 	/**
@@ -807,14 +816,20 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 	@Nonnull
 	public Condition createEverythingPredicate(
-			String theResourceName, List<String> theSourceResourceNames, Long... theTargetPids) {
+			String theResourceName, List<String> theSourceResourceNames, JpaPid... theTargetPids) {
 		Condition condition;
 
 		if (theTargetPids != null && theTargetPids.length >= 1) {
 			// if resource ids are provided, we'll create the predicate
 			// with ids in or equal to this value
-			condition = QueryParameterUtils.toEqualToOrInPredicate(
-					myColumnTargetResourceId, generatePlaceholders(Arrays.asList(theTargetPids)));
+			if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
+				Object left = ColumnTupleObject.from(getJoinColumnsForTarget());
+				JpaPidValueTuples right = JpaPidValueTuples.from(getSearchQueryBuilder(), theTargetPids);
+				condition = new InCondition(left, right);
+			} else {
+				condition = QueryParameterUtils.toEqualToOrInPredicate(
+						myColumnTargetResourceId, generatePlaceholders(JpaPid.toLongList(theTargetPids)));
+			}
 		} else {
 			// ... otherwise we look for resource types
 			condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));

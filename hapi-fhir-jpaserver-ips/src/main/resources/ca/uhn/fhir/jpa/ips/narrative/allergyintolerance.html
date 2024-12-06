@@ -23,8 +23,8 @@ Comments: AllergyIntolerance.note[x].text (separated by <br />)
       </thead>
       <tbody>
       <th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
-         <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
-            <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
+			<th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink')}">
+				<tr th:id="${extension != null} ? ${#strings.arraySplit(extension.getValue().getValue(), '#')[1]} : ''">
                <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')">Allergen</td>
                <td th:insert="~{IpsUtilityFragments :: codeableConcept (cc=*{getClinicalStatus()},attr='code')}">Status</td>
                <td th:insert="~{IpsUtilityFragments :: concat (list=*{getCategory()},attr='value')}">Category</td>
@@ -33,7 +33,7 @@ Comments: AllergyIntolerance.note[x].text (separated by <br />)
                <td th:insert="~{IpsUtilityFragments :: concat (list=*{getNote()},attr='text')}">Comments</td>
 
                <th:block th:if="*{hasOnsetDateTimeType()}">
-                  <td th:text="*{getOnsetDateTimeType().getValue()}">Onset</td>
+                  <td th:text="*{getOnsetDateTimeType().getValueAsString()}">Onset</td>
                </th:block>
                <th:block th:if="*{hasOnsetStringType()}">
                   <td th:text="*{getOnsetStringType().getValue()}">Onset</td>

@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6495
+title: "A new MdmSettings mode field was added (default value `MATCH_AND_LINK`). When the MdmSettings mode is set to
+`MATCH_ONLY` mode, then MDM operations are disabled and no MDM processing occurs. This is useful if, for example,
+you want to use the Patient/$match operation without having the overhead of creating links and golden resources."

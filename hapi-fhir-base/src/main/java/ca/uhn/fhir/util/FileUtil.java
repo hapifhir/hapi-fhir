@@ -29,7 +29,7 @@ public class FileUtil {
 		if (theBytes <= 0) {
 			return "0 " + UNITS[0];
 		}
-		int digitGroups = (int) (Math.log10(theBytes) / Math.log10(1024));
+		int digitGroups = (int) (Math.log10((double) theBytes) / Math.log10(1024));
 		digitGroups = Math.min(digitGroups, UNITS.length - 1);
 		return new DecimalFormat("###0.#").format(theBytes / Math.pow(1024, digitGroups)) + " " + UNITS[digitGroups];
 	}

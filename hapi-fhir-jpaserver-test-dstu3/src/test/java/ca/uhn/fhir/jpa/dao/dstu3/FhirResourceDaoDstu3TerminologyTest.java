@@ -58,8 +58,6 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3TerminologyTest.class);
 	@Autowired
-	private CachingValidationSupport myCachingValidationSupport;
-	@Autowired
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	@AfterEach
@@ -69,10 +67,12 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		myStorageSettings.setMaximumExpansionSize(5000);
-		myCachingValidationSupport.invalidateCaches();
+		myValidationSupport.invalidateCaches();
 	}
 
 	private CodeSystem createExternalCs() {
