@@ -163,6 +163,7 @@ public class ResourceMergeService {
 				sourceResource.getIdElement(),
 				targetResource.getIdElement(),
 				theMergeOperationParameters.getBatchSize());
+		// FIXME KHS check if it needs to go async
 		myReplaceReferencesSvc.replaceReferences(replaceReferenceRequest, theRequestDetails);
 
 		Patient patientToUpdate = prepareTargetPatientForUpdate(
