@@ -43,6 +43,7 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -57,6 +58,7 @@ import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_PATH;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_TYPE;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_VALUE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 
 public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReplaceReferencesSvcImpl.class);
@@ -103,8 +105,13 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	private IBaseParameters replaceReferencesPreferAsync(
 			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
-		// FIXME KHS
-		return null;
+		// FIXME KHS actually start the job
+		Task task = new Task();
+		task.setStatus(Task.TaskStatus.INPROGRESS);
+		myDaoRegistry.getResourceDao(Task.class).create(task, theRequestDetails);
+		Parameters retval = new Parameters();
+		retval.addParameter().setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).setResource(task);
+		return retval;
 	}
 
 	/**

@@ -66,6 +66,7 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_RESULT_PATIENT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
@@ -462,9 +463,38 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.returnResourceType(Parameters.class)
 			.execute();
 
+		assertThat(outParams.getParameter()).hasSize(1);
+
+		if (isAsync) {
+			Task task = (Task) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).getResource();
+
+			await().until(() -> taskCompleted(task.getIdElement()));
+
+			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
+
+			// FIXME KHS the rest of these asserts will likely need to be tweaked
+			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
+
+			// Assert on the output type
+			Coding taskType = taskOutput.getType().getCodingFirstRep();
+			assertEquals("http://hl7.org/fhir/ValueSet/resource-types", taskType.getSystem());
+			assertEquals("OperationOutcome", taskType.getCode());
+
+			List<Resource> containedResources = taskWithOutput.getContained();
+			assertThat(containedResources)
+				.hasSize(1)
+				.element(0)
+				.isInstanceOf(OperationOutcome.class);
+
+			OperationOutcome containedOutcome = (OperationOutcome) containedResources.get(0);
+
+			Reference outputRef = (Reference) taskOutput.getValue();
+			OperationOutcome outcome = (OperationOutcome) outputRef.getResource();
+			assertTrue(containedOutcome.equalsDeep(outcome));
+		}
+
 		// validate
 		Pattern expectedPatchIssuePattern = Pattern.compile("Successfully patched resource \"(Observation|Encounter|CarePlan)/\\d+/_history/\\d+\".");
-		assertThat(outParams.getParameter()).hasSize(1);
 		Bundle patchResultBundle = (Bundle) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME).getResource();
 		assertThat(patchResultBundle.getEntry()).hasSize(23)
 			.allSatisfy(entry ->
