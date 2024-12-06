@@ -2455,7 +2455,7 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.13.0</version>
 					<configuration>
-						<forceJavacCompilerUse>true</forceJavacCompilerUse>
+						<forceLegacyJavacApi>true</forceLegacyJavacApi>
 						<encoding>UTF-8</encoding>
 						<fork>true</fork>
 						<meminitial>500m</meminitial>
@@ -2583,16 +2583,8 @@
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>cobertura-maven-plugin</artifactId>
-					<version>2.7</version>
-					<configuration>
-						<skip>true</skip>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>2.0.0</version>
+					<version>2.5.0</version>
 					<configuration>
 						<verbose>true</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>
@@ -2602,7 +2594,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>versions-maven-plugin</artifactId>
-					<version>2.8.1</version>
+					<version>2.18.0</version>
 					<configuration>
 						<processDependencyManagementTransitive>false</processDependencyManagementTransitive>
 					</configuration>
@@ -2618,18 +2610,9 @@
 					<version>${maven_changes_version}</version>
 				</plugin>
 				<plugin>
-					<groupId>org.eluder.coveralls</groupId>
-					<artifactId>coveralls-maven-plugin</artifactId>
-					<version>4.3.0</version>
-					<configuration>
-						<coberturaReports>
-						</coberturaReports>
-					</configuration>
-				</plugin>
-				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.9</version>
+					<version>0.8.12</version>
 					<configuration>
 						<excludes>
 							<exclude>ca/uhn/fhir/model/dstu2/**/*.class</exclude>
@@ -2646,7 +2629,7 @@
 				<plugin>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-tinder-plugin</artifactId>
-					<version>7.7.10-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<executions>
 						<execution>
 							<goals>
@@ -3194,16 +3177,16 @@
 							</execution>
 						</executions>
 					</plugin>
-					<!--					<plugin>-->
-					<!--						<groupId>org.apache.maven.plugins</groupId>-->
-					<!--						<artifactId>maven-checkstyle-plugin</artifactId>-->
-					<!--						<executions>-->
-					<!--							<execution>-->
-					<!--								<id>hapi-single-module-checkstyle</id>-->
-					<!--								<phase>none</phase>-->
-					<!--							</execution>-->
-					<!--						</executions>-->
-					<!--					</plugin>-->
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-checkstyle-plugin</artifactId>
+							<executions>
+								<execution>
+									<id>hapi-single-module-checkstyle</id>
+									<phase>none</phase>
+								</execution>
+							</executions>
+						</plugin>
 				</plugins>
 			</build>
 		</profile>
