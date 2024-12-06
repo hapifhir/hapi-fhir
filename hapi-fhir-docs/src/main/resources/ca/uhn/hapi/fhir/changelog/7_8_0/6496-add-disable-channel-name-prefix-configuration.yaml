@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6496
+title: "Added a configuration option to ChannelSettings that allows message brokers to disable channel name prefix 
+for chosen topics."
