@@ -110,7 +110,9 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		task.setStatus(Task.TaskStatus.INPROGRESS);
 		myDaoRegistry.getResourceDao(Task.class).create(task, theRequestDetails);
 		Parameters retval = new Parameters();
-		retval.addParameter().setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).setResource(task);
+		retval.addParameter()
+				.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
+				.setResource(task);
 		return retval;
 	}
 
