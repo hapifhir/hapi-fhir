@@ -957,6 +957,11 @@
 			<name>Ibrahim</name>
 			<organization>Trifork A/S</organization>
 		</developer>
+		<developer>
+			<id>MangalaEkanayake</id>
+			<name>Mangala Ekanayake</name>
+			<organization>Cambio</organization>
+		</developer>
 	</developers>
 
 	<licenses>
