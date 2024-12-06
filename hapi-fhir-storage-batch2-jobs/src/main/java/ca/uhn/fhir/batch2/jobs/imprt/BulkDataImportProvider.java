@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.jobs.imprt;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.export.BulkDataExportUtil;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
@@ -59,7 +60,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider.validatePreferAsyncHeader;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkDataImportProvider {
@@ -127,7 +127,7 @@ public class BulkDataImportProvider {
 			HttpServletResponse theResponse)
 			throws IOException {
 
-		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_IMPORT);
+		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_IMPORT);
 
 		BulkImportJobParameters jobParameters = new BulkImportJobParameters();
 

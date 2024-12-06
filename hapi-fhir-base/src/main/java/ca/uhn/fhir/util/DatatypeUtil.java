@@ -21,11 +21,15 @@ package ca.uhn.fhir.util;
 
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class DatatypeUtil {
+	private DatatypeUtil() {
+		// non-instantiable
+	}
 
 	/**
 	 * Convert a list of FHIR String objects to a set of native java Strings
@@ -72,6 +76,14 @@ public class DatatypeUtil {
 	 * not null, else returns null.
 	 */
 	public static Boolean toBooleanValue(IPrimitiveType<Boolean> thePrimitiveType) {
+		return thePrimitiveType != null ? thePrimitiveType.getValue() : null;
+	}
+
+	/**
+	 * Returns {@link IPrimitiveType#getValue()} if <code>thePrimitiveType</code> is
+	 * not null, else returns null.
+	 */
+	public static Date toDateValue(IPrimitiveType<Date> thePrimitiveType) {
 		return thePrimitiveType != null ? thePrimitiveType.getValue() : null;
 	}
 }
