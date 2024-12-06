@@ -132,7 +132,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client-apache-http5</artifactId>
-			<version>7.7.10-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
