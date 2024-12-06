@@ -2230,6 +2230,9 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertTrue(outcomePatientValidateInitial.contains(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY));
 			createStructureDefinitionInDao();
 
+			// Simulate a cache timeout
+			myValidationSupport.invalidateCaches();
+
 			// execute
 			final String outcomePatientValidateAfterStructDef = validate(PATIENT_WITH_REAL_URL);
 

@@ -448,7 +448,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			myValueSetDao.expand(new IdType("http://foo"), null, mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("HAPI-2001: Resource ValueSet/foo is not known", e.getMessage());
+			assertEquals("HAPI-1100: Resource ValueSet/foo is not known", e.getMessage());
 		}
 	}
 

@@ -110,7 +110,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 
 		T persistentId = null;
 		if (theTransactionDetails != null) {
-			T resolvedResourceId = (T) theTransactionDetails.getResolvedResourceId(targetResourceId);
+			IIdType unqualifiedVersionless = targetResourceId.toUnqualifiedVersionless();
+			T resolvedResourceId = (T) theTransactionDetails.getResolvedResourceId(unqualifiedVersionless);
 			if (resolvedResourceId != null
 					&& resolvedResourceId.getId() != null
 					&& resolvedResourceId.getAssociatedResourceId() != null) {

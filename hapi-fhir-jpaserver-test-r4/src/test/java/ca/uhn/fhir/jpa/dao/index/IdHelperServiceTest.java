@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.index;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -7,13 +8,20 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaQuery;
+import org.hibernate.sql.results.internal.TupleImpl;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -31,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,6 +56,18 @@ public class IdHelperServiceTest {
 
 	@Mock
 	private PartitionSettings myPartitionSettings;
+
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	private EntityManager myEntityManager;
+
+	@Mock
+	private TypedQuery myQuery;
+
+	@Mock
+	private Tuple myTuple;
+
+	@Spy
+	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@InjectMocks
 	private IdHelperService myHelperService;
@@ -84,29 +105,23 @@ public class IdHelperServiceTest {
 		patientIdsToResolve.add("BLUE");
 
 		Object[] redView = new Object[] {
-			"Patient",
 			123l,
-			"RED",
-			new Date(),
-			null,
-			null
+			"Patient",
+			"RED"
 		};
 		Object[] blueView = new Object[] {
-			"Patient",
 			456l,
-			"BLUE",
-			new Date(),
-			null,
-			null
+			"Patient",
+			"BLUE"
 		};
 
 		// when
-		when(myStorageSettings.isDeleteEnabled())
-			.thenReturn(true);
-		when(myResourceTableDao.findAndResolveByForcedIdWithNoType(Mockito.anyString(),
-			Mockito.anyList(), Mockito.anyBoolean()))
-			.thenReturn(Collections.singletonList(redView))
-			.thenReturn(Collections.singletonList(blueView));
+		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
+		when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(myQuery);
+		when(myQuery.getResultList()).thenReturn(List.of(
+			new TupleImpl(null, redView),
+			new TupleImpl(null, blueView)
+		));
 
 		// test
 		Map<String, JpaPid> map = myHelperService.resolveResourcePersistentIds(
@@ -132,9 +147,8 @@ public class IdHelperServiceTest {
 		JpaPid blue = JpaPid.fromIdAndVersion(456L, 456L);
 
 		// we will pretend the lookup value is in the cache
-		when(myMemoryCacheService.getThenPutAfterCommit(any(MemoryCacheService.CacheEnum.class),
-			Mockito.anyString(),
-			any(Function.class)))
+		when(myMemoryCacheService.getIfPresent(any(MemoryCacheService.CacheEnum.class),
+			Mockito.anyString()))
 			.thenReturn(red)
 			.thenReturn(blue);
 
@@ -186,7 +200,7 @@ public class IdHelperServiceTest {
 		JpaPid resourcePersistentId1 = JpaPid.fromId(1L);
 		JpaPid resourcePersistentId2 = JpaPid.fromId(2L);
 		JpaPid resourcePersistentId3 = JpaPid.fromId(3L);
-		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any()))
+		when(myMemoryCacheService.getIfPresent(any(), any()))
 			.thenReturn(resourcePersistentId1)
 			.thenReturn(resourcePersistentId2)
 			.thenReturn(resourcePersistentId3);
@@ -206,7 +220,7 @@ public class IdHelperServiceTest {
 
 		JpaPid jpaPid1 = JpaPid.fromId(id);
 		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY);
-		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any())).thenReturn(jpaPid1);
+		when(myMemoryCacheService.getIfPresent(any(), any())).thenReturn(jpaPid1);
 		JpaPid result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, id.toString());
 		assertEquals(id, result.getId());
 	}
