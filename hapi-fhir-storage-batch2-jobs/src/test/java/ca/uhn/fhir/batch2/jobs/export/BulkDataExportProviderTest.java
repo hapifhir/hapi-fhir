@@ -38,7 +38,7 @@ class BulkDataExportProviderTest {
 	@MethodSource("fhirContexts")
 	void checkDeviceIsSupportedInPatientCompartment(FhirContext theFhirContext) {
 		Set<String> resourceNames = new BulkDataExportProvider().getPatientCompartmentResources(theFhirContext);
-		if (PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE.contains(theFhirContext.getVersion().getVersion())) {
+		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R5)) {
 			assertThat(resourceNames).contains("Device");
 		} else {
 			assertThat(resourceNames).doesNotContain("Device");
