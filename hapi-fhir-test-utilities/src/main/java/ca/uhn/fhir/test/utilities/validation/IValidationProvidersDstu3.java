@@ -95,6 +95,10 @@ public interface IValidationProvidersDstu3 {
 			addTerminologyResource(theUrl, codeSystem);
 			return codeSystem;
 		}
+		@Override
+		public CodeSystem addTerminologyResource(String theUrl, String theVersion) {
+			return addTerminologyResource(theUrl);
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -132,6 +136,10 @@ public interface IValidationProvidersDstu3 {
 			valueSet.setUrl(theUrl);
 			addTerminologyResource(theUrl, valueSet);
 			return valueSet;
+		}
+		@Override
+		public ValueSet addTerminologyResource(String theUrl, String theVersion) {
+			return addTerminologyResource(theUrl);
 		}
 	}
 }
