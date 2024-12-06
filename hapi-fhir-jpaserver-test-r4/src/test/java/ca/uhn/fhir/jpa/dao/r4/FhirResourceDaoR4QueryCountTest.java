@@ -12,6 +12,8 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -35,8 +37,11 @@ import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -63,12 +68,14 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -79,6 +86,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -90,6 +98,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -3716,6 +3725,191 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			assertFalse(version.isParamsTokenPopulated());
 		});
 	}
+
+	@Test
+	public void testFetchStructureDefinition_BuiltIn() {
+
+		// First pass with an empty cache
+		myValidationSupport.invalidateCaches();
+		myCaptureQueriesListener.clear();
+		assertNotNull(myValidationSupport.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Patient"));
+
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+
+		// Again (should use cache)
+		myCaptureQueriesListener.clear();
+		assertNotNull(myValidationSupport.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Patient"));
+
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+	}
+
+	@Test
+	public void testFetchStructureDefinition_StoredInRepository() {
+
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://foo");
+		myStructureDefinitionDao.create(sd, mySrd);
+
+		// First pass with an empty cache
+		myValidationSupport.invalidateCaches();
+		myCaptureQueriesListener.clear();
+		assertNotNull(myValidationSupport.fetchStructureDefinition("http://foo"));
+
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+
+		// Again (should use cache)
+		myCaptureQueriesListener.clear();
+		assertNotNull(myValidationSupport.fetchStructureDefinition("http://foo"));
+
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testValidateResource(boolean theStoredInRepository) {
+		Patient resource = new Patient();
+		resource.setGender(Enumerations.AdministrativeGender.MALE);
+		resource.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>hello</div>");
+		String encoded;
+
+		IIdType id = null;
+		if (theStoredInRepository) {
+			id = myPatientDao.create(resource, mySrd).getId();
+			resource = null;
+			encoded = null;
+		} else {
+			resource.setId("A");
+			encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource);
+		}
+
+		myCaptureQueriesListener.clear();
+		ValidationModeEnum mode = ValidationModeEnum.UPDATE;
+		MethodOutcome outcome = myPatientDao.validate(resource, id, encoded, EncodingEnum.JSON, mode, null, mySrd);
+		assertThat(((OperationOutcome)outcome.getOperationOutcome()).getIssueFirstRep().getDiagnostics()).contains("No issues detected");
+		myCaptureQueriesListener.logSelectQueries();
+		if (theStoredInRepository) {
+			assertEquals(8, myCaptureQueriesListener.countSelectQueries());
+		} else {
+			assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		}
+
+		// Again (should use caches)
+		myCaptureQueriesListener.clear();
+		outcome = myPatientDao.validate(resource, id, encoded, EncodingEnum.JSON, mode, null, mySrd);
+		assertThat(((OperationOutcome)outcome.getOperationOutcome()).getIssueFirstRep().getDiagnostics()).contains("No issues detected");
+		if (theStoredInRepository) {
+			assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		} else {
+			assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		}
+	}
+
+
+
+	@Test
+	public void testValidateCode_BuiltIn() {
+
+		// First pass with an empty cache
+		myValidationSupport.invalidateCaches();
+		myCaptureQueriesListener.clear();
+		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+		String vsUrl = "http://hl7.org/fhir/ValueSet/marital-status";
+		String csUrl = "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus";
+		String code = "I";
+		String code2 = "A";
+		assertTrue(myValidationSupport.validateCode(ctx, options, csUrl, code, null, vsUrl).isOk());
+
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+
+		// Again (should use cache)
+		myCaptureQueriesListener.clear();
+		assertTrue(myValidationSupport.validateCode(ctx, options, csUrl, code, null, vsUrl).isOk());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+
+		// Different code (should use cache)
+		myCaptureQueriesListener.clear();
+		assertTrue(myValidationSupport.validateCode(ctx, options, csUrl, code2, null, vsUrl).isOk());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+	}
+
+	@Test
+	public void testValidateCode_StoredInRepository() {
+		String vsUrl = "http://vs";
+		String csUrl = "http://cs";
+		String code = "A";
+		String code2 = "B";
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(csUrl);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode(code);
+		cs.addConcept().setCode(code2);
+		myCodeSystemDao.create(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl(vsUrl);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem(csUrl);
+		myValueSetDao.create(vs, mySrd);
+		IValidationSupport.CodeValidationResult result;
+
+		// First pass with an empty cache
+		myValidationSupport.invalidateCaches();
+		myCaptureQueriesListener.clear();
+		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+		result = myValidationSupport.validateCode(ctx, options, csUrl, code, null, vsUrl);
+		assertNotNull(result);
+		assertTrue(result.isOk());
+		assertThat(result.getMessage()).isNull();
+
+		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Again (should use cache)
+		myCaptureQueriesListener.clear();
+		result = myValidationSupport.validateCode(ctx, options, csUrl, code, null, vsUrl);
+		assertNotNull(result);
+		assertTrue(result.isOk());
+		assertThat(result.getMessage()).isNull();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+
+		// Different code (should use cache)
+		myCaptureQueriesListener.clear();
+		result = myValidationSupport.validateCode(ctx, options, csUrl, code2, null, vsUrl);
+		assertNotNull(result);
+		assertTrue(result.isOk());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+
+		// Now pre-expand the VS and try again (should use disk because we're fetching from pre-expansion)
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myCaptureQueriesListener.clear();
+		result = myValidationSupport.validateCode(ctx, options, csUrl, code, null, vsUrl);
+		assertNotNull(result);
+		assertTrue(result.isOk());
+		assertThat(result.getMessage()).contains("expansion that was pre-calculated");
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+
+		// Same code (should use cache)
+		myCaptureQueriesListener.clear();
+		result = myValidationSupport.validateCode(ctx, options, csUrl, code, null, vsUrl);
+		assertNotNull(result);
+		assertTrue(result.isOk());
+		assertThat(result.getMessage()).contains("expansion that was pre-calculated");
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+
+		// Different code (should use cache)
+		myCaptureQueriesListener.clear();
+		result = myValidationSupport.validateCode(ctx, options, csUrl, code2, null, vsUrl);
+		assertNotNull(result);
+		assertTrue(result.isOk());
+		assertThat(result.getMessage()).contains("expansion that was pre-calculated");
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+
+	}
+
 
 	private void assertQueryCount(int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedInsertCount, int theExpectedDeleteCount) {
 
