@@ -43,9 +43,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,7 +70,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PatientMergeR4Test extends BaseResourceProviderR4Test {
@@ -234,7 +234,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		// Assert Task
 		if (isAsync) {
 			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
-			await().until(() -> task.getStatus() == Task.TaskStatus.COMPLETED);
+			await().until(() -> taskCompleted(task.getIdElement()));
 
 			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
 
@@ -307,7 +307,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Check that the linked resources were updated
 
-		Bundle bundle = fetchBundle(myServerBase + "/" + myTargetPatId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(myServerBase + "/" + myTargetPatId + "/$everything?_format=json&_count=100");
 
 		assertNull(bundle.getLink("next"));
 
@@ -341,6 +341,11 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+	private Boolean taskCompleted(IdType theTask) {
+		Task updatedTask = myTaskDao.read(theTask, mySrd);
+		return updatedTask.getStatus() == Task.TaskStatus.COMPLETED;
+	}
+
 	@ParameterizedTest
 	@CsvSource({
 		// withDelete, withInputResultPatient, withPreview
@@ -353,7 +358,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		"false, true, false",
 		"false, false, false",
 	})
-	public void testMultipleTargetMatchesFails(boolean withDelete, boolean withInputResultPatient, boolean withPreview) throws Exception {
+	public void testMultipleTargetMatchesFails(boolean withDelete, boolean withInputResultPatient, boolean withPreview) {
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
 		inParams.sourcePatient = new Reference().setReferenceElement(mySourcePatId);
 		inParams.targetPatientIdentifier = patBothIdentifierC;
@@ -384,7 +389,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		"false, true, false",
 		"false, false, false",
 	})
-	public void testMultipleSourceMatchesFails(boolean withDelete, boolean withInputResultPatient, boolean withPreview) throws Exception {
+	public void testMultipleSourceMatchesFails(boolean withDelete, boolean withInputResultPatient, boolean withPreview) {
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
 		inParams.sourcePatientIdentifier = patBothIdentifierC;
 		inParams.targetPatient = new Reference().setReferenceElement(mySourcePatId);
@@ -410,8 +415,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.isEqualTo(theExpectedMessage);
 	}
 
-	private Parameters callMergeOperation(Parameters inParameters) {
-		return this.callMergeOperation(inParameters, false);
+	private void callMergeOperation(Parameters inParameters) {
+		this.callMergeOperation(inParameters, false);
 	}
 
 	private Parameters callMergeOperation(Parameters inParameters, boolean isAsync) {
@@ -433,18 +438,26 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	void test_MissingRequiredParameters_Returns400BadRequest() {
 		assertThatThrownBy(() -> callMergeOperation(new Parameters())
 		).isInstanceOf(InvalidRequestException.class)
-			.extracting(e -> ((InvalidRequestException) e).getStatusCode())
+			.extracting(InvalidRequestException.class::cast)
+			.extracting(BaseServerResponseException::getStatusCode)
 			.isEqualTo(400);
 	}
 
-	@Test
-	void testReplaceReferences() throws IOException {
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void testReplaceReferences(boolean isAsync) throws IOException {
 		// exec
-		Parameters outParams = myClient.operation()
+		IOperationUntypedWithInput<Parameters> request = myClient.operation()
 			.onServer()
 			.named(OPERATION_REPLACE_REFERENCES)
-			.withParameter(Parameters.class, ProviderConstants.PARAM_SOURCE_REFERENCE_ID, new StringType(mySourcePatId.getValue()))
-			.andParameter(ProviderConstants.PARAM_TARGET_REFERENCE_ID, new StringType(myTargetPatId.getValue()))
+			.withParameter(Parameters.class, ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID, new StringType(mySourcePatId.getValue()))
+			.andParameter(ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID, new StringType(myTargetPatId.getValue()));
+
+		if (isAsync) {
+			request.withAdditionalHeader(HEADER_PREFER, HEADER_PREFER_RESPOND_ASYNC);
+		}
+
+		Parameters outParams = request
 			.returnResourceType(Parameters.class)
 			.execute();
 
@@ -465,7 +478,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Check that the linked resources were updated
 
-		Bundle bundle = fetchBundle(myServerBase + "/" + myTargetPatId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(myServerBase + "/" + myTargetPatId + "/$everything?_format=json&_count=100");
 
 		assertNull(bundle.getLink("next"));
 
@@ -487,13 +500,13 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	// FIXME KHS look at PatientEverythingR4Test for ideas for other tests
 
-	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
+	private Bundle fetchBundle(String theUrl) throws IOException {
 		Bundle bundle;
 		HttpGet get = new HttpGet(theUrl);
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
-			assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
-			bundle = theEncoding.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
+			assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
+			bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -541,7 +554,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	static class MyExceptionHandler implements TestExecutionExceptionHandler {
 		@Override
 		public void handleTestExecutionException(ExtensionContext theExtensionContext, Throwable theThrowable) throws Throwable {
-			if (theThrowable instanceof BaseServerResponseException ex) {
+			if (theThrowable instanceof BaseServerResponseException) {
+				BaseServerResponseException ex = (BaseServerResponseException) theThrowable;
 				String message = extractFailureMessage(ex);
 				throw ex.getClass().getDeclaredConstructor(String.class, Throwable.class).newInstance(message, ex);
 			}

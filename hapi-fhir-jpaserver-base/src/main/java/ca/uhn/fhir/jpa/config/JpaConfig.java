@@ -55,6 +55,7 @@ import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
@@ -930,7 +931,7 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IReplaceReferencesSvc replaceReferencesSvc(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
-		return new ReplaceReferencesSvcImpl(theFhirContext, theDaoRegistry);
+	public IReplaceReferencesSvc replaceReferencesSvc(FhirContext theFhirContext, DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService, IdHelperService theIdHelperService, IResourceLinkDao theResourceLinkDao) {
+		return new ReplaceReferencesSvcImpl(theFhirContext, theDaoRegistry, theHapiTransactionService, theIdHelperService, theResourceLinkDao);
 	}
 }

@@ -27,5 +27,5 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
  */
 public interface IReplaceReferencesSvc {
 
-	IBaseParameters replaceReferences(String theSourceRefId, String theTargetRefId, RequestDetails theRequest);
+	IBaseParameters replaceReferences(ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails);
 }

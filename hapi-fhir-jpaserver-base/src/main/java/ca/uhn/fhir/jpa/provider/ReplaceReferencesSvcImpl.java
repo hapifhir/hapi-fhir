@@ -21,15 +21,17 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import jakarta.annotation.Nonnull;
@@ -42,146 +44,194 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.patch.FhirPatch.OPERATION_REPLACE;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_OPERATION;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_PATH;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_TYPE;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_VALUE;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.PARAM_SOURCE_REFERENCE_ID;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.PARAM_TARGET_REFERENCE_ID;
-import static software.amazon.awssdk.utils.StringUtils.isBlank;
 
 public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(ReplaceReferencesSvcImpl.class);
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
+	private final HapiTransactionService myHapiTransactionService;
+	private final IdHelperService myIdHelperService;
+	private final IResourceLinkDao myResourceLinkDao;
 
-	public ReplaceReferencesSvcImpl(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+	public ReplaceReferencesSvcImpl(FhirContext theFhirContext, DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService, IdHelperService theIdHelperService, IResourceLinkDao theResourceLinkDao) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
+		myHapiTransactionService = theHapiTransactionService;
+		myIdHelperService = theIdHelperService;
+		myResourceLinkDao = theResourceLinkDao;
 	}
 
 	@Override
-	public IBaseParameters replaceReferences(String theSourceRefId, String theTargetRefId, RequestDetails theRequest) {
+	public IBaseParameters replaceReferences(ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+		theReplaceReferenceRequest.validateOrThrowInvalidParameterException();
 
-		validateParameters(theSourceRefId, theTargetRefId);
-		IIdType sourceRefId = new IdDt(theSourceRefId);
-		IIdType targetRefId = new IdDt(theTargetRefId);
+		if (theRequestDetails.isPreferAsync()) {
+			return replaceReferencesPreferAsync(theReplaceReferenceRequest, theRequestDetails);
+		} else {
+			return replaceReferencesPreferSync(theReplaceReferenceRequest, theRequestDetails);
+		}
+	}
+
+	private IBaseParameters replaceReferencesPreferAsync(ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+		// FIXME KHS
+		return null;
+	}
+
+	/**
+	 * Try to perform the operation synchronously. However if there is more than a page of results, fall back to asynchronous operation
+	 */
+	private @NotNull IBaseParameters replaceReferencesPreferSync(ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 
 		//		todo jm: this could be problematic depending on referenceing object set size, however we are adding
 		//			batch job option to handle that case as part of this feature
-		List<? extends IBaseResource> referencingResources = findReferencingResourceIds(sourceRefId, theRequest);
+		IFhirResourceDao<?> dao = getDao(theReplaceReferenceRequest.sourceId.getResourceType());
+		if (dao == null) {
+			throw new InternalErrorException(
+				Msg.code(2582) + "Couldn't obtain DAO for resource type" + theReplaceReferenceRequest.sourceId.getResourceType());
+		}
 
-		return replaceReferencesInTransaction(referencingResources, sourceRefId, targetRefId, theRequest);
+		return myHapiTransactionService.withRequest(theRequestDetails).execute(
+			() -> performReplaceInTransaction(theReplaceReferenceRequest, theRequestDetails, dao));
+	}
+
+	private @Nullable IBaseParameters performReplaceInTransaction(ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails, IFhirResourceDao<?> dao) {
+		// FIXME KHS get partition from request
+		JpaPid sourcePid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theReplaceReferenceRequest.sourceId);
+
+		Stream<JpaPid> pidStream = myResourceLinkDao.streamSourcePidsForTargetPid(sourcePid.getId()).map(JpaPid::fromId);
+		StopLimitAccumulator<JpaPid> accumulator = StopLimitAccumulator.fromStreamAndLimit(pidStream, theReplaceReferenceRequest.pageSize);
+
+		if (accumulator.isTruncated()) {
+			ourLog.info("Too many results. Switching to asynchronous reference replacement.");
+			return replaceReferencesPreferAsync(theReplaceReferenceRequest, theRequestDetails);
+		}
+
+		List<IBaseResource> referencingResources = accumulator.getItemList().stream().map(myIdHelperService::translatePidIdToForcedIdWithCache)
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.map(IdDt::new)
+			.map(id -> getDao(id.getResourceType()).read(id, theRequestDetails))
+			.collect(Collectors.toUnmodifiableList());
+
+		return replaceReferencesInTransaction(referencingResources, theReplaceReferenceRequest, theRequestDetails);
 	}
 
 	private IBaseParameters replaceReferencesInTransaction(
-			List<? extends IBaseResource> theReferencingResources,
-			IIdType theCurrentTargetId,
-			IIdType theNewTargetId,
-			RequestDetails theRequest) {
+		List<IBaseResource> theReferencingResources,
+		ReplaceReferenceRequest theReplaceReferenceRequest,
+		RequestDetails theRequestDetails) {
 
 		Parameters resultParams = new Parameters();
 		// map resourceType -> map resourceId -> patch Parameters
 		Map<String, Map<IIdType, Parameters>> parametersMap =
-				buildPatchParameterMap(theReferencingResources, theCurrentTargetId, theNewTargetId);
+			buildPatchParameterMap(theReferencingResources, theReplaceReferenceRequest.sourceId, theReplaceReferenceRequest.targetId);
 
 		for (Map.Entry<String, Map<IIdType, Parameters>> mapEntry : parametersMap.entrySet()) {
 			String resourceType = mapEntry.getKey();
 			IFhirResourceDao<?> resDao = myDaoRegistry.getResourceDao(resourceType);
 			if (resDao == null) {
 				throw new InternalErrorException(
-						Msg.code(2588) + "No DAO registered for resource type: " + resourceType);
+					Msg.code(2588) + "No DAO registered for resource type: " + resourceType);
 			}
 
 			// patch each resource of resourceType
-			patchResourceTypeResources(mapEntry, resDao, resultParams, theRequest);
+			patchResourceTypeResources(mapEntry, resDao, resultParams, theRequestDetails);
 		}
 
 		return resultParams;
 	}
 
 	private void patchResourceTypeResources(
-			Map.Entry<String, Map<IIdType, Parameters>> mapEntry,
-			IFhirResourceDao<?> resDao,
-			Parameters resultParams,
-			RequestDetails theRequest) {
+		Map.Entry<String, Map<IIdType, Parameters>> mapEntry,
+		IFhirResourceDao<?> resDao,
+		Parameters resultParams,
+		RequestDetails theRequest) {
 
 		for (Map.Entry<IIdType, Parameters> idParamMapEntry :
-				mapEntry.getValue().entrySet()) {
+			mapEntry.getValue().entrySet()) {
 			IIdType resourceId = idParamMapEntry.getKey();
 			Parameters parameters = idParamMapEntry.getValue();
 
 			MethodOutcome result =
-					resDao.patch(resourceId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, parameters, theRequest);
+				resDao.patch(resourceId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, parameters, theRequest);
 
 			resultParams.addParameter().setResource((Resource) result.getOperationOutcome());
 		}
 	}
 
 	private Map<String, Map<IIdType, Parameters>> buildPatchParameterMap(
-			List<? extends IBaseResource> theReferencingResources,
-			IIdType theCurrentReferencedResourceId,
-			IIdType theNewReferencedResourceId) {
+		List<? extends IBaseResource> theReferencingResources,
+		IIdType theCurrentReferencedResourceId,
+		IIdType theNewReferencedResourceId) {
 		Map<String, Map<IIdType, Parameters>> paramsMap = new HashMap<>();
 
 		for (IBaseResource referencingResource : theReferencingResources) {
 			// resource can have more than one reference to the same target resource
 			for (ResourceReferenceInfo refInfo :
-					myFhirContext.newTerser().getAllResourceReferences(referencingResource)) {
+				myFhirContext.newTerser().getAllResourceReferences(referencingResource)) {
 
 				addReferenceToMapIfForSource(
-						theCurrentReferencedResourceId,
-						theNewReferencedResourceId,
-						referencingResource,
-						refInfo,
-						paramsMap);
+					theCurrentReferencedResourceId,
+					theNewReferencedResourceId,
+					referencingResource,
+					refInfo,
+					paramsMap);
 			}
 		}
 		return paramsMap;
 	}
 
 	private void addReferenceToMapIfForSource(
-			IIdType theCurrentReferencedResourceId,
-			IIdType theNewReferencedResourceId,
-			IBaseResource referencingResource,
-			ResourceReferenceInfo refInfo,
-			Map<String, Map<IIdType, Parameters>> paramsMap) {
+		IIdType theCurrentReferencedResourceId,
+		IIdType theNewReferencedResourceId,
+		IBaseResource referencingResource,
+		ResourceReferenceInfo refInfo,
+		Map<String, Map<IIdType, Parameters>> paramsMap) {
 		if (!refInfo.getResourceReference()
-				.getReferenceElement()
+			.getReferenceElement()
+			.toUnqualifiedVersionless()
+			.getValueAsString()
+			.equals(theCurrentReferencedResourceId
 				.toUnqualifiedVersionless()
-				.getValueAsString()
-				.equals(theCurrentReferencedResourceId
-						.toUnqualifiedVersionless()
-						.getValueAsString())) {
+				.getValueAsString())) {
 
 			// not a reference to the resource being replaced
 			return;
 		}
 
 		Parameters.ParametersParameterComponent paramComponent = createReplaceReferencePatchOperation(
-				referencingResource.fhirType() + "." + refInfo.getName(),
-				new Reference(
-						theNewReferencedResourceId.toUnqualifiedVersionless().getValueAsString()));
+			referencingResource.fhirType() + "." + refInfo.getName(),
+			new Reference(
+				theNewReferencedResourceId.toUnqualifiedVersionless().getValueAsString()));
 
 		paramsMap
-				// preserve order, in case it could matter
-				.computeIfAbsent(referencingResource.fhirType(), k -> new LinkedHashMap<>())
-				.computeIfAbsent(referencingResource.getIdElement(), k -> new Parameters())
-				.addParameter(paramComponent);
+			// preserve order, in case it could matter
+			.computeIfAbsent(referencingResource.fhirType(), k -> new LinkedHashMap<>())
+			.computeIfAbsent(referencingResource.getIdElement(), k -> new Parameters())
+			.addParameter(paramComponent);
 	}
 
 	@Nonnull
 	private Parameters.ParametersParameterComponent createReplaceReferencePatchOperation(
-			String thePath, Type theValue) {
+		String thePath, Type theValue) {
 
 		Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
 		operation.setName(PARAMETER_OPERATION);
@@ -191,50 +241,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return operation;
 	}
 
-	private List<? extends IBaseResource> findReferencingResourceIds(
-			IIdType theSourceRefIdParam, RequestDetails theRequest) {
-		IFhirResourceDao<?> dao = getDao(theSourceRefIdParam.getResourceType());
-		if (dao == null) {
-			throw new InternalErrorException(
-					Msg.code(2582) + "Couldn't obtain DAO for resource type" + theSourceRefIdParam.getResourceType());
-		}
-
-		SearchParameterMap parameterMap = new SearchParameterMap();
-		parameterMap.add(PARAM_ID, new StringParam(theSourceRefIdParam.getValue()));
-		parameterMap.addRevInclude(new Include("*"));
-		return dao.search(parameterMap, theRequest).getAllResources();
-	}
-
 	private IFhirResourceDao<?> getDao(String theResourceName) {
 		return myDaoRegistry.getResourceDao(theResourceName);
 	}
 
-	private void validateParameters(String theSourceRefIdParam, String theTargetRefIdParam) {
-		if (isBlank(theSourceRefIdParam)) {
-			throw new InvalidParameterException(
-					Msg.code(2583) + "Parameter '" + PARAM_SOURCE_REFERENCE_ID + "' is blank");
-		}
-
-		if (isBlank(theTargetRefIdParam)) {
-			throw new InvalidParameterException(
-					Msg.code(2584) + "Parameter '" + PARAM_TARGET_REFERENCE_ID + "' is blank");
-		}
-
-		IIdType sourceId = new IdDt(theSourceRefIdParam);
-		if (isBlank(sourceId.getResourceType())) {
-			throw new InvalidParameterException(
-					Msg.code(2585) + "'" + PARAM_SOURCE_REFERENCE_ID + "' must be a resource type qualified id");
-		}
-
-		IIdType targetId = new IdDt(theTargetRefIdParam);
-		if (isBlank(targetId.getResourceType())) {
-			throw new InvalidParameterException(
-					Msg.code(2586) + "'" + PARAM_TARGET_REFERENCE_ID + "' must be a resource type qualified id");
-		}
-
-		if (!targetId.getResourceType().equals(sourceId.getResourceType())) {
-			throw new InvalidParameterException(
-					Msg.code(2587) + "Source and target id parameters must be for the same resource type");
-		}
-	}
 }

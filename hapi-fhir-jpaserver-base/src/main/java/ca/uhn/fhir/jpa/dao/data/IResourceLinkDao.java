@@ -26,6 +26,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHapiFhirJpaRepository {
 
@@ -45,4 +46,8 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 	 */
 	@Query("SELECT t FROM ResourceLink t LEFT JOIN FETCH t.myTargetResource tr WHERE t.myId in :pids")
 	List<ResourceLink> findByPidAndFetchTargetDetails(@Param("pids") List<Long> thePids);
+
+	@Query("SELECT DISTINCT t.mySourceResourcePid FROM ResourceLink t WHERE t.myTargetResourcePid = :resId")
+	Stream<Long> streamSourcePidsForTargetPid(@Param("resId") Long theTargetPid);
+
 }

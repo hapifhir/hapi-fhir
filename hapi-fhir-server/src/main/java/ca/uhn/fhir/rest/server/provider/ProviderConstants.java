@@ -132,7 +132,7 @@ public class ProviderConstants {
 	public static final String OPERATION_META = "$meta";
 
 	/**
-	 *  Operation name for the $expunge operation
+	 * Operation name for the $expunge operation
 	 */
 	public static final String OPERATION_EXPUNGE = "$expunge";
 
@@ -253,12 +253,25 @@ public class ProviderConstants {
 	/**
 	 * Parameter for source reference of the "$replace-references" operation
 	 */
-	public static final String PARAM_SOURCE_REFERENCE_ID = "source-reference-id";
+	public static final String OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID = "source-reference-id";
 
 	/**
 	 * Parameter for target reference of the "$replace-references" operation
 	 */
-	public static final String PARAM_TARGET_REFERENCE_ID = "target-reference-id";
+	public static final String OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID = "target-reference-id";
+
+	/**
+	 * The number of resources that will be modified at a time. If the number of resources that need to change
+	 * exceeds this amount, the operation will switch to async mode.
+	 */
+	public static final String OPERATION_REPLACE_REFERENCES_PAGE_SIZE = "page-size";
+
+	/**
+	 * $replace-references output Parameters names
+	 */
+	public static final String OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK = "task";
+	public static final String OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME = "outcome";
+
 	/**
 	 * Operation name for the Resource "$merge" operation
 	 * Hapi-fhir use is based on https://www.hl7.org/fhir/patient-operation-merge.html
@@ -273,10 +286,11 @@ public class ProviderConstants {
 	public static final String OPERATION_MERGE_TARGET_PATIENT = "target-patient";
 	public static final String OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER = "target-patient-identifier";
 	public static final String OPERATION_MERGE_RESULT_PATIENT = "result-patient";
+	public static final String OPERATION_MERGE_PAGE_SIZE = "page-size";
 	public static final String OPERATION_MERGE_PREVIEW = "preview";
 	public static final String OPERATION_MERGE_DELETE_SOURCE = "delete-source";
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_INPUT = "input";
-	public static final String OPERATION_MERGE_OUTPUT_PARAM_OUTCOME = "outcome";
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_OUTCOME = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_RESULT = "result";
-	public static final String OPERATION_MERGE_OUTPUT_PARAM_TASK = "task";
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_TASK = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 }

@@ -26,6 +26,10 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER;
 
 public class PatientMergeOperationInputParameters extends MergeOperationInputParameters {
+	public PatientMergeOperationInputParameters(int thePageSize) {
+		super(thePageSize);
+	}
+
 	@Override
 	public String getSourceResourceParameterName() {
 		return OPERATION_MERGE_SOURCE_PATIENT;

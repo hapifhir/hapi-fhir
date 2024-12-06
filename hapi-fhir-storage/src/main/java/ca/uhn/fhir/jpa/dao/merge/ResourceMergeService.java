@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
+import ca.uhn.fhir.jpa.provider.ReplaceReferenceRequest;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -149,7 +150,8 @@ public class ResourceMergeService {
 			return;
 		}
 
-		myReplaceReferencesSvc.replaceReferences(sourceResource.getId(), targetResource.getId(), theRequestDetails);
+		ReplaceReferenceRequest replaceReferenceRequest = new ReplaceReferenceRequest(sourceResource.getIdElement(), targetResource.getIdElement(), theMergeOperationParameters.getPageSize());
+		myReplaceReferencesSvc.replaceReferences(replaceReferenceRequest, theRequestDetails);
 
 		Patient patientToUpdate = prepareTargetPatientForUpdate(
 				targetResource, sourceResource, resultResource, theMergeOperationParameters.getDeleteSource());
