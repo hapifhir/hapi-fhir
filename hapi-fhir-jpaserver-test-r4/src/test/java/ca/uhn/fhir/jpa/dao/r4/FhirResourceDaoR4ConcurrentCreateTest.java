@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
@@ -171,8 +172,8 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		myResourceSearchUrlDao.saveAll(asList(entry1, entry2));
 
 		// when
-		myResourceSearchUrlSvc.deleteByResId(entry1.getResourcePid());
-		myResourceSearchUrlSvc.deleteByResId(nonExistentResourceId);
+		myResourceSearchUrlSvc.deleteByResId(JpaPid.fromId(entry1.getResourcePid()));
+		myResourceSearchUrlSvc.deleteByResId(JpaPid.fromId(nonExistentResourceId));
 
 		// then
 		List<Long> resourcesPids = getStoredResourceSearchUrlEntitiesPids();

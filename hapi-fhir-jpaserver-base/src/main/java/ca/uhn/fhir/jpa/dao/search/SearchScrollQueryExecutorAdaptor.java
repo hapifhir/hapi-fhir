@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.search;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import org.hibernate.search.engine.search.query.SearchScroll;
 import org.hibernate.search.engine.search.query.SearchScrollResult;
@@ -57,12 +58,12 @@ public class SearchScrollQueryExecutorAdaptor implements ISearchQueryExecutor {
 	}
 
 	@Override
-	public Long next() {
+	public JpaPid next() {
 		Long result = myCurrentIterator.next();
 		// was this the last in the current scroll page?
 		if (!myCurrentIterator.hasNext()) {
 			advanceNextScrollPage();
 		}
-		return result;
+		return JpaPid.fromId(result);
 	}
 }
