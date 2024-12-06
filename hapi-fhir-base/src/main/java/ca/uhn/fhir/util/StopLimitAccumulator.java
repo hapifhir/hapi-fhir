@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider;
+package ca.uhn.fhir.util;
 
 import jakarta.annotation.Nonnull;
 
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
-class StopLimitAccumulator<T> {
+public class StopLimitAccumulator<T> {
 	private final boolean isTruncated;
 	private final List<T> myList;
 
@@ -17,7 +17,7 @@ class StopLimitAccumulator<T> {
 		isTruncated = theIsTruncated;
 	}
 
-	static <T> StopLimitAccumulator<T> fromStreamAndLimit(@Nonnull Stream<T> thePidStream, int theLimit) {
+	public static <T> StopLimitAccumulator<T> fromStreamAndLimit(@Nonnull Stream<T> thePidStream, long theLimit) {
 		assert theLimit > 0;
 		AtomicBoolean isBeyondLimit = new AtomicBoolean(false);
 		List<T> accumulator = new ArrayList<>();

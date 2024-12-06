@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import ca.uhn.fhir.util.StopLimitAccumulator;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -54,7 +55,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.patch.FhirPatch.OPERATION_REPLACE;
@@ -124,79 +124,57 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 			return replaceReferencesPreferAsync(theReplaceReferenceRequest, theRequestDetails);
 		}
 
-		List<IBaseResource> referencingResources = accumulator.getItemList().stream().map(myIdHelperService::translatePidIdToForcedIdWithCache)
+		Stream<IBaseResource> referencingResourceStream = accumulator.getItemList().stream().map(myIdHelperService::translatePidIdToForcedIdWithCache)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.map(IdDt::new)
-			.map(id -> getDao(id.getResourceType()).read(id, theRequestDetails))
-			.collect(Collectors.toUnmodifiableList());
+			.map(id -> getDao(id.getResourceType()).read(id, theRequestDetails));
 
-		return replaceReferencesInTransaction(referencingResources, theReplaceReferenceRequest, theRequestDetails);
+		return replaceReferencesInTransaction(referencingResourceStream, theReplaceReferenceRequest, theRequestDetails);
 	}
 
 	private IBaseParameters replaceReferencesInTransaction(
-		List<IBaseResource> theReferencingResources,
+		Stream<IBaseResource> theReferencingResourceStream,
 		ReplaceReferenceRequest theReplaceReferenceRequest,
 		RequestDetails theRequestDetails) {
 
 		Parameters resultParams = new Parameters();
-		// map resourceType -> map resourceId -> patch Parameters
-		Map<String, Map<IIdType, Parameters>> parametersMap =
-			buildPatchParameterMap(theReferencingResources, theReplaceReferenceRequest.sourceId, theReplaceReferenceRequest.targetId);
 
-		for (Map.Entry<String, Map<IIdType, Parameters>> mapEntry : parametersMap.entrySet()) {
-			String resourceType = mapEntry.getKey();
+		// Map resourceType -> map resourceId -> patch Parameters
+		Map<String, Map<IIdType, Parameters>> parametersMap = new HashMap<>();
+
+		// Process each resource in the stream
+		theReferencingResourceStream.forEach(referencingResource -> {
+			for (ResourceReferenceInfo refInfo :
+				myFhirContext.newTerser().getAllResourceReferences(referencingResource)) {
+
+				addReferenceToMapIfForSource(
+					theReplaceReferenceRequest.sourceId,
+					theReplaceReferenceRequest.targetId,
+					referencingResource,
+					refInfo,
+					parametersMap);
+			}
+		});
+
+		// Apply patches for each resourceType
+		parametersMap.forEach((resourceType, resourceIdMap) -> {
 			IFhirResourceDao<?> resDao = myDaoRegistry.getResourceDao(resourceType);
 			if (resDao == null) {
 				throw new InternalErrorException(
 					Msg.code(2588) + "No DAO registered for resource type: " + resourceType);
 			}
 
-			// patch each resource of resourceType
-			patchResourceTypeResources(mapEntry, resDao, resultParams, theRequestDetails);
-		}
+			// Patch each resource of the resourceType
+			resourceIdMap.forEach((resourceId, parameters) -> {
+				MethodOutcome result =
+					resDao.patch(resourceId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, parameters, theRequestDetails);
+
+				resultParams.addParameter().setResource((Resource) result.getOperationOutcome());
+			});
+		});
 
 		return resultParams;
-	}
-
-	private void patchResourceTypeResources(
-		Map.Entry<String, Map<IIdType, Parameters>> mapEntry,
-		IFhirResourceDao<?> resDao,
-		Parameters resultParams,
-		RequestDetails theRequest) {
-
-		for (Map.Entry<IIdType, Parameters> idParamMapEntry :
-			mapEntry.getValue().entrySet()) {
-			IIdType resourceId = idParamMapEntry.getKey();
-			Parameters parameters = idParamMapEntry.getValue();
-
-			MethodOutcome result =
-				resDao.patch(resourceId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, parameters, theRequest);
-
-			resultParams.addParameter().setResource((Resource) result.getOperationOutcome());
-		}
-	}
-
-	private Map<String, Map<IIdType, Parameters>> buildPatchParameterMap(
-		List<? extends IBaseResource> theReferencingResources,
-		IIdType theCurrentReferencedResourceId,
-		IIdType theNewReferencedResourceId) {
-		Map<String, Map<IIdType, Parameters>> paramsMap = new HashMap<>();
-
-		for (IBaseResource referencingResource : theReferencingResources) {
-			// resource can have more than one reference to the same target resource
-			for (ResourceReferenceInfo refInfo :
-				myFhirContext.newTerser().getAllResourceReferences(referencingResource)) {
-
-				addReferenceToMapIfForSource(
-					theCurrentReferencedResourceId,
-					theNewReferencedResourceId,
-					referencingResource,
-					refInfo,
-					paramsMap);
-			}
-		}
-		return paramsMap;
 	}
 
 	private void addReferenceToMapIfForSource(
@@ -205,6 +183,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		IBaseResource referencingResource,
 		ResourceReferenceInfo refInfo,
 		Map<String, Map<IIdType, Parameters>> paramsMap) {
+
 		if (!refInfo.getResourceReference()
 			.getReferenceElement()
 			.toUnqualifiedVersionless()
@@ -212,8 +191,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 			.equals(theCurrentReferencedResourceId
 				.toUnqualifiedVersionless()
 				.getValueAsString())) {
-
-			// not a reference to the resource being replaced
+			// Not a reference to the resource being replaced
 			return;
 		}
 
@@ -223,7 +201,6 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 				theNewReferencedResourceId.toUnqualifiedVersionless().getValueAsString()));
 
 		paramsMap
-			// preserve order, in case it could matter
 			.computeIfAbsent(referencingResource.fhirType(), k -> new LinkedHashMap<>())
 			.computeIfAbsent(referencingResource.getIdElement(), k -> new Parameters())
 			.addParameter(paramComponent);
