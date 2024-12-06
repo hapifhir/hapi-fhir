@@ -34,6 +34,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,7 +67,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		codeSystem.setName("SYSTEM NAME");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = runInTransaction(()->myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new));
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -107,9 +108,12 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", null, cs, table);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		logAllConcepts();
+		logAllConceptParentChildLinks();
 
 		return id;
 	}
@@ -121,7 +125,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = runInTransaction(()->myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new));
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -129,7 +133,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept parentA = new TermConcept(cs, "CS2");
 		cs.getConcepts().add(parentA);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 	}
 
@@ -199,7 +203,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				code2.getDisplay());
 			cs.getConcepts().add(code4);
 
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		});
 	}
 
@@ -211,21 +215,21 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = runInTransaction(()->myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new));
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		// Update
 		cs = new TermCodeSystemVersion();
 		TermConcept parentA = new TermConcept(cs, "ParentA");
 		cs.getConcepts().add(parentA);
-		id = myCodeSystemDao.update(codeSystem, null, true, true, mySrd, new TransactionDetails()).getId().toUnqualified();
-		table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		myCodeSystemDao.update(codeSystem, null, true, true, mySrd, new TransactionDetails()).getId().toUnqualified();
+		table = runInTransaction(()->myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new));
 		cs.setResource(table);
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		// Try to update to a different resource
 		codeSystem = new CodeSystem();
@@ -1823,7 +1827,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = runInTransaction(()->myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new));
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -1841,7 +1845,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		child.addChild(parent, RelationshipTypeEnum.ISA);
 
 		try {
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 			fail("");
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(849) + "CodeSystem contains circular reference around code parent", e.getMessage());
@@ -1858,7 +1862,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				ResourceTable resourceTable = (ResourceTable) myCodeSystemDao.readEntity(codeSystemResource.getIdElement(), null);
-				Long codeSystemResourcePid = resourceTable.getId();
+				JpaPid codeSystemResourcePid = resourceTable.getId();
 				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemResourcePid);
 				assertEquals(CS_URL, codeSystem.getCodeSystemUri());
 				assertEquals("SYSTEM NAME", codeSystem.getName());
@@ -1867,32 +1871,11 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertEquals(9, codeSystemVersion.getConcepts().size());
 
 				List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
+				concepts.sort(Comparator.comparing(TermConcept::getCode));
+				assertEquals(9, concepts.size());
 
-				TermConcept parentWithNoChildrenA = concepts.get(0);
-				assertEquals("ParentWithNoChildrenA", parentWithNoChildrenA.getCode());
-				assertNull(parentWithNoChildrenA.getDisplay());
-				assertEquals(0, parentWithNoChildrenA.getChildren().size());
-				assertEquals(0, parentWithNoChildrenA.getParents().size());
-				assertEquals(0, parentWithNoChildrenA.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenA.getProperties().size());
-
-				TermConcept parentWithNoChildrenB = concepts.get(1);
-				assertEquals("ParentWithNoChildrenB", parentWithNoChildrenB.getCode());
-				assertNull(parentWithNoChildrenB.getDisplay());
-				assertEquals(0, parentWithNoChildrenB.getChildren().size());
-				assertEquals(0, parentWithNoChildrenB.getParents().size());
-				assertEquals(0, parentWithNoChildrenB.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenB.getProperties().size());
-
-				TermConcept parentWithNoChildrenC = concepts.get(2);
-				assertEquals("ParentWithNoChildrenC", parentWithNoChildrenC.getCode());
-				assertNull(parentWithNoChildrenC.getDisplay());
-				assertEquals(0, parentWithNoChildrenC.getChildren().size());
-				assertEquals(0, parentWithNoChildrenC.getParents().size());
-				assertEquals(0, parentWithNoChildrenC.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenC.getProperties().size());
-
-				TermConcept parentA = concepts.get(3);
+				int index = 0;
+				TermConcept parentA = concepts.get(index++);
 				assertEquals("ParentA", parentA.getCode());
 				assertNull(parentA.getDisplay());
 				assertEquals(2, parentA.getChildren().size());
@@ -1900,7 +1883,39 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertEquals(0, parentA.getDesignations().size());
 				assertEquals(0, parentA.getProperties().size());
 
-				TermConcept childAA = concepts.get(4);
+				TermConcept parentB = concepts.get(index++);
+				assertEquals("ParentB", parentB.getCode());
+				assertNull(parentB.getDisplay());
+				assertEquals(0, parentB.getChildren().size());
+				assertEquals(0, parentB.getParents().size());
+				assertEquals(0, parentB.getDesignations().size());
+				assertEquals(0, parentB.getProperties().size());
+
+				TermConcept parentWithNoChildrenA = concepts.get(index++);
+				assertEquals("ParentWithNoChildrenA", parentWithNoChildrenA.getCode());
+				assertNull(parentWithNoChildrenA.getDisplay());
+				assertEquals(0, parentWithNoChildrenA.getChildren().size());
+				assertEquals(0, parentWithNoChildrenA.getParents().size());
+				assertEquals(0, parentWithNoChildrenA.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenA.getProperties().size());
+
+				TermConcept parentWithNoChildrenB = concepts.get(index++);
+				assertEquals("ParentWithNoChildrenB", parentWithNoChildrenB.getCode());
+				assertNull(parentWithNoChildrenB.getDisplay());
+				assertEquals(0, parentWithNoChildrenB.getChildren().size());
+				assertEquals(0, parentWithNoChildrenB.getParents().size());
+				assertEquals(0, parentWithNoChildrenB.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenB.getProperties().size());
+
+				TermConcept parentWithNoChildrenC = concepts.get(index++);
+				assertEquals("ParentWithNoChildrenC", parentWithNoChildrenC.getCode());
+				assertNull(parentWithNoChildrenC.getDisplay());
+				assertEquals(0, parentWithNoChildrenC.getChildren().size());
+				assertEquals(0, parentWithNoChildrenC.getParents().size());
+				assertEquals(0, parentWithNoChildrenC.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenC.getProperties().size());
+
+				TermConcept childAA = concepts.get(index++);
 				assertEquals("childAA", childAA.getCode());
 				assertNull(childAA.getDisplay());
 				assertEquals(2, childAA.getChildren().size());
@@ -1909,7 +1924,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertEquals(0, childAA.getDesignations().size());
 				assertEquals(0, childAA.getProperties().size());
 
-				TermConcept childAAA = concepts.get(5);
+				TermConcept childAAA = concepts.get(index++);
 				assertEquals("childAAA", childAAA.getCode());
 				assertNull(childAAA.getDisplay());
 				assertEquals(0, childAAA.getChildren().size());
@@ -1918,7 +1933,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertEquals(0, childAAA.getDesignations().size());
 				assertEquals(2, childAAA.getProperties().size());
 
-				TermConcept childAAB = concepts.get(6);
+				TermConcept childAAB = concepts.get(index++);
 				assertEquals("childAAB", childAAB.getCode());
 				assertNull(childAAB.getDisplay());
 				assertEquals(0, childAAB.getChildren().size());
@@ -1927,7 +1942,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertEquals(1, childAAB.getDesignations().size());
 				assertEquals(2, childAAB.getProperties().size());
 
-				TermConcept childAB = concepts.get(7);
+				TermConcept childAB = concepts.get(index++);
 				assertEquals("childAB", childAB.getCode());
 				assertNull(childAB.getDisplay());
 				assertEquals(0, childAB.getChildren().size());
@@ -1935,14 +1950,6 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertSame(parentA, childAB.getParents().iterator().next().getParent());
 				assertEquals(0, childAB.getDesignations().size());
 				assertEquals(0, childAB.getProperties().size());
-
-				TermConcept parentB = concepts.get(8);
-				assertEquals("ParentB", parentB.getCode());
-				assertNull(parentB.getDisplay());
-				assertEquals(0, parentB.getChildren().size());
-				assertEquals(0, parentB.getParents().size());
-				assertEquals(0, parentB.getDesignations().size());
-				assertEquals(0, parentB.getProperties().size());
 			}
 		});
 	}
@@ -1965,9 +1972,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		version.getConcepts().add(new TermConcept(version, "C"));
 		version.getConcepts().add(new TermConcept(version, "D"));
 		runInTransaction(() -> {
-			ResourceTable resTable = myEntityManager.find(ResourceTable.class, csId.getIdPartAsLong());
+			ResourceTable resTable = myEntityManager.find(ResourceTable.class, JpaPid.fromId(csId.getIdPartAsLong()));
 			version.setResource(resTable);
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(csId.getIdPartAsLong()), cs.getUrl(), "My System", "SYSTEM VERSION", version, resTable);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(cs.getUrl(), "My System", "SYSTEM VERSION", version, resTable);
 		});
 
 		org.hl7.fhir.dstu3.model.ValueSet vs = new org.hl7.fhir.dstu3.model.ValueSet();

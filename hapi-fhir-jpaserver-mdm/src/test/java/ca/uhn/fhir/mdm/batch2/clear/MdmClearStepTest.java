@@ -45,8 +45,10 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	private String myGoldenId;
 	private String mySourceId;
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		Patient sourcePatient = new Patient();
 		mySourceId = SOURCE_ID + "1";
 		sourcePatient.setId(mySourceId);
@@ -109,7 +111,7 @@ class MdmClearStepTest extends BaseMdmR4Test {
 
 	private void mdmClearGoldenResource() {
 		ResourceIdListWorkChunkJson chunk = new ResourceIdListWorkChunkJson();
-		chunk.addTypedPid("Patient", myGoldenPid);
+		chunk.addTypedPidWithNullPartitionForUnitTest("Patient", myGoldenPid);
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();

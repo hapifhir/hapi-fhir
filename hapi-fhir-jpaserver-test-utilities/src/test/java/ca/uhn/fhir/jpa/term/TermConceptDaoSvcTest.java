@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -12,15 +12,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TermConceptDaoSvcTest {
 
 	@Mock
-	private ITermConceptDao myConceptDao;
+	private EntityManager myEntityManager;
 
 	@InjectMocks
 	private TermConceptDaoSvc myTermConceptDaoSvc;
@@ -29,12 +29,11 @@ public class TermConceptDaoSvcTest {
 	@ValueSource(booleans = {false, true})
 	public void testSaveConcept_withSupportLegacyLob(boolean theSupportLegacyLob){
 		final String parentPids = "1 2 3 4 5 6 7 8 9";
-		when(myConceptDao.save(any())).thenAnswer(t ->{
-				TermConcept codeSystem = (TermConcept) t.getArguments()[0];
-				codeSystem.prePersist();
-
-				return codeSystem;
-		});
+		doAnswer(t->{
+			TermConcept codeSystem = (TermConcept) t.getArguments()[0];
+			codeSystem.prePersist();
+			return null;
+		}).when(myEntityManager).persist(any());
 
 		ArgumentCaptor<TermConcept> captor = ArgumentCaptor.forClass(TermConcept.class);
 
@@ -46,7 +45,7 @@ public class TermConceptDaoSvcTest {
 		myTermConceptDaoSvc.saveConcept(termConcept);
 
 		// then
-		verify(myConceptDao, times(1)).save(captor.capture());
+		verify(myEntityManager, times(1)).persist(captor.capture());
 		TermConcept capturedTermConcept = captor.getValue();
 
 		assertEquals(theSupportLegacyLob, capturedTermConcept.hasParentPidsLobForTesting());

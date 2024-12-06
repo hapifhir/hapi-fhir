@@ -2,10 +2,10 @@ package ca.uhn.fhir.jpa.bulk.export;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.ExpandResourcesStep;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -74,7 +74,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 		ResourceIdList resourceList = new ResourceIdList();
 		resourceList.setResourceType("Patient");
-		resourceList.setIds(ids.stream().map(t -> new BatchResourceId().setResourceType("Patient").setId(Long.toString(t))).toList());
+		resourceList.setIds(ids.stream().map(t -> new TypedPidJson().setResourceType("Patient").setPid(Long.toString(t))).toList());
 
 		BulkExportJobParameters params = new BulkExportJobParameters();
 		JobInstance jobInstance = new JobInstance();
@@ -130,7 +130,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 		ResourceIdList resourceList = new ResourceIdList();
 		resourceList.setResourceType("Patient");
-		resourceList.setIds(allIds.stream().map(t -> new BatchResourceId().setResourceType("Patient").setId(Long.toString(t))).toList());
+		resourceList.setIds(allIds.stream().map(t -> new TypedPidJson().setResourceType("Patient").setPid(Long.toString(t))).toList());
 
 		BulkExportJobParameters params = new BulkExportJobParameters();
 		params.setPostFetchFilterUrls(List.of("Patient?_tag=http://tag-system|tag-value"));
@@ -172,7 +172,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 		ResourceIdList resourceList = new ResourceIdList();
 		resourceList.setResourceType("Patient");
-		resourceList.setIds(allIds.stream().map(t -> new BatchResourceId().setResourceType("Patient").setId(Long.toString(t))).toList());
+		resourceList.setIds(allIds.stream().map(t -> new TypedPidJson().setResourceType("Patient").setPid(Long.toString(t))).toList());
 
 		BulkExportJobParameters params = new BulkExportJobParameters();
 		params.setPostFetchFilterUrls(List.of("Observation?status=final"));
@@ -210,12 +210,12 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		int maxFileSize = 3 * testResourceSize;
 		myStorageSettings.setBulkExportFileMaximumSize(maxFileSize);
 
-		List<BatchResourceId> expectedIds = new ArrayList<>();
+		List<TypedPidJson> expectedIds = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily(StringUtils.leftPad("", testResourceSize, 'A'));
 			String id = myPatientDao.create(p, mySrd).getId().getIdPart();
-			expectedIds.add(new BatchResourceId().setResourceType("Patient").setId(id));
+			expectedIds.add(new TypedPidJson().setResourceType("Patient").setPid(id));
 		}
 		Collections.sort(expectedIds);
 
@@ -236,7 +236,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 		// Verify
 		verify(mySink, atLeast(1)).accept(myWorkChunkCaptor.capture());
-		List<BatchResourceId> actualResourceIdList = new ArrayList<>();
+		List<TypedPidJson> actualResourceIdList = new ArrayList<>();
 		for (var next : myWorkChunkCaptor.getAllValues()) {
 			int nextSize = String.join("\n", next.getStringifiedResources()).length();
 			ourLog.info("Next size: {}", nextSize);
@@ -244,7 +244,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 			next.getStringifiedResources().stream()
 				.filter(StringUtils::isNotBlank)
 				.map(t->myFhirContext.newJsonParser().parseResource(t))
-				.map(t->new BatchResourceId().setResourceType(t.getIdElement().getResourceType()).setId(t.getIdElement().getIdPart()))
+				.map(t->new TypedPidJson().setResourceType(t.getIdElement().getResourceType()).setPid(t.getIdElement().getIdPart()))
 				.forEach(actualResourceIdList::add);
 		}
 

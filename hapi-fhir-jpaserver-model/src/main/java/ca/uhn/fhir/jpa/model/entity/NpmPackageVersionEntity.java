@@ -84,6 +84,9 @@ public class NpmPackageVersionEntity {
 			foreignKey = @ForeignKey(name = "FK_NPM_PKV_RESID"))
 	private ResourceTable myPackageBinary;
 
+	@Column(name = "PARTITION_ID", nullable = true)
+	private Integer myPackageBinaryPartitionId;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SAVED_TIME", nullable = false)
 	private Date mySavedTime;

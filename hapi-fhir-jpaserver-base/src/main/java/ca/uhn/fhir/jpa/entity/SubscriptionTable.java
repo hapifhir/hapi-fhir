@@ -19,15 +19,11 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -56,17 +52,8 @@ public class SubscriptionTable {
 	@Column(name = "PID", insertable = false, updatable = false)
 	private Long myId;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", nullable = true)
 	private Long myResId;
-
-	@OneToOne()
-	@JoinColumn(
-			name = "RES_ID",
-			insertable = true,
-			updatable = false,
-			referencedColumnName = "RES_ID",
-			foreignKey = @ForeignKey(name = "FK_SUBSC_RESOURCE_ID"))
-	private ResourceTable mySubscriptionResource;
 
 	/**
 	 * Constructor
@@ -85,13 +72,5 @@ public class SubscriptionTable {
 
 	public Long getId() {
 		return myId;
-	}
-
-	public ResourceTable getSubscriptionResource() {
-		return mySubscriptionResource;
-	}
-
-	public void setSubscriptionResource(ResourceTable theSubscriptionResource) {
-		mySubscriptionResource = theSubscriptionResource;
 	}
 }

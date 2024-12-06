@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
@@ -28,8 +30,10 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -53,8 +57,14 @@ import static org.apache.commons.lang3.StringUtils.length;
 			@Index(name = "FK_TRM_VSCD_VS_PID", columnList = "VALUESET_PID")
 		})
 @Entity()
-public class TermValueSetConceptDesignation implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermValueSetConceptDesignation extends BasePartitionable implements Serializable {
 	private static final long serialVersionUID = 1L;
+
+	/** Constructor */
+	public TermValueSetConceptDesignation() {
+		super();
+	}
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_VALUESET_C_DSGNTN_PID", sequenceName = "SEQ_VALUESET_C_DSGNTN_PID")
@@ -63,10 +73,21 @@ public class TermValueSetConceptDesignation implements Serializable {
 	private Long myId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "VALUESET_CONCEPT_PID",
-			referencedColumnName = "PID",
-			nullable = false,
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "VALUESET_CONCEPT_PID",
+						referencedColumnName = "PID",
+						insertable = true,
+						updatable = false,
+						nullable = false),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = true,
+				//						updatable = false,
+				//						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_CONCEPT_PID"))
 	private TermValueSetConcept myConcept;
 
@@ -74,14 +95,25 @@ public class TermValueSetConceptDesignation implements Serializable {
 	private Long myConceptPid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "VALUESET_PID",
-			referencedColumnName = "PID",
-			nullable = false,
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "VALUESET_PID",
+						referencedColumnName = "PID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_TRM_VSCD_VS_PID"))
 	private TermValueSet myValueSet;
 
-	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "VALUESET_PID", insertable = true, updatable = true, nullable = false)
 	private Long myValueSetPid;
 
 	@Transient
@@ -112,12 +144,17 @@ public class TermValueSetConceptDesignation implements Serializable {
 		return myId;
 	}
 
+	public IdAndPartitionId getPartitionedId() {
+		return IdAndPartitionId.forId(myId, this);
+	}
+
 	public TermValueSetConcept getConcept() {
 		return myConcept;
 	}
 
 	public TermValueSetConceptDesignation setConcept(TermValueSetConcept theConcept) {
 		myConcept = theConcept;
+		setPartitionId(theConcept.getPartitionId());
 		return this;
 	}
 
@@ -127,6 +164,8 @@ public class TermValueSetConceptDesignation implements Serializable {
 
 	public TermValueSetConceptDesignation setValueSet(TermValueSet theValueSet) {
 		myValueSet = theValueSet;
+		myValueSetPid = theValueSet.getId();
+		assert myValueSetPid != null;
 		return this;
 	}
 

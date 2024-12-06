@@ -396,14 +396,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		return myTxManager;
 	}
 
-	@Override
-	public TransactionTemplate newTxTemplate() {
-		TransactionTemplate retVal = new TransactionTemplate(myTxManager);
-		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		retVal.afterPropertiesSet();
-		return retVal;
-	}
-
 	@AfterEach
 	public void afterEachClearCaches() {
 		myJpaValidationSupportChainDstu3.invalidateCaches();
