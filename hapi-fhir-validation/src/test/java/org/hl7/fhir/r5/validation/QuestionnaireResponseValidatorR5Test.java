@@ -112,7 +112,7 @@ public class QuestionnaireResponseValidatorR5Test  {
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
+		when(myValSupport.fetchValueSet(eq("http://somevalueset"))).thenReturn(options);
 
 		when(myValSupport.validateCode(any(), any(), any(), any(), any(), nullable(String.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code"));
@@ -241,7 +241,7 @@ public class QuestionnaireResponseValidatorR5Test  {
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
+		when(myValSupport.fetchValueSet(eq("http://somevalueset"))).thenReturn(options);
 
 		QuestionnaireResponse qa;
 		ValidationResult errors;
@@ -374,7 +374,7 @@ public class QuestionnaireResponseValidatorR5Test  {
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq(valueSetRef)))
+		when(myValSupport.fetchValueSet(eq(valueSetRef)))
 			.thenReturn(options);
 		when(myValSupport.validateCode(any(), any(), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
@@ -435,7 +435,8 @@ public class QuestionnaireResponseValidatorR5Test  {
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq(valueSetRef)))
+		when(myValSupport.isValueSetSupported(any(), eq(valueSetRef))).thenReturn(true);
+		when(myValSupport.fetchValueSet(eq(valueSetRef)))
 			.thenReturn(options);
 		when(myValSupport.validateCode(any(), any(), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
@@ -564,7 +565,7 @@ public class QuestionnaireResponseValidatorR5Test  {
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
+		when(myValSupport.fetchValueSet(eq("http://somevalueset"))).thenReturn(options);
 
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
@@ -721,7 +722,7 @@ public class QuestionnaireResponseValidatorR5Test  {
 			.setValue(new Coding(SYSTEMURI_ICC_SCHOOLTYPE, CODE_ICC_SCHOOLTYPE_PT, ""));
 
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire()))).thenReturn(questionnaire);
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq(ID_VS_SCHOOLTYPE))).thenReturn(iccSchoolTypeVs);
+		when(myValSupport.fetchValueSet(eq(ID_VS_SCHOOLTYPE))).thenReturn(iccSchoolTypeVs);
 		when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any(ValueSet.class))).thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
 		when(myValSupport.fetchCodeSystem(eq(SYSTEMURI_ICC_SCHOOLTYPE))).thenReturn(codeSystem);
 		ValidationResult errors = myVal.validateWithResult(qa);

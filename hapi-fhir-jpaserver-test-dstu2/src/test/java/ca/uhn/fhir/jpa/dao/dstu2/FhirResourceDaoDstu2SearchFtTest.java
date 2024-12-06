@@ -86,7 +86,6 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_TEXT, new StringParam("DIVBBB"));
 		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map))).containsExactly(pId1);
-
 	}
 
 	@Test

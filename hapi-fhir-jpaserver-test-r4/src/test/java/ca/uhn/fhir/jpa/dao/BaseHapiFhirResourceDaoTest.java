@@ -57,6 +57,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collections;
 import java.util.List;
@@ -256,7 +257,13 @@ class BaseHapiFhirResourceDaoTest {
 		// but for now, Mockito will complain, so we'll leave it out
 
 		// test
-		DaoMethodOutcome outcome = mySvc.delete(id, deleteConflicts, requestDetails, transactionDetails);
+		DaoMethodOutcome outcome;
+		try {
+			TransactionSynchronizationManager.setActualTransactionActive(true);
+			outcome = mySvc.delete(id, deleteConflicts, requestDetails, transactionDetails);
+		} finally {
+			TransactionSynchronizationManager.setActualTransactionActive(false);
+		}
 
 		// verify
 		assertNotNull(outcome);

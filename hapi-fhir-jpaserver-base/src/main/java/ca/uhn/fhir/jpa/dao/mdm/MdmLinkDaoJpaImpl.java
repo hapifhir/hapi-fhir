@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.mdm;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.entity.HapiFhirEnversRevision;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -455,9 +456,13 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	@Nonnull
 	private List<Long> convertToLongIds(List<IIdType> theMdmHistorySearchParameters) {
 		return myIdHelperService
-				.getPidsOrThrowException(RequestPartitionId.allPartitions(), theMdmHistorySearchParameters)
+				.resolveResourceIdentities(
+						RequestPartitionId.allPartitions(),
+						theMdmHistorySearchParameters,
+						ResolveIdentityMode.includeDeleted().cacheOk())
+				.values()
 				.stream()
-				.map(JpaPid::getId)
+				.map(t -> t.getPersistentId().getId())
 				.collect(Collectors.toUnmodifiableList());
 	}
 

@@ -135,13 +135,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public ExtendedHSearchIndexData extractLuceneIndexData(
-			IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
+			IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
 				resourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 				myStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
-		return extractor.extract(theResource, theNewParams);
+		return extractor.extract(theResource, theEntity, theNewParams);
 	}
 
 	@Override
@@ -219,7 +219,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		// indicate param was already processed, otherwise queries DB to process it
 		theParams.setOffset(null);
-		return SearchQueryExecutors.from(longs);
+		return SearchQueryExecutors.from(JpaPid.fromLongList(longs));
 	}
 
 	private int getMaxFetchSize(SearchParameterMap theParams, Integer theMax) {
@@ -386,7 +386,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@SuppressWarnings("rawtypes")
 	private List<IResourcePersistentId> toList(ISearchQueryExecutor theSearchResultStream, long theMaxSize) {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(theSearchResultStream, 0), false)
-				.map(JpaPid::fromId)
 				.limit(theMaxSize)
 				.collect(Collectors.toList());
 	}

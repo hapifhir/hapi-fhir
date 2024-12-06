@@ -25,7 +25,6 @@ import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -52,9 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -156,7 +153,7 @@ public class MdmSurvivorshipSvcImplTest {
 			link.setSourceId(patient.getId());
 			link.setGoldenResourceId(goldenPatient.getId());
 			links.add(link);
-			sourceIdToPid.put(patient.getIdElement(), new JpaResourceLookup("Patient", (Long) link.getSourcePid().getId(), null, new PartitionablePartitionId()));
+			sourceIdToPid.put(patient.getIdElement(), new JpaResourceLookup("Patient", patient.getIdPart(), (Long) link.getSourcePid().getId(), null, new PartitionablePartitionId()));
 		}
 
 		IFhirResourceDao resourceDao = mock(IFhirResourceDao.class);

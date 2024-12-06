@@ -242,7 +242,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 		assertFalse(result.isOk());
-		assertEquals("Unknown code 'http://loinc.org#10013-1-9999999999' for in-memory expansion of ValueSet 'http://loinc.org/vs'", result.getMessage());
+		assertThat(result.getMessage()).contains("Unknown code 'http://loinc.org#10013-1-9999999999' for in-memory expansion");
 	}
 
 	private Set<String> toExpandedCodes(ValueSet theExpanded) {

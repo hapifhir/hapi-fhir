@@ -75,6 +75,17 @@ public interface IFhirVersion {
 	}
 
 	/**
+	 * Creates a new {@link IIdType} instance for the given version with the given value
+	 *
+	 * @since 8.0.0
+	 */
+	default IIdType newIdType(String theResourceType, String theIdPart) {
+		IIdType retVal = newIdType();
+		retVal.setParts(null, theResourceType, theIdPart, null);
+		return retVal;
+	}
+
+	/**
 	 * Returns an instance of <code>IFhirVersionServer<code> for this version.
 	 * Note that this method may only be called if the <code>hapi-fhir-server</code>
 	 * JAR is on the classpath. Otherwise it will result in a {@link ClassNotFoundException}

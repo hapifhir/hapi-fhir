@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.r4.hapi.ctx.FhirR4;
 import org.hl7.fhir.r4.model.Coding;
@@ -27,15 +27,16 @@ public class JpaStorageResourceParserTest {
     @Mock
     private FhirContext myFhirContext;
 
-    @Mock
-    private ResourceSearchView patientSearchView;
-    @InjectMocks
+	@Mock
+	ResourceHistoryTable myEntity;
+
+	@InjectMocks
     private final JpaStorageResourceParser jpaStorageResourceParser = new JpaStorageResourceParser();
 
    @Test
     public void testPopulateResourceMeta_doesNotRemoveTags_whenTagListIsEmpty() {
        Mockito.when(myFhirContext.getVersion()).thenReturn(new FhirR4());
-       Mockito.when(patientSearchView.getIdDt()).thenReturn(new IdDt("Patient/test-patient/_history/1"));
+       Mockito.when(myEntity.getIdDt()).thenReturn(new IdDt("Patient/test-patient/_history/1"));
 
        Coding coding = new Coding("system", "code", "display");
        List<BaseTag> tagList = Collections.emptyList();
@@ -44,8 +45,8 @@ public class JpaStorageResourceParserTest {
        Patient resourceTarget = new Patient();
        resourceTarget.getMeta().addTag(coding);
 
-       Patient actualResult = jpaStorageResourceParser
-               .populateResourceMetadata(patientSearchView, forHistoryOperation, tagList, version, resourceTarget);
+	   Patient actualResult = jpaStorageResourceParser
+               .populateResourceMetadata(myEntity, forHistoryOperation, tagList, version, resourceTarget);
 
        List<Coding> actualTagList = actualResult.getMeta().getTag();
        assertFalse(actualTagList.isEmpty());

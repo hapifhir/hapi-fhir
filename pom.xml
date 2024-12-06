@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.7.7-SNAPSHOT</version>
+	<version>7.7.10-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -970,6 +970,7 @@
 		<fhir_core_version>6.4.0</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
+		<surefire_version>3.5.2</surefire_version>
 
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
@@ -1033,7 +1034,13 @@
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>4.12.0</okhttp_version>
+		<!--
+		Note: As of 2024-11, the opentelemetry-agent-for-testing dependency published to Maven
+		uses a version which lines up with the OTEL instrumentation version, but with "-alpha"
+		appended to it. So we do that too here. This could change in the future.
+		-->
 		<otel_instrumentation.version>2.8.0</otel_instrumentation.version>
+		<otel_agent_for_testing.version>${otel_instrumentation.version}-alpha</otel_agent_for_testing.version>
 		<poi_version>4.1.2</poi_version>
 		<poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
 		<resteasy_version>6.2.9.Final</resteasy_version>
@@ -1163,6 +1170,11 @@
 				<groupId>com.github.ben-manes.caffeine</groupId>
 				<artifactId>caffeine</artifactId>
 				<version>${caffeine_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.jsqlparser</groupId>
+				<artifactId>jsqlparser</artifactId>
+				<version>5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
@@ -1355,7 +1367,7 @@
 			<dependency>
 				<groupId>org.jetbrains</groupId>
 				<artifactId>annotations</artifactId>
-				<version>23.0.0</version>
+				<version>24.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
@@ -2306,6 +2318,16 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry.javaagent</groupId>
+				<artifactId>opentelemetry-testing-common</artifactId>
+				<version>${otel_agent_for_testing.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry.javaagent</groupId>
+				<artifactId>opentelemetry-agent-for-testing</artifactId>
+				<version>${otel_agent_for_testing.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.assertj</groupId>
@@ -2463,7 +2485,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.1.2</version>
+					<version>3.8.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.sonatype.plugins</groupId>
@@ -2493,7 +2515,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>${surefire_version}</version>
 					<configuration>
 						<reuseForks>false</reuseForks>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
@@ -2525,7 +2547,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.1.2</version>
+					<version>${surefire_version}</version>
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
@@ -2623,7 +2645,7 @@
 				<plugin>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-tinder-plugin</artifactId>
-					<version>7.7.7-SNAPSHOT</version>
+					<version>7.7.10-SNAPSHOT</version>
 					<executions>
 						<execution>
 							<goals>
@@ -3059,7 +3081,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>2.19.1</version>
+				<version>${surefire_version}</version>
 				<reportSets>
 					<reportSet>
 						<reports>

@@ -288,7 +288,6 @@ public class WebTest {
 		assertThat(diffPage.asNormalizedText()).contains("\"resourceType\": \"Parameters\"");
 	}
 
-
 	@Test
 	public void testHfqlExecuteQuery() throws IOException {
 		// Load home page
@@ -316,7 +315,6 @@ public class WebTest {
 		ourLog.info(table.asXml());
 		assertThat(table.asNormalizedText()).contains("Simpson");
 	}
-
 
 	private void registerAndUpdatePatient() {
 		Patient p = new Patient();
@@ -380,7 +378,6 @@ public class WebTest {
 			Parameters parameters = new Parameters();
 			return parameters;
 		}
-
 	}
 
 	private static class MyServletContextHandler extends ServletContextHandler {

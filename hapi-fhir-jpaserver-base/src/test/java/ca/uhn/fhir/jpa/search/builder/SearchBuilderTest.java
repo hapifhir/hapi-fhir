@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.search.builder;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +46,7 @@ class SearchBuilderTest {
 
 	@Test
 	void testCalculateIndexUriIdentityHashesForResourceTypes_Include_Null() {
-		Set<Long> types = mySearchBuilder.calculateIndexUriIdentityHashesForResourceTypes(null, false);
+		Set<Long> types = mySearchBuilder.calculateIndexUriIdentityHashesForResourceTypes(new SystemRequestDetails(), null, false).myHashIdentityValues;
 		// There are only 12 resource types that actually can be linked to by the QuestionnaireResponse
 		// resource via canonical references in any parameters
 		assertThat(types).hasSize(1);
@@ -54,14 +55,14 @@ class SearchBuilderTest {
 	@Test
 	void testCalculateIndexUriIdentityHashesForResourceTypes_Include_Nonnull() {
 		Set<String> inputTypes = Set.of("Questionnaire");
-		Set<Long> types = mySearchBuilder.calculateIndexUriIdentityHashesForResourceTypes(inputTypes, false);
+		Set<Long> types = mySearchBuilder.calculateIndexUriIdentityHashesForResourceTypes(new SystemRequestDetails(), inputTypes, false).myHashIdentityValues;
 		// Just the one that we actually specified
 		assertThat(types).hasSize(1);
 	}
 
 	@Test
 	void testCalculateIndexUriIdentityHashesForResourceTypes_RevInclude_Null() {
-		Set<Long> types = mySearchBuilder.calculateIndexUriIdentityHashesForResourceTypes(null, true);
+		Set<Long> types = mySearchBuilder.calculateIndexUriIdentityHashesForResourceTypes(new SystemRequestDetails(), null, true).myHashIdentityValues;
 		// Revincludes are really hard to figure out the potential resource types for, so we just need to
 		// use all active resource types
 		assertThat(types).hasSize(146);

@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 6409
+title: "When searching in versioned tag mode, the JPA server now avoids a redundant
+    lookup of the un-versioned tags, avoiding an extra unnecessary database query
+    in some cases. 
+    "
