@@ -115,6 +115,7 @@
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
 		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
+		<module>hapi-fhir-client-apache-http5</module>
 		<module>hapi-fhir-client-okhttp</module>
 		<module>hapi-fhir-android</module>
 		<module>hapi-fhir-cli</module>
@@ -125,6 +126,7 @@
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
 		<module>hapi-fhir-server-cds-hooks</module>
+
 	</modules>
 
 	<dependencies>
@@ -1029,6 +1031,8 @@
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
+		<httpclient5_version>5.4.1</httpclient5_version>
+		<httpcore5_version>5.3.1</httpcore5_version>
 		<jackson_version>2.17.1</jackson_version>
 		<jackson_databind_version>2.17.1</jackson_databind_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
@@ -1559,6 +1563,16 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
 				<version>${commons_text_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents.core5</groupId>
+				<artifactId>httpcore5</artifactId>
+				<version>${httpcore5_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents.client5</groupId>
+				<artifactId>httpclient5</artifactId>
+				<version>${httpclient5_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
