@@ -78,71 +78,71 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 	 * Patient/123/$everything
 	 */
 	@Operation(
-		name = JpaConstants.OPERATION_EVERYTHING,
-		canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything",
-		idempotent = true,
-		bundleType = BundleTypeEnum.SEARCHSET)
+			name = JpaConstants.OPERATION_EVERYTHING,
+			canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything",
+			idempotent = true,
+			bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientInstanceEverything(
-		jakarta.servlet.http.HttpServletRequest theServletRequest,
-		@IdParam IIdType theId,
-		@Description(
-			shortDefinition =
-				"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-		@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
-		IPrimitiveType<Integer> theCount,
-		@Description(
-			shortDefinition =
-				"Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
-		@OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
-		IPrimitiveType<Integer> theOffset,
-		@Description(
-			shortDefinition =
-				"Only return resources which were last updated as specified by the given range")
-		@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
-		DateRangeParam theLastUpdated,
-		@Description(
-			shortDefinition =
-				"Filter the resources to return only resources matching the given _content filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(
-			name = Constants.PARAM_CONTENT,
-			min = 0,
-			max = OperationParam.MAX_UNLIMITED,
-			typeName = "string")
-		List<IPrimitiveType<String>> theContent,
-		@Description(
-			shortDefinition =
-				"Filter the resources to return only resources matching the given _text filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(
-			name = Constants.PARAM_TEXT,
-			min = 0,
-			max = OperationParam.MAX_UNLIMITED,
-			typeName = "string")
-		List<IPrimitiveType<String>> theNarrative,
-		@Description(
-			shortDefinition =
-				"Filter the resources to return only resources matching the given _filter filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(
-			name = Constants.PARAM_FILTER,
-			min = 0,
-			max = OperationParam.MAX_UNLIMITED,
-			typeName = "string")
-		List<IPrimitiveType<String>> theFilter,
-		@Description(
-			shortDefinition =
-				"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(
-			name = Constants.PARAM_TYPE,
-			min = 0,
-			max = OperationParam.MAX_UNLIMITED,
-			typeName = "string")
-		List<IPrimitiveType<String>> theTypes,
-		@Description(
-			shortDefinition =
-				"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(name = Constants.PARAM_MDM, min = 0, max = 1, typeName = "boolean")
-		IPrimitiveType<Boolean> theMdmExpand,
-		@Sort SortSpec theSortSpec,
-		RequestDetails theRequestDetails) {
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
+			@IdParam IIdType theId,
+			@Description(
+							shortDefinition =
+									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+					@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
+					IPrimitiveType<Integer> theCount,
+			@Description(
+							shortDefinition =
+									"Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+					@OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
+					IPrimitiveType<Integer> theOffset,
+			@Description(
+							shortDefinition =
+									"Only return resources which were last updated as specified by the given range")
+					@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
+					DateRangeParam theLastUpdated,
+			@Description(
+							shortDefinition =
+									"Filter the resources to return only resources matching the given _content filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+					@OperationParam(
+							name = Constants.PARAM_CONTENT,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theContent,
+			@Description(
+							shortDefinition =
+									"Filter the resources to return only resources matching the given _text filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+					@OperationParam(
+							name = Constants.PARAM_TEXT,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theNarrative,
+			@Description(
+							shortDefinition =
+									"Filter the resources to return only resources matching the given _filter filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+					@OperationParam(
+							name = Constants.PARAM_FILTER,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theFilter,
+			@Description(
+							shortDefinition =
+									"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+					@OperationParam(
+							name = Constants.PARAM_TYPE,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theTypes,
+			@Description(
+							shortDefinition =
+									"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+					@OperationParam(name = Constants.PARAM_MDM, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theMdmExpand,
+			@Sort SortSpec theSortSpec,
+			RequestDetails theRequestDetails) {
 
 		startRequest(theServletRequest);
 		try {
@@ -158,7 +158,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			everythingParams.setMdmExpand(resolveNullValue(theMdmExpand));
 
 			return ((IFhirResourceDaoPatient<?>) getDao())
-				.patientInstanceEverything(theServletRequest, theRequestDetails, everythingParams, theId);
+					.patientInstanceEverything(theServletRequest, theRequestDetails, everythingParams, theId);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -168,77 +168,77 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 	 * /Patient/$everything
 	 */
 	@Operation(
-		name = JpaConstants.OPERATION_EVERYTHING,
-		canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything",
-		idempotent = true,
-		bundleType = BundleTypeEnum.SEARCHSET)
+			name = JpaConstants.OPERATION_EVERYTHING,
+			canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything",
+			idempotent = true,
+			bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientTypeEverything(
-		jakarta.servlet.http.HttpServletRequest theServletRequest,
-		@Description(
-			shortDefinition =
-				"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-		@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
-		IPrimitiveType<Integer> theCount,
-		@Description(
-			shortDefinition =
-				"Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
-		@OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
-		IPrimitiveType<Integer> theOffset,
-		@Description(
-			shortDefinition =
-				"Only return resources which were last updated as specified by the given range")
-		@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
-		DateRangeParam theLastUpdated,
-		@Description(
-			shortDefinition =
-				"Filter the resources to return only resources matching the given _content filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(
-			name = Constants.PARAM_CONTENT,
-			min = 0,
-			max = OperationParam.MAX_UNLIMITED,
-			typeName = "string")
-		List<IPrimitiveType<String>> theContent,
-		@Description(
-			shortDefinition =
-				"Filter the resources to return only resources matching the given _text filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(
-			name = Constants.PARAM_TEXT,
-			min = 0,
-			max = OperationParam.MAX_UNLIMITED,
-			typeName = "string")
-		List<IPrimitiveType<String>> theNarrative,
-		@Description(
-			shortDefinition =
-				"Filter the resources to return only resources matching the given _filter filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(
-			name = Constants.PARAM_FILTER,
-			min = 0,
-			max = OperationParam.MAX_UNLIMITED,
-			typeName = "string")
-		List<IPrimitiveType<String>> theFilter,
-		@Description(
-			shortDefinition =
-				"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(
-			name = Constants.PARAM_TYPE,
-			min = 0,
-			max = OperationParam.MAX_UNLIMITED,
-			typeName = "string")
-		List<IPrimitiveType<String>> theTypes,
-		@Description(shortDefinition = "Filter the resources to return based on the patient ids provided.")
-		@OperationParam(
-			name = Constants.PARAM_ID,
-			min = 0,
-			max = OperationParam.MAX_UNLIMITED,
-			typeName = "id")
-		List<IIdType> theId,
-		@Description(
-			shortDefinition =
-				"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(name = Constants.PARAM_MDM, min = 0, max = 1, typeName = "boolean")
-		IPrimitiveType<Boolean> theMdmExpand,
-		@Sort SortSpec theSortSpec,
-		RequestDetails theRequestDetails) {
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
+			@Description(
+							shortDefinition =
+									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+					@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
+					IPrimitiveType<Integer> theCount,
+			@Description(
+							shortDefinition =
+									"Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+					@OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
+					IPrimitiveType<Integer> theOffset,
+			@Description(
+							shortDefinition =
+									"Only return resources which were last updated as specified by the given range")
+					@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
+					DateRangeParam theLastUpdated,
+			@Description(
+							shortDefinition =
+									"Filter the resources to return only resources matching the given _content filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+					@OperationParam(
+							name = Constants.PARAM_CONTENT,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theContent,
+			@Description(
+							shortDefinition =
+									"Filter the resources to return only resources matching the given _text filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+					@OperationParam(
+							name = Constants.PARAM_TEXT,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theNarrative,
+			@Description(
+							shortDefinition =
+									"Filter the resources to return only resources matching the given _filter filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+					@OperationParam(
+							name = Constants.PARAM_FILTER,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theFilter,
+			@Description(
+							shortDefinition =
+									"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+					@OperationParam(
+							name = Constants.PARAM_TYPE,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theTypes,
+			@Description(shortDefinition = "Filter the resources to return based on the patient ids provided.")
+					@OperationParam(
+							name = Constants.PARAM_ID,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "id")
+					List<IIdType> theId,
+			@Description(
+							shortDefinition =
+									"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+					@OperationParam(name = Constants.PARAM_MDM, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theMdmExpand,
+			@Sort SortSpec theSortSpec,
+			RequestDetails theRequestDetails) {
 
 		startRequest(theServletRequest);
 		try {
@@ -254,11 +254,11 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			everythingParams.setMdmExpand(resolveNullValue(theMdmExpand));
 
 			return ((IFhirResourceDaoPatient<?>) getDao())
-				.patientTypeEverything(
-					theServletRequest,
-					theRequestDetails,
-					everythingParams,
-					toFlattenedPatientIdTokenParamList(theId));
+					.patientTypeEverything(
+							theServletRequest,
+							theRequestDetails,
+							everythingParams,
+							toFlattenedPatientIdTokenParamList(theId));
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -268,40 +268,43 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 	 * /Patient/$merge
 	 */
 	@Operation(
-		name = ProviderConstants.OPERATION_MERGE,
-		canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-merge")
+			name = ProviderConstants.OPERATION_MERGE,
+			canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-merge")
 	public IBaseParameters patientMerge(
-		HttpServletRequest theServletRequest,
-		HttpServletResponse theServletResponse,
-		ServletRequestDetails theRequestDetails,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER)
-		List<Identifier> theSourcePatientIdentifier,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER)
-		List<Identifier> theTargetPatientIdentifier,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT, max = 1)
-		IBaseReference theSourcePatient,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_TARGET_PATIENT, max = 1)
-		IBaseReference theTargetPatient,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_PREVIEW, typeName = "boolean", max = 1)
-		IPrimitiveType<Boolean> thePreview,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_DELETE_SOURCE, typeName = "boolean", max = 1)
-		IPrimitiveType<Boolean> theDeleteSource,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_RESULT_PATIENT, max = 1)
-		IBaseResource theResultPatient,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_PAGE_SIZE, typeName = "unsignedInt") IPrimitiveType<Integer> thePageSize) {
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse,
+			ServletRequestDetails theRequestDetails,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER)
+					List<Identifier> theSourcePatientIdentifier,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER)
+					List<Identifier> theTargetPatientIdentifier,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT, max = 1)
+					IBaseReference theSourcePatient,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_TARGET_PATIENT, max = 1)
+					IBaseReference theTargetPatient,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PREVIEW, typeName = "boolean", max = 1)
+					IPrimitiveType<Boolean> thePreview,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_DELETE_SOURCE, typeName = "boolean", max = 1)
+					IPrimitiveType<Boolean> theDeleteSource,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_RESULT_PATIENT, max = 1)
+					IBaseResource theResultPatient,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PAGE_SIZE, typeName = "unsignedInt")
+					IPrimitiveType<Integer> thePageSize) {
 
 		startRequest(theServletRequest);
-		@Nonnull Integer pageSize = defaultIfNull(IPrimitiveType.toValueOrNull(thePageSize), myStorageSettings.getInternalSynchronousSearchSize());
+		@Nonnull
+		Integer pageSize = defaultIfNull(
+				IPrimitiveType.toValueOrNull(thePageSize), myStorageSettings.getInternalSynchronousSearchSize());
 		try {
 			MergeOperationInputParameters mergeOperationParameters = buildMergeOperationInputParameters(
-				theSourcePatientIdentifier,
-				theTargetPatientIdentifier,
-				theSourcePatient,
-				theTargetPatient,
-				thePreview,
-				theDeleteSource,
-				theResultPatient,
-				pageSize);
+					theSourcePatientIdentifier,
+					theTargetPatientIdentifier,
+					theSourcePatient,
+					theTargetPatient,
+					thePreview,
+					theDeleteSource,
+					theResultPatient,
+					pageSize);
 
 			IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) getDao();
 			ResourceMergeService resourceMergeService = new ResourceMergeService(dao, myReplaceReferencesSvc);
@@ -309,7 +312,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			FhirContext fhirContext = dao.getContext();
 
 			MergeOperationOutcome mergeOutcome =
-				resourceMergeService.merge(mergeOperationParameters, theRequestDetails);
+					resourceMergeService.merge(mergeOperationParameters, theRequestDetails);
 
 			theServletResponse.setStatus(mergeOutcome.getHttpStatusCode());
 			return buildMergeOperationOutputParameters(fhirContext, mergeOutcome, theRequestDetails.getResource());
@@ -319,48 +322,48 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 	}
 
 	private IBaseParameters buildMergeOperationOutputParameters(
-		FhirContext theFhirContext, MergeOperationOutcome theMergeOutcome, IBaseResource theInputParameters) {
+			FhirContext theFhirContext, MergeOperationOutcome theMergeOutcome, IBaseResource theInputParameters) {
 
 		IBaseParameters retVal = ParametersUtil.newInstance(theFhirContext);
 		ParametersUtil.addParameterToParameters(
-			theFhirContext, retVal, ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT, theInputParameters);
+				theFhirContext, retVal, ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT, theInputParameters);
 
 		ParametersUtil.addParameterToParameters(
-			theFhirContext,
-			retVal,
-			ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME,
-			theMergeOutcome.getOperationOutcome());
+				theFhirContext,
+				retVal,
+				ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME,
+				theMergeOutcome.getOperationOutcome());
 
 		if (theMergeOutcome.getUpdatedTargetResource() != null) {
 			ParametersUtil.addParameterToParameters(
-				theFhirContext,
-				retVal,
-				OPERATION_MERGE_OUTPUT_PARAM_RESULT,
-				theMergeOutcome.getUpdatedTargetResource());
+					theFhirContext,
+					retVal,
+					OPERATION_MERGE_OUTPUT_PARAM_RESULT,
+					theMergeOutcome.getUpdatedTargetResource());
 		}
 		return retVal;
 	}
 
 	private MergeOperationInputParameters buildMergeOperationInputParameters(
-		List<Identifier> theSourcePatientIdentifier,
-		List<Identifier> theTargetPatientIdentifier,
-		IBaseReference theSourcePatient,
-		IBaseReference theTargetPatient,
-		IPrimitiveType<Boolean> thePreview,
-		IPrimitiveType<Boolean> theDeleteSource,
-		IBaseResource theResultPatient,
-		int thePageSize) {
+			List<Identifier> theSourcePatientIdentifier,
+			List<Identifier> theTargetPatientIdentifier,
+			IBaseReference theSourcePatient,
+			IBaseReference theTargetPatient,
+			IPrimitiveType<Boolean> thePreview,
+			IPrimitiveType<Boolean> theDeleteSource,
+			IBaseResource theResultPatient,
+			int thePageSize) {
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(thePageSize);
 		if (theSourcePatientIdentifier != null) {
 			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourcePatientIdentifier.stream()
-				.map(IdentifierUtil::identifierDtFromIdentifier)
-				.collect(Collectors.toList());
+					.map(IdentifierUtil::identifierDtFromIdentifier)
+					.collect(Collectors.toList());
 			mergeOperationParameters.setSourceResourceIdentifiers(sourceResourceIdentifiers);
 		}
 		if (theTargetPatientIdentifier != null) {
 			List<CanonicalIdentifier> targetResourceIdentifiers = theTargetPatientIdentifier.stream()
-				.map(IdentifierUtil::identifierDtFromIdentifier)
-				.collect(Collectors.toList());
+					.map(IdentifierUtil::identifierDtFromIdentifier)
+					.collect(Collectors.toList());
 			mergeOperationParameters.setTargetResourceIdentifiers(targetResourceIdentifiers);
 		}
 		mergeOperationParameters.setSourceResource(theSourcePatient);

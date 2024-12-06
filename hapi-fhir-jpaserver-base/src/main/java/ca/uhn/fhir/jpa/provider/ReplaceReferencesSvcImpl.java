@@ -52,7 +52,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -71,7 +70,12 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private final IdHelperService myIdHelperService;
 	private final IResourceLinkDao myResourceLinkDao;
 
-	public ReplaceReferencesSvcImpl(FhirContext theFhirContext, DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService, IdHelperService theIdHelperService, IResourceLinkDao theResourceLinkDao) {
+	public ReplaceReferencesSvcImpl(
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			IdHelperService theIdHelperService,
+			IResourceLinkDao theResourceLinkDao) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
@@ -80,7 +84,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	}
 
 	@Override
-	public IBaseParameters replaceReferences(ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+	public IBaseParameters replaceReferences(
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 		theReplaceReferenceRequest.validateOrThrowInvalidParameterException();
 
 		if (theRequestDetails.isPreferAsync()) {
@@ -92,15 +97,16 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	@Override
 	public Integer countResourcesReferencingResource(IIdType theResourceId, RequestDetails theRequestDetails) {
-		return myHapiTransactionService.withRequest(theRequestDetails).execute(
-			() -> {
-				// FIXME KHS get partition from request
-				JpaPid sourcePid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResourceId);
-				return myResourceLinkDao.countResourcesTargetingPid(sourcePid.getId());
-			});
+		return myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
+			// FIXME KHS get partition from request
+			JpaPid sourcePid =
+					myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResourceId);
+			return myResourceLinkDao.countResourcesTargetingPid(sourcePid.getId());
+		});
 	}
 
-	private IBaseParameters replaceReferencesPreferAsync(ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+	private IBaseParameters replaceReferencesPreferAsync(
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 		// FIXME KHS
 		return null;
 	}
@@ -108,45 +114,55 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	/**
 	 * Try to perform the operation synchronously. However if there is more than a page of results, fall back to asynchronous operation
 	 */
-	private @NotNull IBaseParameters replaceReferencesPreferSync(ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+	private @NotNull IBaseParameters replaceReferencesPreferSync(
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 
 		//		todo jm: this could be problematic depending on referenceing object set size, however we are adding
 		//			batch job option to handle that case as part of this feature
 		IFhirResourceDao<?> dao = getDao(theReplaceReferenceRequest.sourceId.getResourceType());
 		if (dao == null) {
-			throw new InternalErrorException(
-				Msg.code(2582) + "Couldn't obtain DAO for resource type" + theReplaceReferenceRequest.sourceId.getResourceType());
+			throw new InternalErrorException(Msg.code(2582) + "Couldn't obtain DAO for resource type"
+					+ theReplaceReferenceRequest.sourceId.getResourceType());
 		}
 
-		return myHapiTransactionService.withRequest(theRequestDetails).execute(
-			() -> performReplaceInTransaction(theReplaceReferenceRequest, theRequestDetails, dao));
+		return myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.execute(() -> performReplaceInTransaction(theReplaceReferenceRequest, theRequestDetails, dao));
 	}
 
-	private @Nullable IBaseParameters performReplaceInTransaction(ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails, IFhirResourceDao<?> dao) {
+	private @Nullable IBaseParameters performReplaceInTransaction(
+			ReplaceReferenceRequest theReplaceReferenceRequest,
+			RequestDetails theRequestDetails,
+			IFhirResourceDao<?> dao) {
 		// FIXME KHS get partition from request
-		JpaPid sourcePid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theReplaceReferenceRequest.sourceId);
+		JpaPid sourcePid = myIdHelperService.getPidOrThrowException(
+				RequestPartitionId.allPartitions(), theReplaceReferenceRequest.sourceId);
 
-		Stream<JpaPid> pidStream = myResourceLinkDao.streamSourcePidsForTargetPid(sourcePid.getId()).map(JpaPid::fromId);
-		StopLimitAccumulator<JpaPid> accumulator = StopLimitAccumulator.fromStreamAndLimit(pidStream, theReplaceReferenceRequest.pageSize);
+		Stream<JpaPid> pidStream = myResourceLinkDao
+				.streamSourcePidsForTargetPid(sourcePid.getId())
+				.map(JpaPid::fromId);
+		StopLimitAccumulator<JpaPid> accumulator =
+				StopLimitAccumulator.fromStreamAndLimit(pidStream, theReplaceReferenceRequest.pageSize);
 
 		if (accumulator.isTruncated()) {
 			ourLog.info("Too many results. Switching to asynchronous reference replacement.");
 			return replaceReferencesPreferAsync(theReplaceReferenceRequest, theRequestDetails);
 		}
 
-		Stream<IBaseResource> referencingResourceStream = accumulator.getItemList().stream().map(myIdHelperService::translatePidIdToForcedIdWithCache)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.map(IdDt::new)
-			.map(id -> getDao(id.getResourceType()).read(id, theRequestDetails));
+		Stream<IBaseResource> referencingResourceStream = accumulator.getItemList().stream()
+				.map(myIdHelperService::translatePidIdToForcedIdWithCache)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.map(IdDt::new)
+				.map(id -> getDao(id.getResourceType()).read(id, theRequestDetails));
 
 		return replaceReferencesInTransaction(referencingResourceStream, theReplaceReferenceRequest, theRequestDetails);
 	}
 
 	private IBaseParameters replaceReferencesInTransaction(
-		Stream<IBaseResource> theReferencingResourceStream,
-		ReplaceReferenceRequest theReplaceReferenceRequest,
-		RequestDetails theRequestDetails) {
+			Stream<IBaseResource> theReferencingResourceStream,
+			ReplaceReferenceRequest theReplaceReferenceRequest,
+			RequestDetails theRequestDetails) {
 
 		Parameters resultParams = new Parameters();
 
@@ -156,14 +172,14 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		// Process each resource in the stream
 		theReferencingResourceStream.forEach(referencingResource -> {
 			for (ResourceReferenceInfo refInfo :
-				myFhirContext.newTerser().getAllResourceReferences(referencingResource)) {
+					myFhirContext.newTerser().getAllResourceReferences(referencingResource)) {
 
 				addReferenceToMapIfForSource(
-					theReplaceReferenceRequest.sourceId,
-					theReplaceReferenceRequest.targetId,
-					referencingResource,
-					refInfo,
-					parametersMap);
+						theReplaceReferenceRequest.sourceId,
+						theReplaceReferenceRequest.targetId,
+						referencingResource,
+						refInfo,
+						parametersMap);
 			}
 		});
 
@@ -172,13 +188,13 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 			IFhirResourceDao<?> resDao = myDaoRegistry.getResourceDao(resourceType);
 			if (resDao == null) {
 				throw new InternalErrorException(
-					Msg.code(2588) + "No DAO registered for resource type: " + resourceType);
+						Msg.code(2588) + "No DAO registered for resource type: " + resourceType);
 			}
 
 			// Patch each resource of the resourceType
 			resourceIdMap.forEach((resourceId, parameters) -> {
-				MethodOutcome result =
-					resDao.patch(resourceId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, parameters, theRequestDetails);
+				MethodOutcome result = resDao.patch(
+						resourceId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, parameters, theRequestDetails);
 
 				resultParams.addParameter().setResource((Resource) result.getOperationOutcome());
 			});
@@ -188,37 +204,37 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	}
 
 	private void addReferenceToMapIfForSource(
-		IIdType theCurrentReferencedResourceId,
-		IIdType theNewReferencedResourceId,
-		IBaseResource referencingResource,
-		ResourceReferenceInfo refInfo,
-		Map<String, Map<IIdType, Parameters>> paramsMap) {
+			IIdType theCurrentReferencedResourceId,
+			IIdType theNewReferencedResourceId,
+			IBaseResource referencingResource,
+			ResourceReferenceInfo refInfo,
+			Map<String, Map<IIdType, Parameters>> paramsMap) {
 
 		if (!refInfo.getResourceReference()
-			.getReferenceElement()
-			.toUnqualifiedVersionless()
-			.getValueAsString()
-			.equals(theCurrentReferencedResourceId
+				.getReferenceElement()
 				.toUnqualifiedVersionless()
-				.getValueAsString())) {
+				.getValueAsString()
+				.equals(theCurrentReferencedResourceId
+						.toUnqualifiedVersionless()
+						.getValueAsString())) {
 			// Not a reference to the resource being replaced
 			return;
 		}
 
 		Parameters.ParametersParameterComponent paramComponent = createReplaceReferencePatchOperation(
-			referencingResource.fhirType() + "." + refInfo.getName(),
-			new Reference(
-				theNewReferencedResourceId.toUnqualifiedVersionless().getValueAsString()));
+				referencingResource.fhirType() + "." + refInfo.getName(),
+				new Reference(
+						theNewReferencedResourceId.toUnqualifiedVersionless().getValueAsString()));
 
 		paramsMap
-			.computeIfAbsent(referencingResource.fhirType(), k -> new LinkedHashMap<>())
-			.computeIfAbsent(referencingResource.getIdElement(), k -> new Parameters())
-			.addParameter(paramComponent);
+				.computeIfAbsent(referencingResource.fhirType(), k -> new LinkedHashMap<>())
+				.computeIfAbsent(referencingResource.getIdElement(), k -> new Parameters())
+				.addParameter(paramComponent);
 	}
 
 	@Nonnull
 	private Parameters.ParametersParameterComponent createReplaceReferencePatchOperation(
-		String thePath, Type theValue) {
+			String thePath, Type theValue) {
 
 		Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
 		operation.setName(PARAMETER_OPERATION);
@@ -231,5 +247,4 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private IFhirResourceDao<?> getDao(String theResourceName) {
 		return myDaoRegistry.getResourceDao(theResourceName);
 	}
-
 }
