@@ -2184,7 +2184,7 @@
 			<dependency>
 				<groupId>org.webjars.npm</groupId>
 				<artifactId>bootstrap</artifactId>
-				<version>4.5.2</version>
+				<version>5.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
