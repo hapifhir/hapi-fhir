@@ -288,10 +288,10 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 		IPrimitiveType<Boolean> theDeleteSource,
 		@OperationParam(name = ProviderConstants.OPERATION_MERGE_RESULT_PATIENT, max = 1)
 		IBaseResource theResultPatient,
-		@OperationParam(name = ProviderConstants.OPERATION_MERGE_PAGE_SIZE, typeName = "unsignedInt") IPrimitiveType<Integer> thePageSize) {
+		@OperationParam(name = ProviderConstants.OPERATION_MERGE_BATCH_SIZE, typeName = "unsignedInt") IPrimitiveType<Integer> theBatchSize) {
 
 		startRequest(theServletRequest);
-		@Nonnull Integer pageSize = defaultIfNull(IPrimitiveType.toValueOrNull(thePageSize), myStorageSettings.getInternalSynchronousSearchSize());
+		@Nonnull Integer batchSize = defaultIfNull(IPrimitiveType.toValueOrNull(theBatchSize), myStorageSettings.getMaxTransactionEntriesForWrite());
 		try {
 			MergeOperationInputParameters mergeOperationParameters = buildMergeOperationInputParameters(
 				theSourcePatientIdentifier,
@@ -301,7 +301,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 				thePreview,
 				theDeleteSource,
 				theResultPatient,
-				pageSize);
+				batchSize);
 
 			IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) getDao();
 			ResourceMergeService resourceMergeService = new ResourceMergeService(dao, myReplaceReferencesSvc);
@@ -349,8 +349,8 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 		IPrimitiveType<Boolean> thePreview,
 		IPrimitiveType<Boolean> theDeleteSource,
 		IBaseResource theResultPatient,
-		int thePageSize) {
-		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(thePageSize);
+		int theBatchSize) {
+		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(theBatchSize);
 		if (theSourcePatientIdentifier != null) {
 			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourcePatientIdentifier.stream()
 				.map(IdentifierUtil::identifierDtFromIdentifier)

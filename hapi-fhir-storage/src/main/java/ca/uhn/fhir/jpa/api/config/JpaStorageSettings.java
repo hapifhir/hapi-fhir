@@ -117,6 +117,8 @@ public class JpaStorageSettings extends StorageSettings {
 	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
 	private static final long DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD = 10000;
 
+	public static final int DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE = 512;
+
 	/**
 	 * Do not change default of {@code 0}!
 	 *
@@ -383,6 +385,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	@Beta
 	private boolean myIncludeHashIdentityForTokenSearches = false;
+	private int myMaxTransactionEntriesForWrite = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE;
 
 	/**
 	 * Constructor
@@ -2592,6 +2595,22 @@ public class JpaStorageSettings extends StorageSettings {
 
 	public void setRestDeleteByUrlResourceIdThreshold(long theRestDeleteByUrlResourceIdThreshold) {
 		myRestDeleteByUrlResourceIdThreshold = theRestDeleteByUrlResourceIdThreshold;
+	}
+
+	/**
+	 * If we are batching write operations in transactions, what should the maximum number of write operations per
+	 * transaction be?
+	 */
+	public int getMaxTransactionEntriesForWrite() {
+		return myMaxTransactionEntriesForWrite;
+	}
+
+	/**
+	 * If we are batching write operations in transactions, what should the maximum number of write operations per
+	 * transaction be?
+	 */
+	public void setMaxTransactionEntriesForWrite(int theMaxTransactionEntriesForWrite) {
+		myMaxTransactionEntriesForWrite = theMaxTransactionEntriesForWrite;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

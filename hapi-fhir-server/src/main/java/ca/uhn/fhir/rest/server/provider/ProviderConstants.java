@@ -286,7 +286,7 @@ public class ProviderConstants {
 	public static final String OPERATION_MERGE_TARGET_PATIENT = "target-patient";
 	public static final String OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER = "target-patient-identifier";
 	public static final String OPERATION_MERGE_RESULT_PATIENT = "result-patient";
-	public static final String OPERATION_MERGE_PAGE_SIZE = "page-size";
+	public static final String OPERATION_MERGE_BATCH_SIZE = "batch-size";
 	public static final String OPERATION_MERGE_PREVIEW = "preview";
 	public static final String OPERATION_MERGE_DELETE_SOURCE = "delete-source";
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_INPUT = "input";

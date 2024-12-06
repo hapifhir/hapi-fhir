@@ -20,12 +20,12 @@ public class ReplaceReferenceRequest {
 	@Nonnull
 	public final IIdType targetId;
 	@Nonnull
-	public final int pageSize;
+	public final int batchSize;
 
-	public ReplaceReferenceRequest(@Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, int thePageSize) {
-		sourceId = theSourceId;
-		targetId = theTargetId;
-		pageSize = thePageSize;
+	public ReplaceReferenceRequest(@Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, int theBatchSize) {
+		sourceId = theSourceId.toUnqualifiedVersionless();
+		targetId = theTargetId.toUnqualifiedVersionless();
+		batchSize = theBatchSize;
 	}
 
 	public void validateOrThrowInvalidParameterException() {

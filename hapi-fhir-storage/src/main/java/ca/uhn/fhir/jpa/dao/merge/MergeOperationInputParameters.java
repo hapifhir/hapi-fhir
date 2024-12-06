@@ -34,10 +34,10 @@ public abstract class MergeOperationInputParameters {
 	private boolean myPreview;
 	private boolean myDeleteSource;
 	private IBaseResource myResultResource;
-	private final int myPageSize;
+	private final int myBatchSize;
 
-	protected MergeOperationInputParameters(int thePageSize) {
-		myPageSize = thePageSize;
+	protected MergeOperationInputParameters(int theBatchSize) {
+		myBatchSize = theBatchSize;
 	}
 
 	public abstract String getSourceResourceParameterName();
@@ -114,7 +114,7 @@ public abstract class MergeOperationInputParameters {
 		this.myTargetResource = theTargetResource;
 	}
 
-	public int getPageSize() {
-		return myPageSize;
+	public int getBatchSize() {
+		return myBatchSize;
 	}
 }

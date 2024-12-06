@@ -156,11 +156,11 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 	public IBaseParameters replaceReferences(
 		@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID) String theSourceId,
 		@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID) String theTargetId,
-		@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PAGE_SIZE, typeName = "unsignedInt") IPrimitiveType<Integer> thePageSize,
+		@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PAGE_SIZE, typeName = "unsignedInt") IPrimitiveType<Integer> theBatchSize,
 		RequestDetails theRequestDetails) {
 		validateReplaceReferencesParams(theSourceId, theTargetId);
-		Integer pageSize = defaultIfNull(IPrimitiveType.toValueOrNull(thePageSize), myStorageSettings.getInternalSynchronousSearchSize());
-		ReplaceReferenceRequest replaceReferenceRequest = new ReplaceReferenceRequest(new IdDt(theSourceId), new IdDt(theTargetId), pageSize);
+		Integer batchSize = defaultIfNull(IPrimitiveType.toValueOrNull(theBatchSize), myStorageSettings.getMaxTransactionEntriesForWrite());
+		ReplaceReferenceRequest replaceReferenceRequest = new ReplaceReferenceRequest(new IdDt(theSourceId), new IdDt(theTargetId), batchSize);
 		return getReplaceReferencesSvc().replaceReferences(replaceReferenceRequest, theRequestDetails);
 	}
 
