@@ -562,7 +562,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			} else {
 				assertThat(getSelectSql(1)).contains(" GROUP BY t0.SRC_RESOURCE_ID ");
 			}
-			assertThat(getSelectSql(1)).endsWith(" ORDER BY t0.SRC_RESOURCE_ID");
+			assertThat(getSelectSql(1)).endsWith(" ORDER BY t0.SRC_RESOURCE_ID fetch first '10000' rows only");
 			assertThat(getSelectSql(2)).containsAnyOf(
 				"from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() + "','" + ids.encounterPid() + "') ",
 				"from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.encounterPid() + "','" + ids.patientPid() + "') "
@@ -920,10 +920,10 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in (('" + id0.getIdPartAsLong() + "','1'),('" + id1.getIdPartAsLong() + "','2'),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL)) and mrt1_0.RES_VER=rht1_0.RES_VER");
 		} else if (myIncludePartitionIdsInSql) {
 			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') )) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first '10000' rows only", getSelectSql(0));
-			assertThat(getSelectSql(1)).contains(" where rht1_0.RES_ID in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
+			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID) in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
 		} else {
 			assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE ((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first '10000' rows only", getSelectSql(0));
-			assertThat(getSelectSql(1)).contains(" where rht1_0.RES_ID in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
+			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID) in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
 		}
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
