@@ -85,7 +85,9 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					}
 					haveValue = true;
 					try {
-						boolean excludeDeleted = true;
+						// These get added to a query that includes a DELETED_AT IS NULL so it's
+						// not actually critical to avoid deleted IDs here
+						boolean excludeDeleted = false;
 						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
 								theRequestPartitionId, theResourceName, valueAsId.getIdPart(), excludeDeleted);
 						orPids.add(pid);
