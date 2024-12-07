@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.7.10-SNAPSHOT</version>
+	<version>7.7.11-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -115,6 +115,7 @@
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
 		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
+		<module>hapi-fhir-client-apache-http5</module>
 		<module>hapi-fhir-client-okhttp</module>
 		<module>hapi-fhir-android</module>
 		<module>hapi-fhir-cli</module>
@@ -125,6 +126,7 @@
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
 		<module>hapi-fhir-server-cds-hooks</module>
+
 	</modules>
 
 	<dependencies>
@@ -954,8 +956,13 @@
 		</developer>
 		<developer>
 			<id>iyt-trifork</id>
-			<name>Ibrahim</name>
+			<name>Ibrahim Tallouzi</name>
 			<organization>Trifork A/S</organization>
+		</developer>
+		<developer>
+			<id>MangalaEkanayake</id>
+			<name>Mangala Ekanayake</name>
+			<organization>Cambio</organization>
 		</developer>
 	</developers>
 
@@ -1029,6 +1036,8 @@
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
+		<httpclient5_version>5.4.1</httpclient5_version>
+		<httpcore5_version>5.3.1</httpcore5_version>
 		<jackson_version>2.17.1</jackson_version>
 		<jackson_databind_version>2.17.1</jackson_databind_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
@@ -1561,6 +1570,16 @@
 				<version>${commons_text_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.httpcomponents.core5</groupId>
+				<artifactId>httpcore5</artifactId>
+				<version>${httpcore5_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents.client5</groupId>
+				<artifactId>httpclient5</artifactId>
+				<version>${httpclient5_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
 				<version>${httpclient_version}</version>
@@ -1885,7 +1904,7 @@
 			<dependency>
 				<groupId>org.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>
-				<version>3.11.0</version>
+				<version>4.6.0</version>
 				<exclusions>
 					<exclusion>
 						<!-- Don't let HTMLUnit bring in Jetty 9 -->
@@ -2178,14 +2197,14 @@
 				<version>${thymeleaf-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.webjars.npm</groupId>
-				<artifactId>ace-builds</artifactId>
-				<version>1.22.0</version>
+				<groupId>org.webjars</groupId>
+				<artifactId>bootstrap</artifactId>
+				<version>5.3.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.npm</groupId>
-				<artifactId>bootstrap</artifactId>
-				<version>4.5.2</version>
+				<artifactId>ace-builds</artifactId>
+				<version>1.22.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
@@ -2235,9 +2254,9 @@
 				<version>2.29.4</version>
 			</dependency>
 			<dependency>
-				<groupId>org.webjars.npm</groupId>
+				<groupId>org.webjars</groupId>
 				<artifactId>popper.js</artifactId>
-				<version>1.16.1</version>
+				<version>2.11.7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
@@ -2608,7 +2627,7 @@
 				<plugin>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-tinder-plugin</artifactId>
-					<version>7.7.10-SNAPSHOT</version>
+					<version>7.7.11-SNAPSHOT</version>
 					<executions>
 						<execution>
 							<goals>
