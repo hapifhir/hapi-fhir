@@ -44,14 +44,14 @@ public class HapiFhirMySQLDialect extends MySQLDialect {
 		return false;
 	}
 
-//	/**
-//	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
-//	 */
-//	@Override
-//	public String getEnumTypeDeclaration(Class<? extends Enum<?>> enumType) {
-//		return null;
-//	}
-//
+	//	/**
+	//	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
+	//	 */
+	//	@Override
+	//	public String getEnumTypeDeclaration(Class<? extends Enum<?>> enumType) {
+	//		return null;
+	//	}
+	//
 	/**
 	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
 	 */
@@ -59,7 +59,4 @@ public class HapiFhirMySQLDialect extends MySQLDialect {
 	public String getEnumTypeDeclaration(String name, String[] values) {
 		return "VARCHAR(99)";
 	}
-
-
-
 }
