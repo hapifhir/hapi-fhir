@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -291,7 +292,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isGreaterThan(0);
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
-			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
+			assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, tableOpt.get().getIndexStatus());
 		});
 
 		runInTransaction(() -> {
@@ -314,7 +315,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
-			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
+			assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, tableOpt.get().getIndexStatus());
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isLessThanOrEqualTo(0);
 		});
 	}
@@ -401,7 +402,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isGreaterThan(0);
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
-			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
+			assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, tableOpt.get().getIndexStatus());
 		});
 
 		/*
@@ -424,7 +425,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
-			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
+			assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, tableOpt.get().getIndexStatus());
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isLessThanOrEqualTo(0);
 		});
 
@@ -3678,7 +3679,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	@Test
 	public void testSortByString01() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 
 		Patient p = new Patient();
 		String string = "testSortByString01";

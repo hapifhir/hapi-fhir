@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
@@ -27,6 +26,7 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +70,7 @@ public class TermConceptDaoSvc {
 
 		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
 			retVal++;
-			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+			theConcept.setIndexStatus(EntityIndexStatusEnum.INDEXED_ALL);
 			theConcept.setUpdated(new Date());
 			theConcept.flagForLegacyLobSupport(mySupportLegacyLob);
 			myConceptDao.save(theConcept);

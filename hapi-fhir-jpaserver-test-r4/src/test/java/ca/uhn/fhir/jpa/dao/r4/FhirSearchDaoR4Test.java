@@ -45,11 +45,14 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndex
 	@Autowired
 	private DataSource myDataSource;
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		SearchBuilder.setMaxPageSizeForTest(10);
+		myStorageSettings.setHibernateSearchIndexFullText(true);
 	}
+
 
 	@AfterEach
 	public void after() {

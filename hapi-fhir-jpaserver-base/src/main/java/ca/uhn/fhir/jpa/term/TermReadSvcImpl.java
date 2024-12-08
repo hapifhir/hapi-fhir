@@ -43,8 +43,6 @@ import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao;
@@ -217,12 +215,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Autowired
 	protected ITermConceptDao myConceptDao;
-
-	@Autowired
-	protected ITermConceptPropertyDao myConceptPropertyDao;
-
-	@Autowired
-	protected ITermConceptDesignationDao myConceptDesignationDao;
 
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;

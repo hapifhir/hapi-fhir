@@ -1344,6 +1344,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEmptySearch() {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Bundle responseBundle;
 
 		responseBundle = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
@@ -1484,6 +1486,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		@Test
 		public void testEverythingInstanceWithContentFilter() {
+            myStorageSettings.setHibernateSearchIndexFullText(true);
+            
 			Patient pt1 = new Patient();
 			pt1.addName().setFamily("Everything").addGiven("Arthur");
 			IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
@@ -2161,6 +2165,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testFullTextSearch() throws Exception {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(ObservationStatus.FINAL);
