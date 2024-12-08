@@ -25,12 +25,10 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -89,9 +87,6 @@ public class SearchConfig {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
-	@Autowired
-	private IResourceSearchViewDao myResourceSearchViewDao;
 
 	@Autowired
 	private FhirContext myContext;
@@ -158,10 +153,8 @@ public class SearchConfig {
 
 	@Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
 	@Scope("prototype")
-	public ISearchBuilder newSearchBuilder(
-			IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+	public ISearchBuilder newSearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		return new SearchBuilder(
-				theDao,
 				theResourceName,
 				myStorageSettings,
 				myEntityManagerFactory,
@@ -172,7 +165,6 @@ public class SearchConfig {
 				myInterceptorBroadcaster,
 				myResourceTagDao,
 				myDaoRegistry,
-				myResourceSearchViewDao,
 				myContext,
 				myIdHelperService,
 				theResourceType);

@@ -390,9 +390,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private transient ResourceHistoryTable myCurrentVersionEntity;
 
 	@Transient
-	private transient ResourceHistoryTable myNewVersionEntity;
-
-	@Transient
 	private transient boolean myVersionUpdatedInCurrentTransaction;
 
 	@Transient
@@ -842,16 +839,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * multiple {@link ResourceHistoryTable} entities will result in a constraint error.
 	 */
 	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {
-		boolean createVersionTags = theCreateVersionTags;
 
-		ResourceHistoryTable retVal = myNewVersionEntity;
-		if (retVal == null) {
-			retVal = new ResourceHistoryTable();
-			myNewVersionEntity = retVal;
-		} else {
-			// Tags should already be set
-			createVersionTags = false;
-		}
+		ResourceHistoryTable retVal = new ResourceHistoryTable();
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
@@ -861,10 +850,18 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.setPartitionId(getPartitionId());
 
 		retVal.setHasTags(isHasTags());
-		if (isHasTags() && createVersionTags) {
+		if (isHasTags() && theCreateVersionTags) {
 			for (ResourceTag next : getTags()) {
 				retVal.addTag(next);
 			}
+		}
+
+		// If we've deleted and updated the same resource in the same transaction,
+		// we need to actually create 2 distinct versions
+		if (getCurrentVersionEntity() != null
+				&& getCurrentVersionEntity().getId() != null
+				&& getVersion() == getCurrentVersionEntity().getVersion()) {
+			myVersion++;
 		}
 
 		populateHistoryEntityVersionAndDates(retVal);
@@ -997,6 +994,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * @return the resource id, or null if the resource doesn't have a client-assigned id,
 	 * and hasn't been saved to the db to get a server-assigned id yet.
 	 */
+	@Override
 	public String getFhirId() {
 		return myFhirId;
 	}

@@ -13,6 +13,7 @@ import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent
 import ca.uhn.fhir.parser.XmlParserDstu3Test.TestPatientFor327;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
+import ca.uhn.fhir.test.utilities.UuidUtils;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -648,6 +649,8 @@ public class JsonParserDstu3Test {
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
+		String conditionUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(conditionUuid);
 
 		//@formatter:off
 		assertThat(encoded).contains(
@@ -656,14 +659,14 @@ public class JsonParserDstu3Test {
 			"\"contained\": [",
 			"{",
 			"\"resourceType\": \"Condition\",",
-			"\"id\": \"1\"",
+			"\"id\": \"" + conditionUuid + "\"",
 			"}",
 			"],",
 			"\"extension\": [",
 			"{",
 			"\"url\": \"test\",",
 			"\"valueReference\": {",
-			"\"reference\": \"#1\"",
+			"\"reference\": \"#" + conditionUuid + "\"",
 			"}",
 			"}",
 			"],",
@@ -920,19 +923,21 @@ public class JsonParserDstu3Test {
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
+		String conditionUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(conditionUuid);
 
 		//@formatter:off
 		assertThat(encoded).contains(
 			"\"resourceType\": \"Patient\"",
 			"\"contained\": [",
 			"\"resourceType\": \"Condition\"",
-			"\"id\": \"1\"",
+			"\"id\": \"" + conditionUuid + "\"",
 			"\"bodySite\": [",
 			"\"text\": \"BODY SITE\"",
 			"\"extension\": [",
 			"\"url\": \"testCondition\",",
 			"\"valueReference\": {",
-			"\"reference\": \"#1\"",
+			"\"reference\": \"#" + conditionUuid + "\"",
 			"\"birthDate\": \"2016-04-14\"",
 			"}"
 		);

@@ -162,7 +162,8 @@ public enum JpaParamUtil {
 		List<RuntimeSearchParam.Component> components = theParamDef.getComponents();
 		for (RuntimeSearchParam.Component next : components) {
 			String url = next.getReference();
-			RuntimeSearchParam componentParam = theSearchParamRegistry.getActiveSearchParamByUrl(url);
+			RuntimeSearchParam componentParam = theSearchParamRegistry.getActiveSearchParamByUrl(
+					url, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 			if (componentParam == null) {
 				throw new InternalErrorException(Msg.code(499) + "Can not find SearchParameter: " + url);
 			}

@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.collect.HashMultimap;
@@ -66,18 +67,42 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 		}
 		//noinspection rawtypes
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+
+		// manipulate the transaction details to provide a fake transaction date
+		TransactionDetails details = null;
+		if (theResource.getMeta() != null && theResource.getMeta().getLastUpdated() != null) {
+			details = new TransactionDetails(theResource.getMeta().getLastUpdated());
+		} else {
+			details = new TransactionDetails();
+		}
+
 		//noinspection unchecked
-		IIdType id = dao.create(theResource, mySrd).getId().toUnqualifiedVersionless();
+		IIdType id = dao.create(theResource, null, true, mySrd, details)
+			.getId().toUnqualifiedVersionless();
 		myIds.put(theResource.fhirType(), id);
 		return id;
 	}
 
 	@Override
 	public IIdType doUpdateResource(IBaseResource theResource) {
+		// manipulate the transaction details to provdie a fake transaction date
+		TransactionDetails details = null;
+		if (theResource.getMeta() != null && theResource.getMeta().getLastUpdated() != null) {
+			details = new TransactionDetails(theResource.getMeta().getLastUpdated());
+		} else {
+			details = new TransactionDetails();
+		}
+
 		//noinspection rawtypes
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		//noinspection unchecked
-		IIdType id = dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+		IIdType id = dao.update(theResource,
+				null,
+				true,
+				false,
+				mySrd,
+				details)
+			.getId().toUnqualifiedVersionless();
 		myIds.put(theResource.fhirType(), id);
 		return id;
 	}

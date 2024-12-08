@@ -30,7 +30,7 @@ public class ValidationSupportContext {
 	private final Set<String> myCurrentlyGeneratingSnapshots = new HashSet<>();
 
 	public ValidationSupportContext(IValidationSupport theRootValidationSupport) {
-		Validate.notNull(theRootValidationSupport, "theRootValidationSupport musty not be null");
+		Validate.notNull(theRootValidationSupport, "theRootValidationSupport must not be null");
 		myRootValidationSupport = theRootValidationSupport;
 	}
 
@@ -42,7 +42,7 @@ public class ValidationSupportContext {
 		return myCurrentlyGeneratingSnapshots;
 	}
 
-	public boolean isEnabledValidationForCodingsLogicalAnd() {
-		return myRootValidationSupport.isEnabledValidationForCodingsLogicalAnd();
+	public boolean isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid() {
+		return myRootValidationSupport.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid();
 	}
 }

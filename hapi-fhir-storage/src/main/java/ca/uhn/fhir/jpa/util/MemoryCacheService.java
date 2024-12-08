@@ -19,20 +19,26 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -64,16 +70,11 @@ public class MemoryCacheService {
 			int maximumSize;
 
 			switch (next) {
-				case CONCEPT_TRANSLATION:
-				case CONCEPT_TRANSLATION_REVERSE:
-					timeoutSeconds =
-							SECONDS.convert(myStorageSettings.getTranslationCachesExpireAfterWriteInMinutes(), MINUTES);
-					maximumSize = 500000;
-					break;
+				case NAME_TO_PARTITION:
+				case ID_TO_PARTITION:
 				case PID_TO_FORCED_ID:
-				case FORCED_ID_TO_PID:
 				case MATCH_URL:
-				case RESOURCE_LOOKUP:
+				case RESOURCE_LOOKUP_BY_FORCED_ID:
 				case HISTORY_COUNT:
 				case TAG_DEFINITION:
 				case RESOURCE_CONDITIONAL_CREATE_VERSION:
@@ -130,7 +131,9 @@ public class MemoryCacheService {
 	}
 
 	public <K, V> void put(CacheEnum theCache, K theKey, V theValue) {
-		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass())
+				: "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache "
+						+ theCache;
 		doPut(theCache, theKey, theValue);
 	}
 
@@ -150,6 +153,9 @@ public class MemoryCacheService {
 	 * in order to avoid cache poisoning.
 	 */
 	public <K, V> void putAfterCommit(CacheEnum theCache, K theKey, V theValue) {
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass())
+				: "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache "
+						+ theCache;
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
@@ -192,23 +198,18 @@ public class MemoryCacheService {
 
 	public enum CacheEnum {
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
-		RESOURCE_LOOKUP(String.class),
-		FORCED_ID_TO_PID(String.class),
+		/**
+		 * Key type: {@link ForcedIdCacheKey}
+		 * Value type: {@literal JpaResourceLookup}
+		 */
+		RESOURCE_LOOKUP_BY_FORCED_ID(ForcedIdCacheKey.class),
 		FHIRPATH_EXPRESSION(String.class),
 		/**
 		 * Key type: {@literal Long}
 		 * Value type: {@literal Optional<String>}
 		 */
 		PID_TO_FORCED_ID(Long.class),
-		/**
-		 * TODO: JA this is duplicate with the CachingValidationSupport cache.
-		 * A better solution would be to drop this cache for this item, and to
-		 * create a new CachingValidationSupport implementation which uses
-		 * the MemoryCacheService for all of its caches.
-		 */
-		CONCEPT_TRANSLATION(TranslationQuery.class),
 		MATCH_URL(String.class),
-		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class),
 		RESOURCE_CONDITIONAL_CREATE_VERSION(Long.class),
 		HISTORY_COUNT(HistoryCountKey.class),
 		NAME_TO_PARTITION(String.class),
@@ -315,6 +316,63 @@ public class MemoryCacheService {
 		@Override
 		public int hashCode() {
 			return myHashCode;
+		}
+	}
+
+	public static class ForcedIdCacheKey {
+
+		private final String myResourceType;
+		private final String myResourceId;
+		private final RequestPartitionId myRequestPartitionId;
+		private final int myHashCode;
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+					.append("resType", myResourceType)
+					.append("resId", myResourceId)
+					.append("partId", myRequestPartitionId)
+					.toString();
+		}
+
+		public ForcedIdCacheKey(
+				@Nullable String theResourceType,
+				@Nonnull String theResourceId,
+				@Nonnull RequestPartitionId theRequestPartitionId) {
+			myResourceType = theResourceType;
+			myResourceId = theResourceId;
+			myRequestPartitionId = theRequestPartitionId;
+			myHashCode = Objects.hash(myResourceType, myResourceId, myRequestPartitionId);
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) {
+				return true;
+			}
+			if (!(theO instanceof ForcedIdCacheKey)) {
+				return false;
+			}
+			ForcedIdCacheKey that = (ForcedIdCacheKey) theO;
+			return Objects.equals(myResourceType, that.myResourceType)
+					&& Objects.equals(myResourceId, that.myResourceId)
+					&& Objects.equals(myRequestPartitionId, that.myRequestPartitionId);
+		}
+
+		@Override
+		public int hashCode() {
+			return myHashCode;
+		}
+
+		/**
+		 * Creates and returns a new unqualified versionless IIdType instance
+		 */
+		public IIdType toIdType(FhirContext theFhirCtx) {
+			return theFhirCtx.getVersion().newIdType(myResourceType, myResourceId);
+		}
+
+		public IIdType toIdTypeWithoutResourceType(FhirContext theFhirCtx) {
+			return theFhirCtx.getVersion().newIdType(null, myResourceId);
 		}
 	}
 }

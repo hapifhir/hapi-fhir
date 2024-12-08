@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -17,7 +15,6 @@ import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -38,10 +35,12 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
@@ -51,7 +50,6 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
-
 	private IIdType myExtensionalVsId;
 
 	@AfterEach
@@ -60,7 +58,6 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		myStorageSettings.setMaximumExpansionSize(new JpaStorageSettings().getMaximumExpansionSize());
 		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 	}
-
 
 	@BeforeEach
 	@Transactional
@@ -116,7 +113,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for 'http://acme.org#11378-7' for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
+		assertThat(result.getMessage()).contains("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for 'http://acme.org#11378-7' for in-memory expansion of ValueSet 'http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2'");
 	}
 
 	@Test
@@ -251,7 +248,6 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	}
 
-
 	/**
 	 * See #4305
 	 */
@@ -267,7 +263,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		// Update valueset
 		vs.setName("Hello");
 		assertEquals("2", myValueSetDao.update(vs, mySrd).getId().getVersionIdPart());
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
 			assertTrue(resource.isPresent());
 		});
@@ -287,12 +283,11 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		myValueSetDao.expunge(id, new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), mySrd);
 
 		// Verify expunged
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
 			assertFalse(resource.isPresent());
 		});
 	}
-
 
 	@Test
 	public void testExpandByValueSet_ExceedsMaxSize() {
@@ -336,12 +331,12 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		logAllValueSets();
-		myCachingValidationSupport.invalidateCaches();
+		myValidationSupport.invalidateCaches();
 
 		// Validate code
 
 		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
-		ConceptValidationOptions options= new ConceptValidationOptions();
+		ConceptValidationOptions options = new ConceptValidationOptions();
 		IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "CODE4", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
@@ -353,9 +348,6 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		String expansionMessage = myValueSetTestUtil.extractExpansionMessage(outcomeVs);
 		assertThat(expansionMessage).startsWith("ValueSet was expanded using an expansion that was pre-calculated");
 	}
-
-	@Autowired
-	protected CachingValidationSupport myCachingValidationSupport;
 
 	@Test
 	public void testValidateCodeAgainstBuiltInValueSetAndCodeSystemWithValidCode() {

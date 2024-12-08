@@ -38,6 +38,8 @@ public class TestElasticsearchContainerHelper {
 			.withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
 			// turn off security warnings
 			.withEnv("xpack.security.enabled", "false")
+			// turn off machine learning (we don't need it in tests anyways)
+			.withEnv("xpack.ml.enabled", "false")
 			.withStartupTimeout(Duration.of(300, SECONDS));
 	}
 

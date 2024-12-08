@@ -26,7 +26,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -95,7 +94,6 @@ public class SearchTask implements Callable<Void> {
 	protected final FhirContext myContext;
 	protected final ISearchResultCacheSvc mySearchResultCacheSvc;
 	private final SearchParameterMap myParams;
-	private final IDao myCallingDao;
 	private final String myResourceType;
 	private final ArrayList<JpaPid> mySyncedPids = new ArrayList<>();
 	private final CountDownLatch myInitialCollectionLatch = new CountDownLatch(1);
@@ -113,6 +111,7 @@ public class SearchTask implements Callable<Void> {
 	private final JpaStorageSettings myStorageSettings;
 	private final ISearchCacheSvc mySearchCacheSvc;
 	private final IPagingProvider myPagingProvider;
+	private final IInterceptorBroadcaster myCompositeBroadcaster;
 	private Search mySearch;
 	private boolean myAbortRequested;
 	private int myCountSavedTotal = 0;
@@ -149,7 +148,6 @@ public class SearchTask implements Callable<Void> {
 		// values
 		myOnRemove = theCreationParams.OnRemove;
 		mySearch = theCreationParams.Search;
-		myCallingDao = theCreationParams.CallingDao;
 		myParams = theCreationParams.Params;
 		myResourceType = theCreationParams.ResourceType;
 		myRequest = theCreationParams.Request;
@@ -158,9 +156,11 @@ public class SearchTask implements Callable<Void> {
 		myLoadingThrottleForUnitTests = theCreationParams.getLoadingThrottleForUnitTests();
 
 		mySearchRuntimeDetails = new SearchRuntimeDetails(myRequest, mySearch.getUuid());
-		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myCallingDao.getContext()));
+		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myContext));
 		myRequestPartitionId = theCreationParams.RequestPartitionId;
 		myParentTransaction = ElasticApm.currentTransaction();
+		myCompositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequest);
 	}
 
 	protected RequestPartitionId getRequestPartitionId() {
@@ -203,7 +203,7 @@ public class SearchTask implements Callable<Void> {
 	private ISearchBuilder newSearchBuilder() {
 		Class<? extends IBaseResource> resourceTypeClass =
 				myContext.getResourceDefinition(myResourceType).getImplementingClass();
-		return mySearchBuilderFactory.newSearchBuilder(myCallingDao, myResourceType, resourceTypeClass);
+		return mySearchBuilderFactory.newSearchBuilder(myResourceType, resourceTypeClass);
 	}
 
 	@Nonnull
@@ -280,7 +280,7 @@ public class SearchTask implements Callable<Void> {
 				.withRequest(myRequest)
 				.withRequestPartitionId(myRequestPartitionId)
 				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> doSaveSearch());
+				.execute(this::doSaveSearch);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -307,8 +307,7 @@ public class SearchTask implements Callable<Void> {
 								.add(RequestDetails.class, mySearchRuntimeDetails.getRequestDetails())
 								.addIfMatchesType(
 										ServletRequestDetails.class, mySearchRuntimeDetails.getRequestDetails());
-						CompositeInterceptorBroadcaster.doCallHooks(
-								myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+						myCompositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 						for (int i = unsyncedPids.size() - 1; i >= 0; i--) {
 							if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -454,15 +453,13 @@ public class SearchTask implements Callable<Void> {
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, params);
+				myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, params);
 			} else {
 				HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, params);
+				myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, params);
 			}
 
 			ourLog.trace(
@@ -516,8 +513,7 @@ public class SearchTask implements Callable<Void> {
 					.add(RequestDetails.class, myRequest)
 					.addIfMatchesType(ServletRequestDetails.class, myRequest)
 					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FAILED, params);
+			myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_FAILED, params);
 
 			saveSearch();
 			span.captureException(t);
@@ -597,6 +593,14 @@ public class SearchTask implements Callable<Void> {
 
 			if (next == -1) {
 				sb.setMaxResultsToFetch(null);
+				/*
+				 * If we're past the last prefetch threshold then
+				 * we're potentially fetiching unlimited amounts of data.
+				 * We'll move responsibility for deduplication to the database in this case
+				 * so that we don't run the risk of blowing out the memory
+				 * in the app server
+				 */
+				sb.setDeduplicateInDatabase(true);
 			} else {
 				// we want at least 1 more than our requested amount
 				// so we know that there are other results

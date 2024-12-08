@@ -44,6 +44,8 @@ stages:
                      module: hapi-fhir-cli/hapi-fhir-cli-api
                   -  name: hapi_fhir_client
                      module: hapi-fhir-client
+                  -  name: hapi_fhir_client_apache_http5
+                     module: hapi-fhir-client-apache-http5
                   -  name: hapi_fhir_client_okhttp
                      module: hapi-fhir-client-okhttp
                   -  name: hapi_fhir_converter

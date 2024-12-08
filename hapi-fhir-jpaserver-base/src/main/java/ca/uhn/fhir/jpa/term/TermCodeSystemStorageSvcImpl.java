@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -382,8 +383,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Note that this creates the TermCodeSystem and TermCodeSystemVersion entities if needed
 		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource, theRequest);
 
-		JpaPid codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(
-				RequestPartitionId.allPartitions(), csId.getResourceType(), csId.getIdPart());
+		JpaPid codeSystemResourcePid = myIdHelperService.resolveResourceIdentityPid(
+				RequestPartitionId.allPartitions(),
+				csId.getResourceType(),
+				csId.getIdPart(),
+				ResolveIdentityMode.includeDeleted().cacheOk());
 		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getId());
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());

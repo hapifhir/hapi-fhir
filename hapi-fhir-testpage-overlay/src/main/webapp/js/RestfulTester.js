@@ -125,7 +125,7 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 		$('#search-param-rowopts-' + theContainerRowNum).append(
          $('<div />', { 'class':'input-group'}).append(
             $('<div />', {'class':'input-group-prepend'}).append(
-                  $('<button />', {'class':'btn btn-default dropdown-toggle input-group-text', 'data-toggle':'dropdown'}).append(
+                  $('<button />', {'class':'btn btn-default dropdown-toggle input-group-text', 'data-bs-toggle':'dropdown'}).append(
                         tokenQualifierLabel,
                         $('<span class="caret" style="margin-left: 5px;"></span>')
                      ),
@@ -177,7 +177,7 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 		$('#search-param-rowopts-' + theContainerRowNum).append(
 			$('<div />', { 'class': 'input-group' }).append(
 				$('<div />', {'class':'input-group-prepend btn-group'}).append(
-					$('<button />', {'class':'btn btn-default dropdown-toggle input-group-text', 'data-toggle':'dropdown'}).append(
+					$('<button />', {'class':'btn btn-default dropdown-toggle input-group-text', 'data-bs-toggle':'dropdown'}).append(
 						matchesLabel,
 						$('<span class="caret" style="margin-left: 5px;"></span>')
 					),
@@ -320,7 +320,7 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
       $('#search-param-rowopts-' + theContainerRowNum).append(
          $('<div />', {'class': 'input-group'}).append(
             $('<div />', {'class': 'input-group-prepend btn-group'}).append(
-               $('<button />', {'class': 'btn btn-default dropdown-toggle input-group-text', 'data-toggle': 'dropdown'}).append(
+               $('<button />', {'class': 'btn btn-default dropdown-toggle input-group-text', 'data-bs-toggle': 'dropdown'}).append(
                   matchesLabel,
                   $('<span class="caret" style="margin-left: 5px;"></span>')
                ),
@@ -355,9 +355,9 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
 
    var input;
 	if (/date$/.test(theSearchParamName)) {
-		input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DD' });
+		input = $('<div />', { 'class':'input-group date', 'data-bs-toggledate-format':'YYYY-MM-DD' });
 	} else {
-		input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DDTHH:mm:ss' });
+		input = $('<div />', { 'class':'input-group date', 'data-bs-toggledate-format':'YYYY-MM-DDTHH:mm:ss' });
 	}
 	var qualifierDiv = $('<div />', {'class':'input-group-prepend'});
 	
@@ -378,7 +378,7 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
     // overrides all addon buttons while it inits..
     qualifierDiv.addClass('input-group-btn');
     var qualifierTooltip = "Set a qualifier and a date to specify a boundary date. Set two qualifiers and dates to specify a range.";
-    var qualifierBtn = $('<button />', {type:'button', 'class':'btn btn-default dropdown-toggle input-group-text', 'data-toggle':'dropdown', 'data-placement':'top', 'title':qualifierTooltip}).text('eq');
+    var qualifierBtn = $('<button />', {type:'button', 'class':'btn btn-default dropdown-toggle input-group-text', 'data-bs-toggle':'dropdown', 'data-bs-toggleplacement':'top', 'title':qualifierTooltip}).text('eq');
     qualifierBtn.tooltip({
         'selector': '',
         'placement': 'top',
@@ -427,7 +427,7 @@ function addSearchControlQuantity(theSearchParamName, theContainerRowNum, theRow
 	);
 
     var qualifierTooltip = "You can optionally use a qualifier to specify a range.";
-    var qualifierBtn = $('<button />', {type:'button', 'class':'btn btn-default dropdown-toggle input-group-text', 'data-toggle':'dropdown', 'data-placement':'top', 'title':qualifierTooltip}).text('=');
+    var qualifierBtn = $('<button />', {type:'button', 'class':'btn btn-default dropdown-toggle input-group-text', 'data-bs-toggle':'dropdown', 'data-bs-toggleplacement':'top', 'title':qualifierTooltip}).text('=');
     qualifierBtn.tooltip({
         'selector': '',
         'placement': 'left',

@@ -67,7 +67,8 @@ public class MdmSearchParamSvc {
 	public List<String> getValueFromResourceForSearchParam(IBaseResource theResource, String theSearchParam) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		String searchParam = SearchParameterUtil.stripModifier(theSearchParam);
-		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(resourceType, searchParam);
+		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(
+				resourceType, searchParam, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		return mySearchParamExtractorService.extractParamValuesAsStrings(activeSearchParam, theResource);
 	}
 
@@ -91,7 +92,7 @@ public class MdmSearchParamSvc {
 
 	public ISearchBuilder generateSearchBuilderForType(String theSourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theSourceType);
-		return mySearchBuilderFactory.newSearchBuilder(resourceDao, theSourceType, resourceDao.getResourceType());
+		return mySearchBuilderFactory.newSearchBuilder(theSourceType, resourceDao.getResourceType());
 	}
 
 	/**

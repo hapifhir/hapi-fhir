@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.DateSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import org.hl7.fhir.r4.model.Observation;
@@ -51,10 +53,10 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		extractedParams.myCompositeParams.add(composite);
 
 		// run: now translate to HSearch
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Observation");
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 			myJpaStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
-		ExtendedHSearchIndexData indexData = extractor.extract(new Observation(), extractedParams);
+		ExtendedHSearchIndexData indexData = extractor.extract(new Observation(), new ResourceTable(), extractedParams);
 
 		// validate
 		Set<CompositeSearchIndexData> spIndexData = indexData.getSearchParamComposites().get("component-code-value-concept");
@@ -74,10 +76,10 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		searchParams.myQuantityParams.add(searchParamQuantity);
 
 		// run: now translate to HSearch
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient");
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 			myJpaStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
-		ExtendedHSearchIndexData indexData = extractor.extract(new SearchParameter(), searchParams);
+		ExtendedHSearchIndexData indexData = extractor.extract(new SearchParameter(), new ResourceTable(), searchParams);
 
 		// validate
 		Set<DateSearchIndexData> dIndexData = indexData.getDateIndexData().get("Date");

@@ -356,7 +356,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				String componentSpRef = component.getReference();
 				String expression = component.getExpression();
 
-				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(componentSpRef);
+				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(
+						componentSpRef, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 				Validate.notNull(
 						componentSp,
 						"Misconfigured SP %s - failed to load component %s",
@@ -426,7 +427,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 
 		private boolean isNotExtractableCompositeComponent(RuntimeSearchParam.Component c) {
-			RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParamByUrl(c.getReference());
+			RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParamByUrl(
+					c.getReference(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 			return // Does the sub-param link work?
 			componentSearchParam == null
 					||
@@ -450,8 +452,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	public SearchParamSet<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(
 			String theResourceType, ResourceIndexedSearchParams theParams) {
 		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
-		List<RuntimeSearchParam> runtimeComboUniqueParams =
-				mySearchParamRegistry.getActiveComboSearchParams(theResourceType, ComboSearchParamType.UNIQUE);
+		List<RuntimeSearchParam> runtimeComboUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(
+				theResourceType, ComboSearchParamType.UNIQUE, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboUniqueParams) {
 			Set<ResourceIndexedComboStringUnique> comboUniqueParams =
@@ -485,8 +487,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	public SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(
 			String theResourceType, ResourceIndexedSearchParams theParams) {
 		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
-		List<RuntimeSearchParam> runtimeComboNonUniqueParams =
-				mySearchParamRegistry.getActiveComboSearchParams(theResourceType, ComboSearchParamType.NON_UNIQUE);
+		List<RuntimeSearchParam> runtimeComboNonUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(
+				theResourceType,
+				ComboSearchParamType.NON_UNIQUE,
+				ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboNonUniqueParams) {
 			Set<ResourceIndexedComboTokenNonUnique> comboNonUniqueParams =
@@ -576,7 +580,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 					String value = nextParamAsClientParam.getValueAsQueryToken(myContext);
 
-					RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceType, key);
+					RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
+							theResourceType, key, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 					if (theParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE
 							&& param != null
 							&& param.getParamType() == RestSearchParameterTypeEnum.STRING) {
@@ -990,8 +995,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@VisibleForTesting
 	Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		Collection<RuntimeSearchParam> retVal =
-				mySearchParamRegistry.getActiveSearchParams(def.getName()).values();
+		Collection<RuntimeSearchParam> retVal = mySearchParamRegistry
+				.getActiveSearchParams(def.getName(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX)
+				.values();
 		List<RuntimeSearchParam> defaultList = Collections.emptyList();
 		retVal = ObjectUtils.defaultIfNull(retVal, defaultList);
 		return retVal;

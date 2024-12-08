@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 
-import java.util.Iterator;
 import java.util.List;
 
 public class SearchQueryExecutors {
@@ -46,7 +45,7 @@ public class SearchQueryExecutors {
 			}
 
 			@Override
-			public Long next() {
+			public JpaPid next() {
 				myCount += 1;
 				return theExecutor.next();
 			}
@@ -54,37 +53,7 @@ public class SearchQueryExecutors {
 	}
 
 	@Nonnull
-	public static ISearchQueryExecutor from(List<Long> rawPids) {
+	public static ISearchQueryExecutor from(List<JpaPid> rawPids) {
 		return new ResolvedSearchQueryExecutor(rawPids);
-	}
-
-	public static ISearchQueryExecutor from(Iterator<JpaPid> theIterator) {
-		return new JpaPidQueryAdaptor(theIterator);
-	}
-
-	public static ISearchQueryExecutor from(Iterable<JpaPid> theIterable) {
-		return new JpaPidQueryAdaptor(theIterable.iterator());
-	}
-
-	static class JpaPidQueryAdaptor implements ISearchQueryExecutor {
-		final Iterator<JpaPid> myIterator;
-
-		JpaPidQueryAdaptor(Iterator<JpaPid> theIterator) {
-			myIterator = theIterator;
-		}
-
-		@Override
-		public void close() {}
-
-		@Override
-		public boolean hasNext() {
-			return myIterator.hasNext();
-		}
-
-		@Override
-		public Long next() {
-			JpaPid next = myIterator.next();
-			return next == null ? null : next.getId();
-		}
 	}
 }

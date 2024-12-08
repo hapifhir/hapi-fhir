@@ -668,7 +668,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 	protected void parseFhirContext(CommandLine theCommandLine) throws ParseException {
 		FhirVersionEnum versionEnum = parseFhirVersion(theCommandLine);
-		myFhirCtx = versionEnum.newContext();
+		myFhirCtx = FhirContext.forVersion(versionEnum);
 	}
 
 	public abstract void run(CommandLine theCommandLine) throws ParseException, ExecutionException;

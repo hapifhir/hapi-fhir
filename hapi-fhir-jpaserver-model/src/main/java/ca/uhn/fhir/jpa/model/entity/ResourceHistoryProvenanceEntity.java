@@ -36,6 +36,16 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGTH;
 
+/**
+ * This entity is deprecated - It stores the source URI and Request ID
+ * fields so that they can be indexed and searched discretely. In
+ * HAPI FHIR 6.8.0 we added equivalent columns to {@link ResourceHistoryTable}
+ * and started populating both those columns and the ones in this table.
+ * As of HAPI FHIR 8.0.0 we are no longer using this table unless
+ * the "AccessMetaSourceInformationFromProvenanceTable" on JpaStorageSettings
+ * is enabled (it's disabled by default). In the future we will remove
+ * this table entirely.
+ */
 @Table(
 		name = "HFJ_RES_VER_PROV",
 		indexes = {

@@ -188,8 +188,9 @@ public class JpaStorageSettings extends StorageSettings {
 
 	// start with a tiny number so our first page always loads quickly.
 	// If they fetch the second page, fetch more.
-	// Use prime sizes to avoid empty next links.
-	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(13, 503, 2003, -1);
+	// we'll only fetch (by default) up to 1 million records, because after that, deduplication in local memory is
+	// prohibitive
+	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(13, 503, 2003, 1000003, -1);
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
@@ -376,6 +377,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @since 7.2.0
 	 */
 	private boolean myWriteToLegacyLobColumns = false;
+	/**
+	 * @since 8.0.0
+	 */
+	private boolean myAccessMetaSourceInformationFromProvenanceTable = false;
 
 	/**
 	 * If this is enabled (default is {@literal false}), searches on token indexes will
@@ -1773,6 +1778,37 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
+	 * If set to <code>true</code> (default is false), the system will read
+	 * <code>Resource.meta.source</code> values from the <code>HFJ_RES_VER_PROV</code>
+	 * table. This table was replaced by dedicated columns in the <code>HFJ_RES_VER</code>
+	 * table as of HAPI FHIR 6.8.0 (Smile CDR 2023.08.R01) and as of that version
+	 * there is no need to read from the dedicated table. However, if old data still
+	 * remains and has not been migrated (using a $reindex operation) then you can
+	 * enable this setting in order to read from the old table.
+	 *
+	 * @since 8.0.0
+	 */
+	public boolean isAccessMetaSourceInformationFromProvenanceTable() {
+		return myAccessMetaSourceInformationFromProvenanceTable;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the system will read
+	 * <code>Resource.meta.source</code> values from the <code>HFJ_RES_VER_PROV</code>
+	 * table. This table was replaced by dedicated columns in the <code>HFJ_RES_VER</code>
+	 * table as of HAPI FHIR 6.8.0 (Smile CDR 2023.08.R01) and as of that version
+	 * there is no need to read from the dedicated table. However, if old data still
+	 * remains and has not been migrated (using a $reindex operation) then you can
+	 * enable this setting in order to read from the old table.
+	 *
+	 * @since 8.0.0
+	 */
+	public void setAccessMetaSourceInformationFromProvenanceTable(
+			boolean theAccessMetaSourceInformationFromProvenanceTable) {
+		myAccessMetaSourceInformationFromProvenanceTable = theAccessMetaSourceInformationFromProvenanceTable;
+	}
+
+	/**
 	 * <p>
 	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
 	 * optimization of the $expand operation on large ValueSets.
@@ -1894,6 +1930,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * deletion can be skipped, which improves performance. This is particularly helpful when large
 	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
 	 * search performance.
+	 * <p>
+	 * If deletes are disabled, it is also not possible to un-delete a previously deleted
+	 * resource.
+	 * </p>
 	 *
 	 * @since 5.0.0
 	 */
@@ -1907,6 +1947,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * deletion can be skipped, which improves performance. This is particularly helpful when large
 	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
 	 * search performance.
+	 * <p>
+	 * If deletes are disabled, it is also not possible to un-delete a previously deleted
+	 * resource.
+	 * </p>
 	 *
 	 * @since 5.0.0
 	 */

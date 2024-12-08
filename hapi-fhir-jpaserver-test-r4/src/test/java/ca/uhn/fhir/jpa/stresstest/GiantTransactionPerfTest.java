@@ -292,11 +292,11 @@ public class GiantTransactionPerfTest {
 
 		ourLog.info("Merges:\n * " + myEntityManager.myMergeCount.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 
-		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactly("ResourceTable");
+		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactly("ResourceTable", "ResourceHistoryTable");
 		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactlyInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken");
 		assertEquals(1, myEntityManager.myFlushCount);
 		assertEquals(1, myResourceVersionSvc.myGetVersionMap);
-		assertEquals(1, myResourceHistoryTableDao.mySaveCount);
+		assertEquals(0, myResourceHistoryTableDao.mySaveCount);
 	}
 
 	@Test
@@ -360,7 +360,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public ResourceHistoryTable findForIdAndVersionAndFetchProvenance(long theId, long theVersion) {
+		public ResourceHistoryTable findForIdAndVersion(long theId, long theVersion) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -370,7 +370,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(Pageable thePage, Long theId, Long theDontWantVersion) {
+		public Slice<ResourceHistoryTable> findAllVersionsExceptSpecificForResourcePid(Pageable thePage, Long theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -401,6 +401,11 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public void updateNonInlinedContents(byte[] theText, long thePid) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(List<Long> theVersionlessPids) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -632,12 +637,12 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public FlushModeType getFlushMode() {
-			throw new UnsupportedOperationException();
+			return FlushModeType.AUTO;
 		}
 
 		@Override
 		public void setFlushMode(FlushModeType flushMode) {
-			throw new UnsupportedOperationException();
+			// ignore
 		}
 
 		@Override

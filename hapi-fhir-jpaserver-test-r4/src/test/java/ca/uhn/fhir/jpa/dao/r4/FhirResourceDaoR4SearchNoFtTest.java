@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
-import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -1729,65 +1728,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add(PARAM_ID, new TokenParam(id1));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params))).containsExactly(id1);
 
-	}
-
-	@Test
-	public void testSearchByIdParam_QueryIsMinimal() {
-		// With only an _id parameter
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			params.add(PARAM_ID, new StringParam("DiagnosticReport/123"));
-			myCaptureQueriesListener.clear();
-			myDiagnosticReportDao.search(params).size();
-			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-			assertThat(selectQueries).hasSize(1);
-
-			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
-			ourLog.info("SQL Query:\n{}", sqlQuery);
-			assertThat(countMatches(sqlQuery, "res_id = '123'")).as(sqlQuery).isEqualTo(1);
-			assertThat(countMatches(sqlQuery, "join")).as(sqlQuery).isEqualTo(0);
-			assertThat(countMatches(sqlQuery, "res_type = 'diagnosticreport'")).as(sqlQuery).isEqualTo(1);
-			assertThat(countMatches(sqlQuery, "res_deleted_at is null")).as(sqlQuery).isEqualTo(1);
-		}
-		// With an _id parameter and a standard search param
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			params.add(PARAM_ID, new StringParam("DiagnosticReport/123"));
-			params.add("code", new TokenParam("foo", "bar"));
-			myCaptureQueriesListener.clear();
-			myDiagnosticReportDao.search(params).size();
-			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-			assertThat(selectQueries).hasSize(1);
-
-			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
-			ourLog.info("SQL Query:\n{}", sqlQuery);
-			assertThat(countMatches(sqlQuery, "res_id = '123'")).as(sqlQuery).isEqualTo(1);
-			assertThat(countMatches(sqlQuery, "join")).as(sqlQuery).isEqualTo(1);
-			assertThat(countMatches(sqlQuery, "hash_sys_and_value")).as(sqlQuery).isEqualTo(1);
-			assertThat(countMatches(sqlQuery, "res_type = 'diagnosticreport")).as(sqlQuery).isEqualTo(0); // could be 0
-			assertThat(countMatches(sqlQuery, "res_deleted_at")).as(sqlQuery).isEqualTo(0); // could be 0
-		}
-	}
-
-	@Test
-	public void testSearchByIdParamAndOtherSearchParam_QueryIsMinimal() {
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(PARAM_ID, new StringParam("DiagnosticReport/123"));
-		params.add(PARAM_ID, new StringParam("DiagnosticReport/123"));
-		myCaptureQueriesListener.clear();
-		myDiagnosticReportDao.search(params).size();
-		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-		assertThat(selectQueries).hasSize(1);
-
-		String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
-		ourLog.info("SQL Query:\n{}", sqlQuery);
-		assertThat(countMatches(sqlQuery, "res_id = '123'")).as(sqlQuery).isEqualTo(1);
-		assertThat(countMatches(sqlQuery, "join")).as(sqlQuery).isEqualTo(0);
-		assertThat(countMatches(sqlQuery, "res_type = 'diagnosticreport'")).as(sqlQuery).isEqualTo(1);
-		assertThat(countMatches(sqlQuery, "res_deleted_at is null")).as(sqlQuery).isEqualTo(1);
 	}
 
 	@Test

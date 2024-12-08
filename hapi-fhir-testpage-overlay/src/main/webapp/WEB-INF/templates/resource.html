@@ -51,21 +51,21 @@
 						<ul class="nav nav-tabs" role="tablist" id="resource-nav-tabs" style="margin-top: 20px; padding-left: 5px;">
 							<!-- Search Tab -->
 							<li th:if="${haveSearchParams}" class="nav-item">
-								<a href="#tab-search" role="tab" data-toggle="tab" class="nav-link" id="search-tab">Search</a>
+								<a href="#tab-search" role="tab" data-bs-toggle="tab" class="nav-link" id="search-tab">Search</a>
 							</li>
 							<li th:if="${!haveSearchParams}" class="disabled nav-item">
 								<a href="#tab-search" role="tab" class="nav-link disabled">Search</a>
 							</li>
 							<!-- Queries Tab -->
 							<li th:if="${!queries.empty}" class="nav-item">
-								<a href="#tab-queries" role="tab" data-toggle="tab" class="nav-link" id="queries-tab">Queries</a>
+								<a href="#tab-queries" role="tab" data-bs-toggle="tab" class="nav-link" id="queries-tab">Queries</a>
 							</li>
 							<li th:if="${queries.empty}" class="disabled nav-item">
 								<a href="#tab-queries" role="tab" class="nav-link disabled">Queries</a>
 							</li>
 							<!-- CRUD Tab -->
 							<li th:class="(${!haveSearchParams} and ${queries.empty}) ? 'active'" class="nav-item">
-								<a href="#tab-otheractions" role="tab" data-toggle="tab" name="tabCrudOperationsLink" class="nav-link" id="crud-tab">CRUD Operations</a>
+								<a href="#tab-otheractions" role="tab" data-bs-toggle="tab" name="tabCrudOperationsLink" class="nav-link" id="crud-tab">CRUD Operations</a>
 							</li>
 						</ul>
 						<script type="text/javascript">
@@ -74,7 +74,7 @@
 									if (!$('#resource-nav-tabs li:eq('+i+')').hasClass('disabled')) {
 										$('#resource-nav-tabs li:eq('+i+') a').tab('show');
 										break;
-									}									
+									}
 								}
 							});
 						</script>
@@ -85,7 +85,7 @@
 							<!-- *************************************************** -->
 							<!-- Search Tab -->
 							<!-- *************************************************** -->
-							<div class="tab-pane active" id="tab-search" aria-labelledby="search-tab">
+							<div class="tab-pane" id="tab-search" aria-labelledby="search-tab">
 	
 								<!-- Search contents -->
 								<div class="container-fluid">
@@ -95,7 +95,7 @@
                                     <i class="fab fa-searchengin"></i>
 												Search
 											</button>
-										</div>												
+										</div>
 									</div>
 									<script type="text/javascript">
 										$('#search-btn').click(function() {
@@ -154,9 +154,9 @@
 										<div class="btn-group">
 											<input type="hidden" id="sort_by" />
 											<button type="button" class="btn btn-info" id="search_sort_button">Default</button>
-											<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+											<button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown">
 												<span class="caret"></span>
-												<span class="sr-only">Default Sort</span>
+												<span class="visually-hidden">Default Sort</span>
 											</button>
 											<ul class="dropdown-menu" role="menu">
 												<li><a href="javascript:updateSort('');">Default Sort</a></li>
@@ -164,14 +164,14 @@
 												<li th:each="nextParam : ${sortParams}"><a th:href="'javascript:updateSort(\'' + ${nextParam} + '\');'" th:text="${nextParam}"></a></li>
 											</ul>
 										</div>
-										&nbsp;&nbsp;&nbsp;
+
 										<label>Direction</label>
 										<div class="btn-group">
 											<input type="hidden" id="sort_direction" />
 											<button type="button" class="btn btn-info" id="search_sort_direction_button">Default</button>
-											<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+											<button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown">
 												<span class="caret"></span>
-												<span class="sr-only">Default Sort</span>
+												<span class="visually-hidden">Default Sort</span>
 											</button>
 											<ul class="dropdown-menu" role="menu">
 												<li><a href="javascript:updateSortDirection('');">Default</a></li>
@@ -327,7 +327,7 @@
 								        </div>											
 								        <div class='col-sm-5'>
 								            <div class="form-group">
-								                <div class='input-group date' id='resource-history-datetime' data-date-format="YYYY-MM-DDTHH:mm:ss">
+								                <div class='input-group date' id='resource-history-datetime' data-bs-toggledate-format="YYYY-MM-DDTHH:mm:ss">
                                            <div class="input-group-prepend">
                                                <span class="input-group-text">
       								                    Since
@@ -360,8 +360,7 @@
 								                	format: 'YYYY-MM-DDTHH:mm:ssZ'
 								                });
 								            });
-								            $('#resource-history-btn').click(
-												function() {
+								            $('#resource-history-btn').click(function() {
 													var btn = $(this);
 													handleActionButtonClick($(this));
 													var limit = $('#resource-history-limit').val();
@@ -371,7 +370,7 @@
 													var id = $('#resource-history-id').val();
 													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-history-id', value: id }));
 													$("#outerForm").attr("action", "history-type").submit();
-												});								            
+												});
 								        </script>								        
 								    </div>
 									<br clear="all"/>
@@ -399,7 +398,7 @@
                                                   <span class="loadingStar">*</span>
                                                </span>
 								                    </div>
-								                    <input type="text" class="form-control rounded-right" id="resource-delete-id"/>
+								                    <input type="text" class="form-control rounded-start" id="resource-delete-id"/>
 								                </div>
 								            </div>
 								        </div>											
@@ -415,9 +414,9 @@
 								        </script>								        
 								    </div>
 									<br clear="all"/>
-																	
+
 								<!-- Create -->
-								
+
 									<div class="row">
                               <div class="col-12">
                                  <b>Create</b> an instance of the resource. Generally you do not need to specify an ID
@@ -616,7 +615,7 @@
 
 	<!-- 
 	<script type="text/javascript">
-		$(function () { $("[data-toggle='tooltip']").tooltip(); });
+		$(function () { $("[data-bs-toggle='tooltip']").tooltip(); });
 	</script>
 	-->	
 </body>

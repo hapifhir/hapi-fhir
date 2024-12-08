@@ -531,7 +531,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			myPatientDao.update((Patient) patientA, requestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(2079) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known", e.getMessage());
+			String idPart = ((Patient) patientA).getIdElement().getIdPart();
+			assertThat(e.getMessage()).contains("HAPI-0960: Can not create resource with ID[" + idPart + "]");
 		}
 	}
 
