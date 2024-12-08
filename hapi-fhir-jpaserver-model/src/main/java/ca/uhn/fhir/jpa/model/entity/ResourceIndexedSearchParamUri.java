@@ -47,7 +47,6 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-@Embeddable
 @EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(

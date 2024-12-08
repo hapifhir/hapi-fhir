@@ -48,7 +48,6 @@ import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-@Embeddable
 @EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(

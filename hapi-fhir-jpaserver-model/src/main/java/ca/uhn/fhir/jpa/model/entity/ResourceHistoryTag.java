@@ -37,7 +37,6 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
 
-@Embeddable
 @Entity
 @Table(
 		name = "HFJ_HISTORY_TAG",
