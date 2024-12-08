@@ -33,6 +33,8 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonSerializer;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.language.InterfaceTypeDefinition;
@@ -80,6 +82,7 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final VersionSpecificWorkerContextWrapper myContext;
 	private final IDaoRegistry myDaoRegistry;
+	private final Gson myGson;
 
 	/**
 	 * Constructor
@@ -97,6 +100,11 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 
 		myContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(theValidationSupport);
 		myGenerator = new GraphQLSchemaGenerator(myContext, VersionUtil.getVersion());
+
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.registerTypeAdapter(Collections.emptyList().getClass(), (JsonSerializer<Object>)
+				(src, typeOfSrc, context) -> new JsonArray());
+		myGson = gsonBuilder.create();
 	}
 
 	@Override
@@ -250,8 +258,7 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 		ExecutionResult executionResult = build.execute(theQueryBody);
 
 		Map<String, Object> data = executionResult.toSpecification();
-		Gson gson = new GsonBuilder().create();
-		return gson.toJson(data);
+		return myGson.toJson(data);
 	}
 
 	@Nonnull

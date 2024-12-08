@@ -35,6 +35,8 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -64,6 +66,7 @@ public class BulkImportJobEntity implements Serializable {
 	private String myJobDescription;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
 	private BulkImportJobStatusEnum myStatus;
 
@@ -82,6 +85,7 @@ public class BulkImportJobEntity implements Serializable {
 	private String myStatusMessage;
 
 	@Column(name = "ROW_PROCESSING_MODE", length = 20, nullable = false, updatable = false)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Enumerated(EnumType.STRING)
 	private JobFileRowProcessingModeEnum myRowProcessingMode;
 

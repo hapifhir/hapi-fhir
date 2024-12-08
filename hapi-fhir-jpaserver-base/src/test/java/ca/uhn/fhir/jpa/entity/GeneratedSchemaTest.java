@@ -1,8 +1,13 @@
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.search.mapper.pojo.common.annotation.Param;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
 
@@ -26,7 +31,6 @@ public class GeneratedSchemaTest {
 		validateLongVarcharDatatype("postgres.sql", "text");
 		validateLongVarcharDatatype("oracle.sql", "clob");
 		validateLongVarcharDatatype("sqlserver.sql", "varchar(max)");
-
 	}
 
 	private static void validateLongVarcharDatatype(String schemaName, String expectedDatatype) {
