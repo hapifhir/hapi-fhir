@@ -23,8 +23,8 @@ public class FhirTesterMvcConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addResourceHandlers(@Nonnull ResourceHandlerRegistry theRegistry) {
-		WebUtil.webJarAddAceBuilds(theRegistry);
 		WebUtil.webJarAddBoostrap(theRegistry);
+		WebUtil.webJarAddAceBuilds(theRegistry);
 		WebUtil.webJarAddJQuery(theRegistry);
 		WebUtil.webJarAddFontAwesome(theRegistry);
 		WebUtil.webJarAddJSTZ(theRegistry);
