@@ -1678,11 +1678,7 @@ public class XmlUtil {
 			XMLEventWriter ew = XmlUtil.createXmlFragmentWriter(w);
 
 			for (XMLEvent next : theEvents) {
-				if (next.isCharacters()) {
-					ew.add(next);
-				} else {
-					ew.add(next);
-				}
+				ew.add(next);
 			}
 			ew.close();
 			return w.toString();
