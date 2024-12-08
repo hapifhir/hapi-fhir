@@ -236,7 +236,8 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				SearchParameterMap params = new SearchParameterMap();
 				params.setLoadSynchronousUpTo(1);
 				int versionSeparator = theUri.lastIndexOf('|');
-				if (versionSeparator != -1) {params.add(StructureDefinition.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
+				if (versionSeparator != -1) {
+					params.add(StructureDefinition.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
 					params.add(StructureDefinition.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
 				} else {
 					params.add(StructureDefinition.SP_URL, new UriParam(theUri));
