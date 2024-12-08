@@ -219,7 +219,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		// indicate param was already processed, otherwise queries DB to process it
 		theParams.setOffset(null);
-		return SearchQueryExecutors.from(longs);
+		return SearchQueryExecutors.from(JpaPid.fromLongList(longs));
 	}
 
 	private int getMaxFetchSize(SearchParameterMap theParams, Integer theMax) {
@@ -386,7 +386,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@SuppressWarnings("rawtypes")
 	private List<IResourcePersistentId> toList(ISearchQueryExecutor theSearchResultStream, long theMaxSize) {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(theSearchResultStream, 0), false)
-				.map(JpaPid::fromId)
 				.limit(theMaxSize)
 				.collect(Collectors.toList());
 	}

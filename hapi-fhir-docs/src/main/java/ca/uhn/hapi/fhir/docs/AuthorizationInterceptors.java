@@ -262,7 +262,6 @@ public class AuthorizationInterceptors {
 			}
 		};
 		// END SNIPPET: advancedCompartment
-
 	}
 
 	@SuppressWarnings("InnerClassMayBeStatic")

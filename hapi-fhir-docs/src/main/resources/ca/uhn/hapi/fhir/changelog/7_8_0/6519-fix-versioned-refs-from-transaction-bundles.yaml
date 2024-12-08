@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6519
+jira: SMILE-8776
+title: "Previously, when posting a transaction bundle with versioned references, the server would strip versioned 
+references form the resource even when configured not to do so. This has now been fixed."

@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -88,9 +87,6 @@ public class SearchConfig {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
-	@Autowired
-	private IResourceSearchViewDao myResourceSearchViewDao;
 
 	@Autowired
 	private FhirContext myContext;
@@ -169,7 +165,6 @@ public class SearchConfig {
 				myInterceptorBroadcaster,
 				myResourceTagDao,
 				myDaoRegistry,
-				myResourceSearchViewDao,
 				myContext,
 				myIdHelperService,
 				theResourceType);

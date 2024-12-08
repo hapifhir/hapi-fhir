@@ -376,6 +376,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder<JpaPid> sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
+		sb.setRequireTotal(theParams.getCount() != null);
 
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
 		boolean isOffsetQuery = theParams.isOffsetQuery();
@@ -393,13 +394,18 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 				try {
 					return direct.get();
-
 				} catch (ResourceNotFoundInIndexException theE) {
 					// some resources were not found in index, so we will inform this and resort to JPA search
 					ourLog.warn(
 							"Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
 				}
 			}
+
+			// we need a max to fetch for synchronous searches;
+			// otherwise we'll explode memory.
+			Integer maxToLoad = getSynchronousMaxResultsToFetch(theParams, loadSynchronousUpTo);
+			ourLog.debug("Setting a max fetch value of {} for synchronous search", maxToLoad);
+			sb.setMaxResultsToFetch(maxToLoad);
 
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 			return mySynchronousSearchSvc.executeQuery(
@@ -432,6 +438,35 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				theCallingDao, theParams, theResourceType, theRequestDetails, sb, theRequestPartitionId, search);
 		retVal.setCacheStatus(cacheStatus);
 		return retVal;
+	}
+
+	/**
+	 * 	The max results to return if this is a synchronous search.
+	 *
+	 * We'll look in this order:
+	 * * load synchronous up to (on params)
+	 * * param count (+ offset)
+	 * * StorageSettings fetch size default max
+	 * *
+	 */
+	private Integer getSynchronousMaxResultsToFetch(SearchParameterMap theParams, Integer theLoadSynchronousUpTo) {
+		if (theLoadSynchronousUpTo != null) {
+			return theLoadSynchronousUpTo;
+		}
+
+		if (theParams.getCount() != null) {
+			int valToReturn = theParams.getCount() + 1;
+			if (theParams.getOffset() != null) {
+				valToReturn += theParams.getOffset();
+			}
+			return valToReturn;
+		}
+
+		if (myStorageSettings.getFetchSizeDefaultMaximum() != null) {
+			return myStorageSettings.getFetchSizeDefaultMaximum();
+		}
+
+		return myStorageSettings.getInternalSynchronousSearchSize();
 	}
 
 	private void validateSearch(SearchParameterMap theParams) {
