@@ -76,6 +76,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1391,7 +1392,7 @@ public class JsonParserDstu2Test {
 	 */
 	@Test
 	public void testParseAndEncodeBundleFromXmlToJson() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example2.xml"));
+		String content = IOUtils.toString(Objects.requireNonNull(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example2.xml")), StandardCharsets.UTF_8);
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
 
@@ -1400,7 +1401,7 @@ public class JsonParserDstu2Test {
 
 		Medication m = (Medication) ((ResourceReferenceDt) p.getMedication()).getResource();
 		assertNotNull(m);
-		assertEquals("#med", m.getId().getValue());
+		assertEquals("med", m.getId().getValue());
 		assertThat(p.getContained().getContainedResources()).hasSize(1);
 		assertThat(p.getContained().getContainedResources().get(0)).isSameAs(m);
 

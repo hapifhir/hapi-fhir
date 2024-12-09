@@ -2241,8 +2241,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			if (nextId == null || nextId.isEmpty()) {
+				// FIXME REMOVE ME
+				System.out.println();
 				// Ignore placeholder references that are blank
 			} else if (!theWantLocalReferences && nextId.getValue().startsWith("#")) {
+				// FIXME REMOVE ME
+				System.out.println();
 				// Ignore local refs unless we specifically want them
 			} else {
 				myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, valueRef, false);
