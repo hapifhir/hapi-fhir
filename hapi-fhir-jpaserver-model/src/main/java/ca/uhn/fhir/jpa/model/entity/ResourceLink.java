@@ -174,7 +174,9 @@ public class ResourceLink extends BaseResourceIndex {
 	public void setTargetResourceVersion(Long theTargetResourceVersion) {
 		myTargetResourceVersion = theTargetResourceVersion;
 	}
+
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceLink.class); // FIXME: remove
+
 	public String getTargetResourceId() {
 		if (myTargetResourceId == null && getTargetResource() != null) {
 			// FIXME: remove
