@@ -110,7 +110,6 @@ public class CascadingDeleteInterceptor {
 		ourLog.debug("Have delete conflicts: {}", theConflictList);
 
 		if (shouldCascade(theRequest) == DeleteCascadeModeEnum.NONE) {
-
 			// Add a message to the response
 			String message = myFhirContext.getLocalizer().getMessage(CascadingDeleteInterceptor.class, "noParam");
 			ourLog.trace(message);
@@ -123,7 +122,6 @@ public class CascadingDeleteInterceptor {
 		}
 
 		myThreadSafeResourceDeleterSvc.delete(theRequest, theConflictList, theTransactionDetails);
-
 		return new DeleteConflictOutcome().setShouldRetryCount(MAX_RETRY_ATTEMPTS);
 	}
 
