@@ -47,7 +47,6 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -60,7 +59,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -184,7 +182,7 @@ public class BulkDataExportProvider {
 		// verify the Group exists before starting the job
 		getBulkDataExportValidator().validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
 
-		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
+		final BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
 				.outputFormat(theOutputFormat)
 				.resourceTypes(theType)
 				.since(theSince)
@@ -196,20 +194,9 @@ public class BulkDataExportProvider {
 				.expandMdm(theMdm)
 				.build();
 
-		if (CollectionUtils.isNotEmpty(bulkExportJobParameters.getResourceTypes())) {
+		bulkExportJobParameters.setResourceTypes(
 			getBulkDataExportValidator()
-					.validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
-		} else {
-			// all patient resource types
-			Set<String> groupTypes = new HashSet<>(getBulkDataExportValidator().getPatientCompartmentResources());
-
-			// Add the forward reference resource types from the patients, e.g. Practitioner, Organization
-			groupTypes.addAll(BulkDataExportUtil.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES);
-
-			groupTypes.removeIf(t -> !myDaoRegistry.isResourceTypeSupported(t));
-			bulkExportJobParameters.setResourceTypes(groupTypes);
-		}
-
+				.validateAndGetResourceTypes(bulkExportJobParameters.getResourceTypes()));
 		getBulkDataExportJobService().startJob(theRequestDetails, bulkExportJobParameters);
 	}
 

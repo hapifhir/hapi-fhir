@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collection;
@@ -44,9 +45,9 @@ public class BulkDataExportSupport {
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	public BulkDataExportSupport(
-			@Nonnull FhirContext theFhirContext,
-			@Nonnull DaoRegistry theDaoRegistry,
-			@Nonnull IRequestPartitionHelperSvc theRequestPartitionHelperService) {
+		@Nonnull FhirContext theFhirContext,
+		@Nonnull DaoRegistry theDaoRegistry,
+		@Nonnull IRequestPartitionHelperSvc theRequestPartitionHelperService) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myRequestPartitionHelperService = theRequestPartitionHelperService;
@@ -60,19 +61,32 @@ public class BulkDataExportSupport {
 	 * @param theIdParams           the id(s) to verify exist
 	 */
 	public void validateTargetsExists(
-			@Nonnull RequestDetails theRequestDetails,
-			@Nonnull String theTargetResourceName,
-			@Nonnull Iterable<IIdType> theIdParams) {
+		@Nonnull RequestDetails theRequestDetails,
+		@Nonnull String theTargetResourceName,
+		@Nonnull Iterable<IIdType> theIdParams) {
 		if (theIdParams.iterator().hasNext()) {
 			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-					theRequestDetails,
-					theTargetResourceName,
-					theIdParams.iterator().next());
+				theRequestDetails,
+				theTargetResourceName,
+				theIdParams.iterator().next());
 			SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
 			for (IIdType nextId : theIdParams) {
 				myDaoRegistry.getResourceDao(theTargetResourceName).read(nextId, requestDetails);
 			}
 		}
+	}
+
+	public Collection<String> validateAndGetResourceTypes(Collection<String> theResourceTypes) {
+		if (CollectionUtils.isNotEmpty(theResourceTypes)) {
+			validateResourceTypesAllContainPatientSearchParams(theResourceTypes);
+			return theResourceTypes;
+		}
+		// all patient resource types
+		final Set<String> results = getPatientCompartmentResources();
+		// Add the forward reference resource types from the patients, e.g. Practitioner, Organization
+		results.addAll(BulkDataExportUtil.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES);
+		results.removeIf(t -> !myDaoRegistry.isResourceTypeSupported(t));
+		return results;
 	}
 
 	public void validateResourceTypesAllContainPatientSearchParams(Collection<String> theResourceTypes) {
