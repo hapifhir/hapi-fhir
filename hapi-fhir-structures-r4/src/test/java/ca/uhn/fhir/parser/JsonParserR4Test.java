@@ -46,6 +46,7 @@ import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
@@ -1386,6 +1387,107 @@ public class JsonParserR4Test extends BaseTest {
 		Observation observation = ourCtx.newJsonParser().parseResource(Observation.class, text);
 		assertThat(observation.getSpecimen().getReference()).isEqualTo("#contained-id");
 		assertThat(observation.getContained().get(0).getId()).isEqualTo("contained-id");
+	}
+
+	@Test
+	public void testContainedResourceIdIsReadWithoutAddingHashThatAlreadyExists() throws IOException {
+		String text = loadResource("/observation-with-contained-specimen-hash-id.json");
+
+		Observation observation = ourCtx.newJsonParser().parseResource(Observation.class, text);
+		// Is this right? This shouldn't be a valid resource, but it's loaded and made into a resource with `#contained-id` anyway.
+		assertThat(observation.getSpecimen().getReference()).isEqualTo("#contained-id");
+		assertThat(observation.getContained().get(0).getId()).isEqualTo("#contained-id");
+	}
+
+	@Test
+	public void testReferenceCreatedByStringDoesntMutateContained() {
+		Observation observation = new Observation();
+		observation.setId("123");
+		Specimen specimen = new Specimen();
+		specimen.setId("contained-id");
+		observation.getContained().add(specimen);
+		observation.setSpecimen(new Reference("#contained-id"));
+
+		String text = ourCtx.newJsonParser().encodeResourceToString(observation);
+
+		assertThat(text).contains("\"reference\":\"#contained-id\"");
+		assertThat(text).contains("\"id\":\"contained-id\"");
+
+		assertThat(observation.getContained().size()).isEqualTo(1);
+		assertThat(observation.getContained().get(0).getId()).isEqualTo("contained-id");
+	}
+
+	@Test
+	public void testReferenceCreatedByResourceDoesntMutateContained() {
+
+		Specimen specimen = new Specimen();
+		specimen.setId("contained-id");
+
+		Observation observation = new Observation();
+		observation.setId("123");
+		observation.getContained().add(specimen);
+		observation.setSpecimen(new Reference(specimen));
+
+		String text = ourCtx.newJsonParser().encodeResourceToString(observation);
+
+		assertThat(text).contains("\"reference\":\"#contained-id\"");
+		assertThat(text).contains("\"id\":\"contained-id\"");
+
+		assertThat(observation.getContained().size()).isEqualTo(1);
+		assertThat(observation.getContained().get(0).getId()).isEqualTo("contained-id");
+	}
+
+	@Test
+	public void testReferenceCreatedByResourceDoesntMutateEmptyContained() {
+		Specimen specimen = new Specimen();
+		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
+
+		Observation observation = new Observation();
+		observation.setId("O1");
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.setSpecimen(new Reference(specimen));
+
+		String text = ourCtx.newJsonParser().encodeResourceToString(observation);
+
+		// When encoding, if the reference does not have an id, it is generated in the FhirTerser
+		String specimenReferenceId = observation.getSpecimen().getResource().getIdElement().getValue();
+		assertThat(specimenReferenceId).startsWith("#");
+
+		// the terser doesn't add a new contained element to the observation
+		assertThat(observation.getContained()).isEmpty();
+
+		// However the encoded text contains both a single contained resource, as well as the reference to it.
+		assertThat(text).contains("\"reference\":\""+specimenReferenceId+"\"");
+		assertThat(text).contains("\"id\":\""+specimenReferenceId.substring(1)+"\"");
+
+	}
+
+
+	@Test
+	public void testReferenceCreatedByIdTypeDoesntMutateContained() {
+		Specimen specimen = new Specimen();
+		specimen.setId("contained-id");
+		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
+
+		Observation observation = new Observation();
+		observation.setId("O1");
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.getContained().add(specimen);
+		observation.setSpecimen(new Reference(new IdType("#contained-id")));
+
+		String text = ourCtx.newJsonParser().encodeResourceToString(observation);
+
+		// When encoding,
+		String specimenReferenceId = observation.getSpecimen().getReference();
+		assertThat(specimenReferenceId).startsWith("#");
+
+		String specimenContainedId = observation.getContained().get(0).getIdElement().getValue();
+		assertThat(specimenContainedId).isEqualTo("contained-id");
+
+		// However the encoded text contains both a single contained resource, as well as the reference to it.
+		assertThat(text).contains("\"reference\":\""+specimenReferenceId+"\"");
+		assertThat(text).contains("\"id\":\""+specimenReferenceId.substring(1)+"\"");
+
 	}
 
 	@DatatypeDef(
