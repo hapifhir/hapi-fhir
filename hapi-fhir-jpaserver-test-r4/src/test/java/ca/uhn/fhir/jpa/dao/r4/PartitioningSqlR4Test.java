@@ -3117,7 +3117,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		output = mySystemDao.transaction(requestDetails, input);
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertEquals(26, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(326, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
