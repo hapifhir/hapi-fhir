@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
@@ -90,7 +91,7 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 
 			Optional<TermValueSet> optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET);
 			assertTrue(optionalTermValueSet.isPresent());
-			Long nullVersion_resid = ((ResourceTable) myValueSets.get(ValueSetVersions.NULL).getEntity()).getId();
+			JpaPid nullVersion_resid = ((ResourceTable) myValueSets.get(ValueSetVersions.NULL).getEntity()).getId();
 			assertNotNull(nullVersion_resid);
 			assertNotNull(optionalTermValueSet.get().getResource());
 			assertEquals(nullVersion_resid, optionalTermValueSet.get().getResource().getId());
@@ -98,7 +99,7 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 
 			optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v1");
 			assertTrue(optionalTermValueSet.isPresent());
-			Long v1Version_resid = ((ResourceTable) myValueSets.get(ValueSetVersions.V1).getEntity()).getId();
+			JpaPid v1Version_resid = ((ResourceTable) myValueSets.get(ValueSetVersions.V1).getEntity()).getId();
 			assertNotNull(v1Version_resid);
 			assertNotNull(optionalTermValueSet.get().getResource());
 			assertEquals(v1Version_resid, optionalTermValueSet.get().getResource().getId());
@@ -106,7 +107,7 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 
 			optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2");
 			assertTrue(optionalTermValueSet.isPresent());
-			Long v2Version_resid = ((ResourceTable) myValueSets.get(ValueSetVersions.V2).getEntity()).getId();
+			JpaPid v2Version_resid = ((ResourceTable) myValueSets.get(ValueSetVersions.V2).getEntity()).getId();
 			assertNotNull(v2Version_resid);
 			assertNotNull(optionalTermValueSet.get().getResource());
 			assertEquals(v2Version_resid, optionalTermValueSet.get().getResource().getId());
@@ -136,17 +137,17 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 		ValueSet updated = (ValueSet) myValueSets.get(ValueSetVersions.NULL).getResource();
 		updated.setName("ValueSet_noVersion_updated");
 		DaoMethodOutcome nullVersion_update_outcome = myValueSetDao.update(updated);
-		Long nullVersion_resid = ((ResourceTable) nullVersion_update_outcome.getEntity()).getId();
+		JpaPid nullVersion_resid = ((ResourceTable) nullVersion_update_outcome.getEntity()).getId();
 
 		updated = (ValueSet) myValueSets.get(ValueSetVersions.V1).getResource();
 		updated.setName("ValueSet_v1_updated");
 		DaoMethodOutcome v1Version_update_outcome = myValueSetDao.update(updated);
-		Long v1Version_resid = ((ResourceTable) v1Version_update_outcome.getEntity()).getId();
+		JpaPid v1Version_resid = ((ResourceTable) v1Version_update_outcome.getEntity()).getId();
 
 		updated = (ValueSet) myValueSets.get(ValueSetVersions.V2).getResource();
 		updated.setName("ValueSet_v2_updated");
 		DaoMethodOutcome v2Version_update_outcome = myValueSetDao.update(updated);
-		Long v2Version_resid = ((ResourceTable) v2Version_update_outcome.getEntity()).getId();
+		JpaPid v2Version_resid = ((ResourceTable) v2Version_update_outcome.getEntity()).getId();
 
 		// Verify that ValueSets were updated.
 		runInTransaction(() -> assertEquals(3, myTermValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 10), URL_MY_VALUE_SET).size()));

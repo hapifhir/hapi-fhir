@@ -227,6 +227,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		assertEquals(2, selectQueriesForCurrentThread.size());
 		assertThat(selectQueriesForCurrentThread.get(0).getSql(false, false)).contains("PARTITION_ID=?");
 		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).doesNotContain("PARTITION_ID=");
+		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).doesNotContain("PARTITION_ID in");
 	}
 
 
@@ -354,7 +355,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		assertEquals(2, outcome.size());
 		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("PARTITION_ID=?");
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("PARTITION_ID in (?)");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("PARTITION_ID=?");
 	}
 
 

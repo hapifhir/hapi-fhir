@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -49,9 +50,10 @@ public class JpaResourceExpungeServiceTest {
 
 	@Test
 	public void testExpungeDoesNotDeleteAllSearchParams() {
-		when(myResourceTableDao.findById(any())).thenReturn(Optional.of(resourceTable));
+		when(myResourceTableDao.findById(any(JpaPid.class))).thenReturn(Optional.of(resourceTable));
 		when(resourceTable.getIdDt()).thenReturn(new IdDt());
-		myService.expungeCurrentVersionOfResource(myRequestDetails, 1L, new AtomicInteger(1));
+		when(resourceTable.getId()).thenReturn(new JpaPid());
+		myService.expungeCurrentVersionOfResource(myRequestDetails, JpaPid.fromId(1L), new AtomicInteger(1));
 		verify(myService, never()).deleteAllSearchParams(any());
 	}
 }

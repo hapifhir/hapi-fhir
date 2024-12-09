@@ -57,6 +57,7 @@ public interface BaseMigrationTaskTestSuite {
 		/**
 		 * Receive a task from the Builder
 		 */
+		@Override
 		public void addTask(BaseTask theTask) {
 			myTasks.add(theTask);
 		}

@@ -77,7 +77,7 @@ public class ResourceReindexer {
 					resource.getIdElement().toUnqualifiedVersionless().getValue(),
 					resource.getIdElement().getVersionIdPart(),
 					expectedVersion);
-			myResourceHistoryTableDao.updateVersion(theResourceTable.getId(), actualVersion, expectedVersion);
+			myResourceHistoryTableDao.updateVersion(theResourceTable.getId().toFk(), actualVersion, expectedVersion);
 		}
 
 		doReindex(theResourceTable, resource);

@@ -355,7 +355,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			myPatientDao.update(p);
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(5);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(4);
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).isEmpty();
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).isEmpty();
@@ -386,7 +386,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			myPatientDao.update(p).getResource();
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(6);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(5);
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(3);
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
@@ -929,7 +929,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		List<TypedPidJson> pids = runInTransaction(() -> myResourceTableDao
 			.findAll()
 			.stream()
-			.map(t -> new TypedPidJson(t.getResourceType(), Long.toString(t.getResourceId())))
+			.map(t -> new TypedPidJson(t.getResourceType(), t.getResourceId()))
 			.collect(Collectors.toList()));
 
 		runInTransaction(() -> assertEquals(10, myResourceTableDao.count()));
@@ -942,7 +942,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(29, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(28, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(10, outcome.getRecordsProcessed());
 		runInTransaction(() -> assertEquals(0, myResourceTableDao.count()));
 	}
@@ -1121,10 +1121,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			p.setManagingOrganization(new Reference(orgId));
 			myPatientDao.update(p, mySrd);
 		}
-		data.addTypedPid("Patient", patientId.getIdPartAsLong());
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", patientId.getIdPartAsLong());
 		for (int i = 0; i < 9; i++) {
 			IIdType nextPatientId = createPatient(withActiveTrue());
-			data.addTypedPid("Patient", nextPatientId.getIdPartAsLong());
+			data.addTypedPidWithNullPartitionForUnitTest("Patient", nextPatientId.getIdPartAsLong());
 		}
 
 		ReindexJobParameters params = new ReindexJobParameters()
@@ -1163,22 +1163,24 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		transactionResonse
 			.getEntry()
 			.stream()
-			.map(t -> new IdType(t.getResponse().getLocation()))
-			.forEach(t -> data.addTypedPid("Observation", t.getIdPartAsLong()));
+			.map(t->new IdType(t.getResponse().getLocation()))
+			.forEach(t->data.addTypedPidWithNullPartitionForUnitTest("Observation", t.getIdPartAsLong()));
 
-		runInTransaction(() -> {
-			assertEquals(24L, myResourceTableDao.count());
-			assertEquals(20L, myResourceIndexedComboStringUniqueDao.count());
-			assertEquals(20L, myResourceIndexedComboTokensNonUniqueDao.count());
-		});
+        runInTransaction(() -> {
+            assertEquals(24L, myResourceTableDao.count());
+            assertEquals(20L, myResourceIndexedComboStringUniqueDao.count());
+            assertEquals(20L, myResourceIndexedComboTokensNonUniqueDao.count());
+        });
 
-		ReindexJobParameters params = new ReindexJobParameters()
-			.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.NONE)
-			.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.ALL)
-			.setOptimisticLock(false);
+		logAllUniqueIndexes();
 
-		// execute
-		myCaptureQueriesListener.clear();
+        ReindexJobParameters params = new ReindexJobParameters()
+                .setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.NONE)
+                .setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.ALL)
+                .setOptimisticLock(false);
+
+        // execute
+        myCaptureQueriesListener.clear();
 		JobInstance instance = new JobInstance();
 		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
 			params,
@@ -2177,12 +2179,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueries();
 		// Search for IDs and Search for tag definition
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
-		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(26, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
@@ -2194,7 +2193,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(7, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(7, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
@@ -4082,6 +4081,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			Group.GroupMemberComponent aGroupMemberComponent = new Group.GroupMemberComponent(new Reference(idType));
 			theGroup.addMember(aGroupMemberComponent);
 		}
+
+		ourLog.info("Updating group to add IDs: {}", theIIdTypeList.stream().map(t->t.toUnqualifiedVersionless().getValue()).sorted().collect(Collectors.toList()));
 
 		return runInTransaction(() -> (Group) myGroupDao.update(theGroup, mySrd).getResource());
 

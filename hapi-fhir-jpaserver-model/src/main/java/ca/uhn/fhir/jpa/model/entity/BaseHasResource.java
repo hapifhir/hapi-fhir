@@ -33,12 +33,13 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.type.SqlTypes;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseHasResource extends BasePartitionable
-		implements IBaseResourceEntity, IBasePersistedResource<JpaPid> {
+public abstract class BaseHasResource<T>
+		implements IBaseResourceEntity<T>, IBasePersistedResource<JpaPid>, Serializable {
 
 	public static final String RES_PUBLISHED = "RES_PUBLISHED";
 	public static final String RES_UPDATED = "RES_UPDATED";

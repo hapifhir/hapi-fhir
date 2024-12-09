@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -31,10 +33,13 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.Validate;
@@ -68,17 +73,33 @@ import static org.apache.commons.lang3.StringUtils.length;
 			@Index(name = "FK_CONCEPTPROP_CONCEPT", columnList = "CONCEPT_PID", unique = false),
 			@Index(name = "FK_CONCEPTPROP_CSV", columnList = "CS_VER_PID")
 		})
-public class TermConceptProperty implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermConceptProperty extends BasePartitionable implements Serializable {
 	public static final int MAX_PROPTYPE_ENUM_LENGTH = 6;
 	private static final long serialVersionUID = 1L;
 	public static final int MAX_LENGTH = 500;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "CONCEPT_PID",
-			referencedColumnName = "PID",
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CONCEPT_PID",
+						referencedColumnName = "PID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CONCEPT"))
 	private TermConcept myConcept;
+
+	@Column(name = "CONCEPT_PID", insertable = true, updatable = true, nullable = false)
+	private Long myConceptPid;
 
 	/**
 	 * TODO: Make this non-null
@@ -86,12 +107,26 @@ public class TermConceptProperty implements Serializable {
 	 * @since 3.5.0
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "CS_VER_PID",
-			nullable = true,
-			referencedColumnName = "PID",
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CS_VER_PID",
+						insertable = false,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "PID"),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CSV"))
 	private TermCodeSystemVersion myCodeSystemVersion;
+
+	@Column(name = "CS_VER_PID")
+	private Long myCodeSystemVersionPid;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_PROP_PID", sequenceName = "SEQ_CONCEPT_PROP_PID")
@@ -255,12 +290,23 @@ public class TermConceptProperty implements Serializable {
 
 	public TermConceptProperty setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
 		myCodeSystemVersion = theCodeSystemVersion;
+		myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		return this;
 	}
 
 	public TermConceptProperty setConcept(TermConcept theConcept) {
 		myConcept = theConcept;
+		myConceptPid = theConcept.getId();
+		setPartitionId(theConcept.getPartitionId());
 		return this;
+	}
+
+	@PrePersist
+	public void prePersist() {
+		if (myConceptPid == null) {
+			myConceptPid = myConcept.getId();
+			assert myConceptPid != null;
+		}
 	}
 
 	@Override
@@ -308,6 +354,10 @@ public class TermConceptProperty implements Serializable {
 		return myId;
 	}
 
+	public IdAndPartitionId getPartitionedId() {
+		return IdAndPartitionId.forId(myId, this);
+	}
+
 	public void performLegacyLobSupport(boolean theSupportLegacyLob) {
 		if (!theSupportLegacyLob) {
 			myValueLob = null;
@@ -332,5 +382,9 @@ public class TermConceptProperty implements Serializable {
 	@VisibleForTesting
 	public void setValueBinForTesting(byte[] theValuebin) {
 		myValueBin = theValuebin;
+	}
+
+	public Long getId() {
+		return myId;
 	}
 }

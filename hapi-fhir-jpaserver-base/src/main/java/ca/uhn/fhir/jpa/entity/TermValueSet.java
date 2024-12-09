@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
@@ -31,10 +33,12 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -69,7 +73,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 			@Index(name = "FK_TRMVALUESET_RES", columnList = "RES_ID")
 		})
 @Entity()
-public class TermValueSet implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermValueSet extends BasePartitionable implements Serializable {
 	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_URL_LENGTH = 200;
@@ -88,16 +93,26 @@ public class TermValueSet implements Serializable {
 	@Column(name = "VER", nullable = true, length = MAX_VER_LENGTH)
 	private String myVersion;
 
-	@OneToOne()
-	@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
-			updatable = false,
+	@ManyToOne()
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						nullable = false,
+				//						insertable = false,
+				//						updatable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_TRMVALUESET_RES"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResourcePid;
 
 	@Column(name = "VSNAME", nullable = true, length = MAX_NAME_LENGTH)
@@ -145,6 +160,10 @@ public class TermValueSet implements Serializable {
 		return myId;
 	}
 
+	public IdAndPartitionId getPartitionedId() {
+		return IdAndPartitionId.forId(myId, this);
+	}
+
 	public String getUrl() {
 		return myUrl;
 	}
@@ -163,6 +182,8 @@ public class TermValueSet implements Serializable {
 
 	public TermValueSet setResource(ResourceTable theResource) {
 		myResource = theResource;
+		myResourcePid = theResource.getId().getId();
+		setPartitionId(theResource.getPartitionId());
 		return this;
 	}
 

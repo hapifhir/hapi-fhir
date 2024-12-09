@@ -19,7 +19,10 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -27,17 +30,22 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(
@@ -53,42 +61,79 @@ public class TermConceptParentChildLink implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "CHILD_PID",
-			nullable = false,
-			referencedColumnName = "PID",
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CHILD_PID",
+						insertable = false,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "PID"),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CHILD"))
 	private TermConcept myChild;
 
-	@Column(name = "CHILD_PID", insertable = false, updatable = false)
+	@Column(name = "CHILD_PID", insertable = true, updatable = true, nullable = false)
 	private Long myChildPid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "CODESYSTEM_PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CS"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CODESYSTEM_PID",
+						referencedColumnName = "PID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CS"))
 	private TermCodeSystemVersion myCodeSystem;
 
-	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "CODESYSTEM_PID", insertable = true, updatable = true, nullable = false)
 	@FullTextField(name = "myCodeSystemVersionPid")
-	private long myCodeSystemVersionPid;
+	private Long myCodeSystemVersionPid;
 
 	@ManyToOne(
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumn(
-			name = "PARENT_PID",
-			nullable = false,
-			referencedColumnName = "PID",
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "PARENT_PID",
+						insertable = false,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "PID"),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_PARENT"))
 	private TermConcept myParent;
 
-	@Column(name = "PARENT_PID", insertable = false, updatable = false)
+	@Column(name = "PARENT_PID", insertable = true, updatable = true, nullable = false)
 	private Long myParentPid;
 
-	@Id()
-	@SequenceGenerator(name = "SEQ_CONCEPT_PC_PID", sequenceName = "SEQ_CONCEPT_PC_PID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PC_PID")
-	@Column(name = "PID")
-	private Long myPid;
+	@EmbeddedId
+	private TermConceptParentChildLinkPk myId;
+
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = true, updatable = false)
+	private Integer myPartitionIdValue;
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "REL_TYPE", length = 5, nullable = true)
@@ -126,8 +171,15 @@ public class TermConceptParentChildLink implements Serializable {
 		return myCodeSystem;
 	}
 
+	public TermConceptParentChildLinkPk getPid() {
+		if (myId == null) {
+			myId = new TermConceptParentChildLinkPk();
+		}
+		return myId;
+	}
+
 	public Long getId() {
-		return myPid;
+		return getPid().myId;
 	}
 
 	public TermConcept getParent() {
@@ -140,6 +192,22 @@ public class TermConceptParentChildLink implements Serializable {
 
 	public RelationshipTypeEnum getRelationshipType() {
 		return myRelationshipType;
+	}
+
+	@PrePersist
+	public void prePersist() {
+		if (myChildPid == null) {
+			myChildPid = myChild.getId();
+			assert myChildPid != null;
+		}
+		if (myParentPid == null) {
+			myParentPid = myParent.getId();
+			assert myParentPid != null;
+		}
+		if (myCodeSystemVersionPid == null) {
+			myCodeSystemVersionPid = myCodeSystem.getPid();
+			assert myCodeSystemVersionPid != null;
+		}
 	}
 
 	@Override
@@ -155,16 +223,21 @@ public class TermConceptParentChildLink implements Serializable {
 
 	public TermConceptParentChildLink setChild(TermConcept theChild) {
 		myChild = theChild;
+		myChildPid = theChild.getId();
 		return this;
 	}
 
-	public TermConceptParentChildLink setCodeSystem(TermCodeSystemVersion theCodeSystem) {
-		myCodeSystem = theCodeSystem;
+	public TermConceptParentChildLink setCodeSystem(TermCodeSystemVersion theCodeSystemVersion) {
+		myCodeSystem = theCodeSystemVersion;
+		myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		return this;
 	}
 
 	public TermConceptParentChildLink setParent(TermConcept theParent) {
 		myParent = theParent;
+		myParentPid = theParent.getId();
+		myPartitionIdValue = theParent.getPartitionId().getPartitionId();
+		getPid().myPartitionIdValue = myPartitionIdValue;
 		return this;
 	}
 
@@ -173,9 +246,54 @@ public class TermConceptParentChildLink implements Serializable {
 		return this;
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("pid", myId)
+				.append("csvPid", myCodeSystemVersionPid)
+				.append("parentPid", myParentPid)
+				.append("childPid", myChildPid)
+				.append("rel", myRelationshipType)
+				.toString();
+	}
+
 	public enum RelationshipTypeEnum {
 		// ********************************************
 		// IF YOU ADD HERE MAKE SURE ORDER IS PRESERVED
 		ISA
+	}
+
+	@Embeddable
+	public static class TermConceptParentChildLinkPk implements Serializable {
+
+		@SequenceGenerator(name = "SEQ_CONCEPT_PC_PID", sequenceName = "SEQ_CONCEPT_PC_PID")
+		@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PC_PID")
+		@Column(name = "PID")
+		private Long myId;
+
+		@Transient
+		private Integer myPartitionIdValue;
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myId);
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) {
+				return true;
+			}
+			if (!(theO instanceof TermConceptParentChildLinkPk)) {
+				return false;
+			}
+			TermConceptParentChildLinkPk that = (TermConceptParentChildLinkPk) theO;
+			return Objects.equals(myId, that.myId);
+		}
+
+		@Override
+		public String toString() {
+			return myPartitionIdValue + "/" + myId;
+		}
 	}
 }

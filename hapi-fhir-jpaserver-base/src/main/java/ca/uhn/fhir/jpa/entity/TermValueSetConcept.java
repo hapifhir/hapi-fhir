@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -29,7 +31,9 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -67,7 +71,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 					columnNames = {"VALUESET_PID", "VALUESET_ORDER"})
 		})
 @Entity()
-public class TermValueSetConcept implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermValueSetConcept extends BasePartitionable implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id()
@@ -77,10 +82,21 @@ public class TermValueSetConcept implements Serializable {
 	private Long myId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "VALUESET_PID",
-			referencedColumnName = "PID",
-			nullable = false,
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "VALUESET_PID",
+						referencedColumnName = "PID",
+						insertable = true,
+						updatable = false,
+						nullable = false),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = true,
+				//						updatable = false,
+				//						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_PID"))
 	private TermValueSet myValueSet;
 
@@ -139,12 +155,17 @@ public class TermValueSetConcept implements Serializable {
 		return myId;
 	}
 
+	public IdAndPartitionId getPartitionedId() {
+		return IdAndPartitionId.forId(myId, this);
+	}
+
 	public TermValueSet getValueSet() {
 		return myValueSet;
 	}
 
 	public TermValueSetConcept setValueSet(TermValueSet theValueSet) {
 		myValueSet = theValueSet;
+		setPartitionId(theValueSet.getPartitionId());
 		return this;
 	}
 

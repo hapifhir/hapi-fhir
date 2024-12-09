@@ -5,10 +5,17 @@ import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
+import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -31,6 +38,7 @@ import java.util.UUID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class HapiFhirJpaMigrationTasksTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirJpaMigrationTasksTest.class);
@@ -38,7 +46,16 @@ public class HapiFhirJpaMigrationTasksTest {
 	private final BasicDataSource myDataSource = newDataSource();
 	private final JdbcTemplate myJdbcTemplate = new JdbcTemplate(myDataSource);
 
+	@RegisterExtension
+	private LoggingExtension myLoggingExtension = new LoggingExtension();
+
+	@BeforeAll
+	public static void beforeEach() {
+		HapiSystemProperties.enableUnitTestMode();
+	}
+
 	@Test
+	@Order(0)
 	public void testCreate() {
 		new HapiFhirJpaMigrationTasks(Collections.emptySet());
 	}
@@ -49,6 +66,7 @@ public class HapiFhirJpaMigrationTasksTest {
 	 * added in 7.4.0 so this backfills them.
 	 */
 	@Test
+	@Order(1)
 	public void testCreateUniqueComboParamHashes() {
 		/*
 		 * Setup
@@ -57,6 +75,15 @@ public class HapiFhirJpaMigrationTasksTest {
 		// Create migrator and initialize schema using a static version
 		// of the schema from the 7.2.0 release
 		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Set.of());
+
+		// This is just logging to try and track down an intermittent failure
+		for (VersionEnum next : VersionEnum.values()) {
+			int size = tasks.getAllTasks(next).size();
+			if (size > 0) {
+				ourLog.info("Version {} has {} tasks", next, size);
+			}
+		}
+
 		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
 		migrator.addTask(new InitializeSchemaTask("7.2.0",				"20180115.0",
 			new SchemaInitializationProvider(
@@ -67,7 +94,7 @@ public class HapiFhirJpaMigrationTasksTest {
 
 		// Run a second time to run the 7.4.0 migrations
 		MigrationTaskList allTasks = tasks.getAllTasks(VersionEnum.V7_3_0, VersionEnum.V7_4_0);
-		migrator.addTasks(allTasks);
+		migrator.addAllTasksForUnitTest(allTasks);
 		migrator.migrate();
 
 		// Create a unique index row with no hashes populated

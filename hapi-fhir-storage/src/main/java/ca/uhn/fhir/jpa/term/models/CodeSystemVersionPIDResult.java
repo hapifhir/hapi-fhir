@@ -24,8 +24,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CodeSystemVersionPIDResult implements IModelJson {
 
+	@JsonProperty("partitionId")
+	private Integer myPartitionId;
+
 	@JsonProperty("codeSystemVersionPID")
 	private long myCodeSystemVersionPID;
+
+	public Integer getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(Integer thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
 
 	public long getCodeSystemVersionPID() {
 		return myCodeSystemVersionPID;

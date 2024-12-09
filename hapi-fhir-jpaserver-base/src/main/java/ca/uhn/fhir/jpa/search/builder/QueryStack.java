@@ -948,6 +948,7 @@ public class QueryStack {
 
 		if (theFilter instanceof SearchFilterParser.FilterParameter) {
 			return createPredicateFilter(
+					theRequest,
 					theQueryStack3,
 					(SearchFilterParser.FilterParameter) theFilter,
 					theResourceName,
@@ -992,6 +993,7 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateFilter(
+			RequestDetails theRequestDetails,
 			QueryStack theQueryStack3,
 			SearchFilterParser.FilterParameter theFilter,
 			String theResourceName,
@@ -1238,8 +1240,9 @@ public class QueryStack {
 			Condition pathPredicate = toEqualToOrInPredicate(
 					resourceLinkTableJoin.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 
-			Condition linkedPredicate =
-					searchForIdsWithAndOr(with().setSourceJoinColumn(resourceLinkTableJoin.getJoinColumnsForSource())
+			Condition linkedPredicate = searchForIdsWithAndOr(
+					theRequest,
+					with().setSourceJoinColumn(resourceLinkTableJoin.getJoinColumnsForSource())
 							.setResourceName(targetResourceType)
 							.setParamName(parameterName)
 							.setAndOrParams(Collections.singletonList(orValues))
@@ -2393,7 +2396,7 @@ public class QueryStack {
 	}
 
 	@Nullable
-	public Condition searchForIdsWithAndOr(SearchForIdsParams theSearchForIdsParams) {
+	public Condition searchForIdsWithAndOr(RequestDetails theRequestDetails, SearchForIdsParams theSearchForIdsParams) {
 
 		if (theSearchForIdsParams.myAndOrParams.isEmpty()) {
 			return null;

@@ -19,15 +19,19 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -45,6 +49,7 @@ import java.io.Serializable;
 					columnNames = {"RES_VER_PID", "TAG_ID"}),
 		},
 		indexes = {@Index(name = "IDX_RESHISTTAG_RESID", columnList = "RES_ID")})
+@IdClass(IdAndPartitionId.class)
 public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -56,14 +61,25 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	private Long myId;
 
 	@ManyToOne()
-	@JoinColumn(
-			name = "RES_VER_PID",
-			referencedColumnName = "PID",
-			nullable = false,
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_VER_PID",
+						referencedColumnName = "PID",
+						nullable = false,
+						insertable = false,
+						updatable = false),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						nullable = false,
+				//						insertable = false,
+				//						updatable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_HISTORYTAG_HISTORY"))
 	private ResourceHistoryTable myResourceHistory;
 
-	@Column(name = "RES_VER_PID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "RES_VER_PID", updatable = false, nullable = false)
 	private Long myResourceHistoryPid;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
@@ -89,7 +105,7 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 		this();
 		setTag(theTag);
 		setResource(theResourceHistoryTable);
-		setResourceId(theResourceHistoryTable.getResourceId());
+		setResourceId(theResourceHistoryTable.getResourceId().getId());
 		setResourceType(theResourceHistoryTable.getResourceType());
 		setPartitionId(theRequestPartitionId);
 	}
@@ -116,10 +132,22 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	public void setResource(ResourceHistoryTable theResourceHistory) {
 		myResourceHistory = theResourceHistory;
+		myResourceHistoryPid = theResourceHistory.getId().getId();
+		myPartitionIdValue = theResourceHistory.getResourceId().getPartitionId();
+	}
+
+	@PrePersist
+	public void prePersist() {
+		myResourceHistoryPid = myResourceHistory.getId().getId();
+		myPartitionIdValue = myResourceHistory.getResourceId().getPartitionId();
 	}
 
 	public Long getId() {
 		return myId;
+	}
+
+	public JpaPid getResourcePid() {
+		return JpaPid.fromId(myResourceId, myPartitionIdValue);
 	}
 
 	@Override

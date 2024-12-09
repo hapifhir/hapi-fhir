@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,16 +32,16 @@ public class ValueSetConceptAccumulatorTest {
 	private ValueSetConceptAccumulator myAccumulator;
 	private TermValueSet myValueSet;
 	@Mock
-	private ITermValueSetDao myValueSetDao;
-	@Mock
 	private ITermValueSetConceptDesignationDao myValueSetDesignationDao;
 	@Mock
 	private ITermValueSetConceptDao myValueSetConceptDao;
+	@Mock
+	private EntityManager myEntityManager;
 
 	@BeforeEach
 	public void before() {
 		myValueSet = new TermValueSet();
-		myAccumulator = new ValueSetConceptAccumulator(myValueSet, myValueSetDao, myValueSetConceptDao, myValueSetDesignationDao);
+		myAccumulator = new ValueSetConceptAccumulator(myValueSet, myEntityManager, myValueSetConceptDao, myValueSetDesignationDao);
 	}
 
 	@Test
@@ -48,7 +49,7 @@ public class ValueSetConceptAccumulatorTest {
 		for (int i = 0; i < 1000; i++) {
 			myAccumulator.includeConcept("sys", "code", "display", null, null, null);
 		}
-		verify(myValueSetConceptDao, times(1000)).save(any());
+		verify(myEntityManager, times(1000)).persist(any(TermValueSetConcept.class));
 	}
 
 	@Test
@@ -87,7 +88,7 @@ public class ValueSetConceptAccumulatorTest {
 		myAccumulator.setSupportLegacyLob(theSupportLegacyLob);
 		myAccumulator.includeConcept("sys", "code", "display", null, sourceConceptDirectParentPids, null);
 
-		verify(myValueSetConceptDao, times(1)).save(captor.capture());
+		verify(myEntityManager, times(1)).persist(captor.capture());
 
 		TermValueSetConcept capturedTermValueSetConcept = captor.getValue();
 

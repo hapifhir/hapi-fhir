@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -44,6 +41,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,11 +59,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -104,7 +103,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		runInTransaction(() -> {
 			PartitionEntity partition = myPartitionDao.findForName(TENANT_A).orElseThrow(IllegalStateException::new);
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(partition.getId(), resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -142,7 +141,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 		});
 
 
@@ -362,7 +361,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 		});
 
 	}
@@ -416,10 +415,10 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -490,9 +489,9 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -522,6 +521,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	@Test
+	@Disabled("This test relied on a tenantId mismatch with the partition ID of the resource - This " +
+		"doesn't really make sense since tenant ID != partition ID")
 	public void testPartitionInRequestDetails_UpdateWithWrongTenantId() {
 		IIdType idA = createPatient(withTenant(TENANT_A), withActiveTrue()).toVersionless();
 		IBaseResource patientA = buildPatient(withId(idA), withActiveTrue());
@@ -555,9 +556,9 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -619,10 +620,10 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -667,6 +668,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IIdType idB = createResource("Condition", withTenant(TENANT_A), withObservationCode("http://cs", "A"));
 		Condition theCondition = myClient.read().resource(Condition.class).withId(idB).execute();
 		theCondition.getSubject().setReference("Patient/" + idA.getIdPart());
+		logAllResources();
+		myTenantClientInterceptor.setTenantId(ProviderConstants.ALL_PARTITIONS_TENANT_NAME);
 		doUpdateResource(theCondition);
 	}
 

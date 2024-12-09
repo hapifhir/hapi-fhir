@@ -32,8 +32,10 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -73,6 +75,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * @since 5.3.0
  *
  */
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIndexedSearchParamQuantity {
 
 	private static final long serialVersionUID = 1L;
@@ -96,12 +99,26 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumn(
-			foreignKey = @ForeignKey(name = "FK_SP_QUANTITYNM_RES"),
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_SP_QUANTITYNM_RES"))
 	private ResourceTable myResource;
+
+	@Column(name = "RES_ID", nullable = false)
+	private Long myResourceId;
 
 	public ResourceIndexedSearchParamQuantityNormalized() {
 		super();
@@ -134,6 +151,11 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 		setHashIdentity(source.getHashIdentity());
 		setHashIdentityAndUnits(source.getHashIdentityAndUnits());
 		setHashIdentitySystemAndUnits(source.getHashIdentitySystemAndUnits());
+	}
+
+	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	// - myValue

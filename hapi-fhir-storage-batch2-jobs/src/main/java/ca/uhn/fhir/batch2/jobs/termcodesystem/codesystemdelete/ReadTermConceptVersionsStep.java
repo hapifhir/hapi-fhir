@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
@@ -51,11 +52,11 @@ public class ReadTermConceptVersionsStep
 
 		long pid = parameters.getTermPid();
 
-		Iterator<Long> versionPids = myITermCodeSystemSvc.getAllCodeSystemVersionForCodeSystemPid(pid);
+		Iterator<IdAndPartitionId> versionPids = myITermCodeSystemSvc.getAllCodeSystemVersionForCodeSystemPid(pid);
 		while (versionPids.hasNext()) {
-			long next = versionPids.next().longValue();
+			IdAndPartitionId next = versionPids.next();
 			CodeSystemVersionPIDResult versionPidResult = new CodeSystemVersionPIDResult();
-			versionPidResult.setCodeSystemVersionPID(next);
+			versionPidResult.setCodeSystemVersionPID(next.getId());
 			theDataSink.accept(versionPidResult);
 		}
 

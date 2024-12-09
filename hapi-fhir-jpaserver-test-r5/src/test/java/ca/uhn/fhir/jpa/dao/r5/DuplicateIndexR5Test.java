@@ -168,6 +168,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			ResourceIndexedComboTokenNonUnique dupe0 = new ResourceIndexedComboTokenNonUnique();
 			dupe0.setPartitionSettings(param.getPartitionSettings());
 			dupe0.setResource(param.getResource());
+			dupe0.setResourceId(table.getId().getId());
 			dupe0.setHashComplete(param.getHashComplete());
 			dupe0.setIndexString(param.getIndexString());
 			dupe0.setSearchParameterId(new IdType(SEARCH_PARAMETER_PATIENT_NAMES_AND_GENDER));
@@ -178,6 +179,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			ResourceIndexedComboTokenNonUnique dupe1 = new ResourceIndexedComboTokenNonUnique();
 			dupe1.setPartitionSettings(param.getPartitionSettings());
 			dupe1.setResource(param.getResource());
+			dupe1.setResourceId(table.getId().getId());
 			dupe1.setHashComplete(param.getHashComplete());
 			dupe1.setIndexString(param.getIndexString());
 			dupe1.setSearchParameterId(new IdType(SEARCH_PARAMETER_PATIENT_NAMES_AND_GENDER));
@@ -228,12 +230,14 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			// Create a dupe
 			ResourceIndexedSearchParamString dupe0 = new ResourceIndexedSearchParamString(myPartitionSettings, myStorageSettings, "Patient", "family", "FAMILY", "FAMILY");
 			dupe0.setResource(table);
+			dupe0.setResourceId(table.getId().getId());
 			dupe0.calculateHashes();
 			myResourceIndexedSearchParamStringDao.save(dupe0);
 
 			// Create a second dupe
 			ResourceIndexedSearchParamString dupe1 = new ResourceIndexedSearchParamString(myPartitionSettings, myStorageSettings, "Patient", "family", "FAMILY", "FAMILY");
 			dupe1.setResource(table);
+			dupe1.setResourceId(table.getId().getId());
 			dupe1.calculateHashes();
 			myResourceIndexedSearchParamStringDao.save(dupe1);
 		});
@@ -249,12 +253,14 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			// Create a dupe
 			ResourceIndexedSearchParamToken dupe0 = new ResourceIndexedSearchParamToken(myPartitionSettings, "Patient", "identifier", "http://foo", "bar");
 			dupe0.setResource(table);
+			dupe0.setResourceId(table.getId().getId());
 			dupe0.calculateHashes();
 			myResourceIndexedSearchParamTokenDao.save(dupe0);
 
 			// Create a second dupe
 			ResourceIndexedSearchParamToken dupe1 = new ResourceIndexedSearchParamToken(myPartitionSettings, "Patient", "identifier", "http://foo", "bar");
 			dupe1.setResource(table);
+			dupe1.setResourceId(table.getId().getId());
 			dupe1.calculateHashes();
 			myResourceIndexedSearchParamTokenDao.save(dupe1);
 		});
