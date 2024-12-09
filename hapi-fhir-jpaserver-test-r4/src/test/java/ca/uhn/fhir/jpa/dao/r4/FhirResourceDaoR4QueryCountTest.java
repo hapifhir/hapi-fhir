@@ -4082,6 +4082,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			theGroup.addMember(aGroupMemberComponent);
 		}
 
+		ourLog.info("Updating group to add IDs: {}", theIIdTypeList.stream().map(t->t.toUnqualifiedVersionless().getValue()).sorted().collect(Collectors.toList()));
+
 		return runInTransaction(() -> (Group) myGroupDao.update(theGroup, mySrd).getResource());
 
 	}
