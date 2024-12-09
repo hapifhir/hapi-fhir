@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import jakarta.annotation.Nonnull;
@@ -76,17 +77,19 @@ public class BulkDataExportSupport {
 		}
 	}
 
-	public Collection<String> validateAndGetResourceTypes(Collection<String> theResourceTypes) {
-		if (CollectionUtils.isNotEmpty(theResourceTypes)) {
-			validateResourceTypesAllContainPatientSearchParams(theResourceTypes);
-			return theResourceTypes;
+	public void validateOrModifyResourceTypes(@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
+		if (CollectionUtils.isNotEmpty(theBulkExportJobParameters.getResourceTypes())) {
+			validateResourceTypesAllContainPatientSearchParams(theBulkExportJobParameters.getResourceTypes());
+		} else {
+			// all patient resource types
+			Set<String> groupTypes = new HashSet<>(getPatientCompartmentResources());
+
+			// Add the forward reference resource types from the patients, e.g. Practitioner, Organization
+			groupTypes.addAll(BulkDataExportUtil.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES);
+
+			groupTypes.removeIf(t -> !myDaoRegistry.isResourceTypeSupported(t));
+			theBulkExportJobParameters.setResourceTypes(groupTypes);
 		}
-		// all patient resource types
-		final Set<String> results = getPatientCompartmentResources();
-		// Add the forward reference resource types from the patients, e.g. Practitioner, Organization
-		results.addAll(BulkDataExportUtil.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES);
-		results.removeIf(t -> !myDaoRegistry.isResourceTypeSupported(t));
-		return results;
 	}
 
 	public void validateResourceTypesAllContainPatientSearchParams(Collection<String> theResourceTypes) {

@@ -194,8 +194,7 @@ public class BulkDataExportProvider {
 				.expandMdm(theMdm)
 				.build();
 
-		bulkExportJobParameters.setResourceTypes(
-				getBulkDataExportValidator().validateAndGetResourceTypes(bulkExportJobParameters.getResourceTypes()));
+		getBulkDataExportValidator().validateOrModifyResourceTypes(bulkExportJobParameters);
 		getBulkDataExportJobService().startJob(theRequestDetails, bulkExportJobParameters);
 	}
 
