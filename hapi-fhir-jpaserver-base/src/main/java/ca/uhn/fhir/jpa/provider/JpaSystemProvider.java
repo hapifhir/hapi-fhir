@@ -162,8 +162,11 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 					IPrimitiveType<Integer> theBatchSize,
 			RequestDetails theRequestDetails) {
 		validateReplaceReferencesParams(theSourceId, theTargetId);
-		Integer batchSize = defaultIfNull(
+		int batchSize = defaultIfNull(
 				IPrimitiveType.toValueOrNull(theBatchSize), myStorageSettings.getMaxTransactionEntriesForWrite());
+		if (batchSize > myStorageSettings.getMaxTransactionEntriesForWrite()) {
+			batchSize = myStorageSettings.getMaxTransactionEntriesForWrite();
+		}
 		ReplaceReferenceRequest replaceReferenceRequest =
 				new ReplaceReferenceRequest(new IdDt(theSourceId), new IdDt(theTargetId), batchSize);
 		return getReplaceReferencesSvc().replaceReferences(replaceReferenceRequest, theRequestDetails);

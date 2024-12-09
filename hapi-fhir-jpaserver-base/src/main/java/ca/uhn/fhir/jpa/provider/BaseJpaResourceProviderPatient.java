@@ -292,9 +292,12 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					IPrimitiveType<Integer> theBatchSize) {
 
 		startRequest(theServletRequest);
-		@Nonnull
-		Integer batchSize = defaultIfNull(
+		int batchSize = defaultIfNull(
 				IPrimitiveType.toValueOrNull(theBatchSize), myStorageSettings.getMaxTransactionEntriesForWrite());
+		if (batchSize > myStorageSettings.getMaxTransactionEntriesForWrite()) {
+			batchSize = myStorageSettings.getMaxTransactionEntriesForWrite();
+		}
+
 		try {
 			MergeOperationInputParameters mergeOperationParameters = buildMergeOperationInputParameters(
 					theSourcePatientIdentifier,

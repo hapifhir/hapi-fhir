@@ -20,8 +20,6 @@ public class ReplaceReferenceRequest {
 
 	@Nonnull
 	public final IIdType targetId;
-
-	@Nonnull
 	public final int batchSize;
 
 	public ReplaceReferenceRequest(@Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, int theBatchSize) {

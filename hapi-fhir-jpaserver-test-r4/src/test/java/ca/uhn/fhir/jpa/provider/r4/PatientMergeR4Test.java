@@ -56,6 +56,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
@@ -245,7 +246,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 			// Assert on the output type
 			Coding taskType = taskOutput.getType().getCodingFirstRep();
-			assertEquals("http://hl7.org/fhir/ValueSet/resource-types", taskType.getSystem());
+			assertEquals(RESOURCE_TYPES_SYSTEM, taskType.getSystem());
 			assertEquals("OperationOutcome", taskType.getCode());
 
 			List<Resource> containedResources = taskWithOutput.getContained();
@@ -467,6 +468,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		assertThat(outParams.getParameter()).hasSize(1);
 
+
+		Bundle patchResultBundle;
 		if (isAsync) {
 			Task task = (Task) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).getResource();
 			assertNull(task.getIdElement().getVersionIdPart());
@@ -474,31 +477,33 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			await().until(() -> taskCompleted(task.getIdElement()));
 
 			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
+			ourLog.info("Complete Task: {}", ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
 
 			// FIXME KHS the rest of these asserts will likely need to be tweaked
 			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
 
 			// Assert on the output type
 			Coding taskType = taskOutput.getType().getCodingFirstRep();
-			assertEquals("http://hl7.org/fhir/ValueSet/resource-types", taskType.getSystem());
-			assertEquals("OperationOutcome", taskType.getCode());
+			assertEquals(RESOURCE_TYPES_SYSTEM, taskType.getSystem());
+			assertEquals("Bundle", taskType.getCode());
 
 			List<Resource> containedResources = taskWithOutput.getContained();
 			assertThat(containedResources)
 				.hasSize(1)
 				.element(0)
-				.isInstanceOf(OperationOutcome.class);
+				.isInstanceOf(Bundle.class);
 
-			OperationOutcome containedOutcome = (OperationOutcome) containedResources.get(0);
+			Bundle containedBundle = (Bundle) containedResources.get(0);
 
 			Reference outputRef = (Reference) taskOutput.getValue();
-			OperationOutcome outcome = (OperationOutcome) outputRef.getResource();
-			assertTrue(containedOutcome.equalsDeep(outcome));
+			patchResultBundle = (Bundle) outputRef.getResource();
+			assertTrue(containedBundle.equalsDeep(patchResultBundle));
+		} else {
+			patchResultBundle = (Bundle) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME).getResource();
 		}
 
 		// validate
 		Pattern expectedPatchIssuePattern = Pattern.compile("Successfully patched resource \"(Observation|Encounter|CarePlan)/\\d+/_history/\\d+\".");
-		Bundle patchResultBundle = (Bundle) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME).getResource();
 		assertThat(patchResultBundle.getEntry()).hasSize(23)
 			.allSatisfy(entry ->
 				assertThat(entry.getResponse().getOutcome())
