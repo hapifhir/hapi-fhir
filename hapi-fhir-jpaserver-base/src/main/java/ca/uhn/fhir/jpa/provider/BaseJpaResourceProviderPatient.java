@@ -49,7 +49,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.IdentifierUtil;
 import ca.uhn.fhir.util.ParametersUtil;
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseParameters;

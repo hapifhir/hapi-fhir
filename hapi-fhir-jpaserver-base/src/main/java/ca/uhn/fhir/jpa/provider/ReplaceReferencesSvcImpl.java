@@ -87,11 +87,11 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	}
 
 	public ReplaceReferencesSvcImpl(
-		FhirContext theFhirContext,
-		DaoRegistry theDaoRegistry,
-		HapiTransactionService theHapiTransactionService,
-		IdHelperService theIdHelperService,
-		IResourceLinkDao theResourceLinkDao) {
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			IdHelperService theIdHelperService,
+			IResourceLinkDao theResourceLinkDao) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
@@ -101,7 +101,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	@Override
 	public IBaseParameters replaceReferences(
-		ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 		theReplaceReferenceRequest.validateOrThrowInvalidParameterException();
 
 		if (theRequestDetails.isPreferAsync()) {
@@ -116,13 +116,13 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
 			// FIXME KHS get partition from request
 			JpaPid sourcePid =
-				myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResourceId);
+					myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResourceId);
 			return myResourceLinkDao.countResourcesTargetingPid(sourcePid.getId());
 		});
 	}
 
 	private IBaseParameters replaceReferencesPreferAsync(
-		ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 		// FIXME KHS actually start the job
 		Task task = new Task();
 		task.setStatus(Task.TaskStatus.INPROGRESS);
@@ -135,8 +135,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		Parameters retval = new Parameters();
 		retval.addParameter()
-			.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
-			.setResource(returnedTask);
+				.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
+				.setResource(returnedTask);
 
 		// FIXME KHS set partitions from request
 		fakeBackgroundTaskUpdate(theReplaceReferenceRequest, task, RequestPartitionId.allPartitions());
@@ -144,107 +144,111 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	}
 
 	// FIXME KHS replace this with a proper batch job
-	private void fakeBackgroundTaskUpdate(ReplaceReferenceRequest theReplaceReferenceRequest, Task theTask, RequestPartitionId thePartitionId) {
+	private void fakeBackgroundTaskUpdate(
+			ReplaceReferenceRequest theReplaceReferenceRequest, Task theTask, RequestPartitionId thePartitionId) {
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 		systemRequestDetails.setRequestPartitionId(thePartitionId);
 		myFakeExecutor.submit(() -> {
-				try {
+			try {
 
-					List<JpaPid> pidList = myHapiTransactionService
+				List<JpaPid> pidList = myHapiTransactionService
 						.withSystemRequestOnPartition(thePartitionId)
-						.execute(() ->
-							getReferencingResourcePidStream(theReplaceReferenceRequest).collect(Collectors.toUnmodifiableList()));
+						.execute(() -> getReferencingResourcePidStream(theReplaceReferenceRequest)
+								.collect(Collectors.toUnmodifiableList()));
 
-					List<List<JpaPid>> chunks = Lists.partition(pidList, theReplaceReferenceRequest.batchSize);
-					List<Bundle> outputBundles = new ArrayList<>();
+				List<List<JpaPid>> chunks = Lists.partition(pidList, theReplaceReferenceRequest.batchSize);
+				List<Bundle> outputBundles = new ArrayList<>();
 
-					chunks.forEach(chunk -> {
-						Bundle result = patchReferencingResources(theReplaceReferenceRequest, chunk, systemRequestDetails);
-						outputBundles.add(result);
-					});
+				chunks.forEach(chunk -> {
+					Bundle result = patchReferencingResources(theReplaceReferenceRequest, chunk, systemRequestDetails);
+					outputBundles.add(result);
+				});
 
-					theTask.setStatus(Task.TaskStatus.COMPLETED);
-					outputBundles.forEach(outputBundle -> {
-						Task.TaskOutputComponent output = theTask.addOutput();
-						Coding coding = output.getType().getCodingFirstRep();
-						coding.setSystem(RESOURCE_TYPES_SYSTEM);
-						coding.setCode("Bundle");
-						Reference outputBundleReference = new Reference("#" + outputBundle.getIdElement().toUnqualifiedVersionless());
-						output.setValue(outputBundleReference);
-						theTask.addContained(outputBundle);
-					});
+				theTask.setStatus(Task.TaskStatus.COMPLETED);
+				outputBundles.forEach(outputBundle -> {
+					Task.TaskOutputComponent output = theTask.addOutput();
+					Coding coding = output.getType().getCodingFirstRep();
+					coding.setSystem(RESOURCE_TYPES_SYSTEM);
+					coding.setCode("Bundle");
+					Reference outputBundleReference =
+							new Reference("#" + outputBundle.getIdElement().toUnqualifiedVersionless());
+					output.setValue(outputBundleReference);
+					theTask.addContained(outputBundle);
+				});
 
-					myDaoRegistry.getResourceDao(Task.class).update(theTask, new SystemRequestDetails());
-					ourLog.info("Updated task {} to COMPLETED.", theTask.getId());
-				} catch (Exception e) {
-					ourLog.error("Patch failed", e);
-					theTask.setStatus(Task.TaskStatus.FAILED);
-					myDaoRegistry.getResourceDao(Task.class).update(theTask, new SystemRequestDetails());
-					ourLog.info("Updated task {} to FAILED.", theTask.getId());
-				}});
-
+				myDaoRegistry.getResourceDao(Task.class).update(theTask, new SystemRequestDetails());
+				ourLog.info("Updated task {} to COMPLETED.", theTask.getId());
+			} catch (Exception e) {
+				ourLog.error("Patch failed", e);
+				theTask.setStatus(Task.TaskStatus.FAILED);
+				myDaoRegistry.getResourceDao(Task.class).update(theTask, new SystemRequestDetails());
+				ourLog.info("Updated task {} to FAILED.", theTask.getId());
 			}
+		});
+	}
 
-			/**
-			 * Try to perform the operation synchronously. However if there is more than a page of results, fall back to asynchronous operation
-			 */
-		@Nonnull
-		private IBaseParameters replaceReferencesPreferSync (
-			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails){
+	/**
+	 * Try to perform the operation synchronously. However if there is more than a page of results, fall back to asynchronous operation
+	 */
+	@Nonnull
+	private IBaseParameters replaceReferencesPreferSync(
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 
-			// TODO KHS get partition from request
-			StopLimitAccumulator<JpaPid> accumulator = myHapiTransactionService
+		// TODO KHS get partition from request
+		StopLimitAccumulator<JpaPid> accumulator = myHapiTransactionService
 				.withRequest(theRequestDetails)
 				.execute(() -> getAllPidsWithLimit(theReplaceReferenceRequest));
 
-			if (accumulator.isTruncated()) {
-				ourLog.warn("Too many results. Switching to asynchronous reference replacement.");
-				return replaceReferencesPreferAsync(theReplaceReferenceRequest, theRequestDetails);
-			}
+		if (accumulator.isTruncated()) {
+			ourLog.warn("Too many results. Switching to asynchronous reference replacement.");
+			return replaceReferencesPreferAsync(theReplaceReferenceRequest, theRequestDetails);
+		}
 
-			Bundle result = patchReferencingResources(theReplaceReferenceRequest, accumulator.getItemList(), theRequestDetails);
+		Bundle result =
+				patchReferencingResources(theReplaceReferenceRequest, accumulator.getItemList(), theRequestDetails);
 
-			Parameters retval = new Parameters();
-			retval.addParameter()
+		Parameters retval = new Parameters();
+		retval.addParameter()
 				.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME)
 				.setResource(result);
-			return retval;
-		}
+		return retval;
+	}
 
-		private Bundle patchReferencingResources (ReplaceReferenceRequest
-		theReplaceReferenceRequest, List < JpaPid > thePidList, RequestDetails theRequestDetails){
-			Bundle patchBundle = buildPatchBundle(theReplaceReferenceRequest, theRequestDetails, thePidList);
-			IFhirSystemDao<Bundle, Meta> systemDao = myDaoRegistry.getSystemDao();
-			Bundle result = systemDao.transaction(theRequestDetails, patchBundle);
-			// TODO KHS shouldn't transaction response bundles have ids?
-			result.setId(UUID.randomUUID().toString());
-			return result;
-		}
+	private Bundle patchReferencingResources(
+			ReplaceReferenceRequest theReplaceReferenceRequest,
+			List<JpaPid> thePidList,
+			RequestDetails theRequestDetails) {
+		Bundle patchBundle = buildPatchBundle(theReplaceReferenceRequest, theRequestDetails, thePidList);
+		IFhirSystemDao<Bundle, Meta> systemDao = myDaoRegistry.getSystemDao();
+		Bundle result = systemDao.transaction(theRequestDetails, patchBundle);
+		// TODO KHS shouldn't transaction response bundles have ids?
+		result.setId(UUID.randomUUID().toString());
+		return result;
+	}
 
-		private @Nonnull StopLimitAccumulator<JpaPid> getAllPidsWithLimit (
-			ReplaceReferenceRequest theReplaceReferenceRequest){
-			Stream<JpaPid> pidStream = getReferencingResourcePidStream(theReplaceReferenceRequest);
-			StopLimitAccumulator<JpaPid> accumulator =
+	private @Nonnull StopLimitAccumulator<JpaPid> getAllPidsWithLimit(
+			ReplaceReferenceRequest theReplaceReferenceRequest) {
+		Stream<JpaPid> pidStream = getReferencingResourcePidStream(theReplaceReferenceRequest);
+		StopLimitAccumulator<JpaPid> accumulator =
 				StopLimitAccumulator.fromStreamAndLimit(pidStream, theReplaceReferenceRequest.batchSize);
-			return accumulator;
-		}
+		return accumulator;
+	}
 
-		private @Nonnull Stream<JpaPid> getReferencingResourcePidStream (ReplaceReferenceRequest
-		theReplaceReferenceRequest){
-			JpaPid sourcePid = myIdHelperService.getPidOrThrowException(
+	private @Nonnull Stream<JpaPid> getReferencingResourcePidStream(
+			ReplaceReferenceRequest theReplaceReferenceRequest) {
+		JpaPid sourcePid = myIdHelperService.getPidOrThrowException(
 				RequestPartitionId.allPartitions(), theReplaceReferenceRequest.sourceId);
 
-			return myResourceLinkDao
-				.streamSourcePidsForTargetPid(sourcePid.getId())
-				.map(JpaPid::fromId);
-		}
+		return myResourceLinkDao.streamSourcePidsForTargetPid(sourcePid.getId()).map(JpaPid::fromId);
+	}
 
-		private Bundle buildPatchBundle (
+	private Bundle buildPatchBundle(
 			ReplaceReferenceRequest theReplaceReferenceRequest,
-			RequestDetails theRequestDetails, List < JpaPid > thePidList){
-			BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+			RequestDetails theRequestDetails,
+			List<JpaPid> thePidList) {
+		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
-			thePidList.stream()
+		thePidList.stream()
 				.map(myIdHelperService::translatePidIdToForcedIdWithCache)
 				.filter(Optional::isPresent)
 				.map(Optional::get)
@@ -256,46 +260,46 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 					IIdType resourceId = resource.getIdElement();
 					bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
 				});
-			Bundle patchBundle = bundleBuilder.getBundleTyped();
-			return patchBundle;
-		}
+		Bundle patchBundle = bundleBuilder.getBundleTyped();
+		return patchBundle;
+	}
 
-		private @Nonnull Parameters buildPatchParams (
-			ReplaceReferenceRequest theReplaceReferenceRequest, IBaseResource referencingResource){
-			Parameters params = new Parameters();
+	private @Nonnull Parameters buildPatchParams(
+			ReplaceReferenceRequest theReplaceReferenceRequest, IBaseResource referencingResource) {
+		Parameters params = new Parameters();
 
-			myFhirContext.newTerser().getAllResourceReferences(referencingResource).stream()
+		myFhirContext.newTerser().getAllResourceReferences(referencingResource).stream()
 				.filter(refInfo -> matches(
-					refInfo,
-					theReplaceReferenceRequest.sourceId)) // We only care about references to our source resource
+						refInfo,
+						theReplaceReferenceRequest.sourceId)) // We only care about references to our source resource
 				.map(refInfo -> createReplaceReferencePatchOperation(
-					referencingResource.fhirType() + "." + refInfo.getName(),
-					new Reference(theReplaceReferenceRequest.targetId.getValueAsString())))
+						referencingResource.fhirType() + "." + refInfo.getName(),
+						new Reference(theReplaceReferenceRequest.targetId.getValueAsString())))
 				.forEach(params::addParameter); // Add each operation to parameters
-			return params;
-		}
+		return params;
+	}
 
-		private static boolean matches (ResourceReferenceInfo refInfo, IIdType theSourceId){
-			return refInfo.getResourceReference()
+	private static boolean matches(ResourceReferenceInfo refInfo, IIdType theSourceId) {
+		return refInfo.getResourceReference()
 				.getReferenceElement()
 				.toUnqualifiedVersionless()
 				.getValueAsString()
 				.equals(theSourceId.getValueAsString());
-		}
-
-		@Nonnull
-		private Parameters.ParametersParameterComponent createReplaceReferencePatchOperation (
-			String thePath, Type theValue){
-
-			Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
-			operation.setName(PARAMETER_OPERATION);
-			operation.addPart().setName(PARAMETER_TYPE).setValue(new CodeType(OPERATION_REPLACE));
-			operation.addPart().setName(PARAMETER_PATH).setValue(new StringType(thePath));
-			operation.addPart().setName(PARAMETER_VALUE).setValue(theValue);
-			return operation;
-		}
-
-		private IFhirResourceDao<?> getDao (String theResourceName){
-			return myDaoRegistry.getResourceDao(theResourceName);
-		}
 	}
+
+	@Nonnull
+	private Parameters.ParametersParameterComponent createReplaceReferencePatchOperation(
+			String thePath, Type theValue) {
+
+		Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
+		operation.setName(PARAMETER_OPERATION);
+		operation.addPart().setName(PARAMETER_TYPE).setValue(new CodeType(OPERATION_REPLACE));
+		operation.addPart().setName(PARAMETER_PATH).setValue(new StringType(thePath));
+		operation.addPart().setName(PARAMETER_VALUE).setValue(theValue);
+		return operation;
+	}
+
+	private IFhirResourceDao<?> getDao(String theResourceName) {
+		return myDaoRegistry.getResourceDao(theResourceName);
+	}
+}

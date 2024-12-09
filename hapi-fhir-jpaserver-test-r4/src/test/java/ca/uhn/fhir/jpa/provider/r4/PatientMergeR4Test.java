@@ -231,82 +231,86 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 		assertTrue(input.equalsDeep(inParameters));
 
-		// Assert outcome
-		OperationOutcome outcome;
+
 
 		// Assert Task
 		if (isAsync) {
 			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+			assertNull(task.getIdElement().getVersionIdPart());
 			ourLog.info("Got task {}", task.getId());
 			await().until(() -> taskCompleted(task.getIdElement()));
 
 			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
+			ourLog.info("Complete Task: {}", ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
 
+			// FIXME KHS the rest of these asserts will likely need to be tweaked
 			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
 
 			// Assert on the output type
 			Coding taskType = taskOutput.getType().getCodingFirstRep();
 			assertEquals(RESOURCE_TYPES_SYSTEM, taskType.getSystem());
-			assertEquals("OperationOutcome", taskType.getCode());
+			assertEquals("Bundle", taskType.getCode());
 
 			List<Resource> containedResources = taskWithOutput.getContained();
 			assertThat(containedResources)
 				.hasSize(1)
 				.element(0)
-				.isInstanceOf(OperationOutcome.class);
+				.isInstanceOf(Bundle.class);
 
-			OperationOutcome containedOutcome = (OperationOutcome) containedResources.get(0);
+			Bundle containedBundle = (Bundle) containedResources.get(0);
 
 			Reference outputRef = (Reference) taskOutput.getValue();
-			outcome = (OperationOutcome) outputRef.getResource();
-			assertTrue(containedOutcome.equalsDeep(outcome));
-		} else {
-			outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
-		}
+			Bundle patchResultBundle = (Bundle) outputRef.getResource();
+			assertTrue(containedBundle.equalsDeep(patchResultBundle));
+			validatePatchResultBundle(patchResultBundle);
+		} else { // Synchronous case
+			// Assert outcome
+			OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
 
-		if (withPreview) {
-			assertThat(outcome.getIssue())
-				.hasSize(1)
-				.element(0)
-				.satisfies(issue -> {
-					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-					assertThat(issue.getDetails().getText()).isEqualTo("Preview only merge operation - no issues detected");
-					assertThat(issue.getDiagnostics()).isEqualTo("Merge would update 25 resources");
-				});
-		} else {
-			assertThat(outcome.getIssue())
-				.hasSize(1)
-				.element(0)
-				.satisfies(issue -> {
-					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-					assertThat(issue.getDetails().getText()).isEqualTo("Merge operation completed successfully.");
-				});
-		}
+			if (withPreview) {
+				assertThat(outcome.getIssue())
+					.hasSize(1)
+					.element(0)
+					.satisfies(issue -> {
+						assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+						assertThat(issue.getDetails().getText()).isEqualTo("Preview only merge operation - no issues detected");
+						assertThat(issue.getDiagnostics()).isEqualTo("Merge would update 25 resources");
+					});
+			} else {
+				assertThat(outcome.getIssue())
+					.hasSize(1)
+					.element(0)
+					.satisfies(issue -> {
+						assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+						assertThat(issue.getDetails().getText()).isEqualTo("Merge operation completed successfully.");
+					});
+			}
 
-		// Assert Merged Patient
-		Patient mergedPatient = (Patient) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
-		List<Identifier> identifiers = mergedPatient.getIdentifier();
-		if (withInputResultPatient) {
-			assertThat(identifiers).hasSize(1);
-			assertThat(identifiers.get(0).getSystem()).isEqualTo("SYS1A");
-			assertThat(identifiers.get(0).getValue()).isEqualTo("VAL1A");
-		} else {
-			assertThat(identifiers).hasSize(5);
-			assertThat(identifiers)
-				.extracting(Identifier::getSystem)
-				.containsExactlyInAnyOrder("SYS1A", "SYS1B", "SYS2A", "SYS2B", "SYSC");
-			assertThat(identifiers)
-				.extracting(Identifier::getValue)
-				.containsExactlyInAnyOrder("VAL1A", "VAL1B", "VAL2A", "VAL2B", "VALC");
-		}
-		if (!withPreview && !withDelete) {
-			// assert source has link to target
-			Patient source = myPatientDao.read(mySourcePatId, mySrd);
-			assertThat(source.getLink())
-				.hasSize(1)
-				.element(0)
-				.extracting(link -> link.getOther().getReferenceElement())
-				.isEqualTo(myTargetPatId);
+			// Assert Merged Patient
+			Patient mergedPatient = (Patient) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
+			List<Identifier> identifiers = mergedPatient.getIdentifier();
+			if (withInputResultPatient) {
+				assertThat(identifiers).hasSize(1);
+				assertThat(identifiers.get(0).getSystem()).isEqualTo("SYS1A");
+				assertThat(identifiers.get(0).getValue()).isEqualTo("VAL1A");
+			} else {
+				assertThat(identifiers).hasSize(5);
+				assertThat(identifiers)
+					.extracting(Identifier::getSystem)
+					.containsExactlyInAnyOrder("SYS1A", "SYS1B", "SYS2A", "SYS2B", "SYSC");
+				assertThat(identifiers)
+					.extracting(Identifier::getValue)
+					.containsExactlyInAnyOrder("VAL1A", "VAL1B", "VAL2A", "VAL2B", "VALC");
+			}
+			if (!withPreview && !withDelete) {
+				// assert source has link to target
+				Patient source = myPatientDao.read(mySourcePatId, mySrd);
+				assertThat(source.getLink())
+					.hasSize(1)
+					.element(0)
+					.extracting(link -> link.getOther().getReferenceElement())
+					.isEqualTo(myTargetPatId);
+			}
 		}
 
 		// Check that the linked resources were updated
@@ -503,18 +507,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 
 		// validate
-		Pattern expectedPatchIssuePattern = Pattern.compile("Successfully patched resource \"(Observation|Encounter|CarePlan)/\\d+/_history/\\d+\".");
-		assertThat(patchResultBundle.getEntry()).hasSize(23)
-			.allSatisfy(entry ->
-				assertThat(entry.getResponse().getOutcome())
-					.isInstanceOf(OperationOutcome.class)
-					.extracting(OperationOutcome.class::cast)
-					.extracting(OperationOutcome::getIssue)
-					.satisfies(issues ->
-						assertThat(issues).hasSize(1)
-							.element(0)
-							.extracting(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
-							.satisfies(diagnostics -> assertThat(diagnostics).matches(expectedPatchIssuePattern))));
+		validatePatchResultBundle(patchResultBundle);
 
 		// Check that the linked resources were updated
 
@@ -536,6 +529,21 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual).containsAll(mySourceObsIds);
 		assertThat(actual).contains(myTargetPatId);
 		assertThat(actual).contains(myTargetEnc1);
+	}
+
+	private static void validatePatchResultBundle(Bundle patchResultBundle) {
+		Pattern expectedPatchIssuePattern = Pattern.compile("Successfully patched resource \"(Observation|Encounter|CarePlan)/\\d+/_history/\\d+\".");
+		assertThat(patchResultBundle.getEntry()).hasSize(23)
+			.allSatisfy(entry ->
+				assertThat(entry.getResponse().getOutcome())
+					.isInstanceOf(OperationOutcome.class)
+					.extracting(OperationOutcome.class::cast)
+					.extracting(OperationOutcome::getIssue)
+					.satisfies(issues ->
+						assertThat(issues).hasSize(1)
+							.element(0)
+							.extracting(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+							.satisfies(diagnostics -> assertThat(diagnostics).matches(expectedPatchIssuePattern))));
 	}
 
 	// FIXME KHS look at PatientEverythingR4Test for ideas for other tests
