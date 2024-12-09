@@ -9,10 +9,14 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import jakarta.annotation.Nonnull;
 
-public class ReplaceReferencesQueryIdsStep implements IJobStepWorker<ReplaceReferencesJobParameters, VoidModel, ResourceIdListWorkChunkJson> {
+public class ReplaceReferencesQueryIdsStep
+		implements IJobStepWorker<ReplaceReferencesJobParameters, VoidModel, ResourceIdListWorkChunkJson> {
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ReplaceReferencesJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<ReplaceReferencesJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink)
+			throws JobExecutionFailedException {
 		return null;
 	}
 }

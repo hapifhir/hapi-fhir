@@ -8,10 +8,17 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import jakarta.annotation.Nonnull;
 
-public class ReplaceReferenceUpdateStep implements IJobStepWorker<ReplaceReferencesJobParameters, ResourceIdListWorkChunkJson, ReplaceReferenceResults> {
+public class ReplaceReferenceUpdateStep
+		implements IJobStepWorker<
+				ReplaceReferencesJobParameters, ResourceIdListWorkChunkJson, ReplaceReferenceResults> {
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ReplaceReferencesJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<ReplaceReferenceResults> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull
+					StepExecutionDetails<ReplaceReferencesJobParameters, ResourceIdListWorkChunkJson>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<ReplaceReferenceResults> theDataSink)
+			throws JobExecutionFailedException {
 		return null;
 	}
 }

@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -54,7 +53,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -112,7 +110,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	@Override
 	public Integer countResourcesReferencingResource(IIdType theResourceId, RequestDetails theRequestDetails) {
 		return myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
-			return myResourceLinkDao.countResourcesTargetingFhirTypeAndId(theResourceId.getResourceType(), theResourceId.getIdPart());
+			return myResourceLinkDao.countResourcesTargetingFhirTypeAndId(
+					theResourceId.getResourceType(), theResourceId.getIdPart());
 		});
 	}
 
@@ -148,7 +147,10 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 				List<IdDt> pidList = myHapiTransactionService
 						.withSystemRequestOnPartition(thePartitionId)
-						.execute(() -> myResourceLinkDao.streamSourceIdsForTargetPid(theReplaceReferenceRequest.sourceId.getResourceType(), theReplaceReferenceRequest.sourceId.getIdPart())
+						.execute(() -> myResourceLinkDao
+								.streamSourceIdsForTargetPid(
+										theReplaceReferenceRequest.sourceId.getResourceType(),
+										theReplaceReferenceRequest.sourceId.getIdPart())
 								.collect(Collectors.toUnmodifiableList()));
 
 				List<List<IdDt>> chunks = Lists.partition(pidList, theReplaceReferenceRequest.batchSize);
@@ -224,7 +226,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private @Nonnull StopLimitAccumulator<IdDt> getAllPidsWithLimit(
 			ReplaceReferenceRequest theReplaceReferenceRequest) {
 
-		Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetPid(theReplaceReferenceRequest.sourceId.getResourceType(), theReplaceReferenceRequest.sourceId.getIdPart());
+		Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetPid(
+				theReplaceReferenceRequest.sourceId.getResourceType(), theReplaceReferenceRequest.sourceId.getIdPart());
 		StopLimitAccumulator<IdDt> accumulator =
 				StopLimitAccumulator.fromStreamAndLimit(idStream, theReplaceReferenceRequest.batchSize);
 		return accumulator;
@@ -236,14 +239,13 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 			List<IdDt> theFhirIdList) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
-		theFhirIdList
-				.forEach(referencingResourceId -> {
-					IFhirResourceDao<?> dao = getDao(referencingResourceId.getResourceType());
-					IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
-					Parameters patchParams = buildPatchParams(theReplaceReferenceRequest, resource);
-					IIdType resourceId = resource.getIdElement();
-					bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
-				});
+		theFhirIdList.forEach(referencingResourceId -> {
+			IFhirResourceDao<?> dao = getDao(referencingResourceId.getResourceType());
+			IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
+			Parameters patchParams = buildPatchParams(theReplaceReferenceRequest, resource);
+			IIdType resourceId = resource.getIdElement();
+			bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
+		});
 		return bundleBuilder.getBundleTyped();
 	}
 
