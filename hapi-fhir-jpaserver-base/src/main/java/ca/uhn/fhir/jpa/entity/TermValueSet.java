@@ -49,6 +49,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -128,6 +130,7 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 	private Long myTotalConceptDesignations;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
 	private TermValueSetPreExpansionStatusEnum myExpansionStatus;
 

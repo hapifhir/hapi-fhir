@@ -169,6 +169,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private SearchTypeEnum mySearchType;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(name = "SEARCH_STATUS", nullable = false, length = 10)
 	private SearchStatusEnum myStatus;
 

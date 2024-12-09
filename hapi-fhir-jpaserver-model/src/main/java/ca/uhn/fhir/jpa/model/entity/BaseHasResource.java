@@ -29,7 +29,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -49,6 +51,7 @@ public abstract class BaseHasResource<T>
 	@Column(name = "RES_VERSION", nullable = true, length = 7)
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private FhirVersionEnum myFhirVersion;
 
 	@Column(name = "HAS_TAGS", nullable = false)
