@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -85,6 +86,10 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	static final Identifier pat2IdentifierA = new Identifier().setSystem("SYS2A").setValue("VAL2A");
 	static final Identifier pat2IdentifierB = new Identifier().setSystem("SYS2B").setValue("VAL2B");
 	static final Identifier patBothIdentifierC = new Identifier().setSystem("SYSC").setValue("VALC");
+	static final int TOTAL_EXPECTED_PATCHES = 23;
+	static final int SMALL_BATCH_SIZE = 5;
+	static final int EXPECTED_SMALL_BATCHES = (TOTAL_EXPECTED_PATCHES + SMALL_BATCH_SIZE - 1) / SMALL_BATCH_SIZE;
+
 
 	IIdType myOrgId;
 	IIdType mySourcePatId;
@@ -232,7 +237,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertTrue(input.equalsDeep(inParameters));
 
 
-
 		// Assert Task
 		if (isAsync) {
 			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
@@ -262,7 +266,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			Reference outputRef = (Reference) taskOutput.getValue();
 			Bundle patchResultBundle = (Bundle) outputRef.getResource();
 			assertTrue(containedBundle.equalsDeep(patchResultBundle));
-			validatePatchResultBundle(patchResultBundle);
+			validatePatchResultBundle(patchResultBundle, TOTAL_EXPECTED_PATCHES);
 		} else { // Synchronous case
 			// Assert outcome
 			OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
@@ -472,7 +476,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		assertThat(outParams.getParameter()).hasSize(1);
 
-
 		Bundle patchResultBundle;
 		if (isAsync) {
 			Task task = (Task) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).getResource();
@@ -483,7 +486,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
 			ourLog.info("Complete Task: {}", ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
 
-			// FIXME KHS the rest of these asserts will likely need to be tweaked
 			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
 
 			// Assert on the output type
@@ -507,10 +509,80 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 
 		// validate
-		validatePatchResultBundle(patchResultBundle);
+		validatePatchResultBundle(patchResultBundle, TOTAL_EXPECTED_PATCHES);
 
 		// Check that the linked resources were updated
 
+		validateLinksUsingEverything();
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void testReplaceReferencesSmallBatchSize(boolean isAsync) throws IOException {
+		// exec
+		IOperationUntypedWithInput<Parameters> request = myClient.operation()
+			.onServer()
+			.named(OPERATION_REPLACE_REFERENCES)
+			.withParameter(Parameters.class, ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID, new StringType(mySourcePatId.getValue()))
+			.andParameter(ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID, new StringType(myTargetPatId.getValue()))
+			.andParameter(ProviderConstants.OPERATION_REPLACE_REFERENCES_BATCH_SIZE, new IntegerType(SMALL_BATCH_SIZE));
+
+		if (isAsync) {
+			request.withAdditionalHeader(HEADER_PREFER, HEADER_PREFER_RESPOND_ASYNC);
+		}
+
+		Parameters outParams = request
+			.returnResourceType(Parameters.class)
+			.execute();
+
+		assertThat(outParams.getParameter()).hasSize(1);
+
+		Bundle patchResultBundle;
+		Task task = (Task) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).getResource();
+		assertNull(task.getIdElement().getVersionIdPart());
+		ourLog.info("Got task {}", task.getId());
+		await().until(() -> taskCompleted(task.getIdElement()));
+
+		Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
+		ourLog.info("Complete Task: {}", ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
+
+		assertThat(taskWithOutput.getOutput()).hasSize(EXPECTED_SMALL_BATCHES);
+		List<Resource> containedResources = taskWithOutput.getContained();
+
+		assertThat(containedResources)
+			.hasSize(EXPECTED_SMALL_BATCHES)
+			.element(0)
+			.isInstanceOf(Bundle.class);
+
+		int entriesLeft = TOTAL_EXPECTED_PATCHES;
+		for (int i = 1; i < EXPECTED_SMALL_BATCHES; i++) {
+
+			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutput().get(i);
+
+			// Assert on the output type
+			Coding taskType = taskOutput.getType().getCodingFirstRep();
+			assertEquals(RESOURCE_TYPES_SYSTEM, taskType.getSystem());
+			assertEquals("Bundle", taskType.getCode());
+
+			Bundle containedBundle = (Bundle) containedResources.get(i);
+
+			Reference outputRef = (Reference) taskOutput.getValue();
+			patchResultBundle = (Bundle) outputRef.getResource();
+			assertTrue(containedBundle.equalsDeep(patchResultBundle));
+
+			// validate
+			entriesLeft -= SMALL_BATCH_SIZE;
+			int expectedNumberOfEntries = entriesLeft > SMALL_BATCH_SIZE ? SMALL_BATCH_SIZE : entriesLeft;
+			validatePatchResultBundle(patchResultBundle, expectedNumberOfEntries);
+		}
+
+
+		// Check that the linked resources were updated
+
+		validateLinksUsingEverything();
+	}
+
+	private void validateLinksUsingEverything() throws IOException {
 		Bundle everythingBundle = fetchBundle(myServerBase + "/" + myTargetPatId + "/$everything?_format=json&_count=100");
 
 		assertNull(everythingBundle.getLink("next"));
@@ -531,9 +603,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual).contains(myTargetEnc1);
 	}
 
-	private static void validatePatchResultBundle(Bundle patchResultBundle) {
+	private static void validatePatchResultBundle(Bundle patchResultBundle, int theTotalExpectedPatches) {
 		Pattern expectedPatchIssuePattern = Pattern.compile("Successfully patched resource \"(Observation|Encounter|CarePlan)/\\d+/_history/\\d+\".");
-		assertThat(patchResultBundle.getEntry()).hasSize(23)
+		assertThat(patchResultBundle.getEntry()).hasSize(theTotalExpectedPatches)
 			.allSatisfy(entry ->
 				assertThat(entry.getResponse().getOutcome())
 					.isInstanceOf(OperationOutcome.class)

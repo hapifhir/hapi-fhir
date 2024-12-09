@@ -158,7 +158,7 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 					String theSourceId,
 			@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID)
 					String theTargetId,
-			@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PAGE_SIZE, typeName = "unsignedInt")
+			@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_BATCH_SIZE, typeName = "unsignedInt")
 					IPrimitiveType<Integer> theBatchSize,
 			RequestDetails theRequestDetails) {
 		validateReplaceReferencesParams(theSourceId, theTargetId);

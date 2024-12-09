@@ -264,7 +264,7 @@ public class ProviderConstants {
 	 * The number of resources that will be modified at a time. If the number of resources that need to change
 	 * exceeds this amount, the operation will switch to async mode.
 	 */
-	public static final String OPERATION_REPLACE_REFERENCES_PAGE_SIZE = "page-size";
+	public static final String OPERATION_REPLACE_REFERENCES_BATCH_SIZE = "batch-size";
 
 	/**
 	 * $replace-references output Parameters names
