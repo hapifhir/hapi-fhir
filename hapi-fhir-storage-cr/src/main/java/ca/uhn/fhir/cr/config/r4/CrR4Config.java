@@ -32,8 +32,8 @@ import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
 import ca.uhn.fhir.cr.r4.ICollectDataServiceFactory;
 import ca.uhn.fhir.cr.r4.ICqlExecutionServiceFactory;
 import ca.uhn.fhir.cr.r4.IDataRequirementsServiceFactory;
-import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.cr.r4.ISubmitDataProcessorFactory;
+import ca.uhn.fhir.cr.r4.R4MeasureEvaluatorSingleFactory;
 import ca.uhn.fhir.cr.r4.R4MeasureServiceUtilsFactory;
 import ca.uhn.fhir.cr.r4.cpg.CqlExecutionOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
@@ -66,13 +66,16 @@ import java.util.Map;
 public class CrR4Config {
 
 	@Bean
-	IMeasureServiceFactory r4MeasureServiceFactory(
+	R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory(
 			RepositoryFactoryForRepositoryInterface theRepositoryFactory,
 			MeasureEvaluationOptions theEvaluationOptions,
 			MeasurePeriodValidator theMeasurePeriodValidator,
 			R4MeasureServiceUtilsFactory theR4MeasureServiceUtilsFactory) {
-		return rd ->
-				new R4MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions, theMeasurePeriodValidator, theR4MeasureServiceUtilsFactory.create(rd));
+		return rd -> new R4MeasureService(
+				theRepositoryFactory.create(rd),
+				theEvaluationOptions,
+				theMeasurePeriodValidator,
+				theR4MeasureServiceUtilsFactory.create(rd));
 	}
 
 	@Bean
@@ -99,7 +102,8 @@ public class CrR4Config {
 	}
 
 	@Bean
-	R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory(RepositoryFactoryForRepositoryInterface theRepositoryFactory) {
+	R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory(
+			RepositoryFactoryForRepositoryInterface theRepositoryFactory) {
 		return requestDetails -> new R4MeasureServiceUtils(theRepositoryFactory.create(requestDetails));
 	}
 
@@ -108,7 +112,10 @@ public class CrR4Config {
 			IRepositoryFactory theRepositoryFactory,
 			MeasureEvaluationOptions theMeasureEvaluationOptions,
 			R4MeasureServiceUtilsFactory theR4MeasureServiceUtilsFactory) {
-		return rd -> new R4CollectDataService(theRepositoryFactory.create(rd), theMeasureEvaluationOptions, theR4MeasureServiceUtilsFactory.create(rd));
+		return rd -> new R4CollectDataService(
+				theRepositoryFactory.create(rd),
+				theMeasureEvaluationOptions,
+				theR4MeasureServiceUtilsFactory.create(rd));
 	}
 
 	@Bean
@@ -149,7 +156,8 @@ public class CrR4Config {
 
 	@Bean
 	MeasureOperationsProvider r4MeasureOperationsProvider(
-			IMeasureServiceFactory theR4MeasureServiceFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+			R4MeasureEvaluatorSingleFactory theR4MeasureServiceFactory,
+			StringTimePeriodHandler theStringTimePeriodHandler) {
 		return new MeasureOperationsProvider(theR4MeasureServiceFactory, theStringTimePeriodHandler);
 	}
 
