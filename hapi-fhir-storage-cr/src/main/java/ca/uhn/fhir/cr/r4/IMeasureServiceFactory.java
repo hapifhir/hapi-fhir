@@ -20,9 +20,10 @@
 package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvaluatorSingle;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 
 @FunctionalInterface
 public interface IMeasureServiceFactory {
-	R4MeasureService create(RequestDetails theRequestDetails);
+	R4MeasureEvaluatorSingle create(RequestDetails theRequestDetails);
 }
