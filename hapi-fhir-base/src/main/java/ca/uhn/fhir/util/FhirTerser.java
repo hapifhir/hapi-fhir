@@ -1507,16 +1507,7 @@ public class FhirTerser {
 		ContainedResources contained = new ContainedResources();
 
 		List<? extends IBaseResource> containedResources = getContainedResourceList(theResource);
-		for (IBaseResource next : containedResources) {
-			String nextId = next.getIdElement().getValue();
-			if (StringUtils.isNotBlank(nextId)) {
-				if (!nextId.startsWith("#")) {
-					nextId = '#' + nextId;
-				}
-				next.getIdElement().setValue(nextId);
-			}
-			contained.addContained(next);
-		}
+		containedResources.forEach(contained::addContained);
 
 		if (myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
 			containResourcesForEncoding(contained, theResource, modifyResource);
