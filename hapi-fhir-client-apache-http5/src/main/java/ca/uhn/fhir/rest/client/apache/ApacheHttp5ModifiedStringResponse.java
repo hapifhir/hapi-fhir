@@ -1,6 +1,6 @@
 /*
  * #%L
- * HAPI FHIR - Client Framework
+ * HAPI FHIR - Client Framework using Apache HttpClient 5
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
