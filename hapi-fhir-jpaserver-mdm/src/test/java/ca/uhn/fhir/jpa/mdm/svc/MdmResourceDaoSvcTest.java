@@ -9,6 +9,8 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -23,8 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -95,8 +99,9 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	public void testSearchForMultiplePatientsByIdInPartitionedEnvironment() {
 		// setup
 		int resourceCount = 3;
+		// keep alphabetical
 		String[] idPrefaces = new String[] {
-			"RED", "BLUE", "GREEN"
+			"BLUE", "GREEN", "RED"
 		};
 
 		SearchParameterMap map;
@@ -120,11 +125,17 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 				patientIds.add(new StringParam("Patient/" +
 					patientOnPartition.getIdElement().getIdPart()
 				));
+				await().atLeast(100, TimeUnit.MILLISECONDS);
 			}
 
 			// test
 			map = SearchParameterMap.newSynchronous();
 			map.add("_id", patientIds);
+			// we'll use a sort to ensure consistent ordering of returned values
+			SortSpec sort = new SortSpec();
+			sort.setOrder(SortOrderEnum.ASC);
+			sort.setParamName("_id");
+			map.setSort(sort);
 			result = myPatientDao.search(map, new SystemRequestDetails());
 
 			// verify
@@ -132,6 +143,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			assertFalse(result.isEmpty());
 			List<IBaseResource> resources = result.getAllResources();
 			assertThat(resources).hasSize(resourceCount);
+
 			int count = 0;
 			for (IBaseResource resource : resources) {
 				String id = idPrefaces[count++];

@@ -41,7 +41,6 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +55,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity.ERROR;
+import static ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity.WARNING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.BOOLEAN;
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE;
@@ -168,7 +169,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			when(myValSupport.fetchResource(eq(Questionnaire.class),
 				eq(QUESTIONNAIRE_URL))).thenReturn(q);
 			when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system"))).thenReturn(codeSystem);
-			when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
+			when(myValSupport.fetchValueSet(eq("http://somevalueset"))).thenReturn(options);
 			when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(ValueSet.class)))
 				.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 
@@ -224,7 +225,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(ValueSet.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(ValueSet.class)))
-			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(ERROR).setMessage("Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -241,12 +242,12 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
+		when(myValSupport.fetchValueSet(eq("http://somevalueset"))).thenReturn(options);
 
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
-			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverityCode("warning").setMessage("Unknown code: http://codesystems.com/system / code1"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(WARNING).setMessage("Unknown code: http://codesystems.com/system / code1"));
 
 
 		QuestionnaireResponse qa;
@@ -801,7 +802,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq(valueSetRef)))
+		when(myValSupport.fetchValueSet(eq(valueSetRef)))
 			.thenReturn(options);
 		when(myValSupport.validateCode(any(), any(), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
@@ -857,7 +858,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq(valueSetRef)))
+		when(myValSupport.fetchValueSet(eq(valueSetRef)))
 			.thenReturn(options);
 		when(myValSupport.validateCode(any(), any(), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
@@ -980,7 +981,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			.setValue(new Coding(SYSTEMURI_ICC_SCHOOLTYPE, CODE_ICC_SCHOOLTYPE_PT, ""));
 
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireResponse.getQuestionnaire().getReference()))).thenReturn(questionnaire);
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq(ID_VS_SCHOOLTYPE.getValue()))).thenReturn(iccSchoolTypeVs);
+		when(myValSupport.fetchValueSet(eq(ID_VS_SCHOOLTYPE.getValue()))).thenReturn(iccSchoolTypeVs);
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq(SYSTEMURI_ICC_SCHOOLTYPE), eq(CODE_ICC_SCHOOLTYPE_PT), any(), nullable(ValueSet.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
 		when(myValSupport.fetchCodeSystem(eq(SYSTEMURI_ICC_SCHOOLTYPE))).thenReturn(codeSystem);
@@ -1034,7 +1035,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
-			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(ERROR).setMessage("Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -1052,7 +1053,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		options.setUrl("http://somevalueset");
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
+		when(myValSupport.fetchValueSet(eq("http://somevalueset"))).thenReturn(options);
 
 		when(myValSupport.isValueSetSupported(any(), eq("http://somevalueset"))).thenReturn(true);
 
@@ -1094,7 +1095,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		assertThat(errors.getMessages()).hasSize(2);
 		assertThat(errors.getMessages().get(0).getMessage()).contains("A code with no system has no defined meaning, and it cannot be validated. A system should be provided");
 		assertThat(errors.getMessages().get(0).getLocationString()).contains("QuestionnaireResponse.item[0].answer[0]");
-		assertThat(errors.getMessages().get(1).getMessage()).contains("The code 'code1' in the system 'null' is not in the options value set (ValueSet[http://somevalueset]) specified by the questionnaire. Terminology Error: Validation failed");
+		assertThat(errors.getMessages().get(1).getMessage()).contains("The code 'code1' in the system 'null' is not in the options value set (ValueSet[http://somevalueset]) specified by the questionnaire. Terminology Error: Unknown code 'code1' for in-memory expansion of ValueSet 'http://somevalueset'");
 		assertThat(errors.getMessages().get(1).getLocationString()).contains("QuestionnaireResponse.item[0].answer[0]");
 
 		qa = new QuestionnaireResponse();
@@ -1107,7 +1108,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		assertThat(errors.getMessages()).hasSize(2);
 		assertThat(errors.getMessages().get(0).getMessage()).contains("A code with no system has no defined meaning, and it cannot be validated. A system should be provided");
 		assertThat(errors.getMessages().get(0).getLocationString()).contains("QuestionnaireResponse.item[0].answer[0]");
-		assertThat(errors.getMessages().get(1).getMessage()).contains("The code 'code1' in the system 'null' is not in the options value set (ValueSet[http://somevalueset]) specified by the questionnaire. Terminology Error: Validation failed");
+		assertThat(errors.getMessages().get(1).getMessage()).contains("The code 'code1' in the system 'null' is not in the options value set (ValueSet[http://somevalueset]) specified by the questionnaire. Terminology Error: Unknown code 'code1' for in-memory expansion of ValueSet 'http://somevalueset'");
 		assertThat(errors.getMessages().get(1).getLocationString()).contains("QuestionnaireResponse.item[0].answer[0]");
 
 		qa = new QuestionnaireResponse();

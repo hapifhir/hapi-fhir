@@ -113,7 +113,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			myClient.create().resource(subs).execute();
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).contains("Unknown SubscriptionStatus code 'aaaaa'");
+			assertThat(e.getMessage()).containsAnyOf("invalid value aaaaa", "Unknown SubscriptionStatus code 'aaaaa'");
 		}
 	}
 

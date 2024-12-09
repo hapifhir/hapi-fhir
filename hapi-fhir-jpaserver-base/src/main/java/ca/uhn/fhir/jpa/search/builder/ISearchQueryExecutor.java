@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.jpa.search.builder;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+
 import java.io.Closeable;
 import java.util.Iterator;
 
-public interface ISearchQueryExecutor extends Iterator<Long>, Closeable {
+public interface ISearchQueryExecutor extends Iterator<JpaPid>, Closeable {
 	/**
 	 * Narrow the signature - no IOException allowed.
 	 */

@@ -54,17 +54,20 @@ public class ServerInterceptorUtil {
 		// Interceptor call: STORAGE_PRESHOW_RESOURCE
 		// This can be used to remove results from the search result details before
 		// the user has a chance to know that they were in the results
-		if (retVal.size() > 0) {
-			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(retVal);
-			HookParams params = new HookParams()
-					.add(IPreResourceShowDetails.class, accessDetails)
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					theInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+		if (!retVal.isEmpty()) {
+			IInterceptorBroadcaster compositeBroadcaster =
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(theInterceptorBroadcaster, theRequest);
+			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
+				SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(retVal);
+				HookParams params = new HookParams()
+						.add(IPreResourceShowDetails.class, accessDetails)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 
-			retVal = accessDetails.toList();
-			retVal.removeIf(Objects::isNull);
+				retVal = accessDetails.toList();
+				retVal.removeIf(Objects::isNull);
+			}
 		}
 
 		return retVal;

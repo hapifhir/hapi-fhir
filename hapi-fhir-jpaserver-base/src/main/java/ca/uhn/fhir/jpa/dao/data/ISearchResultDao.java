@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.SearchResult;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -28,6 +29,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -55,4 +57,16 @@ public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHa
 
 	@Query("SELECT count(r) FROM SearchResult r WHERE r.mySearchPid = :search")
 	int countForSearch(@Param("search") Long theSearchPid);
+
+	/**
+	 * Converts a response from {@link #findWithSearchPid(Long, Pageable)} to
+	 * a List of JpaPid objects
+	 */
+	static List<JpaPid> toJpaPidList(List<Long> theArrays) {
+		List<JpaPid> retVal = new ArrayList<>(theArrays.size());
+		for (Long next : theArrays) {
+			retVal.add(JpaPid.fromId(next));
+		}
+		return retVal;
+	}
 }

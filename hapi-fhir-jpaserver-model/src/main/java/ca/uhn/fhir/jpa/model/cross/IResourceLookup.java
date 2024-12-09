@@ -26,6 +26,8 @@ import java.util.Date;
 public interface IResourceLookup<T extends IResourcePersistentId<?>> {
 	String getResourceType();
 
+	String getFhirId();
+
 	/**
 	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwise, returns <code>null</code>
 	 */

@@ -335,14 +335,17 @@ public abstract class BaseStorageDao {
 		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
 		if (outcome.getResource() != null) {
 			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(outcome.getResource());
-			HookParams params = new HookParams()
-					.add(IPreResourceAccessDetails.class, accessDetails)
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-			if (accessDetails.isDontReturnResourceAtIndex(0)) {
-				outcome.setResource(null);
+			IInterceptorBroadcaster compositeBroadcaster =
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(getInterceptorBroadcaster(), theRequest);
+			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+				HookParams params = new HookParams()
+						.add(IPreResourceAccessDetails.class, accessDetails)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+				if (accessDetails.isDontReturnResourceAtIndex(0)) {
+					outcome.setResource(null);
+				}
 			}
 		}
 
@@ -352,14 +355,17 @@ public abstract class BaseStorageDao {
 		// outcome.fireResourceViewCallback())
 		outcome.registerResourceViewCallback(() -> {
 			if (outcome.getResource() != null) {
-				SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
-				HookParams params = new HookParams()
-						.add(IPreResourceShowDetails.class, showDetails)
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-				outcome.setResource(showDetails.getResource(0));
+				IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+						getInterceptorBroadcaster(), theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
+					SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
+					HookParams params = new HookParams()
+							.add(IPreResourceShowDetails.class, showDetails)
+							.add(RequestDetails.class, theRequest)
+							.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+					outcome.setResource(showDetails.getResource(0));
+				}
 			}
 		});
 
@@ -378,16 +384,19 @@ public abstract class BaseStorageDao {
 		outcome.setEntitySupplierUseCallback(() -> {
 			// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
 			if (outcome.getResource() != null) {
-				SimplePreResourceAccessDetails accessDetails =
-						new SimplePreResourceAccessDetails(outcome.getResource());
-				HookParams params = new HookParams()
-						.add(IPreResourceAccessDetails.class, accessDetails)
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-				if (accessDetails.isDontReturnResourceAtIndex(0)) {
-					outcome.setResource(null);
+				IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+						getInterceptorBroadcaster(), theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+					SimplePreResourceAccessDetails accessDetails =
+							new SimplePreResourceAccessDetails(outcome.getResource());
+					HookParams params = new HookParams()
+							.add(IPreResourceAccessDetails.class, accessDetails)
+							.add(RequestDetails.class, theRequest)
+							.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+					if (accessDetails.isDontReturnResourceAtIndex(0)) {
+						outcome.setResource(null);
+					}
 				}
 			}
 
@@ -397,14 +406,19 @@ public abstract class BaseStorageDao {
 			// outcome.fireResourceViewCallback())
 			outcome.registerResourceViewCallback(() -> {
 				if (outcome.getResource() != null) {
-					SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
-					HookParams params = new HookParams()
-							.add(IPreResourceShowDetails.class, showDetails)
-							.add(RequestDetails.class, theRequest)
-							.addIfMatchesType(ServletRequestDetails.class, theRequest);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-					outcome.setResource(showDetails.getResource(0));
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									getInterceptorBroadcaster(), theRequest);
+					if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
+						SimplePreResourceShowDetails showDetails =
+								new SimplePreResourceShowDetails(outcome.getResource());
+						HookParams params = new HookParams()
+								.add(IPreResourceShowDetails.class, showDetails)
+								.add(RequestDetails.class, theRequest)
+								.addIfMatchesType(ServletRequestDetails.class, theRequest);
+						compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+						outcome.setResource(showDetails.getResource(0));
+					}
 				}
 			});
 		});
@@ -420,8 +434,9 @@ public abstract class BaseStorageDao {
 		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts(thePointcut)) {
 			theTransactionDetails.addDeferredInterceptorBroadcast(thePointcut, theParams);
 		} else {
-			CompositeInterceptorBroadcaster.doCallHooks(
-					getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
+			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+					getInterceptorBroadcaster(), theRequestDetails);
+			compositeBroadcaster.callHooks(thePointcut, theParams);
 		}
 	}
 
@@ -713,6 +728,27 @@ public abstract class BaseStorageDao {
 	}
 
 	/**
+	 * Extracts a list of references that have versions in their ID whose versions should not be stripped
+	 *
+	 * @return A set of references that should not have their client-given versions stripped according to the
+	 * 		   versioned references settings.
+	 */
+	public static Set<IBaseReference> extractReferencesToAvoidReplacement(
+			FhirContext theFhirContext, IBaseResource theResource) {
+		if (!theFhirContext
+				.getParserOptions()
+				.getDontStripVersionsFromReferencesAtPaths()
+				.isEmpty()) {
+			String theResourceType = theFhirContext.getResourceType(theResource);
+			Set<String> versionReferencesPaths = theFhirContext
+					.getParserOptions()
+					.getDontStripVersionsFromReferencesAtPathsByResourceType(theResourceType);
+			return getReferencesWithOrWithoutVersionId(versionReferencesPaths, theFhirContext, theResource, false);
+		}
+		return Collections.emptySet();
+	}
+
+	/**
 	 * Extracts a list of references that should be auto-versioned.
 	 *
 	 * @return A set of references that should be versioned according to both storage settings
@@ -745,7 +781,7 @@ public abstract class BaseStorageDao {
 				MetaUtil.getAutoVersionReferencesAtPath(theResource.getMeta(), resourceType);
 
 		if (!autoVersionReferencesAtPaths.isEmpty()) {
-			return getReferencesWithoutVersionId(autoVersionReferencesAtPaths, theFhirContext, theResource);
+			return getReferencesWithOrWithoutVersionId(autoVersionReferencesAtPaths, theFhirContext, theResource, true);
 		}
 		return Collections.emptySet();
 	}
@@ -761,17 +797,30 @@ public abstract class BaseStorageDao {
 			String resourceName = theFhirContext.getResourceType(theResource);
 			Set<String> autoVersionReferencesPaths =
 					theStorageSettings.getAutoVersionReferenceAtPathsByResourceType(resourceName);
-			return getReferencesWithoutVersionId(autoVersionReferencesPaths, theFhirContext, theResource);
+			return getReferencesWithOrWithoutVersionId(autoVersionReferencesPaths, theFhirContext, theResource, true);
 		}
 		return Collections.emptySet();
 	}
 
-	private static Set<IBaseReference> getReferencesWithoutVersionId(
-			Set<String> autoVersionReferencesPaths, FhirContext theFhirContext, IBaseResource theResource) {
-		return autoVersionReferencesPaths.stream()
+	/**
+	 * Extracts references from given resource and filters references by those with versions, or those without versions.
+	 *
+	 * @param theVersionReferencesPaths the paths from which to extract references from
+	 * @param theFhirContext the FHIR context
+	 * @param theResource the resource from which to extract references from
+	 * @param theShouldFilterByRefsWithoutVersionId If true, this method will return only references without a version. If false, this method will return only references with a version.
+	 * @return Set of references contained in the resource with or without versions
+	 */
+	private static Set<IBaseReference> getReferencesWithOrWithoutVersionId(
+			Set<String> theVersionReferencesPaths,
+			FhirContext theFhirContext,
+			IBaseResource theResource,
+			boolean theShouldFilterByRefsWithoutVersionId) {
+		return theVersionReferencesPaths.stream()
 				.map(fullPath -> theFhirContext.newTerser().getValues(theResource, fullPath, IBaseReference.class))
 				.flatMap(Collection::stream)
-				.filter(reference -> !reference.getReferenceElement().hasVersionIdPart())
+				.filter(reference ->
+						reference.getReferenceElement().hasVersionIdPart() ^ theShouldFilterByRefsWithoutVersionId)
 				.collect(Collectors.toMap(ref -> ref, ref -> ref, (oldRef, newRef) -> oldRef, IdentityHashMap::new))
 				.keySet();
 	}

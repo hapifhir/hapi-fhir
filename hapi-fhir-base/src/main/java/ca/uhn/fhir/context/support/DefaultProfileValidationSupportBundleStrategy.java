@@ -150,9 +150,15 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
 		ArrayList<IBaseResource> retVal = new ArrayList<>();
-		retVal.addAll(myCodeSystems.values());
-		retVal.addAll(myStructureDefinitions.values());
-		retVal.addAll(myValueSets.values());
+		if (myCodeSystems != null) {
+			retVal.addAll(myCodeSystems.values());
+		}
+		if (myStructureDefinitions != null) {
+			retVal.addAll(myStructureDefinitions.values());
+		}
+		if (myValueSets != null) {
+			retVal.addAll(myValueSets.values());
+		}
 		return retVal;
 	}
 

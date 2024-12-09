@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -70,20 +71,20 @@ public class ResourceLinkPredicateBuilderTest {
 	@Test
 	public void createEverythingPredicate_withListOfPids_returnsInPredicate() {
 		when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE + "1", PLACEHOLDER_BASE + "2"));
-		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1L, 2L);
+		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), JpaPid.fromId(1L), JpaPid.fromId(2L));
 		assertEquals(InCondition.class, condition.getClass());
 	}
 
 	@Test
 	public void createEverythingPredicate_withSinglePid_returnsInCondition() {
 		when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE + "1"));
-		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1L);
+		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), JpaPid.fromId(1L));
 		assertEquals(BinaryCondition.class, condition.getClass());
 	}
 
 	@Test
 	public void createEverythingPredicate_withNoPids_returnsBinaryCondition() {
-		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new Long[0]);
+		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new JpaPid[0]);
 		assertEquals(BinaryCondition.class, condition.getClass());
 	}
 
