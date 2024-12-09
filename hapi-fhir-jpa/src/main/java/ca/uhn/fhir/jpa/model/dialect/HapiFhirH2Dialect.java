@@ -57,9 +57,31 @@ public class HapiFhirH2Dialect extends H2Dialect {
 	 *  RES_VERSION varchar(7),
 	 * </pre>
 	 * </p>
+	 * <p>
+	 * Also note, as of Hibernate 6.6, Enum types are also used on some database platforms,
+	 * creating a definition like:
+	 * <code>STAT enum ('CANCELLED','COMPLETED','ERRORED','FAILED','FINALIZE','IN_PROGRESS','QUEUED') not null</code>.
+	 * We also disable these by overriding <code>getEnumTypeDeclaration</code>.
+	 * </p>
 	 */
 	@Override
 	public boolean supportsColumnCheck() {
 		return false;
+	}
+
+	/**
+	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
+	 */
+	@Override
+	public String getEnumTypeDeclaration(Class<? extends Enum<?>> enumType) {
+		return null;
+	}
+
+	/**
+	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
+	 */
+	@Override
+	public String getEnumTypeDeclaration(String name, String[] values) {
+		return null;
 	}
 }
