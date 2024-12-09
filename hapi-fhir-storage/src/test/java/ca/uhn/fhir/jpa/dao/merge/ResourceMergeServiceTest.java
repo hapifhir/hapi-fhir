@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.merge;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -11,10 +12,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -32,6 +31,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -52,7 +53,11 @@ public class ResourceMergeServiceTest {
 		"Target resource must be provided either by 'target-patient' or by 'target-patient-identifier', not both.";
 	private static final String SUCCESSFUL_MERGE_MSG = "Merge operation completed successfully";
 	private static final String SOURCE_PATIENT_TEST_ID = "Patient/123";
+	private static final String SOURCE_PATIENT_TEST_ID_WITH_VERSION_1= SOURCE_PATIENT_TEST_ID + "/_history/1";
+	private static final String SOURCE_PATIENT_TEST_ID_WITH_VERSION_2= SOURCE_PATIENT_TEST_ID + "/_history/2";
 	private static final String TARGET_PATIENT_TEST_ID = "Patient/456";
+	private static final String TARGET_PATIENT_TEST_ID_WITH_VERSION_1 = TARGET_PATIENT_TEST_ID + "/_history/1";
+	private static final String TARGET_PATIENT_TEST_ID_WITH_VERSION_2 = TARGET_PATIENT_TEST_ID + "/_history/2";
 
 	@Mock
 	private IFhirResourceDaoPatient<Patient> myDaoMock;
@@ -63,6 +68,9 @@ public class ResourceMergeServiceTest {
 	@Mock
 	RequestDetails myRequestDetailsMock;
 
+	@Mock
+	IHapiTransactionService myTransactionServiceMock;
+
 	private ResourceMergeService myResourceMergeService;
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -70,7 +78,7 @@ public class ResourceMergeServiceTest {
 	@BeforeEach
 	void setup() {
 		when(myDaoMock.getContext()).thenReturn(myFhirContext);
-		myResourceMergeService = new ResourceMergeService(myDaoMock, myReplaceReferencesSvcMock);
+		myResourceMergeService = new ResourceMergeService(myDaoMock, myReplaceReferencesSvcMock, myTransactionServiceMock);
 	}
 
 	// SUCCESS CASES
@@ -84,10 +92,10 @@ public class ResourceMergeServiceTest {
 		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID);
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
-
 		setupDaoMockForSuccessfulSourcePatientUpdate(sourcePatient, new Patient());
 		Patient patientReturnedFromDaoAfterTargetUpdate = new Patient();
 		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientReturnedFromDaoAfterTargetUpdate, true);
+		setupTransactionServiceMock();
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -122,7 +130,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulSourcePatientUpdate(sourcePatient, new Patient());
 		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
 		setupDaoMockForSuccessfulTargetPatientUpdate(resultPatient, patientToBeReturnedFromDaoAfterTargetUpdate, true);
-
+		setupTransactionServiceMock();
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
@@ -153,6 +161,7 @@ public class ResourceMergeServiceTest {
 		when(myDaoMock.delete(new IdType(SOURCE_PATIENT_TEST_ID), myRequestDetailsMock)).thenReturn(new DaoMethodOutcome());
 		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
 		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientToBeReturnedFromDaoAfterTargetUpdate, false);
+		setupTransactionServiceMock();
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -204,14 +213,14 @@ public class ResourceMergeServiceTest {
 	void testMerge_ResolvesResourcesByReferenceThatHasVersions_CurrentResourceVersionAreTheSame_Success() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123/_history/2"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345/_history/2"));
-		Patient sourcePatient = createPatient("Patient/123/_history/2");
-		Patient targetPatient = createPatient("Patient/345/_history/2");
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID_WITH_VERSION_2));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID_WITH_VERSION_2));
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_2);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_2);
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 		when(myDaoMock.update(any(), eq(myRequestDetailsMock))).thenReturn(new DaoMethodOutcome());
-
+		setupTransactionServiceMock();
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
@@ -233,8 +242,8 @@ public class ResourceMergeServiceTest {
 	void testMerge_UnhandledServerResponseExceptionThrown_UsesStatusCodeOfTheException() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 
 		ForbiddenOperationException ex = new ForbiddenOperationException("this is the exception message");
 		when(myDaoMock.read(any(), eq(myRequestDetailsMock))).thenThrow(ex);
@@ -258,8 +267,8 @@ public class ResourceMergeServiceTest {
 	void testMerge_UnhandledExceptionThrown_Uses500StatusCode() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 
 		RuntimeException ex = new RuntimeException("this is the exception message");
 		when(myDaoMock.read(any(), eq(myRequestDetailsMock))).thenThrow(ex);
@@ -283,7 +292,7 @@ public class ResourceMergeServiceTest {
 	void testMerge_ValidatesInputParameters_MissingSourcePatientParams_ReturnsErrorWith400Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setTargetResource(new Reference("Patient/123"));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -306,7 +315,7 @@ public class ResourceMergeServiceTest {
 	void testMerge_ValidatesInputParameters_MissingTargetPatientParams_ReturnsErrorWith400Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -354,9 +363,9 @@ public class ResourceMergeServiceTest {
 	void testMerge_ValidatesInputParameters_BothSourceResourceAndSourceIdentifierParamsProvided_ReturnsErrorWith400Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setSourceResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue( "val")));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
@@ -380,9 +389,9 @@ public class ResourceMergeServiceTest {
 	void testMerge_ValidatesInputParameters_BothTargetResourceAndTargetIdentifiersParamsProvided_ReturnsErrorWith400Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setTargetResource(new Reference("Patient/123"));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue( "val")));
-		mergeOperationParameters.setSourceResource(new Reference("Patient/345"));
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
@@ -455,9 +464,9 @@ public class ResourceMergeServiceTest {
 	void testMerge_ResolvesSourceResourceByReference_ResourceNotFound_ReturnsErrorWith422Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
-		when(myDaoMock.read(new IdType("Patient/123"), myRequestDetailsMock)).thenThrow(ResourceNotFoundException.class);
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+		when(myDaoMock.read(new IdType(SOURCE_PATIENT_TEST_ID), myRequestDetailsMock)).thenThrow(ResourceNotFoundException.class);
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -479,11 +488,11 @@ public class ResourceMergeServiceTest {
 	void testMerge_ResolvesTargetResourceByReference_ResourceNotFound_ReturnsErrorWith422Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
-		Patient sourcePatient = createPatient("Patient/123");
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
 		setupDaoMockForSuccessfulRead(sourcePatient);
-		when(myDaoMock.read(new IdType("Patient/345"), myRequestDetailsMock)).thenThrow(ResourceNotFoundException.class);
+		when(myDaoMock.read(new IdType(TARGET_PATIENT_TEST_ID), myRequestDetailsMock)).thenThrow(ResourceNotFoundException.class);
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -508,7 +517,7 @@ public class ResourceMergeServiceTest {
 		mergeOperationParameters.setSourceResourceIdentifiers(List.of(
 			new CanonicalIdentifier().setSystem("sys").setValue("val1"),
 			new CanonicalIdentifier().setSystem("sys").setValue("val2")));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		setupDaoMockSearchForIdentifiers(List.of(Collections.emptyList()));
 
 		// When
@@ -566,12 +575,12 @@ public class ResourceMergeServiceTest {
 	void testMerge_ResolvesTargetResourceByIdentifiers_NoMatchFound_ReturnsErrorWith422Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(
 			new CanonicalIdentifier().setSystem("sys").setValue("val1"),
 			new CanonicalIdentifier().setSystem("sys").setValue("val2")));
 		setupDaoMockSearchForIdentifiers(List.of(Collections.emptyList()));
-		Patient sourcePatient = createPatient("Patient/123");
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
 		setupDaoMockForSuccessfulRead(sourcePatient);
 
 		// When
@@ -630,9 +639,10 @@ public class ResourceMergeServiceTest {
 	void testMerge_ResolvesSourceResourceByReferenceThatHasVersion_CurrentResourceVersionIsDifferent_ReturnsErrorWith422Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123/_history/1"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
-		Patient sourcePatient = createPatient("Patient/123/_history/2");
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID_WITH_VERSION_1));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+		//make resolved patient has a more recent version than the one specified in the reference
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_2);
 		setupDaoMockForSuccessfulRead(sourcePatient);
 
 		// When
@@ -655,10 +665,11 @@ public class ResourceMergeServiceTest {
 	void testMerge_ResolvesTargetResourceByReferenceThatHasVersion_CurrentResourceVersionIsDifferent_ReturnsErrorWith422Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345/_history/1"));
-		Patient sourcePatient = createPatient("Patient/123");
-		Patient targetPatient = createPatient("Patient/345/_history/2");
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID_WITH_VERSION_1));
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
+		// make resolved target patient has a more recent version than the one specified in the reference
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_2);
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 
@@ -689,8 +700,8 @@ public class ResourceMergeServiceTest {
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
 		mergeOperationParameters.setSourceResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue("val1")));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue("val2")));
-		Patient sourcePatient = createPatient("Patient/123");
-		Patient targetPatient = createPatient("Patient/123");
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
+		Patient targetPatient = createPatient(SOURCE_PATIENT_TEST_ID);
 		setupDaoMockSearchForIdentifiers(List.of(List.of(sourcePatient), List.of(targetPatient)));
 
 		// When
@@ -715,10 +726,10 @@ public class ResourceMergeServiceTest {
 	void testMerge_TargetResourceIsInactive_ReturnsErrorWith422Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
-		Patient sourcePatient = createPatient("Patient/123");
-		Patient targetPatient = createPatient("Patient/345");
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID);
 		targetPatient.setActive(false);
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
@@ -742,11 +753,11 @@ public class ResourceMergeServiceTest {
 	void testMerge_TargetResourceWasPreviouslyReplacedByAnotherResource_ReturnsErrorWith422Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
-		Patient sourcePatient = createPatient("Patient/123");
-		Patient targetPatient = createPatient("Patient/345");
-		addReplacedByLink(targetPatient, "Patient/678");
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID);
+		addReplacedByLink(targetPatient, "Patient/replacing-res-id");
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 
@@ -760,7 +771,37 @@ public class ResourceMergeServiceTest {
 		assertThat(operationOutcome.getIssue()).hasSize(1);
 		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("Target resource was previously replaced by another resource, it is not a suitable target for merging.");
+		assertThat(issue.getDiagnostics()).contains("Target resource was previously replaced by a resource with " +
+			"reference 'Patient/replacing-res-id', it is " +
+			"not a suitable target for merging.");
+
+		verifyNoMoreInteractions(myDaoMock);
+	}
+
+	@Test
+	void testMerge_SourceResourceWasPreviouslyReplacedByAnotherResource_ReturnsErrorWith422Status() {
+		// Given
+		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID);
+		addReplacedByLink(sourcePatient, "Patient/replacing-res-id");
+		setupDaoMockForSuccessfulRead(sourcePatient);
+		setupDaoMockForSuccessfulRead(targetPatient);
+
+		// When
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+
+		// Then
+		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
+		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
+
+		assertThat(operationOutcome.getIssue()).hasSize(1);
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue.getDiagnostics()).contains("Source resource was previously replaced by a resource with " +
+			"reference 'Patient/replacing-res-id', it is not a suitable source for merging.");
 
 		verifyNoMoreInteractions(myDaoMock);
 	}
@@ -769,14 +810,14 @@ public class ResourceMergeServiceTest {
 	void testMerge_ValidatesResultResource_ResultResourceHasDifferentIdThanTargetResource_ReturnsErrorWith400Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
-		Patient resultPatient = createPatient("Patient/678");
-		addReplacesLink(resultPatient, "Patient/123");
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+		Patient resultPatient = createPatient("Patient/not-the-target-id");
+		addReplacesLink(resultPatient, SOURCE_PATIENT_TEST_ID);
 		mergeOperationParameters.setResultResource(resultPatient);
 
-		Patient sourcePatient = createPatient("Patient/123/_history/1");
-		Patient targetPatient = createPatient("Patient/345/_history/1");
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_1);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_1);
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 
@@ -790,7 +831,9 @@ public class ResourceMergeServiceTest {
 		assertThat(operationOutcome.getIssue()).hasSize(1);
 		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("'result-patient' must have the same versionless id as the actual resolved target resource. The actual resolved target resource's id is: 'Patient/345'");
+		assertThat(issue.getDiagnostics()).contains("'result-patient' must have the same versionless id " +
+			"as the actual" +
+			" resolved target resource. The actual resolved target resource's id is: '" + TARGET_PATIENT_TEST_ID +"'");
 
 		verifyNoMoreInteractions(myDaoMock);
 	}
@@ -800,19 +843,19 @@ public class ResourceMergeServiceTest {
 	void testMerge_ValidatesResultResource_ResultResourceDoesNotHaveAllIdentifiersProvidedInTargetIdentifiers_ReturnsErrorWith400Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(
 			new CanonicalIdentifier().setSystem("sys").setValue("val1"),
 			new CanonicalIdentifier().setSystem("sys").setValue("val2")
 		));
 
 		// the result patient has only one of the identifiers that were provided in the target identifiers
-		Patient resultPatient = createPatient("Patient/345");
+		Patient resultPatient = createPatient(TARGET_PATIENT_TEST_ID);
 		resultPatient.addIdentifier().setSystem("sys").setValue("val");
-		addReplacesLink(resultPatient, "Patient/123");
+		addReplacesLink(resultPatient, SOURCE_PATIENT_TEST_ID);
 		mergeOperationParameters.setResultResource(resultPatient);
-		Patient sourcePatient = createPatient("Patient/123/_history/1");
-		Patient targetPatient = createPatient("Patient/345/_history/1");
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_1);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_1);
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockSearchForIdentifiers(List.of(List.of(targetPatient)));
 
@@ -836,13 +879,13 @@ public class ResourceMergeServiceTest {
 	void testMerge_ValidatesResultResource_ResultResourceHasNoReplacesLink_ReturnsErrorWith400Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 
-		Patient resultPatient = createPatient("Patient/345");
+		Patient resultPatient = createPatient(TARGET_PATIENT_TEST_ID);
 		mergeOperationParameters.setResultResource(resultPatient);
-		Patient sourcePatient = createPatient("Patient/123/_history/1");
-		Patient targetPatient = createPatient("Patient/345/_history/1");
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_1);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_1);
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 
@@ -897,17 +940,17 @@ public class ResourceMergeServiceTest {
 	void testMerge_ValidatesResultResource_ResultResourceHasRedundantReplacesLinksToSource_ReturnsErrorWith400Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
-		mergeOperationParameters.setSourceResource(new Reference("Patient/123"));
-		mergeOperationParameters.setTargetResource(new Reference("Patient/345"));
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 
-		Patient resultPatient = createPatient("Patient/345");
+		Patient resultPatient = createPatient(TARGET_PATIENT_TEST_ID);
 		//add the link twice
-		addReplacesLink(resultPatient, "Patient/123");
-		addReplacesLink(resultPatient, "Patient/123");
+		addReplacesLink(resultPatient, SOURCE_PATIENT_TEST_ID);
+		addReplacesLink(resultPatient, SOURCE_PATIENT_TEST_ID);
 
 		mergeOperationParameters.setResultResource(resultPatient);
-		Patient sourcePatient = createPatient("Patient/123/_history/1");
-		Patient targetPatient = createPatient("Patient/345/_history/1");
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_1);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_1);
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 
@@ -938,6 +981,17 @@ public class ResourceMergeServiceTest {
 
 	private void addReplacesLink(Patient patient, String theReplacedResourceId) {
 		patient.addLink().setType(Patient.LinkType.REPLACES).setOther(new Reference(theReplacedResourceId));
+	}
+
+	private void setupTransactionServiceMock() {
+		IHapiTransactionService.IExecutionBuilder executionBuilderMock =
+			mock(IHapiTransactionService.IExecutionBuilder.class);
+		when(myTransactionServiceMock.withRequest(myRequestDetailsMock)).thenReturn(executionBuilderMock);
+		doAnswer(invocation -> {
+			Runnable runnable = invocation.getArgument(0);
+			runnable.run();
+			return null;
+		}).when(executionBuilderMock).execute(isA(Runnable.class));
 	}
 
 	private void setupDaoMockForSuccessfulRead(Patient resource) {

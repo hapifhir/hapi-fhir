@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.merge;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.ReplaceReferenceRequest;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -60,13 +61,17 @@ public class ResourceMergeService {
 
 	private final IFhirResourceDaoPatient<Patient> myDao;
 	private final IReplaceReferencesSvc myReplaceReferencesSvc;
+	private final IHapiTransactionService myHapiTransactionService;
 	private final FhirContext myFhirContext;
 
 	public ResourceMergeService(
-			IFhirResourceDaoPatient<Patient> thePatientDao, IReplaceReferencesSvc theReplaceReferencesSvc) {
+			IFhirResourceDaoPatient<Patient> thePatientDao,
+			IReplaceReferencesSvc theReplaceReferencesSvc,
+			IHapiTransactionService theHapiTransactionService) {
 		myDao = thePatientDao;
 		myReplaceReferencesSvc = theReplaceReferencesSvc;
 		myFhirContext = myDao.getContext();
+		myHapiTransactionService = theHapiTransactionService;
 	}
 
 	/**
@@ -86,7 +91,7 @@ public class ResourceMergeService {
 		mergeOutcome.setHttpStatusCode(STATUS_HTTP_200_OK);
 
 		try {
-			doMerge(theMergeOperationParameters, theRequestDetails, mergeOutcome);
+			validateAndMerge(theMergeOperationParameters, theRequestDetails, mergeOutcome);
 		} catch (Exception e) {
 			ourLog.error("Resource merge failed", e);
 			if (e instanceof BaseServerResponseException) {
@@ -99,7 +104,7 @@ public class ResourceMergeService {
 		return mergeOutcome;
 	}
 
-	private void doMerge(
+	private void validateAndMerge(
 			MergeOperationInputParameters theMergeOperationParameters,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
@@ -129,7 +134,7 @@ public class ResourceMergeService {
 			return;
 		}
 
-		if (!validateSourceAndTargetAreMergable(sourceResource, targetResource, operationOutcome)) {
+		if (!validateSourceAndTargetAreSuitableForMerge(sourceResource, targetResource, operationOutcome)) {
 			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
 			return;
 		}
@@ -140,47 +145,64 @@ public class ResourceMergeService {
 			return;
 		}
 
-		Patient resultResource = (Patient) theMergeOperationParameters.getResultResource();
 		if (theMergeOperationParameters.getPreview()) {
 			Integer referencingResourceCount = myReplaceReferencesSvc.countResourcesReferencingResource(
 					sourceResource.getIdElement(), theRequestDetails);
 
 			// in preview mode, we should also return how the target would look like
+			Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
 			Patient targetPatientAsIfUpdated = prepareTargetPatientForUpdate(
-					targetResource, sourceResource, resultResource, theMergeOperationParameters.getDeleteSource());
+					targetResource, sourceResource, theResultResource, theMergeOperationParameters.getDeleteSource());
 			theMergeOutcome.setUpdatedTargetResource(targetPatientAsIfUpdated);
 
 			// adding +2 because the source and the target resources themselved would be updated as well
-			// TODO: but what if target resource is already referencing source resource as a link? how do we handle
-			// that case?
 			String diagnosticsMsg = String.format("Merge would update %d resources", referencingResourceCount + 2);
 			String detailsText = "Preview only merge operation - no issues detected";
 			addInfoToOperationOutcome(operationOutcome, diagnosticsMsg, detailsText);
 			return;
 		}
 
+		mergeInTransaction(
+				theMergeOperationParameters, sourceResource, targetResource, theRequestDetails, theMergeOutcome);
+
+		String detailsText = "Merge operation completed successfully.";
+		addInfoToOperationOutcome(operationOutcome, null, detailsText);
+	}
+
+	private void mergeInTransaction(
+			MergeOperationInputParameters theMergeOperationParameters,
+			Patient theSourceResource,
+			Patient theTargetResource,
+			RequestDetails theRequestDetails,
+			MergeOperationOutcome theMergeOutcome) {
+
+		// TODO: cannot do this in transaction yet, because systemDAO.transaction called by replaceReferences complains
+		// that  there is  an active transaction already.
 		ReplaceReferenceRequest replaceReferenceRequest = new ReplaceReferenceRequest(
-				sourceResource.getIdElement(),
-				targetResource.getIdElement(),
+				theSourceResource.getIdElement(),
+				theTargetResource.getIdElement(),
 				theMergeOperationParameters.getBatchSize());
 		// FIXME KHS check if it needs to go async
 		myReplaceReferencesSvc.replaceReferences(replaceReferenceRequest, theRequestDetails);
 
-		Patient patientToUpdate = prepareTargetPatientForUpdate(
-				targetResource, sourceResource, resultResource, theMergeOperationParameters.getDeleteSource());
-		// update the target patient resource after the references are updated
-		Patient targetPatientAfterUpdate = updateResource(patientToUpdate, theRequestDetails);
-		theMergeOutcome.setUpdatedTargetResource(targetPatientAfterUpdate);
+		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
+			Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
+			Patient patientToUpdate = prepareTargetPatientForUpdate(
+					theTargetResource,
+					theSourceResource,
+					theResultResource,
+					theMergeOperationParameters.getDeleteSource());
+			// update the target patient resource after the references are updated
+			Patient targetPatientAfterUpdate = updateResource(patientToUpdate, theRequestDetails);
+			theMergeOutcome.setUpdatedTargetResource(targetPatientAfterUpdate);
 
-		if (theMergeOperationParameters.getDeleteSource()) {
-			deleteResource(sourceResource, theRequestDetails);
-		} else {
-			prepareSourceResourceForUpdate(sourceResource, targetResource);
-			updateResource(sourceResource, theRequestDetails);
-		}
-
-		String detailsText = "Merge operation completed successfully.";
-		addInfoToOperationOutcome(operationOutcome, null, detailsText);
+			if (theMergeOperationParameters.getDeleteSource()) {
+				deleteResource(theSourceResource, theRequestDetails);
+			} else {
+				prepareSourceResourceForUpdate(theSourceResource, theTargetResource);
+				updateResource(theSourceResource, theRequestDetails);
+			}
+		});
 	}
 
 	private boolean validateResultResourceIfExists(
@@ -261,25 +283,6 @@ public class ResourceMergeService {
 				.collect(Collectors.toList());
 	}
 
-	private boolean validateResultResourceDoesNotHaveReplacesLinkToSourceResource(
-			Patient theResultResource,
-			Patient theResolvedSourceResource,
-			String theResultResourceParameterName,
-			IBaseOperationOutcome theOperationOutcome) {
-
-		List<Reference> replacesLinkToSourceResource = getLinksToResource(
-				theResultResource, Patient.LinkType.REPLACES, theResolvedSourceResource.getIdElement());
-
-		if (!replacesLinkToSourceResource.isEmpty()) {
-			String msg = String.format(
-					"'%s' must have a 'replaces' link to the source resource.", theResultResourceParameterName);
-			addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
-			return false;
-		}
-
-		return true;
-	}
-
 	private boolean validateResultResourceReplacesLinkToSourceResource(
 			Patient theResultResource,
 			Patient theResolvedSourceResource,
@@ -331,7 +334,7 @@ public class ResourceMergeService {
 		return links;
 	}
 
-	private boolean validateSourceAndTargetAreMergable(
+	private boolean validateSourceAndTargetAreSuitableForMerge(
 			Patient theSourceResource, Patient theTargetResource, IBaseOperationOutcome outcome) {
 
 		if (theSourceResource.getId().equalsIgnoreCase(theTargetResource.getId())) {
@@ -347,15 +350,28 @@ public class ResourceMergeService {
 			return false;
 		}
 
-		List<Reference> replacedByLinks = getLinksOfType(theTargetResource, Patient.LinkType.REPLACEDBY);
-		if (!replacedByLinks.isEmpty()) {
-			String msg = "Target resource was previously replaced by another resource, it is not a suitable target "
-					+ "for merging.";
+		List<Reference> replacedByLinksInTarget = getLinksOfType(theTargetResource, Patient.LinkType.REPLACEDBY);
+		if (!replacedByLinksInTarget.isEmpty()) {
+			String ref = replacedByLinksInTarget.get(0).getReference();
+			String msg = String.format(
+					"Target resource was previously replaced by a resource with reference '%s', it "
+							+ "is not a suitable target for merging.",
+					ref);
 			addErrorToOperationOutcome(outcome, msg, "invalid");
 			return false;
 		}
 
-		// how about the source patient? should we check it active status and whether it was merged previously as well?
+		List<Reference> replacedByLinksInSource = getLinksOfType(theSourceResource, Patient.LinkType.REPLACEDBY);
+		if (!replacedByLinksInSource.isEmpty()) {
+			String ref = replacedByLinksInSource.get(0).getReference();
+			String msg = String.format(
+					"Source resource was previously replaced by a resource with reference '%s', it "
+							+ "is not a suitable source for merging.",
+					ref);
+			addErrorToOperationOutcome(outcome, msg, "invalid");
+			return false;
+		}
+
 		return true;
 	}
 
