@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6534
+title: "The JpaPersistedValidationSupport module which is used to fetch
+  conformance resources from the JPA repository for validation purposes can
+  now support versioned URLs. Thanks to Mangala Ekanayake for the contribution!"
