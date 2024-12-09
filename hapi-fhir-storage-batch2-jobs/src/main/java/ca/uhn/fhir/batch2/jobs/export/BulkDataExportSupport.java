@@ -45,9 +45,9 @@ public class BulkDataExportSupport {
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	public BulkDataExportSupport(
-		@Nonnull FhirContext theFhirContext,
-		@Nonnull DaoRegistry theDaoRegistry,
-		@Nonnull IRequestPartitionHelperSvc theRequestPartitionHelperService) {
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull DaoRegistry theDaoRegistry,
+			@Nonnull IRequestPartitionHelperSvc theRequestPartitionHelperService) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myRequestPartitionHelperService = theRequestPartitionHelperService;
@@ -61,14 +61,14 @@ public class BulkDataExportSupport {
 	 * @param theIdParams           the id(s) to verify exist
 	 */
 	public void validateTargetsExists(
-		@Nonnull RequestDetails theRequestDetails,
-		@Nonnull String theTargetResourceName,
-		@Nonnull Iterable<IIdType> theIdParams) {
+			@Nonnull RequestDetails theRequestDetails,
+			@Nonnull String theTargetResourceName,
+			@Nonnull Iterable<IIdType> theIdParams) {
 		if (theIdParams.iterator().hasNext()) {
 			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-				theRequestDetails,
-				theTargetResourceName,
-				theIdParams.iterator().next());
+					theRequestDetails,
+					theTargetResourceName,
+					theIdParams.iterator().next());
 			SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
 			for (IIdType nextId : theIdParams) {
 				myDaoRegistry.getResourceDao(theTargetResourceName).read(nextId, requestDetails);
