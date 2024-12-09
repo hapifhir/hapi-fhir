@@ -166,9 +166,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
-	@Autowired
-	IHapiTransactionService myHapiTransactionService;
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
 
 	@AfterEach
@@ -191,7 +188,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	private List<String> extractNames(IBundleProvider theSearch) {
 		ArrayList<String> retVal = new ArrayList<>();
-		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
+		for (IBaseResource next : theSearch.getResources(0, theSearch.sizeOrThrowNpe())) {
 			Patient nextPt = (Patient) next;
 			retVal.add(nextPt.getName().get(0).getNameAsSingleString());
 		}
