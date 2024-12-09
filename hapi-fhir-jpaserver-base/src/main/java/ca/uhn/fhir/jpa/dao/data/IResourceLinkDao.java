@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.primitive.IdDt;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -49,9 +48,15 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 	@Query("SELECT t FROM ResourceLink t LEFT JOIN FETCH t.myTargetResource tr WHERE t.myId in :pids")
 	List<ResourceLink> findByPidAndFetchTargetDetails(@Param("pids") List<Long> thePids);
 
-	@Query("SELECT DISTINCT new ca.uhn.fhir.model.primitive.IdDt(t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
-	Stream<IdDt> streamSourceIdsForTargetPid(@Param("resourceType") String theTargetResourceType, @Param("resourceFhirId") String theTargetResourceFhirId);
+	@Query(
+			"SELECT DISTINCT new ca.uhn.fhir.model.primitive.IdDt(t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
+	Stream<IdDt> streamSourceIdsForTargetPid(
+			@Param("resourceType") String theTargetResourceType,
+			@Param("resourceFhirId") String theTargetResourceFhirId);
 
-	@Query("SELECT COUNT(DISTINCT t.mySourceResourcePid) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
-	Integer countResourcesTargetingFhirTypeAndId(@Param("resourceType") String theTargetResourceType, @Param("resourceFhirId") String theTargetResourceFhirId);
+	@Query(
+			"SELECT COUNT(DISTINCT t.mySourceResourcePid) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
+	Integer countResourcesTargetingFhirTypeAndId(
+			@Param("resourceType") String theTargetResourceType,
+			@Param("resourceFhirId") String theTargetResourceFhirId);
 }
