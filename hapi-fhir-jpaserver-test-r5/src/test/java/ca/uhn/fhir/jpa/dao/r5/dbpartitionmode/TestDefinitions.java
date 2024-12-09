@@ -624,7 +624,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		if (myIncludePartitionIdsInPks) {
 			assertThat(deleteResVerQueries.get(0).getSql(true, false)).startsWith("delete from HFJ_RES_VER rht1_0 where (rht1_0.PARTITION_ID,rht1_0.PID) in ");
 		} else {
-			assertThat(deleteResVerQueries.get(0).getSql(true, false)).startsWith("delete from HFJ_RES_VER rht1_0 where rht1_0.PID in ");
+			assertThat(deleteResVerQueries.get(0).getSql(true, false)).startsWith("delete from HFJ_RES_VER rht1_0 where (rht1_0.PID) in ");
 		}
 		assertEquals(1, deleteResVerQueries.size());
 	}
