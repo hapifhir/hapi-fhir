@@ -726,8 +726,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.addTask(
 				new ForceIdMigrationFixTask(version.getRelease(), "20231018.3").addFlag(TaskFlagEnum.DO_NOTHING));
 
-		// This fix will work for MSSQL or Oracle.
-		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231222.1"));
 
 		// added back in place of 20231018.2.  If 20231018.2 already ran, this is a no-op.
 		hfjResource.modifyColumn("20231018.4", "FHIR_ID").nonNullable();
@@ -789,6 +787,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// This fix was bad for MSSQL, it has been set to do nothing, and is superseded by 20231222.1
 		version.addTask(
 				new ForceIdMigrationFixTask(version.getRelease(), "20231213.1").addFlag(TaskFlagEnum.DO_NOTHING));
+
+		// This fix will work for MSSQL or Oracle.
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231222.1"));
 
 		// add index to Batch2WorkChunkEntity
 		Builder.BuilderWithTableName workChunkTable = version.onTable("BT2_WORK_CHUNK");
