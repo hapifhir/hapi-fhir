@@ -27,8 +27,11 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchFtTest.class);
 
+	@Override
 	@BeforeEach
-	public void beforeDisableResultReuse() {
+	public void before() throws Exception {
+		super.before();
+		myStorageSettings.setHibernateSearchIndexFullText(true);
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 

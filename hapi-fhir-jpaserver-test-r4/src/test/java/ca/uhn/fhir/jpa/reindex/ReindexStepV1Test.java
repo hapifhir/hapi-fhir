@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.jobs.reindex.v1.ReindexStepV1;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -24,14 +25,13 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
-import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@SuppressWarnings("removal")
 public class ReindexStepV1Test extends BaseJpaR4Test {
 
 	@Autowired
@@ -289,10 +289,10 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			ResourceTable table = myResourceTableDao.findById(idPatientToInvalidate).orElseThrow();
-			assertEquals(INDEX_STATUS_INDEXING_FAILED, table.getIndexStatus());
+			assertEquals(EntityIndexStatusEnum.INDEXING_FAILED, table.getIndexStatus());
 
 			table = myResourceTableDao.findById(id0).orElseThrow();
-			assertEquals(INDEX_STATUS_INDEXED, table.getIndexStatus());
+			assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, table.getIndexStatus());
 		});
 	}
 

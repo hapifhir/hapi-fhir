@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.lang3.time.DateUtils;
@@ -280,7 +281,7 @@ public class ResourceReindexingSvcImplTest {
 
 		// verify
 		assertEquals(0, count);
-		verify(myResourceTableDao, times(1)).updateIndexStatus(eq(0L), eq(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED));
+		verify(myResourceTableDao, times(1)).updateIndexStatus(eq(0L), eq(EntityIndexStatusEnum.INDEXING_FAILED));
 	}
 
 	@Test

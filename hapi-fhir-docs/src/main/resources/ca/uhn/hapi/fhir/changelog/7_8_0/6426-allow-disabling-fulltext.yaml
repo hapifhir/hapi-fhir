@@ -1,0 +1,11 @@
+---
+type: add
+issue: 6426
+title: "Previously, it was not possible to enable Hibernate Search but not use it
+  for fulltext indexing. This meant that you could not enable HS-based terminology
+  services without also enabling fulltext indexing of all resources. A new setting
+  has been added to the JpaStorageSettings bean 
+  called `HibernateSearchIndexFullText` which controls whether HS will be used for
+  fulltext indexing. The existing property `AdvancedHSearchIndexing` has also been
+  deprecated and a new equivalent (but better named) property
+  called `HibernateSearchIndexSearchParams`."

@@ -5,10 +5,10 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r4b.JpaR4BConfig;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -18,9 +18,7 @@ import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import jakarta.persistence.EntityManagerFactory;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
-import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
-import org.hibernate.search.engine.cfg.BackendSettings;
+import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +40,7 @@ import javax.sql.DataSource;
 @Configuration
 @Import({CommonConfig.class, JpaR4BConfig.class, HapiJpaConfig.class})
 @EnableTransactionManagement()
-public class TestR4BConfig {
+public class TestR4BConfig extends BaseConfig {
 	public static final String FHIR_DB_USERNAME = "fhir.db.username";
 	public static final String FHIR_DB_PASSWORD = "fhir.db.password";
 	public static final String FHIR_LUCENE_LOCATION_R4B = "fhir.lucene.location.r4b";
@@ -117,6 +115,16 @@ public class TestR4BConfig {
 	}
 
 	@Bean
+	public SubscriptionSettings subscriptionSettings() {
+		SubscriptionSettings retVal = new SubscriptionSettings();
+		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
+		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
+		retVal.setWebsocketContextPath("/websocketR4B");
+		return retVal;
+	}
+
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
 			ConfigurableListableBeanFactory theConfigurableListableBeanFactory,
 			FhirContext theFhirContext,
@@ -145,13 +153,7 @@ public class TestR4BConfig {
 		extraProperties.put("hibernate.cache.use_structured_entries", "false");
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
 
-		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		extraProperties.put(
-				BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
-				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
-		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
-		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), myFhirLuceneLocation);
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
+		configureLuceneProperties(extraProperties, myFhirLuceneLocation);
 
 		return extraProperties;
 	}

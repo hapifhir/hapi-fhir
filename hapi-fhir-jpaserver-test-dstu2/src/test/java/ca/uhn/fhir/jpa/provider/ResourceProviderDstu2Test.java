@@ -1014,6 +1014,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testEverythingInstanceWithContentFilter() {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Patient pt1 = new Patient();
 		pt1.addName().addFamily("Everything").addGiven("Arthur");
 		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();

@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,7 +23,15 @@ public class FhirSearchDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@Autowired
 	private IFulltextSearchSvc mySearchDao;
-	
+
+	@Override
+	@BeforeEach
+	public void before() throws Exception {
+		super.before();
+
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+	}
+
 	@Test
 	public void testContentSearch() {
 		Long id1;
