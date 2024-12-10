@@ -169,7 +169,6 @@
 		</plugins>
 		<finalName>hapi-fhir-jpaserver</finalName>
 	</build>
-
 	<profiles>
 		<profile>
 			<id>DIST</id>
