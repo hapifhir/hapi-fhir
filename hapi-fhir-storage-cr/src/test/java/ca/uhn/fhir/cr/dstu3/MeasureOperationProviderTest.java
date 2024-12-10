@@ -89,7 +89,7 @@ public class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
 	@Test
 	public void test_EXM124_FHIR3_72000() throws IOException {
 		loadBundle("ca/uhn/fhir/cr/dstu3/connectathon/EXM124-FHIR3-7.2.000-bundle.json");
-		var actual = getActual("2019-01-01", "2019-12-31", "Patient/numer-EXM124-FHIR3", "Measure/measure-EXM124-FHIR3-7.2.000", "individual", null);
+		var actual = getActual("2019-01-01", "2019-12-31", "Patient/numer-EXM124-FHIR3", "Measure/measure-EXM124-FHIR3-7.2.000", "subject", null);
 		var expected = getExpected("measurereport-numer-EXM124-FHIR3");
 
 		compareMeasureReport(expected, actual);
@@ -99,7 +99,7 @@ public class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
 	@Test
 	public void test_EXM104_FHIR3_81000() throws IOException {
 		loadBundle("ca/uhn/fhir/cr/dstu3/connectathon/EXM104-FHIR3-8.1.000-bundle.json");
-		var actual = getActual("2019-01-01", "2019-12-31", "Patient/numer-EXM104-FHIR3", "Measure/measure-EXM104-FHIR3-8.1.000", "individual", null);
+		var actual = getActual("2019-01-01", "2019-12-31", "Patient/numer-EXM104-FHIR3", "Measure/measure-EXM104-FHIR3-8.1.000", "subject", null);
 		assertNotNull(actual);
 	}
 
@@ -107,7 +107,7 @@ public class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
 	@Test
 	void test_EXM105_FHIR3() throws IOException {
 		loadBundle("Exm105Fhir3Measure.json");
-		var actual = getActual("2019-01-01", "2020-01-01", "Patient/denom-EXM105-FHIR3", "Measure/measure-EXM105-FHIR3-8.0.000", "individual", null);
+		var actual = getActual("2019-01-01", "2020-01-01", "Patient/denom-EXM105-FHIR3", "Measure/measure-EXM105-FHIR3-8.0.000", "subject", null);
 		assertNotNull(actual);
 	}
 
@@ -118,7 +118,7 @@ public class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
 		loadBundle("Exm105FhirR3MeasurePartBundle.json");
 
 		var additionalData = readResource(Bundle.class, "Exm105FhirR3MeasureAdditionalData.json");
-		var actual = getActual("2019-01-01", "2019-12-01", "Patient/denom-EXM105-FHIR3", "Measure/measure-EXM105-FHIR3-8.0.000", "individual", additionalData);
+		var actual = getActual("2019-01-01", "2019-12-01", "Patient/denom-EXM105-FHIR3", "Measure/measure-EXM105-FHIR3-8.0.000", "subject", additionalData);
 
 		assertNotNull(actual);
 	}

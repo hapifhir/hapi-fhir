@@ -54,7 +54,7 @@ public class CrResourceListenerTest extends BaseCrR4TestServer {
 		assertThat(myResourceChangeListenerRegistry.getWatchedResourceNames()).contains("ValueSet");
 
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
-		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
+		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "subject", null);
 
 		// This is a manual init
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
@@ -80,7 +80,7 @@ public class CrResourceListenerTest extends BaseCrR4TestServer {
 
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		// evaluate-measure adds library to repository cache
-		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
+		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "subject", null);
 
 		// This is a manual init
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
@@ -106,7 +106,7 @@ public class CrResourceListenerTest extends BaseCrR4TestServer {
 		// load measure bundle with measure library version
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		// evaluate-measure adds library to repository cache
-		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
+		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "subject", null);
 
 		//cached libraries from bundle
 		assertThat(myEvaluationSettings.getLibraryCache()).hasSize(7);
@@ -131,7 +131,7 @@ public class CrResourceListenerTest extends BaseCrR4TestServer {
 		// load measure bundle with measure library version
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		// evaluate-measure adds library to repository cache
-		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
+		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "subject", null);
 
 		//cached libraries from bundle
 		assertThat(myEvaluationSettings.getLibraryCache()).hasSize(7);
@@ -156,7 +156,7 @@ public class CrResourceListenerTest extends BaseCrR4TestServer {
 		// load measure bundle with measure library version
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		// evaluate-measure adds valueset to repository cache
-		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
+		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "subject", null);
 
 		//cached valueset from bundle
 		assertThat(myEvaluationSettings.getValueSetCache()).hasSize(19);
