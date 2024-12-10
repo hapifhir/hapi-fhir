@@ -442,12 +442,12 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 */
 	@SuppressWarnings("unchecked")
 	private List<JpaPid> getMembersFromGroupWithFilter(
-			ExportPIDIteratorParameters theParameters, boolean theConsiderSince) throws IOException {
+			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
 		List<JpaPid> resPids = new ArrayList<>();
 
 		List<SearchParameterMap> maps =
-				myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParameters, theConsiderSince);
+				myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParameters, theConsiderDateRange);
 
 		maps.forEach(map -> addMembershipToGroupClause(map, theParameters.getGroupId()));
 
