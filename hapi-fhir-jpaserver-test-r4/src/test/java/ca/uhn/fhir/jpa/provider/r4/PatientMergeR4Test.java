@@ -13,7 +13,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
@@ -29,16 +28,12 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.dao.r4.replacereferences.ReplaceReferencesTestHelper.EXPECTED_SMALL_BATCHES;
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
@@ -48,8 +43,6 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_RESULT_PATIENT;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
@@ -106,7 +99,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		"false, true, false, true",
 		"false, false, false, true",
 	})
-	public void testMergeWithoutResult(boolean withDelete, boolean withInputResultPatient, boolean withPreview, boolean isAsync) throws Exception {
+	public void testMergeWithoutResult(boolean withDelete, boolean withInputResultPatient, boolean withPreview, boolean isAsync) {
 		// setup
 
 		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
@@ -143,7 +136,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
 			assertNull(task.getIdElement().getVersionIdPart());
 			ourLog.info("Got task {}", task.getId());
-			await().until(() -> taskCompleted(task.getIdElement()));
+			await().until(() -> myTestHelper.taskCompleted(task.getIdElement()));
 
 			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
 			ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
@@ -167,7 +160,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			Reference outputRef = (Reference) taskOutput.getValue();
 			Bundle patchResultBundle = (Bundle) outputRef.getResource();
 			assertTrue(containedBundle.equalsDeep(patchResultBundle));
-			validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES);
+			myTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES);
 		} else { // Synchronous case
 			// Assert outcome
 			OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
@@ -238,11 +231,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private Boolean taskCompleted(IdType theTaskId) {
-		Task updatedTask = myTaskDao.read(theTaskId, mySrd);
-		ourLog.info("Task {} status is {}", theTaskId, updatedTask.getStatus());
-		return updatedTask.getStatus() == Task.TaskStatus.COMPLETED;
-	}
+
 
 	@ParameterizedTest
 	@CsvSource({
@@ -320,137 +309,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.extracting(InvalidRequestException.class::cast)
 			.extracting(BaseServerResponseException::getStatusCode)
 			.isEqualTo(400);
-	}
-
-	@ParameterizedTest
-	@ValueSource(booleans = {false, true})
-	void testReplaceReferences(boolean isAsync) throws IOException {
-		// exec
-		Parameters outParams = myTestHelper.callReplaceReferences(isAsync);
-
-		assertThat(outParams.getParameter()).hasSize(1);
-
-		Bundle patchResultBundle;
-		if (isAsync) {
-			Task task = (Task) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).getResource();
-			assertNull(task.getIdElement().getVersionIdPart());
-			ourLog.info("Got task {}", task.getId());
-			await().until(() -> taskCompleted(task.getIdElement()));
-
-			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
-			ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
-
-			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
-
-			// Assert on the output type
-			Coding taskType = taskOutput.getType().getCodingFirstRep();
-			assertEquals(RESOURCE_TYPES_SYSTEM, taskType.getSystem());
-			assertEquals("Bundle", taskType.getCode());
-
-			List<Resource> containedResources = taskWithOutput.getContained();
-			assertThat(containedResources)
-				.hasSize(1)
-				.element(0)
-				.isInstanceOf(Bundle.class);
-
-			Bundle containedBundle = (Bundle) containedResources.get(0);
-
-			Reference outputRef = (Reference) taskOutput.getValue();
-			patchResultBundle = (Bundle) outputRef.getResource();
-			assertTrue(containedBundle.equalsDeep(patchResultBundle));
-		} else {
-			patchResultBundle = (Bundle) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME).getResource();
-		}
-
-		// validate
-		validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES);
-
-		// Check that the linked resources were updated
-
-		validateLinksUsingEverything();
-	}
-
-	@ParameterizedTest
-	@ValueSource(booleans = {false, true})
-	void testReplaceReferencesSmallBatchSize(boolean isAsync) throws IOException {
-		// exec
-		Parameters outParams = myTestHelper.callReplaceReferencesWithBatchSize(isAsync, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
-
-
-		assertThat(outParams.getParameter()).hasSize(1);
-
-		Bundle patchResultBundle;
-		Task task = (Task) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).getResource();
-		assertNull(task.getIdElement().getVersionIdPart());
-		ourLog.info("Got task {}", task.getId());
-		await().until(() -> taskCompleted(task.getIdElement()));
-
-		Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
-		ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
-
-		assertThat(taskWithOutput.getOutput()).hasSize(EXPECTED_SMALL_BATCHES);
-		List<Resource> containedResources = taskWithOutput.getContained();
-
-		assertThat(containedResources)
-			.hasSize(EXPECTED_SMALL_BATCHES)
-			.element(0)
-			.isInstanceOf(Bundle.class);
-
-		int entriesLeft = ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES;
-		for (int i = 1; i < EXPECTED_SMALL_BATCHES; i++) {
-
-			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutput().get(i);
-
-			// Assert on the output type
-			Coding taskType = taskOutput.getType().getCodingFirstRep();
-			assertEquals(RESOURCE_TYPES_SYSTEM, taskType.getSystem());
-			assertEquals("Bundle", taskType.getCode());
-
-			Bundle containedBundle = (Bundle) containedResources.get(i);
-
-			Reference outputRef = (Reference) taskOutput.getValue();
-			patchResultBundle = (Bundle) outputRef.getResource();
-			assertTrue(containedBundle.equalsDeep(patchResultBundle));
-
-			// validate
-			entriesLeft -= ReplaceReferencesTestHelper.SMALL_BATCH_SIZE;
-			int expectedNumberOfEntries = Math.min(entriesLeft, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
-			validatePatchResultBundle(patchResultBundle, expectedNumberOfEntries);
-		}
-
-		// Check that the linked resources were updated
-
-		validateLinksUsingEverything();
-	}
-
-	private void validateLinksUsingEverything() throws IOException {
-		Bundle everythingBundle = myTestHelper.getTargetEverythingBundle();
-
-		assertNull(everythingBundle.getLink("next"));
-
-		Set<IIdType> actual = new HashSet<>();
-		for (BundleEntryComponent nextEntry : everythingBundle.getEntry()) {
-			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless());
-		}
-
-		ourLog.info("Found IDs: {}", actual);
-
-		myTestHelper.assertContainsAllResources(actual, false);
-	}
-
-	private static void validatePatchResultBundle(Bundle patchResultBundle, int theTotalExpectedPatches) {
-		Pattern expectedPatchIssuePattern = Pattern.compile("Successfully patched resource \"(Observation|Encounter|CarePlan)/\\d+/_history/\\d+\".");
-		assertThat(patchResultBundle.getEntry()).hasSize(theTotalExpectedPatches)
-			.allSatisfy(entry ->
-				assertThat(entry.getResponse().getOutcome())
-					.isInstanceOf(OperationOutcome.class)
-					.extracting(OperationOutcome.class::cast)
-					.extracting(OperationOutcome::getIssue)
-					.satisfies(issues ->
-						assertThat(issues).hasSize(1)
-							.element(0)
-							.extracting(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
-							.satisfies(diagnostics -> assertThat(diagnostics).matches(expectedPatchIssuePattern))));
 	}
 
 	// FIXME KHS look at PatientEverythingR4Test for ideas for other tests

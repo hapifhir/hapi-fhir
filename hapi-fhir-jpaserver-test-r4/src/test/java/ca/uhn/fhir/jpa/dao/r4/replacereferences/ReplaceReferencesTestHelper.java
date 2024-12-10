@@ -16,11 +16,13 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
@@ -46,6 +49,7 @@ public class ReplaceReferencesTestHelper {
 	public static final int SMALL_BATCH_SIZE = 5;
 	public static final int EXPECTED_SMALL_BATCHES = (TOTAL_EXPECTED_PATCHES + SMALL_BATCH_SIZE - 1) / SMALL_BATCH_SIZE;
 	private final IFhirResourceDao<Patient> myPatientDao;
+	private final IFhirResourceDao<Task> myTaskDao;
 
 	IIdType myOrgId;
 	IIdType mySourcePatientId;
@@ -65,6 +69,7 @@ public class ReplaceReferencesTestHelper {
 		myFhirContext = theFhirContext;
 		myFhirClient = theFhirClient;
 		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
+		myTaskDao = theDaoRegistry.getResourceDao(Task.class);
 	}
 
 	public void beforeEach() throws Exception {
@@ -153,6 +158,12 @@ public class ReplaceReferencesTestHelper {
 			.useHttpGet()
 			.returnResourceType(Bundle.class)
 			.execute();
+	}
+
+	public Boolean taskCompleted(IdType theTaskId) {
+		Task updatedTask = myTaskDao.read(theTaskId, mySrd);
+		ourLog.info("Task {} status is {}", theTaskId, updatedTask.getStatus());
+		return updatedTask.getStatus() == Task.TaskStatus.COMPLETED;
 	}
 
 	public Parameters callReplaceReferences(boolean theIsAsync) {
@@ -264,6 +275,21 @@ public class ReplaceReferencesTestHelper {
 			}
 			return inParams;
 		}
+	}
+
+	public void validatePatchResultBundle(Bundle patchResultBundle, int theTotalExpectedPatches) {
+		Pattern expectedPatchIssuePattern = Pattern.compile("Successfully patched resource \"(Observation|Encounter|CarePlan)/\\d+/_history/\\d+\".");
+		assertThat(patchResultBundle.getEntry()).hasSize(theTotalExpectedPatches)
+			.allSatisfy(entry ->
+				assertThat(entry.getResponse().getOutcome())
+					.isInstanceOf(OperationOutcome.class)
+					.extracting(OperationOutcome.class::cast)
+					.extracting(OperationOutcome::getIssue)
+					.satisfies(issues ->
+						assertThat(issues).hasSize(1)
+							.element(0)
+							.extracting(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+							.satisfies(diagnostics -> assertThat(diagnostics).matches(expectedPatchIssuePattern))));
 	}
 
 }
