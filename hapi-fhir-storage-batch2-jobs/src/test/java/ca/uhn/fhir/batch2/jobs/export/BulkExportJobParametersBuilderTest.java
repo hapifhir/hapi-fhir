@@ -50,6 +50,17 @@ class BulkExportJobParametersBuilderTest {
 	}
 
 	@Test
+	void until() {
+		// Arrange
+		final Date expected = new Date();
+		final IPrimitiveType<Date> until = new DateDt(expected);
+		// Act
+		myFixture.until(until);
+		// Assert
+		assertThat(myFixture.build().getUntil()).isEqualTo(expected);
+	}
+
+	@Test
 	void filters() {
 		// Arrange
 		final List<String> expected = List.of("Patient", "Observation", "MedicationRequest");

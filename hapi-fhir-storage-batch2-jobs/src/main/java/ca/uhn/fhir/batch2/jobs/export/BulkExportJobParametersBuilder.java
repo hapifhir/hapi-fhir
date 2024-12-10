@@ -22,6 +22,7 @@ public class BulkExportJobParametersBuilder {
 
 	private Set<String> myResourceTypes;
 	private Date mySince;
+	private Date myUntil;
 	private Set<String> myFilters;
 	private String myOutputFormat;
 	private BulkExportJobParameters.ExportStyle myExportStyle;
@@ -41,6 +42,11 @@ public class BulkExportJobParametersBuilder {
 
 	public BulkExportJobParametersBuilder since(IPrimitiveType<Date> theSince) {
 		mySince = DatatypeUtil.toDateValue(theSince);
+		return this;
+	}
+
+	public BulkExportJobParametersBuilder until(IPrimitiveType<Date> theUntil) {
+		myUntil = DatatypeUtil.toDateValue(theUntil);
 		return this;
 	}
 
@@ -104,6 +110,7 @@ public class BulkExportJobParametersBuilder {
 		result.setPatientIds(myPatientIds);
 		result.setResourceTypes(myResourceTypes);
 		result.setSince(mySince);
+		result.setUntil(myUntil);
 		result.setPostFetchFilterUrls(myPostFetchFilterUrls);
 		return result;
 	}
