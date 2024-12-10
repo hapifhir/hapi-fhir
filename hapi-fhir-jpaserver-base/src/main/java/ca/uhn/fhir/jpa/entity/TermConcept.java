@@ -19,15 +19,16 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingRoutingBinder;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -52,6 +53,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
@@ -60,6 +62,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
+import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.r4.model.Coding;
 
 import java.io.Serializable;
@@ -168,8 +171,13 @@ public class TermConcept implements Serializable {
 	@GenericField
 	private Long myId;
 
+	/**
+	 * See {@link EntityIndexStatusEnum} for values
+	 */
 	@Column(name = "INDEX_STATUS", nullable = true)
-	private Long myIndexStatus;
+	@Enumerated(EnumType.ORDINAL)
+	@JdbcTypeCode(SqlTypes.TINYINT)
+	private EntityIndexStatusEnum myIndexStatus;
 
 	@Deprecated(since = "7.2.0")
 	@Lob
@@ -360,11 +368,11 @@ public class TermConcept implements Serializable {
 		return this;
 	}
 
-	public Long getIndexStatus() {
+	public EntityIndexStatusEnum getIndexStatus() {
 		return myIndexStatus;
 	}
 
-	public TermConcept setIndexStatus(Long theIndexStatus) {
+	public TermConcept setIndexStatus(EntityIndexStatusEnum theIndexStatus) {
 		myIndexStatus = theIndexStatus;
 		return this;
 	}
@@ -497,24 +505,6 @@ public class TermConcept implements Serializable {
 			b.append("sequence", mySequence);
 		}
 		return b.build();
-	}
-
-	public List<IValidationSupport.BaseConceptProperty> toValidationProperties() {
-		List<IValidationSupport.BaseConceptProperty> retVal = new ArrayList<>();
-		for (TermConceptProperty next : getProperties()) {
-			switch (next.getType()) {
-				case STRING:
-					retVal.add(new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue()));
-					break;
-				case CODING:
-					retVal.add(new IValidationSupport.CodingConceptProperty(
-							next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
-					break;
-				default:
-					throw new IllegalStateException(Msg.code(830) + "Don't know how to handle " + next.getType());
-			}
-		}
-		return retVal;
 	}
 
 	/**

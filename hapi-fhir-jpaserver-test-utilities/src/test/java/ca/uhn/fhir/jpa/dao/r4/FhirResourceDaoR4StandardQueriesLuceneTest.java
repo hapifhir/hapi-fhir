@@ -83,14 +83,9 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest
 	// todo mb create an extension to restore via clone or xstream + BeanUtils.copyProperties().
 	@BeforeEach
 	void setUp() {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
 		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
-		myStorageSettings.setAdvancedHSearchIndexing(true);
-	}
-
-	@AfterEach
-	void tearDown() {
-		JpaStorageSettings defaultConfig = new JpaStorageSettings();
-		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 	}
 
 	@Override
