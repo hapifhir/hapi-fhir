@@ -1371,7 +1371,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		// so first error has `Unknown code for ValueSet` error message
 		assertThat(all.get(0).getMessage()).contains("The Coding provided (http://unitsofmeasure.org#Heck) was not found in the value set 'Vital Signs Units' " +
 			"(http://hl7.org/fhir/ValueSet/ucum-vitals-common|4.3.0), and a code should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable). " +
-			" (error message = Unknown code 'http://unitsofmeasure.org#Heck' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/ucum-vitals-common')");
+			" (error message = Unknown code 'http://unitsofmeasure.org#Heck' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/ucum-vitals-common'");
 		assertThat(all.get(0).getLocationString()).contains("Observation.value.ofType(Quantity)");
 		// validate second error
 		assertThat(all.get(1).getMessage()).contains("Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck')");

@@ -97,8 +97,10 @@ import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
+import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
 import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
+import ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
@@ -121,11 +123,12 @@ import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryProvenancePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.SourcePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
@@ -699,8 +702,15 @@ public class JpaConfig {
 
 	@Bean
 	@Scope("prototype")
-	public SourcePredicateBuilder newSourcePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new SourcePredicateBuilder(theSearchBuilder);
+	public ResourceHistoryPredicateBuilder newResourceHistoryPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new ResourceHistoryPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ResourceHistoryProvenancePredicateBuilder newResourceHistoryProvenancePredicateBuilder(
+			SearchQueryBuilder theSearchBuilder) {
+		return new ResourceHistoryProvenancePredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
@@ -917,5 +927,10 @@ public class JpaConfig {
 	public CacheTagDefinitionDao tagDefinitionDao(
 			ITagDefinitionDao tagDefinitionDao, MemoryCacheService memoryCacheService) {
 		return new CacheTagDefinitionDao(tagDefinitionDao, memoryCacheService);
+	}
+
+	@Bean
+	public IReplaceReferencesSvc replaceReferencesSvc(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesSvcImpl(theFhirContext, theDaoRegistry);
 	}
 }

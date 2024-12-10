@@ -44,7 +44,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
-import org.springframework.data.history.Revisions;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -408,12 +407,6 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId<?>, M extends IMdmLin
 	@Transactional(propagation = Propagation.MANDATORY)
 	public void deleteLinksWithAnyReferenceToPids(List<P> theGoldenResourcePids) {
 		myMdmLinkDao.deleteLinksWithAnyReferenceToPids(theGoldenResourcePids);
-	}
-
-	// TODO: LD:  delete for good on the next bump
-	@Deprecated(since = "6.5.7", forRemoval = true)
-	public Revisions<Long, M> findMdmLinkHistory(M mdmLink) {
-		return myMdmLinkDao.findHistory(mdmLink.getId());
 	}
 
 	@Transactional

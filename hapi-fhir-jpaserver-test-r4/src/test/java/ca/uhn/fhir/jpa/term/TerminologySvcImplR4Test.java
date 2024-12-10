@@ -270,37 +270,38 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 
-		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
+		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, null);
 		assertNull(result);
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, "BOGUS", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, "11378-7", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsGuess, valueSet, null, "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, coding, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, codeableConcept);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -318,38 +319,39 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 
-		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
+		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, null);
 		assertNull(result);
 
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, "BOGUS", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, "11378-7", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsGuess, valueSet, null, "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, coding, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, codeableConcept);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
