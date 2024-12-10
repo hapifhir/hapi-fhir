@@ -42,6 +42,11 @@ public class ExportPIDIteratorParameters {
 	private Date myStartDate;
 
 	/**
+	 * The latest date to which to retrieve records
+	 */
+	private Date myEndDate;
+
+	/**
 	 * List of filters to be applied to the search.
 	 * Eg:
 	 * Patient/123?group=1
@@ -106,6 +111,14 @@ public class ExportPIDIteratorParameters {
 
 	public void setStartDate(Date theStartDate) {
 		myStartDate = theStartDate;
+	}
+
+	public Date getEndDate() {
+		return myEndDate;
+	}
+
+	public void setEndDate(Date theEndDate) {
+		myEndDate = theEndDate;
 	}
 
 	public List<String> getFilters() {
