@@ -373,7 +373,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, tableOpt.get().getIndexStatus());
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isLessThanOrEqualTo(0);
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(id1.getIdPartAsLong()))).isLessThanOrEqualTo(0);
 		});
 	}
 
@@ -483,7 +483,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, tableOpt.get().getIndexStatus());
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isLessThanOrEqualTo(0);
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(id1.getIdPartAsLong()))).isLessThanOrEqualTo(0);
 		});
 
 
