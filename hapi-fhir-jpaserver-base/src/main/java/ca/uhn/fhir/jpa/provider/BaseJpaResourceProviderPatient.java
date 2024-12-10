@@ -317,8 +317,8 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					batchSize);
 
 			IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) getDao();
-			ResourceMergeService resourceMergeService =
-					new ResourceMergeService(dao, myReplaceReferencesSvc, myHapiTransactionService, myRequestPartitionHelperSvc);
+			ResourceMergeService resourceMergeService = new ResourceMergeService(
+					dao, myReplaceReferencesSvc, myHapiTransactionService, myRequestPartitionHelperSvc);
 
 			FhirContext fhirContext = dao.getContext();
 

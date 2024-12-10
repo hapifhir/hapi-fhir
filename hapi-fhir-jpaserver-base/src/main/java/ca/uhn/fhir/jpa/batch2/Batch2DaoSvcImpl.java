@@ -75,11 +75,12 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	}
 
 	public Batch2DaoSvcImpl(
-		IResourceTableDao theResourceTableDao, IResourceLinkDao theResourceLinkDao,
-		MatchUrlService theMatchUrlService,
-		DaoRegistry theDaoRegistry,
-		FhirContext theFhirContext,
-		IHapiTransactionService theTransactionService) {
+			IResourceTableDao theResourceTableDao,
+			IResourceLinkDao theResourceLinkDao,
+			MatchUrlService theMatchUrlService,
+			DaoRegistry theDaoRegistry,
+			FhirContext theFhirContext,
+			IHapiTransactionService theTransactionService) {
 		myResourceTableDao = theResourceTableDao;
 		myResourceLinkDao = theResourceLinkDao;
 		myMatchUrlService = theMatchUrlService;

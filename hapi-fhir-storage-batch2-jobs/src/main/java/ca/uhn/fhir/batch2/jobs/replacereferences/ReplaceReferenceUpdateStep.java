@@ -35,8 +35,7 @@ import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_TYPE;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_VALUE;
 
 public class ReplaceReferenceUpdateStep
-		implements IJobStepWorker<
-				ReplaceReferencesJobParameters, FhirIdListWorkChunkJson, ReplaceReferenceResults> {
+		implements IJobStepWorker<ReplaceReferencesJobParameters, FhirIdListWorkChunkJson, ReplaceReferenceResults> {
 
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
@@ -70,14 +69,12 @@ public class ReplaceReferenceUpdateStep
 	}
 
 	private Bundle buildPatchBundle(
-		ReplaceReferencesJobParameters theParams,
-		FhirIdListWorkChunkJson theFhirIds, RequestDetails theRequestDetails) {
+			ReplaceReferencesJobParameters theParams,
+			FhirIdListWorkChunkJson theFhirIds,
+			RequestDetails theRequestDetails) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
-
-		theFhirIds.getFhirIds().stream()
-			.map(FhirIdJson::asIdDt)
-			.forEach(referencingResourceId -> {
+		theFhirIds.getFhirIds().stream().map(FhirIdJson::asIdDt).forEach(referencingResourceId -> {
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(referencingResourceId.getResourceType());
 			IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
 			Parameters patchParams = buildPatchParams(theParams, resource);
@@ -88,31 +85,31 @@ public class ReplaceReferenceUpdateStep
 	}
 
 	private @Nonnull Parameters buildPatchParams(
-		ReplaceReferencesJobParameters theParams, IBaseResource referencingResource) {
+			ReplaceReferencesJobParameters theParams, IBaseResource referencingResource) {
 		Parameters params = new Parameters();
 
 		myFhirContext.newTerser().getAllResourceReferences(referencingResource).stream()
-			.filter(refInfo -> matches(
-				refInfo,
-				theParams.getSourceId().asIdDt())) // We only care about references to our source resource
-			.map(refInfo -> createReplaceReferencePatchOperation(
-				referencingResource.fhirType() + "." + refInfo.getName(),
-				new Reference(theParams.getTargetId().toString())))
-			.forEach(params::addParameter); // Add each operation to parameters
+				.filter(refInfo -> matches(
+						refInfo,
+						theParams.getSourceId().asIdDt())) // We only care about references to our source resource
+				.map(refInfo -> createReplaceReferencePatchOperation(
+						referencingResource.fhirType() + "." + refInfo.getName(),
+						new Reference(theParams.getTargetId().toString())))
+				.forEach(params::addParameter); // Add each operation to parameters
 		return params;
 	}
 
 	private static boolean matches(ResourceReferenceInfo refInfo, IIdType theSourceId) {
 		return refInfo.getResourceReference()
-			.getReferenceElement()
-			.toUnqualifiedVersionless()
-			.getValueAsString()
-			.equals(theSourceId.getValueAsString());
+				.getReferenceElement()
+				.toUnqualifiedVersionless()
+				.getValueAsString()
+				.equals(theSourceId.getValueAsString());
 	}
 
 	@Nonnull
 	private Parameters.ParametersParameterComponent createReplaceReferencePatchOperation(
-		String thePath, Type theValue) {
+			String thePath, Type theValue) {
 
 		Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
 		operation.setName(PARAMETER_OPERATION);
@@ -121,5 +118,4 @@ public class ReplaceReferenceUpdateStep
 		operation.addPart().setName(PARAMETER_VALUE).setValue(theValue);
 		return operation;
 	}
-
 }

@@ -47,8 +47,7 @@ public class FhirIdListWorkChunkJson implements IModelJson {
 	/**
 	 * Constructor
 	 */
-	public FhirIdListWorkChunkJson(
-			Collection<FhirIdJson> theFhirIds, RequestPartitionId theRequestPartitionId) {
+	public FhirIdListWorkChunkJson(Collection<FhirIdJson> theFhirIds, RequestPartitionId theRequestPartitionId) {
 		this();
 		getFhirIds().addAll(theFhirIds);
 		myRequestPartitionId = theRequestPartitionId;

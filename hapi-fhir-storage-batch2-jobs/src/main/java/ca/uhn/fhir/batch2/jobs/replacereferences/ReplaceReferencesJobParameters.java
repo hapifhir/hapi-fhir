@@ -16,9 +16,9 @@ public class ReplaceReferencesJobParameters extends BaseBatchJobParameters {
 	private FhirIdJson myTargetId;
 
 	@JsonProperty(
-		value = "batchSize",
-		defaultValue = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING,
-		required = false)
+			value = "batchSize",
+			defaultValue = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING,
+			required = false)
 	private int myBatchSize;
 
 	@JsonProperty("partitionId")
@@ -65,4 +65,3 @@ public class ReplaceReferencesJobParameters extends BaseBatchJobParameters {
 		myPartitionId = thePartitionId;
 	}
 }
-

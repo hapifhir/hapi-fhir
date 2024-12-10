@@ -20,7 +20,8 @@ public class ReplaceReferencesQueryIdsStep
 	private final HapiTransactionService myHapiTransactionService;
 	private final IBatch2DaoSvc myBatch2DaoSvc;
 
-	public ReplaceReferencesQueryIdsStep(HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
+	public ReplaceReferencesQueryIdsStep(
+			HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
 		myHapiTransactionService = theHapiTransactionService;
 		myBatch2DaoSvc = theBatch2DaoSvc;
 	}
@@ -33,23 +34,25 @@ public class ReplaceReferencesQueryIdsStep
 			throws JobExecutionFailedException {
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
 
-		// Warning: It is a little confusing that source/target are reversed in the resource link table from the meaning in
+		// Warning: It is a little confusing that source/target are reversed in the resource link table from the meaning
+		// in
 		// the replace references request
 
 		FhirIdListWorkChunkJson chunk = new FhirIdListWorkChunkJson(params.getBatchSize(), params.getPartitionId());
 		AtomicInteger totalCount = new AtomicInteger();
 		myHapiTransactionService
-			.withSystemRequestOnPartition(params.getPartitionId())
-			.execute(() -> myBatch2DaoSvc
-				.streamSourceIdsThatReferenceTargetId(params.getSourceId().asIdDt())
-				.map(FhirIdJson::new)
-				.forEach(id -> {
-					chunk.add(id);
-					if (chunk.size() == params.getBatchSize()) {
-						totalCount.addAndGet(processChunk(theDataSink, chunk));
-						chunk.clear();
-					}
-				}));
+				.withSystemRequestOnPartition(params.getPartitionId())
+				.execute(() -> myBatch2DaoSvc
+						.streamSourceIdsThatReferenceTargetId(
+								params.getSourceId().asIdDt())
+						.map(FhirIdJson::new)
+						.forEach(id -> {
+							chunk.add(id);
+							if (chunk.size() == params.getBatchSize()) {
+								totalCount.addAndGet(processChunk(theDataSink, chunk));
+								chunk.clear();
+							}
+						}));
 		if (!chunk.isEmpty()) {
 			totalCount.addAndGet(processChunk(theDataSink, chunk));
 		}

@@ -85,7 +85,10 @@ public class FhirIdJson implements IModelJson {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(myResourceType).append(myFhirId).toHashCode();
+		return new HashCodeBuilder(17, 37)
+				.append(myResourceType)
+				.append(myFhirId)
+				.toHashCode();
 	}
 
 	public IdDt asIdDt() {

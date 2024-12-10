@@ -26,7 +26,7 @@ public class ReplaceReferencesAppCtx {
 				.addFirstStep(
 						"query-ids",
 						"Query IDs of resources that link to the source resource",
-					FhirIdListWorkChunkJson.class,
+						FhirIdListWorkChunkJson.class,
 						theReplaceReferencesQueryIds)
 				.addIntermediateStep(
 						"replace-references",
@@ -41,12 +41,14 @@ public class ReplaceReferencesAppCtx {
 	}
 
 	@Bean
-	public ReplaceReferencesQueryIdsStep replaceReferencesQueryIdsStep(HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
+	public ReplaceReferencesQueryIdsStep replaceReferencesQueryIdsStep(
+			HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
 		return new ReplaceReferencesQueryIdsStep(theHapiTransactionService, theBatch2DaoSvc);
 	}
 
 	@Bean
-	public ReplaceReferenceUpdateStep replaceReferenceUpdateStep(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+	public ReplaceReferenceUpdateStep replaceReferenceUpdateStep(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		return new ReplaceReferenceUpdateStep(theFhirContext, theDaoRegistry);
 	}
 

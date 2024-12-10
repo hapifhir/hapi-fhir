@@ -26,7 +26,11 @@ public class ReplaceReferenceRequest {
 
 	public final RequestPartitionId partitionId;
 
-	public ReplaceReferenceRequest(@Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, int theBatchSize, RequestPartitionId thePartitionId) {
+	public ReplaceReferenceRequest(
+			@Nonnull IIdType theSourceId,
+			@Nonnull IIdType theTargetId,
+			int theBatchSize,
+			RequestPartitionId thePartitionId) {
 		sourceId = theSourceId.toUnqualifiedVersionless();
 		targetId = theTargetId.toUnqualifiedVersionless();
 		batchSize = theBatchSize;

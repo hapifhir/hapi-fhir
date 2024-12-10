@@ -176,7 +176,8 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 
 		IdDt sourceId = new IdDt(theSourceId);
 		IdDt targetId = new IdDt(theTargetId);
-		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetId));
+		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
+				theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetId));
 		ReplaceReferenceRequest replaceReferenceRequest =
 				new ReplaceReferenceRequest(sourceId, targetId, batchSize, partitionId);
 		return getReplaceReferencesSvc().replaceReferences(replaceReferenceRequest, theRequestDetails);

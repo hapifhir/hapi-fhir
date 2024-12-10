@@ -118,7 +118,8 @@ public class JpaStorageSettings extends StorageSettings {
 	private static final long DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD = 10000;
 
 	public static final String DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING = "512";
-	public static final int DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE = Integer.parseInt(DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING);
+	public static final int DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE =
+			Integer.parseInt(DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING);
 
 	/**
 	 * Do not change default of {@code 0}!
