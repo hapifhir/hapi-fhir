@@ -99,6 +99,14 @@ public interface IValidationProvidersR4 {
 			addTerminologyResource(theUrl, codeSystem);
 			return codeSystem;
 		}
+
+		@Override
+		public CodeSystem addTerminologyResource(String theUrl, String theVersion) {
+			CodeSystem codeSystem = addTerminologyResource(theUrl);
+			codeSystem.setVersion(theVersion);
+			addVersionedTerminologyResource(theUrl, theVersion, codeSystem);
+			return codeSystem;
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -136,6 +144,13 @@ public interface IValidationProvidersR4 {
 			valueSet.setId(theUrl.substring(0, theUrl.lastIndexOf("/")));
 			valueSet.setUrl(theUrl);
 			addTerminologyResource(theUrl, valueSet);
+			return valueSet;
+		}
+
+		@Override
+		public ValueSet addTerminologyResource(String theUrl, String theVersion) {
+			ValueSet valueSet = addTerminologyResource(theUrl);
+			addVersionedTerminologyResource(theUrl, theVersion, valueSet);
 			return valueSet;
 		}
 	}

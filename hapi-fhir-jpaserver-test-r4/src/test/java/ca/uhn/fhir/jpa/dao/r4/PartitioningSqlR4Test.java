@@ -1473,9 +1473,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(0, searchOutcome.size());
 		}
-
 	}
-
 
 	@Test
 	public void testSearch_MissingParamString_SearchAllPartitions() {
@@ -1872,9 +1870,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// NOTE: the query is changed, only one SP_VALUE_LOW and SP_VALUE_HIGH
 		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
 		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_HIGH"));
-
 	}
-
 
 	@Test
 	public void testSearch_DateParam_SearchSpecificPartitions() {

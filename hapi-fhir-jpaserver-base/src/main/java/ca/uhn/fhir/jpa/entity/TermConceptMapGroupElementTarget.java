@@ -42,6 +42,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 
 import java.io.Serializable;
@@ -93,6 +95,7 @@ public class TermConceptMapGroupElementTarget extends BasePartitionable implemen
 	private String myDisplay;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(name = "TARGET_EQUIVALENCE", nullable = true, length = MAX_EQUIVALENCE_LENGTH)
 	private ConceptMapEquivalence myEquivalence;
 

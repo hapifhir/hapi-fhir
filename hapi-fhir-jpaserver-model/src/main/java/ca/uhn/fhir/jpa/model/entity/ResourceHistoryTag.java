@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -41,7 +40,6 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
 
-@Embeddable
 @Entity
 @Table(
 		name = "HFJ_HISTORY_TAG",

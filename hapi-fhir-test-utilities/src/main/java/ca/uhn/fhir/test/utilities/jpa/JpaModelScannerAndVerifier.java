@@ -34,6 +34,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -53,6 +54,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Subselect;
 import org.hibernate.validator.constraints.Length;
 
@@ -411,6 +413,14 @@ public class JpaModelScannerAndVerifier {
 				}
 			}
 
+		}
+
+		Enumerated enumerated = theAnnotatedElement.getAnnotation(Enumerated.class);
+		if (enumerated != null) {
+			JdbcTypeCode jdbcTypeCode = theAnnotatedElement.getAnnotation(JdbcTypeCode.class);
+			if (jdbcTypeCode == null) {
+				throw new IllegalStateException(Msg.code(2591) + "Field " + theAnnotatedElement + " has @Enumerated but not @JdbcTypeCode (must declare either VARCHAR or a numeric type to avoid the database using native enums)");
+			}
 		}
 
 	}

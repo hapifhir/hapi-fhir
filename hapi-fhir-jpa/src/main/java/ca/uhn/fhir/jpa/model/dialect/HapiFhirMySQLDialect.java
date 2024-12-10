@@ -49,4 +49,12 @@ public class HapiFhirMySQLDialect extends MySQLDialect implements IHapiFhirDiale
 	public DriverTypeEnum getDriverType() {
 		return DriverTypeEnum.MYSQL_5_7;
 	}
+
+	/**
+	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
+	 */
+	@Override
+	public String getEnumTypeDeclaration(String name, String[] values) {
+		return null;
+	}
 }
