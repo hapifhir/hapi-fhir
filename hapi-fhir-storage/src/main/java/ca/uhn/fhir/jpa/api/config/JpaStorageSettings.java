@@ -2216,7 +2216,10 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * Is HSearch indexing enabled beyond _contains or _text?
+	 * Is HSearch indexing enabled beyond {@literal _content} or {@literal _text}?
+	 * If this setting is enabled, other search parameters will also be indexed using
+	 * Hibernate Search, allowing more kinds of searches to be performed using the
+	 * fulltext engine.
 	 *
 	 * <p>
 	 * Note that this property was called "setAdvancedHSearchIndexing" prior to HAPI FHIR 8.0.0
@@ -2246,7 +2249,8 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * Activates hibernate search indexing of fulltext data from resources, which
+	 * Is hibernate search indexing of fulltext data from resources enabled?
+	 * This setting activates hibernate search indexing of fulltext data from resources, which
 	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
 	 *
 	 * @since 8.0.0
