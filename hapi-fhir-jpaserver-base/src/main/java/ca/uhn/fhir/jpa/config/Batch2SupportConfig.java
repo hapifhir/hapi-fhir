@@ -43,12 +43,13 @@ public class Batch2SupportConfig {
 	@Bean
 	public IBatch2DaoSvc batch2DaoSvc(
 			IResourceTableDao theResourceTableDao,
+			IResourceLinkDao theResourceLinkDao,
 			MatchUrlService theMatchUrlService,
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext,
 			IHapiTransactionService theTransactionService) {
 		return new Batch2DaoSvcImpl(
-				theResourceTableDao, theMatchUrlService, theDaoRegistry, theFhirContext, theTransactionService);
+				theResourceTableDao, theResourceLinkDao, theMatchUrlService, theDaoRegistry, theFhirContext, theTransactionService);
 	}
 
 	@Bean

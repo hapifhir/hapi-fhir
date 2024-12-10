@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -23,10 +24,13 @@ public class ReplaceReferenceRequest {
 
 	public final int batchSize;
 
-	public ReplaceReferenceRequest(@Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, int theBatchSize) {
+	public final RequestPartitionId partitionId;
+
+	public ReplaceReferenceRequest(@Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, int theBatchSize, RequestPartitionId thePartitionId) {
 		sourceId = theSourceId.toUnqualifiedVersionless();
 		targetId = theTargetId.toUnqualifiedVersionless();
 		batchSize = theBatchSize;
+		partitionId = thePartitionId;
 	}
 
 	public void validateOrThrowInvalidParameterException() {

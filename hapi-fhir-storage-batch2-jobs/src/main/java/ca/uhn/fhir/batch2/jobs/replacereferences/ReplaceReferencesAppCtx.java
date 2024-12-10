@@ -1,13 +1,17 @@
 package ca.uhn.fhir.batch2.jobs.replacereferences;
 
-import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.chunk.FhirIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ReplaceReferencesAppCtx {
-	private static final String JOB_REPLACE_REFERENCES = "REPLACE_REFERENCES";
+	public static final String JOB_REPLACE_REFERENCES = "REPLACE_REFERENCES";
 
 	@Bean
 	public JobDefinition<ReplaceReferencesJobParameters> bulkImport2JobDefinition(
@@ -22,7 +26,7 @@ public class ReplaceReferencesAppCtx {
 				.addFirstStep(
 						"query-ids",
 						"Query IDs of resources that link to the source resource",
-						ResourceIdListWorkChunkJson.class,
+					FhirIdListWorkChunkJson.class,
 						theReplaceReferencesQueryIds)
 				.addIntermediateStep(
 						"replace-references",
@@ -37,13 +41,13 @@ public class ReplaceReferencesAppCtx {
 	}
 
 	@Bean
-	public ReplaceReferencesQueryIdsStep replaceReferencesQueryIdsStep() {
-		return new ReplaceReferencesQueryIdsStep();
+	public ReplaceReferencesQueryIdsStep replaceReferencesQueryIdsStep(HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
+		return new ReplaceReferencesQueryIdsStep(theHapiTransactionService, theBatch2DaoSvc);
 	}
 
 	@Bean
-	public ReplaceReferenceUpdateStep replaceReferenceUpdateStep() {
-		return new ReplaceReferenceUpdateStep();
+	public ReplaceReferenceUpdateStep replaceReferenceUpdateStep(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		return new ReplaceReferenceUpdateStep(theFhirContext, theDaoRegistry);
 	}
 
 	@Bean

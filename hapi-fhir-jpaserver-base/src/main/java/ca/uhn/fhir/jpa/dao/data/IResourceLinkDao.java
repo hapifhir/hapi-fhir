@@ -50,13 +50,13 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 
 	@Query(
 			"SELECT DISTINCT new ca.uhn.fhir.model.primitive.IdDt(t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
-	Stream<IdDt> streamSourceIdsForTargetPid(
+	Stream<IdDt> streamSourceIdsForTargetFhirId(
 			@Param("resourceType") String theTargetResourceType,
 			@Param("resourceFhirId") String theTargetResourceFhirId);
 
 	@Query(
 			"SELECT COUNT(DISTINCT t.mySourceResourcePid) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
-	Integer countResourcesTargetingFhirTypeAndId(
+	Integer countResourcesTargetingFhirTypeAndFhirId(
 			@Param("resourceType") String theTargetResourceType,
 			@Param("resourceFhirId") String theTargetResourceFhirId);
 }

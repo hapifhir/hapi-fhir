@@ -24,10 +24,13 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
+import ca.uhn.fhir.model.primitive.IdDt;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Date;
+import java.util.stream.Stream;
 
 public interface IBatch2DaoSvc {
 
@@ -76,4 +79,6 @@ public interface IBatch2DaoSvc {
 		return new ListWrappingPidStream(fetchResourceIdsPage(
 				theStart, theEnd, 20000 /* ResourceIdListStep.DEFAULT_PAGE_SIZE */, theTargetPartitionId, theUrl));
 	}
+
+	Stream<IdDt> streamSourceIdsThatReferenceTargetId(IIdType theTargetId);
 }

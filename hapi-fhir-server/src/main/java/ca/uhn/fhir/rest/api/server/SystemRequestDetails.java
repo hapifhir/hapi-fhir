@@ -78,6 +78,12 @@ public class SystemRequestDetails extends RequestDetails {
 		}
 	}
 
+	public static SystemRequestDetails forRequestPartitionId(RequestPartitionId thePartitionId) {
+		SystemRequestDetails retVal = new SystemRequestDetails();
+		retVal.setRequestPartitionId(thePartitionId);
+		return retVal;
+	}
+
 	public RequestPartitionId getRequestPartitionId() {
 		return myRequestPartitionId;
 	}

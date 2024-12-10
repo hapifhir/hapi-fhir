@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -12,7 +13,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
-import net.sourceforge.plantuml.bpm.Col;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -73,6 +73,10 @@ public class ResourceMergeServiceTest {
 	@Mock
 	IHapiTransactionService myTransactionServiceMock;
 
+	@Mock
+	IRequestPartitionHelperSvc myRequestPartitionHelperSvcMock;
+
+
 	private ResourceMergeService myResourceMergeService;
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -84,7 +88,7 @@ public class ResourceMergeServiceTest {
 	@BeforeEach
 	void setup() {
 		when(myDaoMock.getContext()).thenReturn(myFhirContext);
-		myResourceMergeService = new ResourceMergeService(myDaoMock, myReplaceReferencesSvcMock, myTransactionServiceMock);
+		myResourceMergeService = new ResourceMergeService(myDaoMock, myReplaceReferencesSvcMock, myTransactionServiceMock, myRequestPartitionHelperSvcMock);
 	}
 
 	// SUCCESS CASES

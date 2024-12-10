@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Parameters;
@@ -15,7 +14,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper.EXPECTED_SMALL_BATCHES;
@@ -84,7 +82,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 		// Check that the linked resources were updated
 
-		validateLinksUsingEverything();
+		myTestHelper.assertAllReferencesUpdated();
 	}
 
 	@ParameterizedTest
@@ -137,15 +135,6 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 		// Check that the linked resources were updated
 
-		validateLinksUsingEverything();
-	}
-
-
-	private void validateLinksUsingEverything() {
-		Set<IIdType> actual =  myTestHelper.getTargetEverythingResourceIds();
-
-		ourLog.info("Found IDs: {}", actual);
-
-		myTestHelper.assertContainsAllResources(actual, false);
+		myTestHelper.assertAllReferencesUpdated();
 	}
 }

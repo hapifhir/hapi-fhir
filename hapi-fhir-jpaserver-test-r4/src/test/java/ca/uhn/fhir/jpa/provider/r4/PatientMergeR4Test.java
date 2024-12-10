@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
@@ -29,7 +28,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
@@ -211,14 +209,11 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Check that the linked resources were updated
 
-		Set<IIdType> actual = myTestHelper.getTargetEverythingResourceIds();
-
-		ourLog.info("Found IDs: {}", actual);
 
 		if (withPreview) {
-			myTestHelper.assertNothingChanged(actual);
+			myTestHelper.assertNothingChanged();
 		} else {
-			myTestHelper.assertContainsAllResources(actual, withDelete);
+			myTestHelper.assertAllReferencesUpdated(withDelete);
 		}
 	}
 

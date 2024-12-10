@@ -110,7 +110,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	@Override
 	public Integer countResourcesReferencingResource(IIdType theResourceId, RequestDetails theRequestDetails) {
 		return myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
-			return myResourceLinkDao.countResourcesTargetingFhirTypeAndId(
+			return myResourceLinkDao.countResourcesTargetingFhirTypeAndFhirId(
 					theResourceId.getResourceType(), theResourceId.getIdPart());
 		});
 	}
@@ -148,7 +148,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 				List<IdDt> pidList = myHapiTransactionService
 						.withSystemRequestOnPartition(thePartitionId)
 						.execute(() -> myResourceLinkDao
-								.streamSourceIdsForTargetPid(
+								.streamSourceIdsForTargetFhirId(
 										theReplaceReferenceRequest.sourceId.getResourceType(),
 										theReplaceReferenceRequest.sourceId.getIdPart())
 								.collect(Collectors.toUnmodifiableList()));
@@ -211,6 +211,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return retval;
 	}
 
+	// FIXME KHS delete after convert to batch
 	private Bundle patchReferencingResources(
 			ReplaceReferenceRequest theReplaceReferenceRequest,
 			List<IdDt> theFhirIdList,
@@ -226,13 +227,14 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private @Nonnull StopLimitAccumulator<IdDt> getAllPidsWithLimit(
 			ReplaceReferenceRequest theReplaceReferenceRequest) {
 
-		Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetPid(
+		Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
 				theReplaceReferenceRequest.sourceId.getResourceType(), theReplaceReferenceRequest.sourceId.getIdPart());
 		StopLimitAccumulator<IdDt> accumulator =
 				StopLimitAccumulator.fromStreamAndLimit(idStream, theReplaceReferenceRequest.batchSize);
 		return accumulator;
 	}
 
+	// FIXME KHS delete after convert to batch
 	private Bundle buildPatchBundle(
 			ReplaceReferenceRequest theReplaceReferenceRequest,
 			RequestDetails theRequestDetails,
@@ -249,6 +251,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return bundleBuilder.getBundleTyped();
 	}
 
+	// FIXME KHS delete after convert to batch
 	private @Nonnull Parameters buildPatchParams(
 			ReplaceReferenceRequest theReplaceReferenceRequest, IBaseResource referencingResource) {
 		Parameters params = new Parameters();
@@ -264,6 +267,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return params;
 	}
 
+	// FIXME KHS delete after convert to batch
 	private static boolean matches(ResourceReferenceInfo refInfo, IIdType theSourceId) {
 		return refInfo.getResourceReference()
 				.getReferenceElement()
@@ -272,6 +276,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 				.equals(theSourceId.getValueAsString());
 	}
 
+	// FIXME KHS delete after convert to batch
 	@Nonnull
 	private Parameters.ParametersParameterComponent createReplaceReferencePatchOperation(
 			String thePath, Type theValue) {

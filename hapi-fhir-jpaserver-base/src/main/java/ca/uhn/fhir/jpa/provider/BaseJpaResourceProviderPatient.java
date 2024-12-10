@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.merge.PatientMergeOperationInputParameters;
 import ca.uhn.fhir.jpa.dao.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -76,6 +77,9 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 
 	@Autowired
 	private IHapiTransactionService myHapiTransactionService;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	/**
 	 * Patient/123/$everything
@@ -314,7 +318,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 
 			IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) getDao();
 			ResourceMergeService resourceMergeService =
-					new ResourceMergeService(dao, myReplaceReferencesSvc, myHapiTransactionService);
+					new ResourceMergeService(dao, myReplaceReferencesSvc, myHapiTransactionService, myRequestPartitionHelperSvc);
 
 			FhirContext fhirContext = dao.getContext();
 

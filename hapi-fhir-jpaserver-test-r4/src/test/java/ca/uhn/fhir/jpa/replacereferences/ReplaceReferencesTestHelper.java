@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -162,7 +161,7 @@ public class ReplaceReferencesTestHelper {
 		return myTargetPatientId;
 	}
 
-	public Set<IIdType> getTargetEverythingResourceIds() {
+	private Set<IIdType> getTargetEverythingResourceIds() {
 		PatientEverythingParameters everythingParams = new PatientEverythingParameters();
 		everythingParams.setCount(new IntegerType(100));
 
@@ -205,28 +204,41 @@ public class ReplaceReferencesTestHelper {
 			.execute();
 	}
 
-	public void assertContainsAllResources(Set<IIdType> theActual, boolean theWithDelete) {
-		if (theWithDelete) {
-			assertThat(theActual).doesNotContain(mySourcePatientId);
-		}
-		assertThat(theActual).contains(mySourceEncId1);
-		assertThat(theActual).contains(mySourceEncId2);
-		assertThat(theActual).contains(myOrgId);
-		assertThat(theActual).contains(mySourceCarePlanId);
-		assertThat(theActual).containsAll(mySourceObsIds);
-		assertThat(theActual).contains(myTargetPatientId);
-		assertThat(theActual).contains(myTargetEnc1);
+	public void assertAllReferencesUpdated() {
+		assertAllReferencesUpdated(false);
 	}
 
-	public void assertNothingChanged(Set<IIdType> theActual) {
-		assertThat(theActual).doesNotContain(mySourcePatientId);
-		assertThat(theActual).doesNotContain(mySourceEncId1);
-		assertThat(theActual).doesNotContain(mySourceEncId2);
-		assertThat(theActual).contains(myOrgId);
-		assertThat(theActual).doesNotContain(mySourceCarePlanId);
-		assertThat(theActual).doesNotContainAnyElementsOf(mySourceObsIds);
-		assertThat(theActual).contains(myTargetPatientId);
-		assertThat(theActual).contains(myTargetEnc1);
+	public void assertAllReferencesUpdated(boolean theWithDelete) {
+
+		Set<IIdType> actual = getTargetEverythingResourceIds();
+
+		ourLog.info("Found IDs: {}", actual);
+
+		if (theWithDelete) {
+			assertThat(actual).doesNotContain(mySourcePatientId);
+		}
+		assertThat(actual).contains(mySourceEncId1);
+		assertThat(actual).contains(mySourceEncId2);
+		assertThat(actual).contains(myOrgId);
+		assertThat(actual).contains(mySourceCarePlanId);
+		assertThat(actual).containsAll(mySourceObsIds);
+		assertThat(actual).contains(myTargetPatientId);
+		assertThat(actual).contains(myTargetEnc1);
+	}
+
+	public void assertNothingChanged() {
+		Set<IIdType> actual = getTargetEverythingResourceIds();
+
+		ourLog.info("Found IDs: {}", actual);
+
+		assertThat(actual).doesNotContain(mySourcePatientId);
+		assertThat(actual).doesNotContain(mySourceEncId1);
+		assertThat(actual).doesNotContain(mySourceEncId2);
+		assertThat(actual).contains(myOrgId);
+		assertThat(actual).doesNotContain(mySourceCarePlanId);
+		assertThat(actual).doesNotContainAnyElementsOf(mySourceObsIds);
+		assertThat(actual).contains(myTargetPatientId);
+		assertThat(actual).contains(myTargetEnc1);
 	}
 
 	public PatientMergeInputParameters buildMultipleTargetMatchParameters(boolean theWithDelete, boolean theWithInputResultPatient, boolean theWithPreview) {

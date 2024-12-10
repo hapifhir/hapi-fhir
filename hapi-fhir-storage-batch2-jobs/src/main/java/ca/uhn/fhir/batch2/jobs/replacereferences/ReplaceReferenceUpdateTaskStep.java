@@ -18,6 +18,8 @@ public class ReplaceReferenceUpdateTaskStep
 							theStepExecutionDetails,
 			@Nonnull IJobDataSink<VoidModel> theDataSink)
 			throws JobExecutionFailedException {
-		return null;
+		// FIXME KHS
+		RunOutcome retval = new RunOutcome(0);
+		return retval;
 	}
 }

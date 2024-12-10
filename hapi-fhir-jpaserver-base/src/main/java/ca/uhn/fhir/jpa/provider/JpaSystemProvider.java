@@ -20,8 +20,11 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -36,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.security.InvalidParameterException;
 import java.util.Collections;
@@ -49,6 +53,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static software.amazon.awssdk.utils.StringUtils.isBlank;
 
 public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT> {
+	@Autowired
+	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Description(
 			"Marks all currently existing resources of a given type, or all resources of all types, for reindexing.")
@@ -167,8 +173,12 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 		if (batchSize > myStorageSettings.getMaxTransactionEntriesForWrite()) {
 			batchSize = myStorageSettings.getMaxTransactionEntriesForWrite();
 		}
+
+		IdDt sourceId = new IdDt(theSourceId);
+		IdDt targetId = new IdDt(theTargetId);
+		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetId));
 		ReplaceReferenceRequest replaceReferenceRequest =
-				new ReplaceReferenceRequest(new IdDt(theSourceId), new IdDt(theTargetId), batchSize);
+				new ReplaceReferenceRequest(sourceId, targetId, batchSize, partitionId);
 		return getReplaceReferencesSvc().replaceReferences(replaceReferenceRequest, theRequestDetails);
 	}
 
