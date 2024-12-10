@@ -35,7 +35,8 @@ import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_TYPE;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_VALUE;
 
 public class ReplaceReferenceUpdateStep
-		implements IJobStepWorker<ReplaceReferencesJobParameters, FhirIdListWorkChunkJson, ReplaceReferencePatchOutcomeJson> {
+		implements IJobStepWorker<
+				ReplaceReferencesJobParameters, FhirIdListWorkChunkJson, ReplaceReferencePatchOutcomeJson> {
 
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;

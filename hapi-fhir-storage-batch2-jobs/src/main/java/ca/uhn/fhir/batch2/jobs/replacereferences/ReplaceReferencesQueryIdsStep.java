@@ -19,13 +19,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class ReplaceReferencesQueryIdsStep
-	implements IJobStepWorker<ReplaceReferencesJobParameters, VoidModel, FhirIdListWorkChunkJson> {
+		implements IJobStepWorker<ReplaceReferencesJobParameters, VoidModel, FhirIdListWorkChunkJson> {
 
 	private final HapiTransactionService myHapiTransactionService;
 	private final IBatch2DaoSvc myBatch2DaoSvc;
 
 	public ReplaceReferencesQueryIdsStep(
-		HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
+			HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
 		myHapiTransactionService = theHapiTransactionService;
 		myBatch2DaoSvc = theBatch2DaoSvc;
 	}
@@ -33,9 +33,9 @@ public class ReplaceReferencesQueryIdsStep
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<ReplaceReferencesJobParameters, VoidModel> theStepExecutionDetails,
-		@Nonnull IJobDataSink<FhirIdListWorkChunkJson> theDataSink)
-		throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<ReplaceReferencesJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<FhirIdListWorkChunkJson> theDataSink)
+			throws JobExecutionFailedException {
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
 
 		// Warning: It is a little confusing that source/target are reversed in the resource link table from the meaning
@@ -44,21 +44,26 @@ public class ReplaceReferencesQueryIdsStep
 
 		AtomicInteger totalCount = new AtomicInteger();
 		myHapiTransactionService
-			.withSystemRequestOnPartition(params.getPartitionId())
-			.readOnly()
-			.execute(() -> {
-				Stream<FhirIdJson> stream = myBatch2DaoSvc
-					.streamSourceIdsThatReferenceTargetId(
-						params.getSourceId().asIdDt())
-					.map(FhirIdJson::new);
+				.withSystemRequestOnPartition(params.getPartitionId())
+				.readOnly()
+				.execute(() -> {
+					Stream<FhirIdJson> stream = myBatch2DaoSvc
+							.streamSourceIdsThatReferenceTargetId(
+									params.getSourceId().asIdDt())
+							.map(FhirIdJson::new);
 
-				StreamUtil.partition(stream, params.getBatchSize()).forEach(chunk -> totalCount.addAndGet(processChunk(theDataSink, chunk, params.getPartitionId())));
-			});
+					StreamUtil.partition(stream, params.getBatchSize())
+							.forEach(chunk ->
+									totalCount.addAndGet(processChunk(theDataSink, chunk, params.getPartitionId())));
+				});
 
 		return new RunOutcome(totalCount.get());
 	}
 
-	private int processChunk(IJobDataSink<FhirIdListWorkChunkJson> theDataSink, List<FhirIdJson> theChunk, RequestPartitionId theRequestPartitionId) {
+	private int processChunk(
+			IJobDataSink<FhirIdListWorkChunkJson> theDataSink,
+			List<FhirIdJson> theChunk,
+			RequestPartitionId theRequestPartitionId) {
 		FhirIdListWorkChunkJson data = new FhirIdListWorkChunkJson(theChunk, theRequestPartitionId);
 		theDataSink.accept(data);
 		return theChunk.size();

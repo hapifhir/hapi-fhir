@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReplaceReferenceUpdateTaskReducerStep
-		implements IReductionStepWorker<ReplaceReferencesJobParameters, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson> {
+		implements IReductionStepWorker<
+				ReplaceReferencesJobParameters, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson> {
 	public static final String RESOURCE_TYPES_SYSTEM = "http://hl7.org/fhir/ValueSet/resource-types";
 
 	private final FhirContext myFhirContext;
@@ -35,21 +36,28 @@ public class ReplaceReferenceUpdateTaskReducerStep
 
 	@Nonnull
 	@Override
-	public ChunkOutcome consume(ChunkExecutionDetails<ReplaceReferencesJobParameters, ReplaceReferencePatchOutcomeJson> theChunkDetails) {
+	public ChunkOutcome consume(
+			ChunkExecutionDetails<ReplaceReferencesJobParameters, ReplaceReferencePatchOutcomeJson> theChunkDetails) {
 		ReplaceReferencePatchOutcomeJson result = theChunkDetails.getData();
-		Bundle patchOutputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, result.getPatchResponseBundle());
+		Bundle patchOutputBundle =
+				myFhirContext.newJsonParser().parseResource(Bundle.class, result.getPatchResponseBundle());
 		myPatchOutputBundles.add(patchOutputBundle);
 		return ChunkOutcome.SUCCESS();
 	}
 
-
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ReplaceReferencesJobParameters, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails, @Nonnull IJobDataSink<ReplaceReferenceResultsJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull
+					StepExecutionDetails<ReplaceReferencesJobParameters, ReplaceReferencePatchOutcomeJson>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<ReplaceReferenceResultsJson> theDataSink)
+			throws JobExecutionFailedException {
 
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
 		SystemRequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(params.getPartitionId());
-		Task task = myDaoRegistry.getResourceDao(Task.class).read(params.getTaskId().asIdDt(), requestDetails);
+		Task task =
+				myDaoRegistry.getResourceDao(Task.class).read(params.getTaskId().asIdDt(), requestDetails);
 
 		task.setStatus(Task.TaskStatus.COMPLETED);
 		myPatchOutputBundles.forEach(outputBundle -> {
@@ -58,7 +66,7 @@ public class ReplaceReferenceUpdateTaskReducerStep
 			coding.setSystem(RESOURCE_TYPES_SYSTEM);
 			coding.setCode("Bundle");
 			Reference outputBundleReference =
-				new Reference("#" + outputBundle.getIdElement().getIdPart());
+					new Reference("#" + outputBundle.getIdElement().getIdPart());
 			output.setValue(outputBundleReference);
 			task.addContained(outputBundle);
 		});
@@ -71,6 +79,4 @@ public class ReplaceReferenceUpdateTaskReducerStep
 
 		return new RunOutcome(myPatchOutputBundles.size());
 	}
-
-
 }

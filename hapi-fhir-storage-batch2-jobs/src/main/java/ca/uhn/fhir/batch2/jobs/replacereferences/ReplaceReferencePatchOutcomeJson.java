@@ -14,6 +14,7 @@ public class ReplaceReferencePatchOutcomeJson implements IModelJson {
 	public ReplaceReferencePatchOutcomeJson(FhirContext theFhirContext, Bundle theResult) {
 		myPatchResponseBundle = theFhirContext.newJsonParser().encodeResourceToString(theResult);
 	}
+
 	public String getPatchResponseBundle() {
 		return myPatchResponseBundle;
 	}

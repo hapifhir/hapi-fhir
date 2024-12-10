@@ -50,7 +50,7 @@ public class BulkExportCreateReportStep
 	@Nonnull
 	@Override
 	public ChunkOutcome consume(
-		ChunkExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theChunkDetails) {
+			ChunkExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theChunkDetails) {
 		BulkExportBinaryFileId fileId = theChunkDetails.getData();
 		if (myResourceToBinaryIds == null) {
 			myResourceToBinaryIds = new HashMap<>();
@@ -96,8 +96,8 @@ public class BulkExportCreateReportStep
 	}
 
 	private static String getOriginatingRequestUrl(
-		@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
-		BulkExportJobResults results) {
+			@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
+			BulkExportJobResults results) {
 		IJobInstance instance = theStepExecutionDetails.getInstance();
 		String url = "";
 		if (instance instanceof JobInstance) {
