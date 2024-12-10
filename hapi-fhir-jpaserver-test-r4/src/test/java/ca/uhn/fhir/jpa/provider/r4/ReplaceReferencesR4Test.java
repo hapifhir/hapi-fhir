@@ -52,27 +52,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Got task {}", task.getId());
 			await().until(() -> myTestHelper.taskCompleted(task.getIdElement()));
 
-			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
-			ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
-
-			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
-
-			// Assert on the output type
-			Coding taskType = taskOutput.getType().getCodingFirstRep();
-			assertEquals(RESOURCE_TYPES_SYSTEM, taskType.getSystem());
-			assertEquals("Bundle", taskType.getCode());
-
-			List<Resource> containedResources = taskWithOutput.getContained();
-			assertThat(containedResources)
-				.hasSize(1)
-				.element(0)
-				.isInstanceOf(Bundle.class);
-
-			Bundle containedBundle = (Bundle) containedResources.get(0);
-
-			Reference outputRef = (Reference) taskOutput.getValue();
-			patchResultBundle = (Bundle) outputRef.getResource();
-			assertTrue(containedBundle.equalsDeep(patchResultBundle));
+			patchResultBundle = myTestHelper.validateCompletedTask(task.getIdElement());
 		} else {
 			patchResultBundle = (Bundle) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME).getResource();
 		}
@@ -84,6 +64,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 		myTestHelper.assertAllReferencesUpdated();
 	}
+
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})

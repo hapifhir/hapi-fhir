@@ -35,7 +35,7 @@ import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_TYPE;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_VALUE;
 
 public class ReplaceReferenceUpdateStep
-		implements IJobStepWorker<ReplaceReferencesJobParameters, FhirIdListWorkChunkJson, ReplaceReferenceResults> {
+		implements IJobStepWorker<ReplaceReferencesJobParameters, FhirIdListWorkChunkJson, ReplaceReferencePatchOutcomeJson> {
 
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
@@ -51,7 +51,7 @@ public class ReplaceReferenceUpdateStep
 			@Nonnull
 					StepExecutionDetails<ReplaceReferencesJobParameters, FhirIdListWorkChunkJson>
 							theStepExecutionDetails,
-			@Nonnull IJobDataSink<ReplaceReferenceResults> theDataSink)
+			@Nonnull IJobDataSink<ReplaceReferencePatchOutcomeJson> theDataSink)
 			throws JobExecutionFailedException {
 
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
@@ -64,8 +64,10 @@ public class ReplaceReferenceUpdateStep
 		// TODO KHS shouldn't transaction response bundles have ids?
 		result.setId(UUID.randomUUID().toString());
 
-		RunOutcome retval = new RunOutcome(0);
-		return retval;
+		ReplaceReferencePatchOutcomeJson data = new ReplaceReferencePatchOutcomeJson(myFhirContext, result);
+		theDataSink.accept(data);
+
+		return new RunOutcome(result.getEntry().size());
 	}
 
 	private Bundle buildPatchBundle(

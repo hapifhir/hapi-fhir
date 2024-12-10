@@ -15,45 +15,47 @@ public class ReplaceReferencesAppCtx {
 
 	@Bean
 	public JobDefinition<ReplaceReferencesJobParameters> bulkImport2JobDefinition(
-			ReplaceReferencesQueryIdsStep theReplaceReferencesQueryIds,
-			ReplaceReferenceUpdateStep theReplaceReferenceUpdateStep,
-			ReplaceReferenceUpdateTaskStep theReplaceReferenceUpdateTaskStep) {
+		ReplaceReferencesQueryIdsStep theReplaceReferencesQueryIds,
+		ReplaceReferenceUpdateStep theReplaceReferenceUpdateStep,
+		ReplaceReferenceUpdateTaskReducerStep theReplaceReferenceUpdateTaskReducerStep) {
 		return JobDefinition.newBuilder()
-				.setJobDefinitionId(JOB_REPLACE_REFERENCES)
-				.setJobDescription("Replace References")
-				.setJobDefinitionVersion(1)
-				.setParametersType(ReplaceReferencesJobParameters.class)
-				.addFirstStep(
-						"query-ids",
-						"Query IDs of resources that link to the source resource",
-						FhirIdListWorkChunkJson.class,
-						theReplaceReferencesQueryIds)
-				.addIntermediateStep(
-						"replace-references",
-						"Update all references from pointing to source to pointing to target",
-						ReplaceReferenceResults.class,
-						theReplaceReferenceUpdateStep)
-				.addLastStep(
-						"update-task",
-						"Waits for replace reference work to complete and updates Task.",
-						theReplaceReferenceUpdateTaskStep)
-				.build();
+			.setJobDefinitionId(JOB_REPLACE_REFERENCES)
+			.setJobDescription("Replace References")
+			.setJobDefinitionVersion(1)
+			.gatedExecution()
+			.setParametersType(ReplaceReferencesJobParameters.class)
+			.addFirstStep(
+				"query-ids",
+				"Query IDs of resources that link to the source resource",
+				FhirIdListWorkChunkJson.class,
+				theReplaceReferencesQueryIds)
+			.addIntermediateStep(
+				"replace-references",
+				"Update all references from pointing to source to pointing to target",
+				ReplaceReferencePatchOutcomeJson.class,
+				theReplaceReferenceUpdateStep)
+			.addFinalReducerStep(
+				"update-task",
+				"Waits for replace reference work to complete and updates Task.",
+				ReplaceReferenceResultsJson.class,
+				theReplaceReferenceUpdateTaskReducerStep)
+			.build();
 	}
 
 	@Bean
 	public ReplaceReferencesQueryIdsStep replaceReferencesQueryIdsStep(
-			HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
+		HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
 		return new ReplaceReferencesQueryIdsStep(theHapiTransactionService, theBatch2DaoSvc);
 	}
 
 	@Bean
 	public ReplaceReferenceUpdateStep replaceReferenceUpdateStep(
-			FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		return new ReplaceReferenceUpdateStep(theFhirContext, theDaoRegistry);
 	}
 
 	@Bean
-	public ReplaceReferenceUpdateTaskStep replaceReferenceUpdateTaskStep() {
-		return new ReplaceReferenceUpdateTaskStep();
+	public ReplaceReferenceUpdateTaskReducerStep replaceReferenceUpdateTaskStep(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		return new ReplaceReferenceUpdateTaskReducerStep(theFhirContext, theDaoRegistry);
 	}
 }

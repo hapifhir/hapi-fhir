@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -25,6 +26,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
@@ -32,15 +34,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ReplaceReferencesTestHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReplaceReferencesTestHelper.class);
@@ -319,5 +325,32 @@ public class ReplaceReferencesTestHelper {
 							.extracting(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
 							.satisfies(diagnostics -> assertThat(diagnostics).matches(expectedPatchIssuePattern))));
 	}
+
+	public Bundle validateCompletedTask(IIdType theTaskId) {
+		Bundle patchResultBundle;
+		Task taskWithOutput = myTaskDao.read(theTaskId, mySrd);
+		ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
+
+		Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
+
+		// Assert on the output type
+		Coding taskType = taskOutput.getType().getCodingFirstRep();
+		assertEquals(RESOURCE_TYPES_SYSTEM, taskType.getSystem());
+		assertEquals("Bundle", taskType.getCode());
+
+		List<Resource> containedResources = taskWithOutput.getContained();
+		assertThat(containedResources)
+			.hasSize(1)
+			.element(0)
+			.isInstanceOf(Bundle.class);
+
+		Bundle containedBundle = (Bundle) containedResources.get(0);
+
+		Reference outputRef = (Reference) taskOutput.getValue();
+		patchResultBundle = (Bundle) outputRef.getResource();
+		assertTrue(containedBundle.equalsDeep(patchResultBundle));
+		return patchResultBundle;
+	}
+
 
 }

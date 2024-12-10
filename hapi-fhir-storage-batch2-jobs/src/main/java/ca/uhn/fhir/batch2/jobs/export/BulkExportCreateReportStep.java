@@ -49,6 +49,22 @@ public class BulkExportCreateReportStep
 
 	@Nonnull
 	@Override
+	public ChunkOutcome consume(
+		ChunkExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theChunkDetails) {
+		BulkExportBinaryFileId fileId = theChunkDetails.getData();
+		if (myResourceToBinaryIds == null) {
+			myResourceToBinaryIds = new HashMap<>();
+		}
+
+		myResourceToBinaryIds.putIfAbsent(fileId.getResourceType(), new ArrayList<>());
+
+		myResourceToBinaryIds.get(fileId.getResourceType()).add(fileId.getBinaryId());
+
+		return ChunkOutcome.SUCCESS();
+	}
+
+	@Nonnull
+	@Override
 	public RunOutcome run(
 			@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
 			@Nonnull IJobDataSink<BulkExportJobResults> theDataSink)
@@ -79,25 +95,9 @@ public class BulkExportCreateReportStep
 		return RunOutcome.SUCCESS;
 	}
 
-	@Nonnull
-	@Override
-	public ChunkOutcome consume(
-			ChunkExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theChunkDetails) {
-		BulkExportBinaryFileId fileId = theChunkDetails.getData();
-		if (myResourceToBinaryIds == null) {
-			myResourceToBinaryIds = new HashMap<>();
-		}
-
-		myResourceToBinaryIds.putIfAbsent(fileId.getResourceType(), new ArrayList<>());
-
-		myResourceToBinaryIds.get(fileId.getResourceType()).add(fileId.getBinaryId());
-
-		return ChunkOutcome.SUCCESS();
-	}
-
 	private static String getOriginatingRequestUrl(
-			@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
-			BulkExportJobResults results) {
+		@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
+		BulkExportJobResults results) {
 		IJobInstance instance = theStepExecutionDetails.getInstance();
 		String url = "";
 		if (instance instanceof JobInstance) {

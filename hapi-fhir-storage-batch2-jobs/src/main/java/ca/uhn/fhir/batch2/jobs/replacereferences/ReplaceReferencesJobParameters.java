@@ -5,10 +5,15 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.provider.ReplaceReferenceRequest;
 import ca.uhn.fhir.model.api.BaseBatchJobParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hl7.fhir.instance.model.api.IIdType;
 
+import static ca.uhn.fhir.jpa.api.config.JpaStorageSettings.DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE;
 import static ca.uhn.fhir.jpa.api.config.JpaStorageSettings.DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING;
 
 public class ReplaceReferencesJobParameters extends BaseBatchJobParameters {
+	@JsonProperty("taskId")
+	private FhirIdJson myTaskId;
+
 	@JsonProperty("sourceId")
 	private FhirIdJson mySourceId;
 
@@ -16,15 +21,16 @@ public class ReplaceReferencesJobParameters extends BaseBatchJobParameters {
 	private FhirIdJson myTargetId;
 
 	@JsonProperty(
-			value = "batchSize",
-			defaultValue = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING,
-			required = false)
+		value = "batchSize",
+		defaultValue = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING,
+		required = false)
 	private int myBatchSize;
 
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
 
-	public ReplaceReferencesJobParameters() {}
+	public ReplaceReferencesJobParameters() {
+	}
 
 	public ReplaceReferencesJobParameters(ReplaceReferenceRequest theRequest) {
 		mySourceId = new FhirIdJson(theRequest.sourceId);
@@ -50,6 +56,9 @@ public class ReplaceReferencesJobParameters extends BaseBatchJobParameters {
 	}
 
 	public int getBatchSize() {
+		if (myBatchSize <= 0) {
+			myBatchSize = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE;
+		}
 		return myBatchSize;
 	}
 
@@ -63,5 +72,13 @@ public class ReplaceReferencesJobParameters extends BaseBatchJobParameters {
 
 	public void setPartitionId(RequestPartitionId thePartitionId) {
 		myPartitionId = thePartitionId;
+	}
+
+	public void setTaskId(IIdType theTaskId) {
+		myTaskId = new FhirIdJson(theTaskId);
+	}
+
+	public FhirIdJson getTaskId() {
+		return myTaskId;
 	}
 }
