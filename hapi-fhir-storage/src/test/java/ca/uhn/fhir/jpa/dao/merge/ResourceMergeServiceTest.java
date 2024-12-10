@@ -12,8 +12,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
+import net.sourceforge.plantuml.bpm.Col;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -75,6 +77,10 @@ public class ResourceMergeServiceTest {
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 
+	private Patient myCapturedSourcePatientForUpdate;
+
+	private Patient myCapturedTargetPatientForUpdate;
+
 	@BeforeEach
 	void setup() {
 		when(myDaoMock.getContext()).thenReturn(myFhirContext);
@@ -89,26 +95,58 @@ public class ResourceMergeServiceTest {
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
+
+		//the identifiers should be copied from the source to the target, without creating duplicates on the target
+		sourcePatient.addIdentifier(new Identifier().setSystem("sysA").setValue("val1"));
+		sourcePatient.addIdentifier(new Identifier().setSystem("sysB").setValue("val2"));
+		sourcePatient.addIdentifier(new Identifier().setSystem("sysC").setValue("val3"));
 		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID);
+		targetPatient.addIdentifier(new Identifier().setSystem("sysC").setValue("val3"));
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 		setupDaoMockForSuccessfulSourcePatientUpdate(sourcePatient, new Patient());
 		Patient patientReturnedFromDaoAfterTargetUpdate = new Patient();
-		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientReturnedFromDaoAfterTargetUpdate, true);
+		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientReturnedFromDaoAfterTargetUpdate);
 		setupTransactionServiceMock();
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(200);
-		assertThat(mergeOutcome.getUpdatedTargetResource()).isEqualTo(patientReturnedFromDaoAfterTargetUpdate);
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-		assertThat(issue.getDetails().getText()).contains(SUCCESSFUL_MERGE_MSG);
+		verifySuccessfulOutcome(mergeOutcome, patientReturnedFromDaoAfterTargetUpdate);
+		verifyUpdatedSourcePatient();
+		List<Identifier> expectedIdentifiers = List.of(
+			new Identifier().setSystem("sysC").setValue("val3"),
+			new Identifier().setSystem("sysA").setValue("val1"),
+			new Identifier().setSystem("sysB").setValue("val2"));
+		verifyUpdatedTargetPatient(true, expectedIdentifiers);
+		verifyNoMoreInteractions(myDaoMock);
+	}
 
+
+	@Test
+	void testMerge_WithoutResultResource_TargetSetToActiveExplicitly_Success() {
+		// Given
+		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID);
+		targetPatient.setActive(true);
+		setupDaoMockForSuccessfulRead(sourcePatient);
+		setupDaoMockForSuccessfulRead(targetPatient);
+		setupDaoMockForSuccessfulSourcePatientUpdate(sourcePatient, new Patient());
+		Patient patientReturnedFromDaoAfterTargetUpdate = new Patient();
+		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientReturnedFromDaoAfterTargetUpdate);
+		setupTransactionServiceMock();
+
+		// When
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+
+		// Then
+		verifySuccessfulOutcome(mergeOutcome, patientReturnedFromDaoAfterTargetUpdate);
+		verifyUpdatedSourcePatient();
+		verifyUpdatedTargetPatient(true, Collections.emptyList());
 		verifyNoMoreInteractions(myDaoMock);
 	}
 
@@ -129,20 +167,55 @@ public class ResourceMergeServiceTest {
 
 		setupDaoMockForSuccessfulSourcePatientUpdate(sourcePatient, new Patient());
 		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
-		setupDaoMockForSuccessfulTargetPatientUpdate(resultPatient, patientToBeReturnedFromDaoAfterTargetUpdate, true);
+		setupDaoMockForSuccessfulTargetPatientUpdate(resultPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 		setupTransactionServiceMock();
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(200);
-		assertThat(mergeOutcome.getUpdatedTargetResource()).isEqualTo(patientToBeReturnedFromDaoAfterTargetUpdate);
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-		assertThat(issue.getDetails().getText()).contains(SUCCESSFUL_MERGE_MSG);
+		verifySuccessfulOutcome(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
+		verifyUpdatedSourcePatient();
+		verifyUpdatedTargetPatient(true, Collections.emptyList());
+		verifyNoMoreInteractions(myDaoMock);
+	}
 
+
+	@Test
+	void testMerge_WithResultResource_ResultHasAllTargetIdentifiers_Success() {
+		// Given
+		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResourceIdentifiers(List.of(
+			new CanonicalIdentifier().setSystem("sys").setValue("val1"),
+			new CanonicalIdentifier().setSystem("sys").setValue("val2")
+		));
+		Patient resultPatient = createPatient(TARGET_PATIENT_TEST_ID);
+		resultPatient.addLink().setType(Patient.LinkType.REPLACES).setOther(new Reference(SOURCE_PATIENT_TEST_ID));
+		resultPatient.addIdentifier().setSystem("sys").setValue("val1");
+		resultPatient.addIdentifier().setSystem("sys").setValue("val2");
+		mergeOperationParameters.setResultResource(resultPatient);
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID);
+
+		setupDaoMockForSuccessfulRead(sourcePatient);
+		setupDaoMockSearchForIdentifiers(List.of(List.of(targetPatient)));
+
+		setupDaoMockForSuccessfulSourcePatientUpdate(sourcePatient, new Patient());
+		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
+		setupDaoMockForSuccessfulTargetPatientUpdate(resultPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
+		setupTransactionServiceMock();
+
+		// When
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+
+		// Then
+		verifySuccessfulOutcome(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
+		verifyUpdatedSourcePatient();
+		List<Identifier> expectedIdentifiers = List.of(
+			new Identifier().setSystem("sys").setValue("val1"),
+			new Identifier().setSystem("sys").setValue("val2")
+		);
+		verifyUpdatedTargetPatient(true, expectedIdentifiers);
 		verifyNoMoreInteractions(myDaoMock);
 	}
 
@@ -160,21 +233,44 @@ public class ResourceMergeServiceTest {
 
 		when(myDaoMock.delete(new IdType(SOURCE_PATIENT_TEST_ID), myRequestDetailsMock)).thenReturn(new DaoMethodOutcome());
 		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
-		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientToBeReturnedFromDaoAfterTargetUpdate, false);
+		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 		setupTransactionServiceMock();
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(200);
-		assertThat(mergeOutcome.getUpdatedTargetResource()).isEqualTo(patientToBeReturnedFromDaoAfterTargetUpdate);
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-		assertThat(issue.getDetails().getText()).contains(SUCCESSFUL_MERGE_MSG);
+		verifySuccessfulOutcome(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
+		verifyUpdatedTargetPatient(false, Collections.emptyList());
+		verifyNoMoreInteractions(myDaoMock);
+	}
 
+
+	@Test
+	void testMerge_WithDeleteSourceTrue_And_WithResultResource_Success() {
+		// Given
+		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
+		mergeOperationParameters.setDeleteSource(true);
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID);
+		Patient resultPatient = createPatient(TARGET_PATIENT_TEST_ID);
+		mergeOperationParameters.setResultResource(resultPatient);
+		setupDaoMockForSuccessfulRead(sourcePatient);
+		setupDaoMockForSuccessfulRead(targetPatient);
+
+		when(myDaoMock.delete(new IdType(SOURCE_PATIENT_TEST_ID), myRequestDetailsMock)).thenReturn(new DaoMethodOutcome());
+		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
+		setupDaoMockForSuccessfulTargetPatientUpdate(resultPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
+		setupTransactionServiceMock();
+
+		// When
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+
+		// Then
+		verifySuccessfulOutcome(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
+		verifyUpdatedTargetPatient(false, Collections.emptyList());
 		verifyNoMoreInteractions(myDaoMock);
 	}
 
@@ -219,20 +315,18 @@ public class ResourceMergeServiceTest {
 		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_2);
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
-		when(myDaoMock.update(any(), eq(myRequestDetailsMock))).thenReturn(new DaoMethodOutcome());
+		setupDaoMockForSuccessfulSourcePatientUpdate(sourcePatient, new Patient());
+		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
+		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
+
 		setupTransactionServiceMock();
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(200);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-		assertThat(issue.getDetails().getText()).contains(SUCCESSFUL_MERGE_MSG);
-
+		verifySuccessfulOutcome(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
+		verifyUpdatedSourcePatient();
+		verifyUpdatedTargetPatient(true, Collections.emptyList());
 		verifyNoMoreInteractions(myDaoMock);
 	}
 
@@ -845,13 +939,14 @@ public class ResourceMergeServiceTest {
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(
-			new CanonicalIdentifier().setSystem("sys").setValue("val1"),
-			new CanonicalIdentifier().setSystem("sys").setValue("val2")
+			new CanonicalIdentifier().setSystem("sysA").setValue("val1"),
+			new CanonicalIdentifier().setSystem("sysB").setValue("val2")
 		));
 
 		// the result patient has only one of the identifiers that were provided in the target identifiers
 		Patient resultPatient = createPatient(TARGET_PATIENT_TEST_ID);
-		resultPatient.addIdentifier().setSystem("sys").setValue("val");
+		resultPatient.addIdentifier().setSystem("sysA").setValue("val1");
+		resultPatient.addIdentifier().setSystem("sysC").setValue("val2");
 		addReplacesLink(resultPatient, SOURCE_PATIENT_TEST_ID);
 		mergeOperationParameters.setResultResource(resultPatient);
 		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_1);
@@ -876,7 +971,7 @@ public class ResourceMergeServiceTest {
 
 
 	@Test
-	void testMerge_ValidatesResultResource_ResultResourceHasNoReplacesLink_ReturnsErrorWith400Status() {
+	void testMerge_ValidatesResultResource_ResultResourceHasNoReplacesLinkAtAll_ReturnsErrorWith400Status() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
@@ -904,6 +999,36 @@ public class ResourceMergeServiceTest {
 		verifyNoMoreInteractions(myDaoMock);
 	}
 
+	@Test
+	void testMerge_ValidatesResultResource_ResultResourceHasNoReplacesLinkToSource_ReturnsErrorWith400Status() {
+		// Given
+		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
+		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+
+		Patient resultPatient = createPatient(TARGET_PATIENT_TEST_ID);
+		addReplacesLink(resultPatient, "Patient/not-the-source-id");
+
+		mergeOperationParameters.setResultResource(resultPatient);
+		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_1);
+		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_1);
+		setupDaoMockForSuccessfulRead(sourcePatient);
+		setupDaoMockForSuccessfulRead(targetPatient);
+
+		// When
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+
+		// Then
+		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
+		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
+
+		assertThat(operationOutcome.getIssue()).hasSize(1);
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue.getDiagnostics()).contains("'result-patient' must have a 'replaces' link to the source resource.");
+
+		verifyNoMoreInteractions(myDaoMock);
+	}
 
 	@Test
 	void testMerge_ValidatesResultResource_ResultResourceHasReplacesLinkAndDeleteSourceIsTrue_ReturnsErrorWith400Status() {
@@ -969,6 +1094,16 @@ public class ResourceMergeServiceTest {
 		verifyNoMoreInteractions(myDaoMock);
 	}
 
+	private void verifySuccessfulOutcome(MergeOperationOutcome theMergeOutcome, Patient theExpectedTargetResource) {
+		OperationOutcome operationOutcome = (OperationOutcome) theMergeOutcome.getOperationOutcome();
+		assertThat(theMergeOutcome.getHttpStatusCode()).isEqualTo(200);
+		assertThat(theMergeOutcome.getUpdatedTargetResource()).isEqualTo(theExpectedTargetResource);
+		assertThat(operationOutcome.getIssue()).hasSize(1);
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+		assertThat(issue.getDetails().getText()).contains(SUCCESSFUL_MERGE_MSG);
+	}
+
 	private Patient createPatient(String theId) {
 		Patient patient = new Patient();
 		patient.setId(theId);
@@ -1022,6 +1157,11 @@ public class ResourceMergeServiceTest {
 		}
 	}
 
+	private void verifyUpdatedSourcePatient() {
+		assertThat(myCapturedSourcePatientForUpdate.getLink()).hasSize(1);
+		assertThat(myCapturedSourcePatientForUpdate.getLinkFirstRep().getType()).isEqualTo(Patient.LinkType.REPLACEDBY);
+		assertThat(myCapturedSourcePatientForUpdate.getLinkFirstRep().getOther().getReference()).isEqualTo(TARGET_PATIENT_TEST_ID);
+	}
 
 	private void setupDaoMockForSuccessfulSourcePatientUpdate(Patient thePatientExpectedAsInput,
 															  Patient thePatientToReturnInDaoOutcome) {
@@ -1029,10 +1169,7 @@ public class ResourceMergeServiceTest {
 		daoMethodOutcome.setResource(thePatientToReturnInDaoOutcome);
 		when(myDaoMock.update(thePatientExpectedAsInput, myRequestDetailsMock))
 			.thenAnswer(t -> {
-				Patient capturedSourcePatient = t.getArgument(0);
-				assertThat(capturedSourcePatient.getLink()).hasSize(1);
-				assertThat(capturedSourcePatient.getLinkFirstRep().getType()).isEqualTo(Patient.LinkType.REPLACEDBY);
-				assertThat(capturedSourcePatient.getLinkFirstRep().getOther().getReference()).isEqualTo(TARGET_PATIENT_TEST_ID);
+				myCapturedSourcePatientForUpdate = t.getArgument(0);
 
 				DaoMethodOutcome outcome = new DaoMethodOutcome();
 				outcome.setResource(thePatientToReturnInDaoOutcome);
@@ -1040,26 +1177,37 @@ public class ResourceMergeServiceTest {
 			});
 	}
 
+	private void verifyUpdatedTargetPatient(boolean theExpectLinkToSourcePatient, List<Identifier> theExpectedIdentifiers) {
+		if (theExpectLinkToSourcePatient) {
+			assertThat(myCapturedTargetPatientForUpdate.getLink()).hasSize(1);
+			assertThat(myCapturedTargetPatientForUpdate.getLinkFirstRep().getType()).isEqualTo(Patient.LinkType.REPLACES);
+			assertThat(myCapturedTargetPatientForUpdate.getLinkFirstRep().getOther().getReference()).isEqualTo(SOURCE_PATIENT_TEST_ID);
+		}
+		else {
+			assertThat(myCapturedTargetPatientForUpdate.getLink()).isEmpty();
+		}
+
+
+		assertThat(myCapturedTargetPatientForUpdate.getIdentifier()).hasSize(theExpectedIdentifiers.size());
+		for (int i = 0; i < theExpectedIdentifiers.size(); i++) {
+			Identifier expectedIdentifier = theExpectedIdentifiers.get(i);
+			Identifier actualIdentifier = myCapturedTargetPatientForUpdate.getIdentifier().get(i);
+			assertThat(expectedIdentifier.equalsDeep(actualIdentifier)).isTrue();
+		}
+
+	}
+
 	private void setupDaoMockForSuccessfulTargetPatientUpdate(Patient thePatientExpectedAsInput,
-															  Patient thePatientToReturnInDaoOutcome,
-															  boolean theExpectLinkToSourcePatient) {
+															  Patient thePatientToReturnInDaoOutcome) {
 		DaoMethodOutcome daoMethodOutcome = new DaoMethodOutcome();
 		daoMethodOutcome.setResource(thePatientToReturnInDaoOutcome);
 		when(myDaoMock.update(thePatientExpectedAsInput, myRequestDetailsMock))
 			.thenAnswer(t -> {
-				Patient capturedTargetPatient = t.getArgument(0);
-				if (theExpectLinkToSourcePatient) {
-					assertThat(capturedTargetPatient.getLink()).hasSize(1);
-					assertThat(capturedTargetPatient.getLinkFirstRep().getType()).isEqualTo(Patient.LinkType.REPLACES);
-					assertThat(capturedTargetPatient.getLinkFirstRep().getOther().getReference()).isEqualTo(SOURCE_PATIENT_TEST_ID);
-				}
-				else {
-					assertThat(capturedTargetPatient.getLink()).isEmpty();
-				}
+				myCapturedTargetPatientForUpdate = t.getArgument(0);
 				DaoMethodOutcome outcome = new DaoMethodOutcome();
-				outcome.setResource(thePatientToReturnInDaoOutcome);
-				return outcome;
-			});
+					outcome.setResource(thePatientToReturnInDaoOutcome);
+					return outcome;
+				});
 	}
 
 	private void verifySearchParametersOnDaoSearchInvocations(List<List<String>> theExpectedIdentifierParams) {

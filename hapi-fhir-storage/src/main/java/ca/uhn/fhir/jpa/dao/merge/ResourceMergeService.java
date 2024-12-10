@@ -278,8 +278,7 @@ public class ResourceMergeService {
 			Patient theResource, Patient.LinkType theLinkType, IIdType theResourceId) {
 		List<Reference> links = getLinksOfType(theResource, theLinkType);
 		return links.stream()
-				.filter(r -> r.getReference() != null
-						&& r.getReference().equals(theResourceId.toVersionless().getValue()))
+				.filter(r -> theResourceId.toVersionless().getValue().equals(r.getReference()))
 				.collect(Collectors.toList());
 	}
 
@@ -380,7 +379,7 @@ public class ResourceMergeService {
 		theSourceResource
 				.addLink()
 				.setType(Patient.LinkType.REPLACEDBY)
-				.setOther(new Reference(theTargetResource.getId()));
+				.setOther(new Reference(theTargetResource.getIdElement().toVersionless()));
 	}
 
 	private Patient prepareTargetPatientForUpdate(
@@ -400,7 +399,7 @@ public class ResourceMergeService {
 			theTargetResource
 					.addLink()
 					.setType(Patient.LinkType.REPLACES)
-					.setOther(new Reference(theSourceResource.getId()));
+					.setOther(new Reference(theSourceResource.getIdElement().toVersionless()));
 		}
 
 		// copy all identifiers from the source to the target
