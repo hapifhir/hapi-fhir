@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import com.google.common.collect.Lists;
@@ -1800,10 +1801,12 @@ public class FhirTerser {
 			if (existing != null) {
 				return existing;
 			}
-
-			IIdType newId = theResource.getIdElement();
+			
+			IIdType newId = new IdDt(theResource.getIdElement());
 			if (isBlank(newId.getValue())) {
-				newId.setValue("#" + UUID.randomUUID());
+				UUID randomUUID = UUID.randomUUID();
+				theResource.getIdElement().setValue(randomUUID.toString());
+				newId.setValue("#" + randomUUID);
 			}
 
 			getResourceToIdMap().put(theResource, newId);

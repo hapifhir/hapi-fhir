@@ -317,9 +317,9 @@ public class JsonParserR4Test extends BaseTest {
 
 		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
-		String guidWithHash = med.getId();
-		String withoutHash = guidWithHash.replace("#", "");
-		assertThat(encoded).contains("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"" + withoutHash + "\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"" + guidWithHash +"\"}}"); //Note we dont check exact ID since its a GUID
+		String guidWithoutHash = med.getId();
+		String guidWithHash = "#" + guidWithoutHash;
+		assertThat(encoded).contains("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"" + guidWithoutHash + "\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"" + guidWithHash +"\"}}"); //Note we dont check exact ID since its a GUID
 	}
 
 	@Test
@@ -610,7 +610,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
 		assertEquals("1", obs.getContained().get(0).getId());
-		assertEquals(enc.getId(), "#" + obs.getContained().get(1).getId());
+		assertEquals(enc.getId(), obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
@@ -639,7 +639,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
 		assertEquals("1", obs.getContained().get(0).getId());
-		assertEquals(pt.getId(), "#" + obs.getContained().get(1).getId());
+		assertEquals(pt.getId(), obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
@@ -665,8 +665,8 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
 
-		assertEquals(pract.getId(), "#" + mr.getContained().get(0).getId());
-		assertEquals(med.getId(), "#" + mr.getContained().get(1).getId());
+		assertEquals(pract.getId(), mr.getContained().get(0).getId());
+		assertEquals(med.getId(),  mr.getContained().get(1).getId());
 
 	}
 
@@ -1438,7 +1438,7 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 	@Test
-	public void testReferenceCreatedByResourceDoesntMutateEmptyContained() {
+	public void testNoIdReferenceCreatedByResourceDoesntMutateEmptyContained() {
 		Specimen specimen = new Specimen();
 		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
 
@@ -1451,7 +1451,33 @@ public class JsonParserR4Test extends BaseTest {
 
 		// When encoding, if the reference does not have an id, it is generated in the FhirTerser
 		String specimenReferenceId = observation.getSpecimen().getResource().getIdElement().getValue();
-		assertThat(specimenReferenceId).startsWith("#");
+//		assertThat(specimenReferenceId).startsWith("#");
+
+		// the terser doesn't add a new contained element to the observation
+		assertThat(observation.getContained()).isEmpty();
+
+		// However the encoded text contains both a single contained resource, as well as the reference to it.
+		assertThat(text).contains("\"reference\":\""+ "#" + specimenReferenceId+"\"");
+		assertThat(text).contains("\"id\":\""+specimenReferenceId+"\"");
+
+	}
+
+	@Test
+	public void testExplicitIdReferenceCreatedByResourceDoesntMutateEmptyContained() {
+		Specimen specimen = new Specimen();
+		specimen.setId("contained-id");
+		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
+
+		Observation observation = new Observation();
+		observation.setId("O1");
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.setSpecimen(new Reference(specimen));
+
+		String text = ourCtx.newJsonParser().encodeResourceToString(observation);
+
+		// When encoding, if the reference does not have an id, it is generated in the FhirTerser
+		String specimenReferenceId = observation.getSpecimen().getResource().getIdElement().getValue();
+		//assertThat(specimenReferenceId).startsWith("#");
 
 		// the terser doesn't add a new contained element to the observation
 		assertThat(observation.getContained()).isEmpty();
@@ -1461,7 +1487,6 @@ public class JsonParserR4Test extends BaseTest {
 		assertThat(text).contains("\"id\":\""+specimenReferenceId.substring(1)+"\"");
 
 	}
-
 
 	@Test
 	public void testReferenceCreatedByIdTypeDoesntMutateContained() {

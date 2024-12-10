@@ -570,6 +570,35 @@ public class XmlParserDstu2Test {
 	}
 
 	@Test
+	void testEncodeContainedResourceWithNoExplicitId() {
+		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
+
+		String organizationUuid = UUID.randomUUID().toString();
+		// Create an organization, note that the organization does not have an ID
+		Organization org = new Organization();
+		org.getNameElement().setValue("Contained Test Organization");
+		org.setId(organizationUuid);
+
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
+
+		// Put the organization as a reference in the patient resource
+		patient.getManagingOrganization().setResource(org);
+
+
+		//patient.getContained().getContainedResources().clear();
+		patient.getManagingOrganization().setReference((String) null);
+		String encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"" + organizationUuid +
+			"\"/>", "</Organization", "</contained>", "<reference value=\"#" + organizationUuid + "\"/>"));
+		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
+		assertThat(encoded).contains("<reference value=\"#" + organizationUuid + "\"/>");
+
+	}
+
+	@Test
 	public void testEncodeAndParseContainedCustomTypes() {
 		ourCtx = FhirContext.forDstu2();
 		ourCtx.setDefaultTypeForProfile(CustomObservationDstu2.PROFILE, CustomObservationDstu2.class);
