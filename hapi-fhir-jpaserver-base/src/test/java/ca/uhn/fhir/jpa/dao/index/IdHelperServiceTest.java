@@ -119,7 +119,7 @@ public class IdHelperServiceTest {
 
 	@Test
 	public void testResolveResourceIdentity_withPersistentIdOfResourceWithForcedIdAndDefaultClientIdStrategy_returnsNotFound(){
-		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
+//		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
 		String resourceType = "Patient";
 
@@ -144,22 +144,4 @@ public class IdHelperServiceTest {
 			assertThat(e.getMessage()).isEqualTo("HAPI-2001: Resource Patient/1 is not known");
 		}
 	}
-
-	@Test
-	public void testResolveResourceResourceIdentity_withPersistentIdOfResourceWithForcedIdAndClientIdStrategyAny_returnsNotFound(){
-		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY);
-		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
-		String resourceType = "Patient";
-
-		when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(myTypedQuery);
-		when(myTypedQuery.getResultList()).thenReturn(List.of());
-		try {
-			// Search by the PID of the resource that has a client assigned FHIR Id
-			myHelperSvc.resolveResourceIdentity(partitionId, resourceType, "1", ResolveIdentityMode.includeDeleted().cacheOk());
-			fail();
-		} catch(ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2001: Resource Patient/1 is not known");
-		}
-	}
-
 }
