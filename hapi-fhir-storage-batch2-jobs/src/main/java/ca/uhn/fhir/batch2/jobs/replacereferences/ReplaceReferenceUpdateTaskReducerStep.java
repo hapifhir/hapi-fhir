@@ -60,6 +60,7 @@ public class ReplaceReferenceUpdateTaskReducerStep
 				myDaoRegistry.getResourceDao(Task.class).read(params.getTaskId().asIdDt(), requestDetails);
 
 		task.setStatus(Task.TaskStatus.COMPLETED);
+		// TODO KHS this Task will probably be too large for large jobs. Revisit this model once we support Provenance resources.
 		myPatchOutputBundles.forEach(outputBundle -> {
 			Task.TaskOutputComponent output = task.addOutput();
 			Coding coding = output.getType().getCodingFirstRep();
