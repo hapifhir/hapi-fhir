@@ -1,0 +1,8 @@
+---
+type: add
+issue: 6520
+title: "A new FHIR client implementation based on Apache HttpClient 5.x has been
+  added to HAPI FHIR. This implementation is optional for now, with the default
+  remaining to use HttpClient 4.x, but this will likely become the default (and only
+  supported version of the HttpClient library) in the future. Thanks to 
+  Ibrahim Tallouzi for the contribution!"

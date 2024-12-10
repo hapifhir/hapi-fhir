@@ -23,12 +23,14 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.CollectionUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * This object supplies default configuration to all {@link IParser parser} instances
@@ -124,6 +126,17 @@ public class ParserOptions {
 	 */
 	public Set<String> getDontStripVersionsFromReferencesAtPaths() {
 		return myDontStripVersionsFromReferencesAtPaths;
+	}
+
+	/**
+	 * Returns a sub-collection of {@link #getDontStripVersionsFromReferencesAtPaths()} containing only paths
+	 * for the given resource type.
+	 */
+	public Set<String> getDontStripVersionsFromReferencesAtPathsByResourceType(String theResourceType) {
+		Validate.notEmpty(theResourceType, "theResourceType must not be null or empty");
+		return myDontStripVersionsFromReferencesAtPaths.stream()
+				.filter(referencePath -> referencePath.startsWith(theResourceType + "."))
+				.collect(Collectors.toSet());
 	}
 
 	/**

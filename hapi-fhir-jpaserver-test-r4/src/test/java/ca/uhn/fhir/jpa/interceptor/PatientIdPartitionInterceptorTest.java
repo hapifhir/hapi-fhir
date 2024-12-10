@@ -273,7 +273,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myCaptureQueriesListener.clear();
 		myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd);
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Observation') AND (t0.RES_DELETED_AT IS NULL))", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
+		assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Observation') AND (t0.RES_DELETED_AT IS NULL)) fetch first '10000' rows only", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
 	}
 
 	@Test
