@@ -273,7 +273,15 @@ public class JpaStorageSettings extends StorageSettings {
 	 *
 	 * @since 5.6.0
 	 */
-	private boolean myAdvancedHSearchIndexing = false;
+	private boolean myHibernateSearchIndexSearchParams = false;
+
+	/**
+	 * Activates hibernate search indexing of fulltext data from resources, which
+	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 *
+	 * @since 8.0.0
+	 */
+	private boolean myHibernateSearchIndexFullText = false;
 
 	/**
 	 * @since 5.7.0
@@ -2192,12 +2200,35 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * Is HSearch indexing enabled beyond _contains or _text?
+	 * @deprecated Use {@link #isHibernateSearchIndexSearchParams()} instead
+	 */
+	@Deprecated(since = "8.0.0", forRemoval = true)
+	public boolean isAdvancedHSearchIndexing() {
+		return isHibernateSearchIndexSearchParams();
+	}
+
+	/**
+	 * @deprecated Use {@link #setHibernateSearchIndexSearchParams(boolean)} instead
+	 */
+	@Deprecated(since = "8.0.0", forRemoval = true)
+	public void setAdvancedHSearchIndexing(boolean theAdvancedHSearchIndexing) {
+		setHibernateSearchIndexSearchParams(theAdvancedHSearchIndexing);
+	}
+
+	/**
+	 * Is HSearch indexing enabled beyond {@literal _content} or {@literal _text}?
+	 * If this setting is enabled, other search parameters will also be indexed using
+	 * Hibernate Search, allowing more kinds of searches to be performed using the
+	 * fulltext engine.
+	 *
+	 * <p>
+	 * Note that this property was called "setAdvancedHSearchIndexing" prior to HAPI FHIR 8.0.0
+	 * </p>
 	 *
 	 * @since 5.6.0
 	 */
-	public boolean isAdvancedHSearchIndexing() {
-		return myAdvancedHSearchIndexing;
+	public boolean isHibernateSearchIndexSearchParams() {
+		return myHibernateSearchIndexSearchParams;
 	}
 
 	/**
@@ -2206,11 +2237,36 @@ public class JpaStorageSettings extends StorageSettings {
 	 * String, token, and reference parameters can be indexed in HSearch.
 	 * This extends token search to support :text searches, as well as supporting
 	 * :contains and :text on string parameters.
+	 * </p>
+	 * <p>
+	 * Note that this property was called "setAdvancedHSearchIndexing" prior to HAPI FHIR 8.0.0
+	 * </p>
 	 *
 	 * @since 5.6.0
 	 */
-	public void setAdvancedHSearchIndexing(boolean theAdvancedHSearchIndexing) {
-		this.myAdvancedHSearchIndexing = theAdvancedHSearchIndexing;
+	public void setHibernateSearchIndexSearchParams(boolean theAdvancedHSearchIndexing) {
+		this.myHibernateSearchIndexSearchParams = theAdvancedHSearchIndexing;
+	}
+
+	/**
+	 * Is hibernate search indexing of fulltext data from resources enabled?
+	 * This setting activates hibernate search indexing of fulltext data from resources, which
+	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 *
+	 * @since 8.0.0
+	 */
+	public boolean isHibernateSearchIndexFullText() {
+		return myHibernateSearchIndexFullText;
+	}
+
+	/**
+	 * Activates hibernate search indexing of fulltext data from resources, which
+	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 *
+	 * @since 8.0.0
+	 */
+	public void setHibernateSearchIndexFullText(boolean theHibernateSearchIndexFullText) {
+		myHibernateSearchIndexFullText = theHibernateSearchIndexFullText;
 	}
 
 	/**

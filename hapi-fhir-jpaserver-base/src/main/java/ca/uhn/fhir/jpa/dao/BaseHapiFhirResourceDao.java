@@ -53,6 +53,7 @@ import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
@@ -1676,7 +1677,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} catch (Exception e) {
 			ourLog.warn("Failure during reindex: {}", e.toString());
 			theReindexOutcome.addWarning("Failed to reindex resource " + entity.getIdDt() + ": " + e);
-			myResourceTableDao.updateIndexStatus(entity.getId(), INDEX_STATUS_INDEXING_FAILED);
+			myResourceTableDao.updateIndexStatus(entity.getId(), EntityIndexStatusEnum.INDEXING_FAILED);
 		}
 	}
 

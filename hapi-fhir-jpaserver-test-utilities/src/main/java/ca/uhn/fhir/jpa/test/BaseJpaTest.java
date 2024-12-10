@@ -418,9 +418,10 @@ public abstract class BaseJpaTest extends BaseTest {
 
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
 		myStorageSettings.setAccessMetaSourceInformationFromProvenanceTable(defaultConfig.isAccessMetaSourceInformationFromProvenanceTable());
-		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 		myStorageSettings.setDeleteEnabled(defaultConfig.isDeleteEnabled());
+		myStorageSettings.setHibernateSearchIndexSearchParams(defaultConfig.isHibernateSearchIndexSearchParams());
+		myStorageSettings.setHibernateSearchIndexFullText(defaultConfig.isHibernateSearchIndexFullText());
 		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultConfig.isIncludeHashIdentityForTokenSearches());
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaultConfig.isMarkResourcesForReindexingUponSearchParameterChange());
 		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultConfig.getMaximumIncludesToLoadPerPage());
