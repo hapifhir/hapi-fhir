@@ -102,7 +102,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		myTestHelper.setSourceAndTarget(inParams);
 		inParams.deleteSource = withDelete;
 		if (withInputResultPatient) {
-			myTestHelper.setResultPatient(inParams);
+			myTestHelper.setResultPatient(inParams, withDelete);
 		}
 		if (withPreview) {
 			inParams.preview = true;
