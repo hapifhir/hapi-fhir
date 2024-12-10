@@ -161,11 +161,13 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 		for (Component c : registeredComponents) {
 			String tableName = c.getTable().getName();
 
-			c.getColumns().removeIf(t -> {
-				String name = tableName + "#" + t.getName();
-				return myQualifiedIdRemovedColumnNames.contains(name);
-			});
-			c.getSelectables().removeIf(t -> myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getText()));
+			// FIXME: needed?
+			//			c.getColumns().removeIf(t -> {
+			//				String name = tableName + "#" + t.getName();
+			//				return myQualifiedIdRemovedColumnNames.contains(name);
+			//			});
+			//			c.getSelectables().removeIf(t -> myQualifiedIdRemovedColumnNames.contains(tableName + "#" +
+			// t.getText()));
 		}
 
 		// Adjust relations with remote filtered columns (e.g. OneToMany)
@@ -235,14 +237,17 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 			return;
 		}
 
-		identifier.getSelectables().removeIf(t -> idRemovedColumnNames.contains(t.getText()));
-		identifier.getColumns().removeIf(t -> idRemovedColumnNames.contains(t.getName()));
+		// FIXME: needed?
+		//		identifier.getSelectables().removeIf(t -> idRemovedColumnNames.contains(t.getText()));
+		//		identifier.getProperties().removeIf(t -> idRemovedColumnNames.contains(t.getText()));
+		//		identifier.getColumns().removeIf(t -> idRemovedColumnNames.contains(t.getName()));
 
 		Component identifierMapper = entityPersistentClass.getIdentifierMapper();
 		if (identifierMapper != null) {
 			List<Property> finalPropertyList = identifierMapper.getProperties();
 			finalPropertyList.removeIf(t -> idRemovedProperties.contains(t.getName()));
-			identifierMapper.getSelectables().removeIf(t -> idRemovedColumnNames.contains(t.getText()));
+			// FIXME: needed?
+			//			identifierMapper.getSelectables().removeIf(t -> idRemovedColumnNames.contains(t.getText()));
 			updateComponentWithNewPropertyList(identifierMapper, finalPropertyList);
 		}
 
@@ -370,7 +375,9 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 				Component component = (Component) propertyValue;
 				Set<String> columnNames =
 						component.getColumns().stream().map(Column::getName).collect(Collectors.toSet());
-				component.getSelectables().removeIf(t -> (t instanceof Column) && !columnNames.contains(t.getText()));
+				// FIXME: needed?
+				//				component.getSelectables().removeIf(t -> (t instanceof Column) &&
+				// !columnNames.contains(t.getText()));
 			}
 		}
 	}

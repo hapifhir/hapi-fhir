@@ -5,7 +5,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -13,7 +12,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -360,7 +359,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			table.setDeleted(new Date());
 			table = myResourceTableDao.saveAndFlush(table);
 			ResourceHistoryTable newHistory = table.toHistory(true);
-			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromPid(table.getId()), 1L);
+			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromPid(table.getId()), 1L);
 			newHistory.setEncoding(currentHistory.getEncoding());
 			newHistory.setResourceTextVc(currentHistory.getResourceTextVc());
 			myResourceHistoryTableDao.save(newHistory);
@@ -1169,7 +1168,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertEquals(1, resourceTables.size());
 			assertEquals(3, resourceTables.get(0).getVersion());
 
-			List<ResourceHistoryTable> versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(JpaPidNonPk.fromPid(resourceTables.get(0).getResourceId()));
+			List<ResourceHistoryTable> versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(JpaPidFk.fromPid(resourceTables.get(0).getResourceId()));
 			assertThat(versions.stream().map(ResourceHistoryTable::getVersion).toList()).asList().containsExactly(1L, 2L, 3L);
 		});
 
@@ -2568,7 +2567,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			JpaPid observationId = JpaPid.fromId(idDt.getIdPartAsLong());
 			Long resourceCurrentVersion = myResourceTableDao.findCurrentVersionByPid(observationId);
-			int resourceVersionCount = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(JpaPidNonPk.fromPid(observationId)).size();
+			int resourceVersionCount = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(JpaPidFk.fromPid(observationId)).size();
 			int indexedTokenCount = myResourceIndexedSearchParamTokenDao.countForResourceId(observationId);
 
 			assertEquals(2L, resourceCurrentVersion);
@@ -2992,7 +2991,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		tx.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromId(id.getIdPartAsLong(), null), 1L);
+				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id.getIdPartAsLong(), null), 1L);
 				String newContent = myFhirContext.newJsonParser().encodeResourceToString(p);
 				newContent = newContent.replace("male", "foo");
 				table.setResourceTextVc(newContent);

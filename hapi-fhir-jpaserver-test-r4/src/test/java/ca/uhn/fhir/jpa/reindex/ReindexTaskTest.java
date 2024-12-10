@@ -13,7 +13,7 @@ import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
@@ -93,7 +93,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		// Move resource text to compressed storage, which we don't write to anymore but legacy
 		// data may exist that was previously stored there, so we're simulating that.
 		List<ResourceHistoryTable> allHistoryEntities = runInTransaction(() -> myResourceHistoryTableDao.findAll());
-		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(JpaPidNonPk.fromPid(t.getResourceId()), t.getVersion()));
+		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(JpaPidFk.fromPid(t.getResourceId()), t.getVersion()));
 
 		runInTransaction(()->{
 			assertEquals(20, myResourceHistoryTableDao.count());
@@ -150,7 +150,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		// Move resource text to compressed storage, which we don't write to anymore but legacy
 		// data may exist that was previously stored there, so we're simulating that.
 		List<ResourceHistoryTable> allHistoryEntities = runInTransaction(() -> myResourceHistoryTableDao.findAll());
-		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(JpaPidNonPk.fromPid(t.getResourceId()), t.getVersion()));
+		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(JpaPidFk.fromPid(t.getResourceId()), t.getVersion()));
 
 		runInTransaction(()->{
 			assertEquals(20, myResourceHistoryTableDao.count());
@@ -204,7 +204,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		// Move resource text to compressed storage, which we don't write to anymore but legacy
 		// data may exist that was previously stored there, so we're simulating that.
 		List<ResourceHistoryTable> allHistoryEntities = runInTransaction(() -> myResourceHistoryTableDao.findAll());
-		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(JpaPidNonPk.fromPid(t.getResourceId()), t.getVersion()));
+		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(JpaPidFk.fromPid(t.getResourceId()), t.getVersion()));
 
 		runInTransaction(()->{
 			assertEquals(11, myResourceHistoryTableDao.count());

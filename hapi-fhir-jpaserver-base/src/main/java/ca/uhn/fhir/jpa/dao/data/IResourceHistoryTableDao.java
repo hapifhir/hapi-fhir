@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import org.springframework.data.domain.Pageable;
@@ -40,20 +40,20 @@ public interface IResourceHistoryTableDao
 	 * the real world, use a pageable query for real uses.
 	 */
 	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourcePid = :resId ORDER BY t.myResourceVersion ASC")
-	List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(@Param("resId") JpaPidNonPk theId);
+	List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(@Param("resId") JpaPidFk theId);
 
 	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourcePid = :id AND t.myResourceVersion = :version")
-	ResourceHistoryTable findForIdAndVersion(@Param("id") JpaPidNonPk theId, @Param("version") long theVersion);
+	ResourceHistoryTable findForIdAndVersion(@Param("id") JpaPidFk theId, @Param("version") long theVersion);
 
 	@Query(
 			"SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourcePid = :resId AND t.myResourceVersion <> :dontWantVersion")
 	Slice<ResourceHistoryTablePk> findForResourceId(
-			Pageable thePage, @Param("resId") JpaPidNonPk theId, @Param("dontWantVersion") Long theDontWantVersion);
+			Pageable thePage, @Param("resId") JpaPidFk theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query(
 			"SELECT t FROM ResourceHistoryTable t WHERE t.myResourcePid = :resId AND t.myResourceVersion <> :dontWantVersion")
 	Slice<ResourceHistoryTable> findAllVersionsExceptSpecificForResourcePid(
-			Pageable thePage, @Param("resId") JpaPidNonPk theId, @Param("dontWantVersion") Long theDontWantVersion);
+			Pageable thePage, @Param("resId") JpaPidFk theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query("SELECT v.myId FROM ResourceHistoryTable v "
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "
@@ -78,7 +78,7 @@ public interface IResourceHistoryTableDao
 	@Query(
 			"UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourcePid = :id AND r.myResourceVersion = :oldVersion")
 	void updateVersion(
-			@Param("id") JpaPidNonPk theId,
+			@Param("id") JpaPidFk theId,
 			@Param("oldVersion") long theOldVersion,
 			@Param("newVersion") long theNewVersion);
 
@@ -102,5 +102,5 @@ public interface IResourceHistoryTableDao
 			+ "WHERE v.myResourcePid IN (:pids) "
 			+ "AND t.myVersion = v.myResourceVersion")
 	List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(
-			@Param("pids") List<JpaPidNonPk> theVersionlessPids);
+			@Param("pids") List<JpaPidFk> theVersionlessPids);
 }

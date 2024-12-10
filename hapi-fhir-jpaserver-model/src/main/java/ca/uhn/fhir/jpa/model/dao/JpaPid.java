@@ -174,6 +174,10 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 		return COMPARATOR.compare(this, theOther);
 	}
 
+	public JpaPidFk toFk() {
+		return JpaPidFk.fromPid(this);
+	}
+
 	public static List<Long> toLongList(JpaPid[] thePids) {
 		return toLongList(Arrays.asList(thePids));
 	}

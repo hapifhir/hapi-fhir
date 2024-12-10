@@ -30,7 +30,7 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -359,23 +359,23 @@ public class GiantTransactionPerfTest {
 
 
 		@Override
-		public List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(JpaPidNonPk theId) {
+		public List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(JpaPidFk theId) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public ResourceHistoryTable findForIdAndVersion(JpaPidNonPk theId, long theVersion) {
+		public ResourceHistoryTable findForIdAndVersion(JpaPidFk theId, long theVersion) {
 			throw new UnsupportedOperationException();
 
 		}
 
 		@Override
-		public Slice<ResourceHistoryTablePk> findForResourceId(Pageable thePage, JpaPidNonPk theId, Long theDontWantVersion) {
+		public Slice<ResourceHistoryTablePk> findForResourceId(Pageable thePage, JpaPidFk theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public Slice<ResourceHistoryTable> findAllVersionsExceptSpecificForResourcePid(Pageable thePage, JpaPidNonPk theId, Long theDontWantVersion) {
+		public Slice<ResourceHistoryTable> findAllVersionsExceptSpecificForResourcePid(Pageable thePage, JpaPidFk theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -395,7 +395,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public void updateVersion(JpaPidNonPk theId, long theOldVersion, long theNewVersion) {
+		public void updateVersion(JpaPidFk theId, long theOldVersion, long theNewVersion) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -410,7 +410,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(List<JpaPidNonPk> theVersionlessPids) {
+		public List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(List<JpaPidFk> theVersionlessPids) {
 			throw new UnsupportedOperationException();
 		}
 

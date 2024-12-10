@@ -17,7 +17,7 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
@@ -437,7 +437,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, tags.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_VER
-			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromPid(patientId), 1L);
+			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromPid(patientId), 1L);
 			assertEquals(myPartitionId, version.getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, version.getPartitionId().getPartitionDate());
 
@@ -520,7 +520,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, tags.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_VER
-			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromPid(patientId), 1L);
+			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromPid(patientId), 1L);
             assertNull(version.getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, version.getPartitionId().getPartitionDate());
 
@@ -780,7 +780,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 			// HFJ_RES_VER
 			int version = 2;
-			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromPid(patientId), version);
+			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromPid(patientId), version);
 			assertEquals(myPartitionId, resVer.getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, resVer.getPartitionId().getPartitionDate());
 
@@ -854,7 +854,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 			// HFJ_RES_VER
 			int version = 2;
-			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersion(JpaPidNonPk.fromPid(patientId), version);
+			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromPid(patientId), version);
 			assertEquals(myPartitionId, resVer.getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, resVer.getPartitionId().getPartitionDate());
 

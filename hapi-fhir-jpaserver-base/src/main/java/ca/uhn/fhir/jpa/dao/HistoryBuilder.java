@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -277,7 +277,7 @@ public class HistoryBuilder {
 						theCriteriaBuilder.lessThanOrEqualTo(
 								subQueryResourceHistory.get("myUpdated"), myRangeStartInclusive),
 						theCriteriaBuilder.equal(
-								subQueryResourceHistory.get("myResourcePid"), JpaPidNonPk.fromPid(myResourceId)));
+								subQueryResourceHistory.get("myResourcePid"), JpaPidFk.fromPid(myResourceId)));
 
 		Predicate updatedDatePredicate =
 				theCriteriaBuilder.greaterThanOrEqualTo(theFrom.get("myUpdated"), pastDateSubQuery);

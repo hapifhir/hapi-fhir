@@ -53,7 +53,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -561,7 +561,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				ResourceHistoryTable currentHistoryVersion = theEntity.getCurrentVersionEntity();
 				if (currentHistoryVersion == null) {
 					currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersion(
-							JpaPidNonPk.fromPid(theEntity.getId()), theEntity.getVersion());
+							JpaPidFk.fromPid(theEntity.getId()), theEntity.getVersion());
 				}
 				if (currentHistoryVersion == null || !currentHistoryVersion.hasResource()) {
 					changed = true;
@@ -1296,7 +1296,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			 * in which case we'll still create a new one
 			 */
 			historyEntry = myResourceHistoryTableDao.findForIdAndVersion(
-					JpaPidNonPk.fromPid(theEntity.getResourceId()), resourceVersion - 1);
+					JpaPidFk.fromPid(theEntity.getResourceId()), resourceVersion - 1);
 			if (historyEntry != null) {
 				theEntity.populateHistoryEntityVersionAndDates(historyEntry);
 				if (versionedTags && theEntity.isHasTags()) {

@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidNonPk;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import jakarta.annotation.Nonnull;
@@ -47,7 +47,6 @@ import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.type.SqlTypes;
@@ -113,7 +112,7 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	@AttributeOverride(
 			name = "myPartitionIdValue",
 			column = @Column(name = "PARTITION_ID", insertable = false, updatable = false))
-	private JpaPidNonPk myResourcePid;
+	private JpaPidFk myResourcePid;
 
 	/**
 	 * This is here for sorting only, don't get or set this value
@@ -277,7 +276,7 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 
 	private void initializeResourceId() {
 		if (myResourcePid == null) {
-			myResourcePid = new JpaPidNonPk();
+			myResourcePid = new JpaPidFk();
 		}
 	}
 
