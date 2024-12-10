@@ -169,7 +169,7 @@ public class IdHelperServiceTest {
 	}
 
 	@Test
-	public void testResolveResourceResourceIdentity_withPersistentIdOfResourceWithForcedIdAndDefaultClientIdStrategy_returnsNotFound(){
+	public void testResolveResourceIdentity_withPersistentIdOfResourceWithForcedIdAndDefaultClientIdStrategy_returnsNotFound(){
 		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
 		String resourceType = "Patient";
