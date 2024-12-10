@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ColumnAndNullable;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
+import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -48,7 +49,6 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
-import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
@@ -89,6 +89,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			+ "WHERE EXISTS (SELECT 1\n"
 			+ "	FROM collation_by_column\n"
 			+ "	WHERE my_collation != 'C')";
+
 	private final Set<FlagEnum> myFlags;
 
 	/**
@@ -129,8 +130,219 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init780();
 	}
 
+	protected Set<FlagEnum> getFlags() {
+		return myFlags;
+	}
+
 	protected void init780() {
-		final Builder version = forVersion(VersionEnum.V7_8_0);
+		Builder version = forVersion(VersionEnum.V7_8_0);
+
+		version.onTable("HFJ_RES_SEARCH_URL")
+				.dropForeignKey("20241008.100", "FK_RES_SEARCH_URL_RESOURCE", "HFJ_RESOURCE");
+
+		version.onTable("HFJ_RES_VER_PROV").dropForeignKey("20241008.200", "FK_RESVERPROV_RESVER_PID", "HFJ_RES_VER");
+
+		version.onTable("HFJ_SEARCH")
+				.addColumn("20241008.300", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("HFJ_SEARCH_RESULT")
+				.addColumn("20241008.400", "RESOURCE_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("HFJ_SUBSCRIPTION_STATS")
+				.dropForeignKey("20241008.500", "FK_SUBSC_RESOURCE_ID", "HFJ_RESOURCE");
+
+		version.onTable("MPI_LINK")
+				.addColumn("20241008.600", "GOLDEN_RESOURCE_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("MPI_LINK")
+				.addColumn("20241008.601", "PERSON_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("MPI_LINK")
+				.addColumn("20241008.602", "TARGET_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("MPI_LINK_AUD")
+				.addColumn("20241008.700", "GOLDEN_RESOURCE_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("MPI_LINK_AUD")
+				.addColumn("20241008.701", "PERSON_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("MPI_LINK_AUD")
+				.addColumn("20241008.702", "TARGET_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("NPM_PACKAGE_VER")
+				.addColumn("20241008.800", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("NPM_PACKAGE_VER_RES")
+				.addColumn("20241008.900", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("TRM_CODESYSTEM")
+				.addColumn("20241008.1000", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CODESYSTEM")
+				.addColumn("20241008.1001", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("TRM_CODESYSTEM")
+				.modifyColumn("20241008.1002", "RES_ID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+		version.onTable("TRM_CODESYSTEM")
+				.addColumn("20241008.1003", "CURRENT_VERSION_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("TRM_CODESYSTEM_VER")
+				.addColumn("20241008.1100", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CODESYSTEM_VER")
+				.addColumn("20241008.1101", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("TRM_CONCEPT")
+				.addColumn("20241008.1300", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("TRM_CONCEPT_PC_LINK")
+				.modifyColumn("20241008.1400", "CHILD_PID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+		version.onTable("TRM_CONCEPT_PC_LINK")
+				.modifyColumn("20241008.1401", "PARENT_PID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+		version.onTable("TRM_CONCEPT_PC_LINK")
+				.addColumn("20241008.1402", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("TRM_CONCEPT_DESIG")
+				.addColumn("20241008.1500", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_DESIG")
+				.addColumn("20241008.1501", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("TRM_CONCEPT_DESIG")
+				.modifyColumn("20241008.1502", "CONCEPT_PID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+		version.onTable("TRM_CONCEPT_DESIG")
+				.modifyColumn("20241008.1503", "CS_VER_PID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+
+		version.onTable("TRM_CONCEPT_PROPERTY")
+				.addColumn("20241008.1600", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_PROPERTY")
+				.addColumn("20241008.1601", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("TRM_CONCEPT_PROPERTY")
+				.modifyColumn("20241008.1602", "CONCEPT_PID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+
+		version.onTable("TRM_CONCEPT_MAP")
+				.addColumn("20241008.1700", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_MAP")
+				.addColumn("20241008.1701", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("TRM_CONCEPT_MAP")
+				.modifyColumn("20241008.1702", "RES_ID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+
+		version.onTable("TRM_CONCEPT_MAP_GROUP")
+				.addColumn("20241008.1800", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_MAP_GROUP")
+				.addColumn("20241008.1801", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
+				.addColumn("20241008.1900", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
+				.addColumn("20241008.1901", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+				.addColumn("20241008.2000", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+				.addColumn("20241008.2001", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("TRM_VALUESET")
+				.addColumn("20241008.2500", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_VALUESET")
+				.addColumn("20241008.2501", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("TRM_VALUESET")
+				.modifyColumn("20241008.2502", "RES_ID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+
+		version.onTable("TRM_VALUESET_CONCEPT")
+				.addColumn("20241008.2600", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_VALUESET_CONCEPT")
+				.addColumn("20241008.2601", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("TRM_VALUESET_C_DESIGNATION")
+				.addColumn("20241008.2700", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_VALUESET_C_DESIGNATION")
+				.addColumn("20241008.2701", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
 
 		version.onTable("NPM_PACKAGE_VER")
 				.addColumn("20241023.10", "PKG_AUTHOR")
@@ -1254,11 +1466,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Postgres tuning.
 		String postgresTuningStatementsAll =
 				ClasspathUtil.loadResource("ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql");
-		List<String> postgresTuningStatements = Arrays.stream(postgresTuningStatementsAll.split("\\n"))
-				.map(StringUtils::trim)
-				.filter(StringUtils::isNotBlank)
-				.filter(t -> !t.startsWith("--"))
-				.collect(Collectors.toList());
+		List<String> postgresTuningStatements = SqlUtil.splitSqlFileIntoStatements(postgresTuningStatementsAll);
 		version.executeRawSqls("20230402.1", Map.of(DriverTypeEnum.POSTGRES_9_4, postgresTuningStatements));
 
 		// Use an unlimited length text column for RES_TEXT_VC
@@ -4035,10 +4243,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init330() { // 20180114 - 20180329
 		Builder version = forVersion(VersionEnum.V3_3_0);
 
+		String schemaPath = "/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned";
+		if (myFlags.contains(FlagEnum.PARTITIONED_ID_MODE)) {
+			schemaPath = "/ca/uhn/hapi/fhir/jpa/docs/database/partitioned";
+		}
 		version.initializeSchema(
-				"20180115.0",
-				new SchemaInitializationProvider(
-						"HAPI FHIR", "/ca/uhn/hapi/fhir/jpa/docs/database", "HFJ_RESOURCE", true));
+				"20180115.0", new SchemaInitializationProvider("HAPI FHIR", schemaPath, "HFJ_RESOURCE", true));
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 		version.startSectionWithMessage("Starting work on table: " + hfjResource.getTableName());
@@ -4052,12 +4262,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	public enum FlagEnum {
+		PARTITIONED_ID_MODE("partitioned-id-mode"),
+
 		NO_MIGRATE_HASHES("no-migrate-350-hashes");
 
 		private final String myCommandLineValue;
 
 		FlagEnum(String theCommandLineValue) {
 			myCommandLineValue = theCommandLineValue;
+		}
+
+		public String getCommandLineValue() {
+			return myCommandLineValue;
 		}
 
 		public static FlagEnum fromCommandLineValue(String theCommandLineValue) {

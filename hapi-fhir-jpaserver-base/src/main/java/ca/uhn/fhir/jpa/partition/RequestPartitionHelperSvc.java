@@ -132,7 +132,11 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 			if (theRequestPartitionId.hasPartitionIds()) {
 				if (partition == null) {
 					Validate.isTrue(
-							theRequestPartitionId.getPartitionIds().get(i) == null,
+							theRequestPartitionId.getPartitionIds().get(i) == null
+									|| theRequestPartitionId
+											.getPartitionIds()
+											.get(i)
+											.equals(myPartitionSettings.getDefaultPartitionId()),
 							"Partition %s must not have an ID",
 							JpaConstants.DEFAULT_PARTITION_NAME);
 				} else {

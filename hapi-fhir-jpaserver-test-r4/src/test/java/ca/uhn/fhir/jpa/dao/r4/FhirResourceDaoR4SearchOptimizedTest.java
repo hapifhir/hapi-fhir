@@ -1030,7 +1030,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0")).as(selectQuery).isEqualTo(1);
+			assertThat(StringUtils.countMatches(selectQuery, "SELECT t0.RES_ID FROM HFJ_RESOURCE t0")).as(selectQuery).isEqualTo(1);
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'")).as(selectQuery).isEqualTo(1);
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null")).as(selectQuery).isEqualTo(1);
 		}

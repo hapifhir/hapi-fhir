@@ -80,6 +80,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpa-hibernate-services</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -406,7 +411,7 @@
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
 		</dependency>
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>
@@ -414,6 +419,7 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
+				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<id>build_dstu2</id>
@@ -520,19 +526,35 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+
 			<!-- Generate the DDL schema files -->
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate-ddl</goal>
-						</goals>
-					</execution>
+				<version>${project.version}</version>
+				<executions><execution><id>generate-ddl-legacy</id>
+					<phase>process-classes</phase>
+				<goals>
+					<goal>generate-ddl</goal>
+				</goals>
+					<configuration>
+						<trimConditionalIdsFromPrimaryKeys>true</trimConditionalIdsFromPrimaryKeys>
+						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
+					</configuration>
+				</execution>
+				<execution>
+					<id>generate-ddl-partitioned</id>
+					<phase>process-classes</phase>
+				<goals>
+					<goal>generate-ddl</goal>
+				</goals>
+					<configuration>
+						<trimConditionalIdsFromPrimaryKeys>false</trimConditionalIdsFromPrimaryKeys>
+						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/partitioned</outputDirectory>
+					</configuration>
+				</execution>
 				</executions>
 				<configuration>
-					<skip>false</skip>
 					<packageNames>
 						<packageName>ca.uhn.fhir.jpa.entity</packageName>
 						<packageName>ca.uhn.fhir.jpa.model.entity</packageName>
@@ -572,7 +594,6 @@
 							<appendFile>classpath:ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql</appendFile>
 						</dialect>
 					</dialects>
-					<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>
 				</configuration>
 				<dependencies>
 					<dependency>
@@ -582,6 +603,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>

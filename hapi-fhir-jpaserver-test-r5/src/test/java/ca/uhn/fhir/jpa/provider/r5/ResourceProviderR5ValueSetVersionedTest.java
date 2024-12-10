@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -17,16 +15,17 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeSystem;
-import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.Enumerations.FilterOperator;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Parameters;
@@ -42,18 +41,19 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_VALUE_SET;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProviderR5Test {
@@ -65,8 +65,8 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 	private IIdType myExtensionalVsId_v2;
 	private IIdType myLocalValueSetId_v1;
 	private IIdType myLocalValueSetId_v2;
-	private Long myExtensionalVsIdOnResourceTable_v1;
-	private Long myExtensionalVsIdOnResourceTable_v2;
+	private JpaPid myExtensionalVsIdOnResourceTable_v1;
+	private JpaPid myExtensionalVsIdOnResourceTable_v2;
 	private ValueSet myLocalVs_v1;
 	private ValueSet myLocalVs_v2;
 
@@ -122,13 +122,13 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		valueSet.setId("ValueSet/vs1");
 		valueSet.getCompose().getInclude().get(0).setVersion("1");
 		myExtensionalVsId_v1 = persistSingleValueSet(valueSet, HttpVerb.POST);
-		myExtensionalVsIdOnResourceTable_v1 = (Long) myValueSetDao.readEntity(myExtensionalVsId_v1, null).getPersistentId().getId();
+		myExtensionalVsIdOnResourceTable_v1 = (JpaPid) myValueSetDao.readEntity(myExtensionalVsId_v1, null).getPersistentId();
 
 		valueSet.setVersion("2");
 		valueSet.setId("ValueSet/vs2");
 		valueSet.getCompose().getInclude().get(0).setVersion("2");
 		myExtensionalVsId_v2 = persistSingleValueSet(valueSet, HttpVerb.POST);
-		myExtensionalVsIdOnResourceTable_v2 = (Long) myValueSetDao.readEntity(myExtensionalVsId_v2, null).getPersistentId().getId();
+		myExtensionalVsIdOnResourceTable_v2 = (JpaPid) myValueSetDao.readEntity(myExtensionalVsId_v2, null).getPersistentId();
 
 	}
 
@@ -1059,7 +1059,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 
 	}
 
-	private void validateTermValueSetNotExpanded(String theValueSetName, String theVersion, Long theId) {
+	private void validateTermValueSetNotExpanded(String theValueSetName, String theVersion, JpaPid theId) {
 		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(theId);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
@@ -1475,7 +1475,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 
@@ -1486,7 +1486,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
-		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = theResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -1509,7 +1509,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B" + theCodeSystemVersion);
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", theCodeSystemVersion, cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", theCodeSystemVersion, cs, table);
 		return codeSystem;
 	}
 

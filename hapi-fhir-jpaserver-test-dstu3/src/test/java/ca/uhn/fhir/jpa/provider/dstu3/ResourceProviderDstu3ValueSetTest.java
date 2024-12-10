@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -11,15 +8,16 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -45,7 +43,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -54,6 +51,9 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_VALUE_SET;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -103,7 +103,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		IFhirResourceDao<CodeSystem> codeSystemDao = myCodeSystemDao;
 		IResourceTableDao resourceTableDao = myResourceTableDao;
 
-		return createExternalCs(codeSystemDao, resourceTableDao, myTermCodeSystemStorageSvc, mySrd);
+		return createExternalCs(this, codeSystemDao, resourceTableDao, myTermCodeSystemStorageSvc, mySrd);
 	}
 
 	private void createExternalCsAndLocalVs() {
@@ -157,7 +157,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			code.addPropertyString("HELLO", "12345-2");
 			cs.getConcepts().add(code);
 
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		});
 	}
 
@@ -933,12 +933,12 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 
-	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails) {
-		return createExternalCs(theCodeSystemDao, theResourceTableDao, theTermCodeSystemStorageSvc, theRequestDetails, null);
+	public static CodeSystem createExternalCs(BaseJpaTest theTest, IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails) {
+		return createExternalCs(theTest, theCodeSystemDao, theResourceTableDao, theTermCodeSystemStorageSvc, theRequestDetails, null);
 	}
 
 	@Nonnull
-	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails, CircularQueueCaptureQueriesListener theCaptureQueriesListener) {
+	public static CodeSystem createExternalCs(BaseJpaTest theTest, IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails, CircularQueueCaptureQueriesListener theCaptureQueriesListener) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
@@ -946,7 +946,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
-		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = theTest.runInTransaction(()->theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new));
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -974,7 +974,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		if (theCaptureQueriesListener != null) {
 			theCaptureQueriesListener.clear();
 		}
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		if (theCaptureQueriesListener != null) {
 			theCaptureQueriesListener.logAllQueries();
 		}

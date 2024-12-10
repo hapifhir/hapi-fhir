@@ -10,7 +10,6 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.test.utilities.RangeTestHelper;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;

@@ -184,6 +184,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		mySearchParameterDao.update(sp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
+
+		assertNoRemainingPartitionIds();
 	}
 
 	protected void createNonUniqueComboSp() {
@@ -283,6 +285,18 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			if (thePartitionId != null) {
 				addCreatePartition(thePartitionId, null);
 			} else {
+				addCreateDefaultPartition();
+			}
+		};
+	}
+
+	protected ICreationArgument withReadWritePartitions(Integer thePartitionId) {
+		return t -> {
+			if (thePartitionId != null) {
+				addReadPartition(thePartitionId);
+				addCreatePartition(thePartitionId, null);
+			} else {
+				addReadDefaultPartition();
 				addCreateDefaultPartition();
 			}
 		};

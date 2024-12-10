@@ -14,6 +14,8 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -311,7 +313,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 			res = myResourceTableDao.findById(patientId.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
 			assertNotNull(res.getDeleted());
-			versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(patientId.getIdPartAsLong());
+			versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(JpaPidFk.fromId(patientId.getIdPartAsLong()));
 			assertEquals(2, versions.size());
 			assertEquals(1L, versions.get(0).getVersion());
 			assertNull(versions.get(0).getDeleted());
@@ -320,7 +322,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 			res = myResourceTableDao.findById(organizationId.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
 			assertNotNull(res.getDeleted());
-			versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(organizationId.getIdPartAsLong());
+			versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(JpaPidFk.fromId(organizationId.getIdPartAsLong()));
 			assertEquals(2, versions.size());
 			assertEquals(1L, versions.get(0).getVersion());
 			assertNull(versions.get(0).getDeleted());
@@ -997,7 +999,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void verifyOneVersionCodeSystemChildrenExpunged() {
-		List<TermCodeSystemVersion> myOneVersionCodeSystemVersions = myTermCodeSystemVersionDao.findByCodeSystemResourcePid(myOneVersionCodeSystemId.getIdPartAsLong());
+		List<TermCodeSystemVersion> myOneVersionCodeSystemVersions = myTermCodeSystemVersionDao.findByCodeSystemResourcePid(JpaPid.fromId(myOneVersionCodeSystemId.getIdPartAsLong()));
 		assertThat(myOneVersionCodeSystemVersions).isEmpty();
 		assertThat(myTermConceptDesignationDao.findAll()).isEmpty();
 		assertThat(myTermConceptPropertyDao.findAll()).isEmpty();
@@ -1011,7 +1013,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void verifyTwoVersionCodeSystemV1AndChildrenStillThere() {
-		TermCodeSystem myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(myTwoVersionCodeSystemIdV2.getIdPartAsLong());
+		TermCodeSystem myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(myTwoVersionCodeSystemIdV2.getIdPartAsLong()));
 		TermCodeSystemVersion myTwoVersionCodeSystemVersion1 = verifyTermCodeSystemVersionExistsWithDisplayName("CS2-V1");
 		assertThat(myTwoVersionCodeSystemVersion1.getPid()).isNotEqualTo(myTwoVersionCodeSystem.getCurrentVersion().getPid());
 		List<TermConcept> myTwoVersionCodeSystemVersion1Concepts = new ArrayList(myTwoVersionCodeSystemVersion1.getConcepts());
@@ -1021,7 +1023,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void verifyTwoVersionCodeSystemV2AndChildrenStillThere() {
-		TermCodeSystem myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(myTwoVersionCodeSystemIdV2.getIdPartAsLong());
+		TermCodeSystem myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(myTwoVersionCodeSystemIdV2.getIdPartAsLong()));
 		TermCodeSystemVersion myTwoVersionCodeSystemVersion2 = verifyTermCodeSystemVersionExistsWithDisplayName("CS2-V2");
 		assertEquals(myTwoVersionCodeSystem.getCurrentVersion().getPid(), myTwoVersionCodeSystemVersion2.getPid());
 		List<TermConcept> myTwoVersionCodeSystemVersion2Concepts = new ArrayList(myTwoVersionCodeSystemVersion2.getConcepts());

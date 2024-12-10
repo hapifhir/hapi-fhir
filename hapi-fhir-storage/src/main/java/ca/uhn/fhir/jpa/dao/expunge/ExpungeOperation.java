@@ -91,7 +91,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private void expungeDeletedResources() {
-		List<IResourcePersistentId> resourceIds = findHistoricalVersionsOfDeletedResources();
+		List<?> resourceIds = findHistoricalVersionsOfDeletedResources();
 
 		deleteHistoricalVersions(resourceIds);
 		if (expungeLimitReached()) {
@@ -101,7 +101,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 		deleteCurrentVersionsOfDeletedResources(resourceIds);
 	}
 
-	private List<IResourcePersistentId> findHistoricalVersionsOfDeletedResources() {
+	private List<?> findHistoricalVersionsOfDeletedResources() {
 		List<IResourcePersistentId> retVal = getPartitionAwareSupplier()
 				.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfDeletedResources(
 						myResourceName, myResourceId, myRemainingCount.get()));
@@ -119,7 +119,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private void expungeOldVersions() {
-		List<IResourcePersistentId> historicalIds = getPartitionAwareSupplier()
+		List<?> historicalIds = getPartitionAwareSupplier()
 				.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(
 						myResourceName, myResourceId, myRemainingCount.get()));
 
@@ -144,7 +144,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 				myRequestDetails);
 	}
 
-	private void deleteCurrentVersionsOfDeletedResources(List<IResourcePersistentId> theResourceIds) {
+	private void deleteCurrentVersionsOfDeletedResources(List<?> theResourceIds) {
 		getPartitionRunner()
 				.runInPartitionedThreads(
 						theResourceIds,
@@ -152,7 +152,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 								myRequestDetails, partition, myRemainingCount));
 	}
 
-	private void deleteHistoricalVersions(List<IResourcePersistentId> theResourceIds) {
+	private void deleteHistoricalVersions(List<?> theResourceIds) {
 		getPartitionRunner()
 				.runInPartitionedThreads(
 						theResourceIds,

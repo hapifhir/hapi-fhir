@@ -73,10 +73,10 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 		myPartitionInterceptor.assertNoRemainingIds();
 		myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
+		myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof MySubscriptionReadInterceptor);
+		myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof MySubscriptionWriteInterceptor);
 
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-
-		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@Override
@@ -171,7 +171,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		runInTransaction(() -> {
 			List<ResourceTable> resources = myResourceTableDao.findAll();
 			assertEquals(1, resources.size());
-			assertEquals(null, resources.get(0).getPartitionId());
+			assertEquals(null, resources.get(0).getPartitionId().getPartitionId());
 		});
 	}
 

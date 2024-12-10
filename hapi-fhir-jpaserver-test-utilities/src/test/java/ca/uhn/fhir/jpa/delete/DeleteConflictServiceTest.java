@@ -50,7 +50,7 @@ public class DeleteConflictServiceTest {
 	@Test
 	public void noInterceptorTwoConflictsDoesntRetry() {
 		ResourceTable entity = new ResourceTable();
-		entity.setId(22L);
+		entity.setIdForUnitTest(22L);
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
 
 		List<ResourceLink> list = new ArrayList<>();

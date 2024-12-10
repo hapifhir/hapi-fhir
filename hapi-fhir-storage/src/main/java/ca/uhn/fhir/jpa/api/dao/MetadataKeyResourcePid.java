@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.api.dao;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 
-public final class MetadataKeyResourcePid extends ResourceMetadataKeyEnum<Long> {
+public final class MetadataKeyResourcePid extends ResourceMetadataKeyEnum<JpaPid> {
 	private static final long serialVersionUID = 2L;
 
 	MetadataKeyResourcePid(String theValue) {
-		super(theValue, Long.class);
+		super(theValue, JpaPid.class);
 	}
 }

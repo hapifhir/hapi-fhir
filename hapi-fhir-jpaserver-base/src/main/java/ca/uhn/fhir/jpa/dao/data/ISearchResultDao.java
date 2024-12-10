@@ -35,11 +35,13 @@ import java.util.List;
 
 public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHapiFhirJpaRepository {
 
-	@Query(value = "SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search ORDER BY r.myOrder ASC")
-	Slice<Long> findWithSearchPid(@Param("search") Long theSearchPid, Pageable thePage);
+	@Query(
+			value =
+					"SELECT r.myResourcePartitionId,r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search ORDER BY r.myOrder ASC")
+	Slice<Object[]> findWithSearchPid(@Param("search") Long theSearchPid, Pageable thePage);
 
-	@Query(value = "SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search")
-	List<Long> findWithSearchPidOrderIndependent(@Param("search") Long theSearchPid);
+	@Query(value = "SELECT r.myResourcePartitionId,r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search")
+	List<Object[]> findWithSearchPidOrderIndependent(@Param("search") Long theSearchPid);
 
 	@Modifying
 	@Query("DELETE FROM SearchResult s WHERE s.mySearchPid IN :searchIds")
@@ -62,10 +64,12 @@ public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHa
 	 * Converts a response from {@link #findWithSearchPid(Long, Pageable)} to
 	 * a List of JpaPid objects
 	 */
-	static List<JpaPid> toJpaPidList(List<Long> theArrays) {
+	static List<JpaPid> toJpaPidList(List<Object[]> theArrays) {
 		List<JpaPid> retVal = new ArrayList<>(theArrays.size());
-		for (Long next : theArrays) {
-			retVal.add(JpaPid.fromId(next));
+		for (Object[] next : theArrays) {
+			Integer partitionId = (Integer) next[0];
+			Long resourcePid = (Long) next[1];
+			retVal.add(JpaPid.fromId(resourcePid, partitionId));
 		}
 		return retVal;
 	}

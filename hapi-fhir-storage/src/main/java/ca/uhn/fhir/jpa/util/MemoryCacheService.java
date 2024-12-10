@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
@@ -37,6 +38,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -208,21 +210,21 @@ public class MemoryCacheService {
 		 * Key type: {@literal Long}
 		 * Value type: {@literal Optional<String>}
 		 */
-		PID_TO_FORCED_ID(Long.class),
+		PID_TO_FORCED_ID(JpaPid.class),
 		MATCH_URL(String.class),
 		RESOURCE_CONDITIONAL_CREATE_VERSION(Long.class),
 		HISTORY_COUNT(HistoryCountKey.class),
 		NAME_TO_PARTITION(String.class),
 		ID_TO_PARTITION(Integer.class);
 
-		public Class<?> getKeyType() {
-			return myKeyType;
-		}
-
 		private final Class<?> myKeyType;
 
 		CacheEnum(Class<?> theKeyType) {
 			myKeyType = theKeyType;
+		}
+
+		public Class<?> getKeyType() {
+			return myKeyType;
 		}
 	}
 
@@ -232,8 +234,8 @@ public class MemoryCacheService {
 		private final String mySystem;
 		private final String myCode;
 		private final String myVersion;
-		private Boolean myUserSelected;
 		private final int myHashCode;
+		private Boolean myUserSelected;
 
 		public TagDefinitionCacheKey(
 				TagTypeEnum theType, String theSystem, String theCode, String theVersion, Boolean theUserSelected) {
@@ -275,29 +277,23 @@ public class MemoryCacheService {
 	public static class HistoryCountKey {
 		private final String myTypeName;
 		private final Long myInstanceId;
+		private final Integer myPartitionId;
 		private final int myHashCode;
 
-		private HistoryCountKey(String theTypeName, Long theInstanceId) {
+		private HistoryCountKey(@Nullable String theTypeName, @Nullable JpaPid theInstanceId) {
 			myTypeName = theTypeName;
-			myInstanceId = theInstanceId;
+			if (theInstanceId != null) {
+				myInstanceId = theInstanceId.getId();
+				myPartitionId = theInstanceId.getPartitionId();
+			} else {
+				myInstanceId = null;
+				myPartitionId = null;
+			}
 			myHashCode = new HashCodeBuilder()
 					.append(myTypeName)
 					.append(myInstanceId)
+					.append(myPartitionId)
 					.toHashCode();
-		}
-
-		public static HistoryCountKey forSystem() {
-			return new HistoryCountKey(null, null);
-		}
-
-		public static HistoryCountKey forType(@Nonnull String theType) {
-			assert isNotBlank(theType);
-			return new HistoryCountKey(theType, null);
-		}
-
-		public static HistoryCountKey forInstance(@Nonnull Long theInstanceId) {
-			assert theInstanceId != null;
-			return new HistoryCountKey(null, theInstanceId);
 		}
 
 		@Override
@@ -317,23 +313,27 @@ public class MemoryCacheService {
 		public int hashCode() {
 			return myHashCode;
 		}
+
+		public static HistoryCountKey forSystem() {
+			return new HistoryCountKey(null, null);
+		}
+
+		public static HistoryCountKey forType(@Nonnull String theType) {
+			assert isNotBlank(theType);
+			return new HistoryCountKey(theType, null);
+		}
+
+		public static HistoryCountKey forInstance(@Nonnull JpaPid theInstanceId) {
+			return new HistoryCountKey(null, theInstanceId);
+		}
 	}
 
 	public static class ForcedIdCacheKey {
 
 		private final String myResourceType;
 		private final String myResourceId;
-		private final RequestPartitionId myRequestPartitionId;
+		private final List<Integer> myRequestPartitionIds;
 		private final int myHashCode;
-
-		@Override
-		public String toString() {
-			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-					.append("resType", myResourceType)
-					.append("resId", myResourceId)
-					.append("partId", myRequestPartitionId)
-					.toString();
-		}
 
 		public ForcedIdCacheKey(
 				@Nullable String theResourceType,
@@ -341,8 +341,21 @@ public class MemoryCacheService {
 				@Nonnull RequestPartitionId theRequestPartitionId) {
 			myResourceType = theResourceType;
 			myResourceId = theResourceId;
-			myRequestPartitionId = theRequestPartitionId;
-			myHashCode = Objects.hash(myResourceType, myResourceId, myRequestPartitionId);
+			if (theRequestPartitionId.hasPartitionIds()) {
+				myRequestPartitionIds = theRequestPartitionId.getPartitionIds();
+			} else {
+				myRequestPartitionIds = null;
+			}
+			myHashCode = Objects.hash(myResourceType, myResourceId, myRequestPartitionIds);
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+					.append("resType", myResourceType)
+					.append("resId", myResourceId)
+					.append("partId", myRequestPartitionIds)
+					.toString();
 		}
 
 		@Override
@@ -356,7 +369,7 @@ public class MemoryCacheService {
 			ForcedIdCacheKey that = (ForcedIdCacheKey) theO;
 			return Objects.equals(myResourceType, that.myResourceType)
 					&& Objects.equals(myResourceId, that.myResourceId)
-					&& Objects.equals(myRequestPartitionId, that.myRequestPartitionId);
+					&& Objects.equals(myRequestPartitionIds, that.myRequestPartitionIds);
 		}
 
 		@Override
@@ -369,10 +382,6 @@ public class MemoryCacheService {
 		 */
 		public IIdType toIdType(FhirContext theFhirCtx) {
 			return theFhirCtx.getVersion().newIdType(myResourceType, myResourceId);
-		}
-
-		public IIdType toIdTypeWithoutResourceType(FhirContext theFhirCtx) {
-			return theFhirCtx.getVersion().newIdType(null, myResourceId);
 		}
 	}
 }

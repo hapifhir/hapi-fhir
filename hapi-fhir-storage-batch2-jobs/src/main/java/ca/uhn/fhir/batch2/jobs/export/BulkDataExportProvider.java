@@ -129,6 +129,13 @@ public class BulkDataExportProvider {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	/**
+	 * Constructor
+	 */
+	public BulkDataExportProvider() {
+		super();
+	}
+
+	/**
 	 * $export
 	 */
 	@Operation(
