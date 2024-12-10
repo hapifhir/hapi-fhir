@@ -2516,7 +2516,7 @@
 <!--								<artifactId>error_prone_core</artifactId>-->
 <!--								<version>${error_prone_core_version}</version>-->
 <!--							</path>-->
-						</annotationProcessorPaths>
+<!--						</annotationProcessorPaths>-->
 					</configuration>
 				</plugin>
 				<plugin>
