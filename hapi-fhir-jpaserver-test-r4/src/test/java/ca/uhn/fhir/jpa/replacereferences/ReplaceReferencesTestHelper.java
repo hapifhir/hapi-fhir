@@ -139,9 +139,7 @@ public class ReplaceReferencesTestHelper {
 		myResultPatient = new Patient();
 		myResultPatient.setIdElement((IdType) myTargetPatientId);
 		myResultPatient.addIdentifier(pat1IdentifierA);
-		Patient.PatientLinkComponent link = myResultPatient.addLink();
-		link.setOther(new Reference(mySourcePatientId));
-		link.setType(Patient.LinkType.REPLACES);
+
 	}
 
 	public void setSourceAndTarget(PatientMergeInputParameters inParams) {
@@ -149,7 +147,14 @@ public class ReplaceReferencesTestHelper {
 		inParams.targetPatient = new Reference().setReferenceElement(myTargetPatientId);
 	}
 
-	public void setResultPatient(PatientMergeInputParameters theInParams) {
+	public void setResultPatient(PatientMergeInputParameters theInParams, boolean theWithDelete) {
+		if (!theWithDelete)
+		{
+			// add the link only if we are not deleting the source
+			Patient.PatientLinkComponent link = myResultPatient.addLink();
+			link.setOther(new Reference(mySourcePatientId));
+			link.setType(Patient.LinkType.REPLACES);
+		}
 		theInParams.resultPatient = myResultPatient;
 	}
 
