@@ -43,8 +43,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -175,12 +173,8 @@ public class ResourceLink extends BaseResourceIndex {
 		myTargetResourceVersion = theTargetResourceVersion;
 	}
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceLink.class); // FIXME: remove
-
 	public String getTargetResourceId() {
 		if (myTargetResourceId == null && getTargetResource() != null) {
-			// FIXME: remove
-			ourLog.info("Looking up ID for target: {}", myTargetResourcePid);
 			myTargetResourceId = getTargetResource().getIdDt().getIdPart();
 		}
 		return myTargetResourceId;
