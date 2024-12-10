@@ -1,44 +1,26 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.r4.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Type;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,13 +32,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.dao.r4.replacereferences.ReplaceReferencesTestHelper.EXPECTED_SMALL_BATCHES;
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
@@ -66,7 +48,6 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_RESULT_PATIENT;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,32 +60,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PatientMergeR4Test.class);
 
-	static final FhirContext ourFhirContext = FhirContext.forR4Cached();
-
-	static final Identifier pat1IdentifierA = new Identifier().setSystem("SYS1A").setValue("VAL1A");
-	static final Identifier pat1IdentifierB = new Identifier().setSystem("SYS1B").setValue("VAL1B");
-	static final Identifier pat2IdentifierA = new Identifier().setSystem("SYS2A").setValue("VAL2A");
-	static final Identifier pat2IdentifierB = new Identifier().setSystem("SYS2B").setValue("VAL2B");
-	static final Identifier patBothIdentifierC = new Identifier().setSystem("SYSC").setValue("VALC");
-	static final int TOTAL_EXPECTED_PATCHES = 23;
-	static final int SMALL_BATCH_SIZE = 5;
-	static final int EXPECTED_SMALL_BATCHES = (TOTAL_EXPECTED_PATCHES + SMALL_BATCH_SIZE - 1) / SMALL_BATCH_SIZE;
-
-
-	IIdType myOrgId;
-	IIdType mySourcePatId;
-	IIdType mySourceCarePlanId;
-	IIdType mySourceEncId1;
-	IIdType mySourceEncId2;
-	ArrayList<IIdType> mySourceObsIds;
-	IIdType myTargetPatId;
-	IIdType myTargetEnc1;
-	Patient myResultPatient;
-
 	@RegisterExtension
-	static MyExceptionHandler ourExceptionHandler = new MyExceptionHandler();
-
-	IGenericClient myFhirClient;
+	MyExceptionHandler ourExceptionHandler = new MyExceptionHandler();
+	
+	ReplaceReferencesTestHelper myTestHelper;
 
 	@Override
 	@AfterEach
@@ -112,7 +71,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		super.after();
 
 		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
-	}
+			}
 
 	@Override
 	@BeforeEach
@@ -122,65 +81,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setAllowMultipleDelete(true);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
-		myFhirClient = myFhirContext.newRestfulGenericClient(myServerBase);
-
-		Organization org = new Organization();
-		org.setName("an org");
-		myOrgId = myFhirClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
-		ourLog.info("OrgId: {}", myOrgId);
-
-		Patient patient1 = new Patient();
-		patient1.getManagingOrganization().setReferenceElement(myOrgId);
-		patient1.addIdentifier(pat1IdentifierA);
-		patient1.addIdentifier(pat1IdentifierB);
-		patient1.addIdentifier(patBothIdentifierC);
-		mySourcePatId = myFhirClient.create().resource(patient1).execute().getId().toUnqualifiedVersionless();
-
-		Patient patient2 = new Patient();
-		patient2.addIdentifier(pat2IdentifierA);
-		patient2.addIdentifier(pat2IdentifierB);
-		patient2.addIdentifier(patBothIdentifierC);
-		patient2.getManagingOrganization().setReferenceElement(myOrgId);
-		myTargetPatId = myFhirClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless();
-
-		Encounter enc1 = new Encounter();
-		enc1.setStatus(EncounterStatus.CANCELLED);
-		enc1.getSubject().setReferenceElement(mySourcePatId);
-		enc1.getServiceProvider().setReferenceElement(myOrgId);
-		mySourceEncId1 = myFhirClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless();
-
-		Encounter enc2 = new Encounter();
-		enc2.setStatus(EncounterStatus.ARRIVED);
-		enc2.getSubject().setReferenceElement(mySourcePatId);
-		enc2.getServiceProvider().setReferenceElement(myOrgId);
-		mySourceEncId2 = myFhirClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless();
-
-		CarePlan carePlan = new CarePlan();
-		carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
-		carePlan.getSubject().setReferenceElement(mySourcePatId);
-		mySourceCarePlanId = myFhirClient.create().resource(carePlan).execute().getId().toUnqualifiedVersionless();
-
-		Encounter targetEnc1 = new Encounter();
-		targetEnc1.setStatus(EncounterStatus.ARRIVED);
-		targetEnc1.getSubject().setReferenceElement(myTargetPatId);
-		targetEnc1.getServiceProvider().setReferenceElement(myOrgId);
-		this.myTargetEnc1 = myFhirClient.create().resource(targetEnc1).execute().getId().toUnqualifiedVersionless();
-
-		mySourceObsIds = new ArrayList<>();
-		for (int i = 0; i < 20; i++) {
-			Observation obs = new Observation();
-			obs.getSubject().setReferenceElement(mySourcePatId);
-			obs.setStatus(ObservationStatus.FINAL);
-			IIdType obsId = myFhirClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
-			mySourceObsIds.add(obsId);
-		}
-
-		myResultPatient = new Patient();
-		myResultPatient.setIdElement((IdType) myTargetPatId);
-		myResultPatient.addIdentifier(pat1IdentifierA);
-		Patient.PatientLinkComponent link = myResultPatient.addLink();
-		link.setOther(new Reference(mySourcePatId));
-		link.setType(Patient.LinkType.REPLACES);
+		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myClient, myDaoRegistry);
+		myTestHelper.beforeEach();
 	}
 
 	@ParameterizedTest
@@ -207,12 +109,11 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	public void testMergeWithoutResult(boolean withDelete, boolean withInputResultPatient, boolean withPreview, boolean isAsync) throws Exception {
 		// setup
 
-		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
-		inParams.sourcePatient = new Reference().setReferenceElement(mySourcePatId);
-		inParams.targetPatient = new Reference().setReferenceElement(myTargetPatId);
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
+		myTestHelper.setSourceAndTarget(inParams);
 		inParams.deleteSource = withDelete;
 		if (withInputResultPatient) {
-			inParams.resultPatient = myResultPatient;
+			myTestHelper.setResultPatient(inParams);
 		}
 		if (withPreview) {
 			inParams.preview = true;
@@ -231,8 +132,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		if (withInputResultPatient) { // if the following assert fails, check that these two patients are identical
 			Patient p1 = (Patient) inParameters.getParameter(OPERATION_MERGE_RESULT_PATIENT).getResource();
 			Patient p2 = (Patient) input.getParameter(OPERATION_MERGE_RESULT_PATIENT).getResource();
-			ourLog.info(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
-			ourLog.info(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p2));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p2));
 		}
 		assertTrue(input.equalsDeep(inParameters));
 
@@ -245,7 +146,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			await().until(() -> taskCompleted(task.getIdElement()));
 
 			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
-			ourLog.info("Complete Task: {}", ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
+			ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
 
 			// FIXME KHS the rest of these asserts will likely need to be tweaked
 			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
@@ -266,7 +167,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			Reference outputRef = (Reference) taskOutput.getValue();
 			Bundle patchResultBundle = (Bundle) outputRef.getResource();
 			assertTrue(containedBundle.equalsDeep(patchResultBundle));
-			validatePatchResultBundle(patchResultBundle, TOTAL_EXPECTED_PATCHES);
+			validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES);
 		} else { // Synchronous case
 			// Assert outcome
 			OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
@@ -308,18 +209,18 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			}
 			if (!withPreview && !withDelete) {
 				// assert source has link to target
-				Patient source = myPatientDao.read(mySourcePatId, mySrd);
+				Patient source = myTestHelper.readSourcePatient();
 				assertThat(source.getLink())
 					.hasSize(1)
 					.element(0)
 					.extracting(link -> link.getOther().getReferenceElement())
-					.isEqualTo(myTargetPatId);
+					.isEqualTo(myTestHelper.getTargetPatientId());
 			}
 		}
 
 		// Check that the linked resources were updated
 
-		Bundle bundle = fetchBundle(myServerBase + "/" + myTargetPatId + "/$everything?_format=json&_count=100");
+		Bundle bundle = myTestHelper.getTargetEverythingBundle();
 
 		assertNull(bundle.getLink("next"));
 
@@ -331,25 +232,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Found IDs: {}", actual);
 
 		if (withPreview) {
-			assertThat(actual).doesNotContain(mySourcePatId);
-			assertThat(actual).doesNotContain(mySourceEncId1);
-			assertThat(actual).doesNotContain(mySourceEncId2);
-			assertThat(actual).contains(myOrgId);
-			assertThat(actual).doesNotContain(mySourceCarePlanId);
-			assertThat(actual).doesNotContainAnyElementsOf(mySourceObsIds);
-			assertThat(actual).contains(myTargetPatId);
-			assertThat(actual).contains(myTargetEnc1);
+			myTestHelper.assertNothingChanged(actual);
 		} else {
-			if (withDelete) {
-				assertThat(actual).doesNotContain(mySourcePatId);
-			}
-			assertThat(actual).contains(mySourceEncId1);
-			assertThat(actual).contains(mySourceEncId2);
-			assertThat(actual).contains(myOrgId);
-			assertThat(actual).contains(mySourceCarePlanId);
-			assertThat(actual).containsAll(mySourceObsIds);
-			assertThat(actual).contains(myTargetPatId);
-			assertThat(actual).contains(myTargetEnc1);
+			myTestHelper.assertContainsAllResources(actual, withDelete);
 		}
 	}
 
@@ -372,17 +257,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		"false, false, false",
 	})
 	public void testMultipleTargetMatchesFails(boolean withDelete, boolean withInputResultPatient, boolean withPreview) {
-		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
-		inParams.sourcePatient = new Reference().setReferenceElement(mySourcePatId);
-		inParams.targetPatientIdentifier = patBothIdentifierC;
-		inParams.deleteSource = withDelete;
-		if (withInputResultPatient) {
-			inParams.resultPatient = myResultPatient;
-		}
-		if (withPreview) {
-			inParams.preview = true;
-		}
-
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = myTestHelper.buildMultipleTargetMatchParameters(withDelete, withInputResultPatient, withPreview);
 
 		Parameters inParameters = inParams.asParametersResource();
 
@@ -403,16 +278,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		"false, false, false",
 	})
 	public void testMultipleSourceMatchesFails(boolean withDelete, boolean withInputResultPatient, boolean withPreview) {
-		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
-		inParams.sourcePatientIdentifier = patBothIdentifierC;
-		inParams.targetPatient = new Reference().setReferenceElement(mySourcePatId);
-		inParams.deleteSource = withDelete;
-		if (withInputResultPatient) {
-			inParams.resultPatient = myResultPatient;
-		}
-		if (withPreview) {
-			inParams.preview = true;
-		}
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = myTestHelper.buildMultipleSourceMatchParameters(withDelete, withInputResultPatient, withPreview);
 
 		Parameters inParameters = inParams.asParametersResource();
 
@@ -424,7 +290,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			callMergeOperation(inParameters))
 			.isInstanceOf(UnprocessableEntityException.class)
 			.extracting(UnprocessableEntityException.class::cast)
-			.extracting(PatientMergeR4Test::extractFailureMessage)
+			.extracting(this::extractFailureMessage)
 			.isEqualTo(theExpectedMessage);
 	}
 
@@ -460,19 +326,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	@ValueSource(booleans = {false, true})
 	void testReplaceReferences(boolean isAsync) throws IOException {
 		// exec
-		IOperationUntypedWithInput<Parameters> request = myClient.operation()
-			.onServer()
-			.named(OPERATION_REPLACE_REFERENCES)
-			.withParameter(Parameters.class, ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID, new StringType(mySourcePatId.getValue()))
-			.andParameter(ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID, new StringType(myTargetPatId.getValue()));
-
-		if (isAsync) {
-			request.withAdditionalHeader(HEADER_PREFER, HEADER_PREFER_RESPOND_ASYNC);
-		}
-
-		Parameters outParams = request
-			.returnResourceType(Parameters.class)
-			.execute();
+		Parameters outParams = myTestHelper.callReplaceReferences(isAsync);
 
 		assertThat(outParams.getParameter()).hasSize(1);
 
@@ -484,7 +338,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			await().until(() -> taskCompleted(task.getIdElement()));
 
 			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
-			ourLog.info("Complete Task: {}", ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
+			ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
 
 			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
 
@@ -509,7 +363,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 
 		// validate
-		validatePatchResultBundle(patchResultBundle, TOTAL_EXPECTED_PATCHES);
+		validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES);
 
 		// Check that the linked resources were updated
 
@@ -520,20 +374,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	@ValueSource(booleans = {false, true})
 	void testReplaceReferencesSmallBatchSize(boolean isAsync) throws IOException {
 		// exec
-		IOperationUntypedWithInput<Parameters> request = myClient.operation()
-			.onServer()
-			.named(OPERATION_REPLACE_REFERENCES)
-			.withParameter(Parameters.class, ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID, new StringType(mySourcePatId.getValue()))
-			.andParameter(ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID, new StringType(myTargetPatId.getValue()))
-			.andParameter(ProviderConstants.OPERATION_REPLACE_REFERENCES_BATCH_SIZE, new IntegerType(SMALL_BATCH_SIZE));
+		Parameters outParams = myTestHelper.callReplaceReferencesWithBatchSize(isAsync, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
 
-		if (isAsync) {
-			request.withAdditionalHeader(HEADER_PREFER, HEADER_PREFER_RESPOND_ASYNC);
-		}
-
-		Parameters outParams = request
-			.returnResourceType(Parameters.class)
-			.execute();
 
 		assertThat(outParams.getParameter()).hasSize(1);
 
@@ -544,7 +386,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		await().until(() -> taskCompleted(task.getIdElement()));
 
 		Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
-		ourLog.info("Complete Task: {}", ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
+		ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
 
 		assertThat(taskWithOutput.getOutput()).hasSize(EXPECTED_SMALL_BATCHES);
 		List<Resource> containedResources = taskWithOutput.getContained();
@@ -554,7 +396,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.element(0)
 			.isInstanceOf(Bundle.class);
 
-		int entriesLeft = TOTAL_EXPECTED_PATCHES;
+		int entriesLeft = ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES;
 		for (int i = 1; i < EXPECTED_SMALL_BATCHES; i++) {
 
 			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutput().get(i);
@@ -571,11 +413,10 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			assertTrue(containedBundle.equalsDeep(patchResultBundle));
 
 			// validate
-			entriesLeft -= SMALL_BATCH_SIZE;
-			int expectedNumberOfEntries = entriesLeft > SMALL_BATCH_SIZE ? SMALL_BATCH_SIZE : entriesLeft;
+			entriesLeft -= ReplaceReferencesTestHelper.SMALL_BATCH_SIZE;
+			int expectedNumberOfEntries = Math.min(entriesLeft, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
 			validatePatchResultBundle(patchResultBundle, expectedNumberOfEntries);
 		}
-
 
 		// Check that the linked resources were updated
 
@@ -583,7 +424,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void validateLinksUsingEverything() throws IOException {
-		Bundle everythingBundle = fetchBundle(myServerBase + "/" + myTargetPatId + "/$everything?_format=json&_count=100");
+		Bundle everythingBundle = myTestHelper.getTargetEverythingBundle();
 
 		assertNull(everythingBundle.getLink("next"));
 
@@ -594,13 +435,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Found IDs: {}", actual);
 
-		assertThat(actual).contains(mySourceEncId1);
-		assertThat(actual).contains(mySourceEncId2);
-		assertThat(actual).contains(myOrgId);
-		assertThat(actual).contains(mySourceCarePlanId);
-		assertThat(actual).containsAll(mySourceObsIds);
-		assertThat(actual).contains(myTargetPatId);
-		assertThat(actual).contains(myTargetEnc1);
+		myTestHelper.assertContainsAllResources(actual, false);
 	}
 
 	private static void validatePatchResultBundle(Bundle patchResultBundle, int theTotalExpectedPatches) {
@@ -620,58 +455,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	// FIXME KHS look at PatientEverythingR4Test for ideas for other tests
 
-	private Bundle fetchBundle(String theUrl) throws IOException {
-		Bundle bundle;
-		HttpGet get = new HttpGet(theUrl);
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		try {
-			assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
-			bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
-
-		return bundle;
-	}
-
-	private static class PatientMergeInputParameters {
-		Type sourcePatient;
-		Type sourcePatientIdentifier;
-		Type targetPatient;
-		Type targetPatientIdentifier;
-		Patient resultPatient;
-		Boolean preview;
-		Boolean deleteSource;
-
-		public Parameters asParametersResource() {
-			Parameters inParams = new Parameters();
-			if (sourcePatient != null) {
-				inParams.addParameter().setName("source-patient").setValue(sourcePatient);
-			}
-			if (sourcePatientIdentifier != null) {
-				inParams.addParameter().setName("source-patient-identifier").setValue(sourcePatientIdentifier);
-			}
-			if (targetPatient != null) {
-				inParams.addParameter().setName("target-patient").setValue(targetPatient);
-			}
-			if (targetPatientIdentifier != null) {
-				inParams.addParameter().setName("target-patient-identifier").setValue(targetPatientIdentifier);
-			}
-			if (resultPatient != null) {
-				inParams.addParameter().setName("result-patient").setResource(resultPatient);
-			}
-			if (preview != null) {
-				inParams.addParameter().setName("preview").setValue(new BooleanType(preview));
-			}
-			if (deleteSource != null) {
-				inParams.addParameter().setName("delete-source").setValue(new BooleanType(deleteSource));
-			}
-			return inParams;
-		}
-	}
-
-
-	static class MyExceptionHandler implements TestExecutionExceptionHandler {
+	class MyExceptionHandler implements TestExecutionExceptionHandler {
 		@Override
 		public void handleTestExecutionException(ExtensionContext theExtensionContext, Throwable theThrowable) throws Throwable {
 			if (theThrowable instanceof BaseServerResponseException) {
@@ -683,9 +467,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private static @NotNull String extractFailureMessage(BaseServerResponseException ex) {
+	private @Nonnull String extractFailureMessage(BaseServerResponseException ex) {
 		String body = ex.getResponseBody();
-		Parameters outParams = ourFhirContext.newJsonParser().parseResource(Parameters.class, body);
+		Parameters outParams = myFhirContext.newJsonParser().parseResource(Parameters.class, body);
 		OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
 		return outcome.getIssue().stream()
 			.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
