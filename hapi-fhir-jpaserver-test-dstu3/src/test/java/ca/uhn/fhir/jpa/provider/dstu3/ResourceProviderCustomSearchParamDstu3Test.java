@@ -188,9 +188,9 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		obs2.setStatus(ObservationStatus.FINAL);
 		IIdType obsId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
-		ResourceTable res = myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable res = runInTransaction(()->myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new));
 		assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, res.getIndexStatus());
-		res = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		res = runInTransaction(()->myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow(IllegalStateException::new));
 		assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, res.getIndexStatus());
 
 		SearchParameter fooSp = new SearchParameter();
