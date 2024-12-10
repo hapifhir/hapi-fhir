@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.dao.r4.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -74,7 +72,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setAllowMultipleDelete(true);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
-		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myClient, myDaoRegistry);
+		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		myTestHelper.beforeEach();
 	}
 
@@ -213,14 +211,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Check that the linked resources were updated
 
-		Bundle bundle = myTestHelper.getTargetEverythingBundle();
-
-		assertNull(bundle.getLink("next"));
-
-		Set<IIdType> actual = new HashSet<>();
-		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
-			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless());
-		}
+		Set<IIdType> actual = myTestHelper.getTargetEverythingResourceIds();
 
 		ourLog.info("Found IDs: {}", actual);
 
@@ -230,8 +221,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			myTestHelper.assertContainsAllResources(actual, withDelete);
 		}
 	}
-
-
 
 	@ParameterizedTest
 	@CsvSource({

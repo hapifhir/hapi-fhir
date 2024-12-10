@@ -1,12 +1,17 @@
-package ca.uhn.fhir.jpa.dao.r4.replacereferences;
+package ca.uhn.fhir.jpa.replacereferences;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -24,18 +29,19 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ReplaceReferencesTestHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReplaceReferencesTestHelper.class);
@@ -48,8 +54,12 @@ public class ReplaceReferencesTestHelper {
 	public static final int TOTAL_EXPECTED_PATCHES = 23;
 	public static final int SMALL_BATCH_SIZE = 5;
 	public static final int EXPECTED_SMALL_BATCHES = (TOTAL_EXPECTED_PATCHES + SMALL_BATCH_SIZE - 1) / SMALL_BATCH_SIZE;
-	private final IFhirResourceDao<Patient> myPatientDao;
+	private final IFhirResourceDaoPatient<Patient> myPatientDao;
 	private final IFhirResourceDao<Task> myTaskDao;
+	private final IFhirResourceDao<Organization> myOrganizationDao;
+	private final IFhirResourceDao<Encounter> myEncounterDao;
+	private final IFhirResourceDao<CarePlan> myCarePlanDao;
+	private final IFhirResourceDao<Observation> myObservationDao;
 
 	IIdType myOrgId;
 	IIdType mySourcePatientId;
@@ -62,21 +72,23 @@ public class ReplaceReferencesTestHelper {
 	Patient myResultPatient;
 
 	private final FhirContext myFhirContext;
-	private final IGenericClient myFhirClient;
 	private final SystemRequestDetails mySrd = new SystemRequestDetails();
 
-	public ReplaceReferencesTestHelper(FhirContext theFhirContext, IGenericClient theFhirClient, DaoRegistry theDaoRegistry) {
+	public ReplaceReferencesTestHelper(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
-		myFhirClient = theFhirClient;
-		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
+		myPatientDao = (IFhirResourceDaoPatient<Patient>) theDaoRegistry.getResourceDao(Patient.class);
 		myTaskDao = theDaoRegistry.getResourceDao(Task.class);
+		myOrganizationDao = theDaoRegistry.getResourceDao(Organization.class);
+		myEncounterDao = theDaoRegistry.getResourceDao(Encounter.class);
+		myCarePlanDao = theDaoRegistry.getResourceDao(CarePlan.class);
+		myObservationDao = theDaoRegistry.getResourceDao(Observation.class);
 	}
 
 	public void beforeEach() throws Exception {
 
 		Organization org = new Organization();
 		org.setName("an org");
-		myOrgId = myFhirClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		myOrgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 		ourLog.info("OrgId: {}", myOrgId);
 
 		Patient patient1 = new Patient();
@@ -84,44 +96,44 @@ public class ReplaceReferencesTestHelper {
 		patient1.addIdentifier(pat1IdentifierA);
 		patient1.addIdentifier(pat1IdentifierB);
 		patient1.addIdentifier(patBothIdentifierC);
-		mySourcePatientId = myFhirClient.create().resource(patient1).execute().getId().toUnqualifiedVersionless();
+		mySourcePatientId = myPatientDao.create(patient1, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient patient2 = new Patient();
 		patient2.addIdentifier(pat2IdentifierA);
 		patient2.addIdentifier(pat2IdentifierB);
 		patient2.addIdentifier(patBothIdentifierC);
 		patient2.getManagingOrganization().setReferenceElement(myOrgId);
-		myTargetPatientId = myFhirClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless();
+		myTargetPatientId =  myPatientDao.create(patient2, mySrd).getId().toUnqualifiedVersionless();
 
 		Encounter enc1 = new Encounter();
 		enc1.setStatus(Encounter.EncounterStatus.CANCELLED);
 		enc1.getSubject().setReferenceElement(mySourcePatientId);
 		enc1.getServiceProvider().setReferenceElement(myOrgId);
-		mySourceEncId1 = myFhirClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless();
+		mySourceEncId1 = myEncounterDao.create(enc1, mySrd).getId().toUnqualifiedVersionless();
 
 		Encounter enc2 = new Encounter();
 		enc2.setStatus(Encounter.EncounterStatus.ARRIVED);
 		enc2.getSubject().setReferenceElement(mySourcePatientId);
 		enc2.getServiceProvider().setReferenceElement(myOrgId);
-		mySourceEncId2 = myFhirClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless();
+		mySourceEncId2 = myEncounterDao.create(enc2, mySrd).getId().toUnqualifiedVersionless();
 
 		CarePlan carePlan = new CarePlan();
 		carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
 		carePlan.getSubject().setReferenceElement(mySourcePatientId);
-		mySourceCarePlanId = myFhirClient.create().resource(carePlan).execute().getId().toUnqualifiedVersionless();
+		mySourceCarePlanId = myCarePlanDao.create(carePlan, mySrd).getId().toUnqualifiedVersionless();
 
 		Encounter targetEnc1 = new Encounter();
 		targetEnc1.setStatus(Encounter.EncounterStatus.ARRIVED);
 		targetEnc1.getSubject().setReferenceElement(myTargetPatientId);
 		targetEnc1.getServiceProvider().setReferenceElement(myOrgId);
-		this.myTargetEnc1 = myFhirClient.create().resource(targetEnc1).execute().getId().toUnqualifiedVersionless();
+		this.myTargetEnc1 = myEncounterDao.create(targetEnc1, mySrd).getId().toUnqualifiedVersionless();
 
 		mySourceObsIds = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
 			Observation obs = new Observation();
 			obs.getSubject().setReferenceElement(mySourcePatientId);
 			obs.setStatus(Observation.ObservationStatus.FINAL);
-			IIdType obsId = myFhirClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
+			IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			mySourceObsIds.add(obsId);
 		}
 
@@ -150,14 +162,18 @@ public class ReplaceReferencesTestHelper {
 		return myTargetPatientId;
 	}
 
-	public Bundle getTargetEverythingBundle() {
-		return myFhirClient.operation()
-			.onInstance(myTargetPatientId)
-			.named("$everything")
-			.withParameter(Parameters.class, "_count", new IntegerType(100))
-			.useHttpGet()
-			.returnResourceType(Bundle.class)
-			.execute();
+	public Set<IIdType> getTargetEverythingResourceIds() {
+		PatientEverythingParameters everythingParams = new PatientEverythingParameters();
+		everythingParams.setCount(new IntegerType(100));
+
+		IBundleProvider bundleProvider = myPatientDao.patientInstanceEverything(null, mySrd, everythingParams, myTargetPatientId);
+
+		assertNull(bundleProvider.getNextPageId());
+
+		return bundleProvider.getAllResources().stream()
+			.map(IBaseResource::getIdElement)
+			.map(IIdType::toUnqualifiedVersionless)
+			.collect(Collectors.toSet());
 	}
 
 	public Boolean taskCompleted(IdType theTaskId) {
@@ -166,12 +182,12 @@ public class ReplaceReferencesTestHelper {
 		return updatedTask.getStatus() == Task.TaskStatus.COMPLETED;
 	}
 
-	public Parameters callReplaceReferences(boolean theIsAsync) {
-		return callReplaceReferencesWithBatchSize(theIsAsync, null);
+	public Parameters callReplaceReferences(IGenericClient theFhirClient, boolean theIsAsync) {
+		return callReplaceReferencesWithBatchSize(theFhirClient, theIsAsync, null);
 	}
 
-	public Parameters callReplaceReferencesWithBatchSize(boolean theIsAsync, Integer theBatchSize) {
-		IOperationUntypedWithInputAndPartialOutput<Parameters> request = myFhirClient.operation()
+	public Parameters callReplaceReferencesWithBatchSize(IGenericClient theFhirClient, boolean theIsAsync, Integer theBatchSize) {
+		IOperationUntypedWithInputAndPartialOutput<Parameters> request = theFhirClient.operation()
 			.onServer()
 			.named(OPERATION_REPLACE_REFERENCES)
 			.withParameter(Parameters.class, ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID, new StringType(mySourcePatientId.getValue()))

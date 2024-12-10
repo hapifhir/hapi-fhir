@@ -1,8 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.dao.r4.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -15,12 +14,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ca.uhn.fhir.jpa.dao.r4.replacereferences.ReplaceReferencesTestHelper.EXPECTED_SMALL_BATCHES;
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
+import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper.EXPECTED_SMALL_BATCHES;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +35,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	public void before() throws Exception {
 		super.before();
 
-		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myClient, myDaoRegistry);
+		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		myTestHelper.beforeEach();
 	}
 
@@ -45,7 +43,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	@ValueSource(booleans = {false, true})
 	void testReplaceReferences(boolean isAsync) throws IOException {
 		// exec
-		Parameters outParams = myTestHelper.callReplaceReferences(isAsync);
+		Parameters outParams = myTestHelper.callReplaceReferences(myClient, isAsync);
 
 		assertThat(outParams.getParameter()).hasSize(1);
 
@@ -93,7 +91,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	@ValueSource(booleans = {false, true})
 	void testReplaceReferencesSmallBatchSize(boolean isAsync) throws IOException {
 		// exec
-		Parameters outParams = myTestHelper.callReplaceReferencesWithBatchSize(isAsync, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
+		Parameters outParams = myTestHelper.callReplaceReferencesWithBatchSize(myClient, isAsync, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
 
 
 		assertThat(outParams.getParameter()).hasSize(1);
@@ -144,14 +142,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 
 	private void validateLinksUsingEverything() {
-		Bundle everythingBundle = myTestHelper.getTargetEverythingBundle();
-
-		assertNull(everythingBundle.getLink("next"));
-
-		Set<IIdType> actual = new HashSet<>();
-		for (Bundle.BundleEntryComponent nextEntry : everythingBundle.getEntry()) {
-			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless());
-		}
+		Set<IIdType> actual =  myTestHelper.getTargetEverythingResourceIds();
 
 		ourLog.info("Found IDs: {}", actual);
 
