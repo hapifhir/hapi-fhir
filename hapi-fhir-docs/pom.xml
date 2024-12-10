@@ -129,12 +129,6 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-client-apache-http5</artifactId>
-			<version>${project.version}</version>
-			<scope>compile</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
