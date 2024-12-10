@@ -51,13 +51,14 @@ public class BulkExportHelperService {
 	 * The input boolean theConsiderDateRange determines whether to consider the lastUpdated date in the search parameter map.
 	 */
 	public List<SearchParameterMap> createSearchParameterMapsForResourceType(
-			RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderDateRange ) {
+			RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderDateRange) {
 		String resourceType = theDef.getName();
 		List<String> typeFilters = theParams.getFilters();
 		List<SearchParameterMap> spMaps = null;
 		spMaps = typeFilters.stream()
 				.filter(typeFilter -> typeFilter.startsWith(resourceType + "?"))
-				.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef, theParams.getStartDate(), theParams.getEndDate()))
+				.map(filter -> buildSearchParameterMapForTypeFilter(
+						filter, theDef, theParams.getStartDate(), theParams.getEndDate()))
 				.collect(Collectors.toList());
 
 		typeFilters.stream().filter(filter -> !filter.contains("?")).forEach(filter -> {
@@ -70,7 +71,8 @@ public class BulkExportHelperService {
 		if (spMaps.isEmpty()) {
 			SearchParameterMap defaultMap = new SearchParameterMap();
 			if (theConsiderDateRange) {
-				enhanceSearchParameterMapWithCommonParameters(defaultMap, theParams.getStartDate(), theParams.getEndDate());
+				enhanceSearchParameterMapWithCommonParameters(
+						defaultMap, theParams.getStartDate(), theParams.getEndDate());
 			}
 			spMaps = Collections.singletonList(defaultMap);
 		}
@@ -79,13 +81,14 @@ public class BulkExportHelperService {
 	}
 
 	private SearchParameterMap buildSearchParameterMapForTypeFilter(
-		String theFilter, RuntimeResourceDefinition theDef, Date theStartDate, Date theEndDate) {
+			String theFilter, RuntimeResourceDefinition theDef, Date theStartDate, Date theEndDate) {
 		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(theFilter, theDef);
 		enhanceSearchParameterMapWithCommonParameters(searchParameterMap, theStartDate, theEndDate);
 		return searchParameterMap;
 	}
 
-	private void enhanceSearchParameterMapWithCommonParameters(SearchParameterMap map, Date theSinceDate, Date theEndDate) {
+	private void enhanceSearchParameterMapWithCommonParameters(
+			SearchParameterMap map, Date theSinceDate, Date theEndDate) {
 		map.setLoadSynchronous(true);
 		if (theSinceDate != null || theEndDate != null) {
 			map.setLastUpdated(new DateRangeParam(theSinceDate, theEndDate));

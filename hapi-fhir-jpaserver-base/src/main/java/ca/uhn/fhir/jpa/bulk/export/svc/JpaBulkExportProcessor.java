@@ -446,8 +446,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
 		List<JpaPid> resPids = new ArrayList<>();
 
-		List<SearchParameterMap> maps =
-				myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParameters, theConsiderDateRange);
+		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(
+				def, theParameters, theConsiderDateRange);
 
 		maps.forEach(map -> addMembershipToGroupClause(map, theParameters.getGroupId()));
 
