@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -28,14 +28,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourceProviderDstu3Test {
 
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemVersionedTest.class);
-	private long parentChildCs1Id;
-	private long parentChildCs2Id;
+	private JpaPid parentChildCs1Id;
+	private JpaPid parentChildCs2Id;
 
 	@BeforeEach
 	@Transactional
@@ -90,8 +91,8 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 
 	@Test
 	public void testLookupOnExternalCodeMultiVersion() {
-		ResourceProviderDstu3ValueSetVersionedTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "1");
-		ResourceProviderDstu3ValueSetVersionedTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "2");
+		ResourceProviderDstu3ValueSetVersionedTest.createExternalCs(this, myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "1");
+		ResourceProviderDstu3ValueSetVersionedTest.createExternalCs(this, myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "2");
 
 		// First test with no version specified (should return from last version created)
 		Parameters respParam = myClient
@@ -765,7 +766,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testUpdateCodeSystemById() throws IOException {
 
-		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
+		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id.getId()).execute();
 		assertEquals("Parent Child CodeSystem 1", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 1");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
@@ -778,10 +779,10 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			IOUtils.closeQuietly(resp);
 		}
 
-		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
+		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 1", updatedCodeSystem.getName());
 
-		initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id).execute();
+		initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id.getId()).execute();
 		assertEquals("Parent Child CodeSystem 2", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 2");
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
@@ -794,7 +795,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			IOUtils.closeQuietly(resp);
 		}
 
-		updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id).execute();
+		updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 2", updatedCodeSystem.getName());
 	}
 

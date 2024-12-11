@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import org.hl7.fhir.r4.model.Observation;
@@ -23,7 +24,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), JpaPid.fromId(123L));
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
@@ -39,7 +40,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), JpaPid.fromId(123L));
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
@@ -55,7 +56,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), JpaPid.fromId(123L));
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0", obs.getValueQuantity().getValueElement().getValueAsString());
@@ -71,7 +72,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), JpaPid.fromId(123L));
 		try {
 			parser.parseResource(Observation.class, input);
 		} catch (DataFormatException e) {

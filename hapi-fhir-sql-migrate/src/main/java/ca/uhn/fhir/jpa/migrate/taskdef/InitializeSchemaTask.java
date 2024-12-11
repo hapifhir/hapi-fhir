@@ -70,9 +70,10 @@ public class InitializeSchemaTask extends BaseTask {
 
 		logInfo(
 				ourLog,
-				"Initializing {} schema for {}",
+				"Initializing {} schema for {} with dry-run: {}",
 				driverType,
-				mySchemaInitializationProvider.getSchemaDescription());
+				mySchemaInitializationProvider.getSchemaDescription(),
+				isDryRun());
 
 		List<String> sqlStatements = mySchemaInitializationProvider.getSqlStatements(driverType);
 

@@ -332,7 +332,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 
 		// Query for resources within threshold
 		StopWatch pageSw = new StopWatch();
-		Slice<Long> range = myTxTemplate.execute(t -> {
+		Slice<JpaPid> range = myTxTemplate.execute(t -> {
 			PageRequest page = PageRequest.of(0, PASS_SIZE);
 			if (isNotBlank(theJob.getResourceType())) {
 				return myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
@@ -353,7 +353,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 
 		// Submit each resource requiring reindexing
 		List<Future<Date>> futures = range.stream()
-				.map(t -> myTaskExecutor.submit(new ResourceReindexingTask(JpaPid.fromId(t), counter)))
+				.map(t -> myTaskExecutor.submit(new ResourceReindexingTask(t, counter)))
 				.collect(Collectors.toList());
 
 		Date latestDate = null;
@@ -432,58 +432,58 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		txTemplate.execute((TransactionCallback<Void>) theStatus -> {
 			ourLog.info("Marking resource with PID {} as indexing_failed", theId);
 
-			myResourceTableDao.updateIndexStatus(theId.getId(), EntityIndexStatusEnum.INDEXING_FAILED);
+			myResourceTableDao.updateIndexStatus(theId, EntityIndexStatusEnum.INDEXING_FAILED);
 
-			Query q = myEntityManager.createQuery("DELETE FROM ResourceTag t WHERE t.myResource.myId = :id");
-			q.setParameter("id", theId.getId());
+			Query q = myEntityManager.createQuery("DELETE FROM ResourceTag t WHERE t.myResource.myPid = :id");
+			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamCoords t WHERE t.myResource.myId = :id");
-			q.setParameter("id", theId.getId());
+					"DELETE FROM ResourceIndexedSearchParamCoords t WHERE t.myResource.myPid = :id");
+			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamDate t WHERE t.myResource.myId = :id");
-			q.setParameter("id", theId.getId());
+					"DELETE FROM ResourceIndexedSearchParamDate t WHERE t.myResource.myPid = :id");
+			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamNumber t WHERE t.myResource.myId = :id");
-			q.setParameter("id", theId.getId());
+					"DELETE FROM ResourceIndexedSearchParamNumber t WHERE t.myResource.myPid = :id");
+			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamQuantity t WHERE t.myResource.myId = :id");
-			q.setParameter("id", theId.getId());
+					"DELETE FROM ResourceIndexedSearchParamQuantity t WHERE t.myResource.myPid = :id");
+			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResource.myId = :id");
-			q.setParameter("id", theId.getId());
+					"DELETE FROM ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResource.myPid = :id");
+			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResource.myId = :id");
-			q.setParameter("id", theId.getId());
+					"DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResource.myPid = :id");
+			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamToken t WHERE t.myResource.myId = :id");
-			q.setParameter("id", theId.getId());
+					"DELETE FROM ResourceIndexedSearchParamToken t WHERE t.myResource.myPid = :id");
+			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamUri t WHERE t.myResource.myId = :id");
-			q.setParameter("id", theId.getId());
+					"DELETE FROM ResourceIndexedSearchParamUri t WHERE t.myResource.myPid = :id");
+			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.mySourceResource.myId = :id");
-			q.setParameter("id", theId.getId());
+			q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.mySourceResource.myPid = :id");
+			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.myTargetResource.myId = :id");
-			q.setParameter("id", theId.getId());
+			q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.myTargetResource.myPid = :id");
+			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			return null;
@@ -533,7 +533,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 			Throwable reindexFailure;
 			reindexFailure = myTxTemplate.execute(t -> {
 				ResourceTable resourceTable =
-						myResourceTableDao.findById(myNextId.getId()).orElseThrow(IllegalStateException::new);
+						myResourceTableDao.findById(myNextId).orElseThrow(IllegalStateException::new);
 				myUpdated = resourceTable.getUpdatedDate();
 
 				try {

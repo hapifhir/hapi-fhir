@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -50,6 +52,8 @@ public class DaoSearchParamSynchronizerTest {
 	void setUp() {
 		when(theEntity.isParamsNumberPopulated()).thenReturn(true);
 		when(theEntity.getParamsNumber()).thenReturn(List.of(THE_SEARCH_PARAM_NUMBER));
+		when(theEntity.getId()).thenReturn(JpaPid.fromId(1L));
+		when(theEntity.getPartitionId()).thenReturn(new PartitionablePartitionId());
 		when(existingEntity.isParamsNumberPopulated()).thenReturn(true);
 		when(existingEntity.getParamsNumber()).thenReturn(List.of(EXISTING_SEARCH_PARAM_NUMBER));
 
@@ -57,7 +61,7 @@ public class DaoSearchParamSynchronizerTest {
 		existingParams = ResourceIndexedSearchParams.withLists(existingEntity);
 
 		final ResourceTable resourceTable = new ResourceTable();
-		resourceTable.setId(1L);
+		resourceTable.setIdForUnitTest(1L);
 		EXISTING_SEARCH_PARAM_NUMBER.setResource(resourceTable);
 		THE_SEARCH_PARAM_NUMBER.setResource(resourceTable);
 
@@ -73,6 +77,6 @@ public class DaoSearchParamSynchronizerTest {
 		assertEquals(1, addRemoveCount.getAddCount());
 
 		verify(entityManager, never()).remove(any(BaseResourceIndex.class));
-		verify(entityManager, times(1)).merge(THE_SEARCH_PARAM_NUMBER);
+		verify(entityManager, times(1)).persist(THE_SEARCH_PARAM_NUMBER);
 	}
 }

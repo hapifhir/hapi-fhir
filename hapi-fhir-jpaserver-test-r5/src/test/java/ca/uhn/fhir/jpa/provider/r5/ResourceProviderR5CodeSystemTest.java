@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r5;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -29,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test {
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR5CodeSystemTest.class);
-	private Long parentChildCsId;
+	private JpaPid parentChildCsId;
 
 	private IIdType myCsId;
 
