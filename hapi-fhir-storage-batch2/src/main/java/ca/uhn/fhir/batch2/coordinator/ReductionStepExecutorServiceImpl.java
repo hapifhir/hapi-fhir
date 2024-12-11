@@ -146,6 +146,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 					String instanceId = instanceIds[0];
 					myCurrentlyFinalizingInstanceId.set(instanceId);
 					JobWorkCursor<?, ?, ?> jobWorkCursor = myInstanceIdToJobWorkCursor.get(instanceId);
+					// TODO KHS executeReductionStep can return failure. Should we do anything with this information?
 					executeReductionStep(instanceId, jobWorkCursor);
 
 					// If we get here, this succeeded. Purge the instance from the work queue
