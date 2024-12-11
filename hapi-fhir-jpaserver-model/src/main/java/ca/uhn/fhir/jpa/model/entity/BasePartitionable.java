@@ -19,9 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 
 import java.io.Serializable;
@@ -35,36 +34,27 @@ import java.time.LocalDate;
 @MappedSuperclass
 public abstract class BasePartitionable implements Serializable {
 
-	@Embedded
-	private PartitionablePartitionId myPartitionId;
-
-	/**
-	 * This is here to support queries only, do not set this field directly
-	 */
 	@SuppressWarnings("unused")
-	@Column(name = PartitionablePartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
-	private Integer myPartitionIdValue;
+	@Column(name = PartitionablePartitionId.PARTITION_ID)
+	Integer myPartitionIdValue;
 
-	/**
-	 * This is here to support queries only, do not set this field directly
-	 */
 	@SuppressWarnings("unused")
-	@Column(name = PartitionablePartitionId.PARTITION_DATE, insertable = false, updatable = false, nullable = true)
+	@Column(name = PartitionablePartitionId.PARTITION_DATE, updatable = false, nullable = true)
 	private LocalDate myPartitionDateValue;
 
-	@Nullable
+	@Nonnull
 	public PartitionablePartitionId getPartitionId() {
-		return myPartitionId;
+		return PartitionablePartitionId.with(myPartitionIdValue, myPartitionDateValue);
 	}
 
 	public void setPartitionId(PartitionablePartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
+		myPartitionIdValue = thePartitionId.getPartitionId();
+		myPartitionDateValue = thePartitionId.getPartitionDate();
 	}
 
 	@Override
 	public String toString() {
-		return "BasePartitionable{" + "myPartitionId="
-				+ myPartitionId + ", myPartitionIdValue="
+		return "BasePartitionable{" + "myPartitionIdValue="
 				+ myPartitionIdValue + ", myPartitionDateValue="
 				+ myPartitionDateValue + '}';
 	}

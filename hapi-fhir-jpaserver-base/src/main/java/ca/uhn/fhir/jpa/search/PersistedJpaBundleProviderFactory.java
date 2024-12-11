@@ -105,9 +105,7 @@ public class PersistedJpaBundleProviderFactory {
 		search.setLastUpdated(theRangeStartInclusive, theRangeEndInclusive);
 		search.setUuid(UUID.randomUUID().toString());
 		search.setResourceType(resourceName);
-		if (theResourcePid != null) {
-			search.setResourceId(theResourcePid.getId());
-		}
+		search.setResourceId(theResourcePid);
 		search.setSearchType(SearchTypeEnum.HISTORY);
 		search.setStatus(SearchStatusEnum.FINISHED);
 		search.setHistorySearchStyle(searchParameterType);

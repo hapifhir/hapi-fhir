@@ -3558,7 +3558,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		myObservationDao.update(obs);
 
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(10, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(9, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(5, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());

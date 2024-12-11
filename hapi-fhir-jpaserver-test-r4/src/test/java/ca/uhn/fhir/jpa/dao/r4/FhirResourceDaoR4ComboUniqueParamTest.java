@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -437,7 +438,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		IIdType id = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 		myCaptureQueriesListener.logInsertQueries();
 
-		List<ResourceIndexedComboStringUnique> values = runInTransaction(()-> myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong()));
+		List<ResourceIndexedComboStringUnique> values = runInTransaction(()-> myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(JpaPid.fromId(id.getIdPartAsLong())));
 		assertEquals(2, values.size());
 		values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
 		assertEquals("Patient?identifier=urn%7C111", values.get(0).getIndexString());
@@ -457,7 +458,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		myPatientDao.update(pt, mySrd);
 
 		values = runInTransaction(()->{
-			return myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong());
+			return myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(JpaPid.fromId(id.getIdPartAsLong()));
 		});
 		assertEquals(2, values.size());
 		values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
