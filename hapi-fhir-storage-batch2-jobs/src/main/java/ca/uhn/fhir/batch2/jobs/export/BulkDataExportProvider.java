@@ -180,7 +180,7 @@ public class BulkDataExportProvider {
 		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		// verify the Group exists before starting the job
-		getBulkDataExportValidator().validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
+		getBulkDataExportSupport().validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
 
 		final BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
 				.outputFormat(theOutputFormat)
@@ -194,13 +194,13 @@ public class BulkDataExportProvider {
 				.expandMdm(theMdm)
 				.build();
 
-		getBulkDataExportValidator().validateOrModifyResourceTypes(bulkExportJobParameters);
+		getBulkDataExportSupport().validateOrModifyResourceTypes(bulkExportJobParameters);
 		getBulkDataExportJobService().startJob(theRequestDetails, bulkExportJobParameters);
 	}
 
 	@VisibleForTesting
 	Set<String> getPatientCompartmentResources(FhirContext theFhirContext) {
-		return getBulkDataExportValidator().getPatientCompartmentResources(theFhirContext);
+		return getBulkDataExportSupport().getPatientCompartmentResources(theFhirContext);
 	}
 
 	/**
@@ -309,7 +309,7 @@ public class BulkDataExportProvider {
 			List<IPrimitiveType<String>> thePatientIds) {
 		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
-		getBulkDataExportValidator()
+		getBulkDataExportSupport()
 				.validateTargetsExists(
 						theRequestDetails,
 						"Patient",
@@ -319,7 +319,7 @@ public class BulkDataExportProvider {
 
 		// set resourceTypes to all patient compartment resources if it is null
 		IPrimitiveType<String> resourceTypes = theType == null
-				? new StringDt(String.join(",", getBulkDataExportValidator().getPatientCompartmentResources()))
+				? new StringDt(String.join(",", getBulkDataExportSupport().getPatientCompartmentResources()))
 				: theType;
 
 		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
@@ -333,7 +333,7 @@ public class BulkDataExportProvider {
 				.patientIds(thePatientIds)
 				.build();
 
-		getBulkDataExportValidator()
+		getBulkDataExportSupport()
 				.validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
 
 		getBulkDataExportJobService().startJob(theRequestDetails, bulkExportJobParameters);
@@ -530,7 +530,7 @@ public class BulkDataExportProvider {
 	// Do not use this variable directly, use getBulkDataExportSupport() instead
 	private BulkDataExportSupport myBulkDataExportSupport;
 
-	private BulkDataExportSupport getBulkDataExportValidator() {
+	private BulkDataExportSupport getBulkDataExportSupport() {
 		if (myBulkDataExportSupport == null) {
 			myBulkDataExportSupport =
 					new BulkDataExportSupport(myFhirContext, myDaoRegistry, myRequestPartitionHelperService);
