@@ -70,6 +70,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -322,13 +323,15 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 
 						Query nativeQuery = myEntityManager.createQuery(
 								"SELECT (" + idPropertyNames + ") FROM " + theEntityType.getSimpleName());
-						nativeQuery.setMaxResults(400);
+
+						// Each ID is 2 parameters in DB partition mode, so this
+						// is the maximum we should allow
+						nativeQuery.setMaxResults(SearchBuilder.getMaximumPageSize() / 2);
+
 						List pids = nativeQuery.getResultList();
 						if (pids.isEmpty()) {
 							return 0;
 						}
-
-						List<Object> values = new ArrayList<>();
 
 						StringBuilder deleteBuilder = new StringBuilder();
 						deleteBuilder.append("DELETE FROM ");

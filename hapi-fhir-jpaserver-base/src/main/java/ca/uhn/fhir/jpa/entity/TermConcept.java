@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingRoutingBinder;
 import ca.uhn.fhir.util.ValidateUtil;
@@ -30,6 +31,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -54,6 +57,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
 import org.hibernate.search.mapper.pojo.bridge.IdentifierBridge;
@@ -70,6 +74,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
+import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.r4.model.Coding;
 
 import java.io.Serializable;
@@ -194,8 +199,13 @@ public class TermConcept implements Serializable {
 	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
 	private Integer myPartitionIdValue;
 
+	/**
+	 * See {@link EntityIndexStatusEnum} for values
+	 */
 	@Column(name = "INDEX_STATUS", nullable = true)
-	private Long myIndexStatus;
+	@Enumerated(EnumType.ORDINAL)
+	@JdbcTypeCode(SqlTypes.TINYINT)
+	private EntityIndexStatusEnum myIndexStatus;
 
 	@Deprecated(since = "7.2.0")
 	@Lob
@@ -396,11 +406,11 @@ public class TermConcept implements Serializable {
 		return this;
 	}
 
-	public Long getIndexStatus() {
+	public EntityIndexStatusEnum getIndexStatus() {
 		return myIndexStatus;
 	}
 
-	public TermConcept setIndexStatus(Long theIndexStatus) {
+	public TermConcept setIndexStatus(EntityIndexStatusEnum theIndexStatus) {
 		myIndexStatus = theIndexStatus;
 		return this;
 	}

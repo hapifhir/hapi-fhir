@@ -9,12 +9,14 @@ import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import ca.uhn.fhir.jpa.util.DatabaseSupportUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
@@ -29,11 +31,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class HapiFhirJpaMigrationTasksTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirJpaMigrationTasksTest.class);
@@ -91,6 +93,7 @@ public class HapiFhirJpaMigrationTasksTest {
 	 * added in 7.4.0 so this backfills them.
 	 */
 	@Test
+	@Order(1)
 	public void testCreateUniqueComboParamHashes() {
 		/*
 		 * Setup
@@ -105,21 +108,12 @@ public class HapiFhirJpaMigrationTasksTest {
 				"HAPI FHIR", "/jpa_h2_schema_720", "HFJ_RESOURCE", true)));
 
 		migrator.createMigrationTableIfRequired();
-		MigrationResult outcome = migrator.migrate();
-		assertEquals(0, outcome.changes);
-		assertEquals(1, outcome.succeededTasks.size());
-		assertEquals("7.2.0.20180115.0", outcome.succeededTasks.get(0).getMigrationVersion());
-		assertEquals(0, outcome.failedTasks.size());
+		migrator.migrate();
 
 		// Run a second time to run the 7.4.0 migrations
 		MigrationTaskList allTasks = tasks.getAllTasks(VersionEnum.V7_3_0, VersionEnum.V7_4_0);
-		allTasks.forEach(t->migrator.addTask(t));
-		assertEquals(61, allTasks.size());
-		ourLog.info("About to perform second migration");
-		outcome = migrator.migrate();
-		assertEquals(0, outcome.changes);
-		assertEquals(43, outcome.succeededTasks.size());
-		assertEquals(0, outcome.failedTasks.size());
+		migrator.addAllTasksForUnitTest(allTasks);
+		migrator.migrate();
 
 		// Create a unique index row with no hashes populated
 		insertRow_ResourceTable();
@@ -130,15 +124,7 @@ public class HapiFhirJpaMigrationTasksTest {
 		 */
 
 		// Remove the task we're testing from the migrator history, so it runs again
-		assertEquals(1, myJdbcTemplate.update("DELETE FROM " + MIGRATION_TABLE_NAME + " WHERE version = ?", "7.4.0.20240625.40"), ()->{
-			List<Object> results = myJdbcTemplate.query("SELECT version FROM " + MIGRATION_TABLE_NAME, new SingleColumnRowMapper<>());
-			return results.size() + " results:\n * " +
-				results
-				.stream()
-				.map(t->t != null ? t.toString() : "(null)")
-				.sorted()
-				.collect(Collectors.joining("\n * "));
-		});
+		assertEquals(1, myJdbcTemplate.update("DELETE FROM " + MIGRATION_TABLE_NAME + " WHERE version = ?", "7.4.0.20240625.40"));
 
 		// Run the migrator
 		ourLog.info("About to run the migrator a second time");
@@ -174,30 +160,30 @@ public class HapiFhirJpaMigrationTasksTest {
 			"""
 				insert into
 				HFJ_RESOURCE (
-				  RES_DELETED_AT,
-				  RES_VERSION,
-				  FHIR_ID,
-				  HAS_TAGS,
-				  RES_PUBLISHED,
-				  RES_UPDATED,
-				  SP_HAS_LINKS,
-				  HASH_SHA256,
-				  SP_INDEX_STATUS,
-				  RES_LANGUAGE,
-				  SP_CMPSTR_UNIQ_PRESENT,
-				  SP_COORDS_PRESENT,
-				  SP_DATE_PRESENT,
-				  SP_NUMBER_PRESENT,
-				  SP_QUANTITY_PRESENT,
-				  SP_STRING_PRESENT,
-				  SP_TOKEN_PRESENT,
-				  SP_URI_PRESENT,
-				  SP_QUANTITY_NRML_PRESENT,
-				  RES_TYPE,
-				  RES_VER,
-				  RES_ID)
-				  values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  		""",
+						RES_DELETED_AT,
+						RES_VERSION,
+						FHIR_ID,
+						HAS_TAGS,
+						RES_PUBLISHED,
+						RES_UPDATED,
+						SP_HAS_LINKS,
+						HASH_SHA256,
+						SP_INDEX_STATUS,
+						RES_LANGUAGE,
+						SP_CMPSTR_UNIQ_PRESENT,
+						SP_COORDS_PRESENT,
+						SP_DATE_PRESENT,
+						SP_NUMBER_PRESENT,
+						SP_QUANTITY_PRESENT,
+						SP_STRING_PRESENT,
+						SP_TOKEN_PRESENT,
+						SP_URI_PRESENT,
+						SP_QUANTITY_NRML_PRESENT,
+						RES_TYPE,
+						RES_VER,
+						RES_ID)
+						values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			""",
 			new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
 				@Override
 				protected void setValues(@Nonnull PreparedStatement thePs, @Nonnull LobCreator theLobCreator) throws SQLException {

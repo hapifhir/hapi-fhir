@@ -57,7 +57,6 @@ public class ReadTermConceptVersionsStep
 			IdAndPartitionId next = versionPids.next();
 			CodeSystemVersionPIDResult versionPidResult = new CodeSystemVersionPIDResult();
 			versionPidResult.setCodeSystemVersionPID(next.getId());
-			versionPidResult.setPartitionId(next.getPartitionIdValue());
 			theDataSink.accept(versionPidResult);
 		}
 

@@ -45,8 +45,10 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	private String myGoldenId;
 	private String mySourceId;
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		Patient sourcePatient = new Patient();
 		mySourceId = SOURCE_ID + "1";
 		sourcePatient.setId(mySourceId);

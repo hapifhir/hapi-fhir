@@ -603,14 +603,14 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			ResourceHistoryTable readBackHistory = myEntityManager
 				.createQuery("select h from ResourceHistoryTable h where h.myResourcePid = :resId and h.myResourceVersion = 1", ResourceHistoryTable.class)
-				.setParameter("resId", JpaPidFk.fromPid((JpaPid) myMethodOutcome.getPersistentId()))
+				.setParameter("resId", ((JpaPid) myMethodOutcome.getPersistentId()).toFk())
 				.getSingleResult();
 			assertThat(readBackHistory).as("found history").isNotNull();
 
 			// no extra history
 			long historyCount = myEntityManager
 				.createQuery("select count(h) from ResourceHistoryTable h where h.myResourcePid = :resId", Long.class)
-				.setParameter("resId", JpaPidFk.fromPid((JpaPid) myMethodOutcome.getPersistentId()))
+				.setParameter("resId", ((JpaPid) myMethodOutcome.getPersistentId()).toFk())
 				.getSingleResult();
 			assertThat(historyCount).as("only create one history version").isEqualTo(1);
 

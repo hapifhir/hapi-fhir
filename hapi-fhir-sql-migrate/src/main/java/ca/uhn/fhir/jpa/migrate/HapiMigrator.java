@@ -247,6 +247,13 @@ public class HapiMigrator {
 		}
 	}
 
+	/**
+	 * Unlike {@link #addTasks(Iterable)}, this method always adds all tasks
+	 */
+	public void addAllTasksForUnitTest(Iterable<BaseTask> theMigrationTasks) {
+		myTaskList.append(theMigrationTasks);
+	}
+
 	public void addTask(BaseTask theTask) {
 		// Don't add a check for unit test mode here - We call this from
 		// tests which expect tasks to always be added

@@ -123,7 +123,7 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	 * collisions is bad, since it would be plain impossible to insert a row
 	 * with a false collision here. So in order to reduce that risk, we
 	 * double the number of bits we hash by having two hashes, effectively
-	 * making the hash a 128 bit hash instead of just 64.
+	 * making the hash a 128-bit hash instead of just 64.
 	 * <p>
 	 * The idea is that having two of them widens the hash from 64 bits to 128
 	 * bits

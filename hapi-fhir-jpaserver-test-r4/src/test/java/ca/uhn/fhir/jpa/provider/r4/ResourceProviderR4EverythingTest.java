@@ -202,6 +202,8 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testEverythingInstanceWithContentFilter() {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("Everything").addGiven("Arthur");
 		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
@@ -979,6 +981,8 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testFulltextEverythingWithIdAndContent() throws IOException {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Patient p = new Patient();
 		p.setId("FOO");
 		p.addName().setFamily("FAMILY");

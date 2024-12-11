@@ -25,6 +25,10 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * This class is used to store the PID for a given table, and if we're running in
+ * database partition mode, it also stores the partition ID.
+ */
 public class IdAndPartitionId implements Serializable {
 	private Long myId;
 	private Integer myPartitionIdValue;

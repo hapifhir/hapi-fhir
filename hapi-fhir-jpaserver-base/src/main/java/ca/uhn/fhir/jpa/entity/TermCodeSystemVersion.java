@@ -78,11 +78,7 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 	@SequenceGenerator(name = "SEQ_CODESYSTEMVER_PID", sequenceName = "SEQ_CODESYSTEMVER_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CODESYSTEMVER_PID")
 	@Column(name = "PID")
-	//	@EmbeddedId
 	private Long myId;
-
-	//	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
-	//	private Integer myPartitionIdValue;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(
@@ -194,7 +190,6 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		myResource = theResource;
 		myResourcePid = theResource.getId().getId();
 		setPartitionId(theResource.getPartitionId());
-		//		myPartitionIdValue = theResource.getPartitionId().getPartitionId();
 		return this;
 	}
 
@@ -263,31 +258,4 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		myCodeSystemPid = theCodeSystemPid;
 		return this;
 	}
-
-	//	@Embeddable
-	//	public static class TermCodeSystemVersionPk implements Serializable {
-	//
-	//		@SequenceGenerator(name = "SEQ_CODESYSTEMVER_PID", sequenceName = "SEQ_CODESYSTEMVER_PID")
-	//		@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CODESYSTEMVER_PID")
-	//		@Column(name = "PID", nullable = false)
-	//		private Long myId;
-	//
-	//		@ConditionalIdProperty
-	//		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
-	//		private Integer myPartitionIdValue;
-	//
-	//		@Override
-	//		public boolean equals(Object theO) {
-	//			if (this == theO) return true;
-	//			if (!(theO instanceof TermCodeSystemVersionPk)) return false;
-	//			TermCodeSystemVersionPk that = (TermCodeSystemVersionPk) theO;
-	//			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
-	//		}
-	//
-	//		@Override
-	//		public int hashCode() {
-	//			return Objects.hash(myId, myPartitionIdValue);
-	//		}
-	//	}
-
 }

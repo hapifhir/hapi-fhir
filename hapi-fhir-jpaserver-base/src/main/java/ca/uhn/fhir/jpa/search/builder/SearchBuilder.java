@@ -1239,7 +1239,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				resourceId.setVersion(version);
 				if (version != null && !version.equals(next.getVersion())) {
 					ResourceHistoryTable replacement = myResourceHistoryTableDao.findForIdAndVersion(
-							JpaPidFk.fromPid(next.getResourceId()), version);
+							next.getResourceId().toFk(), version);
 					resourceSearchViewList.set(i, replacement);
 				}
 			}

@@ -215,7 +215,13 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 					prefetchByField("date", "myParamsDate", ResourceTable::isParamsDatePopulated, entityChunk);
 					prefetchByField(
 							"quantity", "myParamsQuantity", ResourceTable::isParamsQuantityPopulated, entityChunk);
-					prefetchByField("resourceLinks", "myResourceLinks", ResourceTable::isHasLinks, entityChunk);
+
+					prefetchByJoinClause(
+							"resourceLinks",
+							// fetch the ResourceLink but also the target resource for that link
+							"LEFT JOIN FETCH r.myResourceLinks l LEFT JOIN FETCH l.myTargetResource",
+							ResourceTable::isHasLinks,
+							entityChunk);
 
 					prefetchByJoinClause(
 							"tags",
