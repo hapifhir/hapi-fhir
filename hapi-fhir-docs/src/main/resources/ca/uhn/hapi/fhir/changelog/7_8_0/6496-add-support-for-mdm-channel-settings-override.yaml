@@ -1,0 +1,4 @@
+---
+type: add
+issue: 6496
+title: "Added support for overriding message broker channel settings for MDM message processing."
