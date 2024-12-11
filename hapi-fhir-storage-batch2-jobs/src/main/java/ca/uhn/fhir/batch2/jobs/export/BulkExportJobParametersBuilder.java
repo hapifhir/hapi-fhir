@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * This is a Builder class which helps with building
+ * BulkExportJobParameters object
+ */
 public class BulkExportJobParametersBuilder {
 	public static final String FARM_TO_TABLE_TYPE_FILTER_REGEX = "(?:,)(?=[A-Z][a-z]+\\?)";
 

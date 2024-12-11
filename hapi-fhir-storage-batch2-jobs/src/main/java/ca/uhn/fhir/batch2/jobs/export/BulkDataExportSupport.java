@@ -40,10 +40,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * This class is responsible for validating if a target exists
+ * and if the requested export resource types contain search references to Patient.
+ * In addition to that it also sets resource types in BulkExportJobParameters,
+ * which are part of Patient compartment, when export resource types are not provided.
+ */
 public class BulkDataExportSupport {
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperService;
+	private Set<String> myCompartmentResources;
 
 	public BulkDataExportSupport(
 			@Nonnull FhirContext theFhirContext,
@@ -114,8 +121,6 @@ public class BulkDataExportSupport {
 	public Set<String> getPatientCompartmentResources() {
 		return getPatientCompartmentResources(myFhirContext);
 	}
-
-	private Set<String> myCompartmentResources;
 
 	Set<String> getPatientCompartmentResources(FhirContext theFhirContext) {
 		if (myCompartmentResources == null) {
