@@ -6,13 +6,17 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
-import ca.uhn.fhir.jpa.util.DatabaseSupportUtil;
+import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -21,16 +25,17 @@ import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatemen
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 
-import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,17 +45,16 @@ public class HapiFhirJpaMigrationTasksTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirJpaMigrationTasksTest.class);
 	private static final String MIGRATION_TABLE_NAME = "HFJ_FLY_MIGRATOR";
-	private final DriverTypeEnum.ConnectionProperties myConnection;
-	private final JdbcTemplate myJdbcTemplate;
-	private final DataSource myDataSource;
+	private final BasicDataSource myDataSource = newDataSource();
+	private final JdbcTemplate myJdbcTemplate = new JdbcTemplate(myDataSource);
+	private final DriverTypeEnum.ConnectionProperties myConnection = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myDataSource);
 
-	/**
-	 * Constructor
-	 */
-	public HapiFhirJpaMigrationTasksTest() {
-		myConnection = DatabaseSupportUtil.newConnection();
-		myDataSource = myConnection.getDataSource();
-		myJdbcTemplate = new JdbcTemplate(myDataSource);
+	@RegisterExtension
+	private LoggingExtension myLoggingExtension = new LoggingExtension();
+
+	@BeforeAll
+	public static void beforeEach() {
+		HapiSystemProperties.enableUnitTestMode();
 	}
 
 	@Test
@@ -63,7 +67,7 @@ public class HapiFhirJpaMigrationTasksTest {
 
 		MigrationResult outcome = migrator.migrate();
 		assertEquals(0, outcome.changes);
-		assertEquals(3, outcome.succeededTasks.size());
+		assertEquals(1, outcome.succeededTasks.size());
 		assertEquals(0, outcome.failedTasks.size());
 
 		Set<String> columns = JdbcUtils.getPrimaryKeyColumns(myConnection, "HFJ_RESOURCE");
@@ -80,7 +84,7 @@ public class HapiFhirJpaMigrationTasksTest {
 
 		MigrationResult outcome = migrator.migrate();
 		assertEquals(0, outcome.changes);
-		assertEquals(3, outcome.succeededTasks.size());
+		assertEquals(1, outcome.succeededTasks.size());
 		assertEquals(0, outcome.failedTasks.size());
 
 		Set<String> columns = JdbcUtils.getPrimaryKeyColumns(myConnection, "HFJ_RESOURCE");
@@ -212,6 +216,18 @@ public class HapiFhirJpaMigrationTasksTest {
 					thePs.setLong(i, 1L); // RES_ID
 				}
 			});
+	}
+
+	static BasicDataSource newDataSource() {
+		BasicDataSource retVal = new BasicDataSource();
+		retVal.setDriver(new org.h2.Driver());
+		retVal.setUrl("jdbc:h2:mem:test_migration-" + UUID.randomUUID() + ";CASE_INSENSITIVE_IDENTIFIERS=TRUE;");
+		retVal.setMaxWait(Duration.ofMillis(30000));
+		retVal.setUsername("");
+		retVal.setPassword("");
+		retVal.setMaxTotal(5);
+
+		return retVal;
 	}
 
 }
