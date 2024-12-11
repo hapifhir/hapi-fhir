@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
@@ -92,12 +91,12 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	}
 
 	public ReplaceReferencesSvcImpl(
-		FhirContext theFhirContext,
-		DaoRegistry theDaoRegistry,
-		HapiTransactionService theHapiTransactionService,
-		IdHelperService theIdHelperService,
-		IResourceLinkDao theResourceLinkDao,
-		IJobCoordinator theJobCoordinator) {
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			IdHelperService theIdHelperService,
+			IResourceLinkDao theResourceLinkDao,
+			IJobCoordinator theJobCoordinator) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
@@ -145,8 +144,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());
 		task.getMeta().setVersionId(null);
 		retval.addParameter()
-			.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
-			.setResource(task);
+				.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
+				.setResource(task);
 		return retval;
 	}
 

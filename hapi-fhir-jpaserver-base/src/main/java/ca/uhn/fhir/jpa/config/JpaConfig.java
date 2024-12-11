@@ -933,13 +933,18 @@ public class JpaConfig {
 
 	@Bean
 	public IReplaceReferencesSvc replaceReferencesSvc(
-		FhirContext theFhirContext,
-		DaoRegistry theDaoRegistry,
-		HapiTransactionService theHapiTransactionService,
-		IdHelperService theIdHelperService,
-		IResourceLinkDao theResourceLinkDao,
-		IJobCoordinator theJobCoordinator) {
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			IdHelperService theIdHelperService,
+			IResourceLinkDao theResourceLinkDao,
+			IJobCoordinator theJobCoordinator) {
 		return new ReplaceReferencesSvcImpl(
-				theFhirContext, theDaoRegistry, theHapiTransactionService, theIdHelperService, theResourceLinkDao, theJobCoordinator);
+				theFhirContext,
+				theDaoRegistry,
+				theHapiTransactionService,
+				theIdHelperService,
+				theResourceLinkDao,
+				theJobCoordinator);
 	}
 }
