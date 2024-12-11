@@ -30,15 +30,12 @@ import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
@@ -51,7 +48,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceIdPredicateBuilder.class);
 
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
@@ -65,7 +61,6 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 	@Nullable
 	public Condition createPredicateResourceId(
-			RequestDetails theRequestDetails,
 			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			List<List<IQueryParameterType>> theValues,
