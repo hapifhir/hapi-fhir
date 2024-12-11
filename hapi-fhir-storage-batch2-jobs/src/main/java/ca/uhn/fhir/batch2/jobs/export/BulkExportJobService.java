@@ -32,7 +32,7 @@ import java.util.List;
  * This class is responsible for initiating a bulk export job
  * with appropriate _type parameter & partitionId as well as
  * generating response for request which includes the polling location.
- * It also calls hooks which can update BulkExportJobParameters.
+ * It also calls hooks which can update BulkExportJobParameters and the incoming requests.
  */
 public class BulkExportJobService {
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -54,22 +54,15 @@ public class BulkExportJobService {
 		myStorageSettings = theStorageSettings;
 	}
 
+	/**
+	 * Start BulkExport job with appropriate parameters
+	 */
 	public void startJob(
 			@Nonnull ServletRequestDetails theRequestDetails,
 			@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
 		// parameter massaging
 		expandParameters(theRequestDetails, theBulkExportJobParameters);
-
-		// permission check
-		IInterceptorBroadcaster compositeBroadcaster =
-				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
-		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_INITIATE_BULK_EXPORT)) {
-			HookParams initiateBulkExportHookParams = (new HookParams())
-					.add(BulkExportJobParameters.class, theBulkExportJobParameters)
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			compositeBroadcaster.callHooks(Pointcut.STORAGE_INITIATE_BULK_EXPORT, initiateBulkExportHookParams);
-		}
+		callBulkExportHooks(theRequestDetails, theBulkExportJobParameters);
 
 		// get cache boolean
 		boolean useCache = shouldUseCache(theRequestDetails);
@@ -108,25 +101,48 @@ public class BulkExportJobService {
 						theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 		theBulkExportJobParameters.setPartitionId(partitionId);
-
-		// call hook so any other parameter manipulation can be done
-		IInterceptorBroadcaster compositeBroadcaster =
-				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
-		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT)) {
-			HookParams preInitiateBulkExportHookParams = new HookParams();
-			preInitiateBulkExportHookParams.add(BulkExportJobParameters.class, theBulkExportJobParameters);
-			preInitiateBulkExportHookParams.add(RequestDetails.class, theRequestDetails);
-			preInitiateBulkExportHookParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT, preInitiateBulkExportHookParams);
-		}
 	}
 
+	/**
+	 * This method calls STORAGE_PRE_INITIATE_BULK_EXPORT & STORAGE_INITIATE_BULK_EXPORT,
+	 * if present, which allows modification to the request and the bulk export job parameters
+	 */
+	private void callBulkExportHooks(@Nonnull ServletRequestDetails theRequestDetails,@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
+		IInterceptorBroadcaster compositeBroadcaster =
+			CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT)) {
+			HookParams preInitiateBulkExportHookParams = new HookParams()
+				.add(BulkExportJobParameters.class, theBulkExportJobParameters)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT, preInitiateBulkExportHookParams);
+		}
+
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_INITIATE_BULK_EXPORT)) {
+			HookParams initiateBulkExportHookParams = (new HookParams())
+				.add(BulkExportJobParameters.class, theBulkExportJobParameters)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_INITIATE_BULK_EXPORT, initiateBulkExportHookParams);
+		}
+
+	}
+
+
+	/**
+	 * This method checks if the request has the cache-control header
+	 * set to no-cache
+	 */
 	private boolean shouldUseCache(@Nonnull ServletRequestDetails theRequestDetails) {
 		CacheControlDirective cacheControlDirective =
 				new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
 		return myStorageSettings.getEnableBulkExportJobReuse() && !cacheControlDirective.isNoCache();
 	}
 
+	/**
+	 * This method generates response for the bulk export request
+	 * which contains the polling location
+	 */
 	private void writePollingLocationToResponseHeaders(
 			@Nonnull ServletRequestDetails theRequestDetails, @Nonnull String theInstanceId) {
 		String serverBase = BulkDataExportUtil.getServerBase(theRequestDetails);
