@@ -17,7 +17,10 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MergeJobParameters, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails, @Nonnull IJobDataSink<ReplaceReferenceResultsJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<MergeJobParameters, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<ReplaceReferenceResultsJson> theDataSink)
+			throws JobExecutionFailedException {
 		// FIXME ED add in extra merge steps here e.g. updating source and target resources
 		return super.run(theStepExecutionDetails, theDataSink);
 	}
