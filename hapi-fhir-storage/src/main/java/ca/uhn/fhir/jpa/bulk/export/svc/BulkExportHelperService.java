@@ -45,6 +45,8 @@ public class BulkExportHelperService {
 	@Autowired
 	private FhirContext myContext;
 
+	public BulkExportHelperService() {}
+
 	/**
 	 * Given the parameters, create the search parameter map based on type filters and the _since parameter.
 	 *

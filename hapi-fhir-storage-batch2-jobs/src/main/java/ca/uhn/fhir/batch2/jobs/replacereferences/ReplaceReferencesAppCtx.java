@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -50,8 +51,8 @@ public class ReplaceReferencesAppCtx {
 
 	@Bean
 	public ReplaceReferenceUpdateStep replaceReferenceUpdateStep(
-			FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
-		return new ReplaceReferenceUpdateStep(theFhirContext, theDaoRegistry);
+			FhirContext theFhirContext, ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc) {
+		return new ReplaceReferenceUpdateStep(theFhirContext, theReplaceReferencesPatchBundleSvc);
 	}
 
 	@Bean

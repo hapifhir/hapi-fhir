@@ -145,7 +145,6 @@ public class BulkExportAppCtx {
 	}
 
 	@Bean
-	@Scope("prototype")
 	public BulkExportCreateReportStep createReportStep() {
 		return new BulkExportCreateReportStep();
 	}

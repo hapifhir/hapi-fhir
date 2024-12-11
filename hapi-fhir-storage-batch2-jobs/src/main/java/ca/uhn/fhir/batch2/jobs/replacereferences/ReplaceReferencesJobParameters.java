@@ -2,7 +2,7 @@ package ca.uhn.fhir.batch2.jobs.replacereferences;
 
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.provider.ReplaceReferenceRequest;
+import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
 import ca.uhn.fhir.model.api.BaseBatchJobParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -79,5 +79,9 @@ public class ReplaceReferencesJobParameters extends BaseBatchJobParameters {
 
 	public FhirIdJson getTaskId() {
 		return myTaskId;
+	}
+
+	public ReplaceReferenceRequest asReplaceReferencesRequest() {
+		return new ReplaceReferenceRequest(mySourceId.asIdDt(), myTargetId.asIdDt(), myBatchSize, myPartitionId);
 	}
 }

@@ -177,6 +177,7 @@ import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -213,8 +214,8 @@ import java.util.Date;
 @Configuration
 // repositoryFactoryBeanClass: EnversRevisionRepositoryFactoryBean is needed primarily for unit testing
 @EnableJpaRepositories(
-		basePackages = "ca.uhn.fhir.jpa.dao.data",
-		repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
+	basePackages = "ca.uhn.fhir.jpa.dao.data",
+	repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @Import({
 	BeanPostProcessorConfig.class,
 	TermCodeSystemConfig.class,
@@ -235,7 +236,7 @@ public class JpaConfig {
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER = "PersistedJpaBundleProvider";
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH = "PersistedJpaBundleProvider_BySearch";
 	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER =
-			"PersistedJpaSearchFirstPageBundleProvider";
+		"PersistedJpaSearchFirstPageBundleProvider";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
 	public static final String DEFAULT_PROFILE_VALIDATION_SUPPORT = "myDefaultProfileValidationSupport";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
@@ -265,12 +266,12 @@ public class JpaConfig {
 	@Lazy
 	@Bean
 	public CascadingDeleteInterceptor cascadingDeleteInterceptor(
-			FhirContext theFhirContext,
-			DaoRegistry theDaoRegistry,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc) {
+		FhirContext theFhirContext,
+		DaoRegistry theDaoRegistry,
+		IInterceptorBroadcaster theInterceptorBroadcaster,
+		ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc) {
 		return new CascadingDeleteInterceptor(
-				theFhirContext, theDaoRegistry, theInterceptorBroadcaster, threadSafeResourceDeleterSvc);
+			theFhirContext, theDaoRegistry, theInterceptorBroadcaster, threadSafeResourceDeleterSvc);
 	}
 
 	@Bean
@@ -281,24 +282,24 @@ public class JpaConfig {
 	@Lazy
 	@Bean
 	public ThreadSafeResourceDeleterSvc safeDeleter(
-			DaoRegistry theDaoRegistry,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			HapiTransactionService hapiTransactionService) {
+		DaoRegistry theDaoRegistry,
+		IInterceptorBroadcaster theInterceptorBroadcaster,
+		HapiTransactionService hapiTransactionService) {
 		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService);
 	}
 
 	@Lazy
 	@Bean
 	public ResponseTerminologyTranslationInterceptor responseTerminologyTranslationInterceptor(
-			IValidationSupport theValidationSupport,
-			ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
+		IValidationSupport theValidationSupport,
+		ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
 		return new ResponseTerminologyTranslationInterceptor(
-				theValidationSupport, theResponseTerminologyTranslationSvc);
+			theValidationSupport, theResponseTerminologyTranslationSvc);
 	}
 
 	@Bean
 	public ResponseTerminologyTranslationSvc responseTerminologyTranslationSvc(
-			IValidationSupport theValidationSupport) {
+		IValidationSupport theValidationSupport) {
 		return new ResponseTerminologyTranslationSvc(theValidationSupport);
 	}
 
@@ -350,9 +351,9 @@ public class JpaConfig {
 	@Bean(name = "myBinaryStorageInterceptor")
 	@Lazy
 	public BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> binaryStorageInterceptor(
-			JpaStorageSettings theStorageSettings, FhirContext theCtx) {
+		JpaStorageSettings theStorageSettings, FhirContext theCtx) {
 		BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> interceptor =
-				new BinaryStorageInterceptor<>(theCtx);
+			new BinaryStorageInterceptor<>(theCtx);
 		interceptor.setAllowAutoInflateBinaries(theStorageSettings.isAllowAutoInflateBinaries());
 		interceptor.setAutoInflateBinariesMaximumSize(theStorageSettings.getAutoInflateBinariesMaximumBytes());
 		return interceptor;
@@ -402,16 +403,16 @@ public class JpaConfig {
 	@Bean
 	public TaskScheduler taskScheduler() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler(
-				scheduledExecutorService().getObject(),
-				scheduledExecutorService().getObject());
+			scheduledExecutorService().getObject(),
+			scheduledExecutorService().getObject());
 		return retVal;
 	}
 
 	@Bean(name = TASK_EXECUTOR_NAME)
 	public AsyncTaskExecutor taskExecutor() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler(
-				scheduledExecutorService().getObject(),
-				scheduledExecutorService().getObject());
+			scheduledExecutorService().getObject(),
+			scheduledExecutorService().getObject());
 		return retVal;
 	}
 
@@ -445,7 +446,7 @@ public class JpaConfig {
 	@Bean
 	@Lazy
 	public OverridePathBasedReferentialIntegrityForDeletesInterceptor
-			overridePathBasedReferentialIntegrityForDeletesInterceptor() {
+	overridePathBasedReferentialIntegrityForDeletesInterceptor() {
 		return new OverridePathBasedReferentialIntegrityForDeletesInterceptor();
 	}
 
@@ -522,13 +523,13 @@ public class JpaConfig {
 
 	@Bean
 	public IBulkDataExportJobSchedulingHelper bulkDataExportJobSchedulingHelper(
-			DaoRegistry theDaoRegistry,
-			PlatformTransactionManager theTxManager,
-			JpaStorageSettings theStorageSettings,
-			BulkExportHelperService theBulkExportHelperSvc,
-			IJobPersistence theJpaJobPersistence) {
+		DaoRegistry theDaoRegistry,
+		PlatformTransactionManager theTxManager,
+		JpaStorageSettings theStorageSettings,
+		BulkExportHelperService theBulkExportHelperSvc,
+		IJobPersistence theJpaJobPersistence) {
 		return new BulkDataExportJobSchedulingHelperImpl(
-				theDaoRegistry, theTxManager, theStorageSettings, theBulkExportHelperSvc, theJpaJobPersistence, null);
+			theDaoRegistry, theTxManager, theStorageSettings, theBulkExportHelperSvc, theJpaJobPersistence, null);
 	}
 
 	@Bean
@@ -592,19 +593,19 @@ public class JpaConfig {
 	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH)
 	@Scope("prototype")
 	public PersistedJpaBundleProvider newPersistedJpaBundleProviderBySearch(
-			RequestDetails theRequest, Search theSearch) {
+		RequestDetails theRequest, Search theSearch) {
 		return new PersistedJpaBundleProvider(theRequest, theSearch);
 	}
 
 	@Bean(name = PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER)
 	@Scope("prototype")
 	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(
-			RequestDetails theRequest,
-			SearchTask theSearchTask,
-			ISearchBuilder theSearchBuilder,
-			RequestPartitionId theRequestPartitionId) {
+		RequestDetails theRequest,
+		SearchTask theSearchTask,
+		ISearchBuilder theSearchBuilder,
+		RequestPartitionId theRequestPartitionId) {
 		return new PersistedJpaSearchFirstPageBundleProvider(
-				theSearchTask, theSearchBuilder, theRequest, theRequestPartitionId);
+			theSearchTask, theSearchBuilder, theRequest, theRequestPartitionId);
 	}
 
 	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
@@ -616,14 +617,14 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public ComboUniqueSearchParameterPredicateBuilder newComboUniqueSearchParameterPredicateBuilder(
-			SearchQueryBuilder theSearchSqlBuilder) {
+		SearchQueryBuilder theSearchSqlBuilder) {
 		return new ComboUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ComboNonUniqueSearchParameterPredicateBuilder newComboNonUniqueSearchParameterPredicateBuilder(
-			SearchQueryBuilder theSearchSqlBuilder) {
+		SearchQueryBuilder theSearchSqlBuilder) {
 		return new ComboNonUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
 	}
 
@@ -654,14 +655,14 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public QuantityNormalizedPredicateBuilder newQuantityNormalizedPredicateBuilder(
-			SearchQueryBuilder theSearchBuilder) {
+		SearchQueryBuilder theSearchBuilder) {
 		return new QuantityNormalizedPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ResourceLinkPredicateBuilder newResourceLinkPredicateBuilder(
-			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {
+		QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {
 		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, theReversed);
 	}
 
@@ -686,7 +687,7 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public SearchParamPresentPredicateBuilder newSearchParamPresentPredicateBuilder(
-			SearchQueryBuilder theSearchBuilder) {
+		SearchQueryBuilder theSearchBuilder) {
 		return new SearchParamPresentPredicateBuilder(theSearchBuilder);
 	}
 
@@ -711,7 +712,7 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public ResourceHistoryProvenancePredicateBuilder newResourceHistoryProvenancePredicateBuilder(
-			SearchQueryBuilder theSearchBuilder) {
+		SearchQueryBuilder theSearchBuilder) {
 		return new ResourceHistoryProvenancePredicateBuilder(theSearchBuilder);
 	}
 
@@ -730,10 +731,10 @@ public class JpaConfig {
 	@Bean(name = HISTORY_BUILDER)
 	@Scope("prototype")
 	public HistoryBuilder newHistoryBuilder(
-			@Nullable String theResourceType,
-			@Nullable JpaPid theResourceId,
-			@Nullable Date theRangeStartInclusive,
-			@Nullable Date theRangeEndInclusive) {
+		@Nullable String theResourceType,
+		@Nullable JpaPid theResourceId,
+		@Nullable Date theRangeStartInclusive,
+		@Nullable Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
@@ -771,10 +772,10 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public ExpungeOperation expungeOperation(
-			String theResourceName,
-			IResourcePersistentId theResourceId,
-			ExpungeOptions theExpungeOptions,
-			RequestDetails theRequestDetails) {
+		String theResourceName,
+		IResourcePersistentId theResourceId,
+		ExpungeOptions theExpungeOptions,
+		RequestDetails theRequestDetails) {
 		return new ExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
 	}
 
@@ -830,7 +831,7 @@ public class JpaConfig {
 
 	@Bean
 	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport(
-			FhirContext theFhirContext) {
+		FhirContext theFhirContext) {
 		return new UnknownCodeSystemWarningValidationSupport(theFhirContext);
 	}
 
@@ -846,9 +847,9 @@ public class JpaConfig {
 
 	@Bean
 	public SearchParameterDaoValidator searchParameterDaoValidator(
-			FhirContext theFhirContext,
-			JpaStorageSettings theStorageSettings,
-			ISearchParamRegistry theSearchParamRegistry) {
+		FhirContext theFhirContext,
+		JpaStorageSettings theStorageSettings,
+		ISearchParamRegistry theSearchParamRegistry) {
 		return new SearchParameterDaoValidator(theFhirContext, theStorageSettings, theSearchParamRegistry);
 	}
 
@@ -886,17 +887,17 @@ public class JpaConfig {
 
 	@Bean
 	public ResourceSearchUrlSvc resourceSearchUrlSvc(
-			PersistenceContextProvider thePersistenceContextProvider,
-			IResourceSearchUrlDao theResourceSearchUrlDao,
-			MatchUrlService theMatchUrlService,
-			FhirContext theFhirContext,
-			PartitionSettings thePartitionSettings) {
+		PersistenceContextProvider thePersistenceContextProvider,
+		IResourceSearchUrlDao theResourceSearchUrlDao,
+		MatchUrlService theMatchUrlService,
+		FhirContext theFhirContext,
+		PartitionSettings thePartitionSettings) {
 		return new ResourceSearchUrlSvc(
-				thePersistenceContextProvider.getEntityManager(),
-				theResourceSearchUrlDao,
-				theMatchUrlService,
-				theFhirContext,
-				thePartitionSettings);
+			thePersistenceContextProvider.getEntityManager(),
+			theResourceSearchUrlDao,
+			theMatchUrlService,
+			theFhirContext,
+			thePartitionSettings);
 	}
 
 	@Bean
@@ -906,12 +907,12 @@ public class JpaConfig {
 
 	@Bean
 	public IResourceModifiedMessagePersistenceSvc subscriptionMessagePersistence(
-			FhirContext theFhirContext,
-			IResourceModifiedDao theIResourceModifiedDao,
-			DaoRegistry theDaoRegistry,
-			HapiTransactionService theHapiTransactionService) {
+		FhirContext theFhirContext,
+		IResourceModifiedDao theIResourceModifiedDao,
+		DaoRegistry theDaoRegistry,
+		HapiTransactionService theHapiTransactionService) {
 		return new ResourceModifiedMessagePersistenceSvcImpl(
-				theFhirContext, theIResourceModifiedDao, theDaoRegistry, theHapiTransactionService);
+			theFhirContext, theIResourceModifiedDao, theDaoRegistry, theHapiTransactionService);
 	}
 
 	@Bean
@@ -921,30 +922,33 @@ public class JpaConfig {
 
 	@Bean
 	public ResourceHistoryCalculator resourceHistoryCalculator(
-			FhirContext theFhirContext, HibernatePropertiesProvider theHibernatePropertiesProvider) {
+		FhirContext theFhirContext, HibernatePropertiesProvider theHibernatePropertiesProvider) {
 		return new ResourceHistoryCalculator(theFhirContext, theHibernatePropertiesProvider.isOracleDialect());
 	}
 
 	@Bean
 	public CacheTagDefinitionDao tagDefinitionDao(
-			ITagDefinitionDao tagDefinitionDao, MemoryCacheService memoryCacheService) {
+		ITagDefinitionDao tagDefinitionDao, MemoryCacheService memoryCacheService) {
 		return new CacheTagDefinitionDao(tagDefinitionDao, memoryCacheService);
 	}
 
 	@Bean
 	public IReplaceReferencesSvc replaceReferencesSvc(
-			FhirContext theFhirContext,
-			DaoRegistry theDaoRegistry,
-			HapiTransactionService theHapiTransactionService,
-			IdHelperService theIdHelperService,
-			IResourceLinkDao theResourceLinkDao,
-			IJobCoordinator theJobCoordinator) {
+		DaoRegistry theDaoRegistry,
+		HapiTransactionService theHapiTransactionService,
+		IResourceLinkDao theResourceLinkDao,
+		IJobCoordinator theJobCoordinator,
+		ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle) {
 		return new ReplaceReferencesSvcImpl(
-				theFhirContext,
-				theDaoRegistry,
-				theHapiTransactionService,
-				theIdHelperService,
-				theResourceLinkDao,
-				theJobCoordinator);
+			theDaoRegistry,
+			theHapiTransactionService,
+			theResourceLinkDao,
+			theJobCoordinator,
+			theReplaceReferencesPatchBundle);
+	}
+
+	@Bean
+	public ReplaceReferencesPatchBundleSvc replaceReferencesPatchBundleSvc(DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesPatchBundleSvc(theDaoRegistry);
 	}
 }
