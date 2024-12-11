@@ -202,10 +202,10 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 			RequestDetails theRequest, IBaseResource theResource, TransactionDetails theTransactionDetails) {
 		if (myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
 			Map<IResourcePersistentId, Set<IResourcePersistentId>> goldenResourceIdsTolinkedSourceIds =
-				theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
+					theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
 			if (goldenResourceIdsTolinkedSourceIds != null) {
 				IResourcePersistentId sourcePid =
-					myIdHelperSvc.getPidOrNull(RequestPartitionId.allPartitions(), theResource);
+						myIdHelperSvc.getPidOrNull(RequestPartitionId.allPartitions(), theResource);
 				if (sourcePid != null) {
 					for (IResourcePersistentId goldenPid : goldenResourceIdsTolinkedSourceIds.keySet()) {
 						if (goldenResourceIdsTolinkedSourceIds.get(goldenPid).contains(sourcePid)) {
