@@ -63,4 +63,8 @@ public class StaticLogbackTestExtension implements BeforeAllCallback, AfterAllCa
 		return myLogbackTestExtension;
 	}
 
+	public static StaticLogbackTestExtension withThreshold(Level theLevel) {
+		return new StaticLogbackTestExtension(theLevel);
+	}
+
 }
