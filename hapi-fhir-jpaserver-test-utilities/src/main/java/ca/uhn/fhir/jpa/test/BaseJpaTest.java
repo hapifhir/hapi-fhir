@@ -419,6 +419,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
 		myStorageSettings.setAccessMetaSourceInformationFromProvenanceTable(defaultConfig.isAccessMetaSourceInformationFromProvenanceTable());
 		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(defaultConfig.isDefaultSearchParamsCanBeOverridden());
 		myStorageSettings.setDeleteEnabled(defaultConfig.isDeleteEnabled());
 		myStorageSettings.setHibernateSearchIndexSearchParams(defaultConfig.isHibernateSearchIndexSearchParams());
 		myStorageSettings.setHibernateSearchIndexFullText(defaultConfig.isHibernateSearchIndexFullText());
@@ -427,6 +428,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultConfig.getMaximumIncludesToLoadPerPage());
 		myStorageSettings.setPreExpandValueSets(defaultConfig.isPreExpandValueSets());
 		myStorageSettings.getTreatBaseUrlsAsLocal().clear();
+
 
 		ParserOptions defaultParserOptions = new ParserOptions();
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(defaultParserOptions.isStripVersionsFromReferences());

@@ -601,7 +601,7 @@ public abstract class BaseStructureParser {
 		}
 
 		if (!actuallyWrite) {
-			ourLog.info("Skipping writing already up-to-date file: {}", theFile.getAbsolutePath());
+			ourLog.debug("Skipping writing already up-to-date file: {}", theFile.getAbsolutePath());
 			return;
 		}
 

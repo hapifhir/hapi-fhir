@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBase;
 
 /**
@@ -78,5 +79,5 @@ public interface IMdmSurvivorshipService {
 	 * @param <T> - Resource type to apply the survivorship rules to
 	 */
 	<T extends IBase> T rebuildGoldenResourceWithSurvivorshipRules(
-			T theGoldenResource, MdmTransactionContext theMdmTransactionContext);
+			RequestDetails theRequestDetails, T theGoldenResource, MdmTransactionContext theMdmTransactionContext);
 }

@@ -39,7 +39,7 @@ import java.util.function.Predicate;
  */
 public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallback {
 	private final Logger myLogger;
-	private final Level myLevel;
+	private Level myLevel;
 	private ListAppender<ILoggingEvent> myListAppender = null;
 	private Level mySavedLevel;
 
@@ -78,6 +78,13 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 	}
 
 	/**
+	 * Sets the root logger to the given level
+	 */
+	public LogbackTestExtension(Level theLevel) {
+		this(org.slf4j.Logger.ROOT_LOGGER_NAME, theLevel);
+	}
+
+	/**
 	 * Returns a copy to avoid concurrent modification errors.
 	 * @return A copy of the log events so far.
 	 */
@@ -95,27 +102,33 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
-		setUp();
-	}
-
-	public void setUp() {
-		setUp(myLevel);
-	}
-
-	public void setUp(Level theLevel) {
+		assert myListAppender == null;
 		myListAppender = new ListAppender<>();
 		myListAppender.start();
 		myLogger.addAppender(myListAppender);
-		if (theLevel != null) {
+
+		if (myLevel != null) {
 			mySavedLevel = myLogger.getLevel();
+			myLogger.setLevel(myLevel);
+		}
+	}
+
+	/**
+	 * Temporarily set the logger level - It will be reset after the current test method is done
+	 */
+	public void setLoggerLevel(Level theLevel) {
+		if (theLevel != null) {
 			myLogger.setLevel(theLevel);
 		}
 	}
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
-		myLogger.detachAppender(myListAppender);
-		myListAppender.stop();
+		if (myListAppender != null) {
+			myLogger.detachAppender(myListAppender);
+			myListAppender.stop();
+			myListAppender = null;
+		}
 		if (myLevel != null) {
 			myLogger.setLevel(mySavedLevel);
 		}
@@ -128,6 +141,18 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 	@Nonnull
 	public List<String> getLogMessages() {
 		return getLogEvents().stream().map(ILoggingEvent::getMessage).toList();
+	}
+
+	public void reRegister() throws Exception {
+		afterEach(null);
+		beforeEach(null);
+	}
+
+	/**
+	 * Predicate for passing to {@link #getLogEvents(Predicate)}
+	 */
+	public static Predicate<ILoggingEvent> atLeastLevel(Level theLevel) {
+		return e -> e.getLevel().isGreaterOrEqual(theLevel);
 	}
 
 }

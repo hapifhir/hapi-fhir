@@ -33,7 +33,6 @@ public class PartitionAwareSupplier {
 	private final HapiTransactionService myTransactionService;
 	private final RequestDetails myRequestDetails;
 
-	@Nonnull
 	public PartitionAwareSupplier(HapiTransactionService theTxService, RequestDetails theRequestDetails) {
 		myTransactionService = theTxService;
 		myRequestDetails = theRequestDetails;
@@ -41,6 +40,9 @@ public class PartitionAwareSupplier {
 
 	@Nonnull
 	public <T> T supplyInPartitionedContext(Supplier<T> theResourcePersistentIdSupplier) {
-		return myTransactionService.withRequest(myRequestDetails).execute(tx -> theResourcePersistentIdSupplier.get());
+		T retVal =
+				myTransactionService.withRequest(myRequestDetails).execute(tx -> theResourcePersistentIdSupplier.get());
+		assert retVal != null;
+		return retVal;
 	}
 }
