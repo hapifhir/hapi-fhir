@@ -14,9 +14,11 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep2InputType;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,11 +72,11 @@ public class Batch2FinalizationConcurrencyIT extends BaseJpaR4Test {
 			.setParametersType(TestJobParameters.class)
 			.addFirstStep(FIRST_STEP_ID, "the first step", TestJobStep2InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
 			.addIntermediateStep(SECOND_STEP_ID, "the second step", TestJobStep3InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
-			.addFinalReducerStep(LAST_STEP_ID, "reduction step", VoidModel.class, new TestReducer());
+			.addFinalReducerStep(LAST_STEP_ID, "reduction step", TestResults.class, new TestReducer());
 		return builder.build();
 	}
 
-	private class TestReducer implements IReductionStepWorker<TestJobParameters, TestJobStep3InputType, VoidModel> {
+	private class TestReducer implements IReductionStepWorker<TestJobParameters, TestJobStep3InputType, TestResults> {
 		AtomicInteger counter = new AtomicInteger();
 
 		@Nonnull
@@ -85,9 +87,28 @@ public class Batch2FinalizationConcurrencyIT extends BaseJpaR4Test {
 
 		@Nonnull
 		@Override
-		public RunOutcome run(@Nonnull StepExecutionDetails<TestJobParameters, TestJobStep3InputType> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
+		public RunOutcome run(@Nonnull StepExecutionDetails<TestJobParameters, TestJobStep3InputType> theStepExecutionDetails, @Nonnull IJobDataSink<TestResults> theDataSink) throws JobExecutionFailedException {
 			counter.incrementAndGet();
+			TestResults results = new TestResults("count: "+ counter.get());
+			theDataSink.accept(results);
 			return RunOutcome.SUCCESS;
 		}
 	}
+
+	private class TestResults implements IModelJson {
+		@JsonProperty("message")
+        private String myMessage;
+
+        public TestResults(String theMessage) {
+            myMessage = theMessage;
+        }
+
+        public String getMessage() {
+            return myMessage;
+        }
+
+        public void setMessage(String theMessage) {
+            myMessage = theMessage;
+        }
+    }
 }
