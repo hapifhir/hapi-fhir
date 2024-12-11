@@ -19,8 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ReplaceReferenceUpdateStep<PT extends ReplaceReferencesJobParameters>
-		implements IJobStepWorker<
-				PT, FhirIdListWorkChunkJson, ReplaceReferencePatchOutcomeJson> {
+		implements IJobStepWorker<PT, FhirIdListWorkChunkJson, ReplaceReferencePatchOutcomeJson> {
 
 	private final FhirContext myFhirContext;
 	private final ReplaceReferencesPatchBundleSvc myReplaceReferencesPatchBundleSvc;
@@ -34,9 +33,7 @@ public class ReplaceReferenceUpdateStep<PT extends ReplaceReferencesJobParameter
 	@Nonnull
 	@Override
 	public RunOutcome run(
-			@Nonnull
-					StepExecutionDetails<PT, FhirIdListWorkChunkJson>
-							theStepExecutionDetails,
+			@Nonnull StepExecutionDetails<PT, FhirIdListWorkChunkJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<ReplaceReferencePatchOutcomeJson> theDataSink)
 			throws JobExecutionFailedException {
 

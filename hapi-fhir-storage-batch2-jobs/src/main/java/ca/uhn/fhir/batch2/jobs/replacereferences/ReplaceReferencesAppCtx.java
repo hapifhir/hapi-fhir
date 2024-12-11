@@ -18,7 +18,8 @@ public class ReplaceReferencesAppCtx {
 	public JobDefinition<ReplaceReferencesJobParameters> replaceReferencesJobDefinition(
 			ReplaceReferencesQueryIdsStep<ReplaceReferencesJobParameters> theReplaceReferencesQueryIds,
 			ReplaceReferenceUpdateStep<ReplaceReferencesJobParameters> theReplaceReferenceUpdateStep,
-			ReplaceReferenceUpdateTaskReducerStep<ReplaceReferencesJobParameters> theReplaceReferenceUpdateTaskReducerStep) {
+			ReplaceReferenceUpdateTaskReducerStep<ReplaceReferencesJobParameters>
+					theReplaceReferenceUpdateTaskReducerStep) {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(JOB_REPLACE_REFERENCES)
 				.setJobDescription("Replace References")
@@ -56,7 +57,8 @@ public class ReplaceReferencesAppCtx {
 	}
 
 	@Bean
-	public ReplaceReferenceUpdateTaskReducerStep<ReplaceReferencesJobParameters> replaceReferenceUpdateTaskStep(DaoRegistry theDaoRegistry) {
+	public ReplaceReferenceUpdateTaskReducerStep<ReplaceReferencesJobParameters> replaceReferenceUpdateTaskStep(
+			DaoRegistry theDaoRegistry) {
 		return new ReplaceReferenceUpdateTaskReducerStep<>(theDaoRegistry);
 	}
 }

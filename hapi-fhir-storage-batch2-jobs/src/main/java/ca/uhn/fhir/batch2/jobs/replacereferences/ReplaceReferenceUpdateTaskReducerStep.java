@@ -20,8 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJobParameters>
-		implements IReductionStepWorker<
-	PT, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson> {
+		implements IReductionStepWorker<PT, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson> {
 	public static final String RESOURCE_TYPES_SYSTEM = "http://hl7.org/fhir/ValueSet/resource-types";
 
 	private final FhirContext myFhirContext;
@@ -36,8 +35,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 
 	@Nonnull
 	@Override
-	public ChunkOutcome consume(
-			ChunkExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theChunkDetails) {
+	public ChunkOutcome consume(ChunkExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theChunkDetails) {
 		ReplaceReferencePatchOutcomeJson result = theChunkDetails.getData();
 		Bundle patchOutputBundle =
 				myFhirContext.newJsonParser().parseResource(Bundle.class, result.getPatchResponseBundle());
@@ -48,9 +46,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 	@Nonnull
 	@Override
 	public RunOutcome run(
-			@Nonnull
-					StepExecutionDetails<PT, ReplaceReferencePatchOutcomeJson>
-							theStepExecutionDetails,
+			@Nonnull StepExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<ReplaceReferenceResultsJson> theDataSink)
 			throws JobExecutionFailedException {
 
