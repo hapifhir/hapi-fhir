@@ -26,7 +26,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -41,6 +40,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -49,7 +49,6 @@ import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -76,6 +75,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -88,7 +88,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.api.dao.IDao.RESOURCE_PID_KEY;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
@@ -235,25 +234,25 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		for (TermConceptParentChildLink nextParent : theConcept.getParents()) {
 			nextParent.getParent().getChildren().remove(nextParent);
-			myConceptParentChildLinkDao.deleteById(nextParent.getId());
+			myConceptParentChildLinkDao.deleteById(nextParent.getPid());
 		}
 		for (TermConceptParentChildLink nextChild : theConcept.getChildren()) {
 			nextChild.getChild().getParents().remove(nextChild);
-			myConceptParentChildLinkDao.deleteById(nextChild.getId());
+			myConceptParentChildLinkDao.deleteById(nextChild.getPid());
 		}
 
 		for (TermConceptDesignation next : theConcept.getDesignations()) {
-			myConceptDesignationDao.deleteById(next.getPid());
+			myConceptDesignationDao.deleteById(next.getPartitionedId());
 		}
 		theConcept.getDesignations().clear();
 		for (TermConceptProperty next : theConcept.getProperties()) {
-			myConceptPropertyDao.deleteById(next.getPid());
+			myConceptPropertyDao.deleteById(next.getPartitionedId());
 		}
 		theConcept.getProperties().clear();
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
 
-		myConceptDao.deleteById(theConcept.getId());
+		myConceptDao.deleteById(theConcept.getPid());
 		//		myEntityManager.remove(theConcept);
 
 		theRemoveCounter.incrementAndGet();
@@ -299,10 +298,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 				detectDuplicatesInCodeSystem(theCodeSystem);
 
-				Long pid = (Long) theCodeSystem.getUserData(RESOURCE_PID_KEY);
-				assert pid != null;
-				JpaPid codeSystemResourcePid = JpaPid.fromId(pid);
-
 				/*
 				 * If this is a not-present codesystem and codesystem version already exists, we don't want to
 				 * overwrite the existing version since that will wipe out the existing concepts. We do create
@@ -315,8 +310,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						TermCodeSystemVersion codeSystemVersion =
 								getExistingTermCodeSystemVersion(termCodeSystem.getPid(), theCodeSystem.getVersion());
 						if (codeSystemVersion != null) {
-							TermCodeSystem myCodeSystemEntity = getOrCreateDistinctTermCodeSystem(
-									codeSystemResourcePid,
+							getOrCreateDistinctTermCodeSystem(
 									theCodeSystem.getUrl(),
 									theCodeSystem.getUrl(),
 									theCodeSystem.getVersion(),
@@ -327,13 +321,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				}
 
 				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
-
 				populateCodeSystemVersionProperties(persCs, theCodeSystem, theResourceEntity);
+				myEntityManager.persist(persCs);
 
 				persCs.getConcepts().addAll(TermReadSvcImpl.toPersistedConcepts(theCodeSystem.getConcept(), persCs));
 				ourLog.debug("Code system has {} concepts", persCs.getConcepts().size());
 				storeNewCodeSystemVersion(
-						codeSystemResourcePid,
 						codeSystemUrl,
 						theCodeSystem.getName(),
 						theCodeSystem.getVersion(),
@@ -388,14 +381,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				csId.getResourceType(),
 				csId.getIdPart(),
 				ResolveIdentityMode.includeDeleted().cacheOk());
-		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getId());
+		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid);
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
 
 		populateCodeSystemVersionProperties(theCodeSystemVersion, theCodeSystemResource, resource);
 
 		storeNewCodeSystemVersion(
-				codeSystemResourcePid,
 				theCodeSystemResource.getUrl(),
 				theCodeSystemResource.getName(),
 				theCodeSystemResource.getVersion(),
@@ -412,7 +404,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Override
 	@Transactional
 	public void storeNewCodeSystemVersion(
-			IResourcePersistentId theCodeSystemResourcePid,
 			String theSystemUri,
 			String theSystemName,
 			String theCodeSystemVersionId,
@@ -422,27 +413,31 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		ourLog.debug("Storing code system");
+		Date updated = new Date();
 
 		TermCodeSystemVersion codeSystemToStore = theCodeSystemVersion;
 		ValidateUtil.isTrueOrThrowInvalidRequest(codeSystemToStore.getResource() != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
 		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(
-				theCodeSystemResourcePid,
-				theSystemUri,
-				theSystemName,
-				theCodeSystemVersionId,
-				theCodeSystemResourceTable);
+				theSystemUri, theSystemName, theCodeSystemVersionId, theCodeSystemResourceTable);
 
 		List<TermCodeSystemVersion> existing =
-				myCodeSystemVersionDao.findByCodeSystemResourcePid(((JpaPid) theCodeSystemResourcePid).getId());
+				myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourceTable.getResourceId());
 		for (TermCodeSystemVersion next : existing) {
 			if (Objects.equals(next.getCodeSystemVersionId(), theCodeSystemVersionId)
 					&& myConceptDao.countByCodeSystemVersion(next.getPid()) == 0) {
 
 				/*
 				 * If we already have a CodeSystemVersion that matches the version we're storing, we
-				 * can reuse it.
+				 * can reuse it. Note that we only reuse if there are no concepts attached to the
+				 * existing codesystem because we always write a completely fresh set of concepts
+				 * and mark the old one for deletion. Theoretically we could optimize this by
+				 * figuring out a delta and only writing that, but that is fairly involved
+				 * since concepts have parents and children and properties and designations and
+				 * all that - so it's safer to just always assume changes and write everything
+				 * fresh. Also, this isn't the kind of thing that's expected to happen often
+				 * so we aren't particularly performance sensitive here.
 				 */
 				next.setCodeSystemDisplayName(theSystemName);
 				codeSystemToStore = next;
@@ -456,7 +451,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				 * multiple CodeSystem resources with CodeSystem.version set differently (as opposed to
 				 * multiple versions of the same CodeSystem, where CodeSystem.meta.versionId is different)
 				 */
-				next.setCodeSystemVersionId("DELETED_" + UUID.randomUUID().toString());
+				next.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
 				myCodeSystemVersionDao.saveAndFlush(next);
 				myDeferredStorageSvc.deleteCodeSystemVersion(next);
 			}
@@ -470,6 +465,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		codeSystemToStore.setCodeSystemDisplayName(theSystemName);
 		codeSystemToStore.setCodeSystemVersionId(theCodeSystemVersionId);
 
+		if (codeSystemToStore.getPid() == null) {
+			myEntityManager.persist(codeSystemToStore);
+		}
+
 		ourLog.debug("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
 		// Validate the code system
@@ -479,12 +478,28 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Collection<TermConcept> conceptsToSave = theCodeSystemVersion.getConcepts();
 		for (TermConcept next : conceptsToSave) {
 			totalCodeCount += validateConceptForStorage(next, codeSystemToStore, conceptsStack, allConcepts);
+			assert next.getId() == null;
+			assert codeSystemToStore.getPid() != null;
+
+			next.setCodeSystemVersion(codeSystemToStore);
+			next.setUpdated(updated);
+
+			myEntityManager.persist(next);
+			for (var property : next.getProperties()) {
+				assert property.getId() == null;
+				property.setCodeSystemVersion(codeSystemToStore);
+				myEntityManager.persist(property);
+			}
+			for (var designation : next.getDesignations()) {
+				assert designation.getId() == null;
+				designation.setCodeSystemVersion(codeSystemToStore);
+				myEntityManager.persist(designation);
+			}
 		}
 
 		ourLog.debug("Saving version containing {} concepts", totalCodeCount);
-		if (codeSystemToStore.getPid() == null) {
-			codeSystemToStore = myCodeSystemVersionDao.saveAndFlush(codeSystemToStore);
-		}
+		Validate.notNull(codeSystemToStore.getPid(), "Code system not saved");
+		codeSystemToStore = myEntityManager.merge(codeSystemToStore);
 
 		boolean isMakeVersionCurrent = ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequestDetails);
 		if (isMakeVersionCurrent) {
@@ -680,7 +695,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		theConcept.setCodeSystemVersion(theCodeSystem);
-		theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+		theConcept.setIndexStatus(EntityIndexStatusEnum.INDEXED_ALL);
 
 		if (theConceptsStack.size() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
 			saveConcept(theConcept);
@@ -718,14 +733,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Nonnull
 	private TermCodeSystem getOrCreateDistinctTermCodeSystem(
-			IResourcePersistentId theCodeSystemResourcePid,
 			String theSystemUri,
 			String theSystemName,
 			String theSystemVersionId,
 			ResourceTable theCodeSystemResourceTable) {
 		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
 		if (codeSystem == null) {
-			codeSystem = myCodeSystemDao.findByResourcePid(((JpaPid) theCodeSystemResourcePid).getId());
+			codeSystem = myCodeSystemDao.findByResourcePid((theCodeSystemResourceTable.getId()));
 			if (codeSystem == null) {
 				codeSystem = new TermCodeSystem();
 			}

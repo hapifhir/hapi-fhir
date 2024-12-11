@@ -5,6 +5,7 @@
       (dependent HAPI modules listed in brackets):
       <ul>
       <li>org.hl7.fhir.core (Base): 6.3.25 -&gt; 6.4.0</li>
+      <li>H2 (JPA): 2.2.224 -&gt; 2.3.232</li>
       <li>spring-boot-bom (Base): 3.2.6 -&gt; 3.3.5</li>
       <li>spring-retry (Base): 2.0.6 -&gt; 2.0.10</li>
       <li>spring-data-bom (Base): 2023.1.6 -&gt; 2024.0.5</li>

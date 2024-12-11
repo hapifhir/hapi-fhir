@@ -25,8 +25,8 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
@@ -85,7 +85,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 		int submissionCount = 0;
 		try {
-			Set<BatchResourceId> submittedBatchResourceIds = new HashSet<>();
+			Set<TypedPidJson> submittedBatchResourceIds = new HashSet<>();
 
 			/*
 			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
@@ -100,7 +100,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 						providerParams);
 				Iterator<IResourcePersistentId> pidIterator =
 						myBulkExportProcessor.getResourcePidIterator(providerParams);
-				List<BatchResourceId> idsToSubmit = new ArrayList<>();
+				List<TypedPidJson> idsToSubmit = new ArrayList<>();
 
 				int estimatedChunkSize = 0;
 
@@ -108,13 +108,13 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 					ourLog.debug("Bulk Export generated an iterator with no results!");
 				}
 				while (pidIterator.hasNext()) {
-					IResourcePersistentId pid = pidIterator.next();
+					IResourcePersistentId<?> pid = pidIterator.next();
 
-					BatchResourceId batchResourceId;
+					TypedPidJson batchResourceId;
 					if (pid.getResourceType() != null) {
-						batchResourceId = BatchResourceId.getIdFromPID(pid, pid.getResourceType());
+						batchResourceId = new TypedPidJson(pid.getResourceType(), pid);
 					} else {
-						batchResourceId = BatchResourceId.getIdFromPID(pid, resourceType);
+						batchResourceId = new TypedPidJson(resourceType, pid);
 					}
 
 					if (!submittedBatchResourceIds.add(batchResourceId)) {
@@ -158,9 +158,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	}
 
 	private void submitWorkChunk(
-			List<BatchResourceId> theBatchResourceIds,
-			String theResourceType,
-			IJobDataSink<ResourceIdList> theDataSink) {
+			List<TypedPidJson> theBatchResourceIds, String theResourceType, IJobDataSink<ResourceIdList> theDataSink) {
 		ResourceIdList idList = new ResourceIdList();
 
 		idList.setIds(theBatchResourceIds);

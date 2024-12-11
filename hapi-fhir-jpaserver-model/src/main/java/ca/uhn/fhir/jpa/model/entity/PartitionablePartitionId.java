@@ -33,7 +33,7 @@ import java.time.LocalDate;
 @Embeddable
 public class PartitionablePartitionId implements Cloneable {
 
-	static final String PARTITION_ID = "PARTITION_ID";
+	public static final String PARTITION_ID = "PARTITION_ID";
 	static final String PARTITION_DATE = "PARTITION_DATE";
 
 	@Column(name = PARTITION_ID, nullable = true, insertable = true, updatable = false)

@@ -4,8 +4,11 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -185,10 +188,10 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		obs2.setStatus(ObservationStatus.FINAL);
 		IIdType obsId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
-		ResourceTable res = myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
-		res = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+		ResourceTable res = runInTransaction(()->myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new));
+		assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, res.getIndexStatus());
+		res = runInTransaction(()->myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow(IllegalStateException::new));
+		assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, res.getIndexStatus());
 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");

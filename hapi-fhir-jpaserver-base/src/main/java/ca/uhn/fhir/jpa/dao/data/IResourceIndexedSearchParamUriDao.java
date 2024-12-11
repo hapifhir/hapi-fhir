@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -31,9 +32,9 @@ public interface IResourceIndexedSearchParamUriDao
 		extends JpaRepository<ResourceIndexedSearchParamUri, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT DISTINCT p.myUri FROM ResourceIndexedSearchParamUri p WHERE p.myHashIdentity = :hash_identity")
-	public Collection<String> findAllByHashIdentity(@Param("hash_identity") long theHashIdentity);
+	Collection<String> findAllByHashIdentity(@Param("hash_identity") long theHashIdentity);
 
 	@Modifying
-	@Query("delete from ResourceIndexedSearchParamUri t WHERE t.myResourcePid = :resid")
-	void deleteByResourceId(@Param("resid") Long theResourcePid);
+	@Query("delete from ResourceIndexedSearchParamUri t WHERE t.myResource.myPid = :resid")
+	void deleteByResourceId(@Param("resid") JpaPid theResourcePid);
 }
