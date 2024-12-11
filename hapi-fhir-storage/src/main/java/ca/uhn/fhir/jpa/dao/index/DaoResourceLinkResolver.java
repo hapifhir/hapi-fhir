@@ -35,6 +35,8 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -86,6 +88,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
+	@Autowired
+	private IRequestPartitionHelperSvc myPartitionHelperSvc;
+
 	@Override
 	public IResourceLookup findTargetResource(
 			@Nonnull RequestPartitionId theRequestPartitionId,
@@ -121,7 +126,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			}
 		}
 
-		IResourceLookup resolvedResource;
+		IResourceLookup<?> resolvedResource;
 		String idPart = targetResourceId.getIdPart();
 		try {
 			if (persistentId == null) {
@@ -164,6 +169,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 							+ " not found, specified in path: " + sourcePath);
 				}
 			}
+
 			resolvedResource = createdTableOpt.get();
 		}
 
@@ -176,8 +182,12 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		}
 
 		if (persistentId == null) {
-			persistentId =
-					myIdHelperService.newPid(resolvedResource.getPersistentId().getId());
+			Object id = resolvedResource.getPersistentId().getId();
+			Integer partitionId = null;
+			if (resolvedResource.getPartitionId() != null) {
+				partitionId = resolvedResource.getPartitionId().getPartitionId();
+			}
+			persistentId = myIdHelperService.newPid(id, partitionId);
 			persistentId.setAssociatedResourceId(targetResourceId);
 			if (theTransactionDetails != null) {
 				theTransactionDetails.addResolvedResourceId(targetResourceId, persistentId);
@@ -306,7 +316,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		if (newResource instanceof IBaseHasExtensions) {
 			IBaseExtension<?, ?> extension = ((IBaseHasExtensions) newResource).addExtension();
 			extension.setUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
-			extension.setValue(myContext.getPrimitiveBoolean(true));
+			extension.setValue(myContext.newPrimitiveBoolean(true));
 		}
 	}
 
@@ -463,6 +473,11 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		@Override
 		public P getPersistentId() {
 			return myPersistentId;
+		}
+
+		@Override
+		public PartitionablePartitionId getPartitionId() {
+			return new PartitionablePartitionId(myPersistentId.getPartitionId(), null);
 		}
 	}
 }

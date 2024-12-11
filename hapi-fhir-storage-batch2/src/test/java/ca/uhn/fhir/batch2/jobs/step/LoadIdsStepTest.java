@@ -90,7 +90,7 @@ public class LoadIdsStepTest {
 	private ResourceIdListWorkChunkJson createIdChunk(int theLow, int theHigh) {
 		ResourceIdListWorkChunkJson retVal = new ResourceIdListWorkChunkJson();
 		for (long i = theLow; i < theHigh; i++) {
-			retVal.addTypedPid("Patient", i);
+			retVal.addTypedPidWithNullPartitionForUnitTest("Patient", i);
 		}
 		return retVal;
 	}

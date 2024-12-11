@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 public abstract class BaseResourcePersistentId<T> implements IResourcePersistentId<T> {
 	private Long myVersion;
-	private final String myResourceType;
+	private String myResourceType;
 	private IIdType myAssociatedResourceId;
 
 	protected BaseResourcePersistentId(String theResourceType) {
@@ -82,5 +82,9 @@ public abstract class BaseResourcePersistentId<T> implements IResourcePersistent
 	@Override
 	public String getResourceType() {
 		return myResourceType;
+	}
+
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
 	}
 }

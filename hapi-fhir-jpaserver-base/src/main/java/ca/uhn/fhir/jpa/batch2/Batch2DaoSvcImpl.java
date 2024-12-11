@@ -111,9 +111,9 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	}
 
 	private static TypedResourcePid typedPidFromQueryArray(Object[] thePidTypeDateArray) {
+		JpaPid pid = (JpaPid) thePidTypeDateArray[0];
 		String resourceType = (String) thePidTypeDateArray[1];
-		Long pid = (Long) thePidTypeDateArray[0];
-		return new TypedResourcePid(resourceType, JpaPid.fromId(pid));
+		return new TypedResourcePid(resourceType, pid);
 	}
 
 	@Nonnull

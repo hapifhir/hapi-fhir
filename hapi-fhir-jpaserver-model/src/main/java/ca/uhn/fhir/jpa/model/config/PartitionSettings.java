@@ -201,10 +201,30 @@ public class PartitionSettings {
 				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
+	/**
+	 * The {@link ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity}
+	 * table is used to prevent accidental concurrent conditional create/update operations
+	 * from creating duplicate resources by inserting a row in that table as a part
+	 * of the database transaction performing the write operation. If this setting
+	 * is set to {@literal false} (which is the default), the partition
+	 * ID is not written to this table, meaning that duplicates are prevented across
+	 * partitions. If this setting is {@literal true}, duplicates will not be
+	 * prevented if they appear on different partitions.
+	 */
 	public boolean isConditionalCreateDuplicateIdentifiersEnabled() {
 		return myConditionalCreateDuplicateIdentifiersEnabled;
 	}
 
+	/**
+	 * The {@link ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity}
+	 * table is used to prevent accidental concurrent conditional create/update operations
+	 * from creating duplicate resources by inserting a row in that table as a part
+	 * of the database transaction performing the write operation. If this setting
+	 * is set to {@literal false} (which is the default), the partition
+	 * ID is not written to this table, meaning that duplicates are prevented across
+	 * partitions. If this setting is {@literal true}, duplicates will not be
+	 * prevented if they appear on different partitions.
+	 */
 	public void setConditionalCreateDuplicateIdentifiersEnabled(
 			boolean theConditionalCreateDuplicateIdentifiersEnabled) {
 		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;
