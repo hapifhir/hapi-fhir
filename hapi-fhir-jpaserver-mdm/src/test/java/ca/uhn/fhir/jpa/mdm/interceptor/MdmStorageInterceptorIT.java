@@ -193,8 +193,9 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		});
 	}
 
-	@Test
-	public void deleteLinkedPatients_withReferenceEncountersAndCascadingDelete_deletesSuccessfully() {
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void deleteLinkedPatients_withReferenceEncountersAndCascadingDelete_deletesSuccessfully(boolean theDeleteBothPatientsFlag) {
 		withCascadingDeleteInterceptors(details -> {
 			// setup
 			MDMState<Patient, JpaPid> state = new MDMState<>();
@@ -214,20 +215,42 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 			// test
 			// delete the patient
-			DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?_id=P1,P2", details);
+			String url = theDeleteBothPatientsFlag ? "Patient?_id=P1,P2" : "Patient?_id=P1";
+			DeleteMethodOutcome outcome = myPatientDao.deleteByUrl(url, details);
 
 			assertTrue(outcome.getOperationOutcome() instanceof OperationOutcome);
 			OperationOutcome out = (OperationOutcome) outcome.getOperationOutcome();
+			StringBuilder sb = new StringBuilder();
+			sb.append("successfully deleted ")
+					.append(theDeleteBothPatientsFlag ? "2" : "1")
+						.append(" resource(s)");
 			assertTrue(out.getIssue().stream()
-				.anyMatch(f -> f.getDiagnostics().toLowerCase().contains("successfully deleted 2 resource(s)")));
-			assertTrue(myMdmLinkDao.findAll().isEmpty());
+				.anyMatch(f -> f.getDiagnostics().toLowerCase().contains(sb.toString())));
 
+			// verifications
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLoadSynchronous(true);
 			IBundleProvider encounters = myEncounterDao.search(map, details);
-			assertTrue(encounters.isEmpty());
+
 			IBundleProvider patients = myPatientDao.search(map, details);
-			assertTrue(patients.isEmpty());
+
+			if (theDeleteBothPatientsFlag) {
+				// if we delete both, nothing should be left
+				assertTrue(myMdmLinkDao.findAll().isEmpty());
+				assertTrue(patients.isEmpty());
+				assertTrue(encounters.isEmpty());
+			} else {
+				// otherwise we should still have:
+				// 2 patients (GR and source)
+				// 1 Encounter (linked to the patient)
+				// 1 mdm Link
+				assertFalse(myMdmLinkDao.findAll().isEmpty());
+				assertEquals(2, patients.size());
+				assertEquals(1, encounters.size());
+				Encounter returnedEncounter = (Encounter) encounters.getResources(0, 1).get(0);
+				assertEquals("Patient/P2", returnedEncounter.getSubject().getReference());
+			}
+
 		});
 	}
 

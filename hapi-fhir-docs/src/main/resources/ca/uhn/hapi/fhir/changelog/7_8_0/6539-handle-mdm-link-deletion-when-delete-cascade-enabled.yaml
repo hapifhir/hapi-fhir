@@ -1,6 +1,7 @@
 ---
 type: fix
 issue: 6539
+jira: SMILE-9415
 title: "Previously, deleting an MDM managed Patient
         could result in errors under certain conditions.
         Particularly, if the related Golden record has no other resources linked to it
