@@ -71,8 +71,7 @@ public class BulkExportHelperService {
 		if (spMaps.isEmpty()) {
 			SearchParameterMap defaultMap = new SearchParameterMap();
 			if (theConsiderDateRange) {
-				enhanceSearchParameterMapWithCommonParameters(
-						defaultMap, theParams.getStartDate(), theParams.getEndDate());
+				addLastUpdatedFilter(defaultMap, theParams.getStartDate(), theParams.getEndDate());
 			}
 			spMaps = Collections.singletonList(defaultMap);
 		}
@@ -83,15 +82,14 @@ public class BulkExportHelperService {
 	private SearchParameterMap buildSearchParameterMapForTypeFilter(
 			String theFilter, RuntimeResourceDefinition theDef, Date theStartDate, Date theEndDate) {
 		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(theFilter, theDef);
-		enhanceSearchParameterMapWithCommonParameters(searchParameterMap, theStartDate, theEndDate);
+		addLastUpdatedFilter(searchParameterMap, theStartDate, theEndDate);
 		return searchParameterMap;
 	}
 
-	private void enhanceSearchParameterMapWithCommonParameters(
-			SearchParameterMap map, Date theSinceDate, Date theEndDate) {
+	void addLastUpdatedFilter(SearchParameterMap map, Date theStartDate, Date theEndDate) {
 		map.setLoadSynchronous(true);
-		if (theSinceDate != null || theEndDate != null) {
-			map.setLastUpdated(new DateRangeParam(theSinceDate, theEndDate));
+		if (theStartDate != null || theEndDate != null) {
+			map.setLastUpdated(new DateRangeParam(theStartDate, theEndDate));
 		}
 	}
 
