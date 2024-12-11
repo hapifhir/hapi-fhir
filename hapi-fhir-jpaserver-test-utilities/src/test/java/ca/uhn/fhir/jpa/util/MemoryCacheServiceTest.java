@@ -240,8 +240,8 @@ class MemoryCacheServiceTest {
 
 	@Test
 	public void testToString() {
-		String actual = new MemoryCacheService.ForcedIdCacheKey("Patient", "12", RequestPartitionId.allPartitions()).toString();
-		assertEquals("MemoryCacheService.ForcedIdCacheKey[resType=Patient,resId=12,partId=RequestPartitionId[allPartitions=true]]", actual);
+		String actual = new MemoryCacheService.ForcedIdCacheKey("Patient", "12", RequestPartitionId.forPartitionIdAndName(123, "Some partition", null)).toString();
+		assertEquals("MemoryCacheService.ForcedIdCacheKey[resType=Patient,resId=12,partId=[123]]", actual);
 	}
 
 

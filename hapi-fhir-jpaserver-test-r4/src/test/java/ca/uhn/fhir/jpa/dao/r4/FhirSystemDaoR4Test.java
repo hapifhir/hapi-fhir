@@ -9,6 +9,9 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -588,14 +591,14 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		sleepUntilTimeChange();
 
-		ResourceTable entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
-		assertEquals(Long.valueOf(1), entity.getIndexStatus());
+		ResourceTable entity = runInTransaction(()->myEntityManager.find(ResourceTable.class, JpaPid.fromId(id.getIdPartAsLong())));
+        assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, entity.getIndexStatus());
 
 		Long jobId = myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 
-		entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
-		assertEquals(Long.valueOf(1), entity.getIndexStatus());
+		entity = runInTransaction(()->myEntityManager.find(ResourceTable.class, JpaPid.fromId(id.getIdPartAsLong())));
+		assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, entity.getIndexStatus());
 
 		// Just make sure this doesn't cause a choke
 		myResourceReindexingSvc.forceReindexingPass();
@@ -616,7 +619,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		TransactionTemplate template = new TransactionTemplate(myTxManager);
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		template.execute((TransactionCallback<ResourceTable>) t -> {
-			ResourceHistoryTable resourceHistoryTable = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), id.getVersionIdPartAsLong());
+			ResourceHistoryTable resourceHistoryTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id.getIdPartAsLong()), id.getVersionIdPartAsLong());
 			resourceHistoryTable.setEncoding(ResourceEncodingEnum.JSON);
 			resourceHistoryTable.setResourceTextVc("{\"resourceType\":\"FOO\"}");
 			myResourceHistoryTableDao.save(resourceHistoryTable);
@@ -631,8 +634,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 
-		entity = new TransactionTemplate(myTxManager).execute(theStatus -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
-		assertEquals(Long.valueOf(2), entity.getIndexStatus());
+		entity = runInTransaction(()-> myEntityManager.find(ResourceTable.class, JpaPid.fromId(id.getIdPartAsLong())));
+		assertEquals(EntityIndexStatusEnum.INDEXING_FAILED, entity.getIndexStatus());
 
 	}
 
@@ -661,7 +664,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
 
 		runInTransaction(() -> {
-			ResourceHistoryTable historyEntry = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 3);
+			ResourceHistoryTable historyEntry = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id.getIdPartAsLong()), 3);
 			assertNotNull(historyEntry);
 			myResourceHistoryTableDao.delete(historyEntry);
 		});

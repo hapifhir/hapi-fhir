@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -32,10 +33,10 @@ public interface IResourceIndexedComboStringUniqueDao extends JpaRepository<Reso
 	@Query("SELECT r FROM ResourceIndexedComboStringUnique r WHERE r.myIndexString = :str")
 	ResourceIndexedComboStringUnique findByQueryString(@Param("str") String theQueryString);
 
-	@Query("SELECT r FROM ResourceIndexedComboStringUnique r WHERE r.myResourceId = :resId")
-	List<ResourceIndexedComboStringUnique> findAllForResourceIdForUnitTest(@Param("resId") Long theResourceId);
+	@Query("SELECT r FROM ResourceIndexedComboStringUnique r WHERE r.myResource.myPid = :resId")
+	List<ResourceIndexedComboStringUnique> findAllForResourceIdForUnitTest(@Param("resId") JpaPid theResourceId);
 
 	@Modifying
-	@Query("delete from ResourceIndexedComboStringUnique t WHERE t.myResourceId = :resid")
-	void deleteByResourceId(@Param("resid") Long theResourcePid);
+	@Query("delete from ResourceIndexedComboStringUnique t WHERE t.myResource.myPid = :resid")
+	void deleteByResourceId(@Param("resid") JpaPid theResourcePid);
 }

@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -66,6 +67,12 @@ public class TestAuditConfig {
 	public ValidationSettings validationSettings() {
 		ValidationSettings retVal = new ValidationSettings();
 		retVal.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_VALID);
+		return retVal;
+	}
+
+	@Bean
+	public SubscriptionSettings subscriptionSettings() {
+		SubscriptionSettings retVal = new SubscriptionSettings();
 		return retVal;
 	}
 

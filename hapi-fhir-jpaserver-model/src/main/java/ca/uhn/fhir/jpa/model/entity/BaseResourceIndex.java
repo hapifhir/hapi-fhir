@@ -66,4 +66,6 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 	public void setPlaceholderHashesIfMissing() {
 		// nothing by default
 	}
+
+	public abstract void setResourceId(Long theId);
 }

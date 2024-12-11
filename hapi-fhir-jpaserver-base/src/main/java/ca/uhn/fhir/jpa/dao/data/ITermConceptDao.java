@@ -31,10 +31,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ITermConceptDao extends JpaRepository<TermConcept, Long>, IHapiFhirJpaRepository {
+public interface ITermConceptDao extends JpaRepository<TermConcept, TermConcept.TermConceptPk>, IHapiFhirJpaRepository {
 
 	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myDesignations d " + "WHERE t.myId IN :pids")
-	List<TermConcept> fetchConceptsAndDesignationsByPid(@Param("pids") List<Long> thePids);
+	List<TermConcept> fetchConceptsAndDesignationsByPid(@Param("pids") List<TermConcept.TermConceptPk> thePids);
 
 	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myDesignations d "
 			+ "WHERE t.myCodeSystemVersionPid = :pid")

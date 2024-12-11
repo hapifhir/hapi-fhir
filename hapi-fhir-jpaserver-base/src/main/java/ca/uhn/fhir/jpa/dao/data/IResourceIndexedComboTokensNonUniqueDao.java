@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -29,6 +30,6 @@ public interface IResourceIndexedComboTokensNonUniqueDao
 		extends JpaRepository<ResourceIndexedComboTokenNonUnique, Long> {
 
 	@Modifying
-	@Query("DELETE FROM ResourceIndexedComboTokenNonUnique t WHERE t.myResourceId = :res_id")
-	void deleteByResourceId(@Param("res_id") Long theResourcePid);
+	@Query("DELETE FROM ResourceIndexedComboTokenNonUnique t WHERE t.myResource.myPid = :res_id")
+	void deleteByResourceId(@Param("res_id") JpaPid theResourcePid);
 }
