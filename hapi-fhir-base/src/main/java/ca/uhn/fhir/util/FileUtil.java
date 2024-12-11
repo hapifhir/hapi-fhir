@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.io.IOUtils;
 
@@ -50,7 +51,7 @@ public class FileUtil {
 		try (FileReader fr = new FileReader(theFile, StandardCharsets.UTF_8)) {
 			return IOUtils.toString(fr);
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(2592) + e, e);
 		}
 	}
 }
