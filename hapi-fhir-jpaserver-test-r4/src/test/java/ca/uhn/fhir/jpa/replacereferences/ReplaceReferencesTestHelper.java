@@ -334,6 +334,7 @@ public class ReplaceReferencesTestHelper {
 	public Bundle validateCompletedTask(IIdType theTaskId) {
 		Bundle patchResultBundle;
 		Task taskWithOutput = myTaskDao.read(theTaskId, mySrd);
+		assertThat(taskWithOutput.getStatus()).isEqualTo(Task.TaskStatus.COMPLETED);
 		ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
 
 		Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
@@ -353,6 +354,8 @@ public class ReplaceReferencesTestHelper {
 
 		Reference outputRef = (Reference) taskOutput.getValue();
 		patchResultBundle = (Bundle) outputRef.getResource();
+//		ourLog.info("containedBundle: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(containedBundle));
+//		ourLog.info("patchResultBundle: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patchResultBundle));
 		assertTrue(containedBundle.equalsDeep(patchResultBundle));
 		return patchResultBundle;
 	}

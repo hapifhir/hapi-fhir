@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -17,6 +19,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper.EXPECTED_SMALL_BATCHES;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.HAPI_BATCH_JOB_ID_SYSTEM;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,7 +53,10 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			Task task = (Task) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).getResource();
 			assertNull(task.getIdElement().getVersionIdPart());
 			ourLog.info("Got task {}", task.getId());
-			await().until(() -> myTestHelper.taskCompleted(task.getIdElement()));
+
+			awaitJobCompletion(task);
+
+// FIXME KHS verify report
 
 			patchResultBundle = myTestHelper.validateCompletedTask(task.getIdElement());
 		} else {
@@ -63,6 +69,16 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		// Check that the linked resources were updated
 
 		myTestHelper.assertAllReferencesUpdated();
+	}
+
+	private void awaitJobCompletion(Task task) {
+		assertThat(task.getIdentifier()).hasSize(1)
+			.element(0)
+			.extracting(Identifier::getSystem)
+			.isEqualTo(HAPI_BATCH_JOB_ID_SYSTEM);
+
+		String jobId = task.getIdentifierFirstRep().getValue();
+		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(jobId);
 	}
 
 
@@ -79,12 +95,13 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		Task task = (Task) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).getResource();
 		assertNull(task.getIdElement().getVersionIdPart());
 		ourLog.info("Got task {}", task.getId());
-		await().until(() -> myTestHelper.taskCompleted(task.getIdElement()));
+
+		awaitJobCompletion(task);
 
 		Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
 		ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
 
-		assertThat(taskWithOutput.getOutput()).hasSize(EXPECTED_SMALL_BATCHES);
+		assertThat(taskWithOutput.getOutput()).as("task " + task.getId() + " has size " + EXPECTED_SMALL_BATCHES).hasSize(EXPECTED_SMALL_BATCHES);
 		List<Resource> containedResources = taskWithOutput.getContained();
 
 		assertThat(containedResources)

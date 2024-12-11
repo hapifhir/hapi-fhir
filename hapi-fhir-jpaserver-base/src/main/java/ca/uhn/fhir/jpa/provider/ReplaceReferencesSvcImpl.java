@@ -19,11 +19,16 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -59,11 +64,13 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesAppCtx.JOB_REPLACE_REFERENCES;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.OPERATION_REPLACE;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_OPERATION;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_PATH;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_TYPE;
 import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_VALUE;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.HAPI_BATCH_JOB_ID_SYSTEM;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 
@@ -74,6 +81,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private final DaoRegistry myDaoRegistry;
 	private final HapiTransactionService myHapiTransactionService;
 	private final IResourceLinkDao myResourceLinkDao;
+	private final IJobCoordinator myJobCoordinator;
 	// FIXME remove
 	private final ExecutorService myFakeExecutor = Executors.newSingleThreadExecutor();
 
@@ -84,15 +92,17 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	}
 
 	public ReplaceReferencesSvcImpl(
-			FhirContext theFhirContext,
-			DaoRegistry theDaoRegistry,
-			HapiTransactionService theHapiTransactionService,
-			IdHelperService theIdHelperService,
-			IResourceLinkDao theResourceLinkDao) {
+		FhirContext theFhirContext,
+		DaoRegistry theDaoRegistry,
+		HapiTransactionService theHapiTransactionService,
+		IdHelperService theIdHelperService,
+		IResourceLinkDao theResourceLinkDao,
+		IJobCoordinator theJobCoordinator) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
 		myResourceLinkDao = theResourceLinkDao;
+		myJobCoordinator = theJobCoordinator;
 	}
 
 	@Override
@@ -117,23 +127,26 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	private IBaseParameters replaceReferencesPreferAsync(
 			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
-		// FIXME KHS actually start the job
 		Task task = new Task();
 		task.setStatus(Task.TaskStatus.INPROGRESS);
-		myDaoRegistry.getResourceDao(Task.class).create(task, theRequestDetails);
-		// Make a copy so we can strip the version number so they don't accidentally keep polling for an
-		// out of date version
-		Task returnedTask = task.copy();
-		returnedTask.setIdElement(task.getIdElement().toUnqualifiedVersionless());
-		returnedTask.getMeta().setVersionId(null);
+		IFhirResourceDao<Task> resourceDao = myDaoRegistry.getResourceDao(Task.class);
+		resourceDao.create(task, theRequestDetails);
+
+		ReplaceReferencesJobParameters jobParams = new ReplaceReferencesJobParameters(theReplaceReferenceRequest);
+		jobParams.setTaskId(task.getIdElement().toUnqualifiedVersionless());
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_REPLACE_REFERENCES, jobParams);
+		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(theRequestDetails, request);
+
+		task.addIdentifier().setSystem(HAPI_BATCH_JOB_ID_SYSTEM).setValue(jobStartResponse.getInstanceId());
+		resourceDao.update(task, theRequestDetails);
 
 		Parameters retval = new Parameters();
+		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());
+		task.getMeta().setVersionId(null);
 		retval.addParameter()
-				.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
-				.setResource(returnedTask);
-
-		// FIXME KHS set partitions from request
-		fakeBackgroundTaskUpdate(theReplaceReferenceRequest, task, RequestPartitionId.allPartitions());
+			.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
+			.setResource(task);
 		return retval;
 	}
 
@@ -168,7 +181,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 					coding.setSystem(RESOURCE_TYPES_SYSTEM);
 					coding.setCode("Bundle");
 					Reference outputBundleReference =
-							new Reference("#" + outputBundle.getIdElement().toUnqualifiedVersionless());
+							new Reference(outputBundle.getIdElement().toUnqualifiedVersionless());
 					output.setValue(outputBundleReference);
 					theTask.addContained(outputBundle);
 				});

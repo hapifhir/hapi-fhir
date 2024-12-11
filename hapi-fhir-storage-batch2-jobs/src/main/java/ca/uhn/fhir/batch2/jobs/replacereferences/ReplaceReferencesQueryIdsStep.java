@@ -45,7 +45,6 @@ public class ReplaceReferencesQueryIdsStep
 		AtomicInteger totalCount = new AtomicInteger();
 		myHapiTransactionService
 				.withSystemRequestOnPartition(params.getPartitionId())
-				.readOnly()
 				.execute(() -> {
 					Stream<FhirIdJson> stream = myBatch2DaoSvc
 							.streamSourceIdsThatReferenceTargetId(

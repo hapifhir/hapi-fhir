@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobSubmitterImpl;
@@ -932,12 +933,13 @@ public class JpaConfig {
 
 	@Bean
 	public IReplaceReferencesSvc replaceReferencesSvc(
-			FhirContext theFhirContext,
-			DaoRegistry theDaoRegistry,
-			HapiTransactionService theHapiTransactionService,
-			IdHelperService theIdHelperService,
-			IResourceLinkDao theResourceLinkDao) {
+		FhirContext theFhirContext,
+		DaoRegistry theDaoRegistry,
+		HapiTransactionService theHapiTransactionService,
+		IdHelperService theIdHelperService,
+		IResourceLinkDao theResourceLinkDao,
+		IJobCoordinator theJobCoordinator) {
 		return new ReplaceReferencesSvcImpl(
-				theFhirContext, theDaoRegistry, theHapiTransactionService, theIdHelperService, theResourceLinkDao);
+				theFhirContext, theDaoRegistry, theHapiTransactionService, theIdHelperService, theResourceLinkDao, theJobCoordinator);
 	}
 }

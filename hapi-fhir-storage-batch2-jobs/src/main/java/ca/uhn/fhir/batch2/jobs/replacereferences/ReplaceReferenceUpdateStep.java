@@ -38,8 +38,8 @@ public class ReplaceReferenceUpdateStep
 		implements IJobStepWorker<
 				ReplaceReferencesJobParameters, FhirIdListWorkChunkJson, ReplaceReferencePatchOutcomeJson> {
 
-	private final FhirContext myFhirContext;
-	private final DaoRegistry myDaoRegistry;
+	private FhirContext myFhirContext;
+	private DaoRegistry myDaoRegistry;
 
 	public ReplaceReferenceUpdateStep(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;

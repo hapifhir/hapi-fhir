@@ -60,7 +60,8 @@ public class ReplaceReferenceUpdateTaskReducerStep
 				myDaoRegistry.getResourceDao(Task.class).read(params.getTaskId().asIdDt(), requestDetails);
 
 		task.setStatus(Task.TaskStatus.COMPLETED);
-		// TODO KHS this Task will probably be too large for large jobs. Revisit this model once we support Provenance resources.
+		// TODO KHS this Task will probably be too large for large jobs. Revisit this model once we support Provenance
+		// resources.
 		myPatchOutputBundles.forEach(outputBundle -> {
 			Task.TaskOutputComponent output = task.addOutput();
 			Coding coding = output.getType().getCodingFirstRep();
@@ -77,6 +78,10 @@ public class ReplaceReferenceUpdateTaskReducerStep
 		ReplaceReferenceResultsJson result = new ReplaceReferenceResultsJson();
 		result.setTaskId(params.getTaskId());
 		theDataSink.accept(result);
+
+		// Reusing the same reducer for all jobs feels confusing and dangerous to me. We need to fix this.
+		// See https://github.com/hapifhir/hapi-fhir/pull/6551
+		myPatchOutputBundles.clear();
 
 		return new RunOutcome(myPatchOutputBundles.size());
 	}
