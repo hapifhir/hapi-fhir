@@ -28,6 +28,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is responsible for initiating a bulk export job
+ * with appropriate _type parameter & partitionId as well as
+ * generating response for request which includes the polling location.
+ * It also calls hooks which can update BulkExportJobParameters.
+ */
 public class BulkExportJobService {
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final IJobCoordinator myJobCoordinator;
