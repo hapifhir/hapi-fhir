@@ -50,7 +50,6 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 
 	/**
 	 * The end date to which we should stop doing the export.
-	 * if not specified it is assumed to be "now"
 	 */
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
