@@ -1,7 +1,8 @@
-package ca.uhn.fhir.jpa.replacereferences;
+package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -21,10 +23,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
 import static ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesAppCtx.JOB_REPLACE_REFERENCES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
+public class MergeBatchTest extends BaseJpaR4Test {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
@@ -52,12 +55,12 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 	public void testHappyPath() {
 		IIdType taskId = createReplaceReferencesTask();
 
-		ReplaceReferencesJobParameters jobParams = new ReplaceReferencesJobParameters();
+		MergeJobParameters jobParams = new MergeJobParameters();
 		jobParams.setSourceId(new FhirIdJson(myTestHelper.getSourcePatientId()));
 		jobParams.setTargetId(new FhirIdJson(myTestHelper.getTargetPatientId()));
 		jobParams.setTaskId(taskId);
 
-		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_REPLACE_REFERENCES, jobParams);
+		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_MERGE, jobParams);
 		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(mySrd, request);
 		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(jobStartResponse);
 

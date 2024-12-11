@@ -15,10 +15,10 @@ public class ReplaceReferencesAppCtx {
 	public static final String JOB_REPLACE_REFERENCES = "REPLACE_REFERENCES";
 
 	@Bean
-	public JobDefinition<ReplaceReferencesJobParameters> bulkImport2JobDefinition(
-			ReplaceReferencesQueryIdsStep theReplaceReferencesQueryIds,
-			ReplaceReferenceUpdateStep theReplaceReferenceUpdateStep,
-			ReplaceReferenceUpdateTaskReducerStep theReplaceReferenceUpdateTaskReducerStep) {
+	public JobDefinition<ReplaceReferencesJobParameters> replaceReferencesJobDefinition(
+			ReplaceReferencesQueryIdsStep<ReplaceReferencesJobParameters> theReplaceReferencesQueryIds,
+			ReplaceReferenceUpdateStep<ReplaceReferencesJobParameters> theReplaceReferenceUpdateStep,
+			ReplaceReferenceUpdateTaskReducerStep<ReplaceReferencesJobParameters> theReplaceReferenceUpdateTaskReducerStep) {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(JOB_REPLACE_REFERENCES)
 				.setJobDescription("Replace References")
@@ -44,20 +44,19 @@ public class ReplaceReferencesAppCtx {
 	}
 
 	@Bean
-	public ReplaceReferencesQueryIdsStep replaceReferencesQueryIdsStep(
+	public ReplaceReferencesQueryIdsStep<ReplaceReferencesJobParameters> replaceReferencesQueryIdsStep(
 			HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
-		return new ReplaceReferencesQueryIdsStep(theHapiTransactionService, theBatch2DaoSvc);
+		return new ReplaceReferencesQueryIdsStep<>(theHapiTransactionService, theBatch2DaoSvc);
 	}
 
 	@Bean
-	public ReplaceReferenceUpdateStep replaceReferenceUpdateStep(
+	public ReplaceReferenceUpdateStep<ReplaceReferencesJobParameters> replaceReferenceUpdateStep(
 			FhirContext theFhirContext, ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc) {
-		return new ReplaceReferenceUpdateStep(theFhirContext, theReplaceReferencesPatchBundleSvc);
+		return new ReplaceReferenceUpdateStep<>(theFhirContext, theReplaceReferencesPatchBundleSvc);
 	}
 
 	@Bean
-	public ReplaceReferenceUpdateTaskReducerStep replaceReferenceUpdateTaskStep(
-			FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
-		return new ReplaceReferenceUpdateTaskReducerStep(theFhirContext, theDaoRegistry);
+	public ReplaceReferenceUpdateTaskReducerStep<ReplaceReferencesJobParameters> replaceReferenceUpdateTaskStep(DaoRegistry theDaoRegistry) {
+		return new ReplaceReferenceUpdateTaskReducerStep<>(theDaoRegistry);
 	}
 }

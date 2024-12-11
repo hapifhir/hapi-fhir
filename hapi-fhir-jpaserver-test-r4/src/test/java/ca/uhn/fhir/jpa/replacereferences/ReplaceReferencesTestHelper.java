@@ -66,15 +66,15 @@ public class ReplaceReferencesTestHelper {
 	private final IFhirResourceDao<CarePlan> myCarePlanDao;
 	private final IFhirResourceDao<Observation> myObservationDao;
 
-	IIdType myOrgId;
-	IIdType mySourcePatientId;
-	IIdType mySourceCarePlanId;
-	IIdType mySourceEncId1;
-	IIdType mySourceEncId2;
-	ArrayList<IIdType> mySourceObsIds;
-	IIdType myTargetPatientId;
-	IIdType myTargetEnc1;
-	Patient myResultPatient;
+	private IIdType myOrgId;
+	private IIdType mySourcePatientId;
+	private IIdType mySourceCarePlanId;
+	private IIdType mySourceEncId1;
+	private IIdType mySourceEncId2;
+	private ArrayList<IIdType> mySourceObsIds;
+	private IIdType myTargetPatientId;
+	private IIdType myTargetEnc1;
+	private Patient myResultPatient;
 
 	private final FhirContext myFhirContext;
 	private final SystemRequestDetails mySrd = new SystemRequestDetails();
@@ -168,7 +168,7 @@ public class ReplaceReferencesTestHelper {
 		return myPatientDao.read(mySourcePatientId, mySrd);
 	}
 
-	public Object getTargetPatientId() {
+	public IIdType getTargetPatientId() {
 		return myTargetPatientId;
 	}
 
@@ -278,6 +278,10 @@ public class ReplaceReferencesTestHelper {
 			inParams.preview = true;
 		}
 		return inParams;
+	}
+
+	public IIdType getSourcePatientId() {
+		return mySourcePatientId;
 	}
 
 	public static class PatientMergeInputParameters {

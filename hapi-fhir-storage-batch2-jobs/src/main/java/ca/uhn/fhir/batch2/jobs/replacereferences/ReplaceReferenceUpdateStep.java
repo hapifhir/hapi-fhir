@@ -18,9 +18,9 @@ import org.hl7.fhir.r4.model.Bundle;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ReplaceReferenceUpdateStep
+public class ReplaceReferenceUpdateStep<PT extends ReplaceReferencesJobParameters>
 		implements IJobStepWorker<
-				ReplaceReferencesJobParameters, FhirIdListWorkChunkJson, ReplaceReferencePatchOutcomeJson> {
+				PT, FhirIdListWorkChunkJson, ReplaceReferencePatchOutcomeJson> {
 
 	private final FhirContext myFhirContext;
 	private final ReplaceReferencesPatchBundleSvc myReplaceReferencesPatchBundleSvc;
@@ -35,7 +35,7 @@ public class ReplaceReferenceUpdateStep
 	@Override
 	public RunOutcome run(
 			@Nonnull
-					StepExecutionDetails<ReplaceReferencesJobParameters, FhirIdListWorkChunkJson>
+					StepExecutionDetails<PT, FhirIdListWorkChunkJson>
 							theStepExecutionDetails,
 			@Nonnull IJobDataSink<ReplaceReferencePatchOutcomeJson> theDataSink)
 			throws JobExecutionFailedException {

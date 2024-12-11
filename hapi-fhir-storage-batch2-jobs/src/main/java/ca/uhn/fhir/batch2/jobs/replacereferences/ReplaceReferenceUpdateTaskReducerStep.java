@@ -19,9 +19,9 @@ import org.hl7.fhir.r4.model.Task;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReplaceReferenceUpdateTaskReducerStep
+public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJobParameters>
 		implements IReductionStepWorker<
-				ReplaceReferencesJobParameters, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson> {
+	PT, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson> {
 	public static final String RESOURCE_TYPES_SYSTEM = "http://hl7.org/fhir/ValueSet/resource-types";
 
 	private final FhirContext myFhirContext;
@@ -29,15 +29,15 @@ public class ReplaceReferenceUpdateTaskReducerStep
 
 	private List<Bundle> myPatchOutputBundles = new ArrayList<>();
 
-	public ReplaceReferenceUpdateTaskReducerStep(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
-		myFhirContext = theFhirContext;
+	public ReplaceReferenceUpdateTaskReducerStep(DaoRegistry theDaoRegistry) {
 		myDaoRegistry = theDaoRegistry;
+		myFhirContext = theDaoRegistry.getFhirContext();
 	}
 
 	@Nonnull
 	@Override
 	public ChunkOutcome consume(
-			ChunkExecutionDetails<ReplaceReferencesJobParameters, ReplaceReferencePatchOutcomeJson> theChunkDetails) {
+			ChunkExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theChunkDetails) {
 		ReplaceReferencePatchOutcomeJson result = theChunkDetails.getData();
 		Bundle patchOutputBundle =
 				myFhirContext.newJsonParser().parseResource(Bundle.class, result.getPatchResponseBundle());
@@ -49,7 +49,7 @@ public class ReplaceReferenceUpdateTaskReducerStep
 	@Override
 	public RunOutcome run(
 			@Nonnull
-					StepExecutionDetails<ReplaceReferencesJobParameters, ReplaceReferencePatchOutcomeJson>
+					StepExecutionDetails<PT, ReplaceReferencePatchOutcomeJson>
 							theStepExecutionDetails,
 			@Nonnull IJobDataSink<ReplaceReferenceResultsJson> theDataSink)
 			throws JobExecutionFailedException {

@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public class ReplaceReferencesQueryIdsStep
-		implements IJobStepWorker<ReplaceReferencesJobParameters, VoidModel, FhirIdListWorkChunkJson> {
+public class ReplaceReferencesQueryIdsStep<PT extends ReplaceReferencesJobParameters>
+		implements IJobStepWorker<PT, VoidModel, FhirIdListWorkChunkJson> {
 
 	private final HapiTransactionService myHapiTransactionService;
 	private final IBatch2DaoSvc myBatch2DaoSvc;
@@ -33,7 +33,7 @@ public class ReplaceReferencesQueryIdsStep
 	@Nonnull
 	@Override
 	public RunOutcome run(
-			@Nonnull StepExecutionDetails<ReplaceReferencesJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
 			@Nonnull IJobDataSink<FhirIdListWorkChunkJson> theDataSink)
 			throws JobExecutionFailedException {
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
