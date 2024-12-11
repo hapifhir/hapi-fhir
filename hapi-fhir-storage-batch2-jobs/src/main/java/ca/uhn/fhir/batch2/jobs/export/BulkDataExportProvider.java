@@ -513,18 +513,18 @@ public class BulkDataExportProvider {
 	}
 
 	// Do not use this variable directly, use getBulkDataExportJobService() instead
-	private BulkDataExportJobService myBulkDataExportJobService;
+	private BulkExportJobService myBulkExportJobService;
 
-	private BulkDataExportJobService getBulkDataExportJobService() {
-		if (myBulkDataExportJobService == null) {
-			myBulkDataExportJobService = new BulkDataExportJobService(
+	private BulkExportJobService getBulkDataExportJobService() {
+		if (myBulkExportJobService == null) {
+			myBulkExportJobService = new BulkExportJobService(
 					myInterceptorBroadcaster,
 					myJobCoordinator,
 					myDaoRegistry,
 					myRequestPartitionHelperService,
 					myStorageSettings);
 		}
-		return myBulkDataExportJobService;
+		return myBulkExportJobService;
 	}
 
 	// Do not use this variable directly, use getBulkDataExportSupport() instead

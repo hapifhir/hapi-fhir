@@ -28,14 +28,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BulkDataExportJobService {
+public class BulkExportJobService {
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final IJobCoordinator myJobCoordinator;
 	private final DaoRegistry myDaoRegistry;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	private final JpaStorageSettings myStorageSettings;
 
-	public BulkDataExportJobService(
+	public BulkExportJobService(
 			@Nonnull IInterceptorBroadcaster theInterceptorBroadcaster,
 			@Nonnull IJobCoordinator theJobCoordinator,
 			@Nonnull DaoRegistry theDaoRegistry,
