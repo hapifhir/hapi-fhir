@@ -201,14 +201,14 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	public void deletePostCommit(
 			RequestDetails theRequest, IBaseResource theResource, TransactionDetails theTransactionDetails) {
 		if (myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
-			Map<IResourcePersistentId, Set<IResourcePersistentId>> goldenResourceIdsTolinkedSourceIds =
+			Map<IResourcePersistentId, Set<IResourcePersistentId>> goldenIdToSourceIdsMap =
 					theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
-			if (goldenResourceIdsTolinkedSourceIds != null) {
+			if (goldenIdToSourceIdsMap != null) {
 				IResourcePersistentId sourcePid =
 						myIdHelperSvc.getPidOrNull(RequestPartitionId.allPartitions(), theResource);
 				if (sourcePid != null) {
-					for (IResourcePersistentId goldenPid : goldenResourceIdsTolinkedSourceIds.keySet()) {
-						if (goldenResourceIdsTolinkedSourceIds.get(goldenPid).contains(sourcePid)) {
+					for (IResourcePersistentId goldenPid : goldenIdToSourceIdsMap.keySet()) {
+						if (goldenIdToSourceIdsMap.get(goldenPid).contains(sourcePid)) {
 							// we only delete the golden resource if it's matched to a source id;
 							// there could be multiple of these, so we only delete the first
 							if (!theTransactionDetails.getDeletedResourceIds().contains(goldenPid)) {
@@ -227,7 +227,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 								// remove the golden resource id so it won't be 're-deleted'
 								// if a second id related to this golden id (linked in some way)
 								// is processed
-								goldenResourceIdsTolinkedSourceIds.remove(goldenPid);
+								goldenIdToSourceIdsMap.remove(goldenPid);
 							}
 						}
 					}
