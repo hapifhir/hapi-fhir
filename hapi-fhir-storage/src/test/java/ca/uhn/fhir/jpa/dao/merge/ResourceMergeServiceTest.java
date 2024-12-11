@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
+import ca.uhn.fhir.jpa.provider.ReplaceReferenceRequest;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -17,6 +18,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,6 +91,7 @@ public class ResourceMergeServiceTest {
 	void setup() {
 		when(myDaoMock.getContext()).thenReturn(myFhirContext);
 		myResourceMergeService = new ResourceMergeService(myDaoMock, myReplaceReferencesSvcMock, myTransactionServiceMock, myRequestPartitionHelperSvcMock);
+
 	}
 
 	// SUCCESS CASES
@@ -112,6 +115,7 @@ public class ResourceMergeServiceTest {
 		Patient patientReturnedFromDaoAfterTargetUpdate = new Patient();
 		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientReturnedFromDaoAfterTargetUpdate);
 		setupTransactionServiceMock();
+		setupReplaceReferencesForSuccessForSync();
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -143,6 +147,7 @@ public class ResourceMergeServiceTest {
 		Patient patientReturnedFromDaoAfterTargetUpdate = new Patient();
 		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientReturnedFromDaoAfterTargetUpdate);
 		setupTransactionServiceMock();
+		setupReplaceReferencesForSuccessForSync();
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -173,6 +178,8 @@ public class ResourceMergeServiceTest {
 		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
 		setupDaoMockForSuccessfulTargetPatientUpdate(resultPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 		setupTransactionServiceMock();
+		setupReplaceReferencesForSuccessForSync();
+
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
@@ -208,6 +215,8 @@ public class ResourceMergeServiceTest {
 		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
 		setupDaoMockForSuccessfulTargetPatientUpdate(resultPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 		setupTransactionServiceMock();
+		setupReplaceReferencesForSuccessForSync();
+
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -239,6 +248,8 @@ public class ResourceMergeServiceTest {
 		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
 		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 		setupTransactionServiceMock();
+		setupReplaceReferencesForSuccessForSync();
+
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -268,6 +279,8 @@ public class ResourceMergeServiceTest {
 		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
 		setupDaoMockForSuccessfulTargetPatientUpdate(resultPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 		setupTransactionServiceMock();
+		setupReplaceReferencesForSuccessForSync();
+
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -322,8 +335,9 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulSourcePatientUpdate(sourcePatient, new Patient());
 		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
 		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
-
 		setupTransactionServiceMock();
+		setupReplaceReferencesForSuccessForSync();
+
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
@@ -1199,6 +1213,11 @@ public class ResourceMergeServiceTest {
 			assertThat(expectedIdentifier.equalsDeep(actualIdentifier)).isTrue();
 		}
 
+	}
+
+	private void setupReplaceReferencesForSuccessForSync() {
+		when(myReplaceReferencesSvcMock.replaceReferences(isA(ReplaceReferenceRequest.class),
+			eq(myRequestDetailsMock))).thenReturn(new Parameters());
 	}
 
 	private void setupDaoMockForSuccessfulTargetPatientUpdate(Patient thePatientExpectedAsInput,
