@@ -24,19 +24,21 @@ import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
 
+import java.util.function.Supplier;
+
 public class JobDefinitionReductionStep<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
 		extends JobDefinitionStep<PT, IT, OT> {
 
 	public JobDefinitionReductionStep(
 			@Nonnull String theStepId,
 			@Nonnull String theStepDescription,
-			@Nonnull IReductionStepWorker<PT, IT, OT> theJobStepWorker,
+			@Nonnull Supplier<IReductionStepWorker<PT, IT, OT>> theJobStepWorkerSupplier,
 			@Nonnull Class<IT> theInputType,
 			@Nonnull Class<OT> theOutputType) {
 		super(
 				theStepId,
 				theStepDescription,
-				(IJobStepWorker<PT, IT, OT>) theJobStepWorker,
+				theJobStepWorkerSupplier,
 				theInputType,
 				theOutputType);
 	}

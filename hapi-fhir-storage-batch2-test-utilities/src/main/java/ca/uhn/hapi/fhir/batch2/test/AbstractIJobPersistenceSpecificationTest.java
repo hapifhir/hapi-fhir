@@ -110,7 +110,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 			.setParametersType(TestJobParameters.class)
 			.addFirstStep(FIRST_STEP_ID, "the first step", TestJobStep2InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
 			.addIntermediateStep(SECOND_STEP_ID, "the second step", TestJobStep3InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
-			.addFinalReducerStep(LAST_STEP_ID, "reduction step", VoidModel.class, new IReductionStepWorker<TestJobParameters, TestJobStep3InputType, VoidModel>() {
+			.addFinalReducerStep(LAST_STEP_ID, "reduction step", VoidModel.class, () -> new IReductionStepWorker<TestJobParameters, TestJobStep3InputType, VoidModel>() {
 				@Nonnull
 				@Override
 				public ChunkOutcome consume(ChunkExecutionDetails<TestJobParameters, TestJobStep3InputType> theChunkDetails) {

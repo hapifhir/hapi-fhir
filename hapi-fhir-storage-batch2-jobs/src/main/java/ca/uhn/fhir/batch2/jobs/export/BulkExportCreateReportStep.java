@@ -42,37 +42,27 @@ import java.util.Map;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class BulkExportCreateReportStep
-		implements IReductionStepWorker<BulkExportJobParameters, BulkExportBinaryFileId, BulkExportJobResults> {
+	implements IReductionStepWorker<BulkExportJobParameters, BulkExportBinaryFileId, BulkExportJobResults> {
 	private static final Logger ourLog = getLogger(BulkExportCreateReportStep.class);
 
-	private Map<String, List<String>> myResourceToBinaryIds;
+	private Map<String, List<String>> myResourceToBinaryIds = new HashMap<>();
 
 	@Nonnull
 	@Override
 	public RunOutcome run(
-			@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
-			@Nonnull IJobDataSink<BulkExportJobResults> theDataSink)
-			throws JobExecutionFailedException {
+		@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
+		@Nonnull IJobDataSink<BulkExportJobResults> theDataSink)
+		throws JobExecutionFailedException {
 		BulkExportJobResults results = new BulkExportJobResults();
 
 		String requestUrl = getOriginatingRequestUrl(theStepExecutionDetails, results);
 		results.setOriginalRequestUrl(requestUrl);
 
-		if (myResourceToBinaryIds != null) {
-			ourLog.info(
-					"Bulk Export Report creation step for instance: {}",
-					theStepExecutionDetails.getInstance().getInstanceId());
+		ourLog.info(
+			"Bulk Export Report creation step for instance: {}",
+			theStepExecutionDetails.getInstance().getInstanceId());
 
-			results.setResourceTypeToBinaryIds(myResourceToBinaryIds);
-
-			myResourceToBinaryIds = null;
-		} else {
-			String msg = "Export complete, but no data to generate report for job instance: "
-					+ theStepExecutionDetails.getInstance().getInstanceId();
-			ourLog.warn(msg);
-
-			results.setReportMsg(msg);
-		}
+		results.setResourceTypeToBinaryIds(myResourceToBinaryIds);
 
 		// accept saves the report
 		theDataSink.accept(results);
@@ -82,11 +72,8 @@ public class BulkExportCreateReportStep
 	@Nonnull
 	@Override
 	public ChunkOutcome consume(
-			ChunkExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theChunkDetails) {
+		ChunkExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theChunkDetails) {
 		BulkExportBinaryFileId fileId = theChunkDetails.getData();
-		if (myResourceToBinaryIds == null) {
-			myResourceToBinaryIds = new HashMap<>();
-		}
 
 		myResourceToBinaryIds.putIfAbsent(fileId.getResourceType(), new ArrayList<>());
 
@@ -96,15 +83,14 @@ public class BulkExportCreateReportStep
 	}
 
 	private static String getOriginatingRequestUrl(
-			@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
-			BulkExportJobResults results) {
+		@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
+		BulkExportJobResults results) {
 		IJobInstance instance = theStepExecutionDetails.getInstance();
 		String url = "";
 		if (instance instanceof JobInstance) {
 			JobInstance jobInstance = (JobInstance) instance;
 			BulkExportJobParameters parameters = jobInstance.getParameters(BulkExportJobParameters.class);
-			String originalRequestUrl = parameters.getOriginalRequestUrl();
-			url = originalRequestUrl;
+			url = parameters.getOriginalRequestUrl();
 		}
 		return url;
 	}

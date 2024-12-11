@@ -63,7 +63,7 @@ public class Batch2FinalizationConcurrencyIT extends BaseJpaR4Test {
 			.setParametersType(TestJobParameters.class)
 			.addFirstStep(FIRST_STEP_ID, "the first step", TestJobStep2InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
 			.addIntermediateStep(SECOND_STEP_ID, "the second step", TestJobStep3InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
-			.addFinalReducerStep(LAST_STEP_ID, "reduction step", TestResults.class, new TestReducer());
+			.addFinalReducerStep(LAST_STEP_ID, "reduction step", TestResults.class, TestReducer::new);
 		return builder.build();
 	}
 

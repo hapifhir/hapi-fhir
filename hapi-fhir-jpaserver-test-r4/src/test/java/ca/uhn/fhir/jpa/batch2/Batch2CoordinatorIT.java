@@ -70,6 +70,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
@@ -887,7 +888,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 
 		// step 3
-		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> last = new IReductionStepWorker<>() {
+		Supplier<IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput>> lastSupplier = () -> new IReductionStepWorker<>() {
 
 			@Nonnull
 			@Override
@@ -906,14 +907,14 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				return RunOutcome.SUCCESS;
 			}
 		};
-		createThreeStepReductionJob(theJobId, first, second, last);
+		createThreeStepReductionJob(theJobId, first, second, lastSupplier);
 	}
 
 	private void createThreeStepReductionJob(
 		String theJobId,
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep,
 		IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> theSecondStep,
-		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> theReductionsStep
+		Supplier<IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput>> theReductionsStepSupplier
 	) {
 		// create job definition (it's the test method's name)
 		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
@@ -936,7 +937,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				LAST_STEP_ID,
 				"Test last step",
 				ReductionStepOutput.class,
-				theReductionsStep
+				theReductionsStepSupplier
 			)
 			.completionHandler(myCompletionHandler)
 			.build();

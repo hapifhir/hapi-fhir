@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class JobDefinition<PT extends IModelJson> {
@@ -311,13 +312,13 @@ public class JobDefinition<PT extends IModelJson> {
 				String theStepId,
 				String theStepDescription,
 				Class<OT> theOutputType,
-				IReductionStepWorker<PT, NIT, OT> theStepWorker) {
+				Supplier<IReductionStepWorker<PT, NIT, OT>> theStepWorkerSupplier) {
 			if (!myGatedExecution) {
 				throw new ConfigurationException(Msg.code(2106)
 						+ String.format("Job Definition %s has a reducer step but is not gated", myJobDefinitionId));
 			}
 			mySteps.add(new JobDefinitionReductionStep<>(
-					theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
+					theStepId, theStepDescription, theStepWorkerSupplier, myNextInputType, theOutputType));
 			return new Builder<>(
 					mySteps,
 					myJobDefinitionId,

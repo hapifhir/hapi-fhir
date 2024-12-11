@@ -51,15 +51,12 @@ public class TermCodeSystemJobConfig {
 	 */
 	public static final String TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME = "termCodeSystemVersionDeleteJob";
 
-	@Autowired
-	private ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
-
 	/**
 	 * Delete code system version job.
 	 * Deletes only a specific code system version
 	 */
 	@Bean
-	public JobDefinition<TermCodeSystemDeleteVersionJobParameters> termCodeSystemVersionDeleteJobDefinition() {
+	public JobDefinition<TermCodeSystemDeleteVersionJobParameters> termCodeSystemVersionDeleteJobDefinition(ITermCodeSystemDeleteJobSvc theTermCodeSystemSvc) {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
 				.setJobDescription("Term code system version job delete")
@@ -71,13 +68,13 @@ public class TermCodeSystemJobConfig {
 						"DeleteCodeSystemVersionFirstStep",
 						"A first step for deleting code system versions; deletes the concepts for a provided code system version",
 						CodeSystemVersionPIDResult.class,
-						deleteCodeSystemVersionFirstStep())
+						deleteCodeSystemVersionFirstStep(theTermCodeSystemSvc))
 				.addLastStep(
 						"DeleteCodeSystemVersionFinalStep",
 						"Deletes the code system version",
-						deleteCodeSystemVersionFinalStep())
-				.completionHandler(deleteCodeSystemVersionCompletionHandler())
-				.errorHandler(deleteCodeSystemVersionCompletionHandler())
+						deleteCodeSystemVersionFinalStep(theTermCodeSystemSvc))
+				.completionHandler(deleteCodeSystemVersionCompletionHandler(theTermCodeSystemSvc))
+				.errorHandler(deleteCodeSystemVersionCompletionHandler(theTermCodeSystemSvc))
 				.build();
 	}
 
@@ -86,7 +83,7 @@ public class TermCodeSystemJobConfig {
 	 * Deletes all code system versions, before deleting the code system itself
 	 */
 	@Bean
-	public JobDefinition<TermCodeSystemDeleteJobParameters> termCodeSystemDeleteJobDefinition() {
+	public JobDefinition<TermCodeSystemDeleteJobParameters> termCodeSystemDeleteJobDefinition(ITermCodeSystemDeleteJobSvc theTermCodeSystemSvc) {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(TERM_CODE_SYSTEM_DELETE_JOB_NAME)
 				.setJobDescription("Term code system job delete")
@@ -98,24 +95,24 @@ public class TermCodeSystemJobConfig {
 						"FetchVersionsStep",
 						"Fetches all term code system version PIDs for given Code System PID",
 						CodeSystemVersionPIDResult.class,
-						readCodeSystemVersionsStep())
+						readCodeSystemVersionsStep(theTermCodeSystemSvc))
 				.addIntermediateStep(
 						"DeleteCodeSystemConceptsByVersionPidStep",
 						"Deletes the concept links, concept properties, concept designations, and concepts associated with a given code system version PID",
 						CodeSystemVersionPIDResult.class,
-						deleteCodeSystemConceptsStep())
+						deleteCodeSystemConceptsStep(theTermCodeSystemSvc))
 				.addIntermediateStep(
 						"DeleteCodeSystemVersionStep",
 						"Deletes the specified code system version",
 						CodeSystemVersionPIDResult.class,
-						deleteCodeSystemVersionsStep())
+						deleteCodeSystemVersionsStep(theTermCodeSystemSvc))
 				.addFinalReducerStep(
 						"DeleteCodeSystemStep",
 						"Deletes the code system itself",
 						VoidModel.class,
-						deleteCodeSystemFinalStep())
-				.completionHandler(deleteCodeSystemCompletionHandler())
-				.errorHandler(deleteCodeSystemCompletionHandler())
+					() -> new DeleteCodeSystemStep(theTermCodeSystemSvc))
+				.completionHandler(deleteCodeSystemCompletionHandler(theTermCodeSystemSvc))
+				.errorHandler(deleteCodeSystemCompletionHandler(theTermCodeSystemSvc))
 				.build();
 	}
 
@@ -126,28 +123,23 @@ public class TermCodeSystemJobConfig {
 	}
 
 	@Bean
-	public ReadTermConceptVersionsStep readCodeSystemVersionsStep() {
-		return new ReadTermConceptVersionsStep(myITermCodeSystemSvc);
+	public ReadTermConceptVersionsStep readCodeSystemVersionsStep(ITermCodeSystemDeleteJobSvc theTermCodeSystemSvc) {
+		return new ReadTermConceptVersionsStep(theTermCodeSystemSvc);
 	}
 
 	@Bean
-	public DeleteCodeSystemConceptsByVersionStep deleteCodeSystemConceptsStep() {
-		return new DeleteCodeSystemConceptsByVersionStep(myITermCodeSystemSvc);
+	public DeleteCodeSystemConceptsByVersionStep deleteCodeSystemConceptsStep(ITermCodeSystemDeleteJobSvc theTermCodeSystemSvc) {
+		return new DeleteCodeSystemConceptsByVersionStep(theTermCodeSystemSvc);
 	}
 
 	@Bean
-	public DeleteCodeSystemVersionStep deleteCodeSystemVersionsStep() {
-		return new DeleteCodeSystemVersionStep(myITermCodeSystemSvc);
+	public DeleteCodeSystemVersionStep deleteCodeSystemVersionsStep(ITermCodeSystemDeleteJobSvc theTermCodeSystemSvc) {
+		return new DeleteCodeSystemVersionStep(theTermCodeSystemSvc);
 	}
 
 	@Bean
-	public DeleteCodeSystemStep deleteCodeSystemFinalStep() {
-		return new DeleteCodeSystemStep(myITermCodeSystemSvc);
-	}
-
-	@Bean
-	public DeleteCodeSystemCompletionHandler deleteCodeSystemCompletionHandler() {
-		return new DeleteCodeSystemCompletionHandler(myITermCodeSystemSvc);
+	public DeleteCodeSystemCompletionHandler deleteCodeSystemCompletionHandler(ITermCodeSystemDeleteJobSvc theTermCodeSystemSvc) {
+		return new DeleteCodeSystemCompletionHandler(theTermCodeSystemSvc);
 	}
 
 	/** Delete code system version job **/
@@ -157,17 +149,17 @@ public class TermCodeSystemJobConfig {
 	}
 
 	@Bean
-	public DeleteCodeSystemVersionFirstStep deleteCodeSystemVersionFirstStep() {
-		return new DeleteCodeSystemVersionFirstStep(myITermCodeSystemSvc);
+	public DeleteCodeSystemVersionFirstStep deleteCodeSystemVersionFirstStep(ITermCodeSystemDeleteJobSvc theTermCodeSystemSvc) {
+		return new DeleteCodeSystemVersionFirstStep(theTermCodeSystemSvc);
 	}
 
 	@Bean
-	public DeleteCodeSystemVersionFinalStep deleteCodeSystemVersionFinalStep() {
-		return new DeleteCodeSystemVersionFinalStep(myITermCodeSystemSvc);
+	public DeleteCodeSystemVersionFinalStep deleteCodeSystemVersionFinalStep(ITermCodeSystemDeleteJobSvc theTermCodeSystemSvc) {
+		return new DeleteCodeSystemVersionFinalStep(theTermCodeSystemSvc);
 	}
 
 	@Bean
-	public DeleteCodeSystemVersionCompletionHandler deleteCodeSystemVersionCompletionHandler() {
-		return new DeleteCodeSystemVersionCompletionHandler(myITermCodeSystemSvc);
+	public DeleteCodeSystemVersionCompletionHandler deleteCodeSystemVersionCompletionHandler(ITermCodeSystemDeleteJobSvc theTermCodeSystemSvc) {
+		return new DeleteCodeSystemVersionCompletionHandler(theTermCodeSystemSvc);
 	}
 }
