@@ -107,27 +107,27 @@ public class BulkExportJobService {
 	 * This method calls STORAGE_PRE_INITIATE_BULK_EXPORT & STORAGE_INITIATE_BULK_EXPORT,
 	 * if present, which allows modification to the request and the bulk export job parameters
 	 */
-	private void callBulkExportHooks(@Nonnull ServletRequestDetails theRequestDetails,@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
+	private void callBulkExportHooks(
+			@Nonnull ServletRequestDetails theRequestDetails,
+			@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
 		IInterceptorBroadcaster compositeBroadcaster =
-			CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT)) {
 			HookParams preInitiateBulkExportHookParams = new HookParams()
-				.add(BulkExportJobParameters.class, theBulkExportJobParameters)
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+					.add(BulkExportJobParameters.class, theBulkExportJobParameters)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT, preInitiateBulkExportHookParams);
 		}
 
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_INITIATE_BULK_EXPORT)) {
 			HookParams initiateBulkExportHookParams = (new HookParams())
-				.add(BulkExportJobParameters.class, theBulkExportJobParameters)
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+					.add(BulkExportJobParameters.class, theBulkExportJobParameters)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_INITIATE_BULK_EXPORT, initiateBulkExportHookParams);
 		}
-
 	}
-
 
 	/**
 	 * This method checks if the request has the cache-control header
