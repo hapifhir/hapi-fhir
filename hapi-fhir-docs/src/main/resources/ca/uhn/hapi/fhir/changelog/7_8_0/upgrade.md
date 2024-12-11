@@ -31,3 +31,19 @@ to add other Search Parameters into a given compartment.
 ## Fulltext Search with _lastUpdated Filter
 
 Fulltext searches have been updated to support `_lastUpdated` search parameter. If you are using Advanced Hibernate Search indexing and wish to use the `_lastUpdated` search parameetr with this feature, a full reindex of your repository is required.
+
+# dQM
+
+* Total Denominator and Total Numerator extensions are no longer being used for scoring.  Instead Numerator and Denominator will be used.
+* Support $evaluate-measure and $evaluate-measures queries with Organization subjects.  Previously, this would result in an error.
+* Individual reports with multiple SDEs will no longer error out
+* Passing invalid reportTypes will no longer to INDIVIDUAL or SUMMARY but will instead return an appropriate failure
+* Ensure many cases of user error that resulted in HTTP status code of 500 now results in 400 instead.
+
+# CareGaps
+
+* Ensure many cases of user error that resulted in HTTP status code of 500 now results in 400 instead.
+
+# CRMI
+
+* Support delete operation.
