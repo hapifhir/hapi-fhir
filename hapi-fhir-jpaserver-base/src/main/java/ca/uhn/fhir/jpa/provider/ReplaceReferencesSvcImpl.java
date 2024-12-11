@@ -186,12 +186,12 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 					theTask.addContained(outputBundle);
 				});
 
-				myDaoRegistry.getResourceDao(Task.class).update(theTask, new SystemRequestDetails());
+				myDaoRegistry.getResourceDao(Task.class).update(theTask, systemRequestDetails);
 				ourLog.info("Updated task {} to COMPLETED.", theTask.getId());
 			} catch (Exception e) {
 				ourLog.error("Patch failed", e);
 				theTask.setStatus(Task.TaskStatus.FAILED);
-				myDaoRegistry.getResourceDao(Task.class).update(theTask, new SystemRequestDetails());
+				myDaoRegistry.getResourceDao(Task.class).update(theTask, systemRequestDetails);
 				ourLog.info("Updated task {} to FAILED.", theTask.getId());
 			}
 		});

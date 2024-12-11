@@ -352,6 +352,14 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					OPERATION_MERGE_OUTPUT_PARAM_RESULT,
 					theMergeOutcome.getUpdatedTargetResource());
 		}
+
+		if (theMergeOutcome.getTask() != null) {
+			ParametersUtil.addParameterToParameters(
+					theFhirContext,
+					retVal,
+					ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK,
+					theMergeOutcome.getTask());
+		}
 		return retVal;
 	}
 

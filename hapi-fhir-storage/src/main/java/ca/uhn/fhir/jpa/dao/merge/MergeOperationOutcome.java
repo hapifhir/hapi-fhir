@@ -26,6 +26,7 @@ public class MergeOperationOutcome {
 	private IBaseOperationOutcome myOperationOutcome;
 	private int myHttpStatusCode;
 	private IBaseResource myUpdatedTargetResource;
+	private IBaseResource myTask;
 
 	public IBaseOperationOutcome getOperationOutcome() {
 		return myOperationOutcome;
@@ -49,5 +50,13 @@ public class MergeOperationOutcome {
 
 	public void setUpdatedTargetResource(IBaseResource theUpdatedTargetResource) {
 		this.myUpdatedTargetResource = theUpdatedTargetResource;
+	}
+
+	public IBaseResource getTask() {
+		return myTask;
+	}
+
+	public void setTask(IBaseResource theTask) {
+		this.myTask = theTask;
 	}
 }

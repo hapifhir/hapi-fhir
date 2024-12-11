@@ -45,6 +45,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
@@ -58,6 +59,7 @@ import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 
 public class ResourceMergeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceMergeService.class);
@@ -192,8 +194,15 @@ public class ResourceMergeService {
 				theTargetResource.getIdElement(),
 				theMergeOperationParameters.getBatchSize(),
 				partitionId);
-		// FIXME KHS use the result of this method call to see if it went async
-		myReplaceReferencesSvc.replaceReferences(replaceReferenceRequest, theRequestDetails);
+
+		Parameters replaceRefsOutParams =
+				(Parameters) myReplaceReferencesSvc.replaceReferences(replaceReferenceRequest, theRequestDetails);
+
+		Parameters.ParametersParameterComponent taskOutParam =
+				replaceRefsOutParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK);
+		if (taskOutParam != null) {
+			theMergeOutcome.setTask(taskOutParam.getResource());
+		}
 
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
 			Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();

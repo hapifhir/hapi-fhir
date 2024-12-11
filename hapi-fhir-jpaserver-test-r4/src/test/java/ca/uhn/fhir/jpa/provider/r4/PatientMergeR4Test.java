@@ -60,7 +60,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		super.after();
 
 		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
-			}
+	}
 
 	@Override
 	@BeforeEach
@@ -114,7 +114,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		Parameters outParams = callMergeOperation(inParameters, isAsync);
 
 		// validate
-		assertThat(outParams.getParameter()).hasSize(3);
+		// in async mode, there will be an additional task in the output params
+		assertThat(outParams.getParameter()).hasSizeBetween(3, 4);
 
 		// Assert input
 		Parameters input = (Parameters) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_INPUT).getResource();
