@@ -92,6 +92,10 @@ public class ResourceMergeService {
 	public MergeOperationOutcome merge(
 			MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
 
+		// FIXME ED update to work like ReplaceReferencesSvcImpl.replaceReferences()
+		// in replaceReferencesPreferSync, still need to fallback to async if count exceeds batchSize,
+		// but don't need to stream resources, can just use count method for that.
+
 		MergeOperationOutcome mergeOutcome = new MergeOperationOutcome();
 		IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
 		mergeOutcome.setOperationOutcome(operationOutcome);
@@ -195,6 +199,7 @@ public class ResourceMergeService {
 				theMergeOperationParameters.getBatchSize(),
 				partitionId);
 
+		// FIXME ED this will need to change because this calls JOB_REPLACE_REFERENCES when you want to call JOB_MERGE
 		Parameters replaceRefsOutParams =
 				(Parameters) myReplaceReferencesSvc.replaceReferences(replaceReferenceRequest, theRequestDetails);
 

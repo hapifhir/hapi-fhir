@@ -59,6 +59,7 @@ public class MergeBatchTest extends BaseJpaR4Test {
 		jobParams.setSourceId(new FhirIdJson(myTestHelper.getSourcePatientId()));
 		jobParams.setTargetId(new FhirIdJson(myTestHelper.getTargetPatientId()));
 		jobParams.setTaskId(taskId);
+		// FIXME ED add to parameters
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_MERGE, jobParams);
 		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(mySrd, request);
@@ -72,6 +73,8 @@ public class MergeBatchTest extends BaseJpaR4Test {
 
 		Bundle patchResultBundle = myTestHelper.validateCompletedTask(taskId);
 		myTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES);
+
+		// FIXME ED validate other steps performed by final run merge step
 
 		myTestHelper.assertAllReferencesUpdated();
 	}
