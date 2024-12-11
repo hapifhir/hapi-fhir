@@ -128,6 +128,15 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 		setLoggerLevel(theLevel);
 	}
 
+	/**
+	 * @deprecated This class should be registered as a junit5 extension, and will be set
+	 * up automatically.
+	 */
+	@Deprecated
+	public void setUp() {
+		// nothing
+	}
+
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
 		if (myListAppender != null) {
