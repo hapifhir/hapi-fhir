@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import jakarta.annotation.Nonnull;
@@ -39,7 +38,10 @@ public class ReplaceReferencesPatchBundleSvc {
 		myFhirContext = theDaoRegistry.getFhirContext();
 	}
 
-	public Bundle patchReferencingResources(ReplaceReferenceRequest theReplaceReferenceRequest, List<IdDt> theResourceIds, RequestDetails theRequestDetails) {
+	public Bundle patchReferencingResources(
+			ReplaceReferenceRequest theReplaceReferenceRequest,
+			List<IdDt> theResourceIds,
+			RequestDetails theRequestDetails) {
 		Bundle patchBundle = buildPatchBundle(theReplaceReferenceRequest, theResourceIds, theRequestDetails);
 		IFhirSystemDao<Bundle, Meta> systemDao = myDaoRegistry.getSystemDao();
 		Bundle result = systemDao.transaction(theRequestDetails, patchBundle);
@@ -49,9 +51,9 @@ public class ReplaceReferencesPatchBundleSvc {
 	}
 
 	private Bundle buildPatchBundle(
-		ReplaceReferenceRequest theReplaceReferenceRequest,
-		List<IdDt> theResourceIds,
-		RequestDetails theRequestDetails) {
+			ReplaceReferenceRequest theReplaceReferenceRequest,
+			List<IdDt> theResourceIds,
+			RequestDetails theRequestDetails) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
 		theResourceIds.forEach(referencingResourceId -> {
@@ -65,31 +67,31 @@ public class ReplaceReferencesPatchBundleSvc {
 	}
 
 	private @Nonnull Parameters buildPatchParams(
-		ReplaceReferenceRequest theReplaceReferenceRequest, IBaseResource referencingResource) {
+			ReplaceReferenceRequest theReplaceReferenceRequest, IBaseResource referencingResource) {
 		Parameters params = new Parameters();
 
 		myFhirContext.newTerser().getAllResourceReferences(referencingResource).stream()
-			.filter(refInfo -> matches(
-				refInfo,
-				theReplaceReferenceRequest.sourceId)) // We only care about references to our source resource
-			.map(refInfo -> createReplaceReferencePatchOperation(
-				referencingResource.fhirType() + "." + refInfo.getName(),
-				new Reference(theReplaceReferenceRequest.targetId.getValueAsString())))
-			.forEach(params::addParameter); // Add each operation to parameters
+				.filter(refInfo -> matches(
+						refInfo,
+						theReplaceReferenceRequest.sourceId)) // We only care about references to our source resource
+				.map(refInfo -> createReplaceReferencePatchOperation(
+						referencingResource.fhirType() + "." + refInfo.getName(),
+						new Reference(theReplaceReferenceRequest.targetId.getValueAsString())))
+				.forEach(params::addParameter); // Add each operation to parameters
 		return params;
 	}
 
 	private static boolean matches(ResourceReferenceInfo refInfo, IIdType theSourceId) {
 		return refInfo.getResourceReference()
-			.getReferenceElement()
-			.toUnqualifiedVersionless()
-			.getValueAsString()
-			.equals(theSourceId.getValueAsString());
+				.getReferenceElement()
+				.toUnqualifiedVersionless()
+				.getValueAsString()
+				.equals(theSourceId.getValueAsString());
 	}
 
 	@Nonnull
 	private Parameters.ParametersParameterComponent createReplaceReferencePatchOperation(
-		String thePath, Type theValue) {
+			String thePath, Type theValue) {
 
 		Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
 		operation.setName(PARAMETER_OPERATION);

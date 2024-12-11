@@ -58,11 +58,11 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private final ReplaceReferencesPatchBundleSvc myReplaceReferencesPatchBundleSvc;
 
 	public ReplaceReferencesSvcImpl(
-		DaoRegistry theDaoRegistry,
-		HapiTransactionService theHapiTransactionService,
-		IResourceLinkDao theResourceLinkDao,
-		IJobCoordinator theJobCoordinator,
-		ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc) {
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			IResourceLinkDao theResourceLinkDao,
+			IJobCoordinator theJobCoordinator,
+			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc) {
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
 		myResourceLinkDao = theResourceLinkDao;
@@ -72,7 +72,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	@Override
 	public IBaseParameters replaceReferences(
-		ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 		theReplaceReferenceRequest.validateOrThrowInvalidParameterException();
 
 		if (theRequestDetails.isPreferAsync()) {
@@ -86,12 +86,12 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	public Integer countResourcesReferencingResource(IIdType theResourceId, RequestDetails theRequestDetails) {
 		return myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
 			return myResourceLinkDao.countResourcesTargetingFhirTypeAndFhirId(
-				theResourceId.getResourceType(), theResourceId.getIdPart());
+					theResourceId.getResourceType(), theResourceId.getIdPart());
 		});
 	}
 
 	private IBaseParameters replaceReferencesPreferAsync(
-		ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 		Task task = new Task();
 		task.setStatus(Task.TaskStatus.INPROGRESS);
 		IFhirResourceDao<Task> resourceDao = myDaoRegistry.getResourceDao(Task.class);
@@ -110,8 +110,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());
 		task.getMeta().setVersionId(null);
 		retval.addParameter()
-			.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
-			.setResource(task);
+				.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
+				.setResource(task);
 		return retval;
 	}
 
@@ -120,36 +120,35 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	 */
 	@Nonnull
 	private IBaseParameters replaceReferencesPreferSync(
-		ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 
 		// TODO KHS get partition from request
 		StopLimitAccumulator<IdDt> accumulator = myHapiTransactionService
-			.withRequest(theRequestDetails)
-			.execute(() -> getAllPidsWithLimit(theReplaceReferenceRequest));
+				.withRequest(theRequestDetails)
+				.execute(() -> getAllPidsWithLimit(theReplaceReferenceRequest));
 
 		if (accumulator.isTruncated()) {
 			ourLog.warn("Too many results. Switching to asynchronous reference replacement.");
 			return replaceReferencesPreferAsync(theReplaceReferenceRequest, theRequestDetails);
 		}
 
-
-		Bundle result = myReplaceReferencesPatchBundleSvc.
-			patchReferencingResources(theReplaceReferenceRequest, accumulator.getItemList(), theRequestDetails);
+		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
+				theReplaceReferenceRequest, accumulator.getItemList(), theRequestDetails);
 
 		Parameters retval = new Parameters();
 		retval.addParameter()
-			.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME)
-			.setResource(result);
+				.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME)
+				.setResource(result);
 		return retval;
 	}
 
 	private @Nonnull StopLimitAccumulator<IdDt> getAllPidsWithLimit(
-		ReplaceReferenceRequest theReplaceReferenceRequest) {
+			ReplaceReferenceRequest theReplaceReferenceRequest) {
 
 		Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
-			theReplaceReferenceRequest.sourceId.getResourceType(), theReplaceReferenceRequest.sourceId.getIdPart());
+				theReplaceReferenceRequest.sourceId.getResourceType(), theReplaceReferenceRequest.sourceId.getIdPart());
 		StopLimitAccumulator<IdDt> accumulator =
-			StopLimitAccumulator.fromStreamAndLimit(idStream, theReplaceReferenceRequest.batchSize);
+				StopLimitAccumulator.fromStreamAndLimit(idStream, theReplaceReferenceRequest.batchSize);
 		return accumulator;
 	}
 }

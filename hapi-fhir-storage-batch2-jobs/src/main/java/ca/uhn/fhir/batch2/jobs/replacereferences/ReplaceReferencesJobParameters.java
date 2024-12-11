@@ -2,8 +2,8 @@ package ca.uhn.fhir.batch2.jobs.replacereferences;
 
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
 import ca.uhn.fhir.model.api.BaseBatchJobParameters;
+import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IIdType;
 

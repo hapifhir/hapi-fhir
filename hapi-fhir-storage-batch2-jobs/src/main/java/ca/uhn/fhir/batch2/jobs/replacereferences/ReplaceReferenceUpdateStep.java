@@ -25,7 +25,8 @@ public class ReplaceReferenceUpdateStep
 	private final FhirContext myFhirContext;
 	private final ReplaceReferencesPatchBundleSvc myReplaceReferencesPatchBundleSvc;
 
-	public ReplaceReferenceUpdateStep(FhirContext theFhirContext, ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc) {
+	public ReplaceReferenceUpdateStep(
+			FhirContext theFhirContext, ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc) {
 		myFhirContext = theFhirContext;
 		myReplaceReferencesPatchBundleSvc = theReplaceReferencesPatchBundleSvc;
 	}
@@ -41,16 +42,18 @@ public class ReplaceReferenceUpdateStep
 
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
 		ReplaceReferenceRequest replaceReferencesRequest = params.asReplaceReferencesRequest();
-		List<IdDt> fhirIds = theStepExecutionDetails.getData().getFhirIds().stream().map(FhirIdJson::asIdDt).collect(Collectors.toList());
+		List<IdDt> fhirIds = theStepExecutionDetails.getData().getFhirIds().stream()
+				.map(FhirIdJson::asIdDt)
+				.collect(Collectors.toList());
 
 		SystemRequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(params.getPartitionId());
 
-		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(replaceReferencesRequest, fhirIds, requestDetails);
+		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
+				replaceReferencesRequest, fhirIds, requestDetails);
 
 		ReplaceReferencePatchOutcomeJson data = new ReplaceReferencePatchOutcomeJson(myFhirContext, result);
 		theDataSink.accept(data);
 
 		return new RunOutcome(result.getEntry().size());
 	}
-
 }
