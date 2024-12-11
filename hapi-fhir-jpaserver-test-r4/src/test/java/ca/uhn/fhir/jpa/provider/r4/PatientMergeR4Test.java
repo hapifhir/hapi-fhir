@@ -28,6 +28,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
@@ -128,8 +129,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertTrue(input.equalsDeep(inParameters));
 
 
-		// Assert Task
-		if (isAsync) {
+		// Assert Task inAsync mode, unless it is preview in which case we don't return a task
+		if (isAsync && !withPreview) {
 			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
 			assertNull(task.getIdElement().getVersionIdPart());
 			ourLog.info("Got task {}", task.getId());
