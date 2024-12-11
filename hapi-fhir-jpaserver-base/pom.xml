@@ -414,7 +414,6 @@
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
 				<executions>
-					<!-- Generate the Spring ContextCfg classes -->
 					<execution>
 						<id>build_dstu2</id>
 						<goals>
