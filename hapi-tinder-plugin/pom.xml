@@ -12,15 +12,11 @@
 
 	<artifactId>hapi-tinder-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-	<!-- <packaging>jar</packaging> -->
 
 	<name>HAPI Tinder Plugin</name>
 
 	<properties>
-		<previous_hapi_fhir_version>6.1.0</previous_hapi_fhir_version>
-		<!-- TODO KHS is this still needed?
-		<maven_version>3.1.1</maven_version>
-		-->
+		<previous_hapi_fhir_version>7.6.0</previous_hapi_fhir_version>
 	</properties>
 
 	<dependencies>
@@ -255,42 +251,6 @@
 				</executions>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-plugin-plugin
-										</artifactId>
-										<versionRange>
-											[3.2,)
-										</versionRange>
-										<goals>
-											<goal>descriptor</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 
 </project>
