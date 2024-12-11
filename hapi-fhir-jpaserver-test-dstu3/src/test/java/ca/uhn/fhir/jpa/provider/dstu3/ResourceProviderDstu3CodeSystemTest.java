@@ -52,7 +52,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testLookupOnExternalCode() {
-		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, myCaptureQueriesListener);
+		ResourceProviderDstu3ValueSetTest.createExternalCs(this, myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, myCaptureQueriesListener);
 
 		runInTransaction(() -> {
 			ourLog.info("Code system versions:\n * " + myTermCodeSystemVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));

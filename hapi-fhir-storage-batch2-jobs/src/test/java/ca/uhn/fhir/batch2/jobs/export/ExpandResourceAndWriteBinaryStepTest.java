@@ -6,9 +6,9 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
@@ -198,7 +198,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		// when
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
-		when(myIdHelperService.newPidFromStringIdAndResourceName(anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
+		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
@@ -238,12 +238,12 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	private static ArrayList<IBaseResource> createResourceList(ResourceIdList idList) {
 		idList.setResourceType("Patient");
 		ArrayList<IBaseResource> resources = new ArrayList<>();
-		ArrayList<BatchResourceId> batchResourceIds = new ArrayList<>();
+		ArrayList<TypedPidJson> batchResourceIds = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
 			String stringId = String.valueOf(i);
-			BatchResourceId batchResourceId = new BatchResourceId();
+			TypedPidJson batchResourceId = new TypedPidJson();
 			batchResourceId.setResourceType("Patient");
-			batchResourceId.setId(stringId);
+			batchResourceId.setPid(stringId);
 			batchResourceIds.add(batchResourceId);
 
 			Patient patient = new Patient();
@@ -275,7 +275,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		// when
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
-		when(myIdHelperService.newPidFromStringIdAndResourceName(anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
+		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();

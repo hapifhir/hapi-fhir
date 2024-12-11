@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -110,7 +111,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.shaded.org.bouncycastle.util.Arrays;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -596,21 +596,21 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			// fetch the resource from the db and verify
 			ResourceTable readBackResource = myEntityManager
-				.find(ResourceTable.class, myMethodOutcome.getPersistentId().getId());
+				.find(ResourceTable.class, myMethodOutcome.getPersistentId());
 			assertThat(readBackResource).as("found entity").isNotNull();
 			assertThat(readBackResource.getVersion()).as("first version").isEqualTo(1);
 			assertThat(readBackResource.getFhirId()).as("inline column populated on readback").isEqualTo(myExpectedId);
 
 			ResourceHistoryTable readBackHistory = myEntityManager
-				.createQuery("select h from ResourceHistoryTable h where h.myResourceId = :resId and h.myResourceVersion = 1", ResourceHistoryTable.class)
-				.setParameter("resId", myMethodOutcome.getPersistentId().getId())
+				.createQuery("select h from ResourceHistoryTable h where h.myResourcePid = :resId and h.myResourceVersion = 1", ResourceHistoryTable.class)
+				.setParameter("resId", ((JpaPid) myMethodOutcome.getPersistentId()).toFk())
 				.getSingleResult();
 			assertThat(readBackHistory).as("found history").isNotNull();
 
 			// no extra history
 			long historyCount = myEntityManager
-				.createQuery("select count(h) from ResourceHistoryTable h where h.myResourceId = :resId", Long.class)
-				.setParameter("resId", myMethodOutcome.getPersistentId().getId())
+				.createQuery("select count(h) from ResourceHistoryTable h where h.myResourcePid = :resId", Long.class)
+				.setParameter("resId", ((JpaPid) myMethodOutcome.getPersistentId()).toFk())
 				.getSingleResult();
 			assertThat(historyCount).as("only create one history version").isEqualTo(1);
 
@@ -2803,6 +2803,10 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		IIdType id4 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
+		ArrayList<IIdType> expected = new ArrayList<>(List.of(id1, id2, id3, id4, idMethodName));
+		expected.sort(Comparator.comparing(IIdType::getIdPart));
+		IdType[] expectedArray = expected.toArray(new IdType[0]);
+
 		SearchParameterMap pm;
 		List<IIdType> actual;
 
@@ -2811,21 +2815,22 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertThat(actual).hasSize(5);
-		assertThat(actual).as(actual.toString()).containsExactly(id1, id2, id3, id4, idMethodName);
+		assertThat(actual).as(actual.toString()).containsExactly(expectedArray);
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertThat(actual).hasSize(5);
-		assertThat(actual).as(actual.toString()).containsExactly(id1, id2, id3, id4, idMethodName);
+		assertThat(actual).as(actual.toString()).containsExactly(expectedArray);
 
+		ArrayUtils.reverse(expectedArray);
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertThat(actual).hasSize(5);
-		assertThat(actual).as(actual.toString()).containsExactly(idMethodName, id4, id3, id2, id1);
+		assertThat(actual).as(actual.toString()).containsExactly(expectedArray);
 	}
 
 	@Test

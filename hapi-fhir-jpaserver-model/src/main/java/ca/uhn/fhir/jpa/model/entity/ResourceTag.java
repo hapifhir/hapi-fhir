@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -26,9 +27,12 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -49,6 +53,7 @@ import org.hibernate.annotations.GenericGenerator;
 					name = "IDX_RESTAG_TAGID",
 					columnNames = {"RES_ID", "TAG_ID"})
 		})
+@IdClass(IdAndPartitionId.class)
 public class ResourceTag extends BaseTag {
 
 	private static final long serialVersionUID = 1L;
@@ -62,13 +67,28 @@ public class ResourceTag extends BaseTag {
 	@ManyToOne(
 			cascade = {},
 			fetch = FetchType.LAZY)
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_RESTAG_RESOURCE"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = true)
+			},
+			foreignKey = @ForeignKey(name = "FK_RESTAG_RESOURCE"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", updatable = false, nullable = true)
 	private Long myResourceId;
 
 	/**
@@ -85,13 +105,13 @@ public class ResourceTag extends BaseTag {
 			ResourceTable theResourceTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId) {
 		setTag(theTag);
 		setResource(theResourceTable);
-		setResourceId(theResourceTable.getId());
+		setResourceId(theResourceTable.getId().getId());
 		setResourceType(theResourceTable.getResourceType());
 		setPartitionId(theRequestPartitionId);
 	}
 
-	public Long getResourceId() {
-		return myResourceId;
+	public JpaPid getResourceId() {
+		return JpaPid.fromId(myResourceId, myPartitionIdValue);
 	}
 
 	public void setResourceId(Long theResourceId) {
@@ -104,6 +124,8 @@ public class ResourceTag extends BaseTag {
 
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
+		myResourceId = theResource.getId().getId();
+		myPartitionIdValue = theResource.getPartitionId().getPartitionId();
 	}
 
 	public String getResourceType() {
@@ -112,6 +134,12 @@ public class ResourceTag extends BaseTag {
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+	@PrePersist
+	public void prePersist() {
+		myResourceId = myResource.getId().getId();
+		myPartitionIdValue = myResource.getId().getPartitionId();
 	}
 
 	@Override
@@ -143,7 +171,7 @@ public class ResourceTag extends BaseTag {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		if (getPartitionId() != null) {
+		if (getPartitionId().getPartitionId() != null) {
 			b.append("partition", getPartitionId().getPartitionId());
 		}
 		b.append("resId", getResourceId());

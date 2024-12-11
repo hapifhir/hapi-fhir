@@ -29,13 +29,13 @@ import java.util.Date;
 /**
  * A resource pid list where all pids have the same resource type
  */
-public class HomogeneousResourcePidList extends BaseResourcePidList {
+public class HomogeneousResourcePidList<T extends IResourcePersistentId<T>> extends BaseResourcePidList<T> {
 	@Nonnull
 	final String myResourceType;
 
 	public HomogeneousResourcePidList(
-			String theResourceType,
-			Collection<IResourcePersistentId> theIds,
+			@Nonnull String theResourceType,
+			Collection<T> theIds,
 			Date theLastDate,
 			RequestPartitionId theRequestPartitionId) {
 		super(theIds, theLastDate, theRequestPartitionId);
@@ -47,6 +47,7 @@ public class HomogeneousResourcePidList extends BaseResourcePidList {
 		return getResourceType();
 	}
 
+	@Nonnull
 	public String getResourceType() {
 		return myResourceType;
 	}

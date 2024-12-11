@@ -23,7 +23,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -201,9 +200,7 @@ public abstract class BaseTask {
 		jdbcTemplate.setQueryTimeout(0);
 		try {
 			int changesCount = jdbcTemplate.update(theSql, theArguments);
-			if (!HapiSystemProperties.isUnitTestModeEnabled()) {
-				logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
-			}
+			logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
 			return changesCount;
 		} catch (DataAccessException e) {
 			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
@@ -274,6 +271,11 @@ public abstract class BaseTask {
 			}
 		}
 		doExecute();
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + getProductVersion() + "." + getSchemaVersion() + "]";
 	}
 
 	protected abstract void doExecute() throws SQLException;

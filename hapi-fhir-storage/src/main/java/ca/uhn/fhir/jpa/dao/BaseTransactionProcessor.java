@@ -115,6 +115,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -1457,7 +1458,11 @@ public abstract class BaseTransactionProcessor {
 			}
 			if (!myStorageSettings.isMassIngestionMode()) {
 				validateNoDuplicates(
-						theRequest, theActionName, conditionalRequestUrls, theIdToPersistedOutcome.values());
+						theRequest,
+						theTransactionDetails,
+						theActionName,
+						conditionalRequestUrls,
+						theIdToPersistedOutcome.values());
 			}
 
 			theTransactionStopWatch.endCurrentTask();
@@ -1982,21 +1987,31 @@ public abstract class BaseTransactionProcessor {
 
 	private void validateNoDuplicates(
 			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails,
 			String theActionName,
 			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls,
 			Collection<DaoMethodOutcome> thePersistedOutcomes) {
+
+		Map<ResourceTable, ResourceIndexedSearchParams> existingSearchParams =
+				theTransactionDetails.getOrCreateUserData(
+						HapiTransactionService.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS, Collections::emptyMap);
 
 		IdentityHashMap<IBaseResource, ResourceIndexedSearchParams> resourceToIndexedParams =
 				new IdentityHashMap<>(thePersistedOutcomes.size());
 		thePersistedOutcomes.stream()
 				.filter(t -> !t.isNop())
-				.filter(t -> t.getEntity()
-						instanceof ResourceTable) // N.B. GGG: This validation never occurs for mongo, as nothing is a
-				// ResourceTable.
+				// N.B. GGG: This validation never occurs for mongo, as nothing is a ResourceTable.
+				.filter(t -> t.getEntity() instanceof ResourceTable)
 				.filter(t -> t.getEntity().getDeleted() == null)
 				.filter(t -> t.getResource() != null)
-				.forEach(t -> resourceToIndexedParams.put(
-						t.getResource(), ResourceIndexedSearchParams.withLists((ResourceTable) t.getEntity())));
+				.forEach(t -> {
+					ResourceTable entity = (ResourceTable) t.getEntity();
+					ResourceIndexedSearchParams params = existingSearchParams.get(entity);
+					if (params == null) {
+						params = ResourceIndexedSearchParams.withLists(entity);
+					}
+					resourceToIndexedParams.put(t.getResource(), params);
+				});
 
 		for (Map.Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
 			String matchUrl = nextEntry.getKey();

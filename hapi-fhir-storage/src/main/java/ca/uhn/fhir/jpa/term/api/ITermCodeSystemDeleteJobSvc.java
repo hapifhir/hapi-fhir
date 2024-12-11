@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.term.api;
 
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.term.models.CodeSystemConceptsDeleteResult;
 
 import java.util.Iterator;
@@ -27,10 +28,11 @@ public interface ITermCodeSystemDeleteJobSvc {
 
 	/**
 	 * Gets an iterator for all code system version PIDs
+	 *
 	 * @param thePid
 	 * @return
 	 */
-	Iterator<Long> getAllCodeSystemVersionForCodeSystemPid(long thePid);
+	Iterator<IdAndPartitionId> getAllCodeSystemVersionForCodeSystemPid(long thePid);
 
 	/**
 	 * Deletes all metadata associated with a code system version
