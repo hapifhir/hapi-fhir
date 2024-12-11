@@ -2,11 +2,11 @@
 type: fix
 issue: 6539
 title: "Previously, deleting an MDM managed Patient
-        could result in errors if:
-        * the related Golden record had no other resources linked to it
-            (ie, this is the final linked resource)
-        * there existed other resources referencing the to-be-deleted resource
-        * 'cascade delete` was enabled (to clean up related resources)
+        could result in errors under certain conditions.
+        Particularly, if the related Golden record has no other resources linked to it
+        (ie, this is the final linked resource); there exists other resources
+        referencing the to-be-deleted resource; and the `cascade delete` option is
+        enabled (to clean up related resources).
         
         This has now been fixed.
 "
