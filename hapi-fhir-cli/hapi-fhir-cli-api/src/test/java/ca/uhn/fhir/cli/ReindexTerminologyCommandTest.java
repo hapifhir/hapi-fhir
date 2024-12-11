@@ -2,12 +2,14 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,9 +42,8 @@ class ReindexTerminologyCommandTest {
 	public final RestServerR4Helper myRestServerR4Helper = RestServerR4Helper.newInitialized();
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
-
-	// Deliberately not registered - we manually run this later because App startup resets the logging.
-	LogbackTestExtension myAppLogCapture;
+	@RegisterExtension
+	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(BaseApp.ourLog);
 
 	static {
 		HapiSystemProperties.enableTestMode();
@@ -69,7 +70,7 @@ class ReindexTerminologyCommandTest {
 		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		LogbackTestExtensionAssert.assertThat(myAppLogCapture).doesNotHaveMessage(FAILURE_MESSAGE);
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).doesNotHaveMessage(FAILURE_MESSAGE);
 	}
 
 	@ParameterizedTest
@@ -131,7 +132,7 @@ class ReindexTerminologyCommandTest {
 		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		LogbackTestExtensionAssert.assertThat(myAppLogCapture)
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension)
 			.hasMessage(FAILURE_MESSAGE)
 			.hasMessage("Internal error. Command result unknown. Check system logs for details");
 	}
@@ -156,7 +157,7 @@ class ReindexTerminologyCommandTest {
 		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		LogbackTestExtensionAssert.assertThat(myAppLogCapture)
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension)
 			.hasMessage(FAILURE_MESSAGE)
 			.hasMessage("Freetext service is not configured. Operation didn't run.");
 	}
@@ -176,8 +177,11 @@ class ReindexTerminologyCommandTest {
 	 */
 	Consumer<BaseApp> getLoggingStartupHook() {
 		return (unused) -> {
-			myAppLogCapture = new LogbackTestExtension((Logger) BaseApp.ourLog);
-			myAppLogCapture.setUp();
+			try {
+				myLogbackTestExtension.reRegister();
+			} catch (Exception e) {
+				throw new InternalErrorException(e);
+			}
 		};
 	}
 }
