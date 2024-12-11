@@ -1,17 +1,10 @@
 package ca.uhn.fhir.jpa.batch2;
 
-import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IReductionStepWorker;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.api.*;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -24,11 +17,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ca.uhn.fhir.jpa.batch2.Batch2CoordinatorIT.FIRST_STEP_ID;
-import static ca.uhn.fhir.jpa.batch2.Batch2CoordinatorIT.LAST_STEP_ID;
-import static ca.uhn.fhir.jpa.batch2.Batch2CoordinatorIT.SECOND_STEP_ID;
+import static ca.uhn.fhir.jpa.batch2.Batch2CoordinatorIT.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class Batch2FinalizationConcurrencyIT extends BaseJpaR4Test {
@@ -38,6 +32,7 @@ public class Batch2FinalizationConcurrencyIT extends BaseJpaR4Test {
 	@Autowired
 	Batch2JobHelper myBatch2JobHelper;
 	private JobDefinition<TestJobParameters> myJobDefinition;
+	private final List<Integer> myCounters = Collections.synchronizedList(new ArrayList<>());
 
 	@BeforeEach
 	public void before() {
@@ -49,18 +44,14 @@ public class Batch2FinalizationConcurrencyIT extends BaseJpaR4Test {
 
 	@Test
 	public void testTwoRuns() {
-		TestJobParameters params = new TestJobParameters();
-		params.setParam1("foo");
-		params.setParam1("bar");
-		JobInstanceStartRequest startRequest1 = new JobInstanceStartRequest(CONCURRENT_FINAL_TEST, params.setParam1("a").setParam2("100000"));
-		JobInstanceStartRequest startRequest2 = new JobInstanceStartRequest(CONCURRENT_FINAL_TEST, params.setParam1("b").setParam2("200000"));
+		JobInstanceStartRequest startRequest1 = new JobInstanceStartRequest(CONCURRENT_FINAL_TEST, new TestJobParameters().setParam1("a").setParam2("100000"));
+		JobInstanceStartRequest startRequest2 = new JobInstanceStartRequest(CONCURRENT_FINAL_TEST, new TestJobParameters().setParam1("b").setParam2("200000"));
 
-		Batch2JobStartResponse response1 = myJobCoordinator.startInstance(mySrd, startRequest1);
-		Batch2JobStartResponse response2 = myJobCoordinator.startInstance(mySrd, startRequest2);
+		myJobCoordinator.startInstance(mySrd, startRequest1);
+		myJobCoordinator.startInstance(mySrd, startRequest2);
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(CONCURRENT_FINAL_TEST);
 
-		TestReducer reductionStep = (TestReducer) myJobDefinition.getStepById(LAST_STEP_ID).getJobStepWorker();
-		assertThat(reductionStep.counter).hasValue(1);
+		assertThat(myCounters).containsExactly(1, 1);
 	}
 
 	private JobDefinition<TestJobParameters> buildJobDefinition() {
@@ -90,6 +81,7 @@ public class Batch2FinalizationConcurrencyIT extends BaseJpaR4Test {
 		public RunOutcome run(@Nonnull StepExecutionDetails<TestJobParameters, TestJobStep3InputType> theStepExecutionDetails, @Nonnull IJobDataSink<TestResults> theDataSink) throws JobExecutionFailedException {
 			counter.incrementAndGet();
 			TestResults results = new TestResults("count: "+ counter.get());
+			myCounters.add(counter.get());
 			theDataSink.accept(results);
 			return RunOutcome.SUCCESS;
 		}
