@@ -12,15 +12,11 @@
 
 	<artifactId>hapi-tinder-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-	<!-- <packaging>jar</packaging> -->
 
 	<name>HAPI Tinder Plugin</name>
 
 	<properties>
-		<previous_hapi_fhir_version>6.1.0</previous_hapi_fhir_version>
-		<!-- TODO KHS is this still needed?
-		<maven_version>3.1.1</maven_version>
-		-->
+		<previous_hapi_fhir_version>7.6.0</previous_hapi_fhir_version>
 	</properties>
 
 	<dependencies>
