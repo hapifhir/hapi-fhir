@@ -220,12 +220,11 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 			assertTrue(outcome.getOperationOutcome() instanceof OperationOutcome);
 			OperationOutcome out = (OperationOutcome) outcome.getOperationOutcome();
-			StringBuilder sb = new StringBuilder();
-			sb.append("successfully deleted ")
-					.append(theDeleteBothPatientsFlag ? "2" : "1")
-						.append(" resource(s)");
+			String sb = "successfully deleted " +
+				(theDeleteBothPatientsFlag ? "2" : "1") +
+				" resource(s)";
 			assertTrue(out.getIssue().stream()
-				.anyMatch(f -> f.getDiagnostics().toLowerCase().contains(sb.toString())));
+				.anyMatch(f -> f.getDiagnostics().toLowerCase().contains(sb)));
 
 			// verifications
 			SearchParameterMap map = new SearchParameterMap();
@@ -244,13 +243,14 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 				// 2 patients (GR and source)
 				// 1 Encounter (linked to the patient)
 				// 1 mdm Link
-				assertFalse(myMdmLinkDao.findAll().isEmpty());
-				assertEquals(2, patients.size());
+				// validate the output state
+				state.setOutputState("GP1, AUTO, MATCH, P2");
+				myMdmLinkHelper.validateResults(state);
+				// validate the encounters
 				assertEquals(1, encounters.size());
 				Encounter returnedEncounter = (Encounter) encounters.getResources(0, 1).get(0);
 				assertEquals("Patient/P2", returnedEncounter.getSubject().getReference());
 			}
-
 		});
 	}
 
