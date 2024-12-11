@@ -104,11 +104,12 @@ public class ResourceMergeServiceTest {
 		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
 
 		//the identifiers should be copied from the source to the target, without creating duplicates on the target
-		sourcePatient.addIdentifier(new Identifier().setSystem("sysA").setValue("val1"));
-		sourcePatient.addIdentifier(new Identifier().setSystem("sysB").setValue("val2"));
-		sourcePatient.addIdentifier(new Identifier().setSystem("sysC").setValue("val3"));
+		sourcePatient.addIdentifier(new Identifier().setSystem("sysSource").setValue("valS1"));
+		sourcePatient.addIdentifier(new Identifier().setSystem("sysSource").setValue("valS2"));
+		sourcePatient.addIdentifier(new Identifier().setSystem("sysCommon").setValue("valCommon"));
 		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID);
-		targetPatient.addIdentifier(new Identifier().setSystem("sysC").setValue("val3"));
+		targetPatient.addIdentifier(new Identifier().setSystem("sysCommon").setValue("valCommon"));
+		targetPatient.addIdentifier(new Identifier().setSystem("sysTarget").setValue("valT1"));
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 		setupDaoMockForSuccessfulSourcePatientUpdate(sourcePatient, new Patient());
@@ -123,10 +124,12 @@ public class ResourceMergeServiceTest {
 		// Then
 		verifySuccessfulOutcome(mergeOutcome, patientReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedSourcePatient();
+		// the identifiers copied over from the source should be marked as OLD
 		List<Identifier> expectedIdentifiers = List.of(
-			new Identifier().setSystem("sysC").setValue("val3"),
-			new Identifier().setSystem("sysA").setValue("val1"),
-			new Identifier().setSystem("sysB").setValue("val2"));
+			new Identifier().setSystem("sysCommon").setValue("valCommon"),
+			new Identifier().setSystem("sysTarget").setValue("valT1"),
+			new Identifier().setSystem("sysSource").setValue("valS1").setUse(Identifier.IdentifierUse.OLD),
+			new Identifier().setSystem("sysSource").setValue("valS2").setUse(Identifier.IdentifierUse.OLD));
 		verifyUpdatedTargetPatient(true, expectedIdentifiers);
 		verifyNoMoreInteractions(myDaoMock);
 	}
@@ -169,6 +172,9 @@ public class ResourceMergeServiceTest {
 		resultPatient.addLink().setType(Patient.LinkType.REPLACES).setOther(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setResultResource(resultPatient);
 		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
+		//when result resource exists, the identifiers should not be copied. so we don't expect this identifier when
+		//target is updated
+		sourcePatient.addIdentifier(new Identifier().setSystem("sysSource").setValue("valS1"));
 		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID);
 
 		setupDaoMockForSuccessfulRead(sourcePatient);

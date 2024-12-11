@@ -427,7 +427,7 @@ public class ResourceMergeService {
 		}
 
 		// copy all identifiers from the source to the target
-		copyIdentifiers(theSourceResource, theTargetResource);
+		copyIdentifiersAndMarkOld(theSourceResource, theTargetResource);
 
 		return theTargetResource;
 	}
@@ -450,18 +450,20 @@ public class ResourceMergeService {
 
 	/**
 	 * Copies each identifier from theSourceResource to theTargetResource, after checking that theTargetResource does
-	 * not already contain the source identifier
+	 * not already contain the source identifier. Marks the copied identifiers marked as old.
 	 *
 	 * @param theSourceResource the source resource to copy identifiers from
 	 * @param theTargetResource the target resource to copy identifiers to
 	 */
-	private void copyIdentifiers(Patient theSourceResource, Patient theTargetResource) {
+	private void copyIdentifiersAndMarkOld(Patient theSourceResource, Patient theTargetResource) {
 		if (theSourceResource.hasIdentifier()) {
 			List<Identifier> sourceIdentifiers = theSourceResource.getIdentifier();
 			List<Identifier> targetIdentifiers = theTargetResource.getIdentifier();
 			for (Identifier sourceIdentifier : sourceIdentifiers) {
 				if (!containsIdentifier(targetIdentifiers, sourceIdentifier)) {
-					theTargetResource.addIdentifier(sourceIdentifier);
+					Identifier copyOfSrcIdentifier = sourceIdentifier.copy();
+					copyOfSrcIdentifier.setUse(Identifier.IdentifierUse.OLD);
+					theTargetResource.addIdentifier(copyOfSrcIdentifier);
 				}
 			}
 		}
