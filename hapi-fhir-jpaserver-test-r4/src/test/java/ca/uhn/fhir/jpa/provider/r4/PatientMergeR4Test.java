@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +54,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	@RegisterExtension
 	MyExceptionHandler ourExceptionHandler = new MyExceptionHandler();
+
+	@Autowired
+	Batch2JobHelper myBatch2JobHelper;
 	
 	ReplaceReferencesTestHelper myTestHelper;
 
@@ -96,7 +101,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		"false, true, false, true",
 		"false, false, false, true",
 	})
-	public void testMergeWithoutResult(boolean withDelete, boolean withInputResultPatient, boolean withPreview, boolean isAsync) {
+	public void testMerge(boolean withDelete, boolean withInputResultPatient, boolean withPreview, boolean isAsync) {
 		// setup
 
 		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
@@ -134,7 +139,10 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
 			assertNull(task.getIdElement().getVersionIdPart());
 			ourLog.info("Got task {}", task.getId());
-			await().until(() -> myTestHelper.taskCompleted(task.getIdElement()));
+			await().until(() -> {
+				myBatch2JobHelper.runMaintenancePass();
+				return myTestHelper.taskCompleted(task.getIdElement());
+			});
 
 			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
 			ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
