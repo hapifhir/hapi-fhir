@@ -83,7 +83,7 @@ public class BulkDataExportSupport {
 		}
 	}
 
-	public void validateOrModifyResourceTypesForGroupBulkExport(
+	public void validateOrDefaultResourceTypesForGroupBulkExport(
 			@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
 		if (CollectionUtils.isNotEmpty(theBulkExportJobParameters.getResourceTypes())) {
 			validateResourceTypesAllContainPatientSearchParams(theBulkExportJobParameters.getResourceTypes());
