@@ -98,7 +98,6 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>${project.version}</version>
 				<dependencies>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>

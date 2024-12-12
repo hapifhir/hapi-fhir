@@ -482,7 +482,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		JobInstance instance = createInstance();
 		instance.setCurrentGatedStepId(STEP_2);
 
-		myLogCapture.setUp(Level.ERROR);
+		myLogCapture.setLoggerLevel(Level.ERROR);
 
 		// when
 		doAnswer(args -> {

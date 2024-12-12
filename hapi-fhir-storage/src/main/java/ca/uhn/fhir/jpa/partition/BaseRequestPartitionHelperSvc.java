@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -58,7 +59,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
-	private PartitionSettings myPartitionSettings;
+	PartitionSettings myPartitionSettings;
 
 	public BaseRequestPartitionHelperSvc() {
 		myNonPartitionableResourceNames = new HashSet<>();
@@ -320,6 +321,19 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 		if (StringUtils.isNotBlank(theResourceType)) {
 			validateHasPartitionPermissions(theRequest, theResourceType, retVal);
+		}
+
+		// Replace null partition ID with non-null default partition ID if one is being used
+		if (myPartitionSettings.getDefaultPartitionId() != null
+				&& retVal.hasPartitionIds()
+				&& retVal.hasDefaultPartitionId()) {
+			List<Integer> partitionIds = new ArrayList<>(retVal.getPartitionIds());
+			for (int i = 0; i < partitionIds.size(); i++) {
+				if (partitionIds.get(i) == null) {
+					partitionIds.set(i, myPartitionSettings.getDefaultPartitionId());
+				}
+			}
+			retVal = RequestPartitionId.fromPartitionIds(partitionIds);
 		}
 
 		return retVal;

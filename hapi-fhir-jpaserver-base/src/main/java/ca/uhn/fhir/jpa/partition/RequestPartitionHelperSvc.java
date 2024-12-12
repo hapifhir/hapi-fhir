@@ -130,17 +130,17 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 			}
 
 			if (theRequestPartitionId.hasPartitionIds()) {
+				Integer partitionId = theRequestPartitionId.getPartitionIds().get(i);
 				if (partition == null) {
 					Validate.isTrue(
-							theRequestPartitionId.getPartitionIds().get(i) == null,
+							partitionId == null || partitionId.equals(myPartitionSettings.getDefaultPartitionId()),
 							"Partition %s must not have an ID",
 							JpaConstants.DEFAULT_PARTITION_NAME);
 				} else {
 					Validate.isTrue(
-							Objects.equals(
-									theRequestPartitionId.getPartitionIds().get(i), partition.getId()),
+							Objects.equals(partitionId, partition.getId()),
 							"Partition ID %s does not match name %s",
-							theRequestPartitionId.getPartitionIds().get(i),
+							partitionId,
 							theRequestPartitionId.getPartitionNames().get(i));
 				}
 			} else {
