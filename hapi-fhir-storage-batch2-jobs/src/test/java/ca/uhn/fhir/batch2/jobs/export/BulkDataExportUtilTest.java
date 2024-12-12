@@ -1,6 +1,5 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
