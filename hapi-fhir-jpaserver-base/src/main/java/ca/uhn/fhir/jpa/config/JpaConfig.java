@@ -729,7 +729,7 @@ public class JpaConfig {
 	@Scope("prototype")
 	public HistoryBuilder newHistoryBuilder(
 			@Nullable String theResourceType,
-			@Nullable Long theResourceId,
+			@Nullable JpaPid theResourceId,
 			@Nullable Date theRangeStartInclusive,
 			@Nullable Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);

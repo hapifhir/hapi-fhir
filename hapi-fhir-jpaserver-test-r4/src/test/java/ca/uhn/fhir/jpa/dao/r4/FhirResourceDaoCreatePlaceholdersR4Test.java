@@ -687,6 +687,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		patient.setActive(true);
 		myPatientDao.update(patient);
 
+		logAllResources();
+		logAllResourceVersions();
+
 		// observation (with version 2)
 		Observation obs = new Observation();
 		obs.setId("Observation/DEF");

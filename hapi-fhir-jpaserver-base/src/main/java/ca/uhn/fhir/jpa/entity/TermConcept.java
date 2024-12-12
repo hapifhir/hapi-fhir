@@ -19,22 +19,26 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingRoutingBinder;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -52,14 +56,24 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.bridge.IdentifierBridge;
+import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.IdentifierBridgeRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.ValueBridgeRef;
+import org.hibernate.search.mapper.pojo.bridge.runtime.IdentifierBridgeFromDocumentIdentifierContext;
+import org.hibernate.search.mapper.pojo.bridge.runtime.IdentifierBridgeToDocumentIdentifierContext;
+import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValueContext;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.DocumentId;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
+import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.r4.model.Coding;
 
 import java.io.Serializable;
@@ -68,6 +82,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -115,16 +130,27 @@ public class TermConcept implements Serializable {
 	private Date myUpdated;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "CODESYSTEM_PID",
-			nullable = false,
-			referencedColumnName = "PID",
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CODESYSTEM_PID",
+						insertable = false,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "PID"),
+				//				@JoinColumn(
+				//						name = "PARTITION_ID",
+				//						referencedColumnName = "PARTITION_ID",
+				//						insertable = false,
+				//						updatable = false,
+				//						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
 
-	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "CODESYSTEM_PID", insertable = true, updatable = false, nullable = false)
 	@GenericField(name = "myCodeSystemVersionPid")
-	private long myCodeSystemVersionPid;
+	private Long myCodeSystemVersionPid;
 
 	@Column(name = "DISPLAY", nullable = true, length = MAX_DESC_LENGTH)
 	@FullTextField(
@@ -161,15 +187,24 @@ public class TermConcept implements Serializable {
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
 	private Collection<TermConceptDesignation> myDesignations;
 
-	@Id
-	@SequenceGenerator(name = "SEQ_CONCEPT_PID", sequenceName = "SEQ_CONCEPT_PID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PID")
-	@Column(name = "PID")
-	@GenericField
-	private Long myId;
+	@EmbeddedId
+	@DocumentId(identifierBridge = @IdentifierBridgeRef(type = TermConceptPkIdentifierBridge.class))
+	@GenericField(
+			name = "myId",
+			projectable = Projectable.YES,
+			valueBridge = @ValueBridgeRef(type = TermConceptPkValueBridge.class))
+	private TermConceptPk myId;
 
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
+	private Integer myPartitionIdValue;
+
+	/**
+	 * See {@link EntityIndexStatusEnum} for values
+	 */
 	@Column(name = "INDEX_STATUS", nullable = true)
-	private Long myIndexStatus;
+	@Enumerated(EnumType.ORDINAL)
+	@JdbcTypeCode(SqlTypes.TINYINT)
+	private EntityIndexStatusEnum myIndexStatus;
 
 	@Deprecated(since = "7.2.0")
 	@Lob
@@ -315,6 +350,8 @@ public class TermConcept implements Serializable {
 		myCodeSystem = theCodeSystemVersion;
 		if (theCodeSystemVersion != null && theCodeSystemVersion.getPid() != null) {
 			myCodeSystemVersionPid = theCodeSystemVersion.getPid();
+			assert myCodeSystemVersionPid != null;
+			myPartitionIdValue = theCodeSystemVersion.getPartitionId().getPartitionId();
 		}
 		return this;
 	}
@@ -351,20 +388,27 @@ public class TermConcept implements Serializable {
 		return this;
 	}
 
-	public Long getId() {
+	public TermConceptPk getPid() {
+		if (myId == null) {
+			myId = new TermConceptPk();
+		}
 		return myId;
 	}
 
+	public Long getId() {
+		return getPid().myId;
+	}
+
 	public TermConcept setId(Long theId) {
-		myId = theId;
+		getPid().myId = theId;
 		return this;
 	}
 
-	public Long getIndexStatus() {
+	public EntityIndexStatusEnum getIndexStatus() {
 		return myIndexStatus;
 	}
 
-	public TermConcept setIndexStatus(Long theIndexStatus) {
+	public TermConcept setIndexStatus(EntityIndexStatusEnum theIndexStatus) {
 		myIndexStatus = theIndexStatus;
 		return this;
 	}
@@ -499,24 +543,6 @@ public class TermConcept implements Serializable {
 		return b.build();
 	}
 
-	public List<IValidationSupport.BaseConceptProperty> toValidationProperties() {
-		List<IValidationSupport.BaseConceptProperty> retVal = new ArrayList<>();
-		for (TermConceptProperty next : getProperties()) {
-			switch (next.getType()) {
-				case STRING:
-					retVal.add(new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue()));
-					break;
-				case CODING:
-					retVal.add(new IValidationSupport.CodingConceptProperty(
-							next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
-					break;
-				default:
-					throw new IllegalStateException(Msg.code(830) + "Don't know how to handle " + next.getType());
-			}
-		}
-		return retVal;
-	}
-
 	/**
 	 * Returns a view of {@link #getChildren()} but containing the actual child codes
 	 */
@@ -535,5 +561,77 @@ public class TermConcept implements Serializable {
 	@VisibleForTesting
 	public boolean hasParentPidsLobForTesting() {
 		return nonNull(myParentPids);
+	}
+
+	public PartitionablePartitionId getPartitionId() {
+		return PartitionablePartitionId.with(myPartitionIdValue, null);
+	}
+
+	public static class TermConceptPkValueBridge implements ValueBridge<TermConceptPk, Long> {
+		@Override
+		public Long toIndexedValue(TermConceptPk value, ValueBridgeToIndexedValueContext context) {
+			return value.myId;
+		}
+	}
+
+	public static class TermConceptPkIdentifierBridge implements IdentifierBridge<TermConceptPk> {
+		@Override
+		public String toDocumentIdentifier(
+				TermConceptPk propertyValue, IdentifierBridgeToDocumentIdentifierContext context) {
+			return Long.toString(propertyValue.myId);
+		}
+
+		@Override
+		public TermConceptPk fromDocumentIdentifier(
+				String documentIdentifier, IdentifierBridgeFromDocumentIdentifierContext context) {
+			TermConceptPk retVal = new TermConceptPk();
+			retVal.myId = Long.parseLong(documentIdentifier);
+			return retVal;
+		}
+	}
+
+	@Embeddable
+	public static class TermConceptPk implements Serializable {
+		@SequenceGenerator(name = "SEQ_CONCEPT_PID", sequenceName = "SEQ_CONCEPT_PID")
+		@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PID")
+		@Column(name = "PID")
+		@GenericField(projectable = Projectable.YES)
+		private Long myId;
+
+		/**
+		 * Constructor
+		 */
+		public TermConceptPk() {
+			super();
+		}
+
+		/**
+		 * Constructor
+		 */
+		public TermConceptPk(Long theId, Integer thePartitionId) {
+			myId = theId;
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) {
+				return true;
+			}
+			if (!(theO instanceof TermConceptPk)) {
+				return false;
+			}
+			TermConceptPk that = (TermConceptPk) theO;
+			return Objects.equals(myId, that.myId);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myId);
+		}
+
+		@Override
+		public String toString() {
+			return String.valueOf(myId);
+		}
 	}
 }

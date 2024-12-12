@@ -35,7 +35,7 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser<JpaPid
 	 */
 	<R extends IBaseResource> R toResource(
 			Class<R> theResourceType,
-			IBaseResourceEntity theEntity,
+			IBaseResourceEntity<?> theEntity,
 			Collection<BaseTag> theTagList,
 			boolean theForHistoryOperation);
 
@@ -44,7 +44,7 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser<JpaPid
 	 * objects pulled from the database
 	 */
 	<R extends IBaseResource> R populateResourceMetadata(
-			IBaseResourceEntity theEntitySource,
+			IBaseResourceEntity<?> theEntitySource,
 			boolean theForHistoryOperation,
 			@Nullable Collection<? extends BaseTag> tagList,
 			long theVersion,
@@ -57,5 +57,5 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser<JpaPid
 	 * @param theEntitySource The source
 	 * @param theResourceTarget The target
 	 */
-	void updateResourceMetadata(IBaseResourceEntity theEntitySource, IBaseResource theResourceTarget);
+	void updateResourceMetadata(IBaseResourceEntity<?> theEntitySource, IBaseResource theResourceTarget);
 }

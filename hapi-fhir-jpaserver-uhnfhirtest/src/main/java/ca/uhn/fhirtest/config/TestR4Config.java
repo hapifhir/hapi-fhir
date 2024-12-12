@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -24,9 +23,6 @@ import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import jakarta.persistence.EntityManagerFactory;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
-import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
-import org.hibernate.search.engine.cfg.BackendSettings;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -47,7 +43,7 @@ import javax.sql.DataSource;
 @Configuration
 @Import({CommonConfig.class, JpaR4Config.class, HapiJpaConfig.class})
 @EnableTransactionManagement()
-public class TestR4Config {
+public class TestR4Config extends BaseConfig {
 	public static final String FHIR_LUCENE_LOCATION_R4 = "fhir.lucene.location.r4";
 	public static final Integer COUNT_SEARCH_RESULTS_UP_TO = 50000;
 
@@ -154,13 +150,8 @@ public class TestR4Config {
 		extraProperties.put("hibernate.cache.use_structured_entries", "false");
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
 
-		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		extraProperties.put(
-				BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
-				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
-		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
-		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), myFhirLuceneLocation);
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
+		configureLuceneProperties(extraProperties, myFhirLuceneLocation);
+
 		return extraProperties;
 	}
 

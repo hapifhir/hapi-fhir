@@ -10,6 +10,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,7 +60,7 @@ class ResourceIdListStepTest {
 	@ParameterizedTest
 	@ValueSource(ints = {0, 1, 100, 500, 501, 2345, 10500})
 	void testResourceIdListBatchSizeLimit(int theListSize) {
-		List<IResourcePersistentId> idList = generateIdList(theListSize);
+		List<IResourcePersistentId<JpaPid>> idList = generateIdList(theListSize);
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(1);
 
 		when(myStepExecutionDetails.getData()).thenReturn(myData);
@@ -102,11 +103,11 @@ class ResourceIdListStepTest {
 		}
 	}
 
-	private List<IResourcePersistentId> generateIdList(int theListSize) {
-		List<IResourcePersistentId> idList = new ArrayList<>();
-		for (int id = 0; id < theListSize; id++) {
-			IResourcePersistentId<?> theId = mock(IResourcePersistentId.class);
-			when(theId.toString()).thenReturn(Integer.toString(id + 1));
+	private List<IResourcePersistentId<JpaPid>> generateIdList(int theListSize) {
+		List<IResourcePersistentId<JpaPid>> idList = new ArrayList<>();
+		for (long id = 0; id < theListSize; id++) {
+			IResourcePersistentId<JpaPid> theId = mock(IResourcePersistentId.class);
+			when(theId.getId()).thenReturn(JpaPid.fromId((id + 1)));
 			idList.add(theId);
 		}
 		return idList;

@@ -200,6 +200,8 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testEverythingInstanceWithContentFilter() {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("Everything").addGiven("Arthur");
 		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
@@ -977,6 +979,8 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testFulltextEverythingWithIdAndContent() throws IOException {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Patient p = new Patient();
 		p.setId("FOO");
 		p.addName().setFamily("FAMILY");
@@ -1437,6 +1441,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		}
 
 		private List<IIdType> validateAndGetIdListFromBundle(Bundle theBundle, int theSize) {
+			ourLog.info("Resource IDs: {}", theBundle.getEntry().stream().map(t->t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).toList());
 			assertEquals(Bundle.BundleType.SEARCHSET, theBundle.getType());
 			assertThat(theBundle.getEntry()).hasSize(theSize);
 			return toUnqualifiedVersionlessIds(theBundle);

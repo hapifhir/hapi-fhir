@@ -5,10 +5,17 @@ import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
+import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -31,6 +38,7 @@ import java.util.UUID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class HapiFhirJpaMigrationTasksTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirJpaMigrationTasksTest.class);
@@ -38,7 +46,16 @@ public class HapiFhirJpaMigrationTasksTest {
 	private final BasicDataSource myDataSource = newDataSource();
 	private final JdbcTemplate myJdbcTemplate = new JdbcTemplate(myDataSource);
 
+	@RegisterExtension
+	private LoggingExtension myLoggingExtension = new LoggingExtension();
+
+	@BeforeAll
+	public static void beforeEach() {
+		HapiSystemProperties.enableUnitTestMode();
+	}
+
 	@Test
+	@Order(0)
 	public void testCreate() {
 		new HapiFhirJpaMigrationTasks(Collections.emptySet());
 	}
@@ -49,6 +66,7 @@ public class HapiFhirJpaMigrationTasksTest {
 	 * added in 7.4.0 so this backfills them.
 	 */
 	@Test
+	@Order(1)
 	public void testCreateUniqueComboParamHashes() {
 		/*
 		 * Setup
@@ -67,7 +85,7 @@ public class HapiFhirJpaMigrationTasksTest {
 
 		// Run a second time to run the 7.4.0 migrations
 		MigrationTaskList allTasks = tasks.getAllTasks(VersionEnum.V7_3_0, VersionEnum.V7_4_0);
-		migrator.addTasks(allTasks);
+		migrator.addAllTasksForUnitTest(allTasks);
 		migrator.migrate();
 
 		// Create a unique index row with no hashes populated
@@ -115,30 +133,30 @@ public class HapiFhirJpaMigrationTasksTest {
 			"""
 				insert into
 				HFJ_RESOURCE (
-				  RES_DELETED_AT,
-				  RES_VERSION,
-				  FHIR_ID,
-				  HAS_TAGS,
-				  RES_PUBLISHED,
-				  RES_UPDATED,
-				  SP_HAS_LINKS,
-				  HASH_SHA256,
-				  SP_INDEX_STATUS,
-				  RES_LANGUAGE,
-				  SP_CMPSTR_UNIQ_PRESENT,
-				  SP_COORDS_PRESENT,
-				  SP_DATE_PRESENT,
-				  SP_NUMBER_PRESENT,
-				  SP_QUANTITY_PRESENT,
-				  SP_STRING_PRESENT,
-				  SP_TOKEN_PRESENT,
-				  SP_URI_PRESENT,
-				  SP_QUANTITY_NRML_PRESENT,
-				  RES_TYPE,
-				  RES_VER,
-				  RES_ID)
-				  values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  		""",
+						RES_DELETED_AT,
+						RES_VERSION,
+						FHIR_ID,
+						HAS_TAGS,
+						RES_PUBLISHED,
+						RES_UPDATED,
+						SP_HAS_LINKS,
+						HASH_SHA256,
+						SP_INDEX_STATUS,
+						RES_LANGUAGE,
+						SP_CMPSTR_UNIQ_PRESENT,
+						SP_COORDS_PRESENT,
+						SP_DATE_PRESENT,
+						SP_NUMBER_PRESENT,
+						SP_QUANTITY_PRESENT,
+						SP_STRING_PRESENT,
+						SP_TOKEN_PRESENT,
+						SP_URI_PRESENT,
+						SP_QUANTITY_NRML_PRESENT,
+						RES_TYPE,
+						RES_VER,
+						RES_ID)
+						values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			""",
 			new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
 				@Override
 				protected void setValues(@Nonnull PreparedStatement thePs, @Nonnull LobCreator theLobCreator) throws SQLException {

@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * An empty resource pid list
  */
-public class EmptyResourcePidList implements IResourcePidList {
+public class EmptyResourcePidList<T extends IResourcePersistentId<?>> implements IResourcePidList<T> {
 	@Override
 	public RequestPartitionId getRequestPartitionId() {
 		return null;
@@ -60,7 +60,7 @@ public class EmptyResourcePidList implements IResourcePidList {
 	}
 
 	@Override
-	public List<IResourcePersistentId> getIds() {
+	public List<T> getIds() {
 		return Collections.emptyList();
 	}
 
