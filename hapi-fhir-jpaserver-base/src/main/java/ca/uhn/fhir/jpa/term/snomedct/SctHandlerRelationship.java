@@ -92,10 +92,6 @@ public final class SctHandlerRelationship implements IZipContentsHandlerCsv {
 						}
 					}
 				}
-			} else if (ignoredTypes.contains(typeConcept.getDisplay())) {
-				// ignore
-			} else {
-				// ourLog.warn("Unknown relationship type: {}/{}", typeId, typeConcept.getDisplay());
 			}
 		}
 	}
