@@ -77,7 +77,7 @@ public class TestR5Config {
 	public static final Predicate<String> SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES = CircularQueueCaptureQueriesListener.DEFAULT_SELECT_INCLUSION_CRITERIA.and(t -> !t.toLowerCase(Locale.US).startsWith("select next value"));
 	public static Integer ourMaxThreads;
 
-	@Value("${" + JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + ":false}")
+	@Value("${" + JpaConstants.HAPI_DATABASE_PARTITION_MODE + ":false}")
 	private boolean myIncludePartitionIdsInPks;
 
 	static {

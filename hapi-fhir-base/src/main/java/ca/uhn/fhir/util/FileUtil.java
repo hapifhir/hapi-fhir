@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
@@ -47,10 +47,10 @@ public class FileUtil {
 	 * @throws InternalErrorException If any IOException occurs
 	 */
 	public static String loadFileAsString(File theFile) throws InternalErrorException {
-		try (FileReader fr = new FileReader(theFile, StandardCharsets.UTF_8)) {
-			return IOUtils.toString(fr);
+		try {
+			return FileUtils.readFileToString(theFile, StandardCharsets.UTF_8);
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(2592) + e, e);
 		}
 	}
 }

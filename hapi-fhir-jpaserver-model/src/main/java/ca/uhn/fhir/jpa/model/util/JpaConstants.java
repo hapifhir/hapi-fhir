@@ -301,8 +301,8 @@ public class JpaConstants {
 			"https://hapifhir.org/NamingSystem/bulk-export-binary-resource-type";
 	public static final Set<String> UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE =
 			Set.of("Provenance", "List", "Group");
-	public static final String HAPI_INCLUDE_PARTITION_IDS_IN_PKS = "hapi.include_partition_ids_in_pks";
-	public static final String HAPI_INCLUDE_PARTITION_IDS_IN_PKS_DEFAULT = "false";
+	public static final String HAPI_DATABASE_PARTITION_MODE = "hapi.database_partition_mode";
+	public static final String HAPI_DATABASE_PARTITION_MODE_DEFAULT = "false";
 
 	/**
 	 * Non-instantiable

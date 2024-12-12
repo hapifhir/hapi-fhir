@@ -39,9 +39,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public final class HapiEntityManagerFactoryUtil {
 	private HapiEntityManagerFactoryUtil() {}
@@ -61,11 +60,12 @@ public final class HapiEntityManagerFactoryUtil {
 		configureEntityManagerFactory(retVal, theFhirContext, theStorageSettings);
 
 		PartitionSettings partitionSettings = myConfigurableListableBeanFactory.getBean(PartitionSettings.class);
-		if (partitionSettings.isPartitionIdsInPrimaryKeys()) {
+		if (partitionSettings.isDatabasePartitionMode()) {
 			Properties properties = new Properties();
-			properties.put(JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS, Boolean.toString(true));
-			// Despite the setter name, the method below just merges this property in,
-			// so it won't get overwritten later or overwrite other properties
+			properties.put(JpaConstants.HAPI_DATABASE_PARTITION_MODE, Boolean.toString(true));
+			// Despite the fast that the name make it sound purely like a setter, the method
+			// below just merges this property in, so it won't get overwritten later or
+			// overwrite other properties
 			retVal.setJpaProperties(properties);
 		}
 
@@ -96,18 +96,12 @@ public final class HapiEntityManagerFactoryUtil {
 		protected EntityManagerFactoryBuilder getEntityManagerFactoryBuilder(
 				PersistenceUnitInfo info, Map<?, ?> theIntegration) {
 
-			String includePartitionIdsInPksString =
-					(String) theIntegration.get(JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS);
-			includePartitionIdsInPksString = defaultString(
-					includePartitionIdsInPksString, JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS_DEFAULT);
-			boolean includePartitionIdsInPks = Boolean.parseBoolean(includePartitionIdsInPksString);
+			String databasePartitionModeString = (String) theIntegration.get(JpaConstants.HAPI_DATABASE_PARTITION_MODE);
+			databasePartitionModeString =
+					Objects.toString(databasePartitionModeString, JpaConstants.HAPI_DATABASE_PARTITION_MODE_DEFAULT);
+			boolean databasePartitionMode = Boolean.parseBoolean(databasePartitionModeString);
 
-			return new MyEntityManagerFactoryBuilderImpl(info, theIntegration) {
-				@Override
-				protected boolean isIncludePartitionIdsInPks() {
-					return includePartitionIdsInPks;
-				}
-			};
+			return new MyEntityManagerFactoryBuilderImpl(info, theIntegration, databasePartitionMode);
 		}
 
 		/**
@@ -121,16 +115,20 @@ public final class HapiEntityManagerFactoryUtil {
 		 */
 		private class MyEntityManagerFactoryBuilderImpl extends EntityManagerFactoryBuilderImpl {
 
+			private final boolean myDatabasePartitionMode;
+
 			@SuppressWarnings({"unchecked", "rawtypes"})
-			private MyEntityManagerFactoryBuilderImpl(PersistenceUnitInfo theInfo, Map<?, ?> theIntegration) {
+			private MyEntityManagerFactoryBuilderImpl(
+					PersistenceUnitInfo theInfo, Map<?, ?> theIntegration, boolean theDatabasePartitionMode) {
 				super(new PersistenceUnitInfoDescriptor(theInfo), (Map) theIntegration);
+				myDatabasePartitionMode = theDatabasePartitionMode;
 			}
 
 			@Override
 			protected StandardServiceRegistryBuilder getStandardServiceRegistryBuilder(
 					BootstrapServiceRegistry theBootstrapServiceRegistry) {
 				HapiHibernateDialectSettingsService service = new HapiHibernateDialectSettingsService();
-				service.setTrimConditionalIdsFromPrimaryKeys(!isIncludePartitionIdsInPks());
+				service.setTrimConditionalIdsFromPrimaryKeys(!isDatabasePartitionMode());
 
 				StandardServiceRegistryBuilder retVal =
 						super.getStandardServiceRegistryBuilder(theBootstrapServiceRegistry);
@@ -141,8 +139,8 @@ public final class HapiEntityManagerFactoryUtil {
 				return retVal;
 			}
 
-			protected boolean isIncludePartitionIdsInPks() {
-				return false;
+			protected boolean isDatabasePartitionMode() {
+				return myDatabasePartitionMode;
 			}
 		}
 	}

@@ -1238,7 +1238,7 @@ public class QueryStack {
 							.setRequest(theRequest)
 							.setRequestPartitionId(theRequestPartitionId));
 
-			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			if (myPartitionSettings.isDatabasePartitionMode()) {
 				andPredicates.add(toAndPredicate(pathPredicate, typePredicate, linkedPredicate));
 			} else {
 				Condition partitionPredicate = resourceLinkTableJoin.createPartitionIdPredicate(theRequestPartitionId);
@@ -2076,7 +2076,7 @@ public class QueryStack {
 			BaseJoiningPredicateBuilder join;
 			if (paramInverted) {
 
-				boolean selectPartitionId = myPartitionSettings.isPartitionIdsInPrimaryKeys();
+				boolean selectPartitionId = myPartitionSettings.isDatabasePartitionMode();
 				SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder(selectPartitionId);
 				TagPredicateBuilder tagSelector = sqlBuilder.addTagPredicateBuilder(null);
 				sqlBuilder.addPredicate(
@@ -2261,7 +2261,7 @@ public class QueryStack {
 		BaseJoiningPredicateBuilder join;
 
 		if (paramInverted) {
-			boolean selectPartitionId = myPartitionSettings.isPartitionIdsInPrimaryKeys();
+			boolean selectPartitionId = myPartitionSettings.isDatabasePartitionMode();
 			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder(selectPartitionId);
 			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(

@@ -86,7 +86,7 @@ public class PartitionedIdModeVerificationSvc {
 			return;
 		}
 
-		if (!myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+		if (!myPartitionSettings.isDatabasePartitionMode()) {
 			if (!SetUtils.isEqualSet(pkColumns, Set.of("RES_ID"))) {
 				throw new ConfigurationException(Msg.code(2563)
 						+ "System is configured in Partitioned ID mode but the database schema is not correct for this. Found HFJ_RESOURCE PK: "

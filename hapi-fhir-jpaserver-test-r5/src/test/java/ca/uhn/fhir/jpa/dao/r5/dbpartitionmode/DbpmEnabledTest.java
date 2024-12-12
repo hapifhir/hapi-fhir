@@ -11,7 +11,7 @@ import org.springframework.test.context.TestPropertySource;
  * used in joins etc.
  */
 @TestPropertySource(properties = {
-	JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + "=true"
+	JpaConstants.HAPI_DATABASE_PARTITION_MODE + "=true"
 })
 public class DbpmEnabledTest extends BaseDbpmJpaR5Test {
 

@@ -26,7 +26,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
@@ -158,7 +157,7 @@ public class DatabaseVerificationWithPostgresPartitionedIT extends BaseJpaTest i
 			assert thePartitionSettings != null;
 
 			thePartitionSettings.setPartitioningEnabled(true);
-			thePartitionSettings.setPartitionIdsInPrimaryKeys(true);
+			thePartitionSettings.setDatabasePartitionMode(true);
 			thePartitionSettings.setDefaultPartitionId(0);
 		}
 	}

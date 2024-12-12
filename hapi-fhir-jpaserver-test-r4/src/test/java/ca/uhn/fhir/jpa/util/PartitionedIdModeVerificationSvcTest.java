@@ -56,7 +56,7 @@ class PartitionedIdModeVerificationSvcTest {
 		when(myHibernatePropertiesProvider.getDialect()).thenReturn(new HapiFhirH2Dialect());
 
 		PartitionSettings partitionedSettings = new PartitionSettings();
-		partitionedSettings.setPartitionIdsInPrimaryKeys(thePartitionedIdModeForSettings);
+		partitionedSettings.setDatabasePartitionMode(thePartitionedIdModeForSettings);
 		PartitionedIdModeVerificationSvc svc = new PartitionedIdModeVerificationSvc(partitionedSettings, myHibernatePropertiesProvider, txManager);
 
 		if (thePartitionedIdModeForSchema == thePartitionedIdModeForSettings) {

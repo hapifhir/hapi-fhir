@@ -33,7 +33,7 @@ public class PartitionSettings {
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
 	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
-	private boolean myPartitionIdsInPrimaryKeys = false;
+	private boolean myDatabasePartitionMode = false;
 
 	public PartitionSettings() {
 		super();
@@ -47,8 +47,8 @@ public class PartitionSettings {
 	 *
 	 * @since 8.0.0
 	 */
-	public boolean isPartitionIdsInPrimaryKeys() {
-		return myPartitionIdsInPrimaryKeys;
+	public boolean isDatabasePartitionMode() {
+		return myDatabasePartitionMode;
 	}
 
 	/**
@@ -59,8 +59,8 @@ public class PartitionSettings {
 	 *
 	 * @since 8.0.0
 	 */
-	public void setPartitionIdsInPrimaryKeys(boolean thePartitionIdsInPrimaryKeys) {
-		myPartitionIdsInPrimaryKeys = thePartitionIdsInPrimaryKeys;
+	public void setDatabasePartitionMode(boolean theDatabasePartitionMode) {
+		myDatabasePartitionMode = theDatabasePartitionMode;
 	}
 
 	/**

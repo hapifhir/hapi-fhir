@@ -61,7 +61,7 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 })
 public class TestJPAConfig {
 
-	@Value("${" + JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + ":false}")
+	@Value("${" + JpaConstants.HAPI_DATABASE_PARTITION_MODE + ":false}")
 	private boolean myIncludePartitionIdsInPks;
 
 	@Bean
@@ -83,7 +83,7 @@ public class TestJPAConfig {
 	@Bean
 	public PartitionSettings partitionSettings() {
 		PartitionSettings retVal = new PartitionSettings();
-		retVal.setPartitionIdsInPrimaryKeys(myIncludePartitionIdsInPks);
+		retVal.setDatabasePartitionMode(myIncludePartitionIdsInPks);
 		return retVal;
 	}
 

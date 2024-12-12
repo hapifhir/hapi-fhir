@@ -496,7 +496,7 @@ public class SearchQueryBuilder {
 	}
 
 	public boolean isIncludePartitionIdInJoins() {
-		return mySelectPartitionId && myPartitionSettings.isPartitionIdsInPrimaryKeys();
+		return mySelectPartitionId && myPartitionSettings.isDatabasePartitionMode();
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
