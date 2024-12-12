@@ -92,6 +92,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	private IBaseParameters replaceReferencesPreferAsync(
 			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+		// FIXME ED extract this into a helper class--we'll want to use it beyond these two jobs
 		Task task = new Task();
 		task.setStatus(Task.TaskStatus.INPROGRESS);
 		IFhirResourceDao<Task> resourceDao = myDaoRegistry.getResourceDao(Task.class);
@@ -105,6 +106,9 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		task.addIdentifier().setSystem(HAPI_BATCH_JOB_ID_SYSTEM).setValue(jobStartResponse.getInstanceId());
 		resourceDao.update(task, theRequestDetails);
+
+		// FIXME ED extraction end
+
 
 		Parameters retval = new Parameters();
 		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());

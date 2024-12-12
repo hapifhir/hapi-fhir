@@ -40,6 +40,7 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -93,7 +94,22 @@ public class ResourceMergeService {
 			MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
 
 		// FIXME ED update to work like ReplaceReferencesSvcImpl.replaceReferences()
-		// in replaceReferencesPreferSync, still need to fallback to async if count exceeds batchSize,
+
+		if (theRequestDetails.isPreferAsync()) {
+			return mergePreferAsync(theMergeOperationParameters, theRequestDetails);
+		} else {
+			return mergePreferSync(theMergeOperationParameters, theRequestDetails);
+		}
+	}
+
+	private MergeOperationOutcome mergePreferAsync(MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
+// FIXME ED lots of copy/paste from replaceReferencesPreferAsync, but maybe some shared code in a Util class?
+		return null;
+	}
+
+	private MergeOperationOutcome mergePreferSync(MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
+
+	// in replaceReferencesPreferSync, still need to fallback to async if count exceeds batchSize,
 		// but don't need to stream resources, can just use count method for that.
 
 		MergeOperationOutcome mergeOutcome = new MergeOperationOutcome();
@@ -103,6 +119,12 @@ public class ResourceMergeService {
 		mergeOutcome.setHttpStatusCode(STATUS_HTTP_200_OK);
 
 		try {
+			// FIXME ED call count method.
+			if (count > theMergeOperationParameters.getBatchSize()) {
+				ourLog.warn("Too many results. Switching to asynchronous merge.");
+				return mergePreferAsync(theMergeOperationParameters, theRequestDetails);
+			}
+
 			validateAndMerge(theMergeOperationParameters, theRequestDetails, mergeOutcome);
 		} catch (Exception e) {
 			ourLog.error("Resource merge failed", e);
@@ -199,7 +221,11 @@ public class ResourceMergeService {
 				theMergeOperationParameters.getBatchSize(),
 				partitionId);
 
-		// FIXME ED this will need to change because this calls JOB_REPLACE_REFERENCES when you want to call JOB_MERGE
+		// FIXME ED if we're in the synchronous case, force sync
+		replaceReferenceRequest.forceSyncMode();
+
+		// FIXME ED this will need to change because this calls JOB_REPLACE_REFERENCES when you want to call
+		// JOB_MERGEmdm
 		Parameters replaceRefsOutParams =
 				(Parameters) myReplaceReferencesSvc.replaceReferences(replaceReferenceRequest, theRequestDetails);
 
