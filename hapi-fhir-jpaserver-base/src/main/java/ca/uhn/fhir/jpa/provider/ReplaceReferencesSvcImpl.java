@@ -109,7 +109,6 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		// FIXME ED extraction end
 
-
 		Parameters retval = new Parameters();
 		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());
 		task.getMeta().setVersionId(null);

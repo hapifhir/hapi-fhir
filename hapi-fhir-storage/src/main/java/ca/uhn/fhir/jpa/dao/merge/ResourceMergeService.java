@@ -40,7 +40,6 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -102,14 +101,16 @@ public class ResourceMergeService {
 		}
 	}
 
-	private MergeOperationOutcome mergePreferAsync(MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
-// FIXME ED lots of copy/paste from replaceReferencesPreferAsync, but maybe some shared code in a Util class?
+	private MergeOperationOutcome mergePreferAsync(
+			MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
+		// FIXME ED lots of copy/paste from replaceReferencesPreferAsync, but maybe some shared code in a Util class?
 		return null;
 	}
 
-	private MergeOperationOutcome mergePreferSync(MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
+	private MergeOperationOutcome mergePreferSync(
+			MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
 
-	// in replaceReferencesPreferSync, still need to fallback to async if count exceeds batchSize,
+		// in replaceReferencesPreferSync, still need to fallback to async if count exceeds batchSize,
 		// but don't need to stream resources, can just use count method for that.
 
 		MergeOperationOutcome mergeOutcome = new MergeOperationOutcome();
