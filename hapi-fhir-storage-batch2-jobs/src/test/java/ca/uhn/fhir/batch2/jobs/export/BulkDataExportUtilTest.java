@@ -54,24 +54,6 @@ class BulkDataExportUtilTest {
 		verify(theRequestDetails).getHeader(Constants.HEADER_PREFER);
 	}
 
-	@ParameterizedTest
-	@EnumSource(value = FhirVersionEnum.class, mode = EnumSource.Mode.EXCLUDE, names = {"R5"})
-	void isDeviceResourceSupportedForPatientCompartmentForFhirVersion(FhirVersionEnum theFhirVersionEnum) {
-		// Act
-		final boolean actual = BulkDataExportUtil.isDeviceResourceSupportedForPatientCompartmentForFhirVersion(theFhirVersionEnum);
-		// Assert
-		assertThat(actual).isTrue();
-	}
-
-	@ParameterizedTest
-	@EnumSource(value = FhirVersionEnum.class, mode = EnumSource.Mode.INCLUDE, names = {"R5"})
-	void isDeviceResourceNotSupportedForPatientCompartmentForFhirVersion(FhirVersionEnum theFhirVersionEnum) {
-		// Act
-		final boolean actual = BulkDataExportUtil.isDeviceResourceSupportedForPatientCompartmentForFhirVersion(theFhirVersionEnum);
-		// Assert
-		assertThat(actual).isFalse();
-	}
-
 	@Test
 	void getServerBase() {
 		// Arrange

@@ -41,11 +41,6 @@ public class BulkDataExportUtil {
 		}
 	}
 
-	public static boolean isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
-			FhirVersionEnum theFhirVersionEnum) {
-		return PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE.contains(theFhirVersionEnum);
-	}
-
 	public static String getServerBase(ServletRequestDetails theRequestDetails) {
 		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
 	}

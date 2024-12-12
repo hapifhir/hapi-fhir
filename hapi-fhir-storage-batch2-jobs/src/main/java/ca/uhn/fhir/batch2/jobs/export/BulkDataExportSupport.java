@@ -126,10 +126,6 @@ public class BulkDataExportSupport {
 		if (myCompartmentResources == null) {
 			myCompartmentResources =
 					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext));
-			FhirVersionEnum fhirVersionEnum = theFhirContext.getVersion().getVersion();
-			if (BulkDataExportUtil.isDeviceResourceSupportedForPatientCompartmentForFhirVersion(fhirVersionEnum)) {
-				myCompartmentResources.add("Device");
-			}
 		}
 		return myCompartmentResources;
 	}
