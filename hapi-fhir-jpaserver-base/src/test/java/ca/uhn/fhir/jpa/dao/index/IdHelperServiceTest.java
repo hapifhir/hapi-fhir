@@ -123,7 +123,7 @@ public class IdHelperServiceTest {
 		String resourceType = "Patient";
 
 		Object[] tuple = new Object[] {
-			1L,
+			JpaPid.fromId(1L),
 			"Patient",
 			"AAA",
 			new Date(),
