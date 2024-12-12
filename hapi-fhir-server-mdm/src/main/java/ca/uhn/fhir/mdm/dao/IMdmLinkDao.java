@@ -41,7 +41,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink<P>> {
+public interface IMdmLinkDao<P extends IResourcePersistentId<?>, M extends IMdmLink<P>> {
 	int deleteWithAnyReferenceToPid(P thePid);
 
 	int deleteWithAnyReferenceToPidAndMatchResultNot(P thePid, MdmMatchResultEnum theMatchResult);
