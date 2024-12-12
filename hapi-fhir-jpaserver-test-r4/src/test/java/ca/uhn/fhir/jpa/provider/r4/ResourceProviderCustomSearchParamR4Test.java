@@ -6,7 +6,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -45,7 +44,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.SearchParameter.XPathUsageType;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionStatus;
@@ -69,17 +67,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderCustomSearchParamR4Test.class);
-
-
-	@Override
-	@AfterEach
-	public void after() throws Exception {
-		super.after();
-		JpaStorageSettings defaults = new JpaStorageSettings();
-		myStorageSettings.setDefaultSearchParamsCanBeOverridden(defaults.isDefaultSearchParamsCanBeOverridden());
-		myStorageSettings.setAllowContainsSearches(defaults.isAllowContainsSearches());
-		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaults.isMarkResourcesForReindexingUponSearchParameterChange());
-	}
 
 	@BeforeEach
 	@Override

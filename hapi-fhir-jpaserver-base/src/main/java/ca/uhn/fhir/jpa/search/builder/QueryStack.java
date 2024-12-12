@@ -821,8 +821,6 @@ public class QueryStack {
 
 		ICanMakeMissingParamPredicate innerQuery = PredicateBuilderFactory.createPredicateBuilderForParamType(
 				theParams.getParamType(), theParams.getSqlBuilder(), this);
-		assert innerQuery != null;
-
 		return innerQuery.createPredicateParamMissingValue(new MissingQueryParameterPredicateParams(
 				table, theParams.isMissing(), theParams.getParamName(), theParams.getRequestPartitionId()));
 	}

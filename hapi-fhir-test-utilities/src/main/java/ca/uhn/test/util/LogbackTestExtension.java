@@ -39,7 +39,7 @@ import java.util.function.Predicate;
  */
 public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallback {
 	private final Logger myLogger;
-	private Level myLevel;
+	private final Level myLevel;
 	private ListAppender<ILoggingEvent> myListAppender = null;
 	private Level mySavedLevel;
 
@@ -107,10 +107,8 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 		myListAppender.start();
 		myLogger.addAppender(myListAppender);
 
-		if (myLevel != null) {
-			mySavedLevel = myLogger.getLevel();
-			myLogger.setLevel(myLevel);
-		}
+		mySavedLevel = myLogger.getLevel();
+		setLoggerLevel(myLevel);
 	}
 
 	/**
@@ -122,6 +120,23 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #setLoggerLevel(Level)} instead
+	 */
+	@Deprecated
+	public void setUp(Level theLevel) {
+		setLoggerLevel(theLevel);
+	}
+
+	/**
+	 * @deprecated This class should be registered as a junit5 extension, and will be set
+	 * up automatically.
+	 */
+	@Deprecated
+	public void setUp() {
+		// nothing
+	}
+
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
 		if (myListAppender != null) {
@@ -129,7 +144,7 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 			myListAppender.stop();
 			myListAppender = null;
 		}
-		if (myLevel != null) {
+		if (mySavedLevel != null) {
 			myLogger.setLevel(mySavedLevel);
 		}
 	}

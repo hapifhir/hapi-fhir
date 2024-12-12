@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Nonnull;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -354,7 +355,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 			.get(0)
 			.getPart()
 			.stream()
-			.filter(t -> theParamName.equals(t.getName()))
+			.filter(t -> Objects.equals(theParamName, t.getName()))
 			.toList();
 
 		assertThat(indexInstances).hasSize(theExpectedSize);
