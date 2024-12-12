@@ -255,6 +255,8 @@ public class HapiMigrator {
 	}
 
 	public void addTask(BaseTask theTask) {
+		// Don't add a check for unit test mode here - We call this from
+		// tests which expect tasks to always be added
 		myTaskList.add(theTask);
 	}
 

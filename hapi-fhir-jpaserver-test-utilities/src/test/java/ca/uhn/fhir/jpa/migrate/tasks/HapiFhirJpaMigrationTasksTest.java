@@ -75,15 +75,6 @@ public class HapiFhirJpaMigrationTasksTest {
 		// Create migrator and initialize schema using a static version
 		// of the schema from the 7.2.0 release
 		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Set.of());
-
-		// This is just logging to try and track down an intermittent failure
-		for (VersionEnum next : VersionEnum.values()) {
-			int size = tasks.getAllTasks(next).size();
-			if (size > 0) {
-				ourLog.info("Version {} has {} tasks", next, size);
-			}
-		}
-
 		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
 		migrator.addTask(new InitializeSchemaTask("7.2.0",				"20180115.0",
 			new SchemaInitializationProvider(
@@ -142,30 +133,30 @@ public class HapiFhirJpaMigrationTasksTest {
 			"""
 				insert into
 				HFJ_RESOURCE (
-				  RES_DELETED_AT,
-				  RES_VERSION,
-				  FHIR_ID,
-				  HAS_TAGS,
-				  RES_PUBLISHED,
-				  RES_UPDATED,
-				  SP_HAS_LINKS,
-				  HASH_SHA256,
-				  SP_INDEX_STATUS,
-				  RES_LANGUAGE,
-				  SP_CMPSTR_UNIQ_PRESENT,
-				  SP_COORDS_PRESENT,
-				  SP_DATE_PRESENT,
-				  SP_NUMBER_PRESENT,
-				  SP_QUANTITY_PRESENT,
-				  SP_STRING_PRESENT,
-				  SP_TOKEN_PRESENT,
-				  SP_URI_PRESENT,
-				  SP_QUANTITY_NRML_PRESENT,
-				  RES_TYPE,
-				  RES_VER,
-				  RES_ID)
-				  values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  		""",
+						RES_DELETED_AT,
+						RES_VERSION,
+						FHIR_ID,
+						HAS_TAGS,
+						RES_PUBLISHED,
+						RES_UPDATED,
+						SP_HAS_LINKS,
+						HASH_SHA256,
+						SP_INDEX_STATUS,
+						RES_LANGUAGE,
+						SP_CMPSTR_UNIQ_PRESENT,
+						SP_COORDS_PRESENT,
+						SP_DATE_PRESENT,
+						SP_NUMBER_PRESENT,
+						SP_QUANTITY_PRESENT,
+						SP_STRING_PRESENT,
+						SP_TOKEN_PRESENT,
+						SP_URI_PRESENT,
+						SP_QUANTITY_NRML_PRESENT,
+						RES_TYPE,
+						RES_VER,
+						RES_ID)
+						values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			""",
 			new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
 				@Override
 				protected void setValues(@Nonnull PreparedStatement thePs, @Nonnull LobCreator theLobCreator) throws SQLException {
