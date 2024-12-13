@@ -80,5 +80,7 @@ public interface IBatch2DaoSvc {
 				theStart, theEnd, 20000 /* ResourceIdListStep.DEFAULT_PAGE_SIZE */, theTargetPartitionId, theUrl));
 	}
 
-	Stream<IdDt> streamSourceIdsThatReferenceTargetId(IIdType theTargetId);
+	default Stream<IdDt> streamSourceIdsThatReferenceTargetId(IIdType theTargetId) {
+		throw new UnsupportedOperationException();
+	}
 }
