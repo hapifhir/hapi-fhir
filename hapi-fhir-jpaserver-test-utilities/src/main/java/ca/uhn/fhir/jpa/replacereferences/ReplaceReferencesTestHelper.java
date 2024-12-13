@@ -51,11 +51,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ReplaceReferencesTestHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReplaceReferencesTestHelper.class);
 
-	static final Identifier pat1IdentifierA = new Identifier().setSystem("SYS1A").setValue("VAL1A");
-	static final Identifier pat1IdentifierB = new Identifier().setSystem("SYS1B").setValue("VAL1B");
-	static final Identifier pat2IdentifierA = new Identifier().setSystem("SYS2A").setValue("VAL2A");
-	static final Identifier pat2IdentifierB = new Identifier().setSystem("SYS2B").setValue("VAL2B");
-	static final Identifier patBothIdentifierC = new Identifier().setSystem("SYSC").setValue("VALC");
+	static final Identifier pat1IdentifierA =
+			new Identifier().setSystem("SYS1A").setValue("VAL1A");
+	static final Identifier pat1IdentifierB =
+			new Identifier().setSystem("SYS1B").setValue("VAL1B");
+	static final Identifier pat2IdentifierA =
+			new Identifier().setSystem("SYS2A").setValue("VAL2A");
+	static final Identifier pat2IdentifierB =
+			new Identifier().setSystem("SYS2B").setValue("VAL2B");
+	static final Identifier patBothIdentifierC =
+			new Identifier().setSystem("SYSC").setValue("VALC");
 	public static final int TOTAL_EXPECTED_PATCHES = 23;
 	public static final int SMALL_BATCH_SIZE = 5;
 	public static final int EXPECTED_SMALL_BATCHES = (TOTAL_EXPECTED_PATCHES + SMALL_BATCH_SIZE - 1) / SMALL_BATCH_SIZE;
@@ -108,7 +113,7 @@ public class ReplaceReferencesTestHelper {
 		patient2.addIdentifier(pat2IdentifierB);
 		patient2.addIdentifier(patBothIdentifierC);
 		patient2.getManagingOrganization().setReferenceElement(myOrgId);
-		myTargetPatientId =  myPatientDao.create(patient2, mySrd).getId().toUnqualifiedVersionless();
+		myTargetPatientId = myPatientDao.create(patient2, mySrd).getId().toUnqualifiedVersionless();
 
 		Encounter enc1 = new Encounter();
 		enc1.setStatus(Encounter.EncounterStatus.CANCELLED);
@@ -145,7 +150,6 @@ public class ReplaceReferencesTestHelper {
 		myResultPatient = new Patient();
 		myResultPatient.setIdElement((IdType) myTargetPatientId);
 		myResultPatient.addIdentifier(pat1IdentifierA);
-
 	}
 
 	public void setSourceAndTarget(PatientMergeInputParameters inParams) {
@@ -154,8 +158,7 @@ public class ReplaceReferencesTestHelper {
 	}
 
 	public void setResultPatient(PatientMergeInputParameters theInParams, boolean theWithDelete) {
-		if (!theWithDelete)
-		{
+		if (!theWithDelete) {
 			// add the link only if we are not deleting the source
 			Patient.PatientLinkComponent link = myResultPatient.addLink();
 			link.setOther(new Reference(mySourcePatientId));
@@ -176,14 +179,15 @@ public class ReplaceReferencesTestHelper {
 		PatientEverythingParameters everythingParams = new PatientEverythingParameters();
 		everythingParams.setCount(new IntegerType(100));
 
-		IBundleProvider bundleProvider = myPatientDao.patientInstanceEverything(null, mySrd, everythingParams, myTargetPatientId);
+		IBundleProvider bundleProvider =
+				myPatientDao.patientInstanceEverything(null, mySrd, everythingParams, myTargetPatientId);
 
 		assertNull(bundleProvider.getNextPageId());
 
 		return bundleProvider.getAllResources().stream()
-			.map(IBaseResource::getIdElement)
-			.map(IIdType::toUnqualifiedVersionless)
-			.collect(Collectors.toSet());
+				.map(IBaseResource::getIdElement)
+				.map(IIdType::toUnqualifiedVersionless)
+				.collect(Collectors.toSet());
 	}
 
 	public Boolean taskCompleted(IdType theTaskId) {
@@ -196,23 +200,29 @@ public class ReplaceReferencesTestHelper {
 		return callReplaceReferencesWithBatchSize(theFhirClient, theIsAsync, null);
 	}
 
-	public Parameters callReplaceReferencesWithBatchSize(IGenericClient theFhirClient, boolean theIsAsync, Integer theBatchSize) {
-		IOperationUntypedWithInputAndPartialOutput<Parameters> request = theFhirClient.operation()
-			.onServer()
-			.named(OPERATION_REPLACE_REFERENCES)
-			.withParameter(Parameters.class, ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID, new StringType(mySourcePatientId.getValue()))
-			.andParameter(ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID, new StringType(myTargetPatientId.getValue()));
+	public Parameters callReplaceReferencesWithBatchSize(
+			IGenericClient theFhirClient, boolean theIsAsync, Integer theBatchSize) {
+		IOperationUntypedWithInputAndPartialOutput<Parameters> request = theFhirClient
+				.operation()
+				.onServer()
+				.named(OPERATION_REPLACE_REFERENCES)
+				.withParameter(
+						Parameters.class,
+						ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID,
+						new StringType(mySourcePatientId.getValue()))
+				.andParameter(
+						ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID,
+						new StringType(myTargetPatientId.getValue()));
 		if (theBatchSize != null) {
-			request.andParameter(ProviderConstants.OPERATION_REPLACE_REFERENCES_BATCH_SIZE, new IntegerType(theBatchSize));
+			request.andParameter(
+					ProviderConstants.OPERATION_REPLACE_REFERENCES_BATCH_SIZE, new IntegerType(theBatchSize));
 		}
 
 		if (theIsAsync) {
 			request.withAdditionalHeader(HEADER_PREFER, HEADER_PREFER_RESPOND_ASYNC);
 		}
 
-		return request
-			.returnResourceType(Parameters.class)
-			.execute();
+		return request.returnResourceType(Parameters.class).execute();
 	}
 
 	public void assertAllReferencesUpdated() {
@@ -252,7 +262,8 @@ public class ReplaceReferencesTestHelper {
 		assertThat(actual).contains(myTargetEnc1);
 	}
 
-	public PatientMergeInputParameters buildMultipleTargetMatchParameters(boolean theWithDelete, boolean theWithInputResultPatient, boolean theWithPreview) {
+	public PatientMergeInputParameters buildMultipleTargetMatchParameters(
+			boolean theWithDelete, boolean theWithInputResultPatient, boolean theWithPreview) {
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
 		inParams.sourcePatient = new Reference().setReferenceElement(mySourcePatientId);
 		inParams.targetPatientIdentifier = patBothIdentifierC;
@@ -266,7 +277,8 @@ public class ReplaceReferencesTestHelper {
 		return inParams;
 	}
 
-	public PatientMergeInputParameters buildMultipleSourceMatchParameters(boolean theWithDelete, boolean theWithInputResultPatient, boolean theWithPreview) {
+	public PatientMergeInputParameters buildMultipleSourceMatchParameters(
+			boolean theWithDelete, boolean theWithInputResultPatient, boolean theWithPreview) {
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
 		inParams.sourcePatientIdentifier = patBothIdentifierC;
 		inParams.targetPatient = new Reference().setReferenceElement(mySourcePatientId);
@@ -320,27 +332,32 @@ public class ReplaceReferencesTestHelper {
 		}
 	}
 
-	public static void validatePatchResultBundle(Bundle patchResultBundle, int theTotalExpectedPatches, List<String> theExpectedResourceTypes) {
+	public static void validatePatchResultBundle(
+			Bundle patchResultBundle, int theTotalExpectedPatches, List<String> theExpectedResourceTypes) {
 		String resourceMatchString = "(" + String.join("|", theExpectedResourceTypes) + ")";
-		Pattern expectedPatchIssuePattern = Pattern.compile("Successfully patched resource \"" + resourceMatchString + "/\\d+/_history/\\d+\".");
-		assertThat(patchResultBundle.getEntry()).hasSize(theTotalExpectedPatches)
-			.allSatisfy(entry ->
-				assertThat(entry.getResponse().getOutcome())
-					.isInstanceOf(OperationOutcome.class)
-					.extracting(OperationOutcome.class::cast)
-					.extracting(OperationOutcome::getIssue)
-					.satisfies(issues ->
-						assertThat(issues).hasSize(1)
-							.element(0)
-							.extracting(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
-							.satisfies(diagnostics -> assertThat(diagnostics).matches(expectedPatchIssuePattern))));
+		Pattern expectedPatchIssuePattern =
+				Pattern.compile("Successfully patched resource \"" + resourceMatchString + "/\\d+/_history/\\d+\".");
+		assertThat(patchResultBundle.getEntry())
+				.hasSize(theTotalExpectedPatches)
+				.allSatisfy(entry -> assertThat(entry.getResponse().getOutcome())
+						.isInstanceOf(OperationOutcome.class)
+						.extracting(OperationOutcome.class::cast)
+						.extracting(OperationOutcome::getIssue)
+						.satisfies(issues -> assertThat(issues)
+								.hasSize(1)
+								.element(0)
+								.extracting(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+								.satisfies(
+										diagnostics -> assertThat(diagnostics).matches(expectedPatchIssuePattern))));
 	}
 
 	public Bundle validateCompletedTask(IIdType theTaskId) {
 		Bundle patchResultBundle;
 		Task taskWithOutput = myTaskDao.read(theTaskId, mySrd);
 		assertThat(taskWithOutput.getStatus()).isEqualTo(Task.TaskStatus.COMPLETED);
-		ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
+		ourLog.info(
+				"Complete Task: {}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
 
 		Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
 
@@ -350,20 +367,17 @@ public class ReplaceReferencesTestHelper {
 		assertEquals("Bundle", taskType.getCode());
 
 		List<Resource> containedResources = taskWithOutput.getContained();
-		assertThat(containedResources)
-			.hasSize(1)
-			.element(0)
-			.isInstanceOf(Bundle.class);
+		assertThat(containedResources).hasSize(1).element(0).isInstanceOf(Bundle.class);
 
 		Bundle containedBundle = (Bundle) containedResources.get(0);
 
 		Reference outputRef = (Reference) taskOutput.getValue();
 		patchResultBundle = (Bundle) outputRef.getResource();
-//		ourLog.info("containedBundle: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(containedBundle));
-//		ourLog.info("patchResultBundle: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patchResultBundle));
+		//		ourLog.info("containedBundle: {}",
+		// myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(containedBundle));
+		//		ourLog.info("patchResultBundle: {}",
+		// myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patchResultBundle));
 		assertTrue(containedBundle.equalsDeep(patchResultBundle));
 		return patchResultBundle;
 	}
-
-
 }
