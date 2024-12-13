@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.dao.merge;
+package ca.uhn.fhir.jpa.provider.merge;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_RESULT_PATIENT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT;

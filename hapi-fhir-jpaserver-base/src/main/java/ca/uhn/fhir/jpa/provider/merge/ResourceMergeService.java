@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
@@ -17,13 +17,18 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.dao.merge;
+package ca.uhn.fhir.jpa.provider.merge;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.batch2.jobs.merge.MergeHelper;
+import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
+import ca.uhn.fhir.batch2.util.Batch2TaskUtils;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
@@ -37,7 +42,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -45,9 +49,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,31 +59,40 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 
 public class ResourceMergeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceMergeService.class);
 
-	private final IFhirResourceDaoPatient<Patient> myDao;
+	private final IFhirResourceDaoPatient<Patient> myPatientDao;
 	private final IReplaceReferencesSvc myReplaceReferencesSvc;
 	private final IHapiTransactionService myHapiTransactionService;
 	private final FhirContext myFhirContext;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private final IFhirResourceDao<Task> myTaskDao;
+	private final IJobCoordinator myJobCoordinator;
+	private final MergeHelper myMergeHelper;
 
 	public ResourceMergeService(
 			IFhirResourceDaoPatient<Patient> thePatientDao,
+			IFhirResourceDao<Task> theTaskDao,
 			IReplaceReferencesSvc theReplaceReferencesSvc,
 			IHapiTransactionService theHapiTransactionService,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		myDao = thePatientDao;
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			IJobCoordinator theJobCoordinator) {
+
+		myPatientDao = thePatientDao;
+		myTaskDao = theTaskDao;
 		myReplaceReferencesSvc = theReplaceReferencesSvc;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
-		myFhirContext = myDao.getContext();
+		myJobCoordinator = theJobCoordinator;
+		myFhirContext = myPatientDao.getContext();
 		myHapiTransactionService = theHapiTransactionService;
+		myMergeHelper = new MergeHelper(myPatientDao);
 	}
 
 	/**
@@ -91,10 +104,6 @@ public class ResourceMergeService {
 	 */
 	public MergeOperationOutcome merge(
 			MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
-
-		// FIXME ED update to work like ReplaceReferencesSvcImpl.replaceReferences()
-		// in replaceReferencesPreferSync, still need to fallback to async if count exceeds batchSize,
-		// but don't need to stream resources, can just use count method for that.
 
 		MergeOperationOutcome mergeOutcome = new MergeOperationOutcome();
 		IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
@@ -121,11 +130,39 @@ public class ResourceMergeService {
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
+		ValidationResult validationResult = validate(theMergeOperationParameters, theRequestDetails, theMergeOutcome);
+
+		if (!validationResult.isValid) {
+			return;
+		}
+
+		Patient sourceResource = validationResult.sourceResource;
+		Patient targetResource = validationResult.targetResource;
+
+		if (theMergeOperationParameters.getPreview()) {
+			handlePreview(
+					sourceResource, targetResource, theMergeOperationParameters, theRequestDetails, theMergeOutcome);
+			return;
+		}
+
+		doMerge(theMergeOperationParameters, sourceResource, targetResource, theRequestDetails, theMergeOutcome);
+
+		String detailsText = "Merge operation completed successfully.";
+		addInfoToOperationOutcome(theMergeOutcome.getOperationOutcome(), null, detailsText);
+	}
+
+	private ValidationResult validate(
+			MergeOperationInputParameters theMergeOperationParameters,
+			RequestDetails theRequestDetails,
+			MergeOperationOutcome theMergeOutcome) {
+
+		ValidationResult validationResult = new ValidationResult();
 		IBaseOperationOutcome operationOutcome = theMergeOutcome.getOperationOutcome();
 
 		if (!validateMergeOperationParameters(theMergeOperationParameters, operationOutcome)) {
 			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_400_BAD_REQUEST);
-			return;
+			validationResult.isValid = false;
+			return validationResult;
 		}
 
 		// cast to Patient, since we only support merging Patient resources for now
@@ -134,8 +171,11 @@ public class ResourceMergeService {
 
 		if (sourceResource == null) {
 			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
-			return;
+			validationResult.isValid = false;
+			return validationResult;
 		}
+
+		validationResult.sourceResource = sourceResource;
 
 		// cast to Patient, since we only support merging Patient resources for now
 		Patient targetResource =
@@ -143,90 +183,147 @@ public class ResourceMergeService {
 
 		if (targetResource == null) {
 			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
-			return;
+			validationResult.isValid = false;
+			return validationResult;
 		}
+
+		validationResult.targetResource = targetResource;
 
 		if (!validateSourceAndTargetAreSuitableForMerge(sourceResource, targetResource, operationOutcome)) {
 			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
-			return;
+			validationResult.isValid = false;
+			return validationResult;
 		}
 
 		if (!validateResultResourceIfExists(
 				theMergeOperationParameters, targetResource, sourceResource, operationOutcome)) {
 			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_400_BAD_REQUEST);
-			return;
+			return validationResult;
 		}
 
-		if (theMergeOperationParameters.getPreview()) {
-			Integer referencingResourceCount = myReplaceReferencesSvc.countResourcesReferencingResource(
-					sourceResource.getIdElement(), theRequestDetails);
-
-			// in preview mode, we should also return how the target would look like
-			Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
-			Patient targetPatientAsIfUpdated = prepareTargetPatientForUpdate(
-					targetResource, sourceResource, theResultResource, theMergeOperationParameters.getDeleteSource());
-			theMergeOutcome.setUpdatedTargetResource(targetPatientAsIfUpdated);
-
-			// adding +2 because the source and the target resources themselved would be updated as well
-			String diagnosticsMsg = String.format("Merge would update %d resources", referencingResourceCount + 2);
-			String detailsText = "Preview only merge operation - no issues detected";
-			addInfoToOperationOutcome(operationOutcome, diagnosticsMsg, detailsText);
-			return;
-		}
-
-		mergeInTransaction(
-				theMergeOperationParameters, sourceResource, targetResource, theRequestDetails, theMergeOutcome);
-
-		String detailsText = "Merge operation completed successfully.";
-		addInfoToOperationOutcome(operationOutcome, null, detailsText);
+		validationResult.isValid = true;
+		return validationResult;
 	}
 
-	private void mergeInTransaction(
+	private void handlePreview(
+			Patient theSourceResource,
+			Patient theTargetResource,
+			MergeOperationInputParameters theMergeOperationParameters,
+			RequestDetails theRequestDetails,
+			MergeOperationOutcome theMergeOutcome) {
+
+		Integer referencingResourceCount = myReplaceReferencesSvc.countResourcesReferencingResource(
+				theSourceResource.getIdElement(), theRequestDetails);
+
+		// in preview mode, we should also return how the target would look like
+		Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
+		Patient targetPatientAsIfUpdated = myMergeHelper.prepareTargetPatientForUpdate(
+				theTargetResource, theSourceResource, theResultResource, theMergeOperationParameters.getDeleteSource());
+		theMergeOutcome.setUpdatedTargetResource(targetPatientAsIfUpdated);
+
+		// adding +2 because the source and the target resources themselved would be updated as well
+		String diagnosticsMsg = String.format("Merge would update %d resources", referencingResourceCount + 2);
+		String detailsText = "Preview only merge operation - no issues detected";
+		addInfoToOperationOutcome(theMergeOutcome.getOperationOutcome(), diagnosticsMsg, detailsText);
+	}
+
+	private void doMerge(
 			MergeOperationInputParameters theMergeOperationParameters,
 			Patient theSourceResource,
 			Patient theTargetResource,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
-		// TODO: cannot do this in transaction yet, because systemDAO.transaction called by replaceReferences complains
-		// that  there is  an active transaction already.
 		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
 				theRequestDetails, ReadPartitionIdRequestDetails.forRead(theTargetResource.getIdElement()));
+
+		if (theRequestDetails.isPreferAsync()) {
+			// client prefers async processing, do async
+			doMergeAsync(
+					theMergeOperationParameters,
+					theSourceResource,
+					theTargetResource,
+					theRequestDetails,
+					theMergeOutcome,
+					partitionId);
+		} else {
+			// count the number of refs, if it is larger than batch size then process async, otherwise process sync
+			Integer numberOfRefs = myReplaceReferencesSvc.countResourcesReferencingResource(
+					theSourceResource.getIdElement(), theRequestDetails);
+			if (numberOfRefs > theMergeOperationParameters.getBatchSize()) {
+				doMergeAsync(
+						theMergeOperationParameters,
+						theSourceResource,
+						theTargetResource,
+						theRequestDetails,
+						theMergeOutcome,
+						partitionId);
+			} else {
+				doMergeSync(
+						theMergeOperationParameters,
+						theSourceResource,
+						theTargetResource,
+						theRequestDetails,
+						theMergeOutcome,
+						partitionId);
+			}
+		}
+	}
+
+	private void doMergeSync(
+			MergeOperationInputParameters theMergeOperationParameters,
+			Patient theSourceResource,
+			Patient theTargetResource,
+			RequestDetails theRequestDetails,
+			MergeOperationOutcome theMergeOutcome,
+			RequestPartitionId partitionId) {
 
 		ReplaceReferenceRequest replaceReferenceRequest = new ReplaceReferenceRequest(
 				theSourceResource.getIdElement(),
 				theTargetResource.getIdElement(),
 				theMergeOperationParameters.getBatchSize(),
 				partitionId);
+		replaceReferenceRequest.setForceSync(true);
 
-		// FIXME ED this will need to change because this calls JOB_REPLACE_REFERENCES when you want to call JOB_MERGE
-		Parameters replaceRefsOutParams =
-				(Parameters) myReplaceReferencesSvc.replaceReferences(replaceReferenceRequest, theRequestDetails);
+		myReplaceReferencesSvc.replaceReferences(replaceReferenceRequest, theRequestDetails);
 
-		Parameters.ParametersParameterComponent taskOutParam =
-				replaceRefsOutParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK);
-		if (taskOutParam != null) {
-			theMergeOutcome.setTask(taskOutParam.getResource());
+		Patient updatedTarget = myMergeHelper.updateMergedResourcesAfterReferencesReplaced(
+				myHapiTransactionService,
+				theSourceResource,
+				theTargetResource,
+				(Patient) theMergeOperationParameters.getResultResource(),
+				theMergeOperationParameters.getDeleteSource(),
+				theRequestDetails);
+		theMergeOutcome.setUpdatedTargetResource(updatedTarget);
+	}
+
+	// FIXME ED add unit tests for async case
+	private void doMergeAsync(
+			MergeOperationInputParameters theMergeOperationParameters,
+			Patient theSourceResource,
+			Patient theTargetResource,
+			RequestDetails theRequestDetails,
+			MergeOperationOutcome theMergeOutcome,
+			RequestPartitionId partitionId) {
+
+		MergeJobParameters mergeJobParameters = new MergeJobParameters();
+		if (theMergeOperationParameters.getResultResource() != null) {
+			mergeJobParameters.setResultResource(myFhirContext
+					.newJsonParser()
+					.encodeResourceToString(theMergeOperationParameters.getResultResource()));
 		}
+		mergeJobParameters.setDeleteSource(theMergeOperationParameters.getDeleteSource());
+		mergeJobParameters.setBatchSize(theMergeOperationParameters.getBatchSize());
+		mergeJobParameters.setSourceId(new FhirIdJson(theSourceResource.getIdElement()));
+		mergeJobParameters.setTargetId(new FhirIdJson(theTargetResource.getIdElement()));
+		mergeJobParameters.setPartitionId(partitionId);
 
-		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
-			Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
-			Patient patientToUpdate = prepareTargetPatientForUpdate(
-					theTargetResource,
-					theSourceResource,
-					theResultResource,
-					theMergeOperationParameters.getDeleteSource());
-			// update the target patient resource after the references are updated
-			Patient targetPatientAfterUpdate = updateResource(patientToUpdate, theRequestDetails);
-			theMergeOutcome.setUpdatedTargetResource(targetPatientAfterUpdate);
+		Task task = Batch2TaskUtils.startJobAndCreateAssociatedTask(
+				myTaskDao, theRequestDetails, myJobCoordinator, JOB_MERGE, mergeJobParameters);
 
-			if (theMergeOperationParameters.getDeleteSource()) {
-				deleteResource(theSourceResource, theRequestDetails);
-			} else {
-				prepareSourceResourceForUpdate(theSourceResource, theTargetResource);
-				updateResource(theSourceResource, theRequestDetails);
-			}
-		});
+		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());
+		task.getMeta().setVersionId(null);
+		theMergeOutcome.setTask(task);
 	}
 
 	private boolean validateResultResourceIfExists(
@@ -398,86 +495,6 @@ public class ResourceMergeService {
 		return true;
 	}
 
-	private void prepareSourceResourceForUpdate(Patient theSourceResource, Patient theTargetResource) {
-		theSourceResource.setActive(false);
-		theSourceResource
-				.addLink()
-				.setType(Patient.LinkType.REPLACEDBY)
-				.setOther(new Reference(theTargetResource.getIdElement().toVersionless()));
-	}
-
-	private Patient prepareTargetPatientForUpdate(
-			Patient theTargetResource,
-			Patient theSourceResource,
-			@Nullable Patient theResultResource,
-			boolean theDeleteSource) {
-
-		// if the client provided a result resource as input then use it to update the target resource
-		if (theResultResource != null) {
-			return theResultResource;
-		}
-
-		// client did not provide a result resource, we should update the target resource,
-		// add the replaces link to the target resource, if the source resource is not to be deleted
-		if (!theDeleteSource) {
-			theTargetResource
-					.addLink()
-					.setType(Patient.LinkType.REPLACES)
-					.setOther(new Reference(theSourceResource.getIdElement().toVersionless()));
-		}
-
-		// copy all identifiers from the source to the target
-		copyIdentifiersAndMarkOld(theSourceResource, theTargetResource);
-
-		return theTargetResource;
-	}
-
-	/**
-	 * Checks if theIdentifiers contains theIdentifier using equalsDeep
-	 *
-	 * @param theIdentifiers the list of identifiers
-	 * @param theIdentifier  the identifier to check
-	 * @return true if theIdentifiers contains theIdentifier, false otherwise
-	 */
-	private boolean containsIdentifier(List<Identifier> theIdentifiers, Identifier theIdentifier) {
-		for (Identifier identifier : theIdentifiers) {
-			if (identifier.equalsDeep(theIdentifier)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Copies each identifier from theSourceResource to theTargetResource, after checking that theTargetResource does
-	 * not already contain the source identifier. Marks the copied identifiers marked as old.
-	 *
-	 * @param theSourceResource the source resource to copy identifiers from
-	 * @param theTargetResource the target resource to copy identifiers to
-	 */
-	private void copyIdentifiersAndMarkOld(Patient theSourceResource, Patient theTargetResource) {
-		if (theSourceResource.hasIdentifier()) {
-			List<Identifier> sourceIdentifiers = theSourceResource.getIdentifier();
-			List<Identifier> targetIdentifiers = theTargetResource.getIdentifier();
-			for (Identifier sourceIdentifier : sourceIdentifiers) {
-				if (!containsIdentifier(targetIdentifiers, sourceIdentifier)) {
-					Identifier copyOfSrcIdentifier = sourceIdentifier.copy();
-					copyOfSrcIdentifier.setUse(Identifier.IdentifierUse.OLD);
-					theTargetResource.addIdentifier(copyOfSrcIdentifier);
-				}
-			}
-		}
-	}
-
-	private Patient updateResource(Patient theResource, RequestDetails theRequestDetails) {
-		DaoMethodOutcome outcome = myDao.update(theResource, theRequestDetails);
-		return (Patient) outcome.getResource();
-	}
-
-	private void deleteResource(Patient theResource, RequestDetails theRequestDetails) {
-		myDao.delete(theResource.getIdElement(), theRequestDetails);
-	}
-
 	/**
 	 * Validates the merge operation parameters and adds validation errors to the outcome
 	 *
@@ -597,7 +614,7 @@ public class ResourceMergeService {
 		searchParameterMap.add("identifier", tokenAndListParam);
 		searchParameterMap.setCount(2);
 
-		IBundleProvider bundle = myDao.search(searchParameterMap, theRequestDetails);
+		IBundleProvider bundle = myPatientDao.search(searchParameterMap, theRequestDetails);
 		List<IBaseResource> resources = bundle.getAllResources();
 		if (resources.isEmpty()) {
 			String msg = String.format(
@@ -627,7 +644,7 @@ public class ResourceMergeService {
 		IIdType theResourceId = new IdType(r4ref.getReferenceElement().getValue());
 		IBaseResource resource;
 		try {
-			resource = myDao.read(theResourceId.toVersionless(), theRequestDetails);
+			resource = myPatientDao.read(theResourceId.toVersionless(), theRequestDetails);
 		} catch (ResourceNotFoundException e) {
 			String msg = String.format(
 					"Resource not found for the reference specified in '%s' parameter", theOperationParameterName);
@@ -675,5 +692,11 @@ public class ResourceMergeService {
 
 	private void addErrorToOperationOutcome(IBaseOperationOutcome theOutcome, String theDiagnosticMsg, String theCode) {
 		OperationOutcomeUtil.addIssue(myFhirContext, theOutcome, "error", theDiagnosticMsg, null, theCode);
+	}
+
+	private static class ValidationResult {
+		protected Patient sourceResource;
+		protected Patient targetResource;
+		protected boolean isValid;
 	}
 }

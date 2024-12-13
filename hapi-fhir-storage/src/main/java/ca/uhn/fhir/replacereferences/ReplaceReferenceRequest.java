@@ -45,6 +45,8 @@ public class ReplaceReferenceRequest {
 
 	public final RequestPartitionId partitionId;
 
+	private boolean myForceSync = false;
+
 	public ReplaceReferenceRequest(
 			@Nonnull IIdType theSourceId,
 			@Nonnull IIdType theTargetId,
@@ -82,5 +84,13 @@ public class ReplaceReferenceRequest {
 		retval.addRevInclude(new Include("*"));
 		// Note we do not set the count since we will be streaming
 		return retval;
+	}
+
+	public boolean isForceSync() {
+		return myForceSync;
+	}
+
+	public void setForceSync(boolean forceSync) {
+		this.myForceSync = forceSync;
 	}
 }

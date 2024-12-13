@@ -171,6 +171,10 @@ public class ReplaceReferencesTestHelper {
 		return myPatientDao.read(mySourcePatientId, mySrd);
 	}
 
+	public Patient readTargetPatient() {
+		return myPatientDao.read(myTargetPatientId, mySrd);
+	}
+
 	public IIdType getTargetPatientId() {
 		return myTargetPatientId;
 	}
