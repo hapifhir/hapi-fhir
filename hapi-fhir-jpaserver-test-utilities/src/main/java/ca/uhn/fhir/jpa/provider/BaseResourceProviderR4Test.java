@@ -76,60 +76,60 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
-		.withServerBeforeAll(s -> {
-			s.registerProviders(myResourceProviders.createProviders());
-			s.setDefaultResponseEncoding(EncodingEnum.XML);
-			s.setDefaultPrettyPrint(false);
+			.withServerBeforeAll(s -> {
+				s.registerProviders(myResourceProviders.createProviders());
+				s.setDefaultResponseEncoding(EncodingEnum.XML);
+				s.setDefaultPrettyPrint(false);
 
-			myFhirContext.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+				myFhirContext.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
-			s.registerProvider(mySystemProvider);
-			s.registerProvider(myBinaryAccessProvider);
-			s.registerProvider(myAppCtx.getBean(BulkDataExportProvider.class));
-			s.registerProvider(myAppCtx.getBean(DeleteExpungeProvider.class));
-			s.registerProvider(myAppCtx.getBean(DiffProvider.class));
-			s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
-			s.registerProvider(myAppCtx.getBean(ProcessMessageProvider.class));
-			s.registerProvider(myAppCtx.getBean(ReindexProvider.class));
-			s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
-			s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
-			s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+				s.registerProvider(mySystemProvider);
+				s.registerProvider(myBinaryAccessProvider);
+				s.registerProvider(myAppCtx.getBean(BulkDataExportProvider.class));
+				s.registerProvider(myAppCtx.getBean(DeleteExpungeProvider.class));
+				s.registerProvider(myAppCtx.getBean(DiffProvider.class));
+				s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+				s.registerProvider(myAppCtx.getBean(ProcessMessageProvider.class));
+				s.registerProvider(myAppCtx.getBean(ReindexProvider.class));
+				s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
+				s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
+				s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
-			s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
+				s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
-			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(
-				s, mySystemDao, myStorageSettings, mySearchParamRegistry, myValidationSupport);
-			confProvider.setImplementationDescription("THIS IS THE DESC");
-			s.setServerConformanceProvider(confProvider);
+				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(
+						s, mySystemDao, myStorageSettings, mySearchParamRegistry, myValidationSupport);
+				confProvider.setImplementationDescription("THIS IS THE DESC");
+				s.setServerConformanceProvider(confProvider);
 
-			// Register a CORS filter
-			CorsConfiguration config = new CorsConfiguration();
-			CorsInterceptor corsInterceptor = new CorsInterceptor(config);
-			config.addAllowedHeader("Accept");
-			config.addAllowedHeader("Access-Control-Request-Headers");
-			config.addAllowedHeader("Access-Control-Request-Method");
-			config.addAllowedHeader("Cache-Control");
-			config.addAllowedHeader("Content-Type");
-			config.addAllowedHeader("Origin");
-			config.addAllowedHeader("Prefer");
-			config.addAllowedHeader("x-fhir-starter");
-			config.addAllowedHeader("X-Requested-With");
-			config.addAllowedOrigin("*");
-			config.addExposedHeader("Location");
-			config.addExposedHeader("Content-Location");
-			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-			s.registerInterceptor(corsInterceptor);
-		})
-		.withServerBeforeEach(s -> {
-			myPort = myServer.getPort();
-			myServerBase = myServer.getBaseUrl();
-			myClient = myServer.getFhirClient();
+				// Register a CORS filter
+				CorsConfiguration config = new CorsConfiguration();
+				CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+				config.addAllowedHeader("Accept");
+				config.addAllowedHeader("Access-Control-Request-Headers");
+				config.addAllowedHeader("Access-Control-Request-Method");
+				config.addAllowedHeader("Cache-Control");
+				config.addAllowedHeader("Content-Type");
+				config.addAllowedHeader("Origin");
+				config.addAllowedHeader("Prefer");
+				config.addAllowedHeader("x-fhir-starter");
+				config.addAllowedHeader("X-Requested-With");
+				config.addAllowedOrigin("*");
+				config.addExposedHeader("Location");
+				config.addExposedHeader("Content-Location");
+				config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+				s.registerInterceptor(corsInterceptor);
+			})
+			.withServerBeforeEach(s -> {
+				myPort = myServer.getPort();
+				myServerBase = myServer.getBaseUrl();
+				myClient = myServer.getFhirClient();
 
-			myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
-			if (shouldLogClient()) {
-				myClient.registerInterceptor(new LoggingInterceptor(verboseClientLogging()));
-			}
-		});
+				myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
+				if (shouldLogClient()) {
+					myClient.registerInterceptor(new LoggingInterceptor(verboseClientLogging()));
+				}
+			});
 
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
@@ -166,9 +166,9 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		for (BundleEntryComponent next : resp.getEntry()) {
 			Patient nextPt = (Patient) next.getResource();
 			String nextStr = nextPt.getName().size() > 0
-				? nextPt.getName().get(0).getGivenAsSingleString() + " "
-				+ nextPt.getName().get(0).getFamily()
-				: "";
+					? nextPt.getName().get(0).getGivenAsSingleString() + " "
+							+ nextPt.getName().get(0).getFamily()
+					: "";
 			if (isNotBlank(nextStr)) {
 				names.add(nextStr);
 			}
@@ -210,7 +210,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	}
 
 	public static ParametersParameterComponent getPartByName(
-		ParametersParameterComponent theParameter, String theName) {
+			ParametersParameterComponent theParameter, String theName) {
 		for (ParametersParameterComponent part : theParameter.getPart()) {
 			if (part.getName().equals(theName)) {
 				return part;
@@ -240,7 +240,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
 			ids = toUnqualifiedVersionlessIdValues(bundle);
 			ourLog.debug("Observation: \n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		}
 
 		return ids;
