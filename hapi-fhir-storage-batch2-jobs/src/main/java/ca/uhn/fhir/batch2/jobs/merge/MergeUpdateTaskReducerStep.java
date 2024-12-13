@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * hapi-fhir-storage-batch2-jobs
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.batch2.jobs.merge;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -8,11 +27,18 @@ import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencePatchOutcomeJso
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceUpdateTaskReducerStep;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.r4.model.Patient;
 
 public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReducerStep<MergeJobParameters> {
-	public MergeUpdateTaskReducerStep(DaoRegistry theDaoRegistry) {
+	private final IHapiTransactionService myHapiTransactionService;
+
+	public MergeUpdateTaskReducerStep(DaoRegistry theDaoRegistry, IHapiTransactionService theHapiTransactionService) {
 		super(theDaoRegistry);
+		this.myHapiTransactionService = theHapiTransactionService;
 	}
 
 	@Nonnull
@@ -21,7 +47,30 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			@Nonnull StepExecutionDetails<MergeJobParameters, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<ReplaceReferenceResultsJson> theDataSink)
 			throws JobExecutionFailedException {
-		// FIXME ED add in extra merge steps here e.g. updating source and target resources
+
+		MergeJobParameters mergeJobParameters = theStepExecutionDetails.getParameters();
+
+		SystemRequestDetails requestDetails =
+				SystemRequestDetails.forRequestPartitionId(mergeJobParameters.getPartitionId());
+
+		Patient resultResource = null;
+		if (mergeJobParameters.getResultResource() != null) {
+			resultResource =
+					myFhirContext.newJsonParser().parseResource(Patient.class, mergeJobParameters.getResultResource());
+		}
+
+		IFhirResourceDao<Patient> patientDao = myDaoRegistry.getResourceDao(Patient.class);
+
+		MergeHelper helper = new MergeHelper(patientDao);
+
+		helper.updateMergedResourcesAfterReferencesReplaced(
+				myHapiTransactionService,
+				mergeJobParameters.getSourceId().asIdDt(),
+				mergeJobParameters.getTargetId().asIdDt(),
+				resultResource,
+				mergeJobParameters.isDeleteSource(),
+				requestDetails);
+
 		return super.run(theStepExecutionDetails, theDataSink);
 	}
 }

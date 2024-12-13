@@ -21,10 +21,8 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
-import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.util.Batch2TaskUtils;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -41,10 +39,11 @@ import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesAppCtx.JOB_REPLACE_REFERENCES;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.HAPI_BATCH_JOB_ID_SYSTEM;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 
@@ -77,6 +76,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		if (theRequestDetails.isPreferAsync()) {
 			return replaceReferencesPreferAsync(theReplaceReferenceRequest, theRequestDetails);
+		} else if (theReplaceReferenceRequest.isForceSync()) {
+			return replaceReferencesForceSync(theReplaceReferenceRequest, theRequestDetails);
 		} else {
 			return replaceReferencesPreferSync(theReplaceReferenceRequest, theRequestDetails);
 		}
@@ -92,19 +93,13 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	private IBaseParameters replaceReferencesPreferAsync(
 			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
-		Task task = new Task();
-		task.setStatus(Task.TaskStatus.INPROGRESS);
-		IFhirResourceDao<Task> resourceDao = myDaoRegistry.getResourceDao(Task.class);
-		resourceDao.create(task, theRequestDetails);
 
-		ReplaceReferencesJobParameters jobParams = new ReplaceReferencesJobParameters(theReplaceReferenceRequest);
-		jobParams.setTaskId(task.getIdElement().toUnqualifiedVersionless());
-
-		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_REPLACE_REFERENCES, jobParams);
-		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(theRequestDetails, request);
-
-		task.addIdentifier().setSystem(HAPI_BATCH_JOB_ID_SYSTEM).setValue(jobStartResponse.getInstanceId());
-		resourceDao.update(task, theRequestDetails);
+		Task task = Batch2TaskUtils.startJobAndCreateAssociatedTask(
+				myDaoRegistry.getResourceDao(Task.class),
+				theRequestDetails,
+				myJobCoordinator,
+				JOB_REPLACE_REFERENCES,
+				new ReplaceReferencesJobParameters(theReplaceReferenceRequest));
 
 		Parameters retval = new Parameters();
 		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());
@@ -134,6 +129,34 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
 				theReplaceReferenceRequest, accumulator.getItemList(), theRequestDetails);
+
+		Parameters retval = new Parameters();
+		retval.addParameter()
+				.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME)
+				.setResource(result);
+		return retval;
+	}
+
+	/**
+	 * Perform the operation synchronously. This should be only called if the number of resources to be
+	 * updated is predetermined before calling, and it is small enough to handle synchronously.
+	 */
+	@Nonnull
+	private IBaseParameters replaceReferencesForceSync(
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+
+		// TODO KHS get partition from request
+		List<IdDt> allIds = myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.execute(() -> {
+					Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
+							theReplaceReferenceRequest.sourceId.getResourceType(),
+							theReplaceReferenceRequest.sourceId.getIdPart());
+					return idStream.collect(Collectors.toList());
+				});
+
+		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
+				theReplaceReferenceRequest, allIds, theRequestDetails);
 
 		Parameters retval = new Parameters();
 		retval.addParameter()

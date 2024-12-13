@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
@@ -17,20 +17,22 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.provider;
+package ca.uhn.fhir.batch2.jobs.parameters;
 
-import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
+import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.model.api.BaseBatchJobParameters;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-/**
- * Contract for service which replaces references
- */
-public interface IReplaceReferencesSvc {
+public class BatchJobParametersWithTaskId extends BaseBatchJobParameters {
+	@JsonProperty("taskId")
+	private FhirIdJson myTaskId;
 
-	IBaseParameters replaceReferences(
-			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails);
+	public void setTaskId(IIdType theTaskId) {
+		myTaskId = new FhirIdJson(theTaskId);
+	}
 
-	Integer countResourcesReferencingResource(IIdType theResourceId, RequestDetails theRequestDetails);
+	public FhirIdJson getTaskId() {
+		return myTaskId;
+	}
 }

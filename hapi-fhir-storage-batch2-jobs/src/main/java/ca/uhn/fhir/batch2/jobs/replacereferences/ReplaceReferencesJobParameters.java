@@ -20,18 +20,15 @@
 package ca.uhn.fhir.batch2.jobs.replacereferences;
 
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.batch2.jobs.parameters.BatchJobParametersWithTaskId;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.model.api.BaseBatchJobParameters;
 import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 import static ca.uhn.fhir.jpa.api.config.JpaStorageSettings.DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE;
 import static ca.uhn.fhir.jpa.api.config.JpaStorageSettings.DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING;
 
-public class ReplaceReferencesJobParameters extends BaseBatchJobParameters {
-	@JsonProperty("taskId")
-	private FhirIdJson myTaskId;
+public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId {
 
 	@JsonProperty("sourceId")
 	private FhirIdJson mySourceId;
@@ -90,14 +87,6 @@ public class ReplaceReferencesJobParameters extends BaseBatchJobParameters {
 
 	public void setPartitionId(RequestPartitionId thePartitionId) {
 		myPartitionId = thePartitionId;
-	}
-
-	public void setTaskId(IIdType theTaskId) {
-		myTaskId = new FhirIdJson(theTaskId);
-	}
-
-	public FhirIdJson getTaskId() {
-		return myTaskId;
 	}
 
 	public ReplaceReferenceRequest asReplaceReferencesRequest() {

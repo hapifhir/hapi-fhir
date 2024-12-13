@@ -42,8 +42,8 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 		implements IReductionStepWorker<PT, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson> {
 	public static final String RESOURCE_TYPES_SYSTEM = "http://hl7.org/fhir/ValueSet/resource-types";
 
-	private final FhirContext myFhirContext;
-	private final DaoRegistry myDaoRegistry;
+	protected final FhirContext myFhirContext;
+	protected final DaoRegistry myDaoRegistry;
 
 	private List<Bundle> myPatchOutputBundles = new ArrayList<>();
 

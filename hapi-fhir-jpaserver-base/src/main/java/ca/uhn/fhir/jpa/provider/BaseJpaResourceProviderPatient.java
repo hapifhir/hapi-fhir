@@ -19,16 +19,19 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
-import ca.uhn.fhir.jpa.dao.merge.MergeOperationInputParameters;
-import ca.uhn.fhir.jpa.dao.merge.MergeOperationOutcome;
-import ca.uhn.fhir.jpa.dao.merge.PatientMergeOperationInputParameters;
-import ca.uhn.fhir.jpa.dao.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.provider.merge.MergeOperationInputParameters;
+import ca.uhn.fhir.jpa.provider.merge.MergeOperationOutcome;
+import ca.uhn.fhir.jpa.provider.merge.PatientMergeOperationInputParameters;
+import ca.uhn.fhir.jpa.provider.merge.ResourceMergeService;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -60,6 +63,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
@@ -73,6 +77,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
 
 	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
 	private IReplaceReferencesSvc myReplaceReferencesSvc;
 
 	@Autowired
@@ -80,6 +87,9 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
 
 	/**
 	 * Patient/123/$everything
@@ -316,11 +326,17 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					theResultPatient,
 					batchSize);
 
-			IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) getDao();
+			IFhirResourceDaoPatient<Patient> patientDao = (IFhirResourceDaoPatient<Patient>) getDao();
+			IFhirResourceDao<Task> taskDao = myDaoRegistry.getResourceDao(Task.class);
 			ResourceMergeService resourceMergeService = new ResourceMergeService(
-					dao, myReplaceReferencesSvc, myHapiTransactionService, myRequestPartitionHelperSvc);
+					patientDao,
+					taskDao,
+					myReplaceReferencesSvc,
+					myHapiTransactionService,
+					myRequestPartitionHelperSvc,
+					myJobCoordinator);
 
-			FhirContext fhirContext = dao.getContext();
+			FhirContext fhirContext = patientDao.getContext();
 
 			MergeOperationOutcome mergeOutcome =
 					resourceMergeService.merge(mergeOperationParameters, theRequestDetails);

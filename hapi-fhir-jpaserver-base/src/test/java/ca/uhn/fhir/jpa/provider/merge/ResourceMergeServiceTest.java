@@ -1,14 +1,15 @@
-package ca.uhn.fhir.jpa.dao.merge;
+package ca.uhn.fhir.jpa.provider.merge;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
-import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -21,6 +22,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +48,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ResourceMergeServiceTest {
 	private static final Integer PAGE_SIZE = 1024;
-	
+
 	private static final String MISSING_SOURCE_PARAMS_MSG =
 		"There are no source resource parameters provided, include either a 'source-patient', or a 'source-patient-identifier' parameter.";
 	private static final String MISSING_TARGET_PARAMS_MSG =
@@ -64,7 +66,10 @@ public class ResourceMergeServiceTest {
 	private static final String TARGET_PATIENT_TEST_ID_WITH_VERSION_2 = TARGET_PATIENT_TEST_ID + "/_history/2";
 
 	@Mock
-	private IFhirResourceDaoPatient<Patient> myDaoMock;
+	IFhirResourceDaoPatient<Patient> myPatientDaoMock;
+
+	@Mock
+	IFhirResourceDaoPatient<Task> myTaskDaoMock;
 
 	@Mock
 	IReplaceReferencesSvc myReplaceReferencesSvcMock;
@@ -78,6 +83,9 @@ public class ResourceMergeServiceTest {
 	@Mock
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvcMock;
 
+	@Mock
+	IJobCoordinator myJobCoordinatorMock;
+
 
 	private ResourceMergeService myResourceMergeService;
 
@@ -89,8 +97,9 @@ public class ResourceMergeServiceTest {
 
 	@BeforeEach
 	void setup() {
-		when(myDaoMock.getContext()).thenReturn(myFhirContext);
-		myResourceMergeService = new ResourceMergeService(myDaoMock, myReplaceReferencesSvcMock, myTransactionServiceMock, myRequestPartitionHelperSvcMock);
+		when(myPatientDaoMock.getContext()).thenReturn(myFhirContext);
+		myResourceMergeService = new ResourceMergeService(myPatientDaoMock, myTaskDaoMock, myReplaceReferencesSvcMock,
+			myTransactionServiceMock, myRequestPartitionHelperSvcMock, myJobCoordinatorMock);
 
 	}
 
@@ -131,7 +140,7 @@ public class ResourceMergeServiceTest {
 			new Identifier().setSystem("sysSource").setValue("valS1").setUse(Identifier.IdentifierUse.OLD),
 			new Identifier().setSystem("sysSource").setValue("valS2").setUse(Identifier.IdentifierUse.OLD));
 		verifyUpdatedTargetPatient(true, expectedIdentifiers);
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 
@@ -159,7 +168,7 @@ public class ResourceMergeServiceTest {
 		verifySuccessfulOutcome(mergeOutcome, patientReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedSourcePatient();
 		verifyUpdatedTargetPatient(true, Collections.emptyList());
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -193,7 +202,7 @@ public class ResourceMergeServiceTest {
 		verifySuccessfulOutcome(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedSourcePatient();
 		verifyUpdatedTargetPatient(true, Collections.emptyList());
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 
@@ -235,7 +244,7 @@ public class ResourceMergeServiceTest {
 			new Identifier().setSystem("sys").setValue("val2")
 		);
 		verifyUpdatedTargetPatient(true, expectedIdentifiers);
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -250,7 +259,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 
-		when(myDaoMock.delete(new IdType(SOURCE_PATIENT_TEST_ID), myRequestDetailsMock)).thenReturn(new DaoMethodOutcome());
+		when(myPatientDaoMock.delete(new IdType(SOURCE_PATIENT_TEST_ID), myRequestDetailsMock)).thenReturn(new DaoMethodOutcome());
 		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
 		setupDaoMockForSuccessfulTargetPatientUpdate(targetPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 		setupTransactionServiceMock();
@@ -263,7 +272,7 @@ public class ResourceMergeServiceTest {
 		// Then
 		verifySuccessfulOutcome(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedTargetPatient(false, Collections.emptyList());
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 
@@ -281,7 +290,7 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 
-		when(myDaoMock.delete(new IdType(SOURCE_PATIENT_TEST_ID), myRequestDetailsMock)).thenReturn(new DaoMethodOutcome());
+		when(myPatientDaoMock.delete(new IdType(SOURCE_PATIENT_TEST_ID), myRequestDetailsMock)).thenReturn(new DaoMethodOutcome());
 		Patient patientToBeReturnedFromDaoAfterTargetUpdate = new Patient();
 		setupDaoMockForSuccessfulTargetPatientUpdate(resultPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 		setupTransactionServiceMock();
@@ -294,7 +303,7 @@ public class ResourceMergeServiceTest {
 		// Then
 		verifySuccessfulOutcome(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedTargetPatient(false, Collections.emptyList());
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -325,7 +334,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDetails().getText()).contains("Preview only merge operation - no issues detected");
 		assertThat(issue.getDiagnostics()).contains("Merge would update 12 resources");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -351,7 +360,7 @@ public class ResourceMergeServiceTest {
 		verifySuccessfulOutcome(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedSourcePatient();
 		verifyUpdatedTargetPatient(true, Collections.emptyList());
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	//  ERROR CASES
@@ -364,7 +373,7 @@ public class ResourceMergeServiceTest {
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 
 		ForbiddenOperationException ex = new ForbiddenOperationException("this is the exception message");
-		when(myDaoMock.read(any(), eq(myRequestDetailsMock))).thenThrow(ex);
+		when(myPatientDaoMock.read(any(), eq(myRequestDetailsMock))).thenThrow(ex);
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -378,7 +387,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains("this is the exception message");
 		assertThat(issue.getCode().toCode()).isEqualTo("exception");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -389,7 +398,7 @@ public class ResourceMergeServiceTest {
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 
 		RuntimeException ex = new RuntimeException("this is the exception message");
-		when(myDaoMock.read(any(), eq(myRequestDetailsMock))).thenThrow(ex);
+		when(myPatientDaoMock.read(any(), eq(myRequestDetailsMock))).thenThrow(ex);
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -403,7 +412,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains("this is the exception message");
 		assertThat(issue.getCode().toCode()).isEqualTo("exception");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -425,7 +434,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains(MISSING_SOURCE_PARAMS_MSG);
 		assertThat(issue.getCode().toCode()).isEqualTo("required");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 
@@ -449,7 +458,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains(MISSING_TARGET_PARAMS_MSG);
 		assertThat(issue.getCode().toCode()).isEqualTo("required");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -474,7 +483,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue2.getDiagnostics()).contains(MISSING_TARGET_PARAMS_MSG);
 		assertThat(issue2.getCode().toCode()).isEqualTo("required");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -499,7 +508,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getCode().toCode()).isEqualTo("required");
 
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 
@@ -524,7 +533,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains(BOTH_TARGET_PARAMS_PROVIDED_MSG);
 		assertThat(issue.getCode().toCode()).isEqualTo("required");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 
@@ -549,7 +558,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains("Reference specified in 'source-patient' parameter does not have a reference element.");
 		assertThat(issue.getCode().toCode()).isEqualTo("required");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 
@@ -575,7 +584,7 @@ public class ResourceMergeServiceTest {
 			"a reference element.");
 		assertThat(issue.getCode().toCode()).isEqualTo("required");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -584,7 +593,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
-		when(myDaoMock.read(new IdType(SOURCE_PATIENT_TEST_ID), myRequestDetailsMock)).thenThrow(ResourceNotFoundException.class);
+		when(myPatientDaoMock.read(new IdType(SOURCE_PATIENT_TEST_ID), myRequestDetailsMock)).thenThrow(ResourceNotFoundException.class);
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -599,7 +608,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains("Resource not found for the reference specified in 'source-patient'");
 		assertThat(issue.getCode().toCode()).isEqualTo("not-found");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -610,7 +619,7 @@ public class ResourceMergeServiceTest {
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
 		setupDaoMockForSuccessfulRead(sourcePatient);
-		when(myDaoMock.read(new IdType(TARGET_PATIENT_TEST_ID), myRequestDetailsMock)).thenThrow(ResourceNotFoundException.class);
+		when(myPatientDaoMock.read(new IdType(TARGET_PATIENT_TEST_ID), myRequestDetailsMock)).thenThrow(ResourceNotFoundException.class);
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -625,7 +634,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains("Resource not found for the reference specified in 'target-patient'");
 		assertThat(issue.getCode().toCode()).isEqualTo("not-found");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -653,7 +662,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains("No resources found matching the identifier(s) specified in 'source-patient-identifier'");
 		assertThat(issue.getCode().toCode()).isEqualTo("not-found");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 
@@ -685,7 +694,7 @@ public class ResourceMergeServiceTest {
 			" 'source-patient-identifier'");
 		assertThat(issue.getCode().toCode()).isEqualTo("multiple-matches");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 
@@ -717,7 +726,7 @@ public class ResourceMergeServiceTest {
 			"'target-patient-identifier'");
 		assertThat(issue.getCode().toCode()).isEqualTo("not-found");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -750,7 +759,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains("Multiple resources found matching the identifier(s) specified in 'target-patient-identifier'");
 		assertThat(issue.getCode().toCode()).isEqualTo("multiple-matches");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -776,7 +785,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains("The reference in 'source-patient' parameter has a version specified, but it is not the latest version of the resource");
 		assertThat(issue.getCode().toCode()).isEqualTo("conflict");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -805,7 +814,7 @@ public class ResourceMergeServiceTest {
 			"specified, but it is not the latest version of the resource");
 		assertThat(issue.getCode().toCode()).isEqualTo("conflict");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 
@@ -864,7 +873,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
 		assertThat(issue.getDiagnostics()).contains("Target resource is not active, it must be active to be the target of a merge operation");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -893,7 +902,7 @@ public class ResourceMergeServiceTest {
 			"reference 'Patient/replacing-res-id', it is " +
 			"not a suitable target for merging.");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -921,7 +930,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains("Source resource was previously replaced by a resource with " +
 			"reference 'Patient/replacing-res-id', it is not a suitable source for merging.");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -953,7 +962,7 @@ public class ResourceMergeServiceTest {
 			"as the actual" +
 			" resolved target resource. The actual resolved target resource's id is: '" + TARGET_PATIENT_TEST_ID +"'");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 
@@ -990,7 +999,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
 		assertThat(issue.getDiagnostics()).contains("'result-patient' must have all the identifiers provided in target-patient-identifier");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 
@@ -1020,7 +1029,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
 		assertThat(issue.getDiagnostics()).contains("'result-patient' must have a 'replaces' link to the source resource.");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -1051,7 +1060,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
 		assertThat(issue.getDiagnostics()).contains("'result-patient' must have a 'replaces' link to the source resource.");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -1082,7 +1091,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
 		assertThat(issue.getDiagnostics()).contains("'result-patient' must not have a 'replaces' link to the source resource when the source resource will be deleted, as the link may prevent deleting the source resource.");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	@Test
@@ -1115,7 +1124,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
 		assertThat(issue.getDiagnostics()).contains("'result-patient' has multiple 'replaces' links to the source resource. There should be only one.");
 
-		verifyNoMoreInteractions(myDaoMock);
+		verifyNoMoreInteractions(myPatientDaoMock);
 	}
 
 	private void verifySuccessfulOutcome(MergeOperationOutcome theMergeOutcome, Patient theExpectedTargetResource) {
@@ -1156,7 +1165,7 @@ public class ResourceMergeServiceTest {
 	private void setupDaoMockForSuccessfulRead(Patient resource) {
 		assertThat(resource.getIdElement()).isNotNull();
 		//dao reads the versionless id
-		when(myDaoMock.read(resource.getIdElement().toVersionless(), myRequestDetailsMock)).thenReturn(resource);
+		when(myPatientDaoMock.read(resource.getIdElement().toVersionless(), myRequestDetailsMock)).thenReturn(resource);
 	}
 
 
@@ -1172,7 +1181,7 @@ public class ResourceMergeServiceTest {
 			IBundleProvider bundleProviderMock = mock(IBundleProvider.class);
 			when(bundleProviderMock.getAllResources()).thenReturn(matchingResources);
 			if (ongoingStubbing == null) {
-				ongoingStubbing = when(myDaoMock.search(any(), eq(myRequestDetailsMock))).thenReturn(bundleProviderMock);
+				ongoingStubbing = when(myPatientDaoMock.search(any(), eq(myRequestDetailsMock))).thenReturn(bundleProviderMock);
 			}
 			else {
 				ongoingStubbing.thenReturn(bundleProviderMock);
@@ -1191,7 +1200,7 @@ public class ResourceMergeServiceTest {
 															  Patient thePatientToReturnInDaoOutcome) {
 		DaoMethodOutcome daoMethodOutcome = new DaoMethodOutcome();
 		daoMethodOutcome.setResource(thePatientToReturnInDaoOutcome);
-		when(myDaoMock.update(thePatientExpectedAsInput, myRequestDetailsMock))
+		when(myPatientDaoMock.update(thePatientExpectedAsInput, myRequestDetailsMock))
 			.thenAnswer(t -> {
 				myCapturedSourcePatientForUpdate = t.getArgument(0);
 
@@ -1230,18 +1239,18 @@ public class ResourceMergeServiceTest {
 															  Patient thePatientToReturnInDaoOutcome) {
 		DaoMethodOutcome daoMethodOutcome = new DaoMethodOutcome();
 		daoMethodOutcome.setResource(thePatientToReturnInDaoOutcome);
-		when(myDaoMock.update(thePatientExpectedAsInput, myRequestDetailsMock))
+		when(myPatientDaoMock.update(thePatientExpectedAsInput, myRequestDetailsMock))
 			.thenAnswer(t -> {
 				myCapturedTargetPatientForUpdate = t.getArgument(0);
 				DaoMethodOutcome outcome = new DaoMethodOutcome();
-					outcome.setResource(thePatientToReturnInDaoOutcome);
-					return outcome;
-				});
+				outcome.setResource(thePatientToReturnInDaoOutcome);
+				return outcome;
+			});
 	}
 
 	private void verifySearchParametersOnDaoSearchInvocations(List<List<String>> theExpectedIdentifierParams) {
 		ArgumentCaptor<SearchParameterMap> captor = ArgumentCaptor.forClass(SearchParameterMap.class);
-		verify(myDaoMock, times(theExpectedIdentifierParams.size())).search(captor.capture(), eq(myRequestDetailsMock));
+		verify(myPatientDaoMock, times(theExpectedIdentifierParams.size())).search(captor.capture(), eq(myRequestDetailsMock));
 		List<SearchParameterMap> maps = captor.getAllValues();
 		assertThat(maps).hasSameSizeAs(theExpectedIdentifierParams);
 		for (int i = 0; i < maps.size(); i++) {
@@ -1260,3 +1269,4 @@ public class ResourceMergeServiceTest {
 		}
 	}
 }
+
