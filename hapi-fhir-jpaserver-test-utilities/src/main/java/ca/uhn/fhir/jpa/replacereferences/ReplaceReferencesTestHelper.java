@@ -320,8 +320,9 @@ public class ReplaceReferencesTestHelper {
 		}
 	}
 
-	public void validatePatchResultBundle(Bundle patchResultBundle, int theTotalExpectedPatches) {
-		Pattern expectedPatchIssuePattern = Pattern.compile("Successfully patched resource \"(Observation|Encounter|CarePlan)/\\d+/_history/\\d+\".");
+	public static void validatePatchResultBundle(Bundle patchResultBundle, int theTotalExpectedPatches, List<String> theExpectedResourceTypes) {
+		String resourceMatchString = "(" + String.join("|", theExpectedResourceTypes) + ")";
+		Pattern expectedPatchIssuePattern = Pattern.compile("Successfully patched resource \"" + resourceMatchString + "/\\d+/_history/\\d+\".");
 		assertThat(patchResultBundle.getEntry()).hasSize(theTotalExpectedPatches)
 			.allSatisfy(entry ->
 				assertThat(entry.getResponse().getOutcome())

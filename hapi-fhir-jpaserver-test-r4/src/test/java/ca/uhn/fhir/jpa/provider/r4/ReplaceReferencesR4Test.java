@@ -23,7 +23,6 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.HAPI_BATCH_JOB_
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -64,7 +63,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		}
 
 		// validate
-		myTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES);
+		myTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of("Observation", "Encounter", "CarePlan"));
 
 		// Check that the linked resources were updated
 
@@ -128,7 +127,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			// validate
 			entriesLeft -= ReplaceReferencesTestHelper.SMALL_BATCH_SIZE;
 			int expectedNumberOfEntries = Math.min(entriesLeft, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
-			myTestHelper.validatePatchResultBundle(patchResultBundle, expectedNumberOfEntries);
+			myTestHelper.validatePatchResultBundle(patchResultBundle, expectedNumberOfEntries, List.of("Observation", "Encounter", "CarePlan"));
 		}
 
 		// Check that the linked resources were updated
