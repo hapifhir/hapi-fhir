@@ -70,6 +70,7 @@ public class PartitionedIdModeVerificationSvc {
 	public void verifyPartitionedIdMode() throws SQLException {
 
 		DataSource dataSource = myHibernatePropertiesProvider.getDataSource();
+		boolean expectDatabasePartitionMode = myPartitionSettings.isDatabasePartitionMode();
 
 		Dialect dialect = myHibernatePropertiesProvider.getDialect();
 		if (!(dialect instanceof IHapiFhirDialect)) {
@@ -81,12 +82,16 @@ public class PartitionedIdModeVerificationSvc {
 		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
 		DriverTypeEnum.ConnectionProperties cp =
 				new DriverTypeEnum.ConnectionProperties(dataSource, transactionTemplate, driverType);
+		verifySchemaIsAppropriateForDatabasePartitionMode(cp, expectDatabasePartitionMode);
+	}
+
+	public static void verifySchemaIsAppropriateForDatabasePartitionMode(DriverTypeEnum.ConnectionProperties cp, boolean expectDatabasePartitionMode) throws SQLException {
 		Set<String> pkColumns = JdbcUtils.getPrimaryKeyColumns(cp, "HFJ_RESOURCE");
 		if (pkColumns.isEmpty()) {
 			return;
 		}
 
-		if (!myPartitionSettings.isDatabasePartitionMode()) {
+		if (!expectDatabasePartitionMode) {
 			if (!SetUtils.isEqualSet(pkColumns, Set.of("RES_ID"))) {
 				throw new ConfigurationException(Msg.code(2563)
 						+ "System is configured in Partitioned ID mode but the database schema is not correct for this. Found HFJ_RESOURCE PK: "

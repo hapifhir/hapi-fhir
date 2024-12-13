@@ -23,8 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
@@ -45,9 +43,6 @@ import static org.springframework.util.ResourceUtils.FILE_URL_PREFIX;
 		requiresProject = true)
 public class PartitionDdlMojo extends AbstractMojo {
 
-	private static final Pattern CREATE_TABLE = Pattern.compile(
-			"create table ([a-zA-Z0-9_]+) .* primary key \\(([a-zA-Z_, ]+)\\).*",
-			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionDdlMojo.class);
 
 	@Parameter(required = true)
@@ -73,7 +68,7 @@ public class PartitionDdlMojo extends AbstractMojo {
 		Validate.isTrue(driverType == DriverTypeEnum.POSTGRES_9_4, "Only POSTGRES driver is supported");
 
 		String tuningStatements = loadResource(tuningStatementsFile);
-		myStatsStatements = SqlUtil.splitSqlFileIntoSqlStatementsUpperCase(tuningStatements);
+		myStatsStatements = SqlUtil.splitSqlFileIntoStatements(tuningStatements);
 
 		String input = loadResource(inputFile);
 		List<String> originalStatements = SqlUtil.splitSqlFileIntoStatements(input);
@@ -116,15 +111,19 @@ public class PartitionDdlMojo extends AbstractMojo {
 		}
 	}
 
+	/**
+	 * For every CREATE TABLE statement in the DDL which is creating
+	 * a partitioned table, also add the relevant SQL tuning statements.
+	 */
 	private List<String> applyPostgresPartitioning(List<String> statements) {
 		List<String> retVal = new ArrayList<>();
-		for (int statementIndex = 0; statementIndex < statements.size(); statementIndex++) {
-			String statement = statements.get(statementIndex);
-			Matcher matcher = CREATE_TABLE.matcher(statement);
+		for (String statement : statements) {
+			SqlUtil.CreateTablePrimaryKey createTable = SqlUtil.parseCreateTableStatementPrimaryKey(statement);
+
 			boolean partitioned = false;
-			if (matcher.find()) {
-				String tableName = matcher.group(1).toUpperCase(Locale.US);
-				String primaryKeyColumns = matcher.group(2);
+			if (createTable != null) {
+				String tableName = createTable.getTableName();
+				List<String> primaryKeyColumns = createTable.getPrimaryKeyColumns();
 
 				if (primaryKeyColumns.contains("PARTITION_ID")) {
 					partitioned = true;
@@ -138,22 +137,24 @@ public class PartitionDdlMojo extends AbstractMojo {
 					for (int partIndex = 0; partIndex < numPartitions; partIndex++) {
 						String newTableName = createPartitionedTableName(tableName, partIndex);
 						String partitionedTable = "CREATE TABLE " + newTableName + " PARTITION OF " + tableName + " "
-								+ "FOR VALUES WITH (MODULUS " + numPartitions + ", REMAINDER " + partIndex + ")";
+							+ "FOR VALUES WITH (MODULUS " + numPartitions + ", REMAINDER " + partIndex + ")";
 						retVal.add(partitionedTable + ";");
 					}
 
 					boolean tuneCommentAdded = false;
 					for (int partIndex = 0; partIndex < numPartitions; partIndex++) {
 						for (String nextStatsStatement : myStatsStatements) {
-							if (nextStatsStatement.startsWith("ALTER TABLE " + tableName + " ")) {
+							if (nextStatsStatement
+								.toUpperCase(Locale.US)
+								.startsWith("ALTER TABLE " + tableName.toUpperCase(Locale.US) + " ")) {
 								if (!tuneCommentAdded) {
 									retVal.add("-- Tune " + numPartitions + " partitions for table " + tableName);
 									tuneCommentAdded = true;
 								}
 								String newTableName = createPartitionedTableName(tableName, partIndex);
-								String modifiedStatsStatment =
-										nextStatsStatement.replace(" " + tableName + " ", " " + newTableName + " ");
-								retVal.add(modifiedStatsStatment + ";");
+								String modifiedStatsStatement =
+									nextStatsStatement.replace(" " + tableName + " ", " " + newTableName + " ");
+								retVal.add(modifiedStatsStatement + ";");
 							}
 						}
 					}

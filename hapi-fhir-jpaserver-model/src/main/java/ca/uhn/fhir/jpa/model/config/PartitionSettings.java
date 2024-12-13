@@ -243,5 +243,4 @@ public class PartitionSettings {
 		 */
 		ALLOWED_UNQUALIFIED,
 	}
-
 }

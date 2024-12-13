@@ -20,13 +20,21 @@
 package ca.uhn.fhir.jpa.migrate.util;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SqlUtil {
+	private static final Pattern CREATE_TABLE = Pattern.compile(
+			"create table ([a-zA-Z0-9_]+) .* primary key \\(([a-zA-Z_, ]+)\\).*",
+			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 
 	/**
 	 * Non instantiable
@@ -45,5 +53,45 @@ public class SqlUtil {
 				.filter(StringUtils::isNotBlank)
 				.map(StringUtils::trim)
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Accepts a SQL statement and parses it as a SQL <code>CREATE TABLE</code>
+	 * statement, returning details about the table name and primary key.
+	 * <b>This method has only been tested for Postgresql DDL format!</b>
+	 *
+	 * @param theStatement A single SQL statement
+	 * @return Returns details about the table name and PK columns if the SQL statement
+	 * 	contains a valid CREATE TABLE statement, returns {@literal null}
+	 * 	otherwise.
+	 */
+	@Nonnull
+	public static Optional<CreateTablePrimaryKey> parseCreateTableStatementPrimaryKey(String theStatement) {
+		Matcher matcher = CREATE_TABLE.matcher(theStatement);
+		if (matcher.find()) {
+			String tableName = matcher.group(1).toUpperCase(Locale.US);
+			String primaryKeyColumnsString = matcher.group(2);
+			List<String> primaryKeyColumns = Arrays.asList(StringUtils.split(primaryKeyColumnsString, ", "));
+			return Optional.of(new CreateTablePrimaryKey(tableName, primaryKeyColumns));
+		}
+		return Optional.empty();
+	}
+
+	public static class CreateTablePrimaryKey {
+		private final String myTableName;
+		private final List<String> myPrimaryKeyColumns;
+
+		public CreateTablePrimaryKey(String theTableName, List<String> thePrimaryKeyColumns) {
+			myTableName = theTableName;
+			myPrimaryKeyColumns = thePrimaryKeyColumns;
+		}
+
+		public List<String> getPrimaryKeyColumns() {
+			return myPrimaryKeyColumns;
+		}
+
+		public String getTableName() {
+			return myTableName;
+		}
 	}
 }
