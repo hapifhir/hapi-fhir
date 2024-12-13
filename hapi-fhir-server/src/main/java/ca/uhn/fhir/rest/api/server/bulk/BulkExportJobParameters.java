@@ -41,13 +41,20 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	private List<String> myResourceTypes;
 
 	/**
-	 * The start date from when we should start
-	 * doing the export. (end date is assumed to be "now")
+	 * The start date from when we should start doing the export.
 	 */
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	@JsonProperty("since")
 	private Date mySince;
+
+	/**
+	 * The end date to which we should stop doing the export.
+	 */
+	@JsonSerialize(using = JsonDateSerializer.class)
+	@JsonDeserialize(using = JsonDateDeserializer.class)
+	@JsonProperty("until")
+	private Date myUntil;
 
 	@JsonProperty("exportId")
 	private String myExportId;
@@ -145,6 +152,14 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 
 	public void setSince(Date theSince) {
 		mySince = theSince;
+	}
+
+	public Date getUntil() {
+		return myUntil;
+	}
+
+	public void setUntil(Date theUntil) {
+		myUntil = theUntil;
 	}
 
 	public List<String> getFilters() {

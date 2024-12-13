@@ -92,7 +92,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmQueueConsumerLoader mdmQueueConsumerLoader(
+	public MdmQueueConsumerLoader mdmQueueConsumerLoader(
 			IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
 		return new MdmQueueConsumerLoader(theChannelFactory, theMdmSettings, theMdmMessageHandler);
 	}
@@ -139,7 +139,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmSubscriptionLoader mdmSubscriptionLoader() {
+	public MdmSubscriptionLoader mdmSubscriptionLoader() {
 		return new MdmSubscriptionLoader();
 	}
 
