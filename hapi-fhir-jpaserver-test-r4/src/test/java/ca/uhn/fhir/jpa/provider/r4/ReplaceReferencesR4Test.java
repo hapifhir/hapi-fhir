@@ -49,6 +49,8 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 		Bundle patchResultBundle;
 		if (isAsync) {
+			// FIXME KHS assert we got back a 202 Accepted
+
 			Task task = (Task) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).getResource();
 			assertNull(task.getIdElement().getVersionIdPart());
 			ourLog.info("Got task {}", task.getId());

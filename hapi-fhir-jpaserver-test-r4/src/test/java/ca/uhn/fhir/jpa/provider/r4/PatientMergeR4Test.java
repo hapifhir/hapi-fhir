@@ -135,6 +135,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Assert Task inAsync mode, unless it is preview in which case we don't return a task
 		if (isAsync && !withPreview) {
+			// FIXME KHS assert we got back a 202 Accepted
+
 			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
 			assertNull(task.getIdElement().getVersionIdPart());
 			ourLog.info("Got task {}", task.getId());
@@ -325,5 +327,10 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		return outcome.getIssue().stream()
 			.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
 			.collect(Collectors.joining(", "));
+	}
+
+	@Override
+	protected boolean verboseClientLogging() {
+		return true;
 	}
 }
