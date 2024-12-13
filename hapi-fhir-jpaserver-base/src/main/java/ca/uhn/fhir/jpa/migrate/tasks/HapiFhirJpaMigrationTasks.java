@@ -4257,7 +4257,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V3_3_0);
 
 		String schemaPath = "/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned";
-		if (myFlags.contains(FlagEnum.PARTITIONED_ID_MODE)) {
+		if (myFlags.contains(FlagEnum.DB_PARTITION_MODE)) {
 			schemaPath = "/ca/uhn/hapi/fhir/jpa/docs/database/partitioned";
 		}
 		version.initializeSchema(
@@ -4275,7 +4275,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	public enum FlagEnum {
-		PARTITIONED_ID_MODE("partitioned-id-mode"),
+		DB_PARTITION_MODE("database-partition-mode"),
 
 		NO_MIGRATE_HASHES("no-migrate-350-hashes");
 

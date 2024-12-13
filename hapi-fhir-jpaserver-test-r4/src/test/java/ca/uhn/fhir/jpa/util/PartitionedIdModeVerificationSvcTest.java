@@ -43,7 +43,7 @@ class PartitionedIdModeVerificationSvcTest {
 		"false, false"
 	})
 	void testPartitionedIdDatabase_WantPartitionedIdDatabase(boolean thePartitionedIdModeForSchema, boolean thePartitionedIdModeForSettings) throws SQLException {
-		Set<String> commandLineValue = thePartitionedIdModeForSchema ? Set.of(HapiFhirJpaMigrationTasks.FlagEnum.PARTITIONED_ID_MODE.getCommandLineValue()) : Set.of();
+		Set<String> commandLineValue = thePartitionedIdModeForSchema ? Set.of(HapiFhirJpaMigrationTasks.FlagEnum.DB_PARTITION_MODE.getCommandLineValue()) : Set.of();
 		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(commandLineValue);
 
 		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myConnectionProperties.getDataSource(), DriverTypeEnum.H2_EMBEDDED);

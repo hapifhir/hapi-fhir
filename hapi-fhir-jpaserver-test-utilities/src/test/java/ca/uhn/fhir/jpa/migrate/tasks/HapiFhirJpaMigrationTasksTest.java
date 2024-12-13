@@ -39,8 +39,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class HapiFhirJpaMigrationTasksTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirJpaMigrationTasksTest.class);
@@ -76,7 +76,7 @@ public class HapiFhirJpaMigrationTasksTest {
 
 	@Test
 	public void testCreate_PartitionedIds() throws SQLException {
-		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Set.of(HapiFhirJpaMigrationTasks.FlagEnum.PARTITIONED_ID_MODE.getCommandLineValue()));
+		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Set.of(HapiFhirJpaMigrationTasks.FlagEnum.DB_PARTITION_MODE.getCommandLineValue()));
 
 		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
 		migrator.addTasks(tasks.getAllTasks(VersionEnum.values()));
@@ -97,7 +97,6 @@ public class HapiFhirJpaMigrationTasksTest {
 	 * added in 7.4.0 so this backfills them.
 	 */
 	@Test
-	@Order(1)
 	public void testCreateUniqueComboParamHashes() {
 		/*
 		 * Setup
@@ -145,6 +144,37 @@ public class HapiFhirJpaMigrationTasksTest {
 		Map<String, Object> row = rows.get(0);
 		assertThat(row.get("HASH_COMPLETE")).as(row::toString).isEqualTo(-5443017569618195896L);
 		assertThat(row.get("HASH_COMPLETE_2")).as(row::toString).isEqualTo(-1513800680307323438L);
+	}
+
+	@Test
+	public void testVerifyDbpm_ExistingNonPartitionedSchema_PartitionedMode() {
+		/*
+		 * Setup: Initialize the database in legacy mode
+		 */
+		{
+			HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Set.of());
+			HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+			migrator.createMigrationTableIfRequired();
+			migrator.addAllTasksForUnitTest(tasks.getAllTasks(VersionEnum.values()));
+			migrator.migrate();
+		}
+
+		/*
+		 * Test: Run the migrator again in the wrong mode
+		 */
+		{
+			HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Set.of(HapiFhirJpaMigrationTasks.FlagEnum.DB_PARTITION_MODE.getCommandLineValue()));
+			HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+			migrator.createMigrationTableIfRequired();
+			migrator.addAllTasksForUnitTest(tasks.getAllTasks(VersionEnum.values()));
+			try {
+				migrator.migrate();
+				fail();
+			} catch (Exception e) {
+				assertEquals("AA", e.toString());
+			}
+		}
+
 	}
 
 	private void insertRow_ResourceIndexedComboStringUnique() {
