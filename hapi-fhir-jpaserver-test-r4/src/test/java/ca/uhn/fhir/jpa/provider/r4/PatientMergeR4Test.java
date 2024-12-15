@@ -346,8 +346,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.isEqualTo(400);
 	}
 
-	// FIXME KHS look at PatientEverythingR4Test for ideas for other tests
-
 	class MyExceptionHandler implements TestExecutionExceptionHandler {
 		@Override
 		public void handleTestExecutionException(ExtensionContext theExtensionContext, Throwable theThrowable) throws Throwable {
