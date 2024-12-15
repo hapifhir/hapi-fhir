@@ -136,4 +136,9 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 		myTestHelper.assertAllReferencesUpdated();
 	}
+
+	@Override
+	protected boolean verboseClientLogging() {
+		return true;
+	}
 }

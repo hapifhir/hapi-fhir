@@ -17,7 +17,13 @@
 	<logger name="org.hibernate.event.internal.DefaultPersistEventListener" level="info"/>
 	<logger name="org.eclipse" level="error"/>
 	<logger name="ca.uhn.fhir.rest.client" level="debug"/>
+
+	<!-- These logs can get pretty noisy -->
 	<logger name="ca.uhn.fhir.jpa.dao" level="info"/>
+	<logger name="org.thymeleaf" level="info"/>
+	<logger name="ca.uhn.fhir.jpa.model.entity" level="info"/>
+	<logger name="org.springframework" level="info"/>
+	<logger name="org.hibernate" level="info"/>
 
 	<!-- set to debug to enable term expansion logs -->
 
