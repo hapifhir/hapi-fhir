@@ -262,9 +262,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		private int myLastHttpStatusCode;
 
 		@Override
-		public void interceptRequest(IHttpRequest theRequest) {
-
-		}
+		public void interceptRequest(IHttpRequest theRequest) {}
 
 		@Override
 		public void interceptResponse(IHttpResponse theResponse) throws IOException {

@@ -63,13 +63,7 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(mySrd, request);
 		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(jobStartResponse);
 
-		// FIXME KHS assert outcome
-		String report = jobInstance.getReport();
-		ReplaceReferenceResultsJson replaceReferenceResultsJson = JsonUtil.deserialize(report, ReplaceReferenceResultsJson.class);
-		IdDt resultTaskId = replaceReferenceResultsJson.getTaskId().asIdDt();
-		assertEquals(taskId.getIdPart(), resultTaskId.getIdPart());
-
-		Bundle patchResultBundle = myTestHelper.validateCompletedTask(taskId);
+		Bundle patchResultBundle = myTestHelper.validateCompletedTask(jobInstance, taskId);
 		myTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of("Observation", "Encounter", "CarePlan"));
 
 		myTestHelper.assertAllReferencesUpdated();

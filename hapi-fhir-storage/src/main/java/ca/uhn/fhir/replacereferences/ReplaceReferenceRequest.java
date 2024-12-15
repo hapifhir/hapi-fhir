@@ -77,15 +77,6 @@ public class ReplaceReferenceRequest {
 		}
 	}
 
-	// FIXME KHS remove
-	public SearchParameterMap getSearchParameterMap() {
-		SearchParameterMap retval = SearchParameterMap.newSynchronous();
-		retval.add(PARAM_ID, new StringParam(sourceId.getValue()));
-		retval.addRevInclude(new Include("*"));
-		// Note we do not set the count since we will be streaming
-		return retval;
-	}
-
 	public boolean isForceSync() {
 		return myForceSync;
 	}

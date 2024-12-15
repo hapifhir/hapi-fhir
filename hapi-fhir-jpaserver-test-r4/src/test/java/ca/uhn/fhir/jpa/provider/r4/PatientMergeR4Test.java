@@ -167,7 +167,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
 			ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
 
-			// FIXME KHS the rest of these asserts will likely need to be tweaked
 			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
 
 			// Assert on the output type

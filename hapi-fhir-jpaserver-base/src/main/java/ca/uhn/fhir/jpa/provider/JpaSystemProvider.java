@@ -179,8 +179,10 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 				theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetId));
 		ReplaceReferenceRequest replaceReferenceRequest =
 				new ReplaceReferenceRequest(sourceId, targetId, batchSize, partitionId);
-		IBaseParameters retval = getReplaceReferencesSvc().replaceReferences(replaceReferenceRequest, theRequestDetails);
-		if (ParametersUtil.getNamedParameter(getContext(), retval, OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).isPresent()) {
+		IBaseParameters retval =
+				getReplaceReferencesSvc().replaceReferences(replaceReferenceRequest, theRequestDetails);
+		if (ParametersUtil.getNamedParameter(getContext(), retval, OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
+				.isPresent()) {
 			HttpServletResponse response = theRequestDetails.getServletResponse();
 			response.setStatus(HttpServletResponse.SC_ACCEPTED);
 		}

@@ -1,15 +1,19 @@
 package ca.uhn.fhir.jpa.replacereferences;
 
+import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -355,7 +359,9 @@ public class ReplaceReferencesTestHelper {
 										diagnostics -> assertThat(diagnostics).matches(expectedPatchIssuePattern))));
 	}
 
-	public Bundle validateCompletedTask(IIdType theTaskId) {
+	public Bundle validateCompletedTask(JobInstance theJobInstance, IIdType theTaskId) {
+		validateJobReport(theJobInstance, theTaskId);
+
 		Bundle patchResultBundle;
 		Task taskWithOutput = myTaskDao.read(theTaskId, mySrd);
 		assertThat(taskWithOutput.getStatus()).isEqualTo(Task.TaskStatus.COMPLETED);
@@ -383,5 +389,12 @@ public class ReplaceReferencesTestHelper {
 		// myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patchResultBundle));
 		assertTrue(containedBundle.equalsDeep(patchResultBundle));
 		return patchResultBundle;
+	}
+
+	private void validateJobReport(JobInstance theJobInstance, IIdType theTaskId) {
+		String report = theJobInstance.getReport();
+		ReplaceReferenceResultsJson replaceReferenceResultsJson = JsonUtil.deserialize(report, ReplaceReferenceResultsJson.class);
+		IdDt resultTaskId = replaceReferenceResultsJson.getTaskId().asIdDt();
+		assertEquals(theTaskId.getIdPart(), resultTaskId.getIdPart());
 	}
 }

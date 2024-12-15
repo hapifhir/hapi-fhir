@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -57,11 +58,9 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			assertNull(task.getIdElement().getVersionIdPart());
 			ourLog.info("Got task {}", task.getId());
 
-			awaitJobCompletion(task);
+			JobInstance jobInstance = awaitJobCompletion(task);
 
-// FIXME KHS verify report
-
-			patchResultBundle = myTestHelper.validateCompletedTask(task.getIdElement());
+			patchResultBundle = myTestHelper.validateCompletedTask(jobInstance, task.getIdElement());
 		} else {
 			patchResultBundle = (Bundle) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME).getResource();
 		}
@@ -74,14 +73,14 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		myTestHelper.assertAllReferencesUpdated();
 	}
 
-	private void awaitJobCompletion(Task task) {
+	private JobInstance awaitJobCompletion(Task task) {
 		assertThat(task.getIdentifier()).hasSize(1)
 			.element(0)
 			.extracting(Identifier::getSystem)
 			.isEqualTo(HAPI_BATCH_JOB_ID_SYSTEM);
 
 		String jobId = task.getIdentifierFirstRep().getValue();
-		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(jobId);
+		return myBatch2JobHelper.awaitJobCompletion(jobId);
 	}
 
 
