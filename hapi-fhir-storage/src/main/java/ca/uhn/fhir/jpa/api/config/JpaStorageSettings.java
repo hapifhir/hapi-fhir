@@ -36,6 +36,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @SuppressWarnings("JavadocLinkAsPlainText")
 public class JpaStorageSettings extends StorageSettings {
@@ -117,9 +120,23 @@ public class JpaStorageSettings extends StorageSettings {
 	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
 	private static final long DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD = 10000;
 
-	public static final String DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING = "512";
+	/**
+	 * If we are batching write operations in transactions, what should the maximum number of write operations per
+	 * transaction be?
+	 * @since 7.8.0
+	 */
+	public static final String DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING = "10000";
 	public static final int DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE =
 			Integer.parseInt(DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING);
+
+	/**
+	 * If we are batching write operations in transactions, what should the default number of write operations per
+	 * transaction be?
+	 * @since 7.8.0
+	 */
+	public static final String DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE_STRING = "512";
+	public static final int DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE =
+		Integer.parseInt(DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE_STRING);
 
 	/**
 	 * Do not change default of {@code 0}!
@@ -396,7 +413,19 @@ public class JpaStorageSettings extends StorageSettings {
 	@Beta
 	private boolean myIncludeHashIdentityForTokenSearches = false;
 
+	/**
+	 * If we are batching write operations in transactions, what should the maximum number of write operations per
+	 * transaction be?
+	 * @since 7.8.0
+	 */
 	private int myMaxTransactionEntriesForWrite = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE;
+
+	/**
+	 * If we are batching write operations in transactions, what should the default number of write operations per
+	 * transaction be?
+	 * @since 7.8.0
+	 */
+	private int myDefaultTransactionEntriesForWrite = DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE;
 
 	/**
 	 * Constructor
@@ -2656,10 +2685,13 @@ public class JpaStorageSettings extends StorageSettings {
 		myRestDeleteByUrlResourceIdThreshold = theRestDeleteByUrlResourceIdThreshold;
 	}
 
+
 	/**
 	 * If we are batching write operations in transactions, what should the maximum number of write operations per
 	 * transaction be?
+	 * @since 7.8.0
 	 */
+
 	public int getMaxTransactionEntriesForWrite() {
 		return myMaxTransactionEntriesForWrite;
 	}
@@ -2667,10 +2699,39 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * If we are batching write operations in transactions, what should the maximum number of write operations per
 	 * transaction be?
+	 * @since 7.8.0
 	 */
+
 	public void setMaxTransactionEntriesForWrite(int theMaxTransactionEntriesForWrite) {
 		myMaxTransactionEntriesForWrite = theMaxTransactionEntriesForWrite;
 	}
+
+	/**
+	 * If we are batching write operations in transactions, what should the default number of write operations per
+	 * transaction be?
+	 * @since 7.8.0
+	 */
+	public int getDefaultTransactionEntriesForWrite() {
+		return myDefaultTransactionEntriesForWrite;
+	}
+
+	/**
+	 * If we are batching write operations in transactions, what should the default number of write operations per
+	 * transaction be?
+	 * @since 7.8.0
+	 */
+	public void setDefaultTransactionEntriesForWrite(int theDefaultTransactionEntriesForWrite) {
+		myDefaultTransactionEntriesForWrite = theDefaultTransactionEntriesForWrite;
+	}
+
+	public int getTransactionWriteBatchSizeFromOperationParameter(IPrimitiveType<Integer> theBatchSize) {
+		int retval = defaultIfNull(IPrimitiveType.toValueOrNull(theBatchSize), getDefaultTransactionEntriesForWrite());
+		if (retval > getMaxTransactionEntriesForWrite()) {
+			retval = getMaxTransactionEntriesForWrite();
+		}
+		return retval;
+	}
+
 
 	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),

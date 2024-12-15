@@ -71,7 +71,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
@@ -309,11 +308,8 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					IPrimitiveType<Integer> theBatchSize) {
 
 		startRequest(theServletRequest);
-		int batchSize = defaultIfNull(
-				IPrimitiveType.toValueOrNull(theBatchSize), myStorageSettings.getMaxTransactionEntriesForWrite());
-		if (batchSize > myStorageSettings.getMaxTransactionEntriesForWrite()) {
-			batchSize = myStorageSettings.getMaxTransactionEntriesForWrite();
-		}
+
+		int batchSize = myStorageSettings.getTransactionWriteBatchSizeFromOperationParameter(theBatchSize);
 
 		try {
 			MergeOperationInputParameters mergeOperationParameters = buildMergeOperationInputParameters(
