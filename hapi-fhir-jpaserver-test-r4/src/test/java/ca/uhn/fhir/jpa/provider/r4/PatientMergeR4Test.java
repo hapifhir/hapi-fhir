@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
+import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
@@ -151,7 +153,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Assert Task inAsync mode, unless it is preview in which case we don't return a task
 		if (isAsync && !withPreview) {
-			// FIXME KHS assert we got back a 202 Accepted
+			// FIXME ED see ProviderConstants.OPERATION_REPLACE_REFERENCES in JpaSystemProvider for how to get this to pass
+			assertThat(getLastHttpStatusCode()).isEqualTo(HttpServletResponse.SC_ACCEPTED);
 
 			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
 			assertNull(task.getIdElement().getVersionIdPart());
@@ -224,6 +227,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			assertTargetPatientUpdated(withDelete, expectedIdentifiersOnTargetAfterMerge);
 		}
 	}
+
+	// FIXME ED test case where another resource that links to source was added while the batch was running
+	// so the source can't be deleted
 
 	@ParameterizedTest
 	@CsvSource({

@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,6 +48,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -167,7 +169,7 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 					String theTargetId,
 			@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_BATCH_SIZE, typeName = "unsignedInt")
 					IPrimitiveType<Integer> theBatchSize,
-			RequestDetails theRequestDetails) {
+			ServletRequestDetails theRequestDetails) {
 		validateReplaceReferencesParams(theSourceId, theTargetId);
 		int batchSize = myStorageSettings.getTransactionWriteBatchSizeFromOperationParameter(theBatchSize);
 
@@ -177,7 +179,12 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 				theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetId));
 		ReplaceReferenceRequest replaceReferenceRequest =
 				new ReplaceReferenceRequest(sourceId, targetId, batchSize, partitionId);
-		return getReplaceReferencesSvc().replaceReferences(replaceReferenceRequest, theRequestDetails);
+		IBaseParameters retval = getReplaceReferencesSvc().replaceReferences(replaceReferenceRequest, theRequestDetails);
+		if (ParametersUtil.getNamedParameter(getContext(), retval, OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).isPresent()) {
+			HttpServletResponse response = theRequestDetails.getServletResponse();
+			response.setStatus(HttpServletResponse.SC_ACCEPTED);
+		}
+		return retval;
 	}
 
 	private static void validateReplaceReferencesParams(String theSourceId, String theTargetId) {
