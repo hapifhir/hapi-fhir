@@ -393,7 +393,8 @@ public class ReplaceReferencesTestHelper {
 
 	private void validateJobReport(JobInstance theJobInstance, IIdType theTaskId) {
 		String report = theJobInstance.getReport();
-		ReplaceReferenceResultsJson replaceReferenceResultsJson = JsonUtil.deserialize(report, ReplaceReferenceResultsJson.class);
+		ReplaceReferenceResultsJson replaceReferenceResultsJson =
+				JsonUtil.deserialize(report, ReplaceReferenceResultsJson.class);
 		IdDt resultTaskId = replaceReferenceResultsJson.getTaskId().asIdDt();
 		assertEquals(theTaskId.getIdPart(), resultTaskId.getIdPart());
 	}

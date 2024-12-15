@@ -21,15 +21,11 @@ package ca.uhn.fhir.replacereferences;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.param.StringParam;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.security.InvalidParameterException;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID;
 import static org.apache.commons.lang3.StringUtils.isBlank;
