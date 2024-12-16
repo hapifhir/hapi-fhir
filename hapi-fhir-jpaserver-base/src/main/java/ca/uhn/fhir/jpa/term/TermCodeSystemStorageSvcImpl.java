@@ -481,6 +481,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			Validate.isTrue(next.getPid().getId() == null);
 			Validate.isTrue(codeSystemToStore.getPid() != null);
 
+			// Make sure to initialize the PK object so that hibernate doesn't choke on creation
+			next.setId(null);
+
 			next.setCodeSystemVersion(codeSystemToStore);
 			next.setUpdated(updated);
 
