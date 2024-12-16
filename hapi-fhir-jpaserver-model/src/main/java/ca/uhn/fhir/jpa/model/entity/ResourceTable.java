@@ -31,6 +31,8 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -51,6 +53,7 @@ import org.hibernate.Session;
 import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.GeneratorType;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
@@ -64,6 +67,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 import org.hibernate.tuple.ValueGenerator;
+import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
 
@@ -139,8 +143,10 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private Long myId;
 
 	@Column(name = "SP_INDEX_STATUS", nullable = true)
+	@Enumerated(EnumType.ORDINAL)
+	@JdbcTypeCode(SqlTypes.TINYINT)
 	@OptimisticLock(excluded = true)
-	private Long myIndexStatus;
+	private EntityIndexStatusEnum myIndexStatus;
 
 	// TODO: Removed in 5.5.0. Drop in a future release.
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
@@ -461,11 +467,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myId = theId;
 	}
 
-	public Long getIndexStatus() {
+	public EntityIndexStatusEnum getIndexStatus() {
 		return myIndexStatus;
 	}
 
-	public void setIndexStatus(Long theIndexStatus) {
+	public void setIndexStatus(EntityIndexStatusEnum theIndexStatus) {
 		myIndexStatus = theIndexStatus;
 	}
 
@@ -988,6 +994,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * @return the resource id, or null if the resource doesn't have a client-assigned id,
 	 * and hasn't been saved to the db to get a server-assigned id yet.
 	 */
+	@Override
 	public String getFhirId() {
 		return myFhirId;
 	}

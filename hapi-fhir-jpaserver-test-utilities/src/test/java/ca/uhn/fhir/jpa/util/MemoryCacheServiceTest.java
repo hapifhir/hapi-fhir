@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -235,6 +236,12 @@ class MemoryCacheServiceTest {
 				assertThat(future.isDone()).as("job " + myValue + " not done").isFalse();
 			}
 		}
+	}
+
+	@Test
+	public void testToString() {
+		String actual = new MemoryCacheService.ForcedIdCacheKey("Patient", "12", RequestPartitionId.allPartitions()).toString();
+		assertEquals("MemoryCacheService.ForcedIdCacheKey[resType=Patient,resId=12,partId=RequestPartitionId[allPartitions=true]]", actual);
 	}
 
 

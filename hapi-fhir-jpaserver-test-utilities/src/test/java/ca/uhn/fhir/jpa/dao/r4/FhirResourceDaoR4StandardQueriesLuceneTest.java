@@ -2,19 +2,29 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
@@ -32,15 +42,15 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
 	TestR4Config.class,
 	DaoTestDataBuilder.Config.class,
 	TestDaoSearch.Config.class
 })
-public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
+public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest
+	implements ILuceneSearchR4Test {
+
 	FhirContext myFhirContext = FhirContext.forR4Cached();
 	@Autowired
 	PlatformTransactionManager myTxManager;
@@ -53,6 +63,19 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 	@Qualifier("myObservationDaoR4")
 	IFhirResourceDao<Observation> myObservationDao;
 	@Autowired
+	@Qualifier("myPatientDaoR4")
+	protected IFhirResourceDaoPatient<Patient> myPatientDao;
+	@Autowired
+	private IFhirSystemDao<Bundle, Meta> mySystemDao;
+	@Autowired
+	private IResourceReindexingSvc myResourceReindexingSvc;
+	@Autowired
+	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
+	@Autowired
 	IFhirResourceDao<Practitioner> myPractitionerDao;
 	@Autowired
 	IFhirResourceDao<PractitionerRole> myPractitionerRoleDao;
@@ -60,13 +83,9 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 	// todo mb create an extension to restore via clone or xstream + BeanUtils.copyProperties().
 	@BeforeEach
 	void setUp() {
-		myStorageSettings.setAdvancedHSearchIndexing(true);
-	}
-
-	@AfterEach
-	void tearDown() {
-		JpaStorageSettings defaultConfig = new JpaStorageSettings();
-		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@Override
@@ -77,6 +96,11 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 	@Override
 	protected PlatformTransactionManager getTxManager() {
 		return myTxManager;
+	}
+
+	@Override
+	public DaoRegistry getDaoRegistry() {
+		return myDaoRegistry;
 	}
 
 	@Nested

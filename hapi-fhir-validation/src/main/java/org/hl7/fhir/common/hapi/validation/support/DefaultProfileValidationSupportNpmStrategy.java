@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 
+// This is instantiated through reflection from DefaultProfileValidationSupport
+@SuppressWarnings("unused")
 public class DefaultProfileValidationSupportNpmStrategy extends NpmPackageValidationSupport {
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 

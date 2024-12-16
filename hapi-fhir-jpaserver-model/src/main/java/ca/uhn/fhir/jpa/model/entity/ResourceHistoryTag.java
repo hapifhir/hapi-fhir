@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -31,11 +30,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
 
-@Embeddable
 @Entity
 @Table(
 		name = "HFJ_HISTORY_TAG",
@@ -120,5 +120,18 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	public Long getId() {
 		return myId;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("id", getId());
+		if (getPartitionId() != null) {
+			b.append("partId", getPartitionId().getPartitionId());
+		}
+		b.append("versionId", myResourceHistoryPid);
+		b.append("resId", getResourceId());
+		b.append("tag", getTag().getId());
+		return b.build();
 	}
 }

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>7.7.7-SNAPSHOT</version>
+		<version>7.7.13-SNAPSHOT</version>
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -153,7 +153,7 @@
 			<artifactId>ace-builds</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.webjars.npm</groupId>
+			<groupId>org.webjars</groupId>
 			<artifactId>bootstrap</artifactId>
 		</dependency>
 		<dependency>
@@ -185,7 +185,7 @@
 			<artifactId>moment</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.webjars.npm</groupId>
+			<groupId>org.webjars</groupId>
 			<artifactId>popper.js</artifactId>
 		</dependency>
 

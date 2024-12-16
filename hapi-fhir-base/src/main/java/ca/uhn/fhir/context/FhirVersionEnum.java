@@ -135,15 +135,19 @@ public enum FhirVersionEnum {
 
 	/**
 	 * Creates a new FhirContext for this FHIR version
+	 * @deprecated since 7.7.  Use  {@link FhirContext#forVersion(FhirVersionEnum)} instead
 	 */
+	@Deprecated(forRemoval = true, since = "7.7")
 	public FhirContext newContext() {
-		return new FhirContext(this);
+		return FhirContext.forVersion(this);
 	}
 
 	/**
 	 * Creates a new FhirContext for this FHIR version, or returns a previously created one if one exists. This
 	 * method uses {@link FhirContext#forCached(FhirVersionEnum)} to return a cached instance.
+	 * @deprecated since 7.7.  Use  {@link FhirContext#forCached(FhirVersionEnum)} instead
 	 */
+	@Deprecated(forRemoval = true, since = "7.7")
 	public FhirContext newContextCached() {
 		return FhirContext.forCached(this);
 	}

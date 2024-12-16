@@ -383,8 +383,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				String resourceType = myFhirContext.getResourceType(theJobDetails.getCurrentSearchResourceType());
 				RuntimeResourceDefinition resourceDef =
 						myFhirContext.getResourceDefinition(theJobDetails.getCurrentSearchResourceType());
-				ISearchBuilder searchBuilder = mySearchBuilderFactory.newSearchBuilder(
-						resourceDao, resourceType, resourceDef.getImplementingClass());
+				ISearchBuilder searchBuilder =
+						mySearchBuilderFactory.newSearchBuilder(resourceType, resourceDef.getImplementingClass());
 				List<IBaseResource> listToPopulate = new ArrayList<>();
 
 				myTransactionService.withRequest(null).execute(() -> {

@@ -38,6 +38,7 @@ import ch.qos.logback.classic.Level;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -2237,6 +2238,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			createStructureDefinitionInDao();
 
 			// execute
+			((ValidationSupportChain)myValidationSupport).invalidateExpiringCaches();
 			final String outcomePatientValidateAfterStructDef = validate(PATIENT_WITH_REAL_URL);
 
 			// verify

@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -165,9 +166,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
-	@Autowired
-	IHapiTransactionService myHapiTransactionService;
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
 
 	@AfterEach
@@ -190,7 +188,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	private List<String> extractNames(IBundleProvider theSearch) {
 		ArrayList<String> retVal = new ArrayList<>();
-		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
+		for (IBaseResource next : theSearch.getResources(0, theSearch.sizeOrThrowNpe())) {
 			Patient nextPt = (Patient) next;
 			retVal.add(nextPt.getName().get(0).getNameAsSingleString());
 		}
@@ -291,7 +289,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isGreaterThan(0);
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
-			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
+			assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, tableOpt.get().getIndexStatus());
 		});
 
 		runInTransaction(() -> {
@@ -302,7 +300,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			table.setDeleted(new Date());
 			table = myResourceTableDao.saveAndFlush(table);
 			ResourceHistoryTable newHistory = table.toHistory(true);
-			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(table.getId(), 1L);
+			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersion(table.getId(), 1L);
 			newHistory.setEncoding(currentHistory.getEncoding());
 			newHistory.setResourceTextVc(currentHistory.getResourceTextVc());
 			myResourceHistoryTableDao.save(newHistory);
@@ -314,7 +312,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
-			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
+			assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, tableOpt.get().getIndexStatus());
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isLessThanOrEqualTo(0);
 		});
 	}
@@ -401,7 +399,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isGreaterThan(0);
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
-			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
+			assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, tableOpt.get().getIndexStatus());
 		});
 
 		/*
@@ -424,7 +422,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
-			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
+			assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, tableOpt.get().getIndexStatus());
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isLessThanOrEqualTo(0);
 		});
 
@@ -2934,7 +2932,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		tx.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1L);
+				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 1L);
 				String newContent = myFhirContext.newJsonParser().encodeResourceToString(p);
 				newContent = newContent.replace("male", "foo");
 				table.setResourceTextVc(newContent);
@@ -3678,7 +3676,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	@Test
 	public void testSortByString01() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 
 		Patient p = new Patient();
 		String string = "testSortByString01";

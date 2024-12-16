@@ -43,6 +43,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class MdmSearchExpansionSvc {
 	private static final String EXPANSION_RESULTS = MdmSearchExpansionSvc.class.getName() + "_EXPANSION_RESULTS";
 	private static final String RESOURCE_NAME = MdmSearchExpansionSvc.class.getName() + "_RESOURCE_NAME";
@@ -75,6 +77,7 @@ public class MdmSearchExpansionSvc {
 	 * @since 8.0.0
 	 */
 	public MdmSearchExpansionResults expandSearchAndStoreInRequestDetails(
+			String theResourceName,
 			@Nullable RequestDetails theRequestDetails,
 			@Nonnull SearchParameterMap theSearchParameterMap,
 			IParamTester theParamTester) {
@@ -85,14 +88,15 @@ public class MdmSearchExpansionSvc {
 
 		// Try to detect if the RequestDetails is being reused across multiple different queries, which
 		// can happen during CQL measure evaluation
-		String resourceName = theRequestDetails.getResourceName();
-		String queryString = theSearchParameterMap.toNormalizedQueryString(myFhirContext);
-		if (!Objects.equals(resourceName, theRequestDetails.getUserData().get(RESOURCE_NAME))
-				|| !Objects.equals(queryString, theRequestDetails.getUserData().get(QUERY_STRING))) {
-			theRequestDetails.getUserData().remove(EXPANSION_RESULTS);
+		{
+			String resourceName = theRequestDetails.getResourceName();
+			String queryString = theSearchParameterMap.toNormalizedQueryString(myFhirContext);
+			if (!Objects.equals(resourceName, theRequestDetails.getUserData().get(RESOURCE_NAME))
+					|| !Objects.equals(
+							queryString, theRequestDetails.getUserData().get(QUERY_STRING))) {
+				theRequestDetails.getUserData().remove(EXPANSION_RESULTS);
+			}
 		}
-		theRequestDetails.getUserData().put(RESOURCE_NAME, resourceName);
-		theRequestDetails.getUserData().put(QUERY_STRING, queryString);
 
 		MdmSearchExpansionResults expansionResults = getCachedExpansionResults(theRequestDetails);
 		if (expansionResults != null) {
@@ -112,16 +116,19 @@ public class MdmSearchExpansionSvc {
 				// here we will know if it's an _id param or not
 				// from theSearchParameterMap.keySet()
 				expandAnyReferenceParameters(
-						requestPartitionId,
-						theRequestDetails.getResourceName(),
-						paramName,
-						orList,
-						theParamTester,
-						expansionResults);
+						requestPartitionId, theResourceName, paramName, orList, theParamTester, expansionResults);
 			}
 		}
 
 		theRequestDetails.getUserData().put(EXPANSION_RESULTS, expansionResults);
+
+		/*
+		 * Note: Do this at the end so that the query string reflects the post-translated
+		 * query string
+		 */
+		String queryString = theSearchParameterMap.toNormalizedQueryString(myFhirContext);
+		theRequestDetails.getUserData().put(RESOURCE_NAME, theResourceName);
+		theRequestDetails.getUserData().put(QUERY_STRING, queryString);
 
 		return expansionResults;
 	}
@@ -185,7 +192,7 @@ public class MdmSearchExpansionSvc {
 	}
 
 	private String addResourceTypeIfNecessary(String theResourceType, String theResourceId) {
-		if (theResourceId.contains("/")) {
+		if (theResourceId.contains("/") || isBlank(theResourceType)) {
 			return theResourceId;
 		} else {
 			return theResourceType + "/" + theResourceId;

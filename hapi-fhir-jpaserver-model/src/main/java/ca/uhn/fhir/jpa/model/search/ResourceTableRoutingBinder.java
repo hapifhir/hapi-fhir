@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.search;
 
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hibernate.search.mapper.pojo.bridge.RoutingBridge;
 import org.hibernate.search.mapper.pojo.bridge.binding.RoutingBindingContext;
@@ -41,7 +42,8 @@ public class ResourceTableRoutingBinder implements RoutingBinder {
 				Object theO,
 				ResourceTable theResourceTable,
 				RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
-			if (theResourceTable.getDeleted() == null && theResourceTable.getIndexStatus() != null) {
+			if (theResourceTable.getDeleted() == null
+					&& theResourceTable.getIndexStatus() == EntityIndexStatusEnum.INDEXED_ALL) {
 				theDocumentRoutes.addRoute();
 			} else {
 				theDocumentRoutes.notIndexed();

@@ -3,9 +3,12 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -15,6 +18,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -91,11 +96,12 @@ public class ResourceVersionSvcTest {
 	 * @param theResourcePacks
 	 */
 	private void mockReturnsFor_getIdsOfExistingResources(ResourceIdPackage... theResourcePacks) {
-		List<IResourcePersistentId> resourcePersistentIds = new ArrayList<>();
+		List<IResourcePersistentId<Long>> resourcePersistentIds = new ArrayList<>();
 		List<Object[]> matches = new ArrayList<>();
 
 		for (ResourceIdPackage pack : theResourcePacks) {
 			resourcePersistentIds.add(pack.myPid);
+			pack.myPid.setAssociatedResourceId(pack.MyResourceId);
 
 			matches.add(getResourceTableRecordForResourceTypeAndPid(
 				pack.MyResourceId.getResourceType(),
@@ -104,11 +110,19 @@ public class ResourceVersionSvcTest {
 			));
 		}
 
-		IResourcePersistentId first = resourcePersistentIds.remove(0);
+		IResourcePersistentId<Long> first = resourcePersistentIds.remove(0);
 		if (resourcePersistentIds.isEmpty()) {
-			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any())).thenReturn(Collections.singletonList(first));
+			when(myIdHelperService.resolveResourceIdentities(any(), any(), any()))
+				.thenReturn(Map.of(first.getAssociatedResourceId(), new JpaResourceLookup(first.getResourceType(), first.getAssociatedResourceId().getIdPart(), (JpaPid) first, null, null)));
 		} else {
-			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any())).thenReturn(resourcePersistentIds);
+
+			HashMap<IIdType, IResourceLookup<JpaPid>> map = new HashMap<>();
+			for (var next : resourcePersistentIds) {
+				map.put(next.getAssociatedResourceId(), new JpaResourceLookup(next.getResourceType(),next.getAssociatedResourceId().getIdPart() ,(JpaPid) next, null, null));
+			}
+
+			when(myIdHelperService.resolveResourceIdentities(any(), any(), any()))
+				.thenReturn(map);
 		}
 	}
 

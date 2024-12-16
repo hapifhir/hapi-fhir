@@ -51,6 +51,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -135,13 +136,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public ExtendedHSearchIndexData extractLuceneIndexData(
-			IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
+			IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
 				resourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 				myStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
-		return extractor.extract(theResource, theNewParams);
+		return extractor.extract(theResource, theEntity, theNewParams);
 	}
 
 	@Override
@@ -219,7 +220,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		// indicate param was already processed, otherwise queries DB to process it
 		theParams.setOffset(null);
-		return SearchQueryExecutors.from(longs);
+		return SearchQueryExecutors.from(JpaPid.fromLongList(longs));
 	}
 
 	private int getMaxFetchSize(SearchParameterMap theParams, Integer theMax) {
@@ -264,6 +265,20 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			String theResourceType,
 			SearchParameterMap theParams,
 			IResourcePersistentId theReferencingPid) {
+
+		if (theParams.containsKey(Constants.PARAM_TEXT) || theParams.containsKey(Constants.PARAM_CONTENT)) {
+			if (!myStorageSettings.isHibernateSearchIndexFullText()) {
+				String params = theParams.keySet().stream()
+						.filter(t -> t.equals(Constants.PARAM_TEXT) || t.equals(Constants.PARAM_CONTENT))
+						.sorted()
+						.collect(Collectors.joining(", "));
+				String msg = myFhirContext
+						.getLocalizer()
+						.getMessage(FulltextSearchSvcImpl.class, "fullTextSearchingNotPossible", params);
+				throw new InvalidRequestException(Msg.code(2566) + msg);
+			}
+		}
+
 		return f.bool(b -> {
 			ExtendedHSearchClauseBuilder builder =
 					new ExtendedHSearchClauseBuilder(myFhirContext, myStorageSettings, b, f);
@@ -386,7 +401,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@SuppressWarnings("rawtypes")
 	private List<IResourcePersistentId> toList(ISearchQueryExecutor theSearchResultStream, long theMaxSize) {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(theSearchResultStream, 0), false)
-				.map(JpaPid::fromId)
 				.limit(theMaxSize)
 				.collect(Collectors.toList());
 	}
@@ -516,8 +530,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	 */
 	@SuppressWarnings("rawtypes")
 	private void logQuery(SearchQueryOptionsStep theQuery, RequestDetails theRequestDetails) {
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 			StorageProcessingMessage storageProcessingMessage = new StorageProcessingMessage();
 			String queryString = theQuery.toQuery().queryString();
 			storageProcessingMessage.setMessage(queryString);
@@ -525,8 +540,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(StorageProcessingMessage.class, storageProcessingMessage);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
+			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 		}
 	}
 

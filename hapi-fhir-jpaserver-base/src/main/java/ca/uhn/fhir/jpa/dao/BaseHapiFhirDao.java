@@ -56,8 +56,8 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -162,8 +162,6 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStorageResourceDao<T>
 		implements IDao, IJpaDao<T>, ApplicationContextAware {
 
-	public static final long INDEX_STATUS_INDEXED = 1L;
-	public static final long INDEX_STATUS_INDEXING_FAILED = 2L;
 	public static final String NS_JPA_PROFILE = "https://github.com/hapifhir/hapi-fhir/ns/jpa/profile";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiFhirDao.class);
 	private static boolean ourValidationDisabledForUnitTest;
@@ -561,8 +559,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			} else {
 				ResourceHistoryTable currentHistoryVersion = theEntity.getCurrentVersionEntity();
 				if (currentHistoryVersion == null) {
-					currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-							theEntity.getId(), theEntity.getVersion());
+					currentHistoryVersion =
+							myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
 				}
 				if (currentHistoryVersion == null || !currentHistoryVersion.hasResource()) {
 					changed = true;
@@ -883,7 +881,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 			}
 			if (!StringUtils.isBlank(entity.getResourceType())) {
-				validateIncomingResourceTypeMatchesExisting(theResource, entity);
+				String resourceType = myContext.getResourceType(theResource);
+				// This is just a sanity check and should never actually fail.
+				// We resolve the ID using IdLookupService, and there should be
+				// no way to get it to give you a mismatched type for an ID.
+				Validate.isTrue(resourceType.equals(entity.getResourceType()));
 			}
 		}
 
@@ -904,7 +906,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			entity.setUpdated(theDeletedTimestampOrNull);
 			entity.setNarrativeText(null);
 			entity.setContentText(null);
-			entity.setIndexStatus(INDEX_STATUS_INDEXED);
+			entity.setIndexStatus(getEntityIndexedStatusEnum());
 			changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 
 		} else {
@@ -978,7 +980,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						entity.setUpdated(theTransactionDetails.getTransactionDate());
 					}
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
-					entity.setIndexStatus(INDEX_STATUS_INDEXED);
+					entity.setIndexStatus(getEntityIndexedStatusEnum());
 				}
 
 				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
@@ -1057,8 +1059,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			// Interceptor broadcast: JPA_PERFTRACE_INFO
 			if (!presenceCount.isEmpty()) {
-				if (CompositeInterceptorBroadcaster.hasHooks(
-						Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
+				IInterceptorBroadcaster compositeBroadcaster =
+						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 					StorageProcessingMessage message = new StorageProcessingMessage();
 					message.setMessage(
 							"For " + entity.getIdDt().toUnqualifiedVersionless().getValue() + " added "
@@ -1068,8 +1071,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 							.add(RequestDetails.class, theRequest)
 							.addIfMatchesType(ServletRequestDetails.class, theRequest)
 							.add(StorageProcessingMessage.class, message);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+					compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 				}
 			}
 		}
@@ -1079,7 +1081,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 */
 		if (thePerformIndexing) {
 			if (newParams == null) {
-				myExpungeService.deleteAllSearchParams(JpaPid.fromId(entity.getId()));
+				myExpungeService.deleteAllSearchParams(entity.getPersistentId());
 				entity.clearAllParamsPopulated();
 			} else {
 
@@ -1092,8 +1094,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				// Interceptor broadcast: JPA_PERFTRACE_INFO
 				if (!searchParamAddRemoveCount.isEmpty()) {
-					if (CompositeInterceptorBroadcaster.hasHooks(
-							Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									myInterceptorBroadcaster, theRequest);
+					if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 						StorageProcessingMessage message = new StorageProcessingMessage();
 						message.setMessage("For "
 								+ entity.getIdDt().toUnqualifiedVersionless().getValue() + " added "
@@ -1104,8 +1108,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 								.add(RequestDetails.class, theRequest)
 								.addIfMatchesType(ServletRequestDetails.class, theRequest)
 								.add(StorageProcessingMessage.class, message);
-						CompositeInterceptorBroadcaster.doCallHooks(
-								myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+						compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 					}
 				}
 			}
@@ -1116,6 +1119,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		return entity;
+	}
+
+	/**
+	 * This methor returns the {@link EntityIndexStatusEnum} value that should be
+	 * used for a successfully fully indexed resource. This method will return
+	 * {@link EntityIndexStatusEnum#INDEXED_ALL} or {@link EntityIndexStatusEnum#INDEXED_RDBMS_ONLY}
+	 * depending on configuration.
+	 */
+	@Nonnull
+	private EntityIndexStatusEnum getEntityIndexedStatusEnum() {
+		if (myStorageSettings.isHibernateSearchIndexFullText()
+				|| myStorageSettings.isHibernateSearchIndexSearchParams()) {
+			return EntityIndexStatusEnum.INDEXED_ALL;
+		} else {
+			return EntityIndexStatusEnum.INDEXED_RDBMS_ONLY;
+		}
 	}
 
 	/**
@@ -1214,7 +1233,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		} else {
 			historyEntity = (ResourceHistoryTable) theHistoryEntity;
 			if (!StringUtils.isBlank(historyEntity.getResourceType())) {
-				validateIncomingResourceTypeMatchesExisting(theResource, historyEntity);
+				String resourceType = myContext.getResourceType(theResource);
+				if (!resourceType.equals(historyEntity.getResourceType())) {
+					throw new UnprocessableEntityException(Msg.code(930) + "Existing resource ID["
+							+ historyEntity.getIdDt().toUnqualifiedVersionless() + "] is of type["
+							+ historyEntity.getResourceType()
+							+ "] - Cannot update with [" + resourceType + "]");
+				}
 			}
 
 			historyEntity.setDeleted(null);
@@ -1304,8 +1329,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			 * this could return null if the current resourceVersion has been expunged
 			 * in which case we'll still create a new one
 			 */
-			historyEntry = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-					theEntity.getResourceId(), resourceVersion - 1);
+			historyEntry =
+					myResourceHistoryTableDao.findForIdAndVersion(theEntity.getResourceId(), resourceVersion - 1);
 			if (historyEntry != null) {
 				reusingHistoryEntity = true;
 				theEntity.populateHistoryEntityVersionAndDates(historyEntry);
@@ -1363,29 +1388,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		boolean haveSource = isNotBlank(source) && shouldStoreSource;
 		boolean haveRequestId = isNotBlank(requestId) && shouldStoreRequestId;
 		if (haveSource || haveRequestId) {
-			ResourceHistoryProvenanceEntity provenance = null;
-			if (reusingHistoryEntity) {
-				/*
-				 * If version history is disabled, then we may be reusing
-				 * a previous history entity. If that's the case, let's try
-				 * to reuse the previous provenance entity too.
-				 */
-				provenance = historyEntry.getProvenance();
-			}
-			if (provenance == null) {
-				provenance = historyEntry.toProvenance();
-			}
-			provenance.setResourceHistoryTable(historyEntry);
-			provenance.setResourceTable(theEntity);
-			provenance.setPartitionId(theEntity.getPartitionId());
 			if (haveRequestId) {
 				String persistedRequestId = left(requestId, Constants.REQUEST_ID_LENGTH);
-				provenance.setRequestId(persistedRequestId);
 				historyEntry.setRequestId(persistedRequestId);
 			}
 			if (haveSource) {
 				String persistedSource = left(source, ResourceHistoryTable.SOURCE_URI_LENGTH);
-				provenance.setSourceUri(persistedSource);
 				historyEntry.setSourceUri(persistedSource);
 			}
 			if (theResource != null) {
@@ -1395,8 +1403,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						shouldStoreRequestId ? requestId : null,
 						theResource);
 			}
-
-			myEntityManager.persist(provenance);
 		}
 	}
 
@@ -1405,15 +1411,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return StringUtils.substringAfter(theSource, "#");
 		}
 		return theRequest != null ? theRequest.getRequestId() : null;
-	}
-
-	private void validateIncomingResourceTypeMatchesExisting(IBaseResource theResource, BaseHasResource entity) {
-		String resourceType = myContext.getResourceType(theResource);
-		if (!resourceType.equals(entity.getResourceType())) {
-			throw new UnprocessableEntityException(Msg.code(930) + "Existing resource ID["
-					+ entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType()
-					+ "] - Cannot update with [" + resourceType + "]");
-		}
 	}
 
 	@Override
@@ -1684,11 +1681,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			theEntity.setNarrativeText(null);
 			theEntity.setContentText(null);
 		} else {
-			theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
-			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
-			if (myStorageSettings.isAdvancedHSearchIndexing()) {
+			if (myStorageSettings.isHibernateSearchIndexFullText()) {
+				theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
+				theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
+			}
+			if (myStorageSettings.isHibernateSearchIndexSearchParams()) {
 				ExtendedHSearchIndexData hSearchIndexData =
-						myFulltextSearchSvc.extractLuceneIndexData(theResource, theNewParams);
+						myFulltextSearchSvc.extractLuceneIndexData(theResource, theEntity, theNewParams);
 				theEntity.setLuceneIndexData(hSearchIndexData);
 			}
 		}
