@@ -37,7 +37,7 @@ Fulltext searches have been updated to support `_lastUpdated` search parameter. 
 * Total Denominator and Total Numerator extensions are no longer being used for scoring.  Instead Numerator and Denominator will be used.
 * Support $evaluate-measure and $evaluate-measures queries with Organization subjects.  Previously, this would result in an error.
 * Individual reports with multiple SDEs will no longer error out
-* Passing invalid reportTypes will no longer to INDIVIDUAL or SUMMARY but will instead return an appropriate failure
+* Enforce validity of reportType parameter values.  Only `subject`, `population`, `patient`, `patient-list`, and `subject-list` will be accepted, otherwise the request will fail validation.
 * Ensure many cases of user error that resulted in HTTP status code of 500 now results in 400 instead.
 
 # CareGaps
