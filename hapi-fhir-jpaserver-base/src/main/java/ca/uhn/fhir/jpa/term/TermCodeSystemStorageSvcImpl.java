@@ -478,8 +478,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Collection<TermConcept> conceptsToSave = theCodeSystemVersion.getConcepts();
 		for (TermConcept next : conceptsToSave) {
 			totalCodeCount += validateConceptForStorage(next, codeSystemToStore, conceptsStack, allConcepts);
-			assert next.getId() == null;
-			assert codeSystemToStore.getPid() != null;
+			Validate.isTrue(next.getPid().getId() == null);
+			Validate.isTrue(codeSystemToStore.getPid() != null);
 
 			next.setCodeSystemVersion(codeSystemToStore);
 			next.setUpdated(updated);
