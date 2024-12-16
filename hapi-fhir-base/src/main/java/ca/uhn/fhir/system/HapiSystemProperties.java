@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.system;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import java.util.concurrent.TimeUnit;
 
 public final class HapiSystemProperties {
@@ -92,13 +90,6 @@ public final class HapiSystemProperties {
 			return DEFAULT_VALIDATION_RESOURCE_CACHE_TIMEOUT_MILLIS;
 		}
 		return Long.parseLong(property);
-	}
-
-	@VisibleForTesting
-	public static void restoreDefaultValidationResourceCacheTimeoutMillis() {
-		System.clearProperty(VALIDATION_RESOURCE_CACHE_TIMEOUT_MILLIS);
-		System.setProperty(
-				VALIDATION_RESOURCE_CACHE_TIMEOUT_MILLIS, "" + DEFAULT_VALIDATION_RESOURCE_CACHE_TIMEOUT_MILLIS);
 	}
 
 	/**

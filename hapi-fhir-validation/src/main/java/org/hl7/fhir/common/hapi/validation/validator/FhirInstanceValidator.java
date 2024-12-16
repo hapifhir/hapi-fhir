@@ -152,17 +152,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	}
 
 	/**
-	 * Resets the {@link VersionSpecificWorkerContextWrapper} so it can be created again.
-	 * This method is needed for (integration) test purposes and should not be used otherwise.
-	 */
-	@VisibleForTesting
-	public void resetWorkerContext() {
-		// this method had to be added because the current bean is autowired in the DAOs (BaseHapiFhirResourceDao)
-		// so the only way to force it to reinitialize as of now is by resetting it
-		myWrappedWorkerContext = null;
-	}
-
-	/**
 	 * If set to {@literal true} (default is true) extensions which are not known to the
 	 * validator (e.g. because they have not been explicitly declared in a profile) will
 	 * be validated but will not cause an error.
