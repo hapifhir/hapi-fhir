@@ -1441,6 +1441,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		}
 
 		private List<IIdType> validateAndGetIdListFromBundle(Bundle theBundle, int theSize) {
+			ourLog.info("Resource IDs: {}", theBundle.getEntry().stream().map(t->t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).toList());
 			assertEquals(Bundle.BundleType.SEARCHSET, theBundle.getType());
 			assertThat(theBundle.getEntry()).hasSize(theSize);
 			return toUnqualifiedVersionlessIds(theBundle);

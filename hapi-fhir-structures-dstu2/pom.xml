@@ -187,7 +187,6 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<id>generate</id>

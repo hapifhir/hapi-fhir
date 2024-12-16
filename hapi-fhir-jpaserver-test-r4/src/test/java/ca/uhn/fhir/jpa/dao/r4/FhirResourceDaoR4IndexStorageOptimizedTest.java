@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.reindex.ReindexStepV1Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.param.BaseParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -78,6 +79,16 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 
 	@Autowired
 	private SearchConfig mySearchConfig;
+
+	@Override
+	@BeforeEach
+	public void before() throws Exception {
+		super.before();
+
+		// We rely on this interceptor being in place, and it should be unless some cheeky other test
+		// has removed it
+		assertEquals(1, myInterceptorRegistry.getAllRegisteredInterceptors().stream().filter(t -> t instanceof SearchParamValidatingInterceptor).count());
+	}
 
 	@AfterEach
 	void cleanUp() {
