@@ -1,8 +1,0 @@
----
-type: fix
-issue: 6505
-title: "Previously, when invoking a $validate operation that took more than 10s some unexpected errors 
-would be returned which suggest the profile was not applied properly or used. 
-That happens because the validation cache entry expired within the $validate call 
-and the FHIR Core Validation library expects the same object instance for the same profile to be returned.
-This has been fixed by increasing the cache expiry to 10min."

@@ -116,7 +116,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 			ourLog.info("Resource does not support 'url' or 'version' Search Parameters");
 		}
 		if (results != null && !results.isEmpty()) {
-			if (results.size() > 1 && ourLog.isWarnEnabled()) {
+			if (results.size() > 1) {
 				ourLog.warn("Multiple results found for URL '{}', only the first will be considered.", url);
 			}
 			return results.get(0);
