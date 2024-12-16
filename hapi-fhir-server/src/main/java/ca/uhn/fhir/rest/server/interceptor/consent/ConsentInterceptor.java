@@ -160,7 +160,7 @@ public class ConsentInterceptor {
 
 	@VisibleForTesting
 	public List<IConsentService> getConsentServices() {
-		return myConsentService;
+		return Collections.unmodifiableList(myConsentService);
 	}
 
 	@Hook(value = Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
