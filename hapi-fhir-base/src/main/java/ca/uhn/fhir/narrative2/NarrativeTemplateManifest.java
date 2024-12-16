@@ -65,6 +65,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 	private final ListMultimap<String, NarrativeTemplate> myNameToTemplate;
 	private final ListMultimap<String, NarrativeTemplate> myFragmentNameToTemplate;
 	private final ListMultimap<String, NarrativeTemplate> myClassToTemplate;
+	private final ListMultimap<String, NarrativeTemplate> myCodeToTemplate;
 	private final int myTemplateCount;
 
 	private NarrativeTemplateManifest(Collection<NarrativeTemplate> theTemplates) {
@@ -73,6 +74,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		ListMultimap<String, NarrativeTemplate> nameToTemplate = ArrayListMultimap.create();
 		ListMultimap<String, NarrativeTemplate> classToTemplate = ArrayListMultimap.create();
 		ListMultimap<String, NarrativeTemplate> fragmentNameToTemplate = ArrayListMultimap.create();
+		ListMultimap<String, NarrativeTemplate> codeToTemplate = ArrayListMultimap.create();
 
 		for (NarrativeTemplate nextTemplate : theTemplates) {
 			nameToTemplate.put(nextTemplate.getTemplateName(), nextTemplate);
@@ -88,6 +90,9 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 			for (String nextFragmentName : nextTemplate.getAppliesToFragmentNames()) {
 				fragmentNameToTemplate.put(nextFragmentName, nextTemplate);
 			}
+			for (String nextLoincCode : nextTemplate.getAppliesToCode()) {
+				codeToTemplate.put(nextLoincCode, nextTemplate);
+			}
 		}
 
 		myTemplateCount = theTemplates.size();
@@ -96,6 +101,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		myResourceTypeToTemplate = Multimaps.unmodifiableListMultimap(resourceTypeToTemplate);
 		myDatatypeToTemplate = Multimaps.unmodifiableListMultimap(datatypeToTemplate);
 		myFragmentNameToTemplate = Multimaps.unmodifiableListMultimap(fragmentNameToTemplate);
+		myCodeToTemplate = Multimaps.unmodifiableListMultimap(codeToTemplate);
 	}
 
 	public int getNamedTemplateCount() {
@@ -127,6 +133,14 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		return getFromMap(theStyles, theFragmentName, myFragmentNameToTemplate, Collections.emptyList());
 	}
 
+	@Override
+	public List<INarrativeTemplate> getTemplateByCode(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
+			@Nonnull String theCode) {
+		return getFromMap(theStyles, theCode, myCodeToTemplate, Collections.emptyList());
+	}
+
 	@SuppressWarnings("PatternVariableCanBeUsed")
 	@Override
 	public List<INarrativeTemplate> getTemplateByElement(
@@ -138,12 +152,30 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		if (theElement instanceof IBaseResource) {
 			IBaseResource resource = (IBaseResource) theElement;
 			String resourceName = theFhirContext.getResourceDefinition(resource).getName();
+
 			List<String> profiles = resource.getMeta().getProfile().stream()
 					.filter(Objects::nonNull)
 					.map(IPrimitiveType::getValueAsString)
 					.filter(StringUtils::isNotBlank)
 					.collect(Collectors.toList());
-			retVal = getTemplateByResourceName(theFhirContext, theStyles, resourceName, profiles);
+
+			List<INarrativeTemplate> profileTemplates =
+					getTemplateByResourceName(theFhirContext, theStyles, resourceName, profiles);
+
+			String theCode = resource.getMeta().getTag().stream()
+					.filter(Objects::nonNull)
+					.map(t -> t.getSystem() + "|" + t.getCode())
+					.findFirst()
+					.orElse("");
+
+			if (StringUtils.isNotBlank(theCode)) {
+				// Looking for a specific code system/code as well as resource, get the intersection of these two lists
+				List<INarrativeTemplate> tagTemplates = getTemplateByCode(theFhirContext, theStyles, theCode);
+				retVal =
+						profileTemplates.stream().filter(tagTemplates::contains).collect(Collectors.toList());
+			} else {
+				retVal = profileTemplates;
+			}
 		}
 
 		if (retVal.isEmpty()) {
@@ -155,6 +187,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 					theFhirContext.getElementDefinition(theElement.getClass()).getName();
 			retVal = getFromMap(theStyles, datatypeName.toUpperCase(), myDatatypeToTemplate, Collections.emptyList());
 		}
+
 		return retVal;
 	}
 
@@ -221,6 +254,11 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 				String profile = file.getProperty(nextKey);
 				if (isNotBlank(profile)) {
 					nextTemplate.addAppliesToProfile(profile);
+				}
+			} else if (nextKey.endsWith(".tag")) {
+				String tag = file.getProperty(nextKey);
+				if (isNotBlank(tag)) {
+					nextTemplate.addAppliesToCode(tag);
 				}
 			} else if (nextKey.endsWith(".resourceType")) {
 				String resourceType = file.getProperty(nextKey);

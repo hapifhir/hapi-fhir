@@ -34,6 +34,7 @@ public class NarrativeTemplate implements INarrativeTemplate {
 	private final Set<String> myAppliesToDataTypes = new HashSet<>();
 	private final Set<Class<? extends IBase>> myAppliesToClasses = new HashSet<>();
 	private final Set<String> myAppliesToFragmentNames = new HashSet<>();
+	private final Set<String> myAppliesToCode = new HashSet<>();
 	private String myTemplateFileName;
 	private TemplateTypeEnum myTemplateType = TemplateTypeEnum.THYMELEAF;
 	private String myContextPath;
@@ -81,8 +82,17 @@ public class NarrativeTemplate implements INarrativeTemplate {
 		return Collections.unmodifiableSet(myAppliesToProfiles);
 	}
 
+	@Override
+	public Set<String> getAppliesToCode() {
+		return Collections.unmodifiableSet(myAppliesToCode);
+	}
+
 	void addAppliesToProfile(String theAppliesToProfile) {
 		myAppliesToProfiles.add(theAppliesToProfile);
+	}
+
+	void addAppliesToCode(String theAppliesToCode) {
+		myAppliesToCode.add(theAppliesToCode);
 	}
 
 	@Override

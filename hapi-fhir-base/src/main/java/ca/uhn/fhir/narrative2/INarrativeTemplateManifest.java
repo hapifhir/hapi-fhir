@@ -46,4 +46,7 @@ public interface INarrativeTemplateManifest {
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
 			@Nonnull String theFragmentName);
+
+	List<INarrativeTemplate> getTemplateByCode(
+			@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull String theCode);
 }
