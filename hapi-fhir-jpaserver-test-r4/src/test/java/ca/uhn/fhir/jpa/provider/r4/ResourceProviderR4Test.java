@@ -3787,10 +3787,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertNull(outcome.getResource());
 
 		// Search
+		myCaptureQueriesListener.clear();
 		Bundle search2 = (Bundle) myClient.search()
 			.forResource(Patient.class)
 			.where(Patient.RES_ID.exactly().identifier(patientId))
 			.execute();
+		myCaptureQueriesListener.logSelectQueries();
 
 		assertTrue(CollectionUtils.isEmpty(search2.getEntry()));
 		assertEquals(0, search2.getTotal());

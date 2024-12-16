@@ -138,6 +138,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	 */
 	@Nullable
 	private IBaseResource fetchCodeSystem(String theSystem, @Nullable SummaryEnum theSummaryParam) {
+		if (isBlank(theSystem)) {
+			return null;
+		}
 		IGenericClient client = provideClient();
 		Class<? extends IBaseBundle> bundleType =
 				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
@@ -512,6 +515,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	 */
 	@Nullable
 	private IBaseResource fetchValueSet(String theValueSetUrl, SummaryEnum theSummaryParam) {
+		if (isBlank(theValueSetUrl)) {
+			return null;
+		}
+
 		IGenericClient client = provideClient();
 		Class<? extends IBaseBundle> bundleType =
 				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);

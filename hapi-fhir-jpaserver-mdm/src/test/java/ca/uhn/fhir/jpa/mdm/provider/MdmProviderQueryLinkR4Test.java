@@ -470,7 +470,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.notDuplicate(myGoldenResource1Id, new StringType("Patient/notAnId123"), myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(2001) + "Resource Patient/notAnId123 is not known", e.getMessage());
+			assertEquals(Msg.code(1100) + "Resource Patient/notAnId123 is not known", e.getMessage());
 		}
 	}
 
