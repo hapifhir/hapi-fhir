@@ -90,8 +90,8 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 			for (String nextFragmentName : nextTemplate.getAppliesToFragmentNames()) {
 				fragmentNameToTemplate.put(nextFragmentName, nextTemplate);
 			}
-			for (String nextLoincCode : nextTemplate.getAppliesToCode()) {
-				codeToTemplate.put(nextLoincCode, nextTemplate);
+			for (String nextCode : nextTemplate.getAppliesToCode()) {
+				codeToTemplate.put(nextCode, nextTemplate);
 			}
 		}
 
