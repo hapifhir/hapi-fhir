@@ -633,5 +633,9 @@ public class TermConcept implements Serializable {
 		public String toString() {
 			return String.valueOf(myId);
 		}
+
+		public Long getId() {
+			return myId;
+		}
 	}
 }
