@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -50,6 +51,7 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLA
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ReplaceReferencesTestHelper {
@@ -83,7 +85,6 @@ public class ReplaceReferencesTestHelper {
 	private ArrayList<IIdType> mySourceObsIds;
 	private IIdType myTargetPatientId;
 	private IIdType myTargetEnc1;
-	private Patient myResultPatient;
 
 	private final FhirContext myFhirContext;
 	private final SystemRequestDetails mySrd = new SystemRequestDetails();
@@ -150,10 +151,6 @@ public class ReplaceReferencesTestHelper {
 			IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			mySourceObsIds.add(obsId);
 		}
-
-		myResultPatient = new Patient();
-		myResultPatient.setIdElement((IdType) myTargetPatientId);
-		myResultPatient.addIdentifier(pat1IdentifierA);
 	}
 
 	public void setSourceAndTarget(PatientMergeInputParameters inParams) {
@@ -161,14 +158,17 @@ public class ReplaceReferencesTestHelper {
 		inParams.targetPatient = new Reference().setReferenceElement(myTargetPatientId);
 	}
 
-	public void setResultPatient(PatientMergeInputParameters theInParams, boolean theWithDelete) {
-		if (!theWithDelete) {
+	public Patient createResultPatient(boolean theDeleteSource) {
+		Patient resultPatient = new Patient();
+		resultPatient.setIdElement((IdType) myTargetPatientId);
+		resultPatient.addIdentifier(pat1IdentifierA);
+		if (!theDeleteSource) {
 			// add the link only if we are not deleting the source
-			Patient.PatientLinkComponent link = myResultPatient.addLink();
+			Patient.PatientLinkComponent link = resultPatient.addLink();
 			link.setOther(new Reference(mySourcePatientId));
 			link.setType(Patient.LinkType.REPLACES);
 		}
-		theInParams.resultPatient = myResultPatient;
+		return resultPatient;
 	}
 
 	public Patient readSourcePatient() {
@@ -277,7 +277,7 @@ public class ReplaceReferencesTestHelper {
 		inParams.targetPatientIdentifier = patBothIdentifierC;
 		inParams.deleteSource = theWithDelete;
 		if (theWithInputResultPatient) {
-			inParams.resultPatient = myResultPatient;
+			inParams.resultPatient = createResultPatient(theWithDelete);
 		}
 		if (theWithPreview) {
 			inParams.preview = true;
@@ -292,7 +292,7 @@ public class ReplaceReferencesTestHelper {
 		inParams.targetPatient = new Reference().setReferenceElement(mySourcePatientId);
 		inParams.deleteSource = theWithDelete;
 		if (theWithInputResultPatient) {
-			inParams.resultPatient = myResultPatient;
+			inParams.resultPatient = createResultPatient(theWithDelete);
 		}
 		if (theWithPreview) {
 			inParams.preview = true;
@@ -340,7 +340,7 @@ public class ReplaceReferencesTestHelper {
 		}
 	}
 
-	public static void validatePatchResultBundle(
+	public void validatePatchResultBundle(
 			Bundle patchResultBundle, int theTotalExpectedPatches, List<String> theExpectedResourceTypes) {
 		String resourceMatchString = "(" + String.join("|", theExpectedResourceTypes) + ")";
 		Pattern expectedPatchIssuePattern =
@@ -397,5 +397,56 @@ public class ReplaceReferencesTestHelper {
 				JsonUtil.deserialize(report, ReplaceReferenceResultsJson.class);
 		IdDt resultTaskId = replaceReferenceResultsJson.getTaskId().asIdDt();
 		assertEquals(theTaskId.getIdPart(), resultTaskId.getIdPart());
+	}
+
+	public List<Identifier> getExpectedIdentifiersForTargetAfterMerge(boolean theWithInputResultPatient) {
+
+		List<Identifier> expectedIdentifiersOnTargetAfterMerge = null;
+		if (theWithInputResultPatient) {
+			expectedIdentifiersOnTargetAfterMerge =
+					List.of(new Identifier().setSystem("SYS1A").setValue("VAL1A"));
+		} else {
+			// the identifiers copied over from source should be marked as old
+			expectedIdentifiersOnTargetAfterMerge = List.of(
+					new Identifier().setSystem("SYS2A").setValue("VAL2A"),
+					new Identifier().setSystem("SYS2B").setValue("VAL2B"),
+					new Identifier().setSystem("SYSC").setValue("VALC"),
+					new Identifier().setSystem("SYS1A").setValue("VAL1A").copy().setUse(Identifier.IdentifierUse.OLD),
+					new Identifier().setSystem("SYS1B").setValue("VAL1B").copy().setUse(Identifier.IdentifierUse.OLD));
+		}
+		return expectedIdentifiersOnTargetAfterMerge;
+	}
+
+	public void assertSourcePatientUpdatedOrDeleted(boolean withDelete) {
+		if (withDelete) {
+			assertThrows(ResourceGoneException.class, () -> readSourcePatient());
+		} else {
+			Patient source = readSourcePatient();
+			assertThat(source.getLink()).hasSize(1);
+			Patient.PatientLinkComponent link = source.getLink().get(0);
+			assertThat(link.getOther().getReferenceElement()).isEqualTo(getTargetPatientId());
+			assertThat(link.getType()).isEqualTo(Patient.LinkType.REPLACEDBY);
+		}
+	}
+
+	public void assertTargetPatientUpdated(boolean withDelete, List<Identifier> theExpectedIdentifiers) {
+		Patient target = readTargetPatient();
+		if (!withDelete) {
+			assertThat(target.getLink()).hasSize(1);
+			Patient.PatientLinkComponent link = target.getLink().get(0);
+			assertThat(link.getOther().getReferenceElement()).isEqualTo(getSourcePatientId());
+			assertThat(link.getType()).isEqualTo(Patient.LinkType.REPLACES);
+		}
+		// assertExpected Identifiers found on the target
+		assertIdentifiers(target.getIdentifier(), theExpectedIdentifiers);
+	}
+
+	public void assertIdentifiers(List<Identifier> theActualIdentifiers, List<Identifier> theExpectedIdentifiers) {
+		assertThat(theActualIdentifiers).hasSize(theExpectedIdentifiers.size());
+		for (int i = 0; i < theExpectedIdentifiers.size(); i++) {
+			Identifier expectedIdentifier = theExpectedIdentifiers.get(i);
+			Identifier actualIdentifier = theActualIdentifiers.get(i);
+			assertThat(expectedIdentifier.equalsDeep(actualIdentifier)).isTrue();
+		}
 	}
 }

@@ -75,7 +75,7 @@ public class MergeHelper {
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
 			Patient patientToUpdate = prepareTargetPatientForUpdate(
 					theTargetResource, theSourceResource, theResultResource, theDeleteSource);
-			// update the target patient resource after the references are updated
+
 			targetPatientAfterUpdate.set(updateResource(patientToUpdate, theRequestDetails));
 
 			if (theDeleteSource) {

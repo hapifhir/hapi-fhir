@@ -61,6 +61,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
+import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
@@ -324,6 +325,7 @@ public class ResourceMergeService {
 		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());
 		task.getMeta().setVersionId(null);
 		theMergeOutcome.setTask(task);
+		theMergeOutcome.setHttpStatusCode(STATUS_HTTP_202_ACCEPTED);
 	}
 
 	private boolean validateResultResourceIfExists(

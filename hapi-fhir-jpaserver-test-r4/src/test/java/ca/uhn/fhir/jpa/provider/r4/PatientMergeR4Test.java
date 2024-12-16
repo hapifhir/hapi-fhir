@@ -8,7 +8,6 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,7 +36,6 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
-import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
@@ -49,7 +47,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PatientMergeR4Test extends BaseResourceProviderR4Test {
@@ -111,7 +108,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		myTestHelper.setSourceAndTarget(inParams);
 		inParams.deleteSource = withDelete;
 		if (withInputResultPatient) {
-			myTestHelper.setResultPatient(inParams, withDelete);
+			inParams.resultPatient = myTestHelper.createResultPatient(withDelete);
 		}
 		if (withPreview) {
 			inParams.preview = true;
@@ -137,19 +134,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertTrue(input.equalsDeep(inParameters));
 
 
-		List<Identifier> expectedIdentifiersOnTargetAfterMerge = null;
-		if (withInputResultPatient) {
-			 expectedIdentifiersOnTargetAfterMerge = List.of(new Identifier().setSystem("SYS1A").setValue("VAL1A"));
-		} else {
-			//the identifiers copied over from source should be marked as old
-			expectedIdentifiersOnTargetAfterMerge = List.of(
-				new Identifier().setSystem("SYS2A").setValue("VAL2A"),
-				new Identifier().setSystem("SYS2B").setValue("VAL2B"),
-				new Identifier().setSystem("SYSC").setValue("VALC"),
-				new Identifier().setSystem("SYS1A").setValue("VAL1A").copy().setUse(Identifier.IdentifierUse.OLD),
-				new Identifier().setSystem("SYS1B").setValue("VAL1B").copy().setUse(Identifier.IdentifierUse.OLD)
-			);
-		}
+		List<Identifier> expectedIdentifiersOnTargetAfterMerge =
+			myTestHelper.getExpectedIdentifiersForTargetAfterMerge(withInputResultPatient);
 
 		// Assert Task inAsync mode, unless it is preview in which case we don't return a task
 		if (isAsync && !withPreview) {
@@ -212,18 +198,16 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			// Assert Merged Patient
 			Patient mergedPatient = (Patient) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
 			List<Identifier> identifiers = mergedPatient.getIdentifier();
-			assertIdentifiers(identifiers, expectedIdentifiersOnTargetAfterMerge);
+			myTestHelper.assertIdentifiers(identifiers, expectedIdentifiersOnTargetAfterMerge);
 		}
 
 		// Check that the linked resources were updated
-
-
 		if (withPreview) {
 			myTestHelper.assertNothingChanged();
 		} else {
 			myTestHelper.assertAllReferencesUpdated(withDelete);
-			assertSourcePatientUpdatedOrDeleted(withDelete);
-			assertTargetPatientUpdated(withDelete, expectedIdentifiersOnTargetAfterMerge);
+			myTestHelper.assertSourcePatientUpdatedOrDeleted(withDelete);
+			myTestHelper.assertTargetPatientUpdated(withDelete, expectedIdentifiersOnTargetAfterMerge);
 		}
 	}
 
@@ -270,44 +254,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		assertUnprocessibleEntityWithMessage(inParameters, "Multiple resources found matching the identifier(s) specified in 'source-patient-identifier'");
 	}
-
-
-	private void assertSourcePatientUpdatedOrDeleted(boolean withDelete) {
-		if (withDelete) {
-			// the spec says the deleted resource should return 404 but we seem to return 410 Gone
-			assertThrows(ResourceGoneException.class, () -> myTestHelper.readSourcePatient());
-		}
-		else {
-			Patient source = myTestHelper.readSourcePatient();
-			assertThat(source.getLink()).hasSize(1);
-			Patient.PatientLinkComponent link = source.getLink().get(0);
-			assertThat(link.getOther().getReferenceElement()).isEqualTo(myTestHelper.getTargetPatientId());
-			assertThat(link.getType()).isEqualTo(Patient.LinkType.REPLACEDBY);
-		}
-
-	}
-
-	private void assertTargetPatientUpdated(boolean withDelete, List<Identifier> theExpectedIdentifiers) {
-		Patient target = myTestHelper.readTargetPatient();
-		if (!withDelete) {
-			assertThat(target.getLink()).hasSize(1);
-			Patient.PatientLinkComponent link = target.getLink().get(0);
-			assertThat(link.getOther().getReferenceElement()).isEqualTo(myTestHelper.getSourcePatientId());
-			assertThat(link.getType()).isEqualTo(Patient.LinkType.REPLACES);
-		}
-		//assertExpected Identifiers found on the target
-		assertIdentifiers(target.getIdentifier(), theExpectedIdentifiers);
-	}
-
-	private void assertIdentifiers(List<Identifier> theActualIdentifiers, List<Identifier> theExpectedIdentifiers) {
-		assertThat(theActualIdentifiers).hasSize(theExpectedIdentifiers.size());
-		for (int i = 0; i < theExpectedIdentifiers.size(); i++) {
-			Identifier expectedIdentifier = theExpectedIdentifiers.get(i);
-			Identifier actualIdentifier = theActualIdentifiers.get(i);
-			assertThat(expectedIdentifier.equalsDeep(actualIdentifier)).isTrue();
-		}
-	}
-
 
 	private void assertUnprocessibleEntityWithMessage(Parameters inParameters, String theExpectedMessage) {
 		assertThatThrownBy(() ->
