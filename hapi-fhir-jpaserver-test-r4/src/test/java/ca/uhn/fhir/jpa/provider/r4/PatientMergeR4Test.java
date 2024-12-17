@@ -170,7 +170,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			Reference outputRef = (Reference) taskOutput.getValue();
 			Bundle patchResultBundle = (Bundle) outputRef.getResource();
 			assertTrue(containedBundle.equalsDeep(patchResultBundle));
-			myTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of("Observation", "Encounter", "CarePlan"));
+			ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
+				ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES,
+				List.of("Observation", "Encounter", "CarePlan"));
 
 			OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
 			assertThat(outcome.getIssue())

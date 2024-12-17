@@ -340,7 +340,7 @@ public class ReplaceReferencesTestHelper {
 		}
 	}
 
-	public void validatePatchResultBundle(
+	public static void validatePatchResultBundle(
 			Bundle patchResultBundle, int theTotalExpectedPatches, List<String> theExpectedResourceTypes) {
 		String resourceMatchString = "(" + String.join("|", theExpectedResourceTypes) + ")";
 		Pattern expectedPatchIssuePattern =

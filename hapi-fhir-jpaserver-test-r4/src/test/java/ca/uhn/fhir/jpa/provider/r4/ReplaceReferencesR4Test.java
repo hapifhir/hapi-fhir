@@ -66,7 +66,9 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		}
 
 		// validate
-		myTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of("Observation", "Encounter", "CarePlan"));
+		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
+			ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of(
+			"Observation", "Encounter", "CarePlan"));
 
 		// Check that the linked resources were updated
 
@@ -131,7 +133,8 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			// validate
 			entriesLeft -= ReplaceReferencesTestHelper.SMALL_BATCH_SIZE;
 			int expectedNumberOfEntries = Math.min(entriesLeft, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
-			myTestHelper.validatePatchResultBundle(patchResultBundle, expectedNumberOfEntries, List.of("Observation", "Encounter", "CarePlan"));
+			ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, expectedNumberOfEntries, List.of("Observation",
+				"Encounter", "CarePlan"));
 		}
 
 		// Check that the linked resources were updated

@@ -64,7 +64,8 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(jobStartResponse);
 
 		Bundle patchResultBundle = myTestHelper.validateCompletedTask(jobInstance, taskId);
-		myTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of("Observation", "Encounter", "CarePlan"));
+		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of(
+			"Observation", "Encounter", "CarePlan"));
 
 		myTestHelper.assertAllReferencesUpdated();
 	}
