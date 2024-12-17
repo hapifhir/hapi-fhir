@@ -168,9 +168,10 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 					.findFirst()
 					.orElse("");
 
-			if (StringUtils.isNotBlank(theCode)) {
+			List<INarrativeTemplate> tagTemplates = getTemplateByCode(theFhirContext, theStyles, theCode);
+
+			if (!tagTemplates.isEmpty()) {
 				// Looking for a specific code system/code as well as resource, get the intersection of these two lists
-				List<INarrativeTemplate> tagTemplates = getTemplateByCode(theFhirContext, theStyles, theCode);
 				retVal =
 						profileTemplates.stream().filter(tagTemplates::contains).collect(Collectors.toList());
 			} else {

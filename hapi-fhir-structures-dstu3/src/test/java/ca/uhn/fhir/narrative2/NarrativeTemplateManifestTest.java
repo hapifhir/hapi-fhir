@@ -138,7 +138,7 @@ public class NarrativeTemplateManifestTest {
 	private static Stream<Arguments> getTemplateByElementValues() {
 		return Stream.of(
 			 Arguments.of(2, "http://loinc.org", "46240-8", null, "template"),
-			 Arguments.of(0, "http://loinc.org", "INVALID", null, null),
+			 Arguments.of(6, "http://loinc.org", "INVALID", null, "template"),
 			 Arguments.of(1, null, null, "http://profile1", "template1"),
 			 Arguments.of(1, null, null, "http://profile2", "template2"),
 			 Arguments.of(0, null, null, "http://profile3", null),
