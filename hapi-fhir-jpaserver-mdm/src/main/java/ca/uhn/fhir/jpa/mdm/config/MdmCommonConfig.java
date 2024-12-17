@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.mdm.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.nickname.INicknameSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.interceptor.MdmReadVirtualizationInterceptor;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
@@ -44,6 +45,12 @@ public class MdmCommonConfig {
 	@Lazy
 	public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptor() {
 		return new MdmSearchExpandingInterceptor();
+	}
+
+	@Bean
+	@Lazy
+	public MdmReadVirtualizationInterceptor<?> mdmReadVirtualizationInterceptor() {
+		return new MdmReadVirtualizationInterceptor<>();
 	}
 
 	@Bean

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.cross;
 
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import java.util.Date;
@@ -26,10 +27,14 @@ import java.util.Date;
 public interface IResourceLookup<T extends IResourcePersistentId<?>> {
 	String getResourceType();
 
+	String getFhirId();
+
 	/**
 	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwise, returns <code>null</code>
 	 */
 	Date getDeleted();
 
 	T getPersistentId();
+
+	PartitionablePartitionId getPartitionId();
 }

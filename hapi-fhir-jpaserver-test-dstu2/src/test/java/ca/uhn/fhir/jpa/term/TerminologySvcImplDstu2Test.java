@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 public class TerminologySvcImplDstu2Test extends BaseJpaDstu2Test {
 
@@ -28,6 +29,8 @@ public class TerminologySvcImplDstu2Test extends BaseJpaDstu2Test {
 	public void testFindCodesBelowBuiltInCodeSystem() {
 		List<FhirVersionIndependentConcept> concepts;
 		Set<String> codes;
+
+		when(mySrd.getInterceptorBroadcaster()).thenReturn(null);
 
 		ValueSet upload = new ValueSet();
 		upload.setId(new IdDt("testVs"));
@@ -60,6 +63,8 @@ public class TerminologySvcImplDstu2Test extends BaseJpaDstu2Test {
 	public void testFindCodesAboveBuiltInCodeSystem() {
 		List<FhirVersionIndependentConcept> concepts;
 		Set<String> codes;
+
+		when(mySrd.getInterceptorBroadcaster()).thenReturn(null);
 
 		ValueSet upload = new ValueSet();
 		upload.setId(new IdDt("testVs"));

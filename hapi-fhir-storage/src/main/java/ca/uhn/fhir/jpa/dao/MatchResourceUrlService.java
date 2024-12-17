@@ -118,6 +118,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		}
 
 		T resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
+		ourLog.debug("Resolving match URL from cache {} found: {}", theMatchUrl, resolvedInCache);
 		if (resolvedInCache != null) {
 			retVal = Collections.singleton(resolvedInCache);
 		}
@@ -135,8 +136,9 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		}
 
 		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.STORAGE_PRESHOW_RESOURCES, myInterceptorBroadcaster, theRequest)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
 			Map<IBaseResource, T> resourceToPidMap = new HashMap<>();
 
 			IFhirResourceDao<R> dao = getResourceDao(theResourceType);
@@ -152,8 +154,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
 
 			try {
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 
 				retVal = accessDetails.toList().stream()
 						.map(resourceToPidMap::get)
@@ -222,16 +223,16 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		List<T> retVal = dao.searchForIds(theParamMap, theRequest, theConditionalOperationTargetOrNull);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 			StorageProcessingMessage message = new StorageProcessingMessage();
 			message.setMessage("Processed conditional resource URL with " + retVal.size() + " result(s) in " + sw);
 			HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
 					.add(StorageProcessingMessage.class, message);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 		}
 
 		return new HashSet<>(retVal);

@@ -57,6 +57,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collections;
 import java.util.List;
@@ -71,6 +72,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -136,7 +138,7 @@ class BaseHapiFhirResourceDaoTest {
 	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
 
 	// we won't inject this
-	private FhirContext myFhirContext = FhirContext.forR4Cached();
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@InjectMocks
 	private TestResourceDao mySvc;
@@ -227,7 +229,7 @@ class BaseHapiFhirResourceDaoTest {
 		RequestPartitionId partitionId = Mockito.mock(RequestPartitionId.class);
 		JpaPid jpaPid = JpaPid.fromIdAndVersion(123L, 1L);
 		ResourceTable entity = new ResourceTable();
-		entity.setId(123L);
+		entity.setIdForUnitTest(123L);
 		entity.setFhirId("456");
 
 		// set a transactionService that will actually execute the callback
@@ -236,17 +238,18 @@ class BaseHapiFhirResourceDaoTest {
 		// mock
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
 			any(RequestDetails.class),
-			Mockito.anyString(),
+			anyString(),
 			any(IIdType.class)
 		)).thenReturn(partitionId);
-		when(myIdHelperService.resolveResourcePersistentIds(
+		when(myIdHelperService.resolveResourceIdentityPid(
 			any(RequestPartitionId.class),
-			Mockito.anyString(),
-			Mockito.anyString()
+			anyString(),
+			anyString(),
+			any()
 		)).thenReturn(jpaPid);
 		when(myEntityManager.find(
-			any(Class.class),
-			anyLong()
+			any(),
+			any()
 		)).thenReturn(entity);
 		// we don't stub myConfig.getResourceClientIdStrategy()
 		// because even a null return isn't ANY...
@@ -254,7 +257,13 @@ class BaseHapiFhirResourceDaoTest {
 		// but for now, Mockito will complain, so we'll leave it out
 
 		// test
-		DaoMethodOutcome outcome = mySvc.delete(id, deleteConflicts, requestDetails, transactionDetails);
+		DaoMethodOutcome outcome;
+		try {
+			TransactionSynchronizationManager.setActualTransactionActive(true);
+			outcome = mySvc.delete(id, deleteConflicts, requestDetails, transactionDetails);
+		} finally {
+			TransactionSynchronizationManager.setActualTransactionActive(false);
+		}
 
 		// verify
 		assertNotNull(outcome);
@@ -318,7 +327,7 @@ class BaseHapiFhirResourceDaoTest {
 		mySvc.setTransactionService(myTransactionService);
 
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(mock(RequestPartitionId.class));
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(myISearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(myISearchBuilder);
 		when(myISearchBuilder.createQuery(any(), any(), any(), any())).thenReturn(mock(IResultIterator.class));
 
 		lenient().when(myStorageSettings.getInternalSynchronousSearchSize()).thenReturn(5000);

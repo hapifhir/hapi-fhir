@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -33,7 +34,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 /**
  * This service ensures uniqueness of resources during create or create-on-update
@@ -80,8 +83,17 @@ public class ResourceSearchUrlSvc {
 	 * Once a resource is updated or deleted, we can trust that future match checks will find the committed resource in the db.
 	 * The use of the constraint table is done, and we can delete it to keep the table small.
 	 */
-	public void deleteByResId(long theResId) {
-		myResourceSearchUrlDao.deleteByResId(theResId);
+	public void deleteByResId(JpaPid theResId) {
+		myResourceSearchUrlDao.deleteByResId(theResId.getId());
+	}
+
+	/**
+	 * Once a resource is updated or deleted, we can trust that future match checks will find the committed resource in the db.
+	 * The use of the constraint table is done, and we can delete it to keep the table small.
+	 */
+	public void deleteByResIds(Collection<JpaPid> theResId) {
+		myResourceSearchUrlDao.deleteByResIds(
+				theResId.stream().map(JpaPid::getId).collect(Collectors.toList()));
 	}
 
 	/**

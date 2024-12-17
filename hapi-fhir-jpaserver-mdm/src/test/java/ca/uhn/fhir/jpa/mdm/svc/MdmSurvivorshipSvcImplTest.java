@@ -7,7 +7,10 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -22,8 +25,9 @@ import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,9 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -127,7 +129,7 @@ public class MdmSurvivorshipSvcImplTest {
 
 		List<IBaseResource> resources = new ArrayList<>();
 		List<MdmLinkJson> links = new ArrayList<>();
-		Map<String, IResourcePersistentId> sourceIdToPid = new HashMap<>();
+		Map<IIdType, IResourceLookup<JpaPid>> sourceIdToPid = new HashMap<>();
 		for (int i = 0; i < 10; i++) {
 			// we want our resources to be slightly different
 			Patient patient = new Patient();
@@ -152,7 +154,7 @@ public class MdmSurvivorshipSvcImplTest {
 			link.setSourceId(patient.getId());
 			link.setGoldenResourceId(goldenPatient.getId());
 			links.add(link);
-			sourceIdToPid.put(patient.getId(), link.getSourcePid());
+			sourceIdToPid.put(patient.getIdElement(), new JpaResourceLookup("Patient", patient.getIdPart(), (Long) link.getSourcePid().getId(), null, new PartitionablePartitionId()));
 		}
 
 		IFhirResourceDao resourceDao = mock(IFhirResourceDao.class);
@@ -176,13 +178,14 @@ public class MdmSurvivorshipSvcImplTest {
 		when(myMdmSettings.getMdmRules())
 			.thenReturn(new MdmRulesJson());
 		doReturn(sourceIdToPid).when(myIIdHelperService)
-			.resolveResourcePersistentIds(any(RequestPartitionId.class), anyString(), any(List.class));
+			.resolveResourceIdentities(any(RequestPartitionId.class), any(List.class), any());
 		// we will return a non-empty list to reduce mocking
 		when(myEIDHelper.getExternalEid(any()))
 			.thenReturn(Collections.singletonList(new CanonicalEID("example", "value", "use")));
 
 		// test
 		Patient goldenPatientRebuilt = mySvc.rebuildGoldenResourceWithSurvivorshipRules(
+			new SystemRequestDetails(),
 			goldenPatient,
 			createTransactionContext()
 		);
@@ -199,14 +202,14 @@ public class MdmSurvivorshipSvcImplTest {
 		verify(resourceDao)
 			.update(eq(goldenPatientRebuilt), any(RequestDetails.class));
 
-		ArgumentCaptor<List<String>> idsCaptor = ArgumentCaptor.forClass(List.class);
-		verify(myIIdHelperService).resolveResourcePersistentIds(any(RequestPartitionId.class), anyString(), idsCaptor.capture());
+		ArgumentCaptor<List<IIdType>> idsCaptor = ArgumentCaptor.forClass(List.class);
+		verify(myIIdHelperService).resolveResourceIdentities(any(RequestPartitionId.class), idsCaptor.capture(), any());
 		assertNotNull(idsCaptor.getValue());
 		assertFalse(idsCaptor.getValue().isEmpty());
-		for (String id : idsCaptor.getValue()) {
-			assertFalse(id.contains("/"));
-			assertFalse(id.contains("Patient"));
-		}
+		List<String> ids = idsCaptor.getValue().stream().map(IIdType::getValue).toList();
+
+		List<String> expectedIds = resources.stream().map(t -> t.getIdElement().toUnqualifiedVersionless().getValue()).toList();
+		assertThat(ids).asList().containsExactlyInAnyOrder(expectedIds.toArray());
 	}
 
 	private MdmTransactionContext createTransactionContext() {

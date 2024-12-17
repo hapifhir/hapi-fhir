@@ -20,34 +20,39 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -66,7 +71,7 @@ import java.util.Collection;
 		})
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
-	public static final int SOURCE_URI_LENGTH = 100;
+	public static final int SOURCE_URI_LENGTH = ResourceIndexedSearchParamString.MAX_LENGTH;
 	/**
 	 * @see ResourceEncodingEnum
 	 */
@@ -77,23 +82,43 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	public static final String HFJ_RES_VER = "HFJ_RES_VER";
 	private static final long serialVersionUID = 1L;
 
-	@Id
-	@GenericGenerator(
-			name = "SEQ_RESOURCE_HISTORY_ID",
-			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
-	@Column(name = "PID")
-	private Long myId;
+	@EmbeddedId
+	private ResourceHistoryTablePk myId;
+
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = true, updatable = false)
+	private Integer myPartitionIdValue;
+
+	@SuppressWarnings("unused")
+	@Column(name = PartitionablePartitionId.PARTITION_DATE, updatable = false, nullable = true)
+	private LocalDate myPartitionDateValue;
+
+	@Override
+	@Nullable
+	public PartitionablePartitionId getPartitionId() {
+		return PartitionablePartitionId.with(getResourceId().getPartitionId(), myPartitionDateValue);
+	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "RES_ID",
-			nullable = false,
-			updatable = false,
+	@JoinColumns(
+			value = {
+				@JoinColumn(name = "RES_ID", nullable = false, insertable = false, updatable = false),
+				// @JoinColumn(name = "PARTITION_ID", nullable = false, insertable = false, updatable = false),
+			},
 			foreignKey = @ForeignKey(name = "FK_RESOURCE_HISTORY_RESOURCE"))
 	private ResourceTable myResourceTable;
 
-	@Column(name = "RES_ID", nullable = false, updatable = false, insertable = false)
+	@Embedded
+	@AttributeOverride(name = "myId", column = @Column(name = "RES_ID", insertable = true, updatable = false))
+	// @AttributeOverride(
+	//		name = "myPartitionIdValue",
+	//		column = @Column(name = "PARTITION_ID", insertable = false, updatable = false))
+	private JpaPidFk myResourcePid;
+
+	/**
+	 * This is here for sorting only, don't get or set this value
+	 */
+	@SuppressWarnings("unused")
+	@Column(name = "RES_ID", insertable = false, nullable = false, updatable = false)
 	private Long myResourceId;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
@@ -116,13 +141,10 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	@Column(name = "RES_ENCODING", nullable = false, length = ENCODING_COL_LENGTH)
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@OptimisticLock(excluded = true)
 	private ResourceEncodingEnum myEncoding;
 
-	@OneToOne(
-			mappedBy = "myResourceHistoryTable",
-			cascade = {CascadeType.REMOVE})
-	private ResourceHistoryProvenanceEntity myProvenance;
 	// TODO: This was added in 6.8.0 - In the future we should drop ResourceHistoryProvenanceEntity
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
 	private String mySourceUri;
@@ -164,11 +186,14 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	@Override
 	public String toString() {
+		JpaPid resourceId = getResourceId();
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("resourceId", myResourceId)
+				.append("resourceId", resourceId.getId())
+				.append("partitionId", resourceId.getPartitionId())
 				.append("resourceType", myResourceType)
 				.append("resourceVersion", myResourceVersion)
 				.append("pid", myId)
+				.append("updated", getPublished())
 				.toString();
 	}
 
@@ -178,10 +203,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public void setResourceTextVc(String theResourceTextVc) {
 		myResourceTextVc = theResourceTextVc;
-	}
-
-	public ResourceHistoryProvenanceEntity getProvenance() {
-		return myProvenance;
 	}
 
 	public void addTag(ResourceTag theTag) {
@@ -210,22 +231,26 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		myEncoding = theEncoding;
 	}
 
+	@Nonnull
 	@Override
-	public Long getId() {
+	public ResourceHistoryTablePk getId() {
+		if (myId == null) {
+			myId = new ResourceHistoryTablePk();
+		}
 		return myId;
 	}
 
 	/**
 	 * Do not delete, required for java bean introspection
 	 */
-	public Long getMyId() {
-		return myId;
+	public ResourceHistoryTablePk getMyId() {
+		return getId();
 	}
 
 	/**
 	 * Do not delete, required for java bean introspection
 	 */
-	public void setMyId(Long theId) {
+	public void setMyId(ResourceHistoryTablePk theId) {
 		myId = theId;
 	}
 
@@ -238,17 +263,36 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	@Override
-	public Long getResourceId() {
-		return myResourceId;
+	public JpaPid getResourceId() {
+		initializeResourceId();
+		JpaPid retVal = myResourcePid.toJpaPid();
+		retVal.setVersion(myResourceVersion);
+		retVal.setResourceType(myResourceType);
+		if (retVal.getPartitionId() == null) {
+			retVal.setPartitionId(myPartitionIdValue);
+		}
+		return retVal;
+	}
+
+	private void initializeResourceId() {
+		if (myResourcePid == null) {
+			myResourcePid = new JpaPidFk();
+		}
 	}
 
 	public void setResourceId(Long theResourceId) {
-		myResourceId = theResourceId;
+		initializeResourceId();
+		myResourcePid.setId(theResourceId);
 	}
 
 	@Override
 	public String getResourceType() {
 		return myResourceType;
+	}
+
+	@Override
+	public String getFhirId() {
+		return getIdDt().getIdPart();
 	}
 
 	public void setResourceType(String theResourceType) {
@@ -284,7 +328,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	@Override
 	public JpaPid getPersistentId() {
-		return JpaPid.fromId(myResourceId);
+		return getResourceId();
 	}
 
 	public ResourceTable getResourceTable() {
@@ -334,6 +378,28 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	public void setTransientForcedId(String theTransientForcedId) {
+		assert theTransientForcedId == null || !theTransientForcedId.contains("/")
+				: "Invalid FHIR ID: " + theTransientForcedId;
 		myTransientForcedId = theTransientForcedId;
+	}
+
+	public void setPartitionId(PartitionablePartitionId thePartitionablePartitionId) {
+		if (thePartitionablePartitionId != null) {
+			getId().setPartitionIdValue(thePartitionablePartitionId.getPartitionId());
+
+			initializeResourceId();
+			myResourcePid.setPartitionId(thePartitionablePartitionId.getPartitionId());
+
+			myPartitionIdValue = thePartitionablePartitionId.getPartitionId();
+			myPartitionDateValue = thePartitionablePartitionId.getPartitionDate();
+		} else {
+			getId().setPartitionIdValue(null);
+
+			initializeResourceId();
+			myResourcePid.setPartitionId(null);
+
+			myPartitionIdValue = null;
+			myPartitionDateValue = null;
+		}
 	}
 }

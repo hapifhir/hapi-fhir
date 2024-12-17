@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -75,10 +76,16 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 			target = dao.read(id, (RequestDetails) appContext);
 		} catch (ResourceNotFoundException e) {
 			ourLog.info("Failed to resolve local reference: {}", theUrl);
-			try {
-				target = fetchByUrl(theUrl, dao, (RequestDetails) appContext);
-			} catch (ResourceNotFoundException e2) {
-				ourLog.info("Failed to find resource by URL: {}", theUrl);
+
+			RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
+			if (def.getChildByName("url") != null) {
+				try {
+					target = fetchByUrl(theUrl, dao, (RequestDetails) appContext);
+				} catch (ResourceNotFoundException e2) {
+					ourLog.info("Failed to find resource by URL: {}", theUrl);
+					return null;
+				}
+			} else {
 				return null;
 			}
 		}
@@ -86,7 +93,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 			return new JsonParser(myVersionSpecificContextWrapper)
 					.parse(myFhirContext.newJsonParser().encodeResourceToString(target), resourceType);
 		} catch (Exception e) {
-			throw new FHIRException(Msg.code(576) + e);
+			throw new FHIRException(Msg.code(576) + e, e);
 		}
 	}
 

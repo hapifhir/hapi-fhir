@@ -177,7 +177,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		}
 
 		if (!theReverse && theMatchAll) {
-			SqlQuery searchForCanonicalReferencesQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(3);
+			SqlQuery searchForCanonicalReferencesQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2);
 			// Make sure we have the right query - If this ever fails, maybe we have optimized the queries
 			// (or somehow made things worse) and the search for the canonical target is no longer the 4th
 			// SQL query
@@ -411,7 +411,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		// backdate the Group and CareTeam
 		int updatedCount = new TransactionTemplate(myTxManager).execute((status)->
 			myEntityManager
-				.createQuery("update ResourceTable set myUpdated = :new_updated where myId in (:target_ids)")
+				.createQuery("update ResourceTable set myUpdated = :new_updated where myPid.myId in (:target_ids)")
 				.setParameter("new_updated", Date.from(now.minus(1, ChronoUnit.HOURS)))
 				.setParameter("target_ids", List.of(groupId.getIdPartAsLong(), careTeam.getIdPartAsLong(), org.getIdPartAsLong()))
 				.executeUpdate());

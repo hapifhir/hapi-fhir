@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.collect.Lists;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -68,6 +69,8 @@ public class JdbcDriverTest {
 	public RestfulServerExtension myServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(myProvider)
 		.registerInterceptor(ourHeaderCaptureInterceptor);
+	@RegisterExtension
+	public LoggingExtension myLoggingExtension = new LoggingExtension();
 
 	private BasicDataSource myDs;
 

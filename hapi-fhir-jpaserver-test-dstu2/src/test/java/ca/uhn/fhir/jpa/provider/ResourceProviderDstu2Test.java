@@ -1014,6 +1014,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testEverythingInstanceWithContentFilter() {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Patient pt1 = new Patient();
 		pt1.addName().addFamily("Everything").addGiven("Arthur");
 		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
@@ -2569,32 +2571,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		} finally {
 			response.close();
 		}
-	}
-
-	@Test
-	public void testUpdateRejectsInvalidTypes() {
-
-		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
-		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
-		IdDt p1id = (IdDt) myClient.create().resource(p1).execute().getId();
-
-		Organization p2 = new Organization();
-		p2.getNameElement().setValue("testUpdateRejectsInvalidTypes");
-		try {
-			myClient.update().resource(p2).withId("Organization/" + p1id.getIdPart()).execute();
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			// good
-		}
-
-		try {
-			myClient.update().resource(p2).withId("Patient/" + p1id.getIdPart()).execute();
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			// good
-		}
-
 	}
 
 	@Test

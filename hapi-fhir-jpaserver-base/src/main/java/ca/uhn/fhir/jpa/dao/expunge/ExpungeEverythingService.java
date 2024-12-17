@@ -70,6 +70,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -92,7 +93,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.util.comparator.Comparators;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -124,12 +128,15 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		final AtomicInteger counter = new AtomicInteger();
 
 		// Notify Interceptors about pre-action call
-		HookParams hooks = new HookParams()
-				.add(AtomicInteger.class, counter)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, hooks);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING)) {
+			HookParams hooks = new HookParams()
+					.add(AtomicInteger.class, counter)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, hooks);
+		}
 
 		ourLog.info("BEGINNING GLOBAL $expunge");
 		Propagation propagation = Propagation.REQUIRES_NEW;
@@ -305,22 +312,58 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 						Metamodel metamodel = myEntityManager.getMetamodel();
 						EntityType<T> entity = metamodel.entity(theEntityType);
 						Set<SingularAttribute<? super T, ?>> singularAttributes = entity.getSingularAttributes();
-						String idProperty = null;
+						List<String> idProperty = new ArrayList<>();
 						for (SingularAttribute<? super T, ?> singularAttribute : singularAttributes) {
 							if (singularAttribute.isId()) {
-								idProperty = singularAttribute.getName();
-								break;
+								idProperty.add(singularAttribute.getName());
 							}
 						}
+						idProperty.sort(Comparators.comparable());
+						String idPropertyNames = String.join(",", idProperty);
 
 						Query nativeQuery = myEntityManager.createQuery(
-								"SELECT " + idProperty + " FROM " + theEntityType.getSimpleName());
-						nativeQuery.setMaxResults(800);
-						List pids = nativeQuery.getResultList();
+								"SELECT (" + idPropertyNames + ") FROM " + theEntityType.getSimpleName());
 
-						nativeQuery = myEntityManager.createQuery("DELETE FROM " + theEntityType.getSimpleName()
-								+ " WHERE " + idProperty + " IN (:pids)");
-						nativeQuery.setParameter("pids", pids);
+						// Each ID is 2 parameters in DB partition mode, so this
+						// is the maximum we should allow
+						nativeQuery.setMaxResults(SearchBuilder.getMaximumPageSize() / 2);
+
+						List pids = nativeQuery.getResultList();
+						if (pids.isEmpty()) {
+							return 0;
+						}
+
+						StringBuilder deleteBuilder = new StringBuilder();
+						deleteBuilder.append("DELETE FROM ");
+						deleteBuilder.append(theEntityType.getSimpleName());
+						deleteBuilder.append(" WHERE (");
+						deleteBuilder.append(idPropertyNames);
+						deleteBuilder.append(") IN ");
+						if (idProperty.size() > 1) {
+							deleteBuilder.append('(');
+							for (Iterator<Object> iter = pids.iterator(); iter.hasNext(); ) {
+								Object[] pid = (Object[]) iter.next();
+								deleteBuilder.append('(');
+								for (int i = 0; i < pid.length; i++) {
+									if (i > 0) {
+										deleteBuilder.append(',');
+									}
+									deleteBuilder.append(pid[i]);
+								}
+								deleteBuilder.append(')');
+								if (iter.hasNext()) {
+									deleteBuilder.append(',');
+								}
+							}
+							deleteBuilder.append(')');
+						} else {
+							deleteBuilder.append("(:pids)");
+						}
+						String deleteSql = deleteBuilder.toString();
+						nativeQuery = myEntityManager.createQuery(deleteSql);
+						if (idProperty.size() == 1) {
+							nativeQuery.setParameter("pids", pids);
+						}
 						nativeQuery.executeUpdate();
 						return pids.size();
 					});

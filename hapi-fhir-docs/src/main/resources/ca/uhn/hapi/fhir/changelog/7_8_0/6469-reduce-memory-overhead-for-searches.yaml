@@ -1,0 +1,8 @@
+---
+type: perf
+issue: 6469
+title: "Searching for a large number of resources can use a lot of
+        memory, due to the nature of deduplication of results in memory.
+        We will instead push this responsibility to the db to save
+        reduce this overhead.
+"

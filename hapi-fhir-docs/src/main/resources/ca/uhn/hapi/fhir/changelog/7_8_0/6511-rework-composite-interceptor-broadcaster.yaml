@@ -1,0 +1,8 @@
+---
+type: add
+issue: 6511
+title: "Interceptors can be defined against the registry on the RestfulServer, or on
+  the registry in the JPA repository. Because these are separate registries, the order()
+  attribute on the Hook annotation isn't correctly processed today across the two 
+  registries. The CompositeInterceptorRegistry has been reworked so ordering will be
+  respected across both registries."

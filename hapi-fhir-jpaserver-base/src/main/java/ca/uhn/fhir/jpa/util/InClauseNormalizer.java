@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,9 +35,9 @@ import java.util.List;
 */
 public class InClauseNormalizer {
 
-	public static List<Long> normalizeIdListForInClause(List<Long> theResourceIds) {
+	public static List<JpaPid> normalizeIdListForInClause(List<JpaPid> theResourceIds) {
 
-		List<Long> retVal = theResourceIds;
+		List<JpaPid> retVal = theResourceIds;
 
 		int listSize = theResourceIds.size();
 
@@ -56,8 +58,8 @@ public class InClauseNormalizer {
 		return retVal;
 	}
 
-	private static List<Long> padIdListWithPlaceholders(List<Long> theIdList, int preferredListSize) {
-		List<Long> retVal = theIdList;
+	private static List<JpaPid> padIdListWithPlaceholders(List<JpaPid> theIdList, int preferredListSize) {
+		List<JpaPid> retVal = theIdList;
 
 		if (isUnmodifiableList(theIdList)) {
 			retVal = new ArrayList<>(preferredListSize);
@@ -65,13 +67,13 @@ public class InClauseNormalizer {
 		}
 
 		while (retVal.size() < preferredListSize) {
-			retVal.add(-1L);
+			retVal.add(JpaPid.fromId(-1L));
 		}
 
 		return retVal;
 	}
 
-	private static boolean isUnmodifiableList(List<Long> theList) {
+	private static boolean isUnmodifiableList(List<JpaPid> theList) {
 		try {
 			theList.addAll(Collections.emptyList());
 		} catch (Exception e) {

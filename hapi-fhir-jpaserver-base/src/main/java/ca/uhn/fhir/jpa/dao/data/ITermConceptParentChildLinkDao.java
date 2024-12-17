@@ -28,7 +28,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.Collection;
 
 public interface ITermConceptParentChildLinkDao
-		extends JpaRepository<TermConceptParentChildLink, Long>, IHapiFhirJpaRepository {
+		extends JpaRepository<TermConceptParentChildLink, TermConceptParentChildLink.TermConceptParentChildLinkPk>,
+				IHapiFhirJpaRepository {
 
 	@Query("SELECT t.myParentPid FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
 	Collection<Long> findAllWithChild(@Param("child_pid") Long theConceptPid);

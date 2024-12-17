@@ -23,11 +23,11 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -79,9 +79,9 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * @see ca.uhn.fhir.jpa.reindex.job.ReindexJobConfig
  * @deprecated Use the Batch2 {@link ca.uhn.fhir.batch2.api.IJobCoordinator#startInstance(JobInstanceStartRequest)} instead.
  */
+@SuppressWarnings({"removal", "DeprecatedIsStillUsed"})
 @Deprecated
 public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasScheduledJobs {
 
@@ -106,9 +106,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
-
-	@Autowired
-	private DaoRegistry myDaoRegistry;
 
 	@Autowired
 	private FhirContext myContext;
@@ -261,10 +258,10 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 	private int runReindexJobs() {
 		Collection<ResourceReindexJobEntity> jobs = getResourceReindexJobEntities();
 
-		if (jobs.size() > 0) {
+		if (!jobs.isEmpty()) {
 			ourLog.info("Running {} reindex jobs: {}", jobs.size(), jobs);
 		} else {
-			ourLog.debug("Running {} reindex jobs: {}", jobs.size(), jobs);
+			ourLog.debug("Running 0 reindex jobs");
 			return 0;
 		}
 
@@ -335,7 +332,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 
 		// Query for resources within threshold
 		StopWatch pageSw = new StopWatch();
-		Slice<Long> range = myTxTemplate.execute(t -> {
+		Slice<JpaPid> range = myTxTemplate.execute(t -> {
 			PageRequest page = PageRequest.of(0, PASS_SIZE);
 			if (isNotBlank(theJob.getResourceType())) {
 				return myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
@@ -429,61 +426,63 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		});
 	}
 
-	private void markResourceAsIndexingFailed(final long theId) {
+	private void markResourceAsIndexingFailed(final JpaPid theId) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		txTemplate.execute((TransactionCallback<Void>) theStatus -> {
 			ourLog.info("Marking resource with PID {} as indexing_failed", theId);
 
-			myResourceTableDao.updateIndexStatus(theId, BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED);
+			myResourceTableDao.updateIndexStatus(theId, EntityIndexStatusEnum.INDEXING_FAILED);
 
-			Query q = myEntityManager.createQuery("DELETE FROM ResourceTag t WHERE t.myResourceId = :id");
+			Query q = myEntityManager.createQuery("DELETE FROM ResourceTag t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamCoords t WHERE t.myResourcePid = :id");
-			q.setParameter("id", theId);
-			q.executeUpdate();
-
-			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamDate t WHERE t.myResourcePid = :id");
+					"DELETE FROM ResourceIndexedSearchParamCoords t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamNumber t WHERE t.myResourcePid = :id");
+					"DELETE FROM ResourceIndexedSearchParamDate t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamQuantity t WHERE t.myResourcePid = :id");
+					"DELETE FROM ResourceIndexedSearchParamNumber t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResourcePid = :id");
+					"DELETE FROM ResourceIndexedSearchParamQuantity t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :id");
+					"DELETE FROM ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamToken t WHERE t.myResourcePid = :id");
+					"DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamUri t WHERE t.myResourcePid = :id");
+			q = myEntityManager.createQuery(
+					"DELETE FROM ResourceIndexedSearchParamToken t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.mySourceResourcePid = :id");
+			q = myEntityManager.createQuery(
+					"DELETE FROM ResourceIndexedSearchParamUri t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.myTargetResourcePid = :id");
+			q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.mySourceResource.myPid = :id");
+			q.setParameter("id", theId);
+			q.executeUpdate();
+
+			q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.myTargetResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
@@ -492,11 +491,11 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 	}
 
 	private class ResourceReindexingTask implements Callable<Date> {
-		private final Long myNextId;
+		private final JpaPid myNextId;
 		private final AtomicInteger myCounter;
 		private Date myUpdated;
 
-		ResourceReindexingTask(Long theNextId, AtomicInteger theCounter) {
+		ResourceReindexingTask(JpaPid theNextId, AtomicInteger theCounter) {
 			myNextId = theNextId;
 			myCounter = theCounter;
 		}

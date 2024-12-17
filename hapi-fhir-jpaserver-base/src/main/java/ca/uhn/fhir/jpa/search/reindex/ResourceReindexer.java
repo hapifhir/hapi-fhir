@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -61,16 +60,10 @@ public class ResourceReindexer {
 		myFhirContext = theFhirContext;
 	}
 
-	public void readAndReindexResourceByPid(Long theResourcePid) {
-		ResourceTable resourceTable =
-				myResourceTableDao.findById(theResourcePid).orElseThrow(IllegalStateException::new);
-		reindexResourceEntity(resourceTable);
-	}
-
 	public void reindexResourceEntity(ResourceTable theResourceTable) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceTable.getResourceType());
 		long expectedVersion = theResourceTable.getVersion();
-		IBaseResource resource = dao.readByPid(JpaPid.fromId(theResourceTable.getId()), true);
+		IBaseResource resource = dao.readByPid(theResourceTable.getPersistentId(), true);
 
 		if (resource == null) {
 			throw new InternalErrorException(Msg.code(1171) + "Could not find resource version "
@@ -84,7 +77,7 @@ public class ResourceReindexer {
 					resource.getIdElement().toUnqualifiedVersionless().getValue(),
 					resource.getIdElement().getVersionIdPart(),
 					expectedVersion);
-			myResourceHistoryTableDao.updateVersion(theResourceTable.getId(), actualVersion, expectedVersion);
+			myResourceHistoryTableDao.updateVersion(theResourceTable.getId().toFk(), actualVersion, expectedVersion);
 		}
 
 		doReindex(theResourceTable, resource);

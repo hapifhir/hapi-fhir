@@ -16,6 +16,7 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.CustomResource364Dstu2.CustomResource364CustomDate;
+import ca.uhn.fhir.test.utilities.UuidUtils;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
@@ -54,20 +55,23 @@ public class CustomTypeDstu2Test {
 		
 		String string = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo);
 		ourLog.info(string);
-		
+
+		String medicationUuid = UuidUtils.findFirstUUID(string);
+		assertNotNull(medicationUuid);
+
 		//@formatter:on
 		assertThat(string).containsSubsequence(
 				"<MedicationOrder xmlns=\"http://hl7.org/fhir\">", 
 				"   <contained>", 
-				"      <Medication xmlns=\"http://hl7.org/fhir\">", 
-				"         <id value=\"1\"/>", 
+				"      <Medication xmlns=\"http://hl7.org/fhir\">",
+				"         <id value=\"" + medicationUuid + "\"/>",
 				"         <code>", 
 				"            <text value=\"MED TEXT\"/>", 
 				"         </code>", 
 				"      </Medication>", 
 				"   </contained>", 
 				"   <medication>", 
-				"      <reference value=\"#1\"/>", 
+				"      <reference value=\"#" + medicationUuid + "\"/>",
 				"   </medication>", 
 				"</MedicationOrder>");
 		//@formatter:on
@@ -76,7 +80,7 @@ public class CustomTypeDstu2Test {
 		
 		medication = (Medication) mo.getMedication().getResource();
 		assertNotNull(medication);
-		assertEquals("#1", medication.getId().getValue());
+		assertEquals("#" + medicationUuid, medication.getId().getValue());
 		assertEquals("MED TEXT", medication.getCode().getText());
 		
 	}

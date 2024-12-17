@@ -232,6 +232,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			TransactionDetails theTransactionDetails,
 			boolean theForceUpdate,
 			boolean theCreateNewHistoryEntry) {
+
 		ResourceTable retVal = super.updateEntity(
 				theRequest,
 				theResource,
@@ -242,13 +243,24 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 				theTransactionDetails,
 				theForceUpdate,
 				theCreateNewHistoryEntry);
-		if (!retVal.isUnchangedInCurrentOperation()) {
+		if (thePerformIndexing) {
+			if (!retVal.isUnchangedInCurrentOperation()) {
 
-			org.hl7.fhir.r4.model.CodeSystem cs = myVersionCanonicalizer.codeSystemToCanonical(theResource);
-			addPidToResource(theEntity, cs);
+				org.hl7.fhir.r4.model.CodeSystem cs = myVersionCanonicalizer.codeSystemToCanonical(theResource);
+				addPidToResource(theEntity, cs);
 
-			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(
-					cs, (ResourceTable) theEntity, theRequest);
+				myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(
+						cs, (ResourceTable) theEntity, theRequest);
+			}
+
+			/*
+			 * Flushing for each stored resource hurts performance, but in this case
+			 * it's justified because we don't expect people to be submitting
+			 * CodeSystem resources at super high rates, and we need to have the
+			 * various writes finished in case a second entry in the same transaction
+			 * tries to create a duplicate codesystem.
+			 */
+			myEntityManager.flush();
 		}
 
 		return retVal;

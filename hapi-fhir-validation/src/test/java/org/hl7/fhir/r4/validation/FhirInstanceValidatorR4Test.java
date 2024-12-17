@@ -9,8 +9,10 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -21,7 +23,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.MockValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
@@ -82,10 +84,13 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
@@ -112,46 +117,25 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
-public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMocks {
+@ExtendWith(MockitoExtension.class)
+public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorR4Test.class);
-	private static FhirContext ourCtx = FhirContext.forR4();
-	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
+	private static FhirContext ourCtx = FhirContext.forR4Cached();
 	@RegisterExtension
 	public LoggingExtension myLoggingExtension = new LoggingExtension();
+	@Mock
+	IValidatorResourceFetcher resourceFetcher;
+	@Mock
+	IValidationPolicyAdvisor policyAdvisor;
 	private FhirInstanceValidator myInstanceVal;
-	private Map<String, ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
 	private FhirValidator myFhirValidator;
-	private ArrayList<String> myValidConcepts;
-	private Set<String> myValidSystems = new HashSet<>();
-	private Set<String> myValidSystemsNotReturningIssues = new HashSet<>();
-	private Set<String> myValidValueSets = new HashSet<>();
-	private Map<String, StructureDefinition> myStructureDefinitionMap = new HashMap<>();
-	private CachingValidationSupport myValidationSupport;
-	private IValidationSupport myMockSupport;
-
-	private void addValidConcept(String theSystem, String theCode) {
-		addValidConcept(theSystem, theCode, true);
-	}
-
-	private void addValidConcept(String theSystem, String theCode, boolean theShouldSystemReturnIssuesForInvalidCode) {
-		if (theShouldSystemReturnIssuesForInvalidCode) {
-			myValidSystems.add(theSystem);
-		} else {
-			myValidSystemsNotReturningIssues.add(theSystem);
-		}
-		myValidConcepts.add(theSystem + "___" + theCode);
-	}
-
-	private void addValidValueSet(String theValueSetUrl) {
-		myValidValueSets.add(theValueSetUrl);
-	}
+	private IValidationSupport myValidationSupport;
+	private MockValidationSupport myMockSupport = new MockValidationSupport(FhirContext.forR4Cached());
 
 	/**
 	 * An invalid local reference should not cause a ServiceException.
@@ -173,158 +157,13 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	@BeforeEach
 	public void before() {
 		buildValidationSupportWithLogicalAndSupport(false);
-
-		mySupportedCodeSystemsForExpansion = new HashMap<>();
-
-		myValidConcepts = new ArrayList<>();
-
-		addMockedValueSets();
-
-		when(myMockSupport.expandValueSet(any(), nullable(ValueSetExpansionOptions.class), any(IBaseResource.class))).thenAnswer(t -> {
-			ValueSet arg = (ValueSet) t.getArgument(2, IBaseResource.class);
-			ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
-			if (retVal == null) {
-				IBaseResource outcome = myDefaultValidationSupport.expandValueSet(new ValidationSupportContext(myDefaultValidationSupport), null, arg).getValueSet();
-				return outcome;
-			}
-			ourLog.debug("expandValueSet({}) : {}", new Object[]{t.getArguments()[0], retVal});
-
-			ValueSet valueset = new ValueSet();
-			valueset.setExpansion(retVal);
-			return new ValueSetExpander.ValueSetExpansionOutcome(valueset);
-		});
-		when(myMockSupport.fetchResource(nullable(Class.class), nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
-			@Override
-			public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
-				IBaseResource retVal;
-				Class<IBaseResource> clazz = (Class<IBaseResource>) theInvocation.getArguments()[0];
-				String id = theInvocation.getArgument(1, String.class);
-				if (myStructureDefinitionMap.containsKey(id)) {
-					retVal = myStructureDefinitionMap.get(id);
-				} else if ("Questionnaire/q_jon".equals(id)) {
-					retVal = ourCtx.newJsonParser().parseResource(loadResource("/q_jon.json"));
-				} else {
-					retVal = myDefaultValidationSupport.fetchResource(clazz, id);
-				}
-				ourLog.debug("fetchResource({}, {}) : {}", clazz, id, retVal);
-				return retVal;
-			}
-		});
-
-		when(myMockSupport.fetchCodeSystem(nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
-			@Override
-			public CodeSystem answer(InvocationOnMock theInvocation) {
-				String system = theInvocation.getArgument(0, String.class);
-				if ("http://loinc.org".equals(system)) {
-					CodeSystem retVal = new CodeSystem();
-					retVal.setUrl("http://loinc.org");
-					retVal.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-					ourLog.debug("fetchCodeSystem({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
-					return retVal;
-				}
-
-				CodeSystem retVal = (CodeSystem) myDefaultValidationSupport.fetchCodeSystem(system);
-				ourLog.debug("fetchCodeSystem({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
-				return retVal;
-			}
-		});
-		when(myMockSupport.fetchStructureDefinition(nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
-			@Override
-			public IBaseResource answer(InvocationOnMock theInvocation) {
-				String id = (String) theInvocation.getArguments()[0];
-				IBaseResource retVal;
-				if (myStructureDefinitionMap.containsKey(id)) {
-					retVal = myStructureDefinitionMap.get(id);
-				} else {
-					retVal = myDefaultValidationSupport.fetchStructureDefinition(id);
-				}
-				ourLog.debug("fetchStructureDefinition({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
-				return retVal;
-			}
-		});
-		when(myMockSupport.fetchAllStructureDefinitions()).thenAnswer(new Answer<List<StructureDefinition>>() {
-			@Override
-			public List<StructureDefinition> answer(InvocationOnMock theInvocation) {
-				List<StructureDefinition> retVal = new ArrayList<>(myDefaultValidationSupport.fetchAllStructureDefinitions());
-				retVal.addAll(myStructureDefinitionMap.values());
-				ourLog.debug("fetchAllStructureDefinitions()", new Object[]{});
-				return retVal;
-			}
-		});
-		when(myMockSupport.lookupCode(any(), any())).thenAnswer(t -> {
-			LookupCodeRequest request = t.getArgument(1, LookupCodeRequest.class);
-			String system = request.getSystem();
-			String code = request.getCode();
-			if (myValidConcepts.contains(system + "___" + code)) {
-				return new IValidationSupport.LookupCodeResult().setFound(true);
-			} else {
-				return null;
-			}
-		});
-		when(myMockSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> {
-			String system = t.getArgument(2, String.class);
-			String code = t.getArgument(3, String.class);
-			if (myValidConcepts.contains(system + "___" + code)) {
-				return new IValidationSupport.CodeValidationResult().setCode(code).setDisplay(code);
-			}
-			return null;
-		});
-
-	}
-
-	private void addMockedValueSets() {
-
-		when(myMockSupport.isCodeSystemSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
-			@Override
-			public Boolean answer(InvocationOnMock theInvocation) {
-				String argument = theInvocation.getArgument(1, String.class);
-				boolean retVal = myValidSystems.contains(argument);
-				ourLog.debug("isCodeSystemSupported({}) : {}", argument, retVal);
-				return retVal;
-			}
-		});
-
-		when(myMockSupport.isValueSetSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
-			@Override
-			public Boolean answer(InvocationOnMock theInvocation) {
-				String argument = theInvocation.getArgument(1, String.class);
-				boolean retVal = myValidValueSets.contains(argument);
-				ourLog.debug("isValueSetSupported({}) : {}", argument, retVal);
-				return retVal;
-			}
-		});
-
-		when(myMockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IValidationSupport.CodeValidationResult>() {
-			@Override
-			public IValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
-				ConceptValidationOptions options = theInvocation.getArgument(1, ConceptValidationOptions.class);
-				String system = theInvocation.getArgument(2, String.class);
-				String code = theInvocation.getArgument(3, String.class);
-				String display = theInvocation.getArgument(4, String.class);
-				String valueSetUrl = theInvocation.getArgument(5, String.class);
-				IValidationSupport.CodeValidationResult retVal;
-				if (myValidConcepts.contains(system + "___" + code)) {
-					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
-				} else if (myValidSystems.contains(system)) {
-					final String message = "Unknown code (for '" + system + "#" + code + "')";
-					retVal = new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.IssueSeverity.ERROR, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
-				} else if (myValidSystemsNotReturningIssues.contains(system)) {
-					final String message = "Unknown code (for '" + system + "#" + code + "')";
-					retVal = new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message);
-				} else {
-					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
-				}
-				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
-				return retVal;
-			}
-		});
 	}
 
 	private Object defaultString(Integer theLocationLine) {
 		return theLocationLine != null ? theLocationLine.toString() : "";
 	}
 
-	private StructureDefinition loadStructureDefinition(DefaultProfileValidationSupport theDefaultValSupport, String theResName) throws IOException, FHIRException {
+	private StructureDefinition loadStructureDefinition(IValidationSupport theDefaultValSupport, String theResName) throws IOException, FHIRException {
 		StructureDefinition derived = loadResource(ourCtx, StructureDefinition.class, theResName);
 		StructureDefinition base = (StructureDefinition) theDefaultValSupport.fetchStructureDefinition(derived.getBaseDefinition());
 		Validate.notNull(base);
@@ -473,7 +312,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			"}";
 
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
 		ValidationResult result = val.validateWithResult(operationDefinition);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
@@ -500,7 +339,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			"   ]" +
 			"}";
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
@@ -513,7 +352,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	@Test
 	public void testValidateFixedBindingOnQuantity() throws IOException {
 		StructureDefinition sd = loadResource(ourCtx, StructureDefinition.class, "/r4/bbl-fixed-binding-structuredef.json");
-		myStructureDefinitionMap.put("http://example.org/fhir/StructureDefinition/MyObservation", sd);
+		myMockSupport.addStructureDefinition("http://example.org/fhir/StructureDefinition/MyObservation", sd);
 
 		Observation obs = loadResource(ourCtx, Observation.class, "/r4/bbl-fixed-binding-observation.json");
 
@@ -551,7 +390,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	 */
 	@Test
 	public void testValidateDoesntEnforceBestPracticesByDefault() {
-		addValidConcept("http://loinc.org", "1234");
+		myMockSupport.addValidConcept("http://loinc.org", "1234");
 
 		Observation input = new Observation();
 		input.addPerformer(new Reference("Practitioner/124"));
@@ -740,10 +579,11 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	}
 
 	@Test
-	public void testLargeBase64() throws IOException {
-		addValidConcept("http://loinc.org", "1-8");
+	public void testLargeBase64() {
+		myMockSupport.addValidValueSet("http://hl7.org/fhir/ValueSet/report-codes");
+		myMockSupport.addValidConcept("http://loinc.org", "1-8");
 
-		String input = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/r4/diagnosticreport-example-gingival-mass.json"), Constants.CHARSET_UTF8);
+		String input = ClasspathUtil.loadResource("/r4/diagnosticreport-example-gingival-mass.json");
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
 		assertThat(messages).hasSize(1);
@@ -892,8 +732,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		Patient patient = new Patient();
 		patient.setGender(Enumerations.AdministrativeGender.MALE);
 
-		addValidConcept("http://hl7.org/fhir/administrative-gender", "male");
-		addValidValueSet("http://hl7.org/fhir/ValueSet/administrative-gender");
+		myMockSupport.addValidConcept("http://hl7.org/fhir/administrative-gender", "male");
+		myMockSupport.addValidValueSet("http://hl7.org/fhir/ValueSet/administrative-gender");
 
 		// execute
 		ValidationResult output = myFhirValidator.validateWithResult(patient);
@@ -901,15 +741,15 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		// verify
 		assertTrue(output.isSuccessful());
-		verify(myMockSupport, times(1)).validateCodeInValueSet(any(), any(), eq("http://hl7.org/fhir/administrative-gender"), eq("male"), any(), any());
-		verify(myMockSupport, times(1)).validateCode(any(), any(), eq("http://hl7.org/fhir/administrative-gender"), eq("male"), any(), any());
+		assertEquals(1, myMockSupport.countValidateCodeInValueSet());
+		assertEquals(1, myMockSupport.countValidateCode());
 	}
 
 	@Test
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
-		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)), false);
+		ValidationSupportChain support = new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)).setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(false);
 
 		// Prepopulate SDs
 		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-profile.xml"));
@@ -1244,7 +1084,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	@ParameterizedTest
 	@ValueSource(booleans = {true, /*false*/})
 	public void testValidateResourceContainingLoincCode(boolean theShouldSystemReturnIssuesForInvalidCode) {
-		addValidConcept("http://loinc.org", "1234567", theShouldSystemReturnIssuesForInvalidCode);
+		myMockSupport.addValidConcept("http://loinc.org", "1234567", theShouldSystemReturnIssuesForInvalidCode);
 
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -1264,7 +1104,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	public void testValidateResourceContainingProfileDeclaration() {
-		addValidConcept("http://loinc.org", "12345");
+		myMockSupport.addValidConcept("http://loinc.org", "12345");
 
 		Observation input = new Observation();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -1286,7 +1126,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	public void testValidateResourceContainingProfileDeclarationDoesntResolve() {
-		addValidConcept("http://loinc.org", "12345");
+		myMockSupport.addValidConcept("http://loinc.org", "12345");
 
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
@@ -1350,7 +1190,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertThat(output.getMessages().get(0).getMessage()).contains("Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode'");
-		assertThat(output.getMessages().get(1).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.0.1), and a code is required from this value set  (error message = Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')");
+		assertThat(output.getMessages().get(1).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.0.1), and a code is required from this value set  (error message = Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status'");
 	}
 
 	@Test
@@ -1383,7 +1223,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationFailing() {
-		addValidConcept("http://loinc.org", "12345");
+		myMockSupport.addValidConcept("http://loinc.org", "12345");
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -1410,21 +1250,19 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://acme.org").setCode("12345");
 
-		addValidConcept("http://acme.org", "12345");
+		myMockSupport.addValidConcept("http://acme.org", "12345");
 
-		IValidationPolicyAdvisor policy = mock(IValidationPolicyAdvisor.class, withSettings().verboseLogging());
-		when(policy.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_VALID);
-		when(policy.policyForElement(any(), any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
-		when(policy.policyForCodedContent(any(),any(),any(),any(),any(),any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
+		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_VALID);
+		when(policyAdvisor.policyForElement(any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
+		when(policyAdvisor.policyForCodedContent(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
 
-		myInstanceVal.setValidatorPolicyAdvisor(policy);
+		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 
-		IValidatorResourceFetcher fetcher = mock(IValidatorResourceFetcher.class, withSettings().verboseLogging());
-		when(fetcher.fetch(any(), any(), any())).thenAnswer(t -> {
+		when(resourceFetcher.fetch(any(), any(), any())).thenAnswer(t -> {
 			return new JsonParser(new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(myValidationSupport), new VersionCanonicalizer(ourCtx)))
 				.parse(ourCtx.newJsonParser().encodeResourceToString(patient), "Patient");
 		});
-		myInstanceVal.setValidatorResourceFetcher(fetcher);
+		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		myInstanceVal.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
 
@@ -1444,7 +1282,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
-		addValidConcept("http://acme.org", "12345");
+		myMockSupport.addValidConcept("http://acme.org", "12345");
 
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://acme.org").setCode("9988877");
@@ -1463,7 +1301,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
-		addValidConcept("http://loinc.org", "12345");
+		myMockSupport.addValidConcept("http://loinc.org", "12345");
 
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
@@ -1481,9 +1319,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValueSetExpansionComponent expansionComponent = new ValueSetExpansionComponent();
 		expansionComponent.addContains().setSystem("http://loinc.org").setCode("12345").setDisplay("Some display code");
 
-		mySupportedCodeSystemsForExpansion.put("http://loinc.org", expansionComponent);
 		myInstanceVal.setValidationSupport(myValidationSupport);
-		addValidConcept("http://loinc.org", "12345");
+		myMockSupport.addValidConcept("http://loinc.org", "12345");
 
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234");
@@ -1500,7 +1337,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
-		addValidConcept("http://acme.org", "12345");
+		myMockSupport.addValidConcept("http://acme.org", "12345");
 
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://acme.org").setCode("12345");
@@ -1529,7 +1366,9 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	public void testValidateWithUcum() throws IOException {
-		addValidConcept("http://loinc.org", "8310-5");
+		myMockSupport.addValidValueSet("http://hl7.org/fhir/ValueSet/observation-vitalsignresult");
+		myMockSupport.addValidValueSet("http://hl7.org/fhir/ValueSet/report-codes");
+		myMockSupport.addValidConcept("http://loinc.org", "8310-5");
 
 		Observation input = loadResource(ourCtx, Observation.class, "/r4/observation-with-body-temp-ucum.json");
 		ValidationResult output = myFhirValidator.validateWithResult(input);
@@ -1593,13 +1432,9 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		String encoded = loadResource("/r4/r4-caredove-bundle.json");
 
-		IValidatorResourceFetcher resourceFetcher = mock(IValidatorResourceFetcher.class);
-		IValidationPolicyAdvisor policyAdvisor = mock(IValidationPolicyAdvisor.class);
-
-		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		when(policyAdvisor.policyForContained(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(ContainedReferenceValidationPolicy.CHECK_TYPE);
-		when(policyAdvisor.policyForElement(any(), any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
-		when(policyAdvisor.policyForCodedContent(any(),any(),any(),any(),any(),any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
+		when(policyAdvisor.policyForElement(any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
+		when(policyAdvisor.policyForCodedContent(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myFhirValidator.validateWithResult(encoded);
@@ -1711,9 +1546,9 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	@Test
 	public void testValidateBundleMultithreaded() throws IOException {
 		// setup
-		StructureDefinition sd = loadStructureDefinition(myDefaultValidationSupport, "/r4/concurrent-bundle/StructureDefinitionPatientV1.json");
+		StructureDefinition sd = loadStructureDefinition(myMockSupport, "/r4/concurrent-bundle/StructureDefinitionPatientV1.json");
 
-		myStructureDefinitionMap.put("https://example.com/StructureDefinition/Patient-v1", sd);
+		myMockSupport.addStructureDefinition("https://example.com/StructureDefinition/Patient-v1", sd);
 
 		int entriesCount = 300;
 
@@ -1751,10 +1586,9 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	void testValidateCommonCodes_Ucum_ErrorMessageIsPreserved() {
-		addValidConcept("http://loinc.org", "1234");
+		myMockSupport.addValidConcept("http://loinc.org", "1234");
 
 		buildValidationSupportWithLogicalAndSupport(false);
-		addMockedValueSets();
 
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -1795,10 +1629,9 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	void testValidateCommonCodes_Currency_ErrorMessageIsPreserved() {
-		addValidConcept("http://loinc.org", "1234");
+		myMockSupport.addValidConcept("http://loinc.org", "1234");
 
 		buildValidationSupportWithLogicalAndSupport(false);
-		addMockedValueSets();
 
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -1921,15 +1754,13 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		// This is only used if the validation is performed with validationOptions.isConcurrentBundleValidation = true
 		myFhirValidator.setExecutorService(Executors.newFixedThreadPool(4));
 
-		myMockSupport = mock(IValidationSupport.class);
-		when(myMockSupport.getFhirContext()).thenReturn(ourCtx);
 		ValidationSupportChain chain = new ValidationSupportChain(
-			myDefaultValidationSupport,
 			myMockSupport,
 			new CommonCodeSystemsTerminologyService(ourCtx),
+			ourCtx.getValidationSupport(),
 			new InMemoryTerminologyServerValidationSupport(ourCtx),
 			new SnapshotGeneratingValidationSupport(ourCtx));
-		myValidationSupport = new CachingValidationSupport(chain, theLogicalAnd);
+		myValidationSupport = chain.setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(theLogicalAnd);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 		myFhirValidator.registerValidatorModule(myInstanceVal);
 	}
@@ -1952,8 +1783,6 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 	@AfterAll
 	public static void afterClassClearContext() throws IOException, NoSuchFieldException {
-		myDefaultValidationSupport.flush();
-		myDefaultValidationSupport = null;
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 

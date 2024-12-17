@@ -1,10 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
@@ -84,6 +79,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -95,7 +92,11 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -439,36 +440,19 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-	@Test
-	public void testCreateWithIllegalReference() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testCreateWithIllegalReference_WrongTypeForId(boolean theClientAssignedId) {
+		IIdType id1;
+
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReference(id1);
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
+		if (theClientAssignedId) {
+			o1.setId("A");
+			id1 = myObservationDao.update(o1, mySrd).getId().toUnqualifiedVersionless();
+		} else {
+			id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
 		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReference(new IdDt("Organization", id1.getIdPart()));
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1095) + "Resource contains reference to unknown resource ID Organization/" + id1.getIdPart(), e.getMessage());
-		}
-
-		// Now with a forced ID
-
-		o1 = new Observation();
-		o1.setId("testCreateWithIllegalReference");
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		id1 = myObservationDao.update(o1, mySrd).getId().toUnqualifiedVersionless();
 
 		try {
 			Patient p = new Patient();
@@ -485,9 +469,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			myPatientDao.create(p, mySrd);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1094) + "Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
+			assertEquals(Msg.code(1094) + "Resource Organization/" + id1.getIdPart() + " not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
-
 	}
 
 	@Test
@@ -677,8 +660,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	/**
-	 * See #773
-	 */
+     * See #773
+     */
 	@Test
 	public void testDeleteResourceWithOutboundDeletedResources() {
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
@@ -1387,8 +1370,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	/**
-	 * See #196
-	 */
+     * See #196
+     */
 	@Test
 	public void testInvalidChainNames() {
 		ReferenceParam param = null;
@@ -1675,46 +1658,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		Patient v2 = myPatientDao.read(p1idv2, mySrd);
 		assertThat(v2.getIdentifier()).hasSize(2);
-
-	}
-
-	@Test
-	public void testReadInvalidVersion() throws Exception {
-		String methodName = "testReadInvalidVersion";
-
-		Patient pat = new Patient();
-		pat.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id = myPatientDao.create(pat, mySrd).getId();
-
-		assertEquals(methodName, myPatientDao.read(id, mySrd).getIdentifier().get(0).getValue());
-
-		try {
-			myPatientDao.read(id.withVersion("0"), mySrd);
-			fail("");
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(979) + "Version \"0\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
-		}
-
-		try {
-			myPatientDao.read(id.withVersion("2"), mySrd);
-			fail("");
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(979) + "Version \"2\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
-		}
-
-		try {
-			myPatientDao.read(id.withVersion("H"), mySrd);
-			fail("");
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(978) + "Version \"H\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
-		}
-
-		try {
-			myPatientDao.read(new IdDt("Patient/9999999999999/_history/1"), mySrd);
-			fail("");
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1996) + "Resource Patient/9999999999999/_history/1 is not known", e.getMessage());
-		}
 
 	}
 

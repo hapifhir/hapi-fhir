@@ -285,7 +285,6 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 						    "source": "#384dd6bccaeafa6c"
 						  },
 						  "url": "https://health.gov.on.ca/idms/fhir/SearchParameter/MedicinalProductDefinition-SearchableString",
-						  "version": "1.0.0",
 						  "name": "MedicinalProductDefinitionSearchableString",
 						  "status": "active",
 						  "publisher": "MOH-IDMS",

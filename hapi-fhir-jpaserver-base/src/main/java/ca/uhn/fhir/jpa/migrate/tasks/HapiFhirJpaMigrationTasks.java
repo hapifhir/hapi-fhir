@@ -125,11 +125,219 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init700();
 		init720();
 		init740();
+		init760();
 		init780();
 	}
 
 	protected void init780() {
 		final Builder version = forVersion(VersionEnum.V7_8_0);
+
+		version.onTable("HFJ_RES_SEARCH_URL")
+				.dropForeignKey("20241008.100", "FK_RES_SEARCH_URL_RESOURCE", "HFJ_RESOURCE");
+
+		version.onTable("HFJ_RES_VER_PROV").dropForeignKey("20241008.200", "FK_RESVERPROV_RESVER_PID", "HFJ_RES_VER");
+
+		version.onTable("HFJ_SEARCH")
+				.addColumn("20241008.300", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("HFJ_SEARCH_RESULT")
+				.addColumn("20241008.400", "RESOURCE_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("HFJ_SUBSCRIPTION_STATS")
+				.dropForeignKey("20241008.500", "FK_SUBSC_RESOURCE_ID", "HFJ_RESOURCE");
+
+		version.onTable("MPI_LINK")
+				.addColumn("20241008.600", "GOLDEN_RESOURCE_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("MPI_LINK")
+				.addColumn("20241008.601", "PERSON_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("MPI_LINK")
+				.addColumn("20241008.602", "TARGET_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("MPI_LINK_AUD")
+				.addColumn("20241008.700", "GOLDEN_RESOURCE_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("MPI_LINK_AUD")
+				.addColumn("20241008.701", "PERSON_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("MPI_LINK_AUD")
+				.addColumn("20241008.702", "TARGET_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("NPM_PACKAGE_VER")
+				.addColumn("20241008.800", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("NPM_PACKAGE_VER_RES")
+				.addColumn("20241008.900", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("TRM_CODESYSTEM")
+				.addColumn("20241008.1000", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CODESYSTEM")
+				.addColumn("20241008.1001", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("TRM_CODESYSTEM")
+				.modifyColumn("20241008.1002", "RES_ID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+		version.onTable("TRM_CODESYSTEM")
+				.addColumn("20241008.1003", "CURRENT_VERSION_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("TRM_CODESYSTEM_VER")
+				.addColumn("20241008.1100", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CODESYSTEM_VER")
+				.addColumn("20241008.1101", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("TRM_CONCEPT")
+				.addColumn("20241008.1300", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("TRM_CONCEPT_PC_LINK")
+				.modifyColumn("20241008.1400", "CHILD_PID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+		version.onTable("TRM_CONCEPT_PC_LINK")
+				.modifyColumn("20241008.1401", "PARENT_PID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+		version.onTable("TRM_CONCEPT_PC_LINK")
+				.addColumn("20241008.1402", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("TRM_CONCEPT_DESIG")
+				.addColumn("20241008.1500", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_DESIG")
+				.addColumn("20241008.1501", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("TRM_CONCEPT_DESIG")
+				.modifyColumn("20241008.1502", "CONCEPT_PID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+		version.onTable("TRM_CONCEPT_DESIG")
+				.modifyColumn("20241008.1503", "CS_VER_PID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+
+		version.onTable("TRM_CONCEPT_PROPERTY")
+				.addColumn("20241008.1600", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_PROPERTY")
+				.addColumn("20241008.1601", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("TRM_CONCEPT_PROPERTY")
+				.modifyColumn("20241008.1602", "CONCEPT_PID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+
+		version.onTable("TRM_CONCEPT_MAP")
+				.addColumn("20241008.1700", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_MAP")
+				.addColumn("20241008.1701", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("TRM_CONCEPT_MAP")
+				.modifyColumn("20241008.1702", "RES_ID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+
+		version.onTable("TRM_CONCEPT_MAP_GROUP")
+				.addColumn("20241008.1800", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_MAP_GROUP")
+				.addColumn("20241008.1801", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
+				.addColumn("20241008.1900", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
+				.addColumn("20241008.1901", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+				.addColumn("20241008.2000", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+				.addColumn("20241008.2001", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("TRM_VALUESET")
+				.addColumn("20241008.2500", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_VALUESET")
+				.addColumn("20241008.2501", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("TRM_VALUESET")
+				.modifyColumn("20241008.2502", "RES_ID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+
+		version.onTable("TRM_VALUESET_CONCEPT")
+				.addColumn("20241008.2600", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_VALUESET_CONCEPT")
+				.addColumn("20241008.2601", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("TRM_VALUESET_C_DESIGNATION")
+				.addColumn("20241008.2700", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_VALUESET_C_DESIGNATION")
+				.addColumn("20241008.2701", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
 
 		version.onTable("NPM_PACKAGE_VER")
 				.addColumn("20241023.10", "PKG_AUTHOR")
@@ -152,6 +360,38 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.modifyColumn("20241023.50", "PACKAGE_DESC")
 				.nullable()
 				.withType(ColumnTypeEnum.STRING, 512);
+
+		// This will require a full table scan just to reduce a field size,
+		// so don't run it by default
+		version.onTable("HFJ_RESOURCE")
+				.modifyColumn("20241030.10", "SP_INDEX_STATUS")
+				.nullable()
+				.withType(ColumnTypeEnum.TINYINT)
+				.heavyweightSkipByDefault();
+		version.onTable("TRM_CONCEPT")
+				.modifyColumn("20241030.20", "INDEX_STATUS")
+				.nullable()
+				.withType(ColumnTypeEnum.TINYINT)
+				.heavyweightSkipByDefault();
+	}
+
+	/**
+	 * Built at 2024.11.02 to be backported to version 7.6
+	 */
+	protected void init760() {
+		final Builder version = forVersion(VersionEnum.V7_6_0);
+
+		version.onTable("HFJ_RES_VER")
+				.modifyColumn("20241102.10", "SOURCE_URI")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 768)
+				.failureAllowed();
+
+		version.onTable("HFJ_RES_VER_PROV")
+				.modifyColumn("20241102.20", "SOURCE_URI")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 768)
+				.failureAllowed();
 	}
 
 	protected void init740() {
