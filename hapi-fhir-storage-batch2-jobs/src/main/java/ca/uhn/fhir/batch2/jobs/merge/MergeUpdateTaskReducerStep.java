@@ -68,7 +68,7 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 				mergeJobParameters.getSourceId().asIdDt(),
 				mergeJobParameters.getTargetId().asIdDt(),
 				resultResource,
-				mergeJobParameters.isDeleteSource(),
+				mergeJobParameters.getDeleteSource(),
 				requestDetails);
 
 		return super.run(theStepExecutionDetails, theDataSink);

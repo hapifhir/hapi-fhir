@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
-import ca.uhn.fhir.batch2.util.Batch2TaskUtils;
+import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -55,18 +55,21 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private final IResourceLinkDao myResourceLinkDao;
 	private final IJobCoordinator myJobCoordinator;
 	private final ReplaceReferencesPatchBundleSvc myReplaceReferencesPatchBundleSvc;
+	private final Batch2TaskHelper myBatch2TaskHelper;
 
 	public ReplaceReferencesSvcImpl(
 			DaoRegistry theDaoRegistry,
 			HapiTransactionService theHapiTransactionService,
 			IResourceLinkDao theResourceLinkDao,
 			IJobCoordinator theJobCoordinator,
-			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc) {
+			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
+			Batch2TaskHelper theBatch2TaskHelper) {
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
 		myResourceLinkDao = theResourceLinkDao;
 		myJobCoordinator = theJobCoordinator;
 		myReplaceReferencesPatchBundleSvc = theReplaceReferencesPatchBundleSvc;
+		myBatch2TaskHelper = theBatch2TaskHelper;
 	}
 
 	@Override
@@ -94,7 +97,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private IBaseParameters replaceReferencesPreferAsync(
 			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
 
-		Task task = Batch2TaskUtils.startJobAndCreateAssociatedTask(
+		Task task = myBatch2TaskHelper.startJobAndCreateAssociatedTask(
 				myDaoRegistry.getResourceDao(Task.class),
 				theRequestDetails,
 				myJobCoordinator,

@@ -139,7 +139,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Assert Task inAsync mode, unless it is preview in which case we don't return a task
 		if (isAsync && !withPreview) {
-			// FIXME ED see ProviderConstants.OPERATION_REPLACE_REFERENCES in JpaSystemProvider for how to get this to pass
 			assertThat(getLastHttpStatusCode()).isEqualTo(HttpServletResponse.SC_ACCEPTED);
 
 			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
@@ -172,6 +171,17 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			Bundle patchResultBundle = (Bundle) outputRef.getResource();
 			assertTrue(containedBundle.equalsDeep(patchResultBundle));
 			myTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of("Observation", "Encounter", "CarePlan"));
+
+			OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+			assertThat(outcome.getIssue())
+				.hasSize(1)
+				.element(0)
+				.satisfies(issue -> {
+					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+					assertThat(issue.getDetails().getText()).isEqualTo("Merge request is accepted, and will be " +
+						"processed asynchronously. See task resource returned in this response for details.");
+				});
+
 		} else { // Synchronous case
 			// Assert outcome
 			OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();

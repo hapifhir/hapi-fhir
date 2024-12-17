@@ -23,12 +23,12 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.merge.MergeHelper;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
-import ca.uhn.fhir.batch2.util.Batch2TaskUtils;
+import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
@@ -69,7 +69,7 @@ import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 public class ResourceMergeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceMergeService.class);
 
-	private final IFhirResourceDaoPatient<Patient> myPatientDao;
+	private final IFhirResourceDao<Patient> myPatientDao;
 	private final IReplaceReferencesSvc myReplaceReferencesSvc;
 	private final IHapiTransactionService myHapiTransactionService;
 	private final FhirContext myFhirContext;
@@ -77,20 +77,22 @@ public class ResourceMergeService {
 	private final IFhirResourceDao<Task> myTaskDao;
 	private final IJobCoordinator myJobCoordinator;
 	private final MergeHelper myMergeHelper;
+	private final Batch2TaskHelper myBatch2TaskHelper;
 
 	public ResourceMergeService(
-			IFhirResourceDaoPatient<Patient> thePatientDao,
-			IFhirResourceDao<Task> theTaskDao,
+			DaoRegistry theDaoRegistry,
 			IReplaceReferencesSvc theReplaceReferencesSvc,
 			IHapiTransactionService theHapiTransactionService,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-			IJobCoordinator theJobCoordinator) {
+			IJobCoordinator theJobCoordinator,
+			Batch2TaskHelper theBatch2TaskHelper) {
 
-		myPatientDao = thePatientDao;
-		myTaskDao = theTaskDao;
+		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
+		myTaskDao = theDaoRegistry.getResourceDao(Task.class);
 		myReplaceReferencesSvc = theReplaceReferencesSvc;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		myJobCoordinator = theJobCoordinator;
+		myBatch2TaskHelper = theBatch2TaskHelper;
 		myFhirContext = myPatientDao.getContext();
 		myHapiTransactionService = theHapiTransactionService;
 		myMergeHelper = new MergeHelper(myPatientDao);
@@ -147,9 +149,6 @@ public class ResourceMergeService {
 		}
 
 		doMerge(theMergeOperationParameters, sourceResource, targetResource, theRequestDetails, theMergeOutcome);
-
-		String detailsText = "Merge operation completed successfully.";
-		addInfoToOperationOutcome(theMergeOutcome.getOperationOutcome(), null, detailsText);
 	}
 
 	private ValidationResult validate(
@@ -214,7 +213,7 @@ public class ResourceMergeService {
 			MergeOperationOutcome theMergeOutcome) {
 
 		Integer referencingResourceCount = myReplaceReferencesSvc.countResourcesReferencingResource(
-				theSourceResource.getIdElement(), theRequestDetails);
+				theSourceResource.getIdElement().toVersionless(), theRequestDetails);
 
 		// in preview mode, we should also return how the target would look like
 		Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
@@ -250,7 +249,7 @@ public class ResourceMergeService {
 		} else {
 			// count the number of refs, if it is larger than batch size then process async, otherwise process sync
 			Integer numberOfRefs = myReplaceReferencesSvc.countResourcesReferencingResource(
-					theSourceResource.getIdElement(), theRequestDetails);
+					theSourceResource.getIdElement().toVersionless(), theRequestDetails);
 			if (numberOfRefs > theMergeOperationParameters.getBatchSize()) {
 				doMergeAsync(
 						theMergeOperationParameters,
@@ -296,9 +295,11 @@ public class ResourceMergeService {
 				theMergeOperationParameters.getDeleteSource(),
 				theRequestDetails);
 		theMergeOutcome.setUpdatedTargetResource(updatedTarget);
+
+		String detailsText = "Merge operation completed successfully.";
+		addInfoToOperationOutcome(theMergeOutcome.getOperationOutcome(), null, detailsText);
 	}
 
-	// FIXME ED add unit tests for async case
 	private void doMergeAsync(
 			MergeOperationInputParameters theMergeOperationParameters,
 			Patient theSourceResource,
@@ -315,17 +316,23 @@ public class ResourceMergeService {
 		}
 		mergeJobParameters.setDeleteSource(theMergeOperationParameters.getDeleteSource());
 		mergeJobParameters.setBatchSize(theMergeOperationParameters.getBatchSize());
-		mergeJobParameters.setSourceId(new FhirIdJson(theSourceResource.getIdElement()));
-		mergeJobParameters.setTargetId(new FhirIdJson(theTargetResource.getIdElement()));
+		mergeJobParameters.setSourceId(
+				new FhirIdJson(theSourceResource.getIdElement().toVersionless()));
+		mergeJobParameters.setTargetId(
+				new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
 		mergeJobParameters.setPartitionId(partitionId);
 
-		Task task = Batch2TaskUtils.startJobAndCreateAssociatedTask(
+		Task task = myBatch2TaskHelper.startJobAndCreateAssociatedTask(
 				myTaskDao, theRequestDetails, myJobCoordinator, JOB_MERGE, mergeJobParameters);
 
 		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());
 		task.getMeta().setVersionId(null);
 		theMergeOutcome.setTask(task);
 		theMergeOutcome.setHttpStatusCode(STATUS_HTTP_202_ACCEPTED);
+
+		String detailsText = "Merge request is accepted, and will be processed asynchronously. See"
+				+ " task resource returned in this response for details.";
+		addInfoToOperationOutcome(theMergeOutcome.getOperationOutcome(), null, detailsText);
 	}
 
 	private boolean validateResultResourceIfExists(
@@ -399,7 +406,7 @@ public class ResourceMergeService {
 
 	private List<Reference> getLinksToResource(
 			Patient theResource, Patient.LinkType theLinkType, IIdType theResourceId) {
-		List<Reference> links = getLinksOfType(theResource, theLinkType);
+		List<Reference> links = getLinksOfTypeWithNonNullReference(theResource, theLinkType);
 		return links.stream()
 				.filter(r -> theResourceId.toVersionless().getValue().equals(r.getReference()))
 				.collect(Collectors.toList());
@@ -444,7 +451,7 @@ public class ResourceMergeService {
 		return true;
 	}
 
-	protected List<Reference> getLinksOfType(Patient theResource, Patient.LinkType theLinkType) {
+	protected List<Reference> getLinksOfTypeWithNonNullReference(Patient theResource, Patient.LinkType theLinkType) {
 		List<Reference> links = new ArrayList<>();
 		if (theResource.hasLink()) {
 			for (Patient.PatientLinkComponent link : theResource.getLink()) {
@@ -472,7 +479,8 @@ public class ResourceMergeService {
 			return false;
 		}
 
-		List<Reference> replacedByLinksInTarget = getLinksOfType(theTargetResource, Patient.LinkType.REPLACEDBY);
+		List<Reference> replacedByLinksInTarget =
+				getLinksOfTypeWithNonNullReference(theTargetResource, Patient.LinkType.REPLACEDBY);
 		if (!replacedByLinksInTarget.isEmpty()) {
 			String ref = replacedByLinksInTarget.get(0).getReference();
 			String msg = String.format(
@@ -483,7 +491,8 @@ public class ResourceMergeService {
 			return false;
 		}
 
-		List<Reference> replacedByLinksInSource = getLinksOfType(theSourceResource, Patient.LinkType.REPLACEDBY);
+		List<Reference> replacedByLinksInSource =
+				getLinksOfTypeWithNonNullReference(theSourceResource, Patient.LinkType.REPLACEDBY);
 		if (!replacedByLinksInSource.isEmpty()) {
 			String ref = replacedByLinksInSource.get(0).getReference();
 			String msg = String.format(

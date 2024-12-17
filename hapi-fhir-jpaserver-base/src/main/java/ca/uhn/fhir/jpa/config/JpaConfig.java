@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobSubmitterImpl;
+import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -107,6 +108,7 @@ import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProviderDstu2;
+import ca.uhn.fhir.jpa.provider.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
 import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
@@ -933,22 +935,46 @@ public class JpaConfig {
 	}
 
 	@Bean
+	public Batch2TaskHelper batch2TaskHelper() {
+		return new Batch2TaskHelper();
+	}
+
+	@Bean
 	public IReplaceReferencesSvc replaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			HapiTransactionService theHapiTransactionService,
 			IResourceLinkDao theResourceLinkDao,
 			IJobCoordinator theJobCoordinator,
-			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle) {
+			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle,
+			Batch2TaskHelper theBatch2TaskHelper) {
 		return new ReplaceReferencesSvcImpl(
 				theDaoRegistry,
 				theHapiTransactionService,
 				theResourceLinkDao,
 				theJobCoordinator,
-				theReplaceReferencesPatchBundle);
+				theReplaceReferencesPatchBundle,
+				theBatch2TaskHelper);
 	}
 
 	@Bean
 	public ReplaceReferencesPatchBundleSvc replaceReferencesPatchBundleSvc(DaoRegistry theDaoRegistry) {
 		return new ReplaceReferencesPatchBundleSvc(theDaoRegistry);
+	}
+
+	@Bean
+	public ResourceMergeService resourceMergeService(
+			DaoRegistry theDaoRegistry,
+			IReplaceReferencesSvc theReplaceReferencesSvc,
+			HapiTransactionService theHapiTransactionService,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			IJobCoordinator theJobCoordinator,
+			Batch2TaskHelper theBatch2TaskHelper) {
+		return new ResourceMergeService(
+				theDaoRegistry,
+				theReplaceReferencesSvc,
+				theHapiTransactionService,
+				theRequestPartitionHelperSvc,
+				theJobCoordinator,
+				theBatch2TaskHelper);
 	}
 }

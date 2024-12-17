@@ -37,7 +37,7 @@ public class MergeJobParameters extends ReplaceReferencesJobParameters {
 		return myResultResource;
 	}
 
-	public boolean isDeleteSource() {
+	public boolean getDeleteSource() {
 		return myDeleteSource;
 	}
 

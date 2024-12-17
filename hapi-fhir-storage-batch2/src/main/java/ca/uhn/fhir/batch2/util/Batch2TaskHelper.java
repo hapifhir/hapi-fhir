@@ -29,13 +29,9 @@ import org.hl7.fhir.r4.model.Task;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.HAPI_BATCH_JOB_ID_SYSTEM;
 
-public class Batch2TaskUtils {
+public class Batch2TaskHelper {
 
-	private Batch2TaskUtils() {
-		// non-instantiable
-	}
-
-	public static Task startJobAndCreateAssociatedTask(
+	public Task startJobAndCreateAssociatedTask(
 			IFhirResourceDao<Task> theTaskDao,
 			RequestDetails theRequestDetails,
 			IJobCoordinator theJobCoordinator,

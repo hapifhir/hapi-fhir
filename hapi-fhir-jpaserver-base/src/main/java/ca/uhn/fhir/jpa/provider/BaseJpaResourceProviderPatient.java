@@ -19,15 +19,10 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeOperationInputParameters;
 import ca.uhn.fhir.jpa.provider.merge.MergeOperationOutcome;
 import ca.uhn.fhir.jpa.provider.merge.PatientMergeOperationInputParameters;
@@ -63,7 +58,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
@@ -76,20 +70,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
 
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	private ResourceMergeService myResourceMergeService;
 
 	@Autowired
-	private IReplaceReferencesSvc myReplaceReferencesSvc;
-
-	@Autowired
-	private IHapiTransactionService myHapiTransactionService;
-
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-
-	@Autowired
-	private IJobCoordinator myJobCoordinator;
-
+	private FhirContext myFhirContext;
 	/**
 	 * Patient/123/$everything
 	 */
@@ -322,23 +306,11 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					theResultPatient,
 					batchSize);
 
-			IFhirResourceDaoPatient<Patient> patientDao = (IFhirResourceDaoPatient<Patient>) getDao();
-			IFhirResourceDao<Task> taskDao = myDaoRegistry.getResourceDao(Task.class);
-			ResourceMergeService resourceMergeService = new ResourceMergeService(
-					patientDao,
-					taskDao,
-					myReplaceReferencesSvc,
-					myHapiTransactionService,
-					myRequestPartitionHelperSvc,
-					myJobCoordinator);
-
-			FhirContext fhirContext = patientDao.getContext();
-
 			MergeOperationOutcome mergeOutcome =
-					resourceMergeService.merge(mergeOperationParameters, theRequestDetails);
+					myResourceMergeService.merge(mergeOperationParameters, theRequestDetails);
 
 			theServletResponse.setStatus(mergeOutcome.getHttpStatusCode());
-			return buildMergeOperationOutputParameters(fhirContext, mergeOutcome, theRequestDetails.getResource());
+			return buildMergeOperationOutputParameters(myFhirContext, mergeOutcome, theRequestDetails.getResource());
 		} finally {
 			endRequest(theServletRequest);
 		}
