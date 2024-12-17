@@ -65,7 +65,6 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 	private final ListMultimap<String, NarrativeTemplate> myNameToTemplate;
 	private final ListMultimap<String, NarrativeTemplate> myFragmentNameToTemplate;
 	private final ListMultimap<String, NarrativeTemplate> myClassToTemplate;
-	private final ListMultimap<String, NarrativeTemplate> myCodeToTemplate;
 	private final int myTemplateCount;
 
 	private NarrativeTemplateManifest(Collection<NarrativeTemplate> theTemplates) {
@@ -74,7 +73,6 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		ListMultimap<String, NarrativeTemplate> nameToTemplate = ArrayListMultimap.create();
 		ListMultimap<String, NarrativeTemplate> classToTemplate = ArrayListMultimap.create();
 		ListMultimap<String, NarrativeTemplate> fragmentNameToTemplate = ArrayListMultimap.create();
-		ListMultimap<String, NarrativeTemplate> codeToTemplate = ArrayListMultimap.create();
 
 		for (NarrativeTemplate nextTemplate : theTemplates) {
 			nameToTemplate.put(nextTemplate.getTemplateName(), nextTemplate);
@@ -90,9 +88,6 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 			for (String nextFragmentName : nextTemplate.getAppliesToFragmentNames()) {
 				fragmentNameToTemplate.put(nextFragmentName, nextTemplate);
 			}
-			for (String nextCode : nextTemplate.getAppliesToCode()) {
-				codeToTemplate.put(nextCode, nextTemplate);
-			}
 		}
 
 		myTemplateCount = theTemplates.size();
@@ -101,7 +96,6 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		myResourceTypeToTemplate = Multimaps.unmodifiableListMultimap(resourceTypeToTemplate);
 		myDatatypeToTemplate = Multimaps.unmodifiableListMultimap(datatypeToTemplate);
 		myFragmentNameToTemplate = Multimaps.unmodifiableListMultimap(fragmentNameToTemplate);
-		myCodeToTemplate = Multimaps.unmodifiableListMultimap(codeToTemplate);
 	}
 
 	public int getNamedTemplateCount() {
@@ -113,8 +107,9 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
 			@Nonnull String theResourceName,
-			@Nonnull Collection<String> theProfiles) {
-		return getFromMap(theStyles, theResourceName.toUpperCase(), myResourceTypeToTemplate, theProfiles);
+			@Nonnull Collection<String> theProfiles,
+			@Nonnull Collection<String> theCodes) {
+		return getFromMap(theStyles, theResourceName.toUpperCase(), myResourceTypeToTemplate, theProfiles, theCodes);
 	}
 
 	@Override
@@ -122,7 +117,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
 			@Nonnull String theName) {
-		return getFromMap(theStyles, theName, myNameToTemplate, Collections.emptyList());
+		return getFromMap(theStyles, theName, myNameToTemplate);
 	}
 
 	@Override
@@ -130,15 +125,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
 			@Nonnull String theFragmentName) {
-		return getFromMap(theStyles, theFragmentName, myFragmentNameToTemplate, Collections.emptyList());
-	}
-
-	@Override
-	public List<INarrativeTemplate> getTemplateByCode(
-			@Nonnull FhirContext theFhirContext,
-			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
-			@Nonnull String theCode) {
-		return getFromMap(theStyles, theCode, myCodeToTemplate, Collections.emptyList());
+		return getFromMap(theStyles, theFragmentName, myFragmentNameToTemplate);
 	}
 
 	@SuppressWarnings("PatternVariableCanBeUsed")
@@ -159,36 +146,23 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 					.filter(StringUtils::isNotBlank)
 					.collect(Collectors.toList());
 
-			List<INarrativeTemplate> profileTemplates =
-					getTemplateByResourceName(theFhirContext, theStyles, resourceName, profiles);
-
-			String theCode = resource.getMeta().getTag().stream()
+			List<String> codes = resource.getMeta().getTag().stream()
 					.filter(Objects::nonNull)
 					.map(t -> t.getSystem() + "|" + t.getCode())
-					.findFirst()
-					.orElse("");
+					.collect(Collectors.toList());
 
-			List<INarrativeTemplate> tagTemplates = getTemplateByCode(theFhirContext, theStyles, theCode);
-
-			if (!tagTemplates.isEmpty()) {
-				// Looking for a specific code system/code as well as resource, get the intersection of these two lists
-				retVal =
-						profileTemplates.stream().filter(tagTemplates::contains).collect(Collectors.toList());
-			} else {
-				retVal = profileTemplates;
-			}
+			retVal = getTemplateByResourceName(theFhirContext, theStyles, resourceName, profiles, codes);
 		}
 
 		if (retVal.isEmpty()) {
-			retVal = getFromMap(theStyles, theElement.getClass().getName(), myClassToTemplate, Collections.emptyList());
+			retVal = getFromMap(theStyles, theElement.getClass().getName(), myClassToTemplate);
 		}
 
 		if (retVal.isEmpty()) {
 			String datatypeName =
 					theFhirContext.getElementDefinition(theElement.getClass()).getName();
-			retVal = getFromMap(theStyles, datatypeName.toUpperCase(), myDatatypeToTemplate, Collections.emptyList());
+			retVal = getFromMap(theStyles, datatypeName.toUpperCase(), myDatatypeToTemplate);
 		}
-
 		return retVal;
 	}
 
@@ -322,14 +296,21 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 	}
 
 	private static <T> List<INarrativeTemplate> getFromMap(
+			EnumSet<TemplateTypeEnum> theStyles, T theKey, ListMultimap<T, NarrativeTemplate> theMap) {
+		return getFromMap(theStyles, theKey, theMap, Collections.emptyList(), Collections.emptyList());
+	}
+
+	private static <T> List<INarrativeTemplate> getFromMap(
 			EnumSet<TemplateTypeEnum> theStyles,
 			T theKey,
 			ListMultimap<T, NarrativeTemplate> theMap,
-			Collection<String> theProfiles) {
+			Collection<String> theProfiles,
+			Collection<String> theCodes) {
 		return theMap.get(theKey).stream()
 				.filter(t -> theStyles.contains(t.getTemplateType()))
 				.filter(t -> theProfiles.isEmpty()
 						|| t.getAppliesToProfiles().stream().anyMatch(theProfiles::contains))
+				.filter(t -> theCodes.isEmpty() || t.getAppliesToCode().stream().anyMatch(theCodes::contains))
 				.collect(Collectors.toList());
 	}
 }

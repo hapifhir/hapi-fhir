@@ -15,7 +15,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -28,13 +27,14 @@ public class NarrativeTemplateManifestTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 
 	@Test
-	public void getTemplateByResourceName_NoProfile() throws IOException {
+	public void getTemplateByResourceName_NoProfile() {
 		INarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:manifest/manifest-test.properties");
 		List<INarrativeTemplate> template = manifest.getTemplateByResourceName(
 			ourCtx,
 			EnumSet.of(TemplateTypeEnum.THYMELEAF),
 			"Bundle",
-			Collections.emptyList());
+			Collections.emptyList(),
+			 Collections.emptyList());
 		ourLog.info("Templates: {}", template);
 		assertThat(template).hasSize(6);
 		assertThat(template.get(0).getTemplateText()).contains("template3");
@@ -43,30 +43,32 @@ public class NarrativeTemplateManifestTest {
 	}
 
 	@Test
-	public void getTemplateByResourceName_ByProfile_ExactMatch() throws IOException {
+	public void getTemplateByResourceName_ByProfile_ExactMatch() {
 		INarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:manifest/manifest-test.properties");
 		List<INarrativeTemplate> template = manifest.getTemplateByResourceName(
 			ourCtx,
 			EnumSet.of(TemplateTypeEnum.THYMELEAF),
 			"Bundle",
-			Lists.newArrayList("http://profile1"));
+			Lists.newArrayList("http://profile1"),
+			Collections.emptyList());
 		assertThat(template).hasSize(1);
 		assertThat(template.get(0).getTemplateText()).contains("template1");
 	}
 
 	@Test
-	public void getTemplateByResourceName_ByProfile_NoMatch() throws IOException {
+	public void getTemplateByResourceName_ByProfile_NoMatch() {
 		INarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:manifest/manifest-test.properties");
 		List<INarrativeTemplate> template = manifest.getTemplateByResourceName(
 			ourCtx,
 			EnumSet.of(TemplateTypeEnum.THYMELEAF),
 			"Bundle",
-			Lists.newArrayList("http://profile99"));
+			Lists.newArrayList("http://profile99"),
+			Collections.emptyList());
 		assertThat(template).isEmpty();
 	}
 
 	@Test
-	public void getTemplateByResourceName_WithFallback_ByProfile_ExactMatch() throws IOException {
+	public void getTemplateByResourceName_WithFallback_ByProfile_ExactMatch() {
 		INarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(
 			"classpath:manifest/manifest2-test.properties",
 			"classpath:manifest/manifest-test.properties"
@@ -75,15 +77,15 @@ public class NarrativeTemplateManifestTest {
 			ourCtx,
 			EnumSet.of(TemplateTypeEnum.THYMELEAF),
 			"Bundle",
-			Lists.newArrayList("http://profile1"));
+			Lists.newArrayList("http://profile1"),
+			Collections.emptyList());
 		assertThat(template).hasSize(2);
 		assertThat(template.get(0).getTemplateText()).contains("template2-1");
 		assertThat(template.get(1).getTemplateText()).contains("template1");
 	}
 
-
 	@Test
-	public void getTemplateByFragment() throws IOException {
+	public void getTemplateByFragment() {
 		INarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileContents(
 			ClasspathUtil.loadResource("classpath:manifest/fragment-test.properties")
 		);
@@ -93,27 +95,6 @@ public class NarrativeTemplateManifestTest {
 			"Foo");
 		assertThat(template).hasSize(1);
 		assertThat(template.get(0).getTemplateText()).contains("template1");
-	}
-
-	@Test
-	public void getTemplateByCode_ReturnsValid() throws IOException {
-		INarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:manifest/manifest-test.properties");
-		List<INarrativeTemplate> template = manifest.getTemplateByCode(
-			 ourCtx,
-			 EnumSet.of(TemplateTypeEnum.THYMELEAF),
-			 "http://loinc.org|8716-3");
-		assertThat(template).hasSize(1);
-		assertThat(template.get(0).getTemplateText()).contains("template6");
-	}
-
-	@Test
-	public void getTemplateByCode_NoMatch_ReturnsEmpty() throws IOException {
-		INarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:manifest/manifest-test.properties");
-		List<INarrativeTemplate> template = manifest.getTemplateByCode(
-			 ourCtx,
-			 EnumSet.of(TemplateTypeEnum.THYMELEAF),
-			 "http://loinc.org|BADCODE");
-		assertThat(template).isEmpty();
 	}
 
 	@ParameterizedTest
@@ -138,11 +119,13 @@ public class NarrativeTemplateManifestTest {
 	private static Stream<Arguments> getTemplateByElementValues() {
 		return Stream.of(
 			 Arguments.of(2, "http://loinc.org", "46240-8", null, "template"),
-			 Arguments.of(6, "http://loinc.org", "INVALID", null, "template"),
+			 Arguments.of(1, "http://loinc.org", "46240-8", "http://profile5", "template5"),
+			 Arguments.of(0, "http://loinc.org", "INVALID", null, null),
 			 Arguments.of(1, null, null, "http://profile1", "template1"),
 			 Arguments.of(1, null, null, "http://profile2", "template2"),
-			 Arguments.of(0, null, null, "http://profile3", null),
-			 Arguments.of(1, "http://loinc.org", "8716-3", "http://profile6", "template6")
+			 Arguments.of(0, null, null, "http://INVALID", null),
+			 Arguments.of(1, "http://loinc.org", "8716-3", "http://profile6", "template6"),
+			 Arguments.of(6, null, null, null, "template")
 		);
 	}
 

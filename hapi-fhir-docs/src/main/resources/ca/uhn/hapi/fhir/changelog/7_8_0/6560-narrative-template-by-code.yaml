@@ -2,4 +2,4 @@
 type: add
 issue: 6560
 title: Added the ability to retrieve narrative generation templates from a code system and code that is 
-    defined in the input bundle's `meta.tag` property."
+    defined in the input resource's `meta.tag` property."
