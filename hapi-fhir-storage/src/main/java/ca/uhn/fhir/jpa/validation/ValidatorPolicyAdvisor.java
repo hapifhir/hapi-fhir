@@ -31,6 +31,7 @@ import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.validation.instance.advisor.BasePolicyAdvisorForFullValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,6 +122,16 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 	@Override
 	public boolean isSuppressMessageId(String path, String messageId) {
 		return false;
+	}
+
+	@Override
+	public IValidationPolicyAdvisor getPolicyAdvisor() {
+		return new BasePolicyAdvisorForFullValidation(getReferencePolicy());
+	}
+
+	@Override
+	public IValidationPolicyAdvisor setPolicyAdvisor(IValidationPolicyAdvisor policyAdvisor) {
+		return null;
 	}
 
 	@Override
