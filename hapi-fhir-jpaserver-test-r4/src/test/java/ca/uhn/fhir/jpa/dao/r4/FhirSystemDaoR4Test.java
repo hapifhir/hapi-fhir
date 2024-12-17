@@ -61,6 +61,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.Condition;
@@ -1357,6 +1358,25 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertThat(e.getMessage()).contains("Transaction bundle contains multiple resources with ID: Patient/ABC");
 		}
 	}
+
+	@Test
+	public void testTransactionCreateCodeSystem() {
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setId("CodeSystem/A");
+		cs.setUrl("http://example.com/codesystem");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("1").setDisplay("1");
+		bb.addTransactionUpdateEntry(cs);
+
+		Bundle outcome = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		assertThat(outcome.getEntry()).hasSize(1);
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).endsWith("/_history/1");
+
+	}
+
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatch2() {
