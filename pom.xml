@@ -1087,6 +1087,10 @@
 
 		<!-- Clinical Reasoning & CQL Support -->
 		<clinical-reasoning.version>3.15.0</clinical-reasoning.version>
+		<!-- TODO: LD: this a TEMPORARY HACK to get around the fact that CR 3.15.0 is missing a pom file -->
+		<!-- This needs to be removed next time we do a CR bump -->
+		<!-- See: https://github.com/hapifhir/hapi-fhir/issues/6567 -->
+		<!-- Direct CQL dependencies -->
 		<cql.version>3.19.1</cql.version>
 
 		<!-- Site properties -->
@@ -2393,6 +2397,7 @@
 
 			<!-- TODO: LD: this a TEMPORARY HACK to get around the fact that CR 3.15.0 is missing a pom file -->
 			<!-- This needs to be removed next time we do a CR bump -->
+			<!-- See: https://github.com/hapifhir/hapi-fhir/issues/6567 -->
 			<!-- Direct CQL dependencies -->
 			<dependency>
 				<groupId>info.cqframework</groupId>
