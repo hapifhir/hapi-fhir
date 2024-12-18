@@ -153,6 +153,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.modifyColumn("20241023.50", "PACKAGE_DESC")
 				.nullable()
 				.withType(ColumnTypeEnum.STRING, 512);
+
+		// This will require a full table scan just to reduce a field size,
+		// so don't run it by default
+		version.onTable("HFJ_RESOURCE")
+				.modifyColumn("20241030.10", "SP_INDEX_STATUS")
+				.nullable()
+				.withType(ColumnTypeEnum.TINYINT)
+				.heavyweightSkipByDefault();
+		version.onTable("TRM_CONCEPT")
+				.modifyColumn("20241030.20", "INDEX_STATUS")
+				.nullable()
+				.withType(ColumnTypeEnum.TINYINT)
+				.heavyweightSkipByDefault();
 	}
 
 	/**
