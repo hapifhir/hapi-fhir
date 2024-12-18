@@ -78,7 +78,7 @@ observation.narrative=classpath:com/example/narrative/Observation.html
 vitalsigns.profile=http://hl7.org/fhir/StructureDefinition/vitalsigns
 vitalsigns.narrative=classpath:com/example/narrative/Observation_Vitals.html
 
-# You can also assign a template based on tag ID (Resource.meta.profile). Coding
+# You can also assign a template based on tag ID (Resource.meta.tag). Coding
 # must be represented as a code system and code delimited by a pipe character.
 allergyIntolerance.tag=http://loinc.org|48765-2
 allergyIntolerance.narrative=classpath:com/example/narrative/AllergyIntolerance.html
