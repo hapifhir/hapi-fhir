@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
@@ -29,6 +30,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,7 @@ public class HapiFhirJpaMigrationTasksTest {
 	private static final String MIGRATION_TABLE_NAME = "HFJ_FLY_MIGRATOR";
 	private final BasicDataSource myDataSource = newDataSource();
 	private final JdbcTemplate myJdbcTemplate = new JdbcTemplate(myDataSource);
+	private final DriverTypeEnum.ConnectionProperties myConnection = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myDataSource);
 
 	@RegisterExtension
 	private LoggingExtension myLoggingExtension = new LoggingExtension();
@@ -55,9 +58,37 @@ public class HapiFhirJpaMigrationTasksTest {
 	}
 
 	@Test
-	@Order(0)
-	public void testCreate() {
-		new HapiFhirJpaMigrationTasks(Collections.emptySet());
+	public void testCreate_NonPartitionedIds() throws SQLException {
+		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
+
+		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+		migrator.addTasks(tasks.getAllTasks(VersionEnum.values()));
+		migrator.createMigrationTableIfRequired();
+
+		MigrationResult outcome = migrator.migrate();
+		assertEquals(0, outcome.changes);
+		assertEquals(1, outcome.succeededTasks.size());
+		assertEquals(0, outcome.failedTasks.size());
+
+		Set<String> columns = JdbcUtils.getPrimaryKeyColumns(myConnection, "HFJ_RESOURCE");
+		assertThat(new ArrayList<>(columns)).asList().containsExactlyInAnyOrder("RES_ID");
+	}
+
+	@Test
+	public void testCreate_PartitionedIds() throws SQLException {
+		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Set.of(HapiFhirJpaMigrationTasks.FlagEnum.PARTITIONED_ID_MODE.getCommandLineValue()));
+
+		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+		migrator.addTasks(tasks.getAllTasks(VersionEnum.values()));
+		migrator.createMigrationTableIfRequired();
+
+		MigrationResult outcome = migrator.migrate();
+		assertEquals(0, outcome.changes);
+		assertEquals(1, outcome.succeededTasks.size());
+		assertEquals(0, outcome.failedTasks.size());
+
+		Set<String> columns = JdbcUtils.getPrimaryKeyColumns(myConnection, "HFJ_RESOURCE");
+		assertThat(new ArrayList<>(columns)).asList().containsExactlyInAnyOrder("RES_ID", "PARTITION_ID");
 	}
 
 	/**

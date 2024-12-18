@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +29,17 @@ import org.slf4j.LoggerFactory;
  *
  * @deprecated Use {@link HapiFhirPostgresDialect} instead
  */
-public class HapiFhirPostgres94Dialect extends PostgreSQLDialect {
+public class HapiFhirPostgres94Dialect extends PostgreSQLDialect implements IHapiFhirDialect {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirPostgres94Dialect.class);
 
 	public HapiFhirPostgres94Dialect() {
 		super();
 		ourLog.warn("The " + getClass() + " dialect is deprecated and will be removed in a future release. Use "
 				+ HapiFhirPostgresDialect.class.getName() + " instead");
+	}
+
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.POSTGRES_9_4;
 	}
 }

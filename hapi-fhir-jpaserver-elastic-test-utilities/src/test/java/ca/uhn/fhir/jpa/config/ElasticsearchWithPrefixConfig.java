@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.dao.r4.ElasticsearchPrefixTest;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
@@ -46,6 +47,11 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @Import(TestHSearchAddInConfig.PooledElasticsearchContainerConfig.class)
 public class ElasticsearchWithPrefixConfig {
+
+	@Bean
+	public PartitionSettings partitionSettings() {
+		return new PartitionSettings();
+	}
 
 	@Bean
 	public JpaStorageSettings storageSettings() {

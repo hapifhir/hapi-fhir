@@ -65,7 +65,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_VALUESET_URL",
-					columnNames = {"URL", "VER"})
+					columnNames = {"PARTITION_ID", "URL", "VER"})
 		},
 		indexes = {
 			// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index
@@ -102,12 +102,12 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 						nullable = false,
 						insertable = false,
 						updatable = false),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						nullable = false,
-				//						insertable = false,
-				//						updatable = false)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TRMVALUESET_RES"))
 	private ResourceTable myResource;

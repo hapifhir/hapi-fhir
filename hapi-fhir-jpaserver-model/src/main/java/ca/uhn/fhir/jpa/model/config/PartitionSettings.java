@@ -33,7 +33,7 @@ public class PartitionSettings {
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
 	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
-	private boolean myPartitionIdsInPrimaryKeys = false;
+	private boolean myDatabasePartitionMode = false;
 
 	public PartitionSettings() {
 		super();
@@ -47,8 +47,8 @@ public class PartitionSettings {
 	 *
 	 * @since 8.0.0
 	 */
-	public boolean isPartitionIdsInPrimaryKeys() {
-		return myPartitionIdsInPrimaryKeys;
+	public boolean isDatabasePartitionMode() {
+		return myDatabasePartitionMode;
 	}
 
 	/**
@@ -59,8 +59,8 @@ public class PartitionSettings {
 	 *
 	 * @since 8.0.0
 	 */
-	public void setPartitionIdsInPrimaryKeys(boolean thePartitionIdsInPrimaryKeys) {
-		myPartitionIdsInPrimaryKeys = thePartitionIdsInPrimaryKeys;
+	public void setDatabasePartitionMode(boolean theDatabasePartitionMode) {
+		myDatabasePartitionMode = theDatabasePartitionMode;
 	}
 
 	/**
@@ -244,21 +244,4 @@ public class PartitionSettings {
 		ALLOWED_UNQUALIFIED,
 	}
 
-	public enum BlockPatientCompartmentUpdateMode {
-		/**
-		 * Resource updates which would change resource's patient compartment are blocked.
-		 */
-		ALWAYS,
-
-		/**
-		 * Resource updates which would change resource's patient compartment are blocked
-		 * when Partition Selection Mode is PATIENT_ID
-		 */
-		DEFAULT,
-
-		/**
-		 * Resource updates which would change resource's patient compartment are allowed.
-		 */
-		NEVER,
-	}
 }

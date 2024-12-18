@@ -170,6 +170,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.jpa.util.PartitionedIdModeVerificationSvc;
 import ca.uhn.fhir.jpa.util.PersistenceContextProvider;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
@@ -932,5 +933,13 @@ public class JpaConfig {
 	@Bean
 	public IReplaceReferencesSvc replaceReferencesSvc(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		return new ReplaceReferencesSvcImpl(theFhirContext, theDaoRegistry);
+	}
+
+	@Bean
+	public PartitionedIdModeVerificationSvc partitionedIdModeVerificationSvc(
+			PartitionSettings thePartitionSettings,
+			HibernatePropertiesProvider theHibernatePropertiesProvider,
+			PlatformTransactionManager theTxManager) {
+		return new PartitionedIdModeVerificationSvc(thePartitionSettings, theHibernatePropertiesProvider, theTxManager);
 	}
 }

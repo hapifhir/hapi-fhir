@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ColumnAndNullable;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
+import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -48,7 +49,6 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
-import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
@@ -89,6 +89,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			+ "WHERE EXISTS (SELECT 1\n"
 			+ "	FROM collation_by_column\n"
 			+ "	WHERE my_collation != 'C')";
+
 	private final Set<FlagEnum> myFlags;
 
 	/**
@@ -129,8 +130,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init780();
 	}
 
+	protected Set<FlagEnum> getFlags() {
+		return myFlags;
+	}
+
 	protected void init780() {
-		final Builder version = forVersion(VersionEnum.V7_8_0);
+		Builder version = forVersion(VersionEnum.V7_8_0);
 
 		version.onTable("HFJ_RES_SEARCH_URL")
 				.dropForeignKey("20241008.100", "FK_RES_SEARCH_URL_RESOURCE", "HFJ_RESOURCE");
@@ -1474,11 +1479,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Postgres tuning.
 		String postgresTuningStatementsAll =
 				ClasspathUtil.loadResource("ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql");
-		List<String> postgresTuningStatements = Arrays.stream(postgresTuningStatementsAll.split("\\n"))
-				.map(StringUtils::trim)
-				.filter(StringUtils::isNotBlank)
-				.filter(t -> !t.startsWith("--"))
-				.collect(Collectors.toList());
+		List<String> postgresTuningStatements = SqlUtil.splitSqlFileIntoStatements(postgresTuningStatementsAll);
 		version.executeRawSqls("20230402.1", Map.of(DriverTypeEnum.POSTGRES_9_4, postgresTuningStatements));
 
 		// Use an unlimited length text column for RES_TEXT_VC
@@ -4255,10 +4256,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init330() { // 20180114 - 20180329
 		Builder version = forVersion(VersionEnum.V3_3_0);
 
+		String schemaPath = "/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned";
+		if (myFlags.contains(FlagEnum.PARTITIONED_ID_MODE)) {
+			schemaPath = "/ca/uhn/hapi/fhir/jpa/docs/database/partitioned";
+		}
 		version.initializeSchema(
-				"20180115.0",
-				new SchemaInitializationProvider(
-						"HAPI FHIR", "/ca/uhn/hapi/fhir/jpa/docs/database", "HFJ_RESOURCE", true));
+				"20180115.0", new SchemaInitializationProvider("HAPI FHIR", schemaPath, "HFJ_RESOURCE", true));
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 		version.startSectionWithMessage("Starting work on table: " + hfjResource.getTableName());
@@ -4272,12 +4275,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	public enum FlagEnum {
+		PARTITIONED_ID_MODE("partitioned-id-mode"),
+
 		NO_MIGRATE_HASHES("no-migrate-350-hashes");
 
 		private final String myCommandLineValue;
 
 		FlagEnum(String theCommandLineValue) {
 			myCommandLineValue = theCommandLineValue;
+		}
+
+		public String getCommandLineValue() {
+			return myCommandLineValue;
 		}
 
 		public static FlagEnum fromCommandLineValue(String theCommandLineValue) {

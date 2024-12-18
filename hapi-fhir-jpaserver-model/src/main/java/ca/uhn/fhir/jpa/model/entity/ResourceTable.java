@@ -92,7 +92,7 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = IDX_RES_TYPE_FHIR_ID,
-					columnNames = {"RES_TYPE", "FHIR_ID"})
+					columnNames = {"PARTITION_ID", "RES_TYPE", "FHIR_ID"})
 		},
 		indexes = {
 			// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
@@ -147,7 +147,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 			valueBridge = @ValueBridgeRef(type = JpaPidValueBridge.class))
 	private JpaPid myPid;
 
-	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = true, updatable = false)
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
 	private Integer myPartitionIdValue;
 
 	@Column(name = PartitionablePartitionId.PARTITION_DATE, nullable = true)

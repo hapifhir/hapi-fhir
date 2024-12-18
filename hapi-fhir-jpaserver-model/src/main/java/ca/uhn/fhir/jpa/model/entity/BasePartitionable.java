@@ -19,8 +19,10 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
+import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
 import java.io.Serializable;
@@ -35,6 +37,8 @@ import java.time.LocalDate;
 public abstract class BasePartitionable implements Serializable {
 
 	@SuppressWarnings("unused")
+	@Id
+	@PartitionedIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
 	Integer myPartitionIdValue;
 

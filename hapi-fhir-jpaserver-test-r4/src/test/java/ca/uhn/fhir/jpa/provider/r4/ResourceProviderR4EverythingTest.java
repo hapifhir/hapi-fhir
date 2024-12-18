@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+
+import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;

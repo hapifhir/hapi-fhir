@@ -49,7 +49,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	public void after() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.DEFAULT_TAG_STORAGE_MODE);
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
-		myPartitionSettings.setPartitionIdsInPrimaryKeys(new PartitionSettings().isPartitionIdsInPrimaryKeys());
+		myPartitionSettings.setDatabasePartitionMode(new PartitionSettings().isDatabasePartitionMode());
 
 		myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof MyPartitionInterceptor);
 	}
@@ -129,7 +129,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	void testSqlGeneration_WithPartitionJoins(SqlGenerationTestCase theTestCase) {
 		// include partition_id in joins
 		myPartitionSettings.setDefaultPartitionId(0);
-		myPartitionSettings.setPartitionIdsInPrimaryKeys(true);
+		myPartitionSettings.setDatabasePartitionMode(true);
 		myPartitionSettings.setPartitioningEnabled(true);
 
 		String sql = getSqlForRestQuery(theTestCase.restQuery);

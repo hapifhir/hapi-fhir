@@ -85,7 +85,7 @@ public class PartitionRunner {
 	public <T> void runInPartitionedThreads(List<T> theResourceIds, Consumer<List<T>> partitionConsumer) {
 
 		List<Callable<Void>> runnableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
-		if (runnableTasks.size() == 0) {
+		if (runnableTasks.isEmpty()) {
 			return;
 		}
 

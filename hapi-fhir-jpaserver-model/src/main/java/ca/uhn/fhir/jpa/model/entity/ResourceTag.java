@@ -51,7 +51,7 @@ import org.hibernate.annotations.GenericGenerator;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_RESTAG_TAGID",
-					columnNames = {"RES_ID", "TAG_ID"})
+					columnNames = {"PARTITION_ID", "RES_ID", "TAG_ID"})
 		})
 @IdClass(IdAndPartitionId.class)
 public class ResourceTag extends BaseTag {
@@ -75,12 +75,12 @@ public class ResourceTag extends BaseTag {
 						insertable = false,
 						updatable = false,
 						nullable = true),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = false,
-				//						updatable = false,
-				//						nullable = true)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true)
 			},
 			foreignKey = @ForeignKey(name = "FK_RESTAG_RESOURCE"))
 	private ResourceTable myResource;
