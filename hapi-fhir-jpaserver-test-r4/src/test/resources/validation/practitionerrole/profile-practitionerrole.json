@@ -1,0 +1,104 @@
+{
+  "resourceType": "StructureDefinition",
+  "text": {
+    "status": "empty"
+  },
+  "id": "example-profile-PractitionerRole",
+  "url": "http://example.com/fhir/StructureDefinition/profile-PractitionerRole",
+  "version": "4.0.1",
+  "name": "PractitionerRole",
+  "title": "PractitionerRole (Submission)",
+  "status": "active",
+  "fhirVersion": "4.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "PractitionerRole",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/PractitionerRole",
+  "derivation": "constraint",
+  "differential": {
+    "element":  [
+      {
+        "id": "PractitionerRole",
+        "path": "PractitionerRole",
+        "mustSupport": true
+      },
+      {
+        "id": "PractitionerRole.meta",
+        "path": "PractitionerRole.meta",
+        "min": 1,
+        "mustSupport": true
+      },
+      {
+        "id": "PractitionerRole.meta.profile",
+        "path": "PractitionerRole.meta.profile",
+        "min": 1,
+        "mustSupport": true
+      },
+      {
+        "id": "PractitionerRole.telecom",
+        "path": "PractitionerRole.telecom",
+        "slicing": {
+          "discriminator":  [
+            {
+              "type": "value",
+              "path": "system"
+            }
+          ],
+          "rules": "open"
+        },
+        "max": "2",
+        "mustSupport": true
+      },
+      {
+        "id": "PractitionerRole.telecom:TelecomPhone",
+        "path": "PractitionerRole.telecom",
+        "sliceName": "TelecomPhone",
+        "max": "1",
+        "mustSupport": true
+      },
+      {
+        "id": "PractitionerRole.telecom:TelecomPhone.system",
+        "path": "PractitionerRole.telecom.system",
+        "min": 1,
+        "fixedCode": "phone",
+        "mustSupport": true
+      },
+      {
+        "id": "PractitionerRole.telecom:TelecomPhone.value",
+        "path": "PractitionerRole.telecom.value",
+        "min": 1,
+        "mustSupport": true
+      },
+      {
+        "id": "PractitionerRole.telecom:TelecomPhone.use",
+        "path": "PractitionerRole.telecom.use",
+        "mustSupport": true
+      },
+      {
+        "id": "PractitionerRole.telecom:TelecomFax",
+        "path": "PractitionerRole.telecom",
+        "sliceName": "TelecomFax",
+        "max": "1",
+        "mustSupport": true
+      },
+      {
+        "id": "PractitionerRole.telecom:TelecomFax.system",
+        "path": "PractitionerRole.telecom.system",
+        "min": 1,
+        "fixedCode": "fax",
+        "mustSupport": true
+      },
+      {
+        "id": "PractitionerRole.telecom:TelecomFax.value",
+        "path": "PractitionerRole.telecom.value",
+        "min": 1,
+        "mustSupport": true
+      },
+      {
+        "id": "PractitionerRole.telecom:TelecomFax.use",
+        "path": "PractitionerRole.telecom.use",
+        "mustSupport": true
+      }
+    ]
+  }
+}

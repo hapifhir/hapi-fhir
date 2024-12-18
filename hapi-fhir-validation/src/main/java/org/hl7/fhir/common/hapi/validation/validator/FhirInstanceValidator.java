@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -33,7 +34,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean noTerminologyChecks = false;
 	private boolean noExtensibleWarnings = false;
 	private boolean noBindingMsgSuppressed = false;
-	private volatile VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
+	private VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
 	private boolean errorForUnknownProfiles = true;
 
 	private boolean assumeValidRestReferences;
@@ -249,6 +250,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
 		return wrappedWorkerContext;
+	}
+
+	@VisibleForTesting
+	public VersionSpecificWorkerContextWrapper getWorkerContext() {
+		return myWrappedWorkerContext;
 	}
 
 	public IValidationPolicyAdvisor getValidatorPolicyAdvisor() {
