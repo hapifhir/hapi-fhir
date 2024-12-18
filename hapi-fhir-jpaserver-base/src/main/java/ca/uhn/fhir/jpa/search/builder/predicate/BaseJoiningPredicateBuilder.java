@@ -111,6 +111,7 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 		return inResourceIds;
 	}
 
+	//TODO C: This code appears to kinda try to do what we are anticipating, by swapping out the `null` for the actual default partition, but is not widely used.
 	public static List<Integer> replaceDefaultPartitionIdIfNonNull(
 			PartitionSettings thePartitionSettings, List<Integer> thePartitionIds) {
 		List<Integer> partitionIds = thePartitionIds;

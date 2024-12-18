@@ -7,11 +7,9 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,6 +35,8 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 	static final int UNKNOWN_PARTITION_ID = 1_000_000;
 	static final String UNKNOWN_PARTITION_NAME = "UNKNOWN";
 
+//	static final int CUSTOM_DEFAULT_PARTITION_ID = 666;
+
 	@Autowired
 	IPartitionDao myPartitionDao;
 	@Autowired
@@ -49,6 +49,7 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void before(){
 		myPartitionDao.deleteAll();
+		myPartitionSettings.setDefaultPartitionId(null);
 		myPartitionSettings.setPartitioningEnabled(true);
 
 		myPatient = new Patient();
