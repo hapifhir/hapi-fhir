@@ -22,12 +22,15 @@ package ca.uhn.fhir.batch2.jobs.merge;
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.*;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
+import org.hl7.fhir.r4.model.Task;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -39,7 +42,8 @@ public class MergeAppCtx {
 	public JobDefinition<MergeJobParameters> merge(
 			ReplaceReferencesQueryIdsStep<MergeJobParameters> theMergeQueryIds,
 			ReplaceReferenceUpdateStep<MergeJobParameters> theMergeUpdateStep,
-			MergeUpdateTaskReducerStep theMergeUpdateTaskReducerStep) {
+			MergeUpdateTaskReducerStep theMergeUpdateTaskReducerStep,
+			MergeErrorHandler mergeErrorHandler) {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(JOB_MERGE)
 				.setJobDescription("Merge Resources")
@@ -61,24 +65,31 @@ public class MergeAppCtx {
 						"Waits for replace reference work to complete and updates Task.",
 						ReplaceReferenceResultsJson.class,
 						theMergeUpdateTaskReducerStep)
+				.errorHandler(mergeErrorHandler)
 				.build();
 	}
 
 	@Bean
 	public ReplaceReferencesQueryIdsStep<MergeJobParameters> mergeQueryIdsStep(
 			HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
-		return new ReplaceReferencesQueryIdsStep(theHapiTransactionService, theBatch2DaoSvc);
+		return new ReplaceReferencesQueryIdsStep<>(theHapiTransactionService, theBatch2DaoSvc);
 	}
 
 	@Bean
 	public ReplaceReferenceUpdateStep<MergeJobParameters> mergeUpdateStep(
 			FhirContext theFhirContext, ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc) {
-		return new ReplaceReferenceUpdateStep(theFhirContext, theReplaceReferencesPatchBundleSvc);
+		return new ReplaceReferenceUpdateStep<>(theFhirContext, theReplaceReferencesPatchBundleSvc);
 	}
 
 	@Bean
 	public MergeUpdateTaskReducerStep mergeUpdateTaskStep(
 			DaoRegistry theDaoRegistry, IHapiTransactionService theHapiTransactionService) {
 		return new MergeUpdateTaskReducerStep(theDaoRegistry, theHapiTransactionService);
+	}
+
+	@Bean
+	public MergeErrorHandler mergeErrorHandler(DaoRegistry theDaoRegistry, Batch2TaskHelper theBatch2TaskHelper) {
+		IFhirResourceDao<Task> taskDao = theDaoRegistry.getResourceDao(Task.class);
+		return new MergeErrorHandler(theBatch2TaskHelper, taskDao);
 	}
 }

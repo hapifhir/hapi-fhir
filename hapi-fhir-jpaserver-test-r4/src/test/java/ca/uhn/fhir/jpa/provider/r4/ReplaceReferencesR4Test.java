@@ -6,12 +6,10 @@ import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -21,8 +19,6 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper.EXPECTED_SMALL_BATCHES;
-import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.HAPI_BATCH_JOB_ID_SYSTEM;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,15 +72,9 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private JobInstance awaitJobCompletion(Task task) {
-		assertThat(task.getIdentifier()).hasSize(1)
-			.element(0)
-			.extracting(Identifier::getSystem)
-			.isEqualTo(HAPI_BATCH_JOB_ID_SYSTEM);
-
-		String jobId = task.getIdentifierFirstRep().getValue();
+		String jobId = myTestHelper.getJobIdFromTask(task);
 		return myBatch2JobHelper.awaitJobCompletion(jobId);
 	}
-
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})

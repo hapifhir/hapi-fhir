@@ -11,8 +11,10 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.jena.base.Sys;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
@@ -31,6 +33,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
@@ -120,7 +123,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		Parameters outParams = callMergeOperation(inParameters, isAsync);
 
 		// validate
-		// in async mode, there will be an additional task in the output params
+		// in async mode, there will be an additional task resource in the output params
 		assertThat(outParams.getParameter()).hasSizeBetween(3, 4);
 
 		// Assert input
@@ -144,12 +147,11 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
 			assertNull(task.getIdElement().getVersionIdPart());
 			ourLog.info("Got task {}", task.getId());
-			await().until(() -> {
-				myBatch2JobHelper.runMaintenancePass();
-				return myTestHelper.taskCompleted(task.getIdElement());
-			});
+			String jobId = myTestHelper.getJobIdFromTask(task);
+			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
+			assertThat(taskWithOutput.getStatus()).isEqualTo(Task.TaskStatus.COMPLETED);
 			ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
 
 			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
@@ -223,8 +225,46 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	// FIXME ED test case where another resource that links to source was added while the batch was running
-	// so the source can't be deleted
+	@Test
+	void testMerge_SourceResourceCannotBeDeletedBecauseAnotherResourceReferencingSourceWasAddedWhileJobIsRunning_JobFails() {
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
+		myTestHelper.setSourceAndTarget(inParams);
+		inParams.deleteSource = true;
+		//using a small batch size that would result in multiple chunks to ensure that
+		//the job runs a bit slowly so that we have sometime to add a resource that references the source
+		//after the first step
+		inParams.batchSize = 5;
+		Parameters inParameters = inParams.asParametersResource();
+
+		// exec
+		Parameters outParams = callMergeOperation(inParameters, true);
+		Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+		assertNull(task.getIdElement().getVersionIdPart());
+		ourLog.info("Got task {}", task.getId());
+		String jobId = myTestHelper.getJobIdFromTask(task);
+
+		// wait for first step of the job to finish
+		await()
+			.until(() -> {
+				myBatch2JobHelper.runMaintenancePass();
+				String currentGatedStepId = myJobCoordinator.getInstance(jobId).getCurrentGatedStepId();
+				return !"query-ids".equals(currentGatedStepId);
+			});
+
+		Encounter enc = new Encounter();
+		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
+		enc.getSubject().setReferenceElement(myTestHelper.getSourcePatientId());
+		myEncounterDao.create(enc, mySrd).getId().toUnqualifiedVersionless();
+
+		myBatch2JobHelper.awaitJobFailure(jobId);
+
+
+		await().until(() -> {
+			Task taskAfterJobFailure = myTaskDao.read(task.getIdElement().toVersionless(), mySrd);
+			ourLog.info("Check if Task status is FAILED: {}", taskAfterJobFailure.getStatus());
+			return Task.TaskStatus.FAILED.equals(taskAfterJobFailure.getStatus());
+		});
+	}
 
 	@ParameterizedTest
 	@CsvSource({

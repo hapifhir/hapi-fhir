@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server Test Utilities
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.replacereferences;
 
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
@@ -47,6 +66,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.HAPI_BATCH_JOB_ID_SYSTEM;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -198,10 +218,14 @@ public class ReplaceReferencesTestHelper {
 				.collect(Collectors.toSet());
 	}
 
-	public Boolean taskCompleted(IdType theTaskId) {
-		Task updatedTask = myTaskDao.read(theTaskId, mySrd);
-		ourLog.info("Task {} status is {}", theTaskId, updatedTask.getStatus());
-		return updatedTask.getStatus() == Task.TaskStatus.COMPLETED;
+	public String getJobIdFromTask(Task task) {
+		assertThat(task.getIdentifier())
+				.hasSize(1)
+				.element(0)
+				.extracting(Identifier::getSystem)
+				.isEqualTo(HAPI_BATCH_JOB_ID_SYSTEM);
+
+		return task.getIdentifierFirstRep().getValue();
 	}
 
 	public Parameters callReplaceReferences(IGenericClient theFhirClient, boolean theIsAsync) {
@@ -312,6 +336,7 @@ public class ReplaceReferencesTestHelper {
 		public Patient resultPatient;
 		public Boolean preview;
 		public Boolean deleteSource;
+		public Integer batchSize;
 
 		public Parameters asParametersResource() {
 			Parameters inParams = new Parameters();
@@ -335,6 +360,9 @@ public class ReplaceReferencesTestHelper {
 			}
 			if (deleteSource != null) {
 				inParams.addParameter().setName("delete-source").setValue(new BooleanType(deleteSource));
+			}
+			if (batchSize != null) {
+				inParams.addParameter().setName("batch-size").setValue(new IntegerType(batchSize));
 			}
 			return inParams;
 		}

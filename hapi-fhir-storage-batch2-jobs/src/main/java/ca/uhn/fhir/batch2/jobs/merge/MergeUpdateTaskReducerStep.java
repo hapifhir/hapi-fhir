@@ -49,7 +49,6 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			throws JobExecutionFailedException {
 
 		MergeJobParameters mergeJobParameters = theStepExecutionDetails.getParameters();
-
 		SystemRequestDetails requestDetails =
 				SystemRequestDetails.forRequestPartitionId(mergeJobParameters.getPartitionId());
 

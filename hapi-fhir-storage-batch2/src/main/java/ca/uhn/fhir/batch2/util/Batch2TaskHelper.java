@@ -20,8 +20,10 @@
 package ca.uhn.fhir.batch2.util;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.jobs.parameters.BatchJobParametersWithTaskId;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -50,5 +52,34 @@ public class Batch2TaskHelper {
 		theTaskDao.update(task, theRequestDetails);
 
 		return task;
+	}
+
+	public void updateTaskStatusOnJobCompletion(
+			IFhirResourceDao<Task> theTaskDao,
+			RequestDetails theRequestDetails,
+			JobCompletionDetails<? extends BatchJobParametersWithTaskId> theJobCompletionDetails) {
+
+		BatchJobParametersWithTaskId jobParams = theJobCompletionDetails.getParameters();
+
+		StatusEnum jobStatus = theJobCompletionDetails.getInstance().getStatus();
+		Task.TaskStatus taskStatus;
+		switch (jobStatus) {
+			case COMPLETED:
+				taskStatus = Task.TaskStatus.COMPLETED;
+				break;
+			case FAILED:
+				taskStatus = Task.TaskStatus.FAILED;
+				break;
+			case CANCELLED:
+				taskStatus = Task.TaskStatus.CANCELLED;
+				break;
+			default:
+				throw new IllegalStateException(String.format(
+						"Cannot handle job status '%s'. COMPLETED, FAILED or CANCELLED were expected", jobStatus));
+		}
+
+		Task task = theTaskDao.read(jobParams.getTaskId().asIdDt(), theRequestDetails);
+		task.setStatus(taskStatus);
+		theTaskDao.update(task, theRequestDetails);
 	}
 }
