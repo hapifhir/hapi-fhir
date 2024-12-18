@@ -148,6 +148,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 
 			List<String> codes = resource.getMeta().getTag().stream()
 					.filter(Objects::nonNull)
+					.filter(f -> StringUtils.isNotBlank(f.getSystem()) && StringUtils.isNotBlank(f.getCode()))
 					.map(t -> t.getSystem() + "|" + t.getCode())
 					.collect(Collectors.toList());
 

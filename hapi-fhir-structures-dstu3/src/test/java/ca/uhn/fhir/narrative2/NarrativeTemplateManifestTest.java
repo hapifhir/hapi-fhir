@@ -97,6 +97,43 @@ public class NarrativeTemplateManifestTest {
 		assertThat(template.get(0).getTemplateText()).contains("template1");
 	}
 
+	@Test
+	public void getTemplateByElement_MatchOnLastCode() {
+		BundleBuilder bundleBuilder = new BundleBuilder(FhirContext.forDstu3Cached());
+		IBaseBundle bundle = bundleBuilder.getBundle();
+
+		bundle.getMeta().addTag().setSystem("http://loinc.org").setCode("12345");
+		bundle.getMeta().addTag().setSystem("http://loinc.org").setCode("67890");
+		bundle.getMeta().addTag().setSystem("http://loinc.org").setCode("8716-3");
+
+		INarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(
+			 "classpath:manifest/manifest-test.properties");
+		List<INarrativeTemplate> template = manifest.getTemplateByElement(
+			 ourCtx,
+			 EnumSet.of(TemplateTypeEnum.THYMELEAF),
+			 bundle);
+
+		assertThat(template).hasSize(1);
+		assertThat(template.get(0).getTemplateText()).contains("template6");
+	}
+
+	@ParameterizedTest
+	@MethodSource("getInvalidCodeSystemAndCode")
+	public void getTemplateByElement_InvalidCode_GetsIgnored(String theCodeSystem, String theCode) {
+		final BundleBuilder bundleBuilder = new BundleBuilder(FhirContext.forDstu3Cached());
+		bundleBuilder.setMetaField("tag", new Coding(theCodeSystem, theCode, ""));
+
+		INarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(
+			 "classpath:manifest/manifest-test.properties");
+		List<INarrativeTemplate> template = manifest.getTemplateByElement(
+			 ourCtx,
+			 EnumSet.of(TemplateTypeEnum.THYMELEAF),
+			 bundleBuilder.getBundle());
+
+		// should return 6 profiles since invalid codes will be filtered
+		assertThat(template).hasSize(6);
+	}
+
 	@ParameterizedTest
 	@MethodSource("getTemplateByElementValues")
 	public void getTemplateByElement(int theTemplateListCount, String theSystem,
@@ -114,6 +151,19 @@ public class NarrativeTemplateManifestTest {
 		for(int i=0; i<theTemplateListCount; i++) {
 			assertThat(template.get(i).getTemplateText()).contains(theContents);
 		}
+	}
+
+	private static Stream<Arguments> getInvalidCodeSystemAndCode() {
+		return Stream.of(
+			 Arguments.of("http://loinc.org", null),
+			 Arguments.of(null, "46240-8"),
+			 Arguments.of("", "46240-8"),
+			 Arguments.of("http://loinc.org", ""),
+			 Arguments.of(null, ""),
+			 Arguments.of("", null),
+			 Arguments.of("", ""),
+			 Arguments.of(null, null)
+		);
 	}
 
 	private static Stream<Arguments> getTemplateByElementValues() {
