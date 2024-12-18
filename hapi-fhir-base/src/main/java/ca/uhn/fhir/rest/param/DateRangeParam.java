@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -182,11 +183,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	}
 
 	private void addParam(DateParam theParsed) throws InvalidRequestException {
-		if (theParsed.getPrefix() == null) {
-			theParsed.setPrefix(EQUAL);
-		}
+//		if (theParsed.getPrefix() == null) {
+//			theParsed.setPrefix(EQUAL);
+//		}
 
-		switch (theParsed.getPrefix()) {
+		ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(theParsed.getPrefix(), EQUAL);
+
+		switch (prefix) {
 			case NOT_EQUAL:
 			case EQUAL:
 				if (myLowerBound != null || myUpperBound != null) {
