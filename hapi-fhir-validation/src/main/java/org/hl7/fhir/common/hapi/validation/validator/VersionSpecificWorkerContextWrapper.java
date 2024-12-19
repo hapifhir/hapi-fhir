@@ -497,7 +497,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		// Ensure snapshot is present
 		StructureDefinition canonicalSd = (StructureDefinition) canonical;
-		if (canonicalSd.getSnapshot().isEmpty()) {
+		if (canonicalSd != null && canonicalSd.getSnapshot().isEmpty()) {
 			ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
 			fetched = myValidationSupportContext
 					.getRootValidationSupport()
