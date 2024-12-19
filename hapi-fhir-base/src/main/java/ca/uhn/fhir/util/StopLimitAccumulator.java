@@ -36,13 +36,13 @@ public class StopLimitAccumulator<T> {
 		isTruncated = theIsTruncated;
 	}
 
-	public static <T> StopLimitAccumulator<T> fromStreamAndLimit(@Nonnull Stream<T> thePidStream, long theLimit) {
+	public static <T> StopLimitAccumulator<T> fromStreamAndLimit(@Nonnull Stream<T> theItemStream, long theLimit) {
 		assert theLimit > 0;
 		AtomicBoolean isBeyondLimit = new AtomicBoolean(false);
 		List<T> accumulator = new ArrayList<>();
 
-		thePidStream
-				.limit(theLimit + 1) // Fetch one extra item to see if there are more items past our limit
+		theItemStream
+				.limit(theLimit + 1) // Fetch one extra item to see if there are any more items past our limit
 				.forEach(item -> {
 					if (accumulator.size() < theLimit) {
 						accumulator.add(item);

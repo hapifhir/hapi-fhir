@@ -25,6 +25,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 
+/**
+ * See <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
+ */
 public abstract class MergeOperationInputParameters {
 
 	private List<CanonicalIdentifier> mySourceResourceIdentifiers;
