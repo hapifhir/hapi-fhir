@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 
 import java.util.function.Supplier;
 
@@ -33,7 +34,6 @@ public class PartitionAwareSupplier {
 	private final HapiTransactionService myTransactionService;
 	private final RequestDetails myRequestDetails;
 
-	@Nonnull
 	public PartitionAwareSupplier(HapiTransactionService theTxService, RequestDetails theRequestDetails) {
 		myTransactionService = theTxService;
 		myRequestDetails = theRequestDetails;
@@ -41,6 +41,9 @@ public class PartitionAwareSupplier {
 
 	@Nonnull
 	public <T> T supplyInPartitionedContext(Supplier<T> theResourcePersistentIdSupplier) {
-		return myTransactionService.withRequest(myRequestDetails).execute(tx -> theResourcePersistentIdSupplier.get());
+		T retVal =
+				myTransactionService.withRequest(myRequestDetails).execute(tx -> theResourcePersistentIdSupplier.get());
+		Validate.notNull(retVal, "No resource persistent id supplied by supplier %s", theResourcePersistentIdSupplier);
+		return retVal;
 	}
 }

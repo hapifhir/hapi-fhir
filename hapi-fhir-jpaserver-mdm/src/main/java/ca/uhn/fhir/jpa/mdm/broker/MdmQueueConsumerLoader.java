@@ -55,9 +55,13 @@ public class MdmQueueConsumerLoader {
 		startListeningToMdmChannel();
 	}
 
+	protected ChannelConsumerSettings getChannelConsumerSettings() {
+		return new ChannelConsumerSettings();
+	}
+
 	private void startListeningToMdmChannel() {
 		if (myMdmChannel == null) {
-			ChannelConsumerSettings config = new ChannelConsumerSettings();
+			ChannelConsumerSettings config = getChannelConsumerSettings();
 
 			config.setConcurrentConsumers(myMdmSettings.getConcurrentConsumers());
 

@@ -36,8 +36,6 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
@@ -50,7 +48,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceIdPredicateBuilder.class);
 
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;

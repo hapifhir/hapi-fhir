@@ -25,6 +25,7 @@ import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -184,6 +185,7 @@ public class MdmSurvivorshipSvcImplTest {
 
 		// test
 		Patient goldenPatientRebuilt = mySvc.rebuildGoldenResourceWithSurvivorshipRules(
+			new SystemRequestDetails(),
 			goldenPatient,
 			createTransactionContext()
 		);

@@ -49,9 +49,7 @@ public class DeleteCodeSystemVersionStep
 			throws JobExecutionFailedException {
 		CodeSystemVersionPIDResult versionPidResult = theStepExecutionDetails.getData();
 
-		long versionId = versionPidResult.getCodeSystemVersionPID();
-
-		myITermCodeSystemSvc.deleteCodeSystemVersion(versionId);
+		myITermCodeSystemSvc.deleteCodeSystemVersion(versionPidResult.getCodeSystemVersionPID());
 
 		theDataSink.accept(versionPidResult);
 		return RunOutcome.SUCCESS;
