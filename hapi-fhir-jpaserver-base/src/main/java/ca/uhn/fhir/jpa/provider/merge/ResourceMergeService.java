@@ -251,8 +251,10 @@ public class ResourceMergeService {
 			Integer numberOfRefs = myReplaceReferencesSvc.countResourcesReferencingResource(
 					theSourceResource.getIdElement().toVersionless(), theRequestDetails);
 			if (numberOfRefs > theMergeOperationParameters.getBatchSize()) {
-				ourLog.info("{} resources need to be updated. This exceeds the batch size of {}. Switching to asynchronous processing; will return a Task in the response that can be used to track progress.",
-					numberOfRefs, theMergeOperationParameters.getBatchSize());
+				ourLog.info(
+						"{} resources need to be updated. This exceeds the batch size of {}. Switching to asynchronous processing; will return a Task in the response that can be used to track progress.",
+						numberOfRefs,
+						theMergeOperationParameters.getBatchSize());
 				doMergeAsync(
 						theMergeOperationParameters,
 						theSourceResource,

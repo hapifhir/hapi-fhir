@@ -30,7 +30,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 public interface IReplaceReferencesSvc {
 
 	IBaseParameters replaceReferences(
-		ReplaceReferencesRequest theReplaceReferencesRequest, RequestDetails theRequestDetails);
+			ReplaceReferencesRequest theReplaceReferencesRequest, RequestDetails theRequestDetails);
 
 	Integer countResourcesReferencingResource(IIdType theResourceId, RequestDetails theRequestDetails);
 }

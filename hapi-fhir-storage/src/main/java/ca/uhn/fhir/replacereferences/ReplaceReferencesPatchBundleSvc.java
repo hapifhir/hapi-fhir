@@ -86,7 +86,7 @@ public class ReplaceReferencesPatchBundleSvc {
 	}
 
 	private @Nonnull Parameters buildPatchParams(
-		ReplaceReferencesRequest theReplaceReferencesRequest, IBaseResource referencingResource) {
+			ReplaceReferencesRequest theReplaceReferencesRequest, IBaseResource referencingResource) {
 		Parameters params = new Parameters();
 
 		myFhirContext.newTerser().getAllResourceReferences(referencingResource).stream()
