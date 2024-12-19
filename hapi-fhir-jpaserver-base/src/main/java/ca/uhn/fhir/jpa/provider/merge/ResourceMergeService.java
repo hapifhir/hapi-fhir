@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
-import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
+import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
