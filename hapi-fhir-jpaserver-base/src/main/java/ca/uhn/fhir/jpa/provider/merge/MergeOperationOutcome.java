@@ -22,6 +22,9 @@ package ca.uhn.fhir.jpa.provider.merge;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+/**
+ * See <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
+ */
 public class MergeOperationOutcome {
 	private IBaseOperationOutcome myOperationOutcome;
 	private int myHttpStatusCode;

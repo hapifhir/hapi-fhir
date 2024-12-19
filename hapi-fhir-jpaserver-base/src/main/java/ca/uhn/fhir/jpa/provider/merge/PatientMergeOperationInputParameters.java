@@ -25,6 +25,9 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_TARGET_PATIENT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER;
 
+/**
+ * See <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
+ */
 public class PatientMergeOperationInputParameters extends MergeOperationInputParameters {
 	public PatientMergeOperationInputParameters(int theBatchSize) {
 		super(theBatchSize);

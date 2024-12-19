@@ -20,7 +20,11 @@
 package ca.uhn.fhir.batch2.jobs.merge;
 
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.replacereferences.*;
+import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencePatchOutcomeJson;
+import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
+import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceUpdateStep;
+import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesErrorHandler;
+import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesQueryIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;

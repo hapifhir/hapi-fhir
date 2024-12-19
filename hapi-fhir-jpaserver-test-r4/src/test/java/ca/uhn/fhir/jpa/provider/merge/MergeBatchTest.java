@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 public class MergeBatchTest extends BaseJpaR4Test {
