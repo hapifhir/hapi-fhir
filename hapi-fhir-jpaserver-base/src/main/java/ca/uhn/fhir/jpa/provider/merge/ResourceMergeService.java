@@ -312,7 +312,7 @@ public class ResourceMergeService {
 			Patient theTargetResource,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome,
-			RequestPartitionId partitionId) {
+			RequestPartitionId thePartitionId) {
 
 		MergeJobParameters mergeJobParameters = new MergeJobParameters();
 		if (theMergeOperationParameters.getResultResource() != null) {
@@ -326,7 +326,7 @@ public class ResourceMergeService {
 				new FhirIdJson(theSourceResource.getIdElement().toVersionless()));
 		mergeJobParameters.setTargetId(
 				new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
-		mergeJobParameters.setPartitionId(partitionId);
+		mergeJobParameters.setPartitionId(thePartitionId);
 
 		Task task = myBatch2TaskHelper.startJobAndCreateAssociatedTask(
 				myTaskDao, theRequestDetails, myJobCoordinator, JOB_MERGE, mergeJobParameters);
