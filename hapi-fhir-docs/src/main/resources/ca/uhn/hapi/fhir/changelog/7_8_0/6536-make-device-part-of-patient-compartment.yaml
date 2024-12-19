@@ -1,0 +1,15 @@
+---
+type: add
+jira: SMILE-9260
+backport: 7.6.1
+title: "The `patient` search parameter for the `Device` resource has been added to the Patient Compartment for the purposes of: 
+
+- AuthorizationInterceptor
+- SearchNarrowingInterceptor
+- $everything Operation
+- Patient/Group Bulk Export
+
+This means that a search for $everything on a patient will return devices associated to this patient. This used to be possible
+via the [Advanced Compartment Authorization](/hapi-fhir/docs/security/authorization_interceptor.html#advanced-compartment-authorization), but that would only apply to authorization, 
+and not these other use cases. This solution adds this Search Parameter to all places where compartment membership would be checked. 
+"

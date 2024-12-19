@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
@@ -100,6 +101,7 @@ public class SearchNarrowingInterceptorTest {
 	private RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx)
 		.registerProvider(new DummyObservationResourceProvider())
 		.registerProvider(new DummyPatientResourceProvider())
+		.registerProvider(new DummyDeviceResourceProvider())
 		.registerProvider(new DummySystemProvider())
 		.withPagingProvider(new FifoMemoryPagingProvider(100));
 
@@ -281,6 +283,42 @@ public class SearchNarrowingInterceptorTest {
 
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertNull(ourLastCodeParam);
+	}
+
+	@Test
+	public void testNarrowCompartment_DevicesByPatientContext_ClientRequestedNoParams() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		myClient
+			 .search()
+			 .forResource("Device")
+			 .execute();
+
+		assertEquals("Device.search", ourLastHitMethod);
+		assertNull(ourLastIdParam);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertThat(toStrings(ourLastPatientParam)).containsExactly("Patient/123,Patient/456");
+	}
+
+	@Test
+	public void testNarrowCompartment_DevicesByPatientContext_ClientRequestedWithParams() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123");
+
+		myClient
+			 .search()
+			 .byUrl("Device?patient=Patient/123")
+			 .execute();
+
+		assertEquals("Device.search", ourLastHitMethod);
+		assertNull(ourLastIdParam);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertThat(toStrings(ourLastPatientParam)).containsExactly("Patient/123");
 	}
 
 	@Test
@@ -950,7 +988,110 @@ public class SearchNarrowingInterceptorTest {
 			return new MethodOutcome(new IdType("Patient/123"), true);
 		}
 
+		@SuppressWarnings("unused")
+		public static class DummyObservationResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<? extends IBaseResource> getResourceType() {
+				return Observation.class;
+			}
+
+
+			@Search()
+			public List<Resource> search(
+				 @OptionalParam(name = "_id") TokenAndListParam theIdParam,
+				 @OptionalParam(name = Observation.SP_SUBJECT) ReferenceAndListParam theSubjectParam,
+				 @OptionalParam(name = Observation.SP_PATIENT) ReferenceAndListParam thePatientParam,
+				 @OptionalParam(name = Observation.SP_PERFORMER) ReferenceAndListParam thePerformerParam,
+				 @OptionalParam(name = Observation.SP_CODE) TokenAndListParam theCodeParam
+			) {
+				ourLastHitMethod = "Observation.search";
+				ourLastIdParam = theIdParam;
+				ourLastSubjectParam = theSubjectParam;
+				ourLastPatientParam = thePatientParam;
+				ourLastPerformerParam = thePerformerParam;
+				ourLastCodeParam = theCodeParam;
+				return ourReturn;
+			}
+
+			@Create
+			public MethodOutcome create(@ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl) {
+				ourLastHitMethod = "Observation.create";
+				ourLastConditionalUrl = theConditionalUrl;
+				return new MethodOutcome(new IdType("Observation/123"), true);
+			}
+
+			@Update
+			public MethodOutcome update(@ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl) {
+				ourLastHitMethod = "Observation.update";
+				ourLastConditionalUrl = theConditionalUrl;
+				return new MethodOutcome(new IdType("Observation/123"), true);
+			}
+
+			@Delete
+			public MethodOutcome delete(@IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl) {
+				ourLastHitMethod = "Observation.delete";
+				ourLastConditionalUrl = theConditionalUrl;
+				return new MethodOutcome(new IdType("Observation/123"), true);
+			}
+
+			@Patch
+			public MethodOutcome patch(@IdParam IIdType theId, @ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl, PatchTypeEnum thePatchType) {
+				ourLastHitMethod = "Observation.patch";
+				ourLastConditionalUrl = theConditionalUrl;
+				return new MethodOutcome(new IdType("Observation/123"), true);
+			}
+		}
 	}
+	@SuppressWarnings("unused")
+	public static class DummyDeviceResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Device.class;
+		}
+
+
+		@Search()
+		public List<Resource> search(
+			 @OptionalParam(name = "_id") TokenAndListParam theIdParam,
+			 @OptionalParam(name = Device.SP_PATIENT) ReferenceAndListParam thePatientParam
+		) {
+			ourLastHitMethod = "Device.search";
+			ourLastIdParam = theIdParam;
+			ourLastPatientParam = thePatientParam;
+			return ourReturn;
+		}
+
+		@Create
+		public MethodOutcome create(@ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl) {
+			ourLastHitMethod = "Device.create";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Device/123"), true);
+		}
+
+		@Update
+		public MethodOutcome update(@ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl) {
+			ourLastHitMethod = "Device.update";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Device/123"), true);
+		}
+
+		@Delete
+		public MethodOutcome delete(@IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl) {
+			ourLastHitMethod = "Device.delete";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Device/123"), true);
+		}
+
+		@Patch
+		public MethodOutcome patch(@IdParam IIdType theId, @ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl, PatchTypeEnum thePatchType) {
+			ourLastHitMethod = "Device.patch";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Device/123"), true);
+		}
+	}
+
 
 	@SuppressWarnings("unused")
 	public static class DummyObservationResourceProvider implements IResourceProvider {
