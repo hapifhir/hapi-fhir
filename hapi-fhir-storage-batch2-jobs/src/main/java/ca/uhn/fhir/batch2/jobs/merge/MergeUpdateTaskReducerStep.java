@@ -60,7 +60,7 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 
 		IFhirResourceDao<Patient> patientDao = myDaoRegistry.getResourceDao(Patient.class);
 
-		MergeHelper helper = new MergeHelper(patientDao);
+		MergeResourceHelper helper = new MergeResourceHelper(patientDao);
 
 		helper.updateMergedResourcesAfterReferencesReplaced(
 				myHapiTransactionService,

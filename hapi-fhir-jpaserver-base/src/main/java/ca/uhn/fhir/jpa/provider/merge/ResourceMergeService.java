@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
-import ca.uhn.fhir.batch2.jobs.merge.MergeHelper;
+import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
@@ -79,7 +79,7 @@ public class ResourceMergeService {
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private final IFhirResourceDao<Task> myTaskDao;
 	private final IJobCoordinator myJobCoordinator;
-	private final MergeHelper myMergeHelper;
+	private final MergeResourceHelper myMergeResourceHelper;
 	private final Batch2TaskHelper myBatch2TaskHelper;
 
 	public ResourceMergeService(
@@ -98,7 +98,7 @@ public class ResourceMergeService {
 		myBatch2TaskHelper = theBatch2TaskHelper;
 		myFhirContext = myPatientDao.getContext();
 		myHapiTransactionService = theHapiTransactionService;
-		myMergeHelper = new MergeHelper(myPatientDao);
+		myMergeResourceHelper = new MergeResourceHelper(myPatientDao);
 	}
 
 	/**
@@ -217,7 +217,7 @@ public class ResourceMergeService {
 
 		// in preview mode, we should also return what the target would look like
 		Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
-		Patient targetPatientAsIfUpdated = myMergeHelper.prepareTargetPatientForUpdate(
+		Patient targetPatientAsIfUpdated = myMergeResourceHelper.prepareTargetPatientForUpdate(
 				theTargetResource, theSourceResource, theResultResource, theMergeOperationParameters.getDeleteSource());
 		theMergeOutcome.setUpdatedTargetResource(targetPatientAsIfUpdated);
 
@@ -287,11 +287,13 @@ public class ResourceMergeService {
 				theTargetResource.getIdElement(),
 				theMergeOperationParameters.getBatchSize(),
 				partitionId);
+
+		// We don't want replace references to flip to async mode once we've already made the decision to go sync here.
 		replaceReferencesRequest.setForceSync(true);
 
 		myReplaceReferencesSvc.replaceReferences(replaceReferencesRequest, theRequestDetails);
 
-		Patient updatedTarget = myMergeHelper.updateMergedResourcesAfterReferencesReplaced(
+		Patient updatedTarget = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 				myHapiTransactionService,
 				theSourceResource,
 				theTargetResource,

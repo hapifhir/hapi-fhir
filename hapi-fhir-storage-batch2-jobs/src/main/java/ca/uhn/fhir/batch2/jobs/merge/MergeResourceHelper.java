@@ -36,11 +36,11 @@ import java.util.concurrent.atomic.AtomicReference;
  * This class contains code that is used to update source and target resources after the references are replaced.
  * This is the common functionality that is used in sync case and in the async case as the reduction step.
  */
-public class MergeHelper {
+public class MergeResourceHelper {
 
 	private final IFhirResourceDao<Patient> myPatientDao;
 
-	public MergeHelper(IFhirResourceDao<Patient> theDao) {
+	public MergeResourceHelper(IFhirResourceDao<Patient> theDao) {
 		myPatientDao = theDao;
 	}
 
