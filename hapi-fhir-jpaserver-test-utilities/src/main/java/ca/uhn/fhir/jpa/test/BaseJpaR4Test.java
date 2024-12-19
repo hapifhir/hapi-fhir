@@ -193,6 +193,7 @@ import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.validation.instance.advisor.BasePolicyAdvisorForFullValidation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -1069,6 +1070,18 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		public ReferenceValidationPolicy getReferencePolicy() {
 			return ReferenceValidationPolicy.IGNORE;
 		}
+
+		@Override
+		public IValidationPolicyAdvisor getPolicyAdvisor() {
+			return new BasePolicyAdvisorForFullValidation(getReferencePolicy());
+		}
+
+		@Override
+		public IValidationPolicyAdvisor setPolicyAdvisor(IValidationPolicyAdvisor policyAdvisor) {
+			return null;
+		}
+
+
 	}
 
 
