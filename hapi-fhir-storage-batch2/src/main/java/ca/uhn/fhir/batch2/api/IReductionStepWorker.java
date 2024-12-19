@@ -24,7 +24,8 @@ import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
 
 /**
- * Reduction step worker.
+ * Reduction step worker. Once all chunks from the previous step have completed, consume() will first be called on
+ * all chunks, and then funally run() will be called on this step.
  * @param <PT> Job Parameter Type
  * @param <IT> Input Parameter type (real input for step is ListResult of IT
  * @param <OT> Output Job Report Type

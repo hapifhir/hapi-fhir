@@ -30,7 +30,6 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 @Configuration
 public class BulkExportAppCtx {
@@ -145,7 +144,6 @@ public class BulkExportAppCtx {
 	}
 
 	@Bean
-	@Scope("prototype")
 	public BulkExportCreateReportStep createReportStep() {
 		return new BulkExportCreateReportStep();
 	}

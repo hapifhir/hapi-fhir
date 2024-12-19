@@ -31,11 +31,13 @@ import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.jpa.api.pid.TypedResourceStream;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -46,6 +48,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Date;
 import java.util.function.Supplier;
@@ -55,6 +58,8 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	private static final org.slf4j.Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IResourceTableDao myResourceTableDao;
+
+	private final IResourceLinkDao myResourceLinkDao;
 
 	private final MatchUrlService myMatchUrlService;
 
@@ -71,11 +76,13 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 	public Batch2DaoSvcImpl(
 			IResourceTableDao theResourceTableDao,
+			IResourceLinkDao theResourceLinkDao,
 			MatchUrlService theMatchUrlService,
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext,
 			IHapiTransactionService theTransactionService) {
 		myResourceTableDao = theResourceTableDao;
+		myResourceLinkDao = theResourceLinkDao;
 		myMatchUrlService = theMatchUrlService;
 		myDaoRegistry = theDaoRegistry;
 		myFhirContext = theFhirContext;
@@ -93,6 +100,11 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 					theRequestPartitionId,
 					() -> streamResourceIdsWithUrl(theStart, theEnd, theUrl, theRequestPartitionId));
 		}
+	}
+
+	@Override
+	public Stream<IdDt> streamSourceIdsThatReferenceTargetId(IIdType theTargetId) {
+		return myResourceLinkDao.streamSourceIdsForTargetFhirId(theTargetId.getResourceType(), theTargetId.getIdPart());
 	}
 
 	private Stream<TypedResourcePid> streamResourceIdsWithUrl(

@@ -19,13 +19,18 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * Contract for service which replaces references
  */
 public interface IReplaceReferencesSvc {
 
-	IBaseParameters replaceReferences(String theSourceRefId, String theTargetRefId, RequestDetails theRequest);
+	IBaseParameters replaceReferences(
+			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails);
+
+	Integer countResourcesReferencingResource(IIdType theResourceId, RequestDetails theRequestDetails);
 }

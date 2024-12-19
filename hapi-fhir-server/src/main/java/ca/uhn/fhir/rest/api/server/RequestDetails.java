@@ -23,9 +23,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -608,5 +610,11 @@ public abstract class RequestDetails {
 
 	public void setRetry(boolean theRetry) {
 		myRetry = theRetry;
+	}
+
+	public boolean isPreferAsync() {
+		String prefer = getHeader(Constants.HEADER_PREFER);
+		PreferHeader preferHeader = RestfulServerUtils.parsePreferHeader(prefer);
+		return preferHeader.getRespondAsync();
 	}
 }
