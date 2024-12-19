@@ -33,7 +33,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -146,9 +146,18 @@ public class ResourceMergeService {
 
 			if (theMergeOperationParameters.getPreview()) {
 				handlePreview(
-					sourceResource, targetResource, theMergeOperationParameters, theRequestDetails, theMergeOutcome);
+						sourceResource,
+						targetResource,
+						theMergeOperationParameters,
+						theRequestDetails,
+						theMergeOutcome);
 			} else {
-				doMerge(theMergeOperationParameters, sourceResource, targetResource, theRequestDetails, theMergeOutcome);
+				doMerge(
+						theMergeOperationParameters,
+						sourceResource,
+						targetResource,
+						theRequestDetails,
+						theMergeOutcome);
 			}
 		}
 	}
@@ -242,6 +251,8 @@ public class ResourceMergeService {
 			Integer numberOfRefs = myReplaceReferencesSvc.countResourcesReferencingResource(
 					theSourceResource.getIdElement().toVersionless(), theRequestDetails);
 			if (numberOfRefs > theMergeOperationParameters.getBatchSize()) {
+				ourLog.info("{} resources need to be updated. This exceeds the batch size of {}. Switching to asynchronous processing; will return a Task in the response that can be used to track progress.",
+					numberOfRefs, theMergeOperationParameters.getBatchSize());
 				doMergeAsync(
 						theMergeOperationParameters,
 						theSourceResource,
@@ -269,14 +280,14 @@ public class ResourceMergeService {
 			MergeOperationOutcome theMergeOutcome,
 			RequestPartitionId partitionId) {
 
-		ReplaceReferenceRequest replaceReferenceRequest = new ReplaceReferenceRequest(
+		ReplaceReferencesRequest replaceReferencesRequest = new ReplaceReferencesRequest(
 				theSourceResource.getIdElement(),
 				theTargetResource.getIdElement(),
 				theMergeOperationParameters.getBatchSize(),
 				partitionId);
-		replaceReferenceRequest.setForceSync(true);
+		replaceReferencesRequest.setForceSync(true);
 
-		myReplaceReferencesSvc.replaceReferences(replaceReferenceRequest, theRequestDetails);
+		myReplaceReferencesSvc.replaceReferences(replaceReferencesRequest, theRequestDetails);
 
 		Patient updatedTarget = myMergeHelper.updateMergedResourcesAfterReferencesReplaced(
 				myHapiTransactionService,

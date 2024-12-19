@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -177,10 +177,10 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 		IdDt targetId = new IdDt(theTargetId);
 		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
 				theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetId));
-		ReplaceReferenceRequest replaceReferenceRequest =
-				new ReplaceReferenceRequest(sourceId, targetId, batchSize, partitionId);
+		ReplaceReferencesRequest replaceReferencesRequest =
+				new ReplaceReferencesRequest(sourceId, targetId, batchSize, partitionId);
 		IBaseParameters retval =
-				getReplaceReferencesSvc().replaceReferences(replaceReferenceRequest, theRequestDetails);
+				getReplaceReferencesSvc().replaceReferences(replaceReferencesRequest, theRequestDetails);
 		if (ParametersUtil.getNamedParameter(getContext(), retval, OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
 				.isPresent()) {
 			HttpServletResponse response = theRequestDetails.getServletResponse();

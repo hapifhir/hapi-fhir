@@ -30,7 +30,7 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLA
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class ReplaceReferenceRequest {
+public class ReplaceReferencesRequest {
 	@Nonnull
 	public final IIdType sourceId;
 
@@ -43,7 +43,7 @@ public class ReplaceReferenceRequest {
 
 	private boolean myForceSync = false;
 
-	public ReplaceReferenceRequest(
+	public ReplaceReferencesRequest(
 			@Nonnull IIdType theSourceId,
 			@Nonnull IIdType theTargetId,
 			int theBatchSize,

@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.StopLimitAccumulator;
@@ -74,15 +74,15 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	@Override
 	public IBaseParameters replaceReferences(
-			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
-		theReplaceReferenceRequest.validateOrThrowInvalidParameterException();
+		ReplaceReferencesRequest theReplaceReferencesRequest, RequestDetails theRequestDetails) {
+		theReplaceReferencesRequest.validateOrThrowInvalidParameterException();
 
 		if (theRequestDetails.isPreferAsync()) {
-			return replaceReferencesPreferAsync(theReplaceReferenceRequest, theRequestDetails);
-		} else if (theReplaceReferenceRequest.isForceSync()) {
-			return replaceReferencesForceSync(theReplaceReferenceRequest, theRequestDetails);
+			return replaceReferencesPreferAsync(theReplaceReferencesRequest, theRequestDetails);
+		} else if (theReplaceReferencesRequest.isForceSync()) {
+			return replaceReferencesForceSync(theReplaceReferencesRequest, theRequestDetails);
 		} else {
-			return replaceReferencesPreferSync(theReplaceReferenceRequest, theRequestDetails);
+			return replaceReferencesPreferSync(theReplaceReferencesRequest, theRequestDetails);
 		}
 	}
 
@@ -95,14 +95,14 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	}
 
 	private IBaseParameters replaceReferencesPreferAsync(
-			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+		ReplaceReferencesRequest theReplaceReferencesRequest, RequestDetails theRequestDetails) {
 
 		Task task = myBatch2TaskHelper.startJobAndCreateAssociatedTask(
 				myDaoRegistry.getResourceDao(Task.class),
 				theRequestDetails,
 				myJobCoordinator,
 				JOB_REPLACE_REFERENCES,
-				new ReplaceReferencesJobParameters(theReplaceReferenceRequest));
+				new ReplaceReferencesJobParameters(theReplaceReferencesRequest));
 
 		Parameters retval = new Parameters();
 		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());
@@ -118,20 +118,20 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	 */
 	@Nonnull
 	private IBaseParameters replaceReferencesPreferSync(
-			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+		ReplaceReferencesRequest theReplaceReferencesRequest, RequestDetails theRequestDetails) {
 
 		// TODO KHS get partition from request
 		StopLimitAccumulator<IdDt> accumulator = myHapiTransactionService
 				.withRequest(theRequestDetails)
-				.execute(() -> getAllPidsWithLimit(theReplaceReferenceRequest));
+				.execute(() -> getAllPidsWithLimit(theReplaceReferencesRequest));
 
 		if (accumulator.isTruncated()) {
 			ourLog.warn("Too many results. Switching to asynchronous reference replacement.");
-			return replaceReferencesPreferAsync(theReplaceReferenceRequest, theRequestDetails);
+			return replaceReferencesPreferAsync(theReplaceReferencesRequest, theRequestDetails);
 		}
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
-				theReplaceReferenceRequest, accumulator.getItemList(), theRequestDetails);
+			theReplaceReferencesRequest, accumulator.getItemList(), theRequestDetails);
 
 		Parameters retval = new Parameters();
 		retval.addParameter()
@@ -146,20 +146,20 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	 */
 	@Nonnull
 	private IBaseParameters replaceReferencesForceSync(
-			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails) {
+		ReplaceReferencesRequest theReplaceReferencesRequest, RequestDetails theRequestDetails) {
 
 		// TODO KHS get partition from request
 		List<IdDt> allIds = myHapiTransactionService
 				.withRequest(theRequestDetails)
 				.execute(() -> {
 					Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
-							theReplaceReferenceRequest.sourceId.getResourceType(),
-							theReplaceReferenceRequest.sourceId.getIdPart());
+							theReplaceReferencesRequest.sourceId.getResourceType(),
+							theReplaceReferencesRequest.sourceId.getIdPart());
 					return idStream.collect(Collectors.toList());
 				});
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
-				theReplaceReferenceRequest, allIds, theRequestDetails);
+			theReplaceReferencesRequest, allIds, theRequestDetails);
 
 		Parameters retval = new Parameters();
 		retval.addParameter()
@@ -169,12 +169,12 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	}
 
 	private @Nonnull StopLimitAccumulator<IdDt> getAllPidsWithLimit(
-			ReplaceReferenceRequest theReplaceReferenceRequest) {
+			ReplaceReferencesRequest theReplaceReferencesRequest) {
 
 		Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
-				theReplaceReferenceRequest.sourceId.getResourceType(), theReplaceReferenceRequest.sourceId.getIdPart());
+				theReplaceReferencesRequest.sourceId.getResourceType(), theReplaceReferencesRequest.sourceId.getIdPart());
 		StopLimitAccumulator<IdDt> accumulator =
-				StopLimitAccumulator.fromStreamAndLimit(idStream, theReplaceReferenceRequest.batchSize);
+				StopLimitAccumulator.fromStreamAndLimit(idStream, theReplaceReferencesRequest.batchSize);
 		return accumulator;
 	}
 }

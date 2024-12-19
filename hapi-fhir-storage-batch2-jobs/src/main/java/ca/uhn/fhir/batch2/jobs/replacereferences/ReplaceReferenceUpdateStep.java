@@ -28,7 +28,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdListWorkChunkJson;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
@@ -57,7 +57,7 @@ public class ReplaceReferenceUpdateStep<PT extends ReplaceReferencesJobParameter
 			throws JobExecutionFailedException {
 
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
-		ReplaceReferenceRequest replaceReferencesRequest = params.asReplaceReferencesRequest();
+		ReplaceReferencesRequest replaceReferencesRequest = params.asReplaceReferencesRequest();
 		List<IdDt> fhirIds = theStepExecutionDetails.getData().getFhirIds().stream()
 				.map(FhirIdJson::asIdDt)
 				.collect(Collectors.toList());

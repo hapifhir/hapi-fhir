@@ -22,7 +22,7 @@ package ca.uhn.fhir.batch2.jobs.replacereferences;
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.parameters.BatchJobParametersWithTaskId;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import static ca.uhn.fhir.jpa.api.config.JpaStorageSettings.DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE;
@@ -47,7 +47,7 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 
 	public ReplaceReferencesJobParameters() {}
 
-	public ReplaceReferencesJobParameters(ReplaceReferenceRequest theRequest) {
+	public ReplaceReferencesJobParameters(ReplaceReferencesRequest theRequest) {
 		mySourceId = new FhirIdJson(theRequest.sourceId);
 		myTargetId = new FhirIdJson(theRequest.targetId);
 		myBatchSize = theRequest.batchSize;
@@ -89,7 +89,7 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 		myPartitionId = thePartitionId;
 	}
 
-	public ReplaceReferenceRequest asReplaceReferencesRequest() {
-		return new ReplaceReferenceRequest(mySourceId.asIdDt(), myTargetId.asIdDt(), myBatchSize, myPartitionId);
+	public ReplaceReferencesRequest asReplaceReferencesRequest() {
+		return new ReplaceReferencesRequest(mySourceId.asIdDt(), myTargetId.asIdDt(), myBatchSize, myPartitionId);
 	}
 }

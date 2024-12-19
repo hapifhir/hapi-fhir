@@ -14,7 +14,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -1413,7 +1413,7 @@ public class ResourceMergeServiceTest {
 		// set the count to less that the page size for sync processing
 		when(myReplaceReferencesSvcMock.countResourcesReferencingResource(new IdType(SOURCE_PATIENT_TEST_ID),
 			myRequestDetailsMock)).thenReturn(PAGE_SIZE - 1);
-		when(myReplaceReferencesSvcMock.replaceReferences(isA(ReplaceReferenceRequest.class),
+		when(myReplaceReferencesSvcMock.replaceReferences(isA(ReplaceReferencesRequest.class),
 			eq(myRequestDetailsMock))).thenReturn(new Parameters());
 	}
 

@@ -58,10 +58,10 @@ public class ReplaceReferencesPatchBundleSvc {
 	}
 
 	public Bundle patchReferencingResources(
-			ReplaceReferenceRequest theReplaceReferenceRequest,
+			ReplaceReferencesRequest theReplaceReferencesRequest,
 			List<IdDt> theResourceIds,
 			RequestDetails theRequestDetails) {
-		Bundle patchBundle = buildPatchBundle(theReplaceReferenceRequest, theResourceIds, theRequestDetails);
+		Bundle patchBundle = buildPatchBundle(theReplaceReferencesRequest, theResourceIds, theRequestDetails);
 		IFhirSystemDao<Bundle, Meta> systemDao = myDaoRegistry.getSystemDao();
 		Bundle result = systemDao.transaction(theRequestDetails, patchBundle);
 		// TODO KHS shouldn't transaction response bundles already have ids?
@@ -70,7 +70,7 @@ public class ReplaceReferencesPatchBundleSvc {
 	}
 
 	private Bundle buildPatchBundle(
-			ReplaceReferenceRequest theReplaceReferenceRequest,
+			ReplaceReferencesRequest theReplaceReferencesRequest,
 			List<IdDt> theResourceIds,
 			RequestDetails theRequestDetails) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
@@ -78,7 +78,7 @@ public class ReplaceReferencesPatchBundleSvc {
 		theResourceIds.forEach(referencingResourceId -> {
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(referencingResourceId.getResourceType());
 			IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
-			Parameters patchParams = buildPatchParams(theReplaceReferenceRequest, resource);
+			Parameters patchParams = buildPatchParams(theReplaceReferencesRequest, resource);
 			IIdType resourceId = resource.getIdElement();
 			bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
 		});
@@ -86,16 +86,16 @@ public class ReplaceReferencesPatchBundleSvc {
 	}
 
 	private @Nonnull Parameters buildPatchParams(
-			ReplaceReferenceRequest theReplaceReferenceRequest, IBaseResource referencingResource) {
+		ReplaceReferencesRequest theReplaceReferencesRequest, IBaseResource referencingResource) {
 		Parameters params = new Parameters();
 
 		myFhirContext.newTerser().getAllResourceReferences(referencingResource).stream()
 				.filter(refInfo -> matches(
 						refInfo,
-						theReplaceReferenceRequest.sourceId)) // We only care about references to our source resource
+						theReplaceReferencesRequest.sourceId)) // We only care about references to our source resource
 				.map(refInfo -> createReplaceReferencePatchOperation(
 						referencingResource.fhirType() + "." + refInfo.getName(),
-						new Reference(theReplaceReferenceRequest.targetId.getValueAsString())))
+						new Reference(theReplaceReferencesRequest.targetId.getValueAsString())))
 				.forEach(params::addParameter); // Add each operation to parameters
 		return params;
 	}

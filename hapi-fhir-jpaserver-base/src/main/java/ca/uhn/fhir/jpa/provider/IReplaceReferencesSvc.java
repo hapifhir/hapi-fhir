@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import ca.uhn.fhir.replacereferences.ReplaceReferenceRequest;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -30,7 +30,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 public interface IReplaceReferencesSvc {
 
 	IBaseParameters replaceReferences(
-			ReplaceReferenceRequest theReplaceReferenceRequest, RequestDetails theRequestDetails);
+		ReplaceReferencesRequest theReplaceReferencesRequest, RequestDetails theRequestDetails);
 
 	Integer countResourcesReferencingResource(IIdType theResourceId, RequestDetails theRequestDetails);
 }
