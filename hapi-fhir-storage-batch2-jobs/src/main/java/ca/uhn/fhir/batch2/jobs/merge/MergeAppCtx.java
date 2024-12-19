@@ -43,7 +43,7 @@ public class MergeAppCtx {
 			ReplaceReferencesQueryIdsStep<MergeJobParameters> theMergeQueryIds,
 			ReplaceReferenceUpdateStep<MergeJobParameters> theMergeUpdateStep,
 			MergeUpdateTaskReducerStep theMergeUpdateTaskReducerStep,
-			MergeErrorHandler mergeErrorHandler) {
+			ReplaceReferencesErrorHandler<MergeJobParameters> theMergeErrorHandler) {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(JOB_MERGE)
 				.setJobDescription("Merge Resources")
@@ -65,7 +65,7 @@ public class MergeAppCtx {
 						"Waits for replace reference work to complete and updates Task.",
 						ReplaceReferenceResultsJson.class,
 						theMergeUpdateTaskReducerStep)
-				.errorHandler(mergeErrorHandler)
+				.errorHandler(theMergeErrorHandler)
 				.build();
 	}
 
@@ -88,8 +88,9 @@ public class MergeAppCtx {
 	}
 
 	@Bean
-	public MergeErrorHandler mergeErrorHandler(DaoRegistry theDaoRegistry, Batch2TaskHelper theBatch2TaskHelper) {
+	public ReplaceReferencesErrorHandler<MergeJobParameters> mergeErorHandler(
+			DaoRegistry theDaoRegistry, Batch2TaskHelper theBatch2TaskHelper) {
 		IFhirResourceDao<Task> taskDao = theDaoRegistry.getResourceDao(Task.class);
-		return new MergeErrorHandler(theBatch2TaskHelper, taskDao);
+		return new ReplaceReferencesErrorHandler<>(theBatch2TaskHelper, taskDao);
 	}
 }

@@ -16,6 +16,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 public class MergeBatchTest extends BaseJpaR4Test {
 
@@ -82,6 +85,26 @@ public class MergeBatchTest extends BaseJpaR4Test {
 		myTestHelper.assertSourcePatientUpdatedOrDeleted(theDeleteSource);
 		myTestHelper.assertTargetPatientUpdated(theDeleteSource,
 			myTestHelper.getExpectedIdentifiersForTargetAfterMerge(theWithResultResource));
+	}
+
+	@Test
+	void testMergeJob_JobFails_ErrorHandlerSetsAssociatedTaskStatusToFailed() {
+		IIdType taskId = createTask();
+
+		MergeJobParameters jobParams = new MergeJobParameters();
+		//use a source that does not exist to force the job to fail
+		jobParams.setSourceId(new FhirIdJson("Patient", "doesnotexist"));
+		jobParams.setTargetId(new FhirIdJson(myTestHelper.getTargetPatientId()));
+		jobParams.setTaskId(taskId);
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_MERGE, jobParams);
+		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(mySrd, request);
+		myBatch2JobHelper.awaitJobFailure(jobStartResponse);
+
+		await().until(() -> {
+			myBatch2JobHelper.runMaintenancePass();
+			return myTaskDao.read(taskId, mySrd).getStatus().equals(Task.TaskStatus.FAILED);
+		});
 	}
 
 	private IIdType createTask() {

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.replacereferences;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -23,7 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
 import static ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesAppCtx.JOB_REPLACE_REFERENCES;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
@@ -68,6 +72,27 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 			"Observation", "Encounter", "CarePlan"));
 
 		myTestHelper.assertAllReferencesUpdated();
+	}
+
+
+	@Test
+	void testReplaceReferencesJob_JobFails_ErrorHandlerSetsAssociatedTaskStatusToFailed() {
+		IIdType taskId = createReplaceReferencesTask();
+
+		ReplaceReferencesJobParameters jobParams = new ReplaceReferencesJobParameters();
+		jobParams.setSourceId(new FhirIdJson(myTestHelper.getSourcePatientId()));
+		//use a target that does not exist to force the job to fail
+		jobParams.setTargetId(new FhirIdJson("Patient", "doesnotexist"));
+		jobParams.setTaskId(taskId);
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_REPLACE_REFERENCES, jobParams);
+		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(mySrd, request);
+		myBatch2JobHelper.awaitJobFailure(jobStartResponse);
+
+		await().until(() -> {
+			myBatch2JobHelper.runMaintenancePass();
+			return myTaskDao.read(taskId, mySrd).getStatus().equals(Task.TaskStatus.FAILED);
+		});
 	}
 
 	private IIdType createReplaceReferencesTask() {

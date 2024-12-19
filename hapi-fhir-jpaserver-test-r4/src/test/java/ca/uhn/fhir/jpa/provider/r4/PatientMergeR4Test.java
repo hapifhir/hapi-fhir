@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.jena.base.Sys;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
@@ -33,7 +32,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
@@ -259,11 +257,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		myBatch2JobHelper.awaitJobFailure(jobId);
 
 
-		await().until(() -> {
-			Task taskAfterJobFailure = myTaskDao.read(task.getIdElement().toVersionless(), mySrd);
-			ourLog.info("Check if Task status is FAILED: {}", taskAfterJobFailure.getStatus());
-			return Task.TaskStatus.FAILED.equals(taskAfterJobFailure.getStatus());
-		});
+		Task taskAfterJobFailure = myTaskDao.read(task.getIdElement().toVersionless(), mySrd);
+		assertThat(taskAfterJobFailure.getStatus()).isEqualTo(Task.TaskStatus.FAILED);
 	}
 
 	@ParameterizedTest

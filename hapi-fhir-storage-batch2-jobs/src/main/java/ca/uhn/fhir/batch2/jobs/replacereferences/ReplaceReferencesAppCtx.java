@@ -21,11 +21,14 @@ package ca.uhn.fhir.batch2.jobs.replacereferences;
 
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
+import org.hl7.fhir.r4.model.Task;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -38,7 +41,8 @@ public class ReplaceReferencesAppCtx {
 			ReplaceReferencesQueryIdsStep<ReplaceReferencesJobParameters> theReplaceReferencesQueryIds,
 			ReplaceReferenceUpdateStep<ReplaceReferencesJobParameters> theReplaceReferenceUpdateStep,
 			ReplaceReferenceUpdateTaskReducerStep<ReplaceReferencesJobParameters>
-					theReplaceReferenceUpdateTaskReducerStep) {
+					theReplaceReferenceUpdateTaskReducerStep,
+			ReplaceReferencesErrorHandler<ReplaceReferencesJobParameters> theReplaceReferencesErrorHandler) {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(JOB_REPLACE_REFERENCES)
 				.setJobDescription("Replace References")
@@ -60,6 +64,7 @@ public class ReplaceReferencesAppCtx {
 						"Waits for replace reference work to complete and updates Task.",
 						ReplaceReferenceResultsJson.class,
 						theReplaceReferenceUpdateTaskReducerStep)
+				.errorHandler(theReplaceReferencesErrorHandler)
 				.build();
 	}
 
@@ -79,5 +84,12 @@ public class ReplaceReferencesAppCtx {
 	public ReplaceReferenceUpdateTaskReducerStep<ReplaceReferencesJobParameters> replaceReferenceUpdateTaskStep(
 			DaoRegistry theDaoRegistry) {
 		return new ReplaceReferenceUpdateTaskReducerStep<>(theDaoRegistry);
+	}
+
+	@Bean
+	public ReplaceReferencesErrorHandler<ReplaceReferencesJobParameters> replaceReferencesErrorHandler(
+			DaoRegistry theDaoRegistry, Batch2TaskHelper theBatch2TaskHelper) {
+		IFhirResourceDao<Task> taskDao = theDaoRegistry.getResourceDao(Task.class);
+		return new ReplaceReferencesErrorHandler<>(theBatch2TaskHelper, taskDao);
 	}
 }
