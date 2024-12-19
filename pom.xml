@@ -1055,6 +1055,11 @@
 
 		<!-- Clinical Reasoning & CQL Support -->
 		<clinical-reasoning.version>3.13.1</clinical-reasoning.version>
+		<!-- TODO: JM: this a TEMPORARY HACK to introduce CQL bug fix -->
+		<!-- This needs to be removed next time we do a CR bump -->
+		<!-- See: https://github.com/hapifhir/hapi-fhir/issues/6569 -->
+		<!-- Direct CQL dependencies -->
+		<cql.version>3.20.0</cql.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -2322,6 +2327,20 @@
 						<artifactId>hamcrest</artifactId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<!-- TODO: JM: this a TEMPORARY HACK to introduce CQL bug fix -->
+			<!-- This needs to be removed next time we do a CR bump -->
+			<!-- See: https://github.com/hapifhir/hapi-fhir/issues/6569 -->
+			<!-- Direct CQL dependencies -->
+			<dependency>
+				<groupId>info.cqframework</groupId>
+				<artifactId>cql-to-elm</artifactId>
+				<version>${cql.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>info.cqframework</groupId>
+				<artifactId>cqf-fhir</artifactId>
+				<version>${cql.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

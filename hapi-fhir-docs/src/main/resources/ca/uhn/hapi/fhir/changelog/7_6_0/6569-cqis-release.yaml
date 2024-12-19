@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6569
+title: "Critical CQL bug fix to patch rel_7_6. This allows for QICore based CQL files to properly map signatures for expression evaluation."
