@@ -140,18 +140,16 @@ public class ResourceMergeService {
 
 		ValidationResult validationResult = validate(theMergeOperationParameters, theRequestDetails, theMergeOutcome);
 
-		if (!validationResult.isValid) {
-			return;
-		}
+		if (validationResult.isValid) {
+			Patient sourceResource = validationResult.sourceResource;
+			Patient targetResource = validationResult.targetResource;
 
-		Patient sourceResource = validationResult.sourceResource;
-		Patient targetResource = validationResult.targetResource;
-
-		if (theMergeOperationParameters.getPreview()) {
-			handlePreview(
+			if (theMergeOperationParameters.getPreview()) {
+				handlePreview(
 					sourceResource, targetResource, theMergeOperationParameters, theRequestDetails, theMergeOutcome);
-		} else {
-			doMerge(theMergeOperationParameters, sourceResource, targetResource, theRequestDetails, theMergeOutcome);
+			} else {
+				doMerge(theMergeOperationParameters, sourceResource, targetResource, theRequestDetails, theMergeOutcome);
+			}
 		}
 	}
 
@@ -208,13 +206,13 @@ public class ResourceMergeService {
 		Integer referencingResourceCount = myReplaceReferencesSvc.countResourcesReferencingResource(
 				theSourceResource.getIdElement().toVersionless(), theRequestDetails);
 
-		// in preview mode, we should also return how the target would look like
+		// in preview mode, we should also return what the target would look like
 		Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
 		Patient targetPatientAsIfUpdated = myMergeHelper.prepareTargetPatientForUpdate(
 				theTargetResource, theSourceResource, theResultResource, theMergeOperationParameters.getDeleteSource());
 		theMergeOutcome.setUpdatedTargetResource(targetPatientAsIfUpdated);
 
-		// adding +2 because the source and the target resources themselved would be updated as well
+		// adding +2 because the source and the target resources would be updated as well
 		String diagnosticsMsg = String.format("Merge would update %d resources", referencingResourceCount + 2);
 		String detailsText = "Preview only merge operation - no issues detected";
 		addInfoToOperationOutcome(theMergeOutcome.getOperationOutcome(), diagnosticsMsg, detailsText);
