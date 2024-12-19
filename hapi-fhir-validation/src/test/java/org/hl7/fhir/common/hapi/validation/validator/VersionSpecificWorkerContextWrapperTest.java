@@ -2,6 +2,7 @@ package org.hl7.fhir.common.hapi.validation.validator;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
@@ -18,8 +19,11 @@ import org.mockito.quality.Strictness;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -155,6 +159,54 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 
 		// Assert that unknown types are not regarded as primitive
 		assertThat(wrapper.isPrimitiveType("Unknown")).isFalse();
+	}
+
+	@Test
+	public void testFetchResource_ResourceParameter() {
+		// setup
+		IValidationSupport validationSupport = mockValidationSupport();
+		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(validationSupport.getFhirContext());
+		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
+
+		org.hl7.fhir.r4.model.StructureDefinition expected = new org.hl7.fhir.r4.model.StructureDefinition();
+		expected.setUrl("http://foo");
+		expected.getSnapshot().addElement().setId("FOO");
+		when(mockContext.getRootValidationSupport().fetchResource(isNull(), eq("http://foo"))).thenReturn(expected);
+
+		// Test
+		boolean hasResource = wrapper.hasResource(Resource.class, "http://foo");
+		StructureDefinition actual = (StructureDefinition) wrapper.fetchResource(Resource.class, "http://foo");
+
+		// Verify
+		assertTrue(hasResource);
+		assertEquals("FOO", actual.getSnapshot().getElementFirstRep().getId());
+	}
+
+	@Test
+	public void testFetchResource_StructureDefinitionParameter() {
+		// setup
+		IValidationSupport validationSupport = mockValidationSupport();
+		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
+		RuntimeResourceDefinition mockRuntimeResourceDefinition = mock(RuntimeResourceDefinition.class);
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(validationSupport.getFhirContext());
+		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
+
+		org.hl7.fhir.r4.model.StructureDefinition expected = new org.hl7.fhir.r4.model.StructureDefinition();
+		expected.setUrl("http://foo");
+		expected.getSnapshot().addElement().setId("FOO");
+		when(mockContext.getRootValidationSupport().getFhirContext()
+			.getResourceDefinition(eq(StructureDefinition.class.getSimpleName()))).thenReturn(mockRuntimeResourceDefinition);
+		when(mockRuntimeResourceDefinition.getImplementingClass()).thenReturn((Class) org.hl7.fhir.r4.model.StructureDefinition.class);
+		when(mockContext.getRootValidationSupport().fetchResource(eq(org.hl7.fhir.r4.model.StructureDefinition.class), eq("http://foo"))).thenReturn(expected);
+
+		// Test
+		boolean hasResource = wrapper.hasResource(StructureDefinition.class, "http://foo");
+		StructureDefinition actual = wrapper.fetchResource(StructureDefinition.class, "http://foo");
+
+		// Verify
+		assertTrue(hasResource);
+		assertEquals("FOO", actual.getSnapshot().getElementFirstRep().getId());
 	}
 
 	private List<StructureDefinition> createStructureDefinitions() {

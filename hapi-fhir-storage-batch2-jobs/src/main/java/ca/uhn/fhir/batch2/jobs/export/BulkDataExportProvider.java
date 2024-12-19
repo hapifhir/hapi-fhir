@@ -360,10 +360,6 @@ public class BulkDataExportProvider {
 		if (myCompartmentResources == null) {
 			myCompartmentResources =
 					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext));
-			if (isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
-					theFhirContext.getVersion().getVersion())) {
-				myCompartmentResources.add("Device");
-			}
 		}
 		return myCompartmentResources;
 	}
@@ -818,10 +814,5 @@ public class BulkDataExportProvider {
 		if (!prefer.getRespondAsync()) {
 			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
 		}
-	}
-
-	private static boolean isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
-			FhirVersionEnum theFhirVersionEnum) {
-		return PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE.contains(theFhirVersionEnum);
 	}
 }
