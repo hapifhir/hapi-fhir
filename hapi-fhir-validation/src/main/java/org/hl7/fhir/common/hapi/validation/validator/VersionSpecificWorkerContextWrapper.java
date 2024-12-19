@@ -61,6 +61,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -73,6 +74,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private final ValidationSupportContext myValidationSupportContext;
 	private final VersionCanonicalizer myVersionCanonicalizer;
 	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
+	private final Map<String, StructureDefinition> myStructureDefinitionNonExpiringCache;
 	private volatile List<StructureDefinition> myAllStructures;
 	private volatile Set<String> myAllPrimitiveTypes;
 	private Parameters myExpansionProfile;
@@ -81,6 +83,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer) {
 		myValidationSupportContext = theValidationSupportContext;
 		myVersionCanonicalizer = theVersionCanonicalizer;
+		myStructureDefinitionNonExpiringCache = new ConcurrentHashMap<>();
 
 		long timeoutMillis = HapiSystemProperties.getTestValidationResourceCachesMs();
 
@@ -112,24 +115,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					.getRootValidationSupport()
 					.fetchResource(fetchResourceType, key.getUri());
 
-			Resource canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
-
-			if (canonical instanceof StructureDefinition) {
-				StructureDefinition canonicalSd = (StructureDefinition) canonical;
-				if (canonicalSd.getSnapshot().isEmpty()) {
-					ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
-					fetched = myValidationSupportContext
-							.getRootValidationSupport()
-							.generateSnapshot(theValidationSupportContext, fetched, "", null, "");
-					Validate.isTrue(
-							fetched != null,
-							"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
-							key.getUri());
-					canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
-				}
-			}
-
-			return canonical;
+			return myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
 		});
 
 		setValidationMessageLanguage(getLocale());
@@ -466,7 +452,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return null;
 		}
 
-		String uri = theUri;
+		String uri;
 		// handle profile version, if present
 		if (theUri.contains("|")) {
 			String[] parts = theUri.split("\\|");
@@ -474,7 +460,17 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				uri = parts[0];
 			} else {
 				ourLog.warn("Unrecognized profile uri: {}", theUri);
+				uri = theUri;
 			}
+		} else {
+			uri = theUri;
+		}
+
+		if (StructureDefinition.class.equals(class_)) {
+			@SuppressWarnings("unchecked")
+			T structureDefinition =
+					(T) myStructureDefinitionNonExpiringCache.computeIfAbsent(uri, k -> fetchStructureDefinition(uri));
+			return structureDefinition;
 		}
 
 		ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
@@ -482,6 +478,38 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		T retVal = (T) myFetchResourceCache.get(key);
 
 		return retVal;
+	}
+
+	private StructureDefinition fetchStructureDefinition(String theUri) {
+		// Fetch the resourceType
+		Class<? extends IBaseResource> resourceType = myValidationSupportContext
+				.getRootValidationSupport()
+				.getFhirContext()
+				.getResourceDefinition(StructureDefinition.class.getSimpleName())
+				.getImplementingClass();
+
+		// Fetch the resource
+		IBaseResource fetched =
+				myValidationSupportContext.getRootValidationSupport().fetchResource(resourceType, theUri);
+
+		// Canonicalize the resource
+		Resource canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
+
+		// Ensure snapshot is present
+		StructureDefinition canonicalSd = (StructureDefinition) canonical;
+		if (canonicalSd.getSnapshot().isEmpty()) {
+			ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
+			fetched = myValidationSupportContext
+					.getRootValidationSupport()
+					.generateSnapshot(myValidationSupportContext, fetched, "", null, "");
+			Validate.isTrue(
+					fetched != null,
+					"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
+					theUri);
+			canonicalSd = (StructureDefinition) myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
+		}
+
+		return canonicalSd;
 	}
 
 	@Override
@@ -634,6 +662,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	public <T extends Resource> boolean hasResource(Class<T> class_, String uri) {
 		if (isBlank(uri)) {
 			return false;
+		}
+
+		if (StructureDefinition.class.equals(class_)) {
+			@SuppressWarnings("unchecked")
+			T structureDefinition =
+					(T) myStructureDefinitionNonExpiringCache.computeIfAbsent(uri, k -> fetchStructureDefinition(uri));
+			return structureDefinition != null;
 		}
 
 		ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
@@ -906,6 +941,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	public void invalidateCaches() {
 		myFetchResourceCache.invalidateAll();
+		myStructureDefinitionNonExpiringCache.clear();
 	}
 
 	@Override
