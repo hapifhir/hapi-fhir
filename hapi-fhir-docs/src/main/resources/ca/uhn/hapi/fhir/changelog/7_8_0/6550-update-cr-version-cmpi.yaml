@@ -1,0 +1,4 @@
+---
+type: add
+issue: 6550
+title: "Upgrade the Clinical Reasoning module to the latest release of 3.15.0. CMPI now supports the delete operation"
