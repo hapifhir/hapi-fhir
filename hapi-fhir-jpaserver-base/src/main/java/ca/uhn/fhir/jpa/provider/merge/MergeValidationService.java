@@ -37,9 +37,9 @@ public class MergeValidationService {
 	}
 
 	MergeValidationResult validate(
-			MergeOperationInputParameters theMergeOperationParameters,
-			RequestDetails theRequestDetails,
-			MergeOperationOutcome theMergeOutcome) {
+		MergeOperationInputParameters theMergeOperationParameters,
+		RequestDetails theRequestDetails,
+		MergeOperationOutcome theMergeOutcome) {
 
 		IBaseOperationOutcome operationOutcome = theMergeOutcome.getOperationOutcome();
 
@@ -50,7 +50,7 @@ public class MergeValidationService {
 
 		// cast to Patient, since we only support merging Patient resources for now
 		Patient sourceResource =
-				(Patient) resolveSourceResource(theMergeOperationParameters, theRequestDetails, operationOutcome);
+			(Patient) resolveSourceResource(theMergeOperationParameters, theRequestDetails, operationOutcome);
 
 		if (sourceResource == null) {
 			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
@@ -59,7 +59,7 @@ public class MergeValidationService {
 
 		// cast to Patient, since we only support merging Patient resources for now
 		Patient targetResource =
-				(Patient) resolveTargetResource(theMergeOperationParameters, theRequestDetails, operationOutcome);
+			(Patient) resolveTargetResource(theMergeOperationParameters, theRequestDetails, operationOutcome);
 
 		if (targetResource == null) {
 			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
@@ -72,7 +72,7 @@ public class MergeValidationService {
 		}
 
 		if (!validateResultResourceIfExists(
-				theMergeOperationParameters, targetResource, sourceResource, operationOutcome)) {
+			theMergeOperationParameters, targetResource, sourceResource, operationOutcome)) {
 			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_400_BAD_REQUEST);
 			return MergeValidationResult.invalidResult();
 		}
@@ -80,10 +80,10 @@ public class MergeValidationService {
 	}
 
 	private boolean validateResultResourceIfExists(
-			MergeOperationInputParameters theMergeOperationParameters,
-			Patient theResolvedTargetResource,
-			Patient theResolvedSourceResource,
-			IBaseOperationOutcome theOperationOutcome) {
+		MergeOperationInputParameters theMergeOperationParameters,
+		Patient theResolvedTargetResource,
+		Patient theResolvedSourceResource,
+		IBaseOperationOutcome theOperationOutcome) {
 
 		if (theMergeOperationParameters.getResultResource() == null) {
 			// result resource is not provided, no further validation is needed
@@ -97,21 +97,21 @@ public class MergeValidationService {
 		// validate the result resource's  id as same as the target resource
 		if (!theResolvedTargetResource.getIdElement().toVersionless().equals(theResultResource.getIdElement())) {
 			String msg = String.format(
-					"'%s' must have the same versionless id as the actual resolved target resource. "
-							+ "The actual resolved target resource's id is: '%s'",
-					theMergeOperationParameters.getResultResourceParameterName(),
-					theResolvedTargetResource.getIdElement().toVersionless().getValue());
+				"'%s' must have the same versionless id as the actual resolved target resource. "
+					+ "The actual resolved target resource's id is: '%s'",
+				theMergeOperationParameters.getResultResourceParameterName(),
+				theResolvedTargetResource.getIdElement().toVersionless().getValue());
 			addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
 			retval = false;
 		}
 
 		// validate the result resource contains the identifiers provided in the target identifiers param
 		if (theMergeOperationParameters.hasAtLeastOneTargetIdentifier()
-				&& !hasAllIdentifiers(theResultResource, theMergeOperationParameters.getTargetIdentifiers())) {
+			&& !hasAllIdentifiers(theResultResource, theMergeOperationParameters.getTargetIdentifiers())) {
 			String msg = String.format(
-					"'%s' must have all the identifiers provided in %s",
-					theMergeOperationParameters.getResultResourceParameterName(),
-					theMergeOperationParameters.getTargetIdentifiersParameterName());
+				"'%s' must have all the identifiers provided in %s",
+				theMergeOperationParameters.getResultResourceParameterName(),
+				theMergeOperationParameters.getTargetIdentifiersParameterName());
 			addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
 			retval = false;
 		}
@@ -121,11 +121,11 @@ public class MergeValidationService {
 		// if the source resource is being deleted, the result resource must not have a replaces link to the source
 		// resource
 		if (!validateResultResourceReplacesLinkToSourceResource(
-				theResultResource,
-				theResolvedSourceResource,
-				theMergeOperationParameters.getResultResourceParameterName(),
-				theMergeOperationParameters.getDeleteSource(),
-				theOperationOutcome)) {
+			theResultResource,
+			theResolvedSourceResource,
+			theMergeOperationParameters.getResultResourceParameterName(),
+			theMergeOperationParameters.getDeleteSource(),
+			theOperationOutcome)) {
 			retval = false;
 		}
 
@@ -141,9 +141,9 @@ public class MergeValidationService {
 		List<Identifier> identifiersInResource = theResource.getIdentifier();
 		for (CanonicalIdentifier identifier : theIdentifiers) {
 			boolean identifierFound = identifiersInResource.stream()
-					.anyMatch(i -> i.getSystem()
-									.equals(identifier.getSystemElement().getValueAsString())
-							&& i.getValue().equals(identifier.getValueElement().getValueAsString()));
+				.anyMatch(i -> i.getSystem()
+					.equals(identifier.getSystemElement().getValueAsString())
+					&& i.getValue().equals(identifier.getValueElement().getValueAsString()));
 
 			if (!identifierFound) {
 				return false;
@@ -153,37 +153,37 @@ public class MergeValidationService {
 	}
 
 	private boolean validateResultResourceReplacesLinkToSourceResource(
-			Patient theResultResource,
-			Patient theResolvedSourceResource,
-			String theResultResourceParameterName,
-			boolean theDeleteSource,
-			IBaseOperationOutcome theOperationOutcome) {
+		Patient theResultResource,
+		Patient theResolvedSourceResource,
+		String theResultResourceParameterName,
+		boolean theDeleteSource,
+		IBaseOperationOutcome theOperationOutcome) {
 		// the result resource must have the replaces link set to the source resource
 		List<Reference> replacesLinkToSourceResource = getLinksToResource(
-				theResultResource, Patient.LinkType.REPLACES, theResolvedSourceResource.getIdElement());
+			theResultResource, Patient.LinkType.REPLACES, theResolvedSourceResource.getIdElement());
 
 		if (theDeleteSource) {
 			if (!replacesLinkToSourceResource.isEmpty()) {
 				String msg = String.format(
-						"'%s' must not have a 'replaces' link to the source resource "
-								+ "when the source resource will be deleted, as the link may prevent deleting the source "
-								+ "resource.",
-						theResultResourceParameterName);
+					"'%s' must not have a 'replaces' link to the source resource "
+						+ "when the source resource will be deleted, as the link may prevent deleting the source "
+						+ "resource.",
+					theResultResourceParameterName);
 				addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
 				return false;
 			}
 		} else {
 			if (replacesLinkToSourceResource.isEmpty()) {
 				String msg = String.format(
-						"'%s' must have a 'replaces' link to the source resource.", theResultResourceParameterName);
+					"'%s' must have a 'replaces' link to the source resource.", theResultResourceParameterName);
 				addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
 				return false;
 			}
 
 			if (replacesLinkToSourceResource.size() > 1) {
 				String msg = String.format(
-						"'%s' has multiple 'replaces' links to the source resource. There should be only one.",
-						theResultResourceParameterName);
+					"'%s' has multiple 'replaces' links to the source resource. There should be only one.",
+					theResultResourceParameterName);
 				addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
 				return false;
 			}
@@ -192,14 +192,14 @@ public class MergeValidationService {
 	}
 
 	private List<Reference> getLinksToResource(
-			Patient theResource, Patient.LinkType theLinkType, IIdType theResourceId) {
+		Patient theResource, Patient.LinkType theLinkType, IIdType theResourceId) {
 		List<Reference> links = getLinksOfTypeWithNonNullReference(theResource, theLinkType);
 		return links.stream()
-				.filter(r -> theResourceId.toVersionless().getValue().equals(r.getReference()))
-				.collect(Collectors.toList());
+			.filter(r -> theResourceId.toVersionless().getValue().equals(r.getReference()))
+			.collect(Collectors.toList());
 	}
 
-	protected List<Reference> getLinksOfTypeWithNonNullReference(Patient theResource, Patient.LinkType theLinkType) {
+	private List<Reference> getLinksOfTypeWithNonNullReference(Patient theResource, Patient.LinkType theLinkType) {
 		List<Reference> links = new ArrayList<>();
 		if (theResource.hasLink()) {
 			for (Patient.PatientLinkComponent link : theResource.getLink()) {
@@ -212,7 +212,7 @@ public class MergeValidationService {
 	}
 
 	private boolean validateSourceAndTargetAreSuitableForMerge(
-			Patient theSourceResource, Patient theTargetResource, IBaseOperationOutcome outcome) {
+		Patient theSourceResource, Patient theTargetResource, IBaseOperationOutcome outcome) {
 
 		if (theSourceResource.getId().equalsIgnoreCase(theTargetResource.getId())) {
 			String msg = "Source and target resources are the same resource.";
@@ -228,25 +228,25 @@ public class MergeValidationService {
 		}
 
 		List<Reference> replacedByLinksInTarget =
-				getLinksOfTypeWithNonNullReference(theTargetResource, Patient.LinkType.REPLACEDBY);
+			getLinksOfTypeWithNonNullReference(theTargetResource, Patient.LinkType.REPLACEDBY);
 		if (!replacedByLinksInTarget.isEmpty()) {
 			String ref = replacedByLinksInTarget.get(0).getReference();
 			String msg = String.format(
-					"Target resource was previously replaced by a resource with reference '%s', it "
-							+ "is not a suitable target for merging.",
-					ref);
+				"Target resource was previously replaced by a resource with reference '%s', it "
+					+ "is not a suitable target for merging.",
+				ref);
 			addErrorToOperationOutcome(outcome, msg, "invalid");
 			return false;
 		}
 
 		List<Reference> replacedByLinksInSource =
-				getLinksOfTypeWithNonNullReference(theSourceResource, Patient.LinkType.REPLACEDBY);
+			getLinksOfTypeWithNonNullReference(theSourceResource, Patient.LinkType.REPLACEDBY);
 		if (!replacedByLinksInSource.isEmpty()) {
 			String ref = replacedByLinksInSource.get(0).getReference();
 			String msg = String.format(
-					"Source resource was previously replaced by a resource with reference '%s', it "
-							+ "is not a suitable source for merging.",
-					ref);
+				"Source resource was previously replaced by a resource with reference '%s', it "
+					+ "is not a suitable source for merging.",
+				ref);
 			addErrorToOperationOutcome(outcome, msg, "invalid");
 			return false;
 		}
@@ -262,59 +262,59 @@ public class MergeValidationService {
 	 * @return true if the parameters are valid, false otherwise
 	 */
 	private boolean validateMergeOperationParameters(
-			MergeOperationInputParameters theMergeOperationParameters, IBaseOperationOutcome theOutcome) {
+		MergeOperationInputParameters theMergeOperationParameters, IBaseOperationOutcome theOutcome) {
 		List<String> errorMessages = new ArrayList<>();
 		if (!theMergeOperationParameters.hasAtLeastOneSourceIdentifier()
-				&& theMergeOperationParameters.getSourceResource() == null) {
+			&& theMergeOperationParameters.getSourceResource() == null) {
 			String msg = String.format(
-					"There are no source resource parameters provided, include either a '%s', or a '%s' parameter.",
-					theMergeOperationParameters.getSourceResourceParameterName(),
-					theMergeOperationParameters.getSourceIdentifiersParameterName());
+				"There are no source resource parameters provided, include either a '%s', or a '%s' parameter.",
+				theMergeOperationParameters.getSourceResourceParameterName(),
+				theMergeOperationParameters.getSourceIdentifiersParameterName());
 			errorMessages.add(msg);
 		}
 
 		// Spec has conflicting information about this case
 		if (theMergeOperationParameters.hasAtLeastOneSourceIdentifier()
-				&& theMergeOperationParameters.getSourceResource() != null) {
+			&& theMergeOperationParameters.getSourceResource() != null) {
 			String msg = String.format(
-					"Source resource must be provided either by '%s' or by '%s', not both.",
-					theMergeOperationParameters.getSourceResourceParameterName(),
-					theMergeOperationParameters.getSourceIdentifiersParameterName());
+				"Source resource must be provided either by '%s' or by '%s', not both.",
+				theMergeOperationParameters.getSourceResourceParameterName(),
+				theMergeOperationParameters.getSourceIdentifiersParameterName());
 			errorMessages.add(msg);
 		}
 
 		if (!theMergeOperationParameters.hasAtLeastOneTargetIdentifier()
-				&& theMergeOperationParameters.getTargetResource() == null) {
+			&& theMergeOperationParameters.getTargetResource() == null) {
 			String msg = String.format(
-					"There are no target resource parameters provided, include either a '%s', or a '%s' parameter.",
-					theMergeOperationParameters.getTargetResourceParameterName(),
-					theMergeOperationParameters.getTargetIdentifiersParameterName());
+				"There are no target resource parameters provided, include either a '%s', or a '%s' parameter.",
+				theMergeOperationParameters.getTargetResourceParameterName(),
+				theMergeOperationParameters.getTargetIdentifiersParameterName());
 			errorMessages.add(msg);
 		}
 
 		// Spec has conflicting information about this case
 		if (theMergeOperationParameters.hasAtLeastOneTargetIdentifier()
-				&& theMergeOperationParameters.getTargetResource() != null) {
+			&& theMergeOperationParameters.getTargetResource() != null) {
 			String msg = String.format(
-					"Target resource must be provided either by '%s' or by '%s', not both.",
-					theMergeOperationParameters.getTargetResourceParameterName(),
-					theMergeOperationParameters.getTargetIdentifiersParameterName());
+				"Target resource must be provided either by '%s' or by '%s', not both.",
+				theMergeOperationParameters.getTargetResourceParameterName(),
+				theMergeOperationParameters.getTargetIdentifiersParameterName());
 			errorMessages.add(msg);
 		}
 
 		Reference sourceRef = (Reference) theMergeOperationParameters.getSourceResource();
 		if (sourceRef != null && !sourceRef.hasReference()) {
 			String msg = String.format(
-					"Reference specified in '%s' parameter does not have a reference element.",
-					theMergeOperationParameters.getSourceResourceParameterName());
+				"Reference specified in '%s' parameter does not have a reference element.",
+				theMergeOperationParameters.getSourceResourceParameterName());
 			errorMessages.add(msg);
 		}
 
 		Reference targetRef = (Reference) theMergeOperationParameters.getTargetResource();
 		if (targetRef != null && !targetRef.hasReference()) {
 			String msg = String.format(
-					"Reference specified in '%s' parameter does not have a reference element.",
-					theMergeOperationParameters.getTargetResourceParameterName());
+				"Reference specified in '%s' parameter does not have a reference element.",
+				theMergeOperationParameters.getTargetResourceParameterName());
 			errorMessages.add(msg);
 		}
 
@@ -331,59 +331,59 @@ public class MergeValidationService {
 	}
 
 	private IBaseResource resolveSourceResource(
-			MergeOperationInputParameters theOperationParameters,
-			RequestDetails theRequestDetails,
-			IBaseOperationOutcome theOutcome) {
+		MergeOperationInputParameters theOperationParameters,
+		RequestDetails theRequestDetails,
+		IBaseOperationOutcome theOutcome) {
 		return resolveResource(
-				theOperationParameters.getSourceResource(),
-				theOperationParameters.getSourceIdentifiers(),
-				theRequestDetails,
-				theOutcome,
-				theOperationParameters.getSourceResourceParameterName(),
-				theOperationParameters.getSourceIdentifiersParameterName());
+			theOperationParameters.getSourceResource(),
+			theOperationParameters.getSourceIdentifiers(),
+			theRequestDetails,
+			theOutcome,
+			theOperationParameters.getSourceResourceParameterName(),
+			theOperationParameters.getSourceIdentifiersParameterName());
 	}
 
 	private IBaseResource resolveTargetResource(
-			MergeOperationInputParameters theOperationParameters,
-			RequestDetails theRequestDetails,
-			IBaseOperationOutcome theOutcome) {
+		MergeOperationInputParameters theOperationParameters,
+		RequestDetails theRequestDetails,
+		IBaseOperationOutcome theOutcome) {
 		return resolveResource(
-				theOperationParameters.getTargetResource(),
-				theOperationParameters.getTargetIdentifiers(),
-				theRequestDetails,
-				theOutcome,
-				theOperationParameters.getTargetResourceParameterName(),
-				theOperationParameters.getTargetIdentifiersParameterName());
+			theOperationParameters.getTargetResource(),
+			theOperationParameters.getTargetIdentifiers(),
+			theRequestDetails,
+			theOutcome,
+			theOperationParameters.getTargetResourceParameterName(),
+			theOperationParameters.getTargetIdentifiersParameterName());
 	}
 
 	private IBaseResource resolveResource(
-			IBaseReference theReference,
-			List<CanonicalIdentifier> theIdentifiers,
-			RequestDetails theRequestDetails,
-			IBaseOperationOutcome theOutcome,
-			String theOperationReferenceParameterName,
-			String theOperationIdentifiersParameterName) {
+		IBaseReference theReference,
+		List<CanonicalIdentifier> theIdentifiers,
+		RequestDetails theRequestDetails,
+		IBaseOperationOutcome theOutcome,
+		String theOperationReferenceParameterName,
+		String theOperationIdentifiersParameterName) {
 		if (theReference != null) {
 			return resolveResourceByReference(
-					theReference, theRequestDetails, theOutcome, theOperationReferenceParameterName);
+				theReference, theRequestDetails, theOutcome, theOperationReferenceParameterName);
 		}
 
 		return resolveResourceByIdentifiers(
-				theIdentifiers, theRequestDetails, theOutcome, theOperationIdentifiersParameterName);
+			theIdentifiers, theRequestDetails, theOutcome, theOperationIdentifiersParameterName);
 	}
 
 	private IBaseResource resolveResourceByIdentifiers(
-			List<CanonicalIdentifier> theIdentifiers,
-			RequestDetails theRequestDetails,
-			IBaseOperationOutcome theOutcome,
-			String theOperationParameterName) {
+		List<CanonicalIdentifier> theIdentifiers,
+		RequestDetails theRequestDetails,
+		IBaseOperationOutcome theOutcome,
+		String theOperationParameterName) {
 
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		TokenAndListParam tokenAndListParam = new TokenAndListParam();
 		for (CanonicalIdentifier identifier : theIdentifiers) {
 			TokenParam tokenParam = new TokenParam(
-					identifier.getSystemElement().getValueAsString(),
-					identifier.getValueElement().getValueAsString());
+				identifier.getSystemElement().getValueAsString(),
+				identifier.getValueElement().getValueAsString());
 			tokenAndListParam.addAnd(tokenParam);
 		}
 		searchParameterMap.add("identifier", tokenAndListParam);
@@ -393,13 +393,13 @@ public class MergeValidationService {
 		List<IBaseResource> resources = bundle.getAllResources();
 		if (resources.isEmpty()) {
 			String msg = String.format(
-					"No resources found matching the identifier(s) specified in '%s'", theOperationParameterName);
+				"No resources found matching the identifier(s) specified in '%s'", theOperationParameterName);
 			addErrorToOperationOutcome(theOutcome, msg, "not-found");
 			return null;
 		}
 		if (resources.size() > 1) {
 			String msg = String.format(
-					"Multiple resources found matching the identifier(s) specified in '%s'", theOperationParameterName);
+				"Multiple resources found matching the identifier(s) specified in '%s'", theOperationParameterName);
 			addErrorToOperationOutcome(theOutcome, msg, "multiple-matches");
 			return null;
 		}
@@ -408,10 +408,10 @@ public class MergeValidationService {
 	}
 
 	private IBaseResource resolveResourceByReference(
-			IBaseReference theReference,
-			RequestDetails theRequestDetails,
-			IBaseOperationOutcome theOutcome,
-			String theOperationParameterName) {
+		IBaseReference theReference,
+		RequestDetails theRequestDetails,
+		IBaseOperationOutcome theOutcome,
+		String theOperationParameterName) {
 		// TODO Emre: why does IBaseReference not have getIdentifier or hasReference methods?
 		// casting it to r4.Reference for now
 		Reference r4ref = (Reference) theReference;
@@ -422,19 +422,19 @@ public class MergeValidationService {
 			resource = myPatientDao.read(theResourceId.toVersionless(), theRequestDetails);
 		} catch (ResourceNotFoundException e) {
 			String msg = String.format(
-					"Resource not found for the reference specified in '%s' parameter", theOperationParameterName);
+				"Resource not found for the reference specified in '%s' parameter", theOperationParameterName);
 			addErrorToOperationOutcome(theOutcome, msg, "not-found");
 			return null;
 		}
 
 		if (theResourceId.hasVersionIdPart()
-				&& !theResourceId
-						.getVersionIdPart()
-						.equals(resource.getIdElement().getVersionIdPart())) {
+			&& !theResourceId
+			.getVersionIdPart()
+			.equals(resource.getIdElement().getVersionIdPart())) {
 			String msg = String.format(
-					"The reference in '%s' parameter has a version specified, "
-							+ "but it is not the latest version of the resource",
-					theOperationParameterName);
+				"The reference in '%s' parameter has a version specified, "
+					+ "but it is not the latest version of the resource",
+				theOperationParameterName);
 			addErrorToOperationOutcome(theOutcome, msg, "conflict");
 			return null;
 		}
