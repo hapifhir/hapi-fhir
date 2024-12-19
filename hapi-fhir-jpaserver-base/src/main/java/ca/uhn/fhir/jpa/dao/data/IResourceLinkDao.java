@@ -49,11 +49,27 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 	@Query("SELECT t FROM ResourceLink t LEFT JOIN FETCH t.myTargetResource tr WHERE t.myId in :pids")
 	List<ResourceLink> findByPidAndFetchTargetDetails(@Param("pids") List<Long> thePids);
 
+	/**
+	 * Stream Resource Ids of all resources that have a reference to the provided resource id
+	 *
+	 * @param theTargetResourceType the resource type part of the id
+	 * @param theTargetResourceFhirId the value part of the id
+	 * @return
+	 */
+
 	@Query(
 			"SELECT DISTINCT new ca.uhn.fhir.model.primitive.IdDt(t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
 	Stream<IdDt> streamSourceIdsForTargetFhirId(
 			@Param("resourceType") String theTargetResourceType,
 			@Param("resourceFhirId") String theTargetResourceFhirId);
+
+	/**
+	 * Count the number of resources that have a reference to the provided resource id
+	 *
+	 * @param theTargetResourceType the resource type part of the id
+	 * @param theTargetResourceFhirId the value part of the id
+	 * @return
+	 */
 
 	@Query(
 			"SELECT COUNT(DISTINCT t.mySourceResourcePid) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
