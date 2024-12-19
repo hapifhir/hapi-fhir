@@ -28,6 +28,8 @@ public interface INarrativeTemplate {
 
 	Set<String> getAppliesToProfiles();
 
+	Set<String> getAppliesToCode();
+
 	Set<String> getAppliesToResourceTypes();
 
 	Set<Class<? extends IBase>> getAppliesToClasses();

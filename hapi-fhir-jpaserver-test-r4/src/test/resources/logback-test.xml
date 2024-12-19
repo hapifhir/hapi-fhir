@@ -49,4 +49,6 @@
 	<!-- See https://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/#backend-lucene-io-writer-infostream for lucene logging
 	<logger name="org.hibernate.search.backend.lucene.infostream" level="TRACE"/>  -->
 
+	<!-- <logger name="ca.uhn.fhir.log.terminology_troubleshooting" level="TRACE"/> -->
+
 </configuration>

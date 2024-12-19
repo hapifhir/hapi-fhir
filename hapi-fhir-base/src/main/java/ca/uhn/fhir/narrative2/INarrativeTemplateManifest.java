@@ -32,7 +32,8 @@ public interface INarrativeTemplateManifest {
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
 			@Nonnull String theResourceName,
-			@Nonnull Collection<String> theProfiles);
+			@Nonnull Collection<String> theProfiles,
+			@Nonnull Collection<String> theCodes);
 
 	List<INarrativeTemplate> getTemplateByName(
 			@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull String theName);
