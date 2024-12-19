@@ -111,17 +111,17 @@
    </th:block>
 </th:block>
 
-<th:block th:if="${performed}" th:fragment="renderPerformed (performed)">
-   <th:block th:if="${performed} != null" th:object="${performed}">
+<th:block th:if="${time}" th:fragment="renderTime (time)">
+   <th:block th:if="${time} != null" th:object="${time}">
       <th:block th:switch="*{getClass().getSimpleName()}">
-         <th:block th:case="'DateTimeType'" th:text="*{getValue()}">Date</th:block>
+         <th:block th:case="'DateTimeType'" th:text="*{getValueAsString()}">Date</th:block>
          <th:block th:case="'Period'"
-                   th:text="*{#strings.concatReplaceNulls('', getStartElement().getValue(), '-', getEndElement().getValue() )}">
+                   th:text="*{#strings.concatReplaceNulls('', getStartElement().getValueAsString(), ' - ', getEndElement().getValueAsString() )}">
             Date
          </th:block>
          <th:block th:case="'Age'" th:text="*{getValue()}">Date</th:block>
          <th:block th:case="'Range'"
-                   th:text="*{#strings.concatReplaceNulls('', getLow().getValue(), '-', getHigh().getValue() )}">Date
+                   th:text="*{#strings.concatReplaceNulls('', getLow().getValueAsString(), ' - ', getHigh().getValueAsString() )}">Date
          </th:block>
          <th:block th:case="'StringType'" th:text="*{getValue()}">Date</th:block>
       </th:block>
