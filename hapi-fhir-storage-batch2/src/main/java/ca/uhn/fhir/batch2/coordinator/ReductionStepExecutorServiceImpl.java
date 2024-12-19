@@ -235,7 +235,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			ourLog.error("Job completion failed for Job {}", instance.getInstanceId(), ex);
 
 			executeInTransactionWithSynchronization(() -> {
-
 				myJobPersistence.updateInstance(instance.getInstanceId(), theInstance -> {
 					theInstance.setEndTime(new Date());
 					myJobInstanceStatusUpdater.updateInstanceStatus(theInstance, StatusEnum.FAILED);
