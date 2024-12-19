@@ -35,7 +35,6 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.HAPI_BATCH_JOB_
  * Start a job and create a Task resource that tracks the status of the job. This is designed in a way that
  * it could be used by any Batch 2 job.
  */
-
 public class Batch2TaskHelper {
 
 	public Task startJobAndCreateAssociatedTask(
