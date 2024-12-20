@@ -64,7 +64,6 @@ public class ReplaceReferencesPatchBundleSvc {
 	 * @param theRequestDetails
 	 * @return
 	 */
-
 	public Bundle patchReferencingResources(
 			ReplaceReferencesRequest theReplaceReferencesRequest,
 			List<IdDt> theResourceIds,

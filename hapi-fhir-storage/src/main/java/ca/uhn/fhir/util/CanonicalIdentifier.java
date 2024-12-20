@@ -110,7 +110,7 @@ public class CanonicalIdentifier extends BaseIdentifierDt {
 			retval.setSystem(ident.getSystem()).setValue(ident.getValue());
 		} else {
 			throw new InternalErrorException(Msg.code(1486) + "Expected 'Identifier' type but was '"
-				+ theIdentifier.getClass().getName() + "'");
+					+ theIdentifier.getClass().getName() + "'");
 		}
 		return retval;
 	}
