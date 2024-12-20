@@ -28,7 +28,6 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Bundle;
@@ -44,13 +43,13 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 	public static final String RESOURCE_TYPES_SYSTEM = "http://hl7.org/fhir/ValueSet/resource-types";
 
 	protected final FhirContext myFhirContext;
+	protected final DaoRegistry myDaoRegistry;
 
 	private List<Bundle> myPatchOutputBundles = new ArrayList<>();
-	private IFhirResourceDao<Task> myTaskDao;
 
 	public ReplaceReferenceUpdateTaskReducerStep(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
 		myFhirContext = theDaoRegistry.getFhirContext();
-		myTaskDao = theDaoRegistry.getResourceDao(Task.class);
 	}
 
 	@Nonnull
@@ -72,7 +71,8 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
 		SystemRequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(params.getPartitionId());
-		Task task = myTaskDao.read(params.getTaskId().asIdDt(), requestDetails);
+		Task task =
+				myDaoRegistry.getResourceDao(Task.class).read(params.getTaskId().asIdDt(), requestDetails);
 
 		task.setStatus(Task.TaskStatus.COMPLETED);
 		// TODO KHS this Task will probably be too large for large jobs. Revisit this model once we support Provenance
@@ -88,7 +88,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 			task.addContained(outputBundle);
 		});
 
-		myTaskDao.update(task, requestDetails);
+		myDaoRegistry.getResourceDao(Task.class).update(task, requestDetails);
 
 		ReplaceReferenceResultsJson result = new ReplaceReferenceResultsJson();
 		result.setTaskId(params.getTaskId());

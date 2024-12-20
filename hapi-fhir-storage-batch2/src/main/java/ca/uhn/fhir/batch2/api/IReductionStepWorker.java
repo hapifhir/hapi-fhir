@@ -25,13 +25,16 @@ import jakarta.annotation.Nonnull;
 
 /**
  * Reduction step worker. Once all chunks from the previous step have completed, consume() will first be called on
- * all chunks, and then funally run() will be called on this step.
+ * all chunks, and then finally run() will be called on this step.
  * @param <PT> Job Parameter Type
  * @param <IT> Input Parameter type (real input for step is ListResult of IT
  * @param <OT> Output Job Report Type
  */
 public interface IReductionStepWorker<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
 		extends IJobStepWorker<PT, IT, OT> {
+
+	// TODO KHS create an abstract superclass under this that enforces the one-at-a-time contract
+	// (this contract is currently baked into the implementations inconsistently)
 
 	/**
 	 *

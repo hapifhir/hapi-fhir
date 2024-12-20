@@ -34,6 +34,7 @@ public class FhirIdJson implements IModelJson {
 	@JsonProperty("id")
 	private String myFhirId;
 
+	// Jackson needs an empty constructor
 	public FhirIdJson() {}
 
 	public FhirIdJson(String theResourceType, String theFhirId) {

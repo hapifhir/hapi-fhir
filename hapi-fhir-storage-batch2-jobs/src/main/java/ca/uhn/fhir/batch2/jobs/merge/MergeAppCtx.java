@@ -92,7 +92,7 @@ public class MergeAppCtx {
 	}
 
 	@Bean
-	public ReplaceReferencesErrorHandler<MergeJobParameters> mergeErorHandler(
+	public ReplaceReferencesErrorHandler<MergeJobParameters> mergeErrorHandler(
 			DaoRegistry theDaoRegistry, Batch2TaskHelper theBatch2TaskHelper) {
 		IFhirResourceDao<Task> taskDao = theDaoRegistry.getResourceDao(Task.class);
 		return new ReplaceReferencesErrorHandler<>(theBatch2TaskHelper, taskDao);
