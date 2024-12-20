@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.jpa.provider.merge;
 
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_RESULT_PATIENT;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_TARGET_PATIENT;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_RESULT_PATIENT;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER;
 
 /**
  * See <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
@@ -35,26 +35,26 @@ public class PatientMergeOperationInputParameters extends MergeOperationInputPar
 
 	@Override
 	public String getSourceResourceParameterName() {
-		return OPERATION_MERGE_SOURCE_PATIENT;
+		return OPERATION_MERGE_PARAM_SOURCE_PATIENT;
 	}
 
 	@Override
 	public String getTargetResourceParameterName() {
-		return OPERATION_MERGE_TARGET_PATIENT;
+		return OPERATION_MERGE_PARAM_TARGET_PATIENT;
 	}
 
 	@Override
 	public String getSourceIdentifiersParameterName() {
-		return OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER;
+		return OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER;
 	}
 
 	@Override
 	public String getTargetIdentifiersParameterName() {
-		return OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER;
+		return OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER;
 	}
 
 	@Override
 	public String getResultResourceParameterName() {
-		return OPERATION_MERGE_RESULT_PATIENT;
+		return OPERATION_MERGE_PARAM_RESULT_PATIENT;
 	}
 }

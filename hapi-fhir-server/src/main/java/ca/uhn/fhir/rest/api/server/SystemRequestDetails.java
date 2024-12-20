@@ -78,6 +78,7 @@ public class SystemRequestDetails extends RequestDetails {
 		}
 	}
 
+	// TODO KHS use this everywhere we create a srd with only one partition
 	public static SystemRequestDetails forRequestPartitionId(RequestPartitionId thePartitionId) {
 		SystemRequestDetails retVal = new SystemRequestDetails();
 		retVal.setRequestPartitionId(thePartitionId);

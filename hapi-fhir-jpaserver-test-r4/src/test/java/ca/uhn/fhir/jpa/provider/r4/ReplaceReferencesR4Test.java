@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.IOException;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
@@ -40,7 +39,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
-	void testReplaceReferences(boolean isAsync) throws IOException {
+	void testReplaceReferences(boolean isAsync) {
 		// exec
 		Parameters outParams = myTestHelper.callReplaceReferences(myClient, isAsync);
 
@@ -78,7 +77,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
-	void testReplaceReferencesSmallBatchSize(boolean isAsync) throws IOException {
+	void testReplaceReferencesSmallBatchSize(boolean isAsync) {
 		// exec
 		Parameters outParams = myTestHelper.callReplaceReferencesWithBatchSize(myClient, isAsync, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
 

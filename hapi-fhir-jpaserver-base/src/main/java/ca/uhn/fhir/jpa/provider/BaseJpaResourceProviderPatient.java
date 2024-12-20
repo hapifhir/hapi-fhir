@@ -274,21 +274,21 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			HttpServletRequest theServletRequest,
 			HttpServletResponse theServletResponse,
 			ServletRequestDetails theRequestDetails,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER)
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER)
 					List<Identifier> theSourcePatientIdentifier,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER)
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER)
 					List<Identifier> theTargetPatientIdentifier,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_SOURCE_PATIENT, max = 1)
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT, max = 1)
 					IBaseReference theSourcePatient,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_TARGET_PATIENT, max = 1)
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT, max = 1)
 					IBaseReference theTargetPatient,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PREVIEW, typeName = "boolean", max = 1)
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_PREVIEW, typeName = "boolean", max = 1)
 					IPrimitiveType<Boolean> thePreview,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_DELETE_SOURCE, typeName = "boolean", max = 1)
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE, typeName = "boolean", max = 1)
 					IPrimitiveType<Boolean> theDeleteSource,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_RESULT_PATIENT, max = 1)
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_RESULT_PATIENT, max = 1)
 					IBaseResource theResultPatient,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_BATCH_SIZE, typeName = "unsignedInt")
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_BATCH_SIZE, typeName = "unsignedInt")
 					IPrimitiveType<Integer> theBatchSize) {
 
 		startRequest(theServletRequest);

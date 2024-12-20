@@ -281,15 +281,15 @@ public class ProviderConstants {
 	/**
 	 * Patient $merge operation parameters
 	 */
-	public static final String OPERATION_MERGE_SOURCE_PATIENT = "source-patient";
+	public static final String OPERATION_MERGE_PARAM_SOURCE_PATIENT = "source-patient";
 
-	public static final String OPERATION_MERGE_SOURCE_PATIENT_IDENTIFIER = "source-patient-identifier";
-	public static final String OPERATION_MERGE_TARGET_PATIENT = "target-patient";
-	public static final String OPERATION_MERGE_TARGET_PATIENT_IDENTIFIER = "target-patient-identifier";
-	public static final String OPERATION_MERGE_RESULT_PATIENT = "result-patient";
-	public static final String OPERATION_MERGE_BATCH_SIZE = "batch-size";
-	public static final String OPERATION_MERGE_PREVIEW = "preview";
-	public static final String OPERATION_MERGE_DELETE_SOURCE = "delete-source";
+	public static final String OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER = "source-patient-identifier";
+	public static final String OPERATION_MERGE_PARAM_TARGET_PATIENT = "target-patient";
+	public static final String OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER = "target-patient-identifier";
+	public static final String OPERATION_MERGE_PARAM_RESULT_PATIENT = "result-patient";
+	public static final String OPERATION_MERGE_PARAM_BATCH_SIZE = "batch-size";
+	public static final String OPERATION_MERGE_PARAM_PREVIEW = "preview";
+	public static final String OPERATION_MERGE_PARAM_DELETE_SOURCE = "delete-source";
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_INPUT = "input";
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_OUTCOME = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_RESULT = "result";
