@@ -167,23 +167,23 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 							name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID,
 							min = 1,
 							typeName = "string")
-					String theSourceId,
+					IPrimitiveType<String> theSourceId,
 			@OperationParam(
 							name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID,
 							min = 1,
 							typeName = "string")
-					String theTargetId,
+					IPrimitiveType<String> theTargetId,
 			@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_BATCH_SIZE, typeName = "unsignedInt")
 					IPrimitiveType<Integer> theBatchSize,
 			ServletRequestDetails theServletRequest) {
 		startRequest(theServletRequest);
 
 		try {
-			validateReplaceReferencesParams(theSourceId, theTargetId);
+			validateReplaceReferencesParams(theSourceId.getValue(), theTargetId.getValue());
 			int batchSize = myStorageSettings.getTransactionWriteBatchSizeFromOperationParameter(theBatchSize);
 
-			IdDt sourceId = new IdDt(theSourceId);
-			IdDt targetId = new IdDt(theTargetId);
+			IdDt sourceId = new IdDt(theSourceId.getValue());
+			IdDt targetId = new IdDt(theTargetId.getValue());
 			RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
 					theServletRequest, ReadPartitionIdRequestDetails.forRead(targetId));
 			ReplaceReferencesRequest replaceReferencesRequest =
