@@ -150,9 +150,11 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		List<IdDt> allIds = myHapiTransactionService
 				.withRequest(theRequestDetails)
-				.execute(() -> myResourceLinkDao.streamSourceIdsForTargetFhirId(
-						theReplaceReferencesRequest.sourceId.getResourceType(),
-						theReplaceReferencesRequest.sourceId.getIdPart()).collect(Collectors.toList()));
+				.execute(() -> myResourceLinkDao
+						.streamSourceIdsForTargetFhirId(
+								theReplaceReferencesRequest.sourceId.getResourceType(),
+								theReplaceReferencesRequest.sourceId.getIdPart())
+						.collect(Collectors.toList()));
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
 				theReplaceReferencesRequest, allIds, theRequestDetails);

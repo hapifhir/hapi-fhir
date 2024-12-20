@@ -42,7 +42,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -61,18 +60,18 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Description(
-		"Marks all currently existing resources of a given type, or all resources of all types, for reindexing.")
+			"Marks all currently existing resources of a given type, or all resources of all types, for reindexing.")
 	@Operation(
-		name = MARK_ALL_RESOURCES_FOR_REINDEXING,
-		idempotent = false,
-		returnParameters = {@OperationParam(name = "status")})
+			name = MARK_ALL_RESOURCES_FOR_REINDEXING,
+			idempotent = false,
+			returnParameters = {@OperationParam(name = "status")})
 	/**
 	 * @deprecated
 	 * @see ReindexProvider#Reindex(List, IPrimitiveType, RequestDetails)
 	 */
 	@Deprecated
 	public IBaseResource markAllResourcesForReindexing(
-		@OperationParam(name = "type", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theType) {
+			@OperationParam(name = "type", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theType) {
 
 		if (theType != null && isNotBlank(theType.getValueAsString())) {
 			getResourceReindexingSvc().markAllResourcesForReindexing(theType.getValueAsString());
@@ -90,9 +89,9 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 
 	@Description("Forces a single pass of the resource reindexing processor")
 	@Operation(
-		name = PERFORM_REINDEXING_PASS,
-		idempotent = false,
-		returnParameters = {@OperationParam(name = "status")})
+			name = PERFORM_REINDEXING_PASS,
+			idempotent = false,
+			returnParameters = {@OperationParam(name = "status")})
 	/**
 	 * @deprecated
 	 * @see ReindexProvider#Reindex(List, IPrimitiveType, RequestDetails)
@@ -116,8 +115,8 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 
 	@Operation(name = JpaConstants.OPERATION_GET_RESOURCE_COUNTS, idempotent = true)
 	@Description(
-		shortDefinition =
-			"Provides the number of resources currently stored on the server, broken down by resource type")
+			shortDefinition =
+					"Provides the number of resources currently stored on the server, broken down by resource type")
 	public IBaseParameters getResourceCounts() {
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 
@@ -126,23 +125,23 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 		counts = new TreeMap<>(counts);
 		for (Map.Entry<String, Long> nextEntry : counts.entrySet()) {
 			ParametersUtil.addParameterToParametersInteger(
-				getContext(),
-				retVal,
-				nextEntry.getKey(),
-				nextEntry.getValue().intValue());
+					getContext(),
+					retVal,
+					nextEntry.getKey(),
+					nextEntry.getValue().intValue());
 		}
 
 		return retVal;
 	}
 
 	@Operation(
-		name = ProviderConstants.OPERATION_META,
-		idempotent = true,
-		returnParameters = {@OperationParam(name = "return", typeName = "Meta")})
+			name = ProviderConstants.OPERATION_META,
+			idempotent = true,
+			returnParameters = {@OperationParam(name = "return", typeName = "Meta")})
 	public IBaseParameters meta(RequestDetails theRequestDetails) {
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 		ParametersUtil.addParameterToParameters(
-			getContext(), retVal, "return", getDao().metaGetOperation(theRequestDetails));
+				getContext(), retVal, "return", getDao().metaGetOperation(theRequestDetails));
 		return retVal;
 	}
 
@@ -160,17 +159,23 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 
 	@Operation(name = ProviderConstants.OPERATION_REPLACE_REFERENCES, global = true)
 	@Description(
-		value =
-			"This operation searches for all references matching the provided id and updates them to references to the provided target-reference-id.",
-		shortDefinition = "Repoints referencing resources to another resources instance")
+			value =
+					"This operation searches for all references matching the provided id and updates them to references to the provided target-reference-id.",
+			shortDefinition = "Repoints referencing resources to another resources instance")
 	public IBaseParameters replaceReferences(
-		@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID, min = 1, typeName = "string")
-		String theSourceId,
-		@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID, min = 1, typeName = "string")
-		String theTargetId,
-		@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_BATCH_SIZE, typeName = "unsignedInt")
-		IPrimitiveType<Integer> theBatchSize,
-		ServletRequestDetails theServletRequest) {
+			@OperationParam(
+							name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID,
+							min = 1,
+							typeName = "string")
+					String theSourceId,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID,
+							min = 1,
+							typeName = "string")
+					String theTargetId,
+			@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_BATCH_SIZE, typeName = "unsignedInt")
+					IPrimitiveType<Integer> theBatchSize,
+			ServletRequestDetails theServletRequest) {
 		startRequest(theServletRequest);
 
 		try {
@@ -180,13 +185,13 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 			IdDt sourceId = new IdDt(theSourceId);
 			IdDt targetId = new IdDt(theTargetId);
 			RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
-				theServletRequest, ReadPartitionIdRequestDetails.forRead(targetId));
+					theServletRequest, ReadPartitionIdRequestDetails.forRead(targetId));
 			ReplaceReferencesRequest replaceReferencesRequest =
-				new ReplaceReferencesRequest(sourceId, targetId, batchSize, partitionId);
+					new ReplaceReferencesRequest(sourceId, targetId, batchSize, partitionId);
 			IBaseParameters retval =
-				getReplaceReferencesSvc().replaceReferences(replaceReferencesRequest, theServletRequest);
+					getReplaceReferencesSvc().replaceReferences(replaceReferencesRequest, theServletRequest);
 			if (ParametersUtil.getNamedParameter(getContext(), retval, OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)
-				.isPresent()) {
+					.isPresent()) {
 				HttpServletResponse response = theServletRequest.getServletResponse();
 				response.setStatus(HttpServletResponse.SC_ACCEPTED);
 			}
@@ -199,12 +204,12 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 	private static void validateReplaceReferencesParams(String theSourceId, String theTargetId) {
 		if (isBlank(theSourceId)) {
 			throw new InvalidRequestException(Msg.code(2583) + "Parameter '"
-				+ OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID + "' is blank");
+					+ OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID + "' is blank");
 		}
 
 		if (isBlank(theTargetId)) {
 			throw new InvalidRequestException(Msg.code(2584) + "Parameter '"
-				+ OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID + "' is blank");
+					+ OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID + "' is blank");
 		}
 	}
 }

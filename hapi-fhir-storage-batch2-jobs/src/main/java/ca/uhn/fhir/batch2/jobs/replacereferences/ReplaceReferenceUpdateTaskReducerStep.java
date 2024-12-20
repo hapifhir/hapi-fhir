@@ -72,8 +72,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
 		SystemRequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(params.getPartitionId());
-		Task task =
-				myTaskDao.read(params.getTaskId().asIdDt(), requestDetails);
+		Task task = myTaskDao.read(params.getTaskId().asIdDt(), requestDetails);
 
 		task.setStatus(Task.TaskStatus.COMPLETED);
 		// TODO KHS this Task will probably be too large for large jobs. Revisit this model once we support Provenance
