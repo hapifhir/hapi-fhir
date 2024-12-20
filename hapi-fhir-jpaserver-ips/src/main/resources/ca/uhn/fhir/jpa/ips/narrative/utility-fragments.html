@@ -22,6 +22,16 @@
    </th:block>
 </th:block>
 
+<th:block th:if="${immunization}" th:fragment="renderVaccineManufacturer (immunization)">
+	<th:block th:with="organization = ${#fhirpath.evaluateFirst(immunization, 'manufacturer.resolve()')}">
+		<th:block th:if="${organization != null}">
+			<th:block th:if='${organization.getResourceType().name() == "Organization"}'>
+				<th:block th:text="${organization.getName()}">Org Name</th:block>
+			</th:block>
+		</th:block>
+	</th:block>
+</th:block>
+
 <th:block th:fragment="renderMedication (medicationType)">
    <th:block th:if="${medicationType} != null" th:object="${medicationType}">
       <th:block th:switch="*{getClass().getSimpleName()}">
