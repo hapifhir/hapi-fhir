@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvaluatorSingleRequest;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class MeasureOperationsProvider {
@@ -89,18 +90,18 @@ public class MeasureOperationsProvider {
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
 				.evaluate(
-						Eithers.forMiddle3(theId),
-						myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails),
-						myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails),
-						theReportType,
-						theSubject,
-						theLastReceivedOn,
-						null,
-						theTerminologyEndpoint,
-						null,
-						theAdditionalData,
-						theParameters,
-						theProductLine,
-						thePractitioner);
+					R4MeasureEvaluatorSingleRequest.builder()
+						.setMeasure(Eithers.forMiddle3(theId))
+						.setPeriodStart(myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails))
+						.setPeriodEnd(myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails))
+						.setReportType(theReportType)
+						.setSubjectId(theSubject)
+						.setLastReceivedOn(theLastReceivedOn)
+						.setTerminologyEndpoint(theTerminologyEndpoint)
+						.setAdditionalData(theAdditionalData)
+						.setParameters(theParameters)
+						.setProductLine(theProductLine)
+						.setPractitioner(thePractitioner)
+						.build());
 	}
 }
