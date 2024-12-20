@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.7.14-SNAPSHOT</version>
+	<version>7.7.15-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1087,7 +1087,12 @@
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- Clinical Reasoning & CQL Support -->
-		<clinical-reasoning.version>3.13.1</clinical-reasoning.version>
+		<clinical-reasoning.version>3.15.0</clinical-reasoning.version>
+		<!-- TODO: LD: this a TEMPORARY HACK to get around the fact that CR 3.15.0 is missing a pom file -->
+		<!-- This needs to be removed next time we do a CR bump -->
+		<!-- See: https://github.com/hapifhir/hapi-fhir/issues/6567 -->
+		<!-- Direct CQL dependencies -->
+		<cql.version>3.19.1</cql.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -2392,6 +2397,21 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+
+			<!-- TODO: LD: this a TEMPORARY HACK to get around the fact that CR 3.15.0 is missing a pom file -->
+			<!-- This needs to be removed next time we do a CR bump -->
+			<!-- See: https://github.com/hapifhir/hapi-fhir/issues/6567 -->
+			<!-- Direct CQL dependencies -->
+			<dependency>
+				<groupId>info.cqframework</groupId>
+				<artifactId>cql-to-elm</artifactId>
+				<version>${cql.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>info.cqframework</groupId>
+				<artifactId>cqf-fhir</artifactId>
+				<version>${cql.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -2649,7 +2669,7 @@
 				<plugin>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-tinder-plugin</artifactId>
-					<version>7.7.14-SNAPSHOT</version>
+					<version>7.7.15-SNAPSHOT</version>
 					<executions>
 						<execution>
 							<goals>
