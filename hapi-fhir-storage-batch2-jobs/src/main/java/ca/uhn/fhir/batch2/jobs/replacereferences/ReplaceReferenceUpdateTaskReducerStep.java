@@ -75,11 +75,11 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 		try {
 			ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
 			SystemRequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(params.getPartitionId());
-			Task task =
-				myTaskDao.read(params.getTaskId().asIdDt(), requestDetails);
+			Task task = myTaskDao.read(params.getTaskId().asIdDt(), requestDetails);
 
 			task.setStatus(Task.TaskStatus.COMPLETED);
-			// TODO KHS this Task will probably be too large for large jobs. Revisit this model once we support Provenance
+			// TODO KHS this Task will probably be too large for large jobs. Revisit this model once we support
+			// Provenance
 			// resources.
 			myPatchOutputBundles.forEach(outputBundle -> {
 				Task.TaskOutputComponent output = task.addOutput();
@@ -87,7 +87,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 				coding.setSystem(RESOURCE_TYPES_SYSTEM);
 				coding.setCode("Bundle");
 				Reference outputBundleReference =
-					new Reference("#" + outputBundle.getIdElement().getIdPart());
+						new Reference("#" + outputBundle.getIdElement().getIdPart());
 				output.setValue(outputBundleReference);
 				task.addContained(outputBundle);
 			});
