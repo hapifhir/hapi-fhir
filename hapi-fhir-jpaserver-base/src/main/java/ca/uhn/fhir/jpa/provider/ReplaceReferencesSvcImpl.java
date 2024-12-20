@@ -88,8 +88,10 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 	@Override
 	public Integer countResourcesReferencingResource(IIdType theResourceId, RequestDetails theRequestDetails) {
-		return myHapiTransactionService.withRequest(theRequestDetails).execute(() -> myResourceLinkDao.countResourcesTargetingFhirTypeAndFhirId(
-				theResourceId.getResourceType(), theResourceId.getIdPart()));
+		return myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.execute(() -> myResourceLinkDao.countResourcesTargetingFhirTypeAndFhirId(
+						theResourceId.getResourceType(), theResourceId.getIdPart()));
 	}
 
 	private IBaseParameters replaceReferencesPreferAsync(
