@@ -33,6 +33,7 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
@@ -56,6 +57,7 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -85,6 +87,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private final Semaphore myCurrentlyExecuting = new Semaphore(1);
 	private final AtomicReference<String> myCurrentlyFinalizingInstanceId = new AtomicReference<>();
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 	private Timer myHeartbeatTimer;
 
 	/**
@@ -97,6 +100,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		myJobPersistence = theJobPersistence;
 		myTransactionService = theTransactionService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 
 		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
 	}
@@ -232,7 +236,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 			executeInTransactionWithSynchronization(() -> {
 				myJobPersistence.updateInstance(instance.getInstanceId(), theInstance -> {
-					theInstance.setStatus(StatusEnum.FAILED);
+					theInstance.setEndTime(new Date());
+					myJobInstanceStatusUpdater.updateInstanceStatus(theInstance, StatusEnum.FAILED);
 					return true;
 				});
 				return null;

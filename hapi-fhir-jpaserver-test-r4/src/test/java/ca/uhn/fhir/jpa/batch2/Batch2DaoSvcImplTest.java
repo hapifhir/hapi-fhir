@@ -43,7 +43,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	void beforeEach() {
-		mySvc = new Batch2DaoSvcImpl(myResourceTableDao, myMatchUrlService, myDaoRegistry, myFhirContext, myIHapiTransactionService);
+		mySvc = new Batch2DaoSvcImpl(myResourceTableDao, myResourceLinkDao,  myMatchUrlService, myDaoRegistry, myFhirContext, myIHapiTransactionService);
 	}
 
 	@Test

@@ -31,7 +31,10 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
@@ -73,6 +76,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	@Autowired
 	@RegisterExtension
 	protected RestfulServerExtension myServer;
+
+	private MyHttpCodeClientIntercepter myLastHttpResponseCodeCapture = new MyHttpCodeClientIntercepter();
 
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
@@ -127,8 +132,10 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 				myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
 				if (shouldLogClient()) {
-					myClient.registerInterceptor(new LoggingInterceptor());
+					myClient.registerInterceptor(new LoggingInterceptor(verboseClientLogging()));
 				}
+
+				myClient.registerInterceptor(myLastHttpResponseCodeCapture);
 			});
 
 	@Autowired
@@ -157,6 +164,10 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		return true;
 	}
 
+	protected boolean verboseClientLogging() {
+		return false;
+	}
+
 	protected List<String> toNameList(Bundle resp) {
 		List<String> names = new ArrayList<>();
 		for (BundleEntryComponent next : resp.getEntry()) {
@@ -170,6 +181,10 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			}
 		}
 		return names;
+	}
+
+	protected int getLastHttpStatusCode() {
+		return myLastHttpResponseCodeCapture.getLastHttpStatusCode();
 	}
 
 	public static int getNumberOfParametersByName(Parameters theParameters, String theName) {
@@ -240,5 +255,22 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 
 		return ids;
+	}
+
+	private class MyHttpCodeClientIntercepter implements IClientInterceptor {
+
+		private int myLastHttpStatusCode;
+
+		@Override
+		public void interceptRequest(IHttpRequest theRequest) {}
+
+		@Override
+		public void interceptResponse(IHttpResponse theResponse) throws IOException {
+			myLastHttpStatusCode = theResponse.getStatus();
+		}
+
+		public int getLastHttpStatusCode() {
+			return myLastHttpStatusCode;
+		}
 	}
 }
