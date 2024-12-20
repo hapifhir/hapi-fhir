@@ -138,6 +138,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
@@ -300,6 +301,9 @@ public abstract class BaseJpaTest extends BaseTest {
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
+
+	@Autowired
+	protected ApplicationContext myApplicationContext;
 
 	@SuppressWarnings("BusyWait")
 	public static void waitForSize(int theTarget, List<?> theList) {

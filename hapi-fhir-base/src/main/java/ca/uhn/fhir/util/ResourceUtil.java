@@ -22,10 +22,18 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.io.IOException;
+import java.io.Reader;
+
 public class ResourceUtil {
+
+	private static final String RAW_JSON = "RAW_JSON";
+
+	private ResourceUtil() {}
 
 	/**
 	 * This method removes the narrative from the resource, or if the resource is a bundle, removes the narrative from
@@ -46,5 +54,13 @@ public class ResourceUtil {
 		if (textElement != null) {
 			textElement.getMutator().setValue(theInput, null);
 		}
+	}
+
+	public static void addRawDataToResource(IBaseResource theResource, String theRawJson) throws IOException {
+		theResource.setUserData(RAW_JSON, theRawJson);
+	}
+
+	public static String getRawStringFromResourceOrNull(@Nonnull IBaseResource theResource) {
+		return (String)theResource.getUserData(RAW_JSON);
 	}
 }

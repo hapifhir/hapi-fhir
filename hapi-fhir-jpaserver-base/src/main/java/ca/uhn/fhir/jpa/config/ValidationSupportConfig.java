@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
+import ca.uhn.fhir.jpa.validation.FhirContextValidationSupportSvc;
 import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
@@ -41,6 +42,11 @@ public class ValidationSupportConfig {
 
 	@Autowired
 	private FhirContext myFhirContext;
+
+	@Bean
+	public FhirContextValidationSupportSvc fhirValidationSupportSvc() {
+		return new FhirContextValidationSupportSvc(myFhirContext);
+	}
 
 	@Bean(name = JpaConfig.DEFAULT_PROFILE_VALIDATION_SUPPORT)
 	public DefaultProfileValidationSupport defaultProfileValidationSupport() {

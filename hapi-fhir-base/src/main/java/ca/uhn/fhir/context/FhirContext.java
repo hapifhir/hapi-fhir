@@ -137,6 +137,15 @@ public class FhirContext {
 	private volatile Boolean myFormatNDJsonSupported;
 	private volatile Boolean myFormatRdfSupported;
 	private IFhirValidatorFactory myFhirValidatorFactory = FhirValidator::new;
+	/**
+	 * If true, parsed resources will have the json string
+	 * used to create them stored
+	 * in the UserData.
+	 *
+	 * This is to help with validation, because the parser itself is far
+	 * more lenient than validation might be.
+	 */
+	private boolean myStoreResourceJsonFlag = false;
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
@@ -760,6 +769,14 @@ public class FhirContext {
 	 */
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
+	}
+
+	public void setStoreRawJson(boolean theStoreResourceJsonFlag) {
+		myStoreResourceJsonFlag = theStoreResourceJsonFlag;
+	}
+
+	public boolean isStoreResourceJson() {
+		return myStoreResourceJsonFlag;
 	}
 
 	public IFhirVersion getVersion() {

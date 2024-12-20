@@ -8,6 +8,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.ResourceUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
@@ -83,7 +84,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class JsonParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4();
 
 	private Bundle createBundleWithPatient() {
 		Bundle b = new Bundle();
@@ -101,6 +102,40 @@ public class JsonParserR4Test extends BaseTest {
 	@AfterEach
 	public void afterEach() {
 		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+		ourCtx.setStoreRawJson(false);
+	}
+
+	@Test
+	public void parseResource_withStoreRawJsonTrue_willStoreTheRawJsonOnTheResource() {
+		ourCtx.setStoreRawJson(true);
+		IParser parser = ourCtx.newJsonParser();
+		String patientStr;
+		{
+			patientStr = """
+				{
+					"resourceType": "Patient",
+					"id": "P1212",
+					"contact": [{
+						"name": [{
+							"use": "official",
+							"family": "Simpson",
+							"given": ["Homer" ]
+						}]
+					}],
+					"text": {
+						"status": "additional",
+						"div": "<div>a div element</div>"
+					}
+				}
+				""";
+		}
+
+		// test
+		Patient patient = parser.parseResource(Patient.class, patientStr);
+
+		// verify
+		String rawJson = ResourceUtil.getRawStringFromResourceOrNull(patient);
+		assertEquals(patientStr, rawJson);
 	}
 
 	@Test

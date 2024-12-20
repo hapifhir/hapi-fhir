@@ -46,9 +46,11 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.CollectionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
+import ca.uhn.fhir.util.ResourceUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nullable;
+import org.apache.commons.io.input.TeeInputStream;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -68,6 +70,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
@@ -86,6 +90,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.replaceEach;
 import static org.apache.commons.lang3.StringUtils.startsWith;
 
 @SuppressWarnings("WeakerAccess")
@@ -640,12 +645,27 @@ public abstract class BaseParser implements IParser {
 		 * We do this so that the context can verify that the structure is for
 		 * the correct FHIR version
 		 */
+		Reader readerToUse = theReader;
 		if (theResourceType != null) {
-			myContext.getResourceDefinition(theResourceType);
-		}
+				myContext.getResourceDefinition(theResourceType);
+				if (myContext.isStoreResourceJson()) {
+					readerToUse = new PreserveStringReader(theReader);
+				}
+			}
 
 		// Actually do the parse
-		T retVal = doParseResource(theResourceType, theReader);
+		T retVal = doParseResource(theResourceType, readerToUse);
+
+		if (theResourceType != null && myContext.isStoreResourceJson()) {
+			PreserveStringReader psr = (PreserveStringReader) readerToUse;
+			if (psr.hasString()) {
+				try {
+					ResourceUtil.addRawDataToResource(retVal, psr.toString());
+				} catch (IOException ex) {
+					ourLog.warn("Unable to store raw JSON. This will not break functionality, but could have issues with validation.", ex);
+				}
+			}
+		}
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
 		if ("Bundle".equals(def.getName())) {
