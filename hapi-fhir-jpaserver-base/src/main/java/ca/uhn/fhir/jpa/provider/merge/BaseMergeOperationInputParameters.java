@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * See <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
  */
-public abstract class MergeOperationInputParameters {
+public abstract class BaseMergeOperationInputParameters {
 
 	private List<CanonicalIdentifier> mySourceResourceIdentifiers;
 	private List<CanonicalIdentifier> myTargetResourceIdentifiers;
@@ -39,7 +39,7 @@ public abstract class MergeOperationInputParameters {
 	private IBaseResource myResultResource;
 	private final int myBatchSize;
 
-	protected MergeOperationInputParameters(int theBatchSize) {
+	protected BaseMergeOperationInputParameters(int theBatchSize) {
 		myBatchSize = theBatchSize;
 	}
 

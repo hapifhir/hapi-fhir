@@ -37,7 +37,7 @@ public class MergeValidationService {
 	}
 
 	MergeValidationResult validate(
-			MergeOperationInputParameters theMergeOperationParameters,
+			BaseMergeOperationInputParameters theMergeOperationParameters,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
@@ -80,7 +80,7 @@ public class MergeValidationService {
 	}
 
 	private boolean validateResultResourceIfExists(
-			MergeOperationInputParameters theMergeOperationParameters,
+			BaseMergeOperationInputParameters theMergeOperationParameters,
 			Patient theResolvedTargetResource,
 			Patient theResolvedSourceResource,
 			IBaseOperationOutcome theOperationOutcome) {
@@ -262,7 +262,7 @@ public class MergeValidationService {
 	 * @return true if the parameters are valid, false otherwise
 	 */
 	private boolean validateMergeOperationParameters(
-			MergeOperationInputParameters theMergeOperationParameters, IBaseOperationOutcome theOutcome) {
+			BaseMergeOperationInputParameters theMergeOperationParameters, IBaseOperationOutcome theOutcome) {
 		List<String> errorMessages = new ArrayList<>();
 		if (!theMergeOperationParameters.hasAtLeastOneSourceIdentifier()
 				&& theMergeOperationParameters.getSourceResource() == null) {
@@ -331,7 +331,7 @@ public class MergeValidationService {
 	}
 
 	private IBaseResource resolveSourceResource(
-			MergeOperationInputParameters theOperationParameters,
+			BaseMergeOperationInputParameters theOperationParameters,
 			RequestDetails theRequestDetails,
 			IBaseOperationOutcome theOutcome) {
 		return resolveResource(
@@ -344,7 +344,7 @@ public class MergeValidationService {
 	}
 
 	private IBaseResource resolveTargetResource(
-			MergeOperationInputParameters theOperationParameters,
+			BaseMergeOperationInputParameters theOperationParameters,
 			RequestDetails theRequestDetails,
 			IBaseOperationOutcome theOutcome) {
 		return resolveResource(

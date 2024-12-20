@@ -86,6 +86,6 @@ public interface IBatch2DaoSvc {
 	 * @param theTargetId the id of the resource we are searching for references to
 	 */
 	default Stream<IdDt> streamSourceIdsThatReferenceTargetId(IIdType theTargetId) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2594) + "Not implemented unless explicitly overridden");
 	}
 }

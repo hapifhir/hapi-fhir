@@ -95,7 +95,7 @@ public class ResourceMergeService {
 	 * @return the merge outcome containing OperationOutcome and HTTP status code
 	 */
 	public MergeOperationOutcome merge(
-			MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
+			BaseMergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
 
 		MergeOperationOutcome mergeOutcome = new MergeOperationOutcome();
 		IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
@@ -118,7 +118,7 @@ public class ResourceMergeService {
 	}
 
 	private void validateAndMerge(
-			MergeOperationInputParameters theMergeOperationParameters,
+			BaseMergeOperationInputParameters theMergeOperationParameters,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
@@ -150,7 +150,7 @@ public class ResourceMergeService {
 	private void handlePreview(
 			Patient theSourceResource,
 			Patient theTargetResource,
-			MergeOperationInputParameters theMergeOperationParameters,
+			BaseMergeOperationInputParameters theMergeOperationParameters,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
@@ -170,7 +170,7 @@ public class ResourceMergeService {
 	}
 
 	private void doMerge(
-			MergeOperationInputParameters theMergeOperationParameters,
+			BaseMergeOperationInputParameters theMergeOperationParameters,
 			Patient theSourceResource,
 			Patient theTargetResource,
 			RequestDetails theRequestDetails,
@@ -217,7 +217,7 @@ public class ResourceMergeService {
 	}
 
 	private void doMergeSync(
-			MergeOperationInputParameters theMergeOperationParameters,
+			BaseMergeOperationInputParameters theMergeOperationParameters,
 			Patient theSourceResource,
 			Patient theTargetResource,
 			RequestDetails theRequestDetails,
@@ -249,7 +249,7 @@ public class ResourceMergeService {
 	}
 
 	private void doMergeAsync(
-			MergeOperationInputParameters theMergeOperationParameters,
+			BaseMergeOperationInputParameters theMergeOperationParameters,
 			Patient theSourceResource,
 			Patient theTargetResource,
 			RequestDetails theRequestDetails,

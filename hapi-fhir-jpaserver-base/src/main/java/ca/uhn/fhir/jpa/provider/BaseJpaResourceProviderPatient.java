@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.provider.merge.MergeOperationInputParameters;
+import ca.uhn.fhir.jpa.provider.merge.BaseMergeOperationInputParameters;
 import ca.uhn.fhir.jpa.provider.merge.MergeOperationOutcome;
 import ca.uhn.fhir.jpa.provider.merge.PatientMergeOperationInputParameters;
 import ca.uhn.fhir.jpa.provider.merge.ResourceMergeService;
@@ -295,7 +295,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 		try {
 			int batchSize = myStorageSettings.getTransactionWriteBatchSizeFromOperationParameter(theBatchSize);
 
-			MergeOperationInputParameters mergeOperationParameters = buildMergeOperationInputParameters(
+			BaseMergeOperationInputParameters mergeOperationParameters = buildMergeOperationInputParameters(
 					theSourcePatientIdentifier,
 					theTargetPatientIdentifier,
 					theSourcePatient,
@@ -346,7 +346,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 		return retVal;
 	}
 
-	private MergeOperationInputParameters buildMergeOperationInputParameters(
+	private BaseMergeOperationInputParameters buildMergeOperationInputParameters(
 			List<Identifier> theSourcePatientIdentifier,
 			List<Identifier> theTargetPatientIdentifier,
 			IBaseReference theSourcePatient,
@@ -355,7 +355,8 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			IPrimitiveType<Boolean> theDeleteSource,
 			IBaseResource theResultPatient,
 			int theBatchSize) {
-		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(theBatchSize);
+		BaseMergeOperationInputParameters mergeOperationParameters =
+				new PatientMergeOperationInputParameters(theBatchSize);
 		if (theSourcePatientIdentifier != null) {
 			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourcePatientIdentifier.stream()
 					.map(CanonicalIdentifier::fromIdentifier)

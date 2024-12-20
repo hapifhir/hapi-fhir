@@ -255,7 +255,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		Encounter enc = new Encounter();
 		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
 		enc.getSubject().setReferenceElement(myTestHelper.getSourcePatientId());
-		myEncounterDao.create(enc, mySrd).getId().toUnqualifiedVersionless();
+		myEncounterDao.create(enc, mySrd);
 
 		myBatch2JobHelper.awaitJobFailure(jobId);
 
@@ -305,6 +305,15 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertUnprocessibleEntityWithMessage(inParameters, "Multiple resources found matching the identifier(s) specified in 'source-patient-identifier'");
 	}
 
+	@Test
+	void test_MissingRequiredParameters_Returns400BadRequest() {
+		assertThatThrownBy(() -> callMergeOperation(new Parameters())
+		).isInstanceOf(InvalidRequestException.class)
+			.extracting(InvalidRequestException.class::cast)
+			.extracting(BaseServerResponseException::getStatusCode)
+			.isEqualTo(400);
+	}
+
 	private void assertUnprocessibleEntityWithMessage(Parameters inParameters, String theExpectedMessage) {
 		assertThatThrownBy(() ->
 			callMergeOperation(inParameters))
@@ -333,14 +342,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.execute();
 	}
 
-	@Test
-	void test_MissingRequiredParameters_Returns400BadRequest() {
-		assertThatThrownBy(() -> callMergeOperation(new Parameters())
-		).isInstanceOf(InvalidRequestException.class)
-			.extracting(InvalidRequestException.class::cast)
-			.extracting(BaseServerResponseException::getStatusCode)
-			.isEqualTo(400);
-	}
+
 
 	class MyExceptionHandler implements TestExecutionExceptionHandler {
 		@Override

@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.jobs.parameters.BatchJobParametersWithTaskId;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -78,8 +79,10 @@ public class Batch2TaskHelper {
 				taskStatus = Task.TaskStatus.CANCELLED;
 				break;
 			default:
-				throw new IllegalStateException(String.format(
-						"Cannot handle job status '%s'. COMPLETED, FAILED or CANCELLED were expected", jobStatus));
+				throw new IllegalStateException(Msg.code(2595)
+						+ String.format(
+								"Cannot handle job status '%s'. COMPLETED, FAILED or CANCELLED were expected",
+								jobStatus));
 		}
 
 		Task task = theTaskDao.read(jobParams.getTaskId().asIdDt(), theRequestDetails);
