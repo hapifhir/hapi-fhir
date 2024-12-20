@@ -76,7 +76,7 @@ public class ReplaceReferencesRequest {
 		return myForceSync;
 	}
 
-	public void setForceSync(boolean forceSync) {
-		this.myForceSync = forceSync;
+	public void setForceSync(boolean theForceSync) {
+		this.myForceSync = theForceSync;
 	}
 }

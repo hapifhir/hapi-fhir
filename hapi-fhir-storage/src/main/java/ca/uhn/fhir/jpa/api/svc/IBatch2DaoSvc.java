@@ -80,6 +80,11 @@ public interface IBatch2DaoSvc {
 				theStart, theEnd, 20000 /* ResourceIdListStep.DEFAULT_PAGE_SIZE */, theTargetPartitionId, theUrl));
 	}
 
+	/**
+	 * Stream Resource Ids of all resources that have a reference to the provided resource id
+	 *
+	 * @param theTargetId the id of the resource we are searching for references to
+	 */
 	default Stream<IdDt> streamSourceIdsThatReferenceTargetId(IIdType theTargetId) {
 		throw new UnsupportedOperationException();
 	}

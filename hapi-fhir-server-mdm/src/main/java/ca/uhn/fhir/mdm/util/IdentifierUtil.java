@@ -30,7 +30,7 @@ public final class IdentifierUtil {
 	private IdentifierUtil() {}
 
 	public static CanonicalIdentifier identifierDtFromIdentifier(IBase theIdentifier) {
-		return ca.uhn.fhir.util.IdentifierUtil.identifierDtFromIdentifier(theIdentifier);
+		return ca.uhn.fhir.util.CanonicalIdentifier.fromIdentifier(theIdentifier);
 	}
 
 	/**

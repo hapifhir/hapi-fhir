@@ -57,6 +57,14 @@ public class ReplaceReferencesPatchBundleSvc {
 		myFhirContext = theDaoRegistry.getFhirContext();
 	}
 
+	/**
+	 * Build a bundle of PATCH entries that make the requested reference updates
+	 * @param theReplaceReferencesRequest source and target for reference switch
+	 * @param theResourceIds the ids of the resource to create the patch entries for (they will all have references to the source resource)
+	 * @param theRequestDetails
+	 * @return
+	 */
+
 	public Bundle patchReferencingResources(
 			ReplaceReferencesRequest theReplaceReferencesRequest,
 			List<IdDt> theResourceIds,
@@ -64,7 +72,7 @@ public class ReplaceReferencesPatchBundleSvc {
 		Bundle patchBundle = buildPatchBundle(theReplaceReferencesRequest, theResourceIds, theRequestDetails);
 		IFhirSystemDao<Bundle, Meta> systemDao = myDaoRegistry.getSystemDao();
 		Bundle result = systemDao.transaction(theRequestDetails, patchBundle);
-		// TODO KHS shouldn't transaction response bundles already have ids?
+
 		result.setId(UUID.randomUUID().toString());
 		return result;
 	}

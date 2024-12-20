@@ -47,7 +47,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CanonicalIdentifier;
-import ca.uhn.fhir.util.IdentifierUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -359,13 +358,13 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 		MergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(theBatchSize);
 		if (theSourcePatientIdentifier != null) {
 			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourcePatientIdentifier.stream()
-					.map(IdentifierUtil::identifierDtFromIdentifier)
+					.map(CanonicalIdentifier::fromIdentifier)
 					.collect(Collectors.toList());
 			mergeOperationParameters.setSourceResourceIdentifiers(sourceResourceIdentifiers);
 		}
 		if (theTargetPatientIdentifier != null) {
 			List<CanonicalIdentifier> targetResourceIdentifiers = theTargetPatientIdentifier.stream()
-					.map(IdentifierUtil::identifierDtFromIdentifier)
+					.map(CanonicalIdentifier::fromIdentifier)
 					.collect(Collectors.toList());
 			mergeOperationParameters.setTargetResourceIdentifiers(targetResourceIdentifiers);
 		}
