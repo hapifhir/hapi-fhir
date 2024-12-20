@@ -148,15 +148,11 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private IBaseParameters replaceReferencesForceSync(
 			ReplaceReferencesRequest theReplaceReferencesRequest, RequestDetails theRequestDetails) {
 
-		// TODO KHS get partition from request
 		List<IdDt> allIds = myHapiTransactionService
 				.withRequest(theRequestDetails)
-				.execute(() -> {
-					Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
-							theReplaceReferencesRequest.sourceId.getResourceType(),
-							theReplaceReferencesRequest.sourceId.getIdPart());
-					return idStream.collect(Collectors.toList());
-				});
+				.execute(() -> myResourceLinkDao.streamSourceIdsForTargetFhirId(
+						theReplaceReferencesRequest.sourceId.getResourceType(),
+						theReplaceReferencesRequest.sourceId.getIdPart()).collect(Collectors.toList()));
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
 				theReplaceReferencesRequest, allIds, theRequestDetails);

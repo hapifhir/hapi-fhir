@@ -6,7 +6,7 @@
 	</appender>
 
 	<!-- define the root first, so the rest can inherit our logger -->
-	<root level="debug">
+	<root level="info">
 		<appender-ref ref="STDOUT" />
 	</root>
 

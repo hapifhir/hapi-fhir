@@ -132,6 +132,8 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		myTestHelper.assertAllReferencesUpdated();
 	}
 
+	// TODO ED we should add some tests for the invalid request error cases (and assert 4xx status code)
+
 	@Override
 	protected boolean verboseClientLogging() {
 		return true;

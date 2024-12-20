@@ -292,6 +292,9 @@ public class ReplaceReferencesTestHelper {
 		assertThat(actual).doesNotContainAnyElementsOf(mySourceObsIds);
 		assertThat(actual).contains(myTargetPatientId);
 		assertThat(actual).contains(myTargetEnc1);
+
+		// TODO ED should we also assert here that source still has the all references it had before the operation,
+		// that is in addition to the validation that target doesn't contain the references.
 	}
 
 	public PatientMergeInputParameters buildMultipleTargetMatchParameters(

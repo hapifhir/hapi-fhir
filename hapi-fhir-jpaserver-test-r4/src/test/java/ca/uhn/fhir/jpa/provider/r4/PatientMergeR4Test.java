@@ -210,6 +210,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			// Assert Merged Patient
 			Patient mergedPatient = (Patient) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
 			List<Identifier> identifiers = mergedPatient.getIdentifier();
+
+			// TODO ED We can also validate that result patient returned here has the same id as the target patient.
+			// And maybe in not preview case, we should also read the target patient from the db and assert it equals to the result returned.
 			myTestHelper.assertIdentifiers(identifiers, expectedIdentifiersOnTargetAfterMerge);
 		}
 

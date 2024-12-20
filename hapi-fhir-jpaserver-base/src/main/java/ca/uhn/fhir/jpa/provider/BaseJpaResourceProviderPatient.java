@@ -293,9 +293,9 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 
 		startRequest(theServletRequest);
 
-		int batchSize = myStorageSettings.getTransactionWriteBatchSizeFromOperationParameter(theBatchSize);
-
 		try {
+			int batchSize = myStorageSettings.getTransactionWriteBatchSizeFromOperationParameter(theBatchSize);
+
 			MergeOperationInputParameters mergeOperationParameters = buildMergeOperationInputParameters(
 					theSourcePatientIdentifier,
 					theTargetPatientIdentifier,

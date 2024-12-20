@@ -21,10 +21,9 @@ package ca.uhn.fhir.replacereferences;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import java.security.InvalidParameterException;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID;
@@ -56,19 +55,19 @@ public class ReplaceReferencesRequest {
 
 	public void validateOrThrowInvalidParameterException() {
 		if (isBlank(sourceId.getResourceType())) {
-			throw new InvalidParameterException(
+			throw new InvalidRequestException(
 					Msg.code(2585) + "'" + OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID
 							+ "' must be a resource type qualified id");
 		}
 
 		if (isBlank(targetId.getResourceType())) {
-			throw new InvalidParameterException(
+			throw new InvalidRequestException(
 					Msg.code(2586) + "'" + OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID
 							+ "' must be a resource type qualified id");
 		}
 
 		if (!targetId.getResourceType().equals(sourceId.getResourceType())) {
-			throw new InvalidParameterException(
+			throw new InvalidRequestException(
 					Msg.code(2587) + "Source and target id parameters must be for the same resource type");
 		}
 	}
