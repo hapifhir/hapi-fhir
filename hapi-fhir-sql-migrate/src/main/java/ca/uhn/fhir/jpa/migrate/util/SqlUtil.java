@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.migrate.util;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
