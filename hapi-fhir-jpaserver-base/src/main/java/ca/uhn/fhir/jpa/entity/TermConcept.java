@@ -648,5 +648,9 @@ public class TermConcept implements Serializable {
 		public String toString() {
 			return myPartitionIdValue + "/" + myId;
 		}
+
+		public Long getId() {
+			return myId;
+		}
 	}
 }

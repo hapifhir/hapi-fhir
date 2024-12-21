@@ -13,10 +13,10 @@
 	],
 	"entry": [
 		{
-			"fullUrl": "https://cqf-ruler.nhsnlink.org/fhir/Measure/InitialInpatientPopulation",
+			"fullUrl": "https://cqf-ruler.nhsnlink.org/fhir/Measure/InitialInpatientPopulation-NO-supplementalDataCode",
 			"resource": {
 				"resourceType": "Measure",
-				"id": "InitialInpatientPopulation",
+				"id": "InitialInpatientPopulation-NO-supplementalDataCode",
 				"meta": {
 					"versionId": "8",
 					"lastUpdated": "2022-03-01T19:49:30.831+00:00",
@@ -947,7 +947,7 @@
 						}
 					}
 				],
-				"url": "http://nhsnlink.org/fhir/Measure/InitialInpatientPopulation",
+				"url": "http://nhsnlink.org/fhir/Measure/InitialInpatientPopulation-NO-supplementalDataCode",
 				"identifier": [
 					{
 						"system": "https://nhsnlink.org",
@@ -1203,7 +1203,7 @@
 			},
 			"request": {
 				"method": "PUT",
-				"url": "Measure/InitialInpatientPopulation"
+				"url": "Measure/InitialInpatientPopulation-NO-supplementalDataCode"
 			}
 		},
 		{
