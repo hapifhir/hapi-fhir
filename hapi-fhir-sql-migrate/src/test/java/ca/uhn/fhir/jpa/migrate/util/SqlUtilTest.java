@@ -61,13 +61,12 @@ class SqlUtilTest {
 	}
 
 	@Test
-	public void testParseCreateTableStatementPrimaryKey_NoPk(String thePrimaryKeyLine) {
+	public void testParseCreateTableStatementPrimaryKey_NoPk() {
 		String input = """
 			create table HFJ_IDX_CMB_TOK_NU (
 			    PID bigint not null,
 			    PARTITION_ID integer not null
 			);""";
-		input = input.replace("THE_PK_LINE", thePrimaryKeyLine);
 
 		Optional<SqlUtil.CreateTablePrimaryKey> output = SqlUtil.parseCreateTableStatementPrimaryKey(input);
 		assertFalse(output.isPresent());
