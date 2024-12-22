@@ -54,6 +54,8 @@ public class TesterConfig {
 			if (next.myEnableDebugTemplates) {
 				myDebugTemplatesMode = true;
 			}
+			// FIXME: remove
+			myDebugTemplatesMode = true;
 		}
 		myServerBuilders.clear();
 	}

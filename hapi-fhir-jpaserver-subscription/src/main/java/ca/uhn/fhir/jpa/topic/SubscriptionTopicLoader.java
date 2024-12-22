@@ -34,6 +34,8 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 
 import java.util.HashSet;
 import java.util.List;
@@ -59,6 +61,7 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 	}
 
 	@Override
+	@EventListener(classes = ContextStartedEvent.class)
 	public void registerListener() {
 		if (!myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4B)) {
 			return;

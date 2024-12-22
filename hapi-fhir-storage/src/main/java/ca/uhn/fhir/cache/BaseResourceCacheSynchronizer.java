@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -40,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 
 import java.util.Collection;
@@ -78,7 +78,11 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 	}
 
-	@PostConstruct
+	/**
+	 * This method performs a search in the DB, so use the {@link ContextStartedEvent}
+	 * to ensure that it runs after the database initializer
+	 */
+	@EventListener(classes = ContextStartedEvent.class)
 	public void registerListener() {
 		if (myDaoRegistry.getResourceDaoOrNull(myResourceName) == null) {
 			ourLog.info("No resource DAO found for resource type {}, not registering listener", myResourceName);

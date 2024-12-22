@@ -78,7 +78,7 @@ import static ca.uhn.fhir.util.MessageSupplier.msg;
 public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(GraphQLProviderWithIntrospection.class);
-	private final GraphQLSchemaGenerator myGenerator;
+	private volatile GraphQLSchemaGenerator myGenerator;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final VersionSpecificWorkerContextWrapper myContext;
 	private final IDaoRegistry myDaoRegistry;
@@ -99,7 +99,6 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 		myDaoRegistry = theDaoRegistry;
 
 		myContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(theValidationSupport);
-		myGenerator = new GraphQLSchemaGenerator(myContext, VersionUtil.getVersion());
 
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.registerTypeAdapter(Collections.emptyList().getClass(), (JsonSerializer<Object>)
@@ -153,37 +152,23 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 			Collection<String> theResourceTypes,
 			EnumSet<GraphQLSchemaGenerator.FHIROperationType> theOperations) {
 
+		GraphQLSchemaGenerator generator = myGenerator;
+		if (generator == null) {
+			generator = new GraphQLSchemaGenerator(myContext, VersionUtil.getVersion());
+			myGenerator = generator;
+		}
+
 		final StringBuilder schemaBuilder = new StringBuilder();
 		try (Writer writer = new StringBuilderWriter(schemaBuilder)) {
 
 			// Generate FHIR base types schemas
-			myGenerator.generateTypes(writer, theOperations);
+			generator.generateTypes(writer, theOperations);
 
 			// Fix up a few things that are missing from the generated schema
 			writer.append("\ninterface Element {")
 					.append("\n  id: ID")
 					.append("\n}")
 					.append("\n");
-			//			writer
-			//				.append("\ninterface Quantity {\n")
-			//						.append("id: String\n")
-			//				.append("extension: [Extension]\n")
-			//				.append("value: decimal  _value: ElementBase\n")
-			//				.append("comparator: code  _comparator: ElementBase\n")
-			//				.append("unit: String  _unit: ElementBase\n")
-			//				.append("system: uri  _system: ElementBase\n")
-			//				.append("code: code  _code: ElementBase\n")
-			//				.append("\n}")
-			//				.append("\n");
-
-			//			writer
-			//				.append("\ntype Resource {")
-			//				.append("\n  id: [token]" + "\n}")
-			//				.append("\n");
-			//			writer
-			//				.append("\ninput ResourceInput {")
-			//				.append("\n  id: [token]" + "\n}")
-			//				.append("\n");
 
 			// Generate schemas for the resource types
 			for (String nextResourceType : theResourceTypes) {
