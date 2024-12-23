@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -99,6 +100,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 				s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
 				s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+				s.registerProvider(myAppCtx.getBean(PatientMergeProvider.class));
 
 				s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 

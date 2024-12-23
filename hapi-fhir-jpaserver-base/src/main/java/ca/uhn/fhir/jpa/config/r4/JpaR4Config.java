@@ -19,17 +19,25 @@
  */
 package ca.uhn.fhir.jpa.config.r4;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR4;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
+import ca.uhn.fhir.jpa.provider.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -95,5 +103,27 @@ public class JpaR4Config {
 	public ITermLoaderSvc termLoaderService(
 			ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
 		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
+	}
+
+	@Bean
+	public ResourceMergeService resourceMergeService(
+		DaoRegistry theDaoRegistry,
+		IReplaceReferencesSvc theReplaceReferencesSvc,
+		HapiTransactionService theHapiTransactionService,
+		IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+		IJobCoordinator theJobCoordinator,
+		Batch2TaskHelper theBatch2TaskHelper) {
+		return new ResourceMergeService(
+			theDaoRegistry,
+			theReplaceReferencesSvc,
+			theHapiTransactionService,
+			theRequestPartitionHelperSvc,
+			theJobCoordinator,
+			theBatch2TaskHelper);
+	}
+
+	@Bean
+	public PatientMergeProvider patientMergeProvider(FhirContext theFhirContext, ResourceMergeService theResourceMergeService) {
+		return new PatientMergeProvider(theFhirContext, theResourceMergeService);
 	}
 }

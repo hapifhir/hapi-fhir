@@ -960,21 +960,4 @@ public class JpaConfig {
 	public ReplaceReferencesPatchBundleSvc replaceReferencesPatchBundleSvc(DaoRegistry theDaoRegistry) {
 		return new ReplaceReferencesPatchBundleSvc(theDaoRegistry);
 	}
-
-	@Bean
-	public ResourceMergeService resourceMergeService(
-			DaoRegistry theDaoRegistry,
-			IReplaceReferencesSvc theReplaceReferencesSvc,
-			HapiTransactionService theHapiTransactionService,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-			IJobCoordinator theJobCoordinator,
-			Batch2TaskHelper theBatch2TaskHelper) {
-		return new ResourceMergeService(
-				theDaoRegistry,
-				theReplaceReferencesSvc,
-				theHapiTransactionService,
-				theRequestPartitionHelperSvc,
-				theJobCoordinator,
-				theBatch2TaskHelper);
-	}
 }
