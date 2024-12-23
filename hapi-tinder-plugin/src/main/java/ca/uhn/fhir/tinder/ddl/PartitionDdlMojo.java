@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
@@ -118,12 +119,13 @@ public class PartitionDdlMojo extends AbstractMojo {
 	private List<String> applyPostgresPartitioning(List<String> statements) {
 		List<String> retVal = new ArrayList<>();
 		for (String statement : statements) {
-			SqlUtil.CreateTablePrimaryKey createTable = SqlUtil.parseCreateTableStatementPrimaryKey(statement);
+			Optional<SqlUtil.CreateTablePrimaryKey> createTable =
+					SqlUtil.parseCreateTableStatementPrimaryKey(statement);
 
 			boolean partitioned = false;
-			if (createTable != null) {
-				String tableName = createTable.getTableName();
-				List<String> primaryKeyColumns = createTable.getPrimaryKeyColumns();
+			if (createTable.isPresent()) {
+				String tableName = createTable.get().getTableName();
+				List<String> primaryKeyColumns = createTable.get().getPrimaryKeyColumns();
 
 				if (primaryKeyColumns.contains("PARTITION_ID")) {
 					partitioned = true;
