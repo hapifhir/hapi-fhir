@@ -19,9 +19,14 @@
  */
 package ca.uhn.fhir.jpa.provider.merge;
 
+import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 
 import java.util.List;
 
@@ -119,5 +124,22 @@ public abstract class BaseMergeOperationInputParameters {
 
 	public int getBatchSize() {
 		return myBatchSize;
+	}
+
+	public MergeJobParameters asMergeJobParameters(FhirContext theFhirContext, Patient theSourceResource, Patient theTargetResource, RequestPartitionId thePartitionId) {
+		MergeJobParameters retval = new MergeJobParameters();
+		if (getResultResource() != null) {
+			retval.setResultResource(theFhirContext
+				.newJsonParser()
+				.encodeResourceToString(getResultResource()));
+		}
+		retval.setDeleteSource(getDeleteSource());
+		retval.setBatchSize(getBatchSize());
+		retval.setSourceId(
+			new FhirIdJson(theSourceResource.getIdElement().toVersionless()));
+		retval.setTargetId(
+			new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
+		retval.setPartitionId(thePartitionId);
+		return retval;
 	}
 }
