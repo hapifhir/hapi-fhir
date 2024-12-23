@@ -30,9 +30,15 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLA
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ReplaceReferencesRequest {
+	/**
+	 * Unqualified source id
+	 */
 	@Nonnull
 	public final IIdType sourceId;
 
+	/**
+	 * Unqualified target id
+	 */
 	@Nonnull
 	public final IIdType targetId;
 
