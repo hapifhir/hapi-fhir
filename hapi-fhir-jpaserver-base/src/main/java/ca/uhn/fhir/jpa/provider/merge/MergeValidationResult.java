@@ -27,7 +27,8 @@ class MergeValidationResult {
 	final boolean isValid;
 	final Integer httpStatusCode;
 
-	private MergeValidationResult(boolean theIsValid, Integer theHttpStatusCode, Patient theSourceResource, Patient theTargetResource) {
+	private MergeValidationResult(
+			boolean theIsValid, Integer theHttpStatusCode, Patient theSourceResource, Patient theTargetResource) {
 		isValid = theIsValid;
 		httpStatusCode = theHttpStatusCode;
 		sourceResource = theSourceResource;

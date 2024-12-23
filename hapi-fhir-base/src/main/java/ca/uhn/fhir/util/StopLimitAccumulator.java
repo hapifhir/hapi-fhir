@@ -33,7 +33,6 @@ import java.util.stream.Stream;
  *
  * @param <T> the type of object being streamed
  */
-
 public class StopLimitAccumulator<T> {
 	private final boolean isTruncated;
 	private final List<T> myList;

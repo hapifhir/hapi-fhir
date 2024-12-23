@@ -49,7 +49,6 @@ import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTIT
 /**
  * Supporting class that validates input parameters to {@link ResourceMergeService}.
  */
-
 class MergeValidationService {
 	private final FhirContext myFhirContext;
 	private final IFhirResourceDao<Patient> myPatientDao;
