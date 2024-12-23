@@ -85,7 +85,8 @@ public class PartitionedIdModeVerificationSvc {
 		verifySchemaIsAppropriateForDatabasePartitionMode(cp, expectDatabasePartitionMode);
 	}
 
-	public static void verifySchemaIsAppropriateForDatabasePartitionMode(DriverTypeEnum.ConnectionProperties cp, boolean expectDatabasePartitionMode) throws SQLException {
+	public static void verifySchemaIsAppropriateForDatabasePartitionMode(
+			DriverTypeEnum.ConnectionProperties cp, boolean expectDatabasePartitionMode) throws SQLException {
 		Set<String> pkColumns = JdbcUtils.getPrimaryKeyColumns(cp, "HFJ_RESOURCE");
 		if (pkColumns.isEmpty()) {
 			return;

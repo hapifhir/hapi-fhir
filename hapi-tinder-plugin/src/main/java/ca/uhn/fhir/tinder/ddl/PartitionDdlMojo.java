@@ -137,7 +137,7 @@ public class PartitionDdlMojo extends AbstractMojo {
 					for (int partIndex = 0; partIndex < numPartitions; partIndex++) {
 						String newTableName = createPartitionedTableName(tableName, partIndex);
 						String partitionedTable = "CREATE TABLE " + newTableName + " PARTITION OF " + tableName + " "
-							+ "FOR VALUES WITH (MODULUS " + numPartitions + ", REMAINDER " + partIndex + ")";
+								+ "FOR VALUES WITH (MODULUS " + numPartitions + ", REMAINDER " + partIndex + ")";
 						retVal.add(partitionedTable + ";");
 					}
 
@@ -145,15 +145,15 @@ public class PartitionDdlMojo extends AbstractMojo {
 					for (int partIndex = 0; partIndex < numPartitions; partIndex++) {
 						for (String nextStatsStatement : myStatsStatements) {
 							if (nextStatsStatement
-								.toUpperCase(Locale.US)
-								.startsWith("ALTER TABLE " + tableName.toUpperCase(Locale.US) + " ")) {
+									.toUpperCase(Locale.US)
+									.startsWith("ALTER TABLE " + tableName.toUpperCase(Locale.US) + " ")) {
 								if (!tuneCommentAdded) {
 									retVal.add("-- Tune " + numPartitions + " partitions for table " + tableName);
 									tuneCommentAdded = true;
 								}
 								String newTableName = createPartitionedTableName(tableName, partIndex);
 								String modifiedStatsStatement =
-									nextStatsStatement.replace(" " + tableName + " ", " " + newTableName + " ");
+										nextStatsStatement.replace(" " + tableName + " ", " " + newTableName + " ");
 								retVal.add(modifiedStatsStatement + ";");
 							}
 						}

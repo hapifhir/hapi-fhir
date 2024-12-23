@@ -133,7 +133,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init780() {
 		Builder version = forVersion(VersionEnum.V7_8_0);
 
-		version.addTask(new VerifyDatabasePartitioningModeMigrationTask(version.getRelease(), "20241008.1", myFlags.contains(FlagEnum.DB_PARTITION_MODE)));
+		version.addTask(new VerifyDatabasePartitioningModeMigrationTask(
+				version.getRelease(), "20241008.1", myFlags.contains(FlagEnum.DB_PARTITION_MODE)));
 
 		version.onTable("HFJ_RES_SEARCH_URL")
 				.dropForeignKey("20241008.100", "FK_RES_SEARCH_URL_RESOURCE", "HFJ_RESOURCE");

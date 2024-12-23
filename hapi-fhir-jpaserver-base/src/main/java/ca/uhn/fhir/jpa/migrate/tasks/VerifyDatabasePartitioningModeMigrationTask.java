@@ -16,7 +16,8 @@ import java.sql.SQLException;
 public class VerifyDatabasePartitioningModeMigrationTask extends BaseTask {
 	private final boolean myExpectDatabasePartitionMode;
 
-	public VerifyDatabasePartitioningModeMigrationTask(String theProductVersion, String theSchemaVersion, boolean theExpectDatabasePartitionMode) {
+	public VerifyDatabasePartitioningModeMigrationTask(
+			String theProductVersion, String theSchemaVersion, boolean theExpectDatabasePartitionMode) {
 		super(theProductVersion, theSchemaVersion);
 		myExpectDatabasePartitionMode = theExpectDatabasePartitionMode;
 	}
@@ -29,7 +30,8 @@ public class VerifyDatabasePartitioningModeMigrationTask extends BaseTask {
 	@Override
 	protected void doExecute() throws SQLException {
 		DriverTypeEnum.ConnectionProperties cp = getConnectionProperties();
-		PartitionedIdModeVerificationSvc.verifySchemaIsAppropriateForDatabasePartitionMode(cp, myExpectDatabasePartitionMode);
+		PartitionedIdModeVerificationSvc.verifySchemaIsAppropriateForDatabasePartitionMode(
+				cp, myExpectDatabasePartitionMode);
 	}
 
 	/**
@@ -48,7 +50,4 @@ public class VerifyDatabasePartitioningModeMigrationTask extends BaseTask {
 	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		theBuilder.append(getClass().getSimpleName(), theOtherObject.getClass().getSimpleName());
 	}
-
-
-
 }
