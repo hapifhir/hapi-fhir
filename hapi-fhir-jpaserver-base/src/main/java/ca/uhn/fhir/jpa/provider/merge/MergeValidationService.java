@@ -114,9 +114,10 @@ class MergeValidationService {
 		// validate the result resource's  id as same as the target resource
 		if (!theResolvedTargetResource.getIdElement().toVersionless().equals(theResultResource.getIdElement())) {
 			String msg = String.format(
-					"'%s' must have the same versionless id as the actual resolved target resource. "
+					"'%s' must have the same versionless id as the actual resolved target resource '%s'. "
 							+ "The actual resolved target resource's id is: '%s'",
 					theMergeOperationParameters.getResultResourceParameterName(),
+					theResultResource.getIdElement(),
 					theResolvedTargetResource.getIdElement().toVersionless().getValue());
 			addErrorToOperationOutcome(theOperationOutcome, msg, "invalid");
 			retval = false;

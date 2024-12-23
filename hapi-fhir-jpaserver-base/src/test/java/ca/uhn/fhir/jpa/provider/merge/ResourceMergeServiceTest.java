@@ -1106,7 +1106,7 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
 		assertThat(issue.getDiagnostics()).contains("'result-patient' must have the same versionless id " +
 			"as the actual" +
-			" resolved target resource. The actual resolved target resource's id is: '" + TARGET_PATIENT_TEST_ID +"'");
+			" resolved target resource 'Patient/not-the-target-id'. The actual resolved target resource's id is: '" + TARGET_PATIENT_TEST_ID +"'");
 
 		verifyNoMoreInteractions(myPatientDaoMock);
 	}
