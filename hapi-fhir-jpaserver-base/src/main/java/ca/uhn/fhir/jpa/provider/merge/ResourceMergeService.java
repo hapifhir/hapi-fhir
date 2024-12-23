@@ -66,12 +66,12 @@ public class ResourceMergeService {
 	private final MergeValidationService myMergeValidationService;
 
 	public ResourceMergeService(
-			DaoRegistry theDaoRegistry,
-			IReplaceReferencesSvc theReplaceReferencesSvc,
-			IHapiTransactionService theHapiTransactionService,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-			IJobCoordinator theJobCoordinator,
-			Batch2TaskHelper theBatch2TaskHelper) {
+		DaoRegistry theDaoRegistry,
+		IReplaceReferencesSvc theReplaceReferencesSvc,
+		IHapiTransactionService theHapiTransactionService,
+		IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+		IJobCoordinator theJobCoordinator,
+		Batch2TaskHelper theBatch2TaskHelper) {
 
 		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
 		myTaskDao = theDaoRegistry.getResourceDao(Task.class);
@@ -95,14 +95,13 @@ public class ResourceMergeService {
 	 * @return the merge outcome containing OperationOutcome and HTTP status code
 	 */
 	public MergeOperationOutcome merge(
-			BaseMergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
+		BaseMergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
 
 		MergeOperationOutcome mergeOutcome = new MergeOperationOutcome();
 		IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
 		mergeOutcome.setOperationOutcome(operationOutcome);
 		// default to 200 OK, would be changed to another code during processing as required
 		mergeOutcome.setHttpStatusCode(STATUS_HTTP_200_OK);
-
 		try {
 			validateAndMerge(theMergeOperationParameters, theRequestDetails, mergeOutcome);
 		} catch (Exception e) {
@@ -118,12 +117,12 @@ public class ResourceMergeService {
 	}
 
 	private void validateAndMerge(
-			BaseMergeOperationInputParameters theMergeOperationParameters,
-			RequestDetails theRequestDetails,
-			MergeOperationOutcome theMergeOutcome) {
+		BaseMergeOperationInputParameters theMergeOperationParameters,
+		RequestDetails theRequestDetails,
+		MergeOperationOutcome theMergeOutcome) {
 
 		MergeValidationResult mergeValidationResult =
-				myMergeValidationService.validate(theMergeOperationParameters, theRequestDetails, theMergeOutcome);
+			myMergeValidationService.validate(theMergeOperationParameters, theRequestDetails, theMergeOutcome);
 
 		if (mergeValidationResult.isValid) {
 			Patient sourceResource = mergeValidationResult.sourceResource;
@@ -131,36 +130,39 @@ public class ResourceMergeService {
 
 			if (theMergeOperationParameters.getPreview()) {
 				handlePreview(
-						sourceResource,
-						targetResource,
-						theMergeOperationParameters,
-						theRequestDetails,
-						theMergeOutcome);
+					sourceResource,
+					targetResource,
+					theMergeOperationParameters,
+					theRequestDetails,
+					theMergeOutcome);
 			} else {
 				doMerge(
-						theMergeOperationParameters,
-						sourceResource,
-						targetResource,
-						theRequestDetails,
-						theMergeOutcome);
+					theMergeOperationParameters,
+					sourceResource,
+					targetResource,
+					theRequestDetails,
+					theMergeOutcome);
 			}
+		} else {
+			theMergeOutcome.setHttpStatusCode(mergeValidationResult.httpStatusCode);
 		}
+
 	}
 
 	private void handlePreview(
-			Patient theSourceResource,
-			Patient theTargetResource,
-			BaseMergeOperationInputParameters theMergeOperationParameters,
-			RequestDetails theRequestDetails,
-			MergeOperationOutcome theMergeOutcome) {
+		Patient theSourceResource,
+		Patient theTargetResource,
+		BaseMergeOperationInputParameters theMergeOperationParameters,
+		RequestDetails theRequestDetails,
+		MergeOperationOutcome theMergeOutcome) {
 
 		Integer referencingResourceCount = myReplaceReferencesSvc.countResourcesReferencingResource(
-				theSourceResource.getIdElement().toVersionless(), theRequestDetails);
+			theSourceResource.getIdElement().toVersionless(), theRequestDetails);
 
 		// in preview mode, we should also return what the target would look like
 		Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
 		Patient targetPatientAsIfUpdated = myMergeResourceHelper.prepareTargetPatientForUpdate(
-				theTargetResource, theSourceResource, theResultResource, theMergeOperationParameters.getDeleteSource());
+			theTargetResource, theSourceResource, theResultResource, theMergeOperationParameters.getDeleteSource());
 		theMergeOutcome.setUpdatedTargetResource(targetPatientAsIfUpdated);
 
 		// adding +2 because the source and the target resources would be updated as well
@@ -170,65 +172,65 @@ public class ResourceMergeService {
 	}
 
 	private void doMerge(
-			BaseMergeOperationInputParameters theMergeOperationParameters,
-			Patient theSourceResource,
-			Patient theTargetResource,
-			RequestDetails theRequestDetails,
-			MergeOperationOutcome theMergeOutcome) {
+		BaseMergeOperationInputParameters theMergeOperationParameters,
+		Patient theSourceResource,
+		Patient theTargetResource,
+		RequestDetails theRequestDetails,
+		MergeOperationOutcome theMergeOutcome) {
 
 		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
-				theRequestDetails, ReadPartitionIdRequestDetails.forRead(theTargetResource.getIdElement()));
+			theRequestDetails, ReadPartitionIdRequestDetails.forRead(theTargetResource.getIdElement()));
 
 		if (theRequestDetails.isPreferAsync()) {
 			// client prefers async processing, do async
 			doMergeAsync(
+				theMergeOperationParameters,
+				theSourceResource,
+				theTargetResource,
+				theRequestDetails,
+				theMergeOutcome,
+				partitionId);
+		} else {
+			// count the number of refs, if it is larger than batch size then process async, otherwise process sync
+			Integer numberOfRefs = myReplaceReferencesSvc.countResourcesReferencingResource(
+				theSourceResource.getIdElement().toVersionless(), theRequestDetails);
+			if (numberOfRefs > theMergeOperationParameters.getBatchSize()) {
+				ourLog.info(
+					"{} resources need to be updated. This exceeds the batch size of {}. Switching to asynchronous processing; will return a Task in the response that can be used to track progress.",
+					numberOfRefs,
+					theMergeOperationParameters.getBatchSize());
+				doMergeAsync(
 					theMergeOperationParameters,
 					theSourceResource,
 					theTargetResource,
 					theRequestDetails,
 					theMergeOutcome,
 					partitionId);
-		} else {
-			// count the number of refs, if it is larger than batch size then process async, otherwise process sync
-			Integer numberOfRefs = myReplaceReferencesSvc.countResourcesReferencingResource(
-					theSourceResource.getIdElement().toVersionless(), theRequestDetails);
-			if (numberOfRefs > theMergeOperationParameters.getBatchSize()) {
-				ourLog.info(
-						"{} resources need to be updated. This exceeds the batch size of {}. Switching to asynchronous processing; will return a Task in the response that can be used to track progress.",
-						numberOfRefs,
-						theMergeOperationParameters.getBatchSize());
-				doMergeAsync(
-						theMergeOperationParameters,
-						theSourceResource,
-						theTargetResource,
-						theRequestDetails,
-						theMergeOutcome,
-						partitionId);
 			} else {
 				doMergeSync(
-						theMergeOperationParameters,
-						theSourceResource,
-						theTargetResource,
-						theRequestDetails,
-						theMergeOutcome,
-						partitionId);
+					theMergeOperationParameters,
+					theSourceResource,
+					theTargetResource,
+					theRequestDetails,
+					theMergeOutcome,
+					partitionId);
 			}
 		}
 	}
 
 	private void doMergeSync(
-			BaseMergeOperationInputParameters theMergeOperationParameters,
-			Patient theSourceResource,
-			Patient theTargetResource,
-			RequestDetails theRequestDetails,
-			MergeOperationOutcome theMergeOutcome,
-			RequestPartitionId partitionId) {
+		BaseMergeOperationInputParameters theMergeOperationParameters,
+		Patient theSourceResource,
+		Patient theTargetResource,
+		RequestDetails theRequestDetails,
+		MergeOperationOutcome theMergeOutcome,
+		RequestPartitionId partitionId) {
 
 		ReplaceReferencesRequest replaceReferencesRequest = new ReplaceReferencesRequest(
-				theSourceResource.getIdElement(),
-				theTargetResource.getIdElement(),
-				theMergeOperationParameters.getBatchSize(),
-				partitionId);
+			theSourceResource.getIdElement(),
+			theTargetResource.getIdElement(),
+			theMergeOperationParameters.getBatchSize(),
+			partitionId);
 
 		// We don't want replace references to flip to async mode once we've already made the decision to go sync here.
 		replaceReferencesRequest.setForceSync(true);
@@ -236,12 +238,12 @@ public class ResourceMergeService {
 		myReplaceReferencesSvc.replaceReferences(replaceReferencesRequest, theRequestDetails);
 
 		Patient updatedTarget = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
-				myHapiTransactionService,
-				theSourceResource,
-				theTargetResource,
-				(Patient) theMergeOperationParameters.getResultResource(),
-				theMergeOperationParameters.getDeleteSource(),
-				theRequestDetails);
+			myHapiTransactionService,
+			theSourceResource,
+			theTargetResource,
+			(Patient) theMergeOperationParameters.getResultResource(),
+			theMergeOperationParameters.getDeleteSource(),
+			theRequestDetails);
 		theMergeOutcome.setUpdatedTargetResource(updatedTarget);
 
 		String detailsText = "Merge operation completed successfully.";
@@ -249,29 +251,29 @@ public class ResourceMergeService {
 	}
 
 	private void doMergeAsync(
-			BaseMergeOperationInputParameters theMergeOperationParameters,
-			Patient theSourceResource,
-			Patient theTargetResource,
-			RequestDetails theRequestDetails,
-			MergeOperationOutcome theMergeOutcome,
-			RequestPartitionId thePartitionId) {
+		BaseMergeOperationInputParameters theMergeOperationParameters,
+		Patient theSourceResource,
+		Patient theTargetResource,
+		RequestDetails theRequestDetails,
+		MergeOperationOutcome theMergeOutcome,
+		RequestPartitionId thePartitionId) {
 
 		MergeJobParameters mergeJobParameters = new MergeJobParameters();
 		if (theMergeOperationParameters.getResultResource() != null) {
 			mergeJobParameters.setResultResource(myFhirContext
-					.newJsonParser()
-					.encodeResourceToString(theMergeOperationParameters.getResultResource()));
+				.newJsonParser()
+				.encodeResourceToString(theMergeOperationParameters.getResultResource()));
 		}
 		mergeJobParameters.setDeleteSource(theMergeOperationParameters.getDeleteSource());
 		mergeJobParameters.setBatchSize(theMergeOperationParameters.getBatchSize());
 		mergeJobParameters.setSourceId(
-				new FhirIdJson(theSourceResource.getIdElement().toVersionless()));
+			new FhirIdJson(theSourceResource.getIdElement().toVersionless()));
 		mergeJobParameters.setTargetId(
-				new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
+			new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
 		mergeJobParameters.setPartitionId(thePartitionId);
 
 		Task task = myBatch2TaskHelper.startJobAndCreateAssociatedTask(
-				myTaskDao, theRequestDetails, myJobCoordinator, JOB_MERGE, mergeJobParameters);
+			myTaskDao, theRequestDetails, myJobCoordinator, JOB_MERGE, mergeJobParameters);
 
 		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());
 		task.getMeta().setVersionId(null);
@@ -279,14 +281,14 @@ public class ResourceMergeService {
 		theMergeOutcome.setHttpStatusCode(STATUS_HTTP_202_ACCEPTED);
 
 		String detailsText = "Merge request is accepted, and will be processed asynchronously. See"
-				+ " task resource returned in this response for details.";
+			+ " task resource returned in this response for details.";
 		addInfoToOperationOutcome(theMergeOutcome.getOperationOutcome(), null, detailsText);
 	}
 
 	private void addInfoToOperationOutcome(
-			IBaseOperationOutcome theOutcome, String theDiagnosticMsg, String theDetailsText) {
+		IBaseOperationOutcome theOutcome, String theDiagnosticMsg, String theDetailsText) {
 		IBase issue =
-				OperationOutcomeUtil.addIssue(myFhirContext, theOutcome, "information", theDiagnosticMsg, null, null);
+			OperationOutcomeUtil.addIssue(myFhirContext, theOutcome, "information", theDiagnosticMsg, null, null);
 		OperationOutcomeUtil.addDetailsToIssue(myFhirContext, issue, null, null, theDetailsText);
 	}
 }

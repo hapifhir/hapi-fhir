@@ -46,7 +46,11 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY;
 
-public class MergeValidationService {
+/**
+ * Supporting class that validates input parameters to {@link ResourceMergeService}.
+ */
+
+class MergeValidationService {
 	private final FhirContext myFhirContext;
 	private final IFhirResourceDao<Patient> myPatientDao;
 
@@ -63,8 +67,7 @@ public class MergeValidationService {
 		IBaseOperationOutcome operationOutcome = theMergeOutcome.getOperationOutcome();
 
 		if (!validateMergeOperationParameters(theMergeOperationParameters, operationOutcome)) {
-			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_400_BAD_REQUEST);
-			return MergeValidationResult.invalidResult();
+			return MergeValidationResult.invalidResult(STATUS_HTTP_400_BAD_REQUEST);
 		}
 
 		// cast to Patient, since we only support merging Patient resources for now
@@ -72,8 +75,7 @@ public class MergeValidationService {
 				(Patient) resolveSourceResource(theMergeOperationParameters, theRequestDetails, operationOutcome);
 
 		if (sourceResource == null) {
-			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
-			return MergeValidationResult.invalidResult();
+			return MergeValidationResult.invalidResult(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
 		}
 
 		// cast to Patient, since we only support merging Patient resources for now
@@ -81,19 +83,16 @@ public class MergeValidationService {
 				(Patient) resolveTargetResource(theMergeOperationParameters, theRequestDetails, operationOutcome);
 
 		if (targetResource == null) {
-			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
-			return MergeValidationResult.invalidResult();
+			return MergeValidationResult.invalidResult(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
 		}
 
 		if (!validateSourceAndTargetAreSuitableForMerge(sourceResource, targetResource, operationOutcome)) {
-			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
-			return MergeValidationResult.invalidResult();
+			return MergeValidationResult.invalidResult(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
 		}
 
 		if (!validateResultResourceIfExists(
 				theMergeOperationParameters, targetResource, sourceResource, operationOutcome)) {
-			theMergeOutcome.setHttpStatusCode(STATUS_HTTP_400_BAD_REQUEST);
-			return MergeValidationResult.invalidResult();
+			return MergeValidationResult.invalidResult(STATUS_HTTP_400_BAD_REQUEST);
 		}
 		return MergeValidationResult.validResult(sourceResource, targetResource);
 	}

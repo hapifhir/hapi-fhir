@@ -22,21 +22,23 @@ package ca.uhn.fhir.jpa.provider.merge;
 import org.hl7.fhir.r4.model.Patient;
 
 class MergeValidationResult {
-	protected final Patient sourceResource;
-	protected final Patient targetResource;
-	protected final boolean isValid;
+	final Patient sourceResource;
+	final Patient targetResource;
+	final boolean isValid;
+	final Integer httpStatusCode;
 
-	private MergeValidationResult(Patient theSourceResource, Patient theTargetResource, boolean theIsValid) {
+	private MergeValidationResult(boolean theIsValid, Integer theHttpStatusCode, Patient theSourceResource, Patient theTargetResource) {
+		isValid = theIsValid;
+		httpStatusCode = theHttpStatusCode;
 		sourceResource = theSourceResource;
 		targetResource = theTargetResource;
-		isValid = theIsValid;
 	}
 
-	public static MergeValidationResult invalidResult() {
-		return new MergeValidationResult(null, null, false);
+	public static MergeValidationResult invalidResult(int theHttpStatusCode) {
+		return new MergeValidationResult(false, theHttpStatusCode, null, null);
 	}
 
 	public static MergeValidationResult validResult(Patient theSourceResource, Patient theTargetResource) {
-		return new MergeValidationResult(theSourceResource, theTargetResource, true);
+		return new MergeValidationResult(true, null, theSourceResource, theTargetResource);
 	}
 }

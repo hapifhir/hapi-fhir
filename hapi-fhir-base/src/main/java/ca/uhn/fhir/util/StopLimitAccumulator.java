@@ -27,6 +27,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
+/**
+ * This class collects items from a stream to a given limit and know whether there are
+ * still more items beyond that limit.
+ *
+ * @param <T> the type of object being streamed
+ */
+
 public class StopLimitAccumulator<T> {
 	private final boolean isTruncated;
 	private final List<T> myList;

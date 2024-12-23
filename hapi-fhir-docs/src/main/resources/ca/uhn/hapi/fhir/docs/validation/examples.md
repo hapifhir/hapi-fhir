@@ -39,5 +39,5 @@ FhirValidator validator = myFhirCtx.newValidator();
 validator.registerValidatorModule(instanceValidator);
 
 // Validate theResource
-ValidationResult mergeValidationResult = validator.validateWithResult(theResource);
+ValidationResult validationResult = validator.validateWithResult(theResource);
 ```
