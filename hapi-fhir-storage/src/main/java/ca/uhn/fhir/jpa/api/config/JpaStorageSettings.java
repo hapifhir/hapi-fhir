@@ -123,7 +123,7 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * If we are batching write operations in transactions, what should the maximum number of write operations per
 	 * transaction be?
-	 * @since 7.8.0
+	 * @since 8.0.0
 	 */
 	public static final String DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING = "10000";
 
@@ -133,7 +133,7 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * If we are batching write operations in transactions, what should the default number of write operations per
 	 * transaction be?
-	 * @since 7.8.0
+	 * @since 8.0.0
 	 */
 	public static final String DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE_STRING = "512";
 
@@ -418,14 +418,14 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * If we are batching write operations in transactions, what should the maximum number of write operations per
 	 * transaction be?
-	 * @since 7.8.0
+	 * @since 8.0.0
 	 */
 	private int myMaxTransactionEntriesForWrite = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE;
 
 	/**
 	 * If we are batching write operations in transactions, what should the default number of write operations per
 	 * transaction be?
-	 * @since 7.8.0
+	 * @since 8.0.0
 	 */
 	private int myDefaultTransactionEntriesForWrite = DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE;
 
@@ -2690,7 +2690,7 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * If we are batching write operations in transactions, what should the maximum number of write operations per
 	 * transaction be?
-	 * @since 7.8.0
+	 * @since 8.0.0
 	 */
 	public int getMaxTransactionEntriesForWrite() {
 		return myMaxTransactionEntriesForWrite;
@@ -2699,7 +2699,7 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * If we are batching write operations in transactions, what should the maximum number of write operations per
 	 * transaction be?
-	 * @since 7.8.0
+	 * @since 8.0.0
 	 */
 	public void setMaxTransactionEntriesForWrite(int theMaxTransactionEntriesForWrite) {
 		myMaxTransactionEntriesForWrite = theMaxTransactionEntriesForWrite;
@@ -2708,7 +2708,7 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * If we are batching write operations in transactions, what should the default number of write operations per
 	 * transaction be?
-	 * @since 7.8.0
+	 * @since 8.0.0
 	 */
 	public int getDefaultTransactionEntriesForWrite() {
 		return myDefaultTransactionEntriesForWrite;
@@ -2717,7 +2717,7 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * If we are batching write operations in transactions, what should the default number of write operations per
 	 * transaction be?
-	 * @since 7.8.0
+	 * @since 8.0.0
 	 */
 	public void setDefaultTransactionEntriesForWrite(int theDefaultTransactionEntriesForWrite) {
 		myDefaultTransactionEntriesForWrite = theDefaultTransactionEntriesForWrite;
