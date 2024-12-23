@@ -107,23 +107,24 @@ public class JpaR4Config {
 
 	@Bean
 	public ResourceMergeService resourceMergeService(
-		DaoRegistry theDaoRegistry,
-		IReplaceReferencesSvc theReplaceReferencesSvc,
-		HapiTransactionService theHapiTransactionService,
-		IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-		IJobCoordinator theJobCoordinator,
-		Batch2TaskHelper theBatch2TaskHelper) {
+			DaoRegistry theDaoRegistry,
+			IReplaceReferencesSvc theReplaceReferencesSvc,
+			HapiTransactionService theHapiTransactionService,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			IJobCoordinator theJobCoordinator,
+			Batch2TaskHelper theBatch2TaskHelper) {
 		return new ResourceMergeService(
-			theDaoRegistry,
-			theReplaceReferencesSvc,
-			theHapiTransactionService,
-			theRequestPartitionHelperSvc,
-			theJobCoordinator,
-			theBatch2TaskHelper);
+				theDaoRegistry,
+				theReplaceReferencesSvc,
+				theHapiTransactionService,
+				theRequestPartitionHelperSvc,
+				theJobCoordinator,
+				theBatch2TaskHelper);
 	}
 
 	@Bean
-	public PatientMergeProvider patientMergeProvider(FhirContext theFhirContext, ResourceMergeService theResourceMergeService) {
+	public PatientMergeProvider patientMergeProvider(
+			FhirContext theFhirContext, ResourceMergeService theResourceMergeService) {
 		return new PatientMergeProvider(theFhirContext, theResourceMergeService);
 	}
 }
