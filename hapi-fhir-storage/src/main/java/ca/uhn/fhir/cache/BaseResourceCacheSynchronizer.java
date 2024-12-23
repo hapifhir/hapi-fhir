@@ -82,7 +82,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	 * This method performs a search in the DB, so use the {@link ContextStartedEvent}
 	 * to ensure that it runs after the database initializer
 	 */
-	@EventListener(classes = ContextStartedEvent.class)
+	@EventListener(classes = ContextRefreshedEvent.class)
 	public void registerListener() {
 		if (myDaoRegistry.getResourceDaoOrNull(myResourceName) == null) {
 			ourLog.info("No resource DAO found for resource type {}, not registering listener", myResourceName);

@@ -399,35 +399,25 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
 function addSearchControlQuantity(theSearchParamName, theContainerRowNum, theRowNum) {
 	var input = $('<div />', { 'class':'input-group'});
 	var qualifier = $('<input />', {type:'hidden', id:'param.' + theRowNum + '.0'});
-	var qualifierDiv = $('<div />', {'class':'input-group-prepend'});
-	
-	input.append(
-		qualifierDiv,
-		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.1', placeholder: "value" }),
-		$('<div />', { 'class':'input-group-append'} ).append(
-			$('<span class="input-group-text">System</span>')
-		),
-		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.2', placeholder: "(opt)" }),
-		$('<div />', { 'class':'input-group-append'} ).append(
-			$('<span class="input-group-text">Code</span>')
-		),
-		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.3', placeholder: "(opt)" })
+	$('#search-param-rowopts-' + theContainerRowNum).append(
+		qualifier,
+		input
 	);
 
-    var qualifierTooltip = "You can optionally use a qualifier to specify a range.";
-    var qualifierBtn = $('<button />', {type:'button', 'class':'btn btn-default dropdown-toggle input-group-text', 'data-bs-toggle':'dropdown', 'data-bs-toggleplacement':'top', 'title':qualifierTooltip}).text('=');
-    qualifierBtn.tooltip({
-        'selector': '',
-        'placement': 'left',
-        'container':'body'
-      });
-    var qualifierBtnEq = $('<a>=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '='); });
-    var qualifierBtnAp = $('<a>ap (Approx)</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'ap'); });
-    var qualifierBtnGt = $('<a>gt</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'gt');  });
-    var qualifierBtnGe = $('<a>ge</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'ge');  });
-    var qualifierBtnLt = $('<a>lt</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'lt');  });
-    var qualifierBtnLe = $('<a>le</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'le');  });
-    qualifierDiv.append(
+	var qualifierTooltip = "You can optionally use a qualifier to specify a range.";
+	var qualifierBtn = $('<button />', {type:'button', 'class':'btn btn-outline-primary dropdown-toggle', 'data-bs-toggle':'dropdown', 'data-bs-toggleplacement':'top', 'title':qualifierTooltip}).text('=');
+	qualifierBtn.tooltip({
+		'selector': '',
+		'placement': 'left',
+		'container':'body'
+	});
+	var qualifierBtnEq = $('<a class="dropdown-item">=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '='); });
+	var qualifierBtnAp = $('<a class="dropdown-item">ap (Approx)</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'ap'); });
+	var qualifierBtnGt = $('<a class="dropdown-item">gt</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'gt');  });
+	var qualifierBtnGe = $('<a class="dropdown-item">ge</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'ge');  });
+	var qualifierBtnLt = $('<a class="dropdown-item">lt</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'lt');  });
+	var qualifierBtnLe = $('<a class="dropdown-item">le</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'le');  });
+	input.append(
 		qualifierBtn,
 		$('<ul class="dropdown-menu" role="menu">').append(
 			$('<li />').append(qualifierBtnEq),
@@ -439,12 +429,14 @@ function addSearchControlQuantity(theSearchParamName, theContainerRowNum, theRow
 		)
 	);
 
-	$('#search-param-rowopts-' + theContainerRowNum).append(
-		qualifier,
-		$('<div />', { }).append(
-			input
-		)
+	input.append(
+		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.1', placeholder: "value" }),
+		$('<label class="input-group-text">System</label>'),
+		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.2', placeholder: "(opt)" }),
+		$('<label class="input-group-text">Code</label>'),
+		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.3', placeholder: "(opt)" })
 	);
+
 }
 
 function handleSearchParamTypeChange(select, params, theContainerRowNum, theParamRowNum) {
