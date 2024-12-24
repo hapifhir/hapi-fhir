@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -53,10 +54,11 @@ import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 public class ResourceMergeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceMergeService.class);
 
+	private final FhirContext myFhirContext;
+	private final JpaStorageSettings myStorageSettings;
 	private final IFhirResourceDao<Patient> myPatientDao;
 	private final IReplaceReferencesSvc myReplaceReferencesSvc;
 	private final IHapiTransactionService myHapiTransactionService;
-	private final FhirContext myFhirContext;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private final IFhirResourceDao<Task> myTaskDao;
 	private final IJobCoordinator myJobCoordinator;
@@ -65,12 +67,14 @@ public class ResourceMergeService {
 	private final MergeValidationService myMergeValidationService;
 
 	public ResourceMergeService(
-			DaoRegistry theDaoRegistry,
-			IReplaceReferencesSvc theReplaceReferencesSvc,
-			IHapiTransactionService theHapiTransactionService,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-			IJobCoordinator theJobCoordinator,
-			Batch2TaskHelper theBatch2TaskHelper) {
+		JpaStorageSettings theStorageSettings,
+		DaoRegistry theDaoRegistry,
+		IReplaceReferencesSvc theReplaceReferencesSvc,
+		IHapiTransactionService theHapiTransactionService,
+		IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+		IJobCoordinator theJobCoordinator,
+		Batch2TaskHelper theBatch2TaskHelper) {
+		myStorageSettings = theStorageSettings;
 
 		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
 		myTaskDao = theDaoRegistry.getResourceDao(Task.class);
@@ -237,7 +241,7 @@ public class ResourceMergeService {
 			RequestPartitionId thePartitionId) {
 
 		MergeJobParameters mergeJobParameters = theMergeOperationParameters.asMergeJobParameters(
-				myFhirContext, theSourceResource, theTargetResource, thePartitionId);
+				myFhirContext, myStorageSettings, theSourceResource, theTargetResource, thePartitionId);
 
 		Task task = myBatch2TaskHelper.startJobAndCreateAssociatedTask(
 				myTaskDao, theRequestDetails, myJobCoordinator, JOB_MERGE, mergeJobParameters);

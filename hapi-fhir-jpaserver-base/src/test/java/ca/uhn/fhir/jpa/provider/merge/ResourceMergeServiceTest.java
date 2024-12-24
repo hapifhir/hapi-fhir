@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.jobs.parameters.BatchJobParametersWithTaskId;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -109,6 +110,8 @@ public class ResourceMergeServiceTest {
 	@Mock
 	RequestPartitionId myRequestPartitionIdMock;
 
+	@Mock
+	private JpaStorageSettings myStorageSettingsMock;
 
 	private ResourceMergeService myResourceMergeService;
 
@@ -123,7 +126,9 @@ public class ResourceMergeServiceTest {
 		when(myDaoRegistryMock.getResourceDao(eq(Patient.class))).thenReturn(myPatientDaoMock);
 		when(myDaoRegistryMock.getResourceDao(eq(Task.class))).thenReturn(myTaskDaoMock);
 		when(myPatientDaoMock.getContext()).thenReturn(myFhirContext);
-		myResourceMergeService = new ResourceMergeService(myDaoRegistryMock,
+		myResourceMergeService = new ResourceMergeService(
+			myStorageSettingsMock,
+			myDaoRegistryMock,
 			myReplaceReferencesSvcMock,
 			myTransactionServiceMock,
 			myRequestPartitionHelperSvcMock,

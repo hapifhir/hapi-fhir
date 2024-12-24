@@ -87,7 +87,6 @@ import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDelet
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
@@ -941,13 +940,13 @@ public class JpaConfig {
 
 	@Bean
 	public IReplaceReferencesSvc replaceReferencesSvc(
-		DaoRegistry theDaoRegistry,
-		HapiTransactionService theHapiTransactionService,
-		IResourceLinkDao theResourceLinkDao,
-		IJobCoordinator theJobCoordinator,
-		ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle,
-		Batch2TaskHelper theBatch2TaskHelper,
-		JpaStorageSettings theStorageSettings) {
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			IResourceLinkDao theResourceLinkDao,
+			IJobCoordinator theJobCoordinator,
+			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle,
+			Batch2TaskHelper theBatch2TaskHelper,
+			JpaStorageSettings theStorageSettings) {
 		return new ReplaceReferencesSvcImpl(
 				theDaoRegistry,
 				theHapiTransactionService,
@@ -955,7 +954,7 @@ public class JpaConfig {
 				theJobCoordinator,
 				theReplaceReferencesPatchBundle,
 				theBatch2TaskHelper,
-			theStorageSettings);
+				theStorageSettings);
 	}
 
 	@Bean

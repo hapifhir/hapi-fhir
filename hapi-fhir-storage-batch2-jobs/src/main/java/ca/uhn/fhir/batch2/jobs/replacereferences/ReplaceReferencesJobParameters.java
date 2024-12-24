@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.jobs.replacereferences;
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.parameters.BatchJobParametersWithTaskId;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -48,7 +49,8 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 	public ReplaceReferencesJobParameters(ReplaceReferencesRequest theReplaceReferencesRequest, int theBatchSize) {
 		mySourceId = new FhirIdJson(theReplaceReferencesRequest.sourceId);
 		myTargetId = new FhirIdJson(theReplaceReferencesRequest.targetId);
-		// Note theReplaceReferencesRequest.resourceLimit is only used for the synchronous case. It is ignored in this async case.
+		// Note theReplaceReferencesRequest.resourceLimit is only used for the synchronous case. It is ignored in this
+		// async case.
 		myBatchSize = theBatchSize;
 		myPartitionId = theReplaceReferencesRequest.partitionId;
 	}
@@ -71,7 +73,7 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 
 	public int getBatchSize() {
 		if (myBatchSize <= 0) {
-			myBatchSize = ProviderConstants.OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT;
+			myBatchSize = JpaStorageSettings.DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE;
 		}
 		return myBatchSize;
 	}

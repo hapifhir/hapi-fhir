@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
@@ -60,13 +59,13 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private final JpaStorageSettings myStorageSettings;
 
 	public ReplaceReferencesSvcImpl(
-		DaoRegistry theDaoRegistry,
-		HapiTransactionService theHapiTransactionService,
-		IResourceLinkDao theResourceLinkDao,
-		IJobCoordinator theJobCoordinator,
-		ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
-		Batch2TaskHelper theBatch2TaskHelper,
-		JpaStorageSettings theStorageSettings) {
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			IResourceLinkDao theResourceLinkDao,
+			IJobCoordinator theJobCoordinator,
+			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
+			Batch2TaskHelper theBatch2TaskHelper,
+			JpaStorageSettings theStorageSettings) {
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
 		myResourceLinkDao = theResourceLinkDao;
@@ -104,7 +103,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 				theRequestDetails,
 				myJobCoordinator,
 				JOB_REPLACE_REFERENCES,
-				new ReplaceReferencesJobParameters(theReplaceReferencesRequest, myStorageSettings.getDefaultTransactionEntriesForWrite()));
+				new ReplaceReferencesJobParameters(
+						theReplaceReferencesRequest, myStorageSettings.getDefaultTransactionEntriesForWrite()));
 
 		Parameters retval = new Parameters();
 		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());

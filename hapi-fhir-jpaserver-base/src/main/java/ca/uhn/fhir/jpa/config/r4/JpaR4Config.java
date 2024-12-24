@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR4;
@@ -107,13 +108,16 @@ public class JpaR4Config {
 
 	@Bean
 	public ResourceMergeService resourceMergeService(
-			DaoRegistry theDaoRegistry,
-			IReplaceReferencesSvc theReplaceReferencesSvc,
-			HapiTransactionService theHapiTransactionService,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-			IJobCoordinator theJobCoordinator,
-			Batch2TaskHelper theBatch2TaskHelper) {
+		DaoRegistry theDaoRegistry,
+		IReplaceReferencesSvc theReplaceReferencesSvc,
+		HapiTransactionService theHapiTransactionService,
+		IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+		IJobCoordinator theJobCoordinator,
+		Batch2TaskHelper theBatch2TaskHelper,
+		JpaStorageSettings theStorageSettings) {
+
 		return new ResourceMergeService(
+			theStorageSettings,
 				theDaoRegistry,
 				theReplaceReferencesSvc,
 				theHapiTransactionService,

@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -128,6 +129,7 @@ public abstract class BaseMergeOperationInputParameters {
 
 	public MergeJobParameters asMergeJobParameters(
 			FhirContext theFhirContext,
+			JpaStorageSettings theStorageSettings,
 			Patient theSourceResource,
 			Patient theTargetResource,
 			RequestPartitionId thePartitionId) {
@@ -136,7 +138,7 @@ public abstract class BaseMergeOperationInputParameters {
 			retval.setResultResource(theFhirContext.newJsonParser().encodeResourceToString(getResultResource()));
 		}
 		retval.setDeleteSource(getDeleteSource());
-		retval.setBatchSize(getResourceLimit());
+		retval.setBatchSize(theStorageSettings.getDefaultTransactionEntriesForWrite());
 		retval.setSourceId(new FhirIdJson(theSourceResource.getIdElement().toVersionless()));
 		retval.setTargetId(new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
 		retval.setPartitionId(thePartitionId);
