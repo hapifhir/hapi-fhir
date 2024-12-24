@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.merge;
 import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -29,7 +30,8 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 	private final FhirContext myFhirContext;
 	private final ResourceMergeService myResourceMergeService;
 
-	public PatientMergeProvider(FhirContext theFhirContext, ResourceMergeService theResourceMergeService) {
+	public PatientMergeProvider(FhirContext theFhirContext, DaoRegistry theDaoRegistry, ResourceMergeService theResourceMergeService) {
+		super(theDaoRegistry.getResourceDao("Patient"));
 		myFhirContext = theFhirContext;
 		assert myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4;
 		myResourceMergeService = theResourceMergeService;

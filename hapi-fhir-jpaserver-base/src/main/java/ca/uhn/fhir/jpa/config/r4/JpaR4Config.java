@@ -128,7 +128,7 @@ public class JpaR4Config {
 
 	@Bean
 	public PatientMergeProvider patientMergeProvider(
-			FhirContext theFhirContext, ResourceMergeService theResourceMergeService) {
-		return new PatientMergeProvider(theFhirContext, theResourceMergeService);
+		FhirContext theFhirContext, DaoRegistry theDaoRegistry, ResourceMergeService theResourceMergeService) {
+		return new PatientMergeProvider(theFhirContext, theDaoRegistry, theResourceMergeService);
 	}
 }
