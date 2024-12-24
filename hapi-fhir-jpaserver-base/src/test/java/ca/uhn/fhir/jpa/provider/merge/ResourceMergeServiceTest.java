@@ -1438,7 +1438,7 @@ public class ResourceMergeServiceTest {
 
 		assertThat(jobParametersCaptor.getValue()).isInstanceOf(MergeJobParameters.class);
 		MergeJobParameters capturedJobParams = (MergeJobParameters) jobParametersCaptor.getValue();
-		assertThat(capturedJobParams.getResourceLimit()).isEqualTo(PAGE_SIZE);
+		assertThat(capturedJobParams.getBatchSize()).isEqualTo(PAGE_SIZE);
 		assertThat(capturedJobParams.getSourceId().toString()).isEqualTo(SOURCE_PATIENT_TEST_ID);
 		assertThat(capturedJobParams.getTargetId().toString()).isEqualTo(TARGET_PATIENT_TEST_ID);
 		assertThat(capturedJobParams.getDeleteSource()).isEqualTo(theDeleteSource);

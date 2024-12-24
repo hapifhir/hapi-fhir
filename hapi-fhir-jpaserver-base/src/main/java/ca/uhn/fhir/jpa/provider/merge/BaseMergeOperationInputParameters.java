@@ -136,7 +136,7 @@ public abstract class BaseMergeOperationInputParameters {
 			retval.setResultResource(theFhirContext.newJsonParser().encodeResourceToString(getResultResource()));
 		}
 		retval.setDeleteSource(getDeleteSource());
-		retval.setResourceLimit(getResourceLimit());
+		retval.setBatchSize(getResourceLimit());
 		retval.setSourceId(new FhirIdJson(theSourceResource.getIdElement().toVersionless()));
 		retval.setTargetId(new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
 		retval.setPartitionId(thePartitionId);

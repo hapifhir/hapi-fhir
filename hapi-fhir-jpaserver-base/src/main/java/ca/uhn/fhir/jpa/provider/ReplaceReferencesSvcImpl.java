@@ -22,9 +22,11 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
@@ -55,20 +57,23 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private final IJobCoordinator myJobCoordinator;
 	private final ReplaceReferencesPatchBundleSvc myReplaceReferencesPatchBundleSvc;
 	private final Batch2TaskHelper myBatch2TaskHelper;
+	private final JpaStorageSettings myStorageSettings;
 
 	public ReplaceReferencesSvcImpl(
-			DaoRegistry theDaoRegistry,
-			HapiTransactionService theHapiTransactionService,
-			IResourceLinkDao theResourceLinkDao,
-			IJobCoordinator theJobCoordinator,
-			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
-			Batch2TaskHelper theBatch2TaskHelper) {
+		DaoRegistry theDaoRegistry,
+		HapiTransactionService theHapiTransactionService,
+		IResourceLinkDao theResourceLinkDao,
+		IJobCoordinator theJobCoordinator,
+		ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
+		Batch2TaskHelper theBatch2TaskHelper,
+		JpaStorageSettings theStorageSettings) {
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
 		myResourceLinkDao = theResourceLinkDao;
 		myJobCoordinator = theJobCoordinator;
 		myReplaceReferencesPatchBundleSvc = theReplaceReferencesPatchBundleSvc;
 		myBatch2TaskHelper = theBatch2TaskHelper;
+		myStorageSettings = theStorageSettings;
 	}
 
 	@Override
@@ -99,7 +104,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 				theRequestDetails,
 				myJobCoordinator,
 				JOB_REPLACE_REFERENCES,
-				new ReplaceReferencesJobParameters(theReplaceReferencesRequest));
+				new ReplaceReferencesJobParameters(theReplaceReferencesRequest, myStorageSettings.getDefaultTransactionEntriesForWrite()));
 
 		Parameters retval = new Parameters();
 		task.setIdElement(task.getIdElement().toUnqualifiedVersionless());
