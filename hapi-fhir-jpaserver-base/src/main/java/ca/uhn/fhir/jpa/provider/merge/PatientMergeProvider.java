@@ -30,7 +30,8 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 	private final FhirContext myFhirContext;
 	private final ResourceMergeService myResourceMergeService;
 
-	public PatientMergeProvider(FhirContext theFhirContext, DaoRegistry theDaoRegistry, ResourceMergeService theResourceMergeService) {
+	public PatientMergeProvider(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry, ResourceMergeService theResourceMergeService) {
 		super(theDaoRegistry.getResourceDao("Patient"));
 		myFhirContext = theFhirContext;
 		assert myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4;
