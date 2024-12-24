@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -11,6 +12,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -21,6 +23,7 @@ import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper.EXPE
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -75,11 +78,17 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		return myBatch2JobHelper.awaitJobCompletion(jobId);
 	}
 
-	@ParameterizedTest
-	@ValueSource(booleans = {false, true})
-	void testReplaceReferencesSmallResourceLimit(boolean isAsync) {
+	@Test
+	void testReplaceReferencesSmallResourceLimitSync() {
+		assertThatThrownBy(() -> myTestHelper.callReplaceReferencesWithResourceLimit(myClient, false, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE))
+			.isInstanceOf(PreconditionFailedException.class)
+			.hasMessage("HTTP 412 Precondition Failed: Number of resources with references to " + myTestHelper.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
+	}
+
+	@Test
+	void testReplaceReferencesSmallResourceLimitAsync() {
 		// exec
-		Parameters outParams = myTestHelper.callReplaceReferencesWithResourceLimit(myClient, isAsync, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
+		Parameters outParams = myTestHelper.callReplaceReferencesWithResourceLimit(myClient, true, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
 
 		assertThat(getLastHttpStatusCode()).isEqualTo(HttpServletResponse.SC_ACCEPTED);
 

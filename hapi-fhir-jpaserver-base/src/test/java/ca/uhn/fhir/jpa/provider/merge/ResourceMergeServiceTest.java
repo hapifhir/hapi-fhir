@@ -18,6 +18,7 @@ import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -76,6 +77,7 @@ public class ResourceMergeServiceTest {
 	private static final String TARGET_PATIENT_TEST_ID = "Patient/456";
 	private static final String TARGET_PATIENT_TEST_ID_WITH_VERSION_1 = TARGET_PATIENT_TEST_ID + "/_history/1";
 	private static final String TARGET_PATIENT_TEST_ID_WITH_VERSION_2 = TARGET_PATIENT_TEST_ID + "/_history/2";
+	public static final String PRECONDITION_FAILED_MESSAGE = "bad wolf";
 
 	@Mock
 	DaoRegistry myDaoRegistryMock;
@@ -449,25 +451,24 @@ public class ResourceMergeServiceTest {
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 
-		when(myReplaceReferencesSvcMock.countResourcesReferencingResource(new IdType(SOURCE_PATIENT_TEST_ID),
-			myRequestDetailsMock)).thenReturn(PAGE_SIZE + 1);
-
-		Patient resultResource = null;
 		if (theWithResultResource) {
-			resultResource = createValidResultPatient(theWithDeleteSource);
+			Patient resultResource = createValidResultPatient(theWithDeleteSource);
 			mergeOperationParameters.setResultResource(resultResource);
 		}
 
-		Task task = new Task();
-		setupBatch2JobTaskHelperMock(task);
+		when(myReplaceReferencesSvcMock.replaceReferences(any(), any())).thenThrow(new PreconditionFailedException(PRECONDITION_FAILED_MESSAGE));
 
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
-		verifySuccessfulOutcomeForAsync(mergeOutcome, task);
-		verifyBatch2JobTaskHelperMockInvocation(resultResource, theWithDeleteSource);
-
+		verifyFailedOutcome(mergeOutcome);
 		verifyNoMoreInteractions(myPatientDaoMock);
+	}
 
+	private void verifyFailedOutcome(MergeOperationOutcome theMergeOutcome) {
+		assertThat(theMergeOutcome.getHttpStatusCode()).isEqualTo(PreconditionFailedException.STATUS_CODE);
+		OperationOutcome operationOutcome = (OperationOutcome) theMergeOutcome.getOperationOutcome();
+		assertThat(operationOutcome.getIssue()).hasSize(1);
+		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics()).isEqualTo(PRECONDITION_FAILED_MESSAGE);
 	}
 
 	//  ERROR CASES
@@ -1411,8 +1412,6 @@ public class ResourceMergeServiceTest {
 
 	private void setupReplaceReferencesForSuccessForSync() {
 		// set the count to less that the page size for sync processing
-		when(myReplaceReferencesSvcMock.countResourcesReferencingResource(new IdType(SOURCE_PATIENT_TEST_ID),
-			myRequestDetailsMock)).thenReturn(PAGE_SIZE - 1);
 		when(myReplaceReferencesSvcMock.replaceReferences(isA(ReplaceReferencesRequest.class),
 			eq(myRequestDetailsMock))).thenReturn(new Parameters());
 	}

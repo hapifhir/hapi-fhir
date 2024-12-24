@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.StopLimitAccumulator;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -122,9 +123,11 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 				.execute(() -> getAllPidsWithLimit(theReplaceReferencesRequest));
 
 		if (accumulator.isTruncated()) {
-			// FIXME KHS undo this?
-			ourLog.warn("Too many results. Switching to asynchronous reference replacement.");
-			return replaceReferencesPreferAsync(theReplaceReferencesRequest, theRequestDetails);
+			throw new PreconditionFailedException("Number of resources with references to " +
+				theReplaceReferencesRequest.sourceId +
+				" exceeds the resource-limit " +
+				theReplaceReferencesRequest.resourceLimit +
+				". Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
 		}
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
