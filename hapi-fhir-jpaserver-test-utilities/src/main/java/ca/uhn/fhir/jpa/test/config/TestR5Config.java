@@ -80,11 +80,12 @@ public class TestR5Config {
 		 * and catch any potential deadlocks caused by database connection
 		 * starvation
 		 *
-		 * A minimum of 2 is necessary for most transactions,
-		 * so 2 will be our limit
+		 * A minimum of 3 is necessary for most transactions,
+		 * so 3 will be our minimum
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 2;
+//			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
+			ourMaxThreads =  3;
 
 			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
