@@ -49,10 +49,11 @@ public class MergeResourceHelper {
 		myPatientDao = theDao;
 	}
 
-	public static int setResourceLimitFromParameter(JpaStorageSettings theStorageSettings, IPrimitiveType<Integer> theResourceLimit) {
+	public static int setResourceLimitFromParameter(
+			JpaStorageSettings theStorageSettings, IPrimitiveType<Integer> theResourceLimit) {
 		int retval = defaultIfNull(
-			IPrimitiveType.toValueOrNull(theResourceLimit),
-			ProviderConstants.OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT);
+				IPrimitiveType.toValueOrNull(theResourceLimit),
+				ProviderConstants.OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT);
 		if (retval > theStorageSettings.getMaxTransactionEntriesForWrite()) {
 			retval = theStorageSettings.getMaxTransactionEntriesForWrite();
 		}
@@ -60,36 +61,36 @@ public class MergeResourceHelper {
 	}
 
 	public void updateMergedResourcesAfterReferencesReplaced(
-		IHapiTransactionService myHapiTransactionService,
-		IIdType theSourceResourceId,
-		IIdType theTargetResourceId,
-		@Nullable Patient theResultResource,
-		boolean theDeleteSource,
-		RequestDetails theRequestDetails) {
+			IHapiTransactionService myHapiTransactionService,
+			IIdType theSourceResourceId,
+			IIdType theTargetResourceId,
+			@Nullable Patient theResultResource,
+			boolean theDeleteSource,
+			RequestDetails theRequestDetails) {
 		Patient sourceResource = myPatientDao.read(theSourceResourceId, theRequestDetails);
 		Patient targetResource = myPatientDao.read(theTargetResourceId, theRequestDetails);
 
 		updateMergedResourcesAfterReferencesReplaced(
-			myHapiTransactionService,
-			sourceResource,
-			targetResource,
-			theResultResource,
-			theDeleteSource,
-			theRequestDetails);
+				myHapiTransactionService,
+				sourceResource,
+				targetResource,
+				theResultResource,
+				theDeleteSource,
+				theRequestDetails);
 	}
 
 	public Patient updateMergedResourcesAfterReferencesReplaced(
-		IHapiTransactionService myHapiTransactionService,
-		Patient theSourceResource,
-		Patient theTargetResource,
-		@Nullable Patient theResultResource,
-		boolean theDeleteSource,
-		RequestDetails theRequestDetails) {
+			IHapiTransactionService myHapiTransactionService,
+			Patient theSourceResource,
+			Patient theTargetResource,
+			@Nullable Patient theResultResource,
+			boolean theDeleteSource,
+			RequestDetails theRequestDetails) {
 
 		AtomicReference<Patient> targetPatientAfterUpdate = new AtomicReference<>();
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
 			Patient patientToUpdate = prepareTargetPatientForUpdate(
-				theTargetResource, theSourceResource, theResultResource, theDeleteSource);
+					theTargetResource, theSourceResource, theResultResource, theDeleteSource);
 
 			targetPatientAfterUpdate.set(updateResource(patientToUpdate, theRequestDetails));
 
@@ -105,10 +106,10 @@ public class MergeResourceHelper {
 	}
 
 	public Patient prepareTargetPatientForUpdate(
-		Patient theTargetResource,
-		Patient theSourceResource,
-		@Nullable Patient theResultResource,
-		boolean theDeleteSource) {
+			Patient theTargetResource,
+			Patient theSourceResource,
+			@Nullable Patient theResultResource,
+			boolean theDeleteSource) {
 
 		// if the client provided a result resource as input then use it to update the target resource
 		if (theResultResource != null) {
@@ -119,9 +120,9 @@ public class MergeResourceHelper {
 		// add the replaces link to the target resource, if the source resource is not to be deleted
 		if (!theDeleteSource) {
 			theTargetResource
-				.addLink()
-				.setType(Patient.LinkType.REPLACES)
-				.setOther(new Reference(theSourceResource.getIdElement().toVersionless()));
+					.addLink()
+					.setType(Patient.LinkType.REPLACES)
+					.setOther(new Reference(theSourceResource.getIdElement().toVersionless()));
 		}
 
 		// copy all identifiers from the source to the target
@@ -133,9 +134,9 @@ public class MergeResourceHelper {
 	private void prepareSourcePatientForUpdate(Patient theSourceResource, Patient theTargetResource) {
 		theSourceResource.setActive(false);
 		theSourceResource
-			.addLink()
-			.setType(Patient.LinkType.REPLACEDBY)
-			.setOther(new Reference(theTargetResource.getIdElement().toVersionless()));
+				.addLink()
+				.setType(Patient.LinkType.REPLACEDBY)
+				.setOther(new Reference(theTargetResource.getIdElement().toVersionless()));
 	}
 
 	/**

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 

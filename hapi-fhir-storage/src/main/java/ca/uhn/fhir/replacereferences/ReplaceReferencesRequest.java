@@ -75,5 +75,4 @@ public class ReplaceReferencesRequest {
 					Msg.code(2587) + "Source and target id parameters must be for the same resource type");
 		}
 	}
-
 }
