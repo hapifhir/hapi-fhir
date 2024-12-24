@@ -8,6 +8,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
@@ -224,6 +225,20 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			myTestHelper.assertSourcePatientUpdatedOrDeleted(withDelete);
 			myTestHelper.assertTargetPatientUpdated(withDelete, expectedIdentifiersOnTargetAfterMerge);
 		}
+	}
+
+	@Test
+	void testMerge_smallResourceLimit() {
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
+		myTestHelper.setSourceAndTarget(inParams);
+
+		inParams.resourceLimit = 5;
+		Parameters inParameters = inParams.asParametersResource();
+
+		// exec
+		assertThatThrownBy(() -> callMergeOperation(inParameters, false))
+			.isInstanceOf(PreconditionFailedException.class)
+			.satisfies(ex -> assertThat(extractFailureMessage((BaseServerResponseException) ex)).isEqualTo("Number of resources with references to "+ myTestHelper.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
 	}
 
 	@Test

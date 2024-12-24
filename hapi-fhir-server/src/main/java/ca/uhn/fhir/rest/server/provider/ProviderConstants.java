@@ -265,7 +265,6 @@ public class ProviderConstants {
 	 * exceeds this amount, the operation will fail with 412 Precondition Failed.
 	 */
 
-	// FIXME KHS change tests and var names
 	public static final String OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT = "resource-limit";
 
 	/**

@@ -123,11 +123,11 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 				.execute(() -> getAllPidsWithLimit(theReplaceReferencesRequest));
 
 		if (accumulator.isTruncated()) {
-			throw new PreconditionFailedException("Number of resources with references to " +
-				theReplaceReferencesRequest.sourceId +
-				" exceeds the resource-limit " +
-				theReplaceReferencesRequest.resourceLimit +
-				". Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
+			throw new PreconditionFailedException(
+					"Number of resources with references to " + theReplaceReferencesRequest.sourceId
+							+ " exceeds the resource-limit "
+							+ theReplaceReferencesRequest.resourceLimit
+							+ ". Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
 		}
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
