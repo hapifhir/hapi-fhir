@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
@@ -128,7 +129,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 				.execute(() -> getAllPidsWithLimit(theReplaceReferencesRequest));
 
 		if (accumulator.isTruncated()) {
-			throw new PreconditionFailedException(
+			throw new PreconditionFailedException(Msg.code(2597) +
 					"Number of resources with references to " + theReplaceReferencesRequest.sourceId
 							+ " exceeds the resource-limit "
 							+ theReplaceReferencesRequest.resourceLimit
