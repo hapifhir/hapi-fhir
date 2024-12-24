@@ -67,13 +67,13 @@ public class ResourceMergeService {
 	private final MergeValidationService myMergeValidationService;
 
 	public ResourceMergeService(
-		JpaStorageSettings theStorageSettings,
-		DaoRegistry theDaoRegistry,
-		IReplaceReferencesSvc theReplaceReferencesSvc,
-		IHapiTransactionService theHapiTransactionService,
-		IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-		IJobCoordinator theJobCoordinator,
-		Batch2TaskHelper theBatch2TaskHelper) {
+			JpaStorageSettings theStorageSettings,
+			DaoRegistry theDaoRegistry,
+			IReplaceReferencesSvc theReplaceReferencesSvc,
+			IHapiTransactionService theHapiTransactionService,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			IJobCoordinator theJobCoordinator,
+			Batch2TaskHelper theBatch2TaskHelper) {
 		myStorageSettings = theStorageSettings;
 
 		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);

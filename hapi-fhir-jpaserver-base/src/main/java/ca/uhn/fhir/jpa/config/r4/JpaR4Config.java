@@ -108,16 +108,16 @@ public class JpaR4Config {
 
 	@Bean
 	public ResourceMergeService resourceMergeService(
-		DaoRegistry theDaoRegistry,
-		IReplaceReferencesSvc theReplaceReferencesSvc,
-		HapiTransactionService theHapiTransactionService,
-		IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-		IJobCoordinator theJobCoordinator,
-		Batch2TaskHelper theBatch2TaskHelper,
-		JpaStorageSettings theStorageSettings) {
+			DaoRegistry theDaoRegistry,
+			IReplaceReferencesSvc theReplaceReferencesSvc,
+			HapiTransactionService theHapiTransactionService,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			IJobCoordinator theJobCoordinator,
+			Batch2TaskHelper theBatch2TaskHelper,
+			JpaStorageSettings theStorageSettings) {
 
 		return new ResourceMergeService(
-			theStorageSettings,
+				theStorageSettings,
 				theDaoRegistry,
 				theReplaceReferencesSvc,
 				theHapiTransactionService,
