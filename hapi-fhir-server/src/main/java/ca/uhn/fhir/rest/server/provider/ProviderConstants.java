@@ -264,7 +264,6 @@ public class ProviderConstants {
 	 * If the request is being performed synchronously and the number of resources that need to change
 	 * exceeds this amount, the operation will fail with 412 Precondition Failed.
 	 */
-
 	public static final String OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT = "resource-limit";
 
 	/**
