@@ -67,6 +67,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 
+		myStorageSettings.setDefaultTransactionEntriesForWrite(new JpaStorageSettings().getDefaultTransactionEntriesForWrite());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 	}
 
@@ -238,7 +239,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		// exec
 		assertThatThrownBy(() -> callMergeOperation(inParameters, false))
 			.isInstanceOf(PreconditionFailedException.class)
-			.satisfies(ex -> assertThat(extractFailureMessage((BaseServerResponseException) ex)).isEqualTo("Number of resources with references to "+ myTestHelper.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
+			.satisfies(ex -> assertThat(extractFailureMessage((BaseServerResponseException) ex)).isEqualTo("HAPI-2597: Number of resources with references to "+ myTestHelper.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
 	}
 
 	@Test
@@ -249,7 +250,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		//using a small batch size that would result in multiple chunks to ensure that
 		//the job runs a bit slowly so that we have sometime to add a resource that references the source
 		//after the first step
-		inParams.resourceLimit = 5;
+		myStorageSettings.setDefaultTransactionEntriesForWrite(5);
 		Parameters inParameters = inParams.asParametersResource();
 
 		// exec
@@ -371,11 +372,15 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	private @Nonnull String extractFailureMessage(BaseServerResponseException ex) {
 		String body = ex.getResponseBody();
-		Parameters outParams = myFhirContext.newJsonParser().parseResource(Parameters.class, body);
-		OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
-		return outcome.getIssue().stream()
-			.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
-			.collect(Collectors.joining(", "));
+		if (body != null) {
+			Parameters outParams = myFhirContext.newJsonParser().parseResource(Parameters.class, body);
+			OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+			return outcome.getIssue().stream()
+				.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+				.collect(Collectors.joining(", "));
+		} else {
+			return "null";
+		}
 	}
 
 	@Override
