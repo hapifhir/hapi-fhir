@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -11,6 +12,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,6 +32,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	ReplaceReferencesTestHelper myTestHelper;
+
+	@Override
+	@AfterEach
+	public void after() throws Exception {
+		super.after();
+		myStorageSettings.setDefaultTransactionEntriesForWrite(new JpaStorageSettings().getDefaultTransactionEntriesForWrite());
+	}
 
 	@Override
 	@BeforeEach
@@ -66,7 +75,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		// validate
 		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
 			ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of(
-			"Observation", "Encounter", "CarePlan"));
+				"Observation", "Encounter", "CarePlan"));
 
 		// Check that the linked resources were updated
 
@@ -82,11 +91,13 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	void testReplaceReferencesSmallResourceLimitSync() {
 		assertThatThrownBy(() -> myTestHelper.callReplaceReferencesWithResourceLimit(myClient, false, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE))
 			.isInstanceOf(PreconditionFailedException.class)
-			.hasMessage("HTTP 412 Precondition Failed: Number of resources with references to " + myTestHelper.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
+			.hasMessage("HTTP 412 Precondition Failed: HAPI-2597: Number of resources with references to " + myTestHelper.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
 	}
 
 	@Test
-	void testReplaceReferencesSmallResourceLimitAsync() {
+	void testReplaceReferencesSmallTransactionEntriesSize() {
+		myStorageSettings.setDefaultTransactionEntriesForWrite(5);
+
 		// exec
 		Parameters outParams = myTestHelper.callReplaceReferencesWithResourceLimit(myClient, true, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
 
