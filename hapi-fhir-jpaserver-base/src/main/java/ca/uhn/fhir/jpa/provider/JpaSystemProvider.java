@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -58,7 +59,7 @@ import static software.amazon.awssdk.utils.StringUtils.isBlank;
 
 public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT> {
 	@Autowired
-	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Description(
 			"Marks all currently existing resources of a given type, or all resources of all types, for reindexing.")
