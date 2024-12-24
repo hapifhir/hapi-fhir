@@ -37,6 +37,6 @@ import org.springframework.context.annotation.Import;
 	DeleteExpungeAppCtx.class,
 	BulkExportAppCtx.class,
 	TermCodeSystemJobConfig.class,
-	BulkImportPullConfig.class,
+	BulkImportPullConfig.class
 })
 public class Batch2JobsConfig {}
