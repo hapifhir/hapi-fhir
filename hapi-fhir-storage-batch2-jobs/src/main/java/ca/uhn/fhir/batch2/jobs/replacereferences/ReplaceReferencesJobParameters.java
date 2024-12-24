@@ -23,10 +23,8 @@ import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.parameters.BatchJobParametersWithTaskId;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import static ca.uhn.fhir.jpa.api.config.JpaStorageSettings.DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE;
-import static ca.uhn.fhir.jpa.api.config.JpaStorageSettings.DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING;
 
 public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId {
 
@@ -37,10 +35,10 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 	private FhirIdJson myTargetId;
 
 	@JsonProperty(
-			value = "batchSize",
-			defaultValue = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING,
+			value = "resourceLimit",
+			defaultValue = ProviderConstants.OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT_STRING,
 			required = false)
-	private int myBatchSize;
+	private int myResourceLimit;
 
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
@@ -50,7 +48,7 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 	public ReplaceReferencesJobParameters(ReplaceReferencesRequest theRequest) {
 		mySourceId = new FhirIdJson(theRequest.sourceId);
 		myTargetId = new FhirIdJson(theRequest.targetId);
-		myBatchSize = theRequest.batchSize;
+		myResourceLimit = theRequest.resourceLimit;
 		myPartitionId = theRequest.partitionId;
 	}
 
@@ -70,15 +68,15 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 		myTargetId = theTargetId;
 	}
 
-	public int getBatchSize() {
-		if (myBatchSize <= 0) {
-			myBatchSize = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE;
+	public int getResourceLimit() {
+		if (myResourceLimit <= 0) {
+			myResourceLimit = ProviderConstants.OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT;
 		}
-		return myBatchSize;
+		return myResourceLimit;
 	}
 
-	public void setBatchSize(int theBatchSize) {
-		myBatchSize = theBatchSize;
+	public void setResourceLimit(int theResourceLimit) {
+		myResourceLimit = theResourceLimit;
 	}
 
 	public RequestPartitionId getPartitionId() {
@@ -90,6 +88,6 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 	}
 
 	public ReplaceReferencesRequest asReplaceReferencesRequest() {
-		return new ReplaceReferencesRequest(mySourceId.asIdDt(), myTargetId.asIdDt(), myBatchSize, myPartitionId);
+		return new ReplaceReferencesRequest(mySourceId.asIdDt(), myTargetId.asIdDt(), myResourceLimit, myPartitionId);
 	}
 }

@@ -42,10 +42,10 @@ public abstract class BaseMergeOperationInputParameters {
 	private boolean myPreview;
 	private boolean myDeleteSource;
 	private IBaseResource myResultResource;
-	private final int myBatchSize;
+	private final int myResourceLimit;
 
-	protected BaseMergeOperationInputParameters(int theBatchSize) {
-		myBatchSize = theBatchSize;
+	protected BaseMergeOperationInputParameters(int theResourceLimit) {
+		myResourceLimit = theResourceLimit;
 	}
 
 	public abstract String getSourceResourceParameterName();
@@ -122,8 +122,8 @@ public abstract class BaseMergeOperationInputParameters {
 		this.myTargetResource = theTargetResource;
 	}
 
-	public int getBatchSize() {
-		return myBatchSize;
+	public int getResourceLimit() {
+		return myResourceLimit;
 	}
 
 	public MergeJobParameters asMergeJobParameters(
@@ -136,7 +136,7 @@ public abstract class BaseMergeOperationInputParameters {
 			retval.setResultResource(theFhirContext.newJsonParser().encodeResourceToString(getResultResource()));
 		}
 		retval.setDeleteSource(getDeleteSource());
-		retval.setBatchSize(getBatchSize());
+		retval.setResourceLimit(getResourceLimit());
 		retval.setSourceId(new FhirIdJson(theSourceResource.getIdElement().toVersionless()));
 		retval.setTargetId(new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
 		retval.setPartitionId(thePartitionId);

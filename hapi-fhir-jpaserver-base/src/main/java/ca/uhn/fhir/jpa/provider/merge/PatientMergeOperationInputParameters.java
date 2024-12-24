@@ -29,8 +29,8 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
  * See <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
  */
 public class PatientMergeOperationInputParameters extends BaseMergeOperationInputParameters {
-	public PatientMergeOperationInputParameters(int theBatchSize) {
-		super(theBatchSize);
+	public PatientMergeOperationInputParameters(int theResourceLimit) {
+		super(theResourceLimit);
 	}
 
 	@Override

@@ -180,9 +180,7 @@ public class ResourceMergeService {
 		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
 				theRequestDetails, ReadPartitionIdRequestDetails.forRead(theTargetResource.getIdElement()));
 
-		if (theRequestDetails.isPreferAsync()
-				|| referenceCountExceedsSyncLimit(
-						theSourceResource, theRequestDetails, theMergeOperationParameters.getBatchSize())) {
+		if (theRequestDetails.isPreferAsync()) {
 			doMergeAsync(
 					theMergeOperationParameters,
 					theSourceResource,
@@ -202,15 +200,15 @@ public class ResourceMergeService {
 	}
 
 	private boolean referenceCountExceedsSyncLimit(
-			Patient theSourceResource, RequestDetails theRequestDetails, Integer theBatchSize) {
+			Patient theSourceResource, RequestDetails theRequestDetails, Integer theResourceLimit) {
 		Integer numberOfRefs = myReplaceReferencesSvc.countResourcesReferencingResource(
 				theSourceResource.getIdElement().toVersionless(), theRequestDetails);
-		boolean exceedsSyncLimit = numberOfRefs > theBatchSize;
+		boolean exceedsSyncLimit = numberOfRefs > theResourceLimit;
 		if (exceedsSyncLimit) {
 			ourLog.info(
 					"{} resources need to be updated. This exceeds the batch size of {}. Switching to asynchronous processing; will return a Task in the response that can be used to track progress.",
 					numberOfRefs,
-					theBatchSize);
+					theResourceLimit);
 		}
 		return exceedsSyncLimit;
 	}
@@ -226,11 +224,8 @@ public class ResourceMergeService {
 		ReplaceReferencesRequest replaceReferencesRequest = new ReplaceReferencesRequest(
 				theSourceResource.getIdElement(),
 				theTargetResource.getIdElement(),
-				theMergeOperationParameters.getBatchSize(),
+				theMergeOperationParameters.getResourceLimit(),
 				partitionId);
-
-		// We don't want replace references to flip to async mode once we've already made the decision to go sync here.
-		replaceReferencesRequest.setForceSync(true);
 
 		myReplaceReferencesSvc.replaceReferences(replaceReferencesRequest, theRequestDetails);
 

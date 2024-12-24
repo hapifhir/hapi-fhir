@@ -19,18 +19,23 @@
  */
 package ca.uhn.fhir.batch2.jobs.merge;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 /**
  * This class contains code that is used to update source and target resources after the references are replaced.
@@ -44,37 +49,47 @@ public class MergeResourceHelper {
 		myPatientDao = theDao;
 	}
 
+	public static int setResourceLimitFromParameter(JpaStorageSettings theStorageSettings, IPrimitiveType<Integer> theResourceLimit) {
+		int retval = defaultIfNull(
+			IPrimitiveType.toValueOrNull(theResourceLimit),
+			ProviderConstants.OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT);
+		if (retval > theStorageSettings.getMaxTransactionEntriesForWrite()) {
+			retval = theStorageSettings.getMaxTransactionEntriesForWrite();
+		}
+		return retval;
+	}
+
 	public void updateMergedResourcesAfterReferencesReplaced(
-			IHapiTransactionService myHapiTransactionService,
-			IIdType theSourceResourceId,
-			IIdType theTargetResourceId,
-			@Nullable Patient theResultResource,
-			boolean theDeleteSource,
-			RequestDetails theRequestDetails) {
+		IHapiTransactionService myHapiTransactionService,
+		IIdType theSourceResourceId,
+		IIdType theTargetResourceId,
+		@Nullable Patient theResultResource,
+		boolean theDeleteSource,
+		RequestDetails theRequestDetails) {
 		Patient sourceResource = myPatientDao.read(theSourceResourceId, theRequestDetails);
 		Patient targetResource = myPatientDao.read(theTargetResourceId, theRequestDetails);
 
 		updateMergedResourcesAfterReferencesReplaced(
-				myHapiTransactionService,
-				sourceResource,
-				targetResource,
-				theResultResource,
-				theDeleteSource,
-				theRequestDetails);
+			myHapiTransactionService,
+			sourceResource,
+			targetResource,
+			theResultResource,
+			theDeleteSource,
+			theRequestDetails);
 	}
 
 	public Patient updateMergedResourcesAfterReferencesReplaced(
-			IHapiTransactionService myHapiTransactionService,
-			Patient theSourceResource,
-			Patient theTargetResource,
-			@Nullable Patient theResultResource,
-			boolean theDeleteSource,
-			RequestDetails theRequestDetails) {
+		IHapiTransactionService myHapiTransactionService,
+		Patient theSourceResource,
+		Patient theTargetResource,
+		@Nullable Patient theResultResource,
+		boolean theDeleteSource,
+		RequestDetails theRequestDetails) {
 
 		AtomicReference<Patient> targetPatientAfterUpdate = new AtomicReference<>();
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
 			Patient patientToUpdate = prepareTargetPatientForUpdate(
-					theTargetResource, theSourceResource, theResultResource, theDeleteSource);
+				theTargetResource, theSourceResource, theResultResource, theDeleteSource);
 
 			targetPatientAfterUpdate.set(updateResource(patientToUpdate, theRequestDetails));
 
@@ -90,10 +105,10 @@ public class MergeResourceHelper {
 	}
 
 	public Patient prepareTargetPatientForUpdate(
-			Patient theTargetResource,
-			Patient theSourceResource,
-			@Nullable Patient theResultResource,
-			boolean theDeleteSource) {
+		Patient theTargetResource,
+		Patient theSourceResource,
+		@Nullable Patient theResultResource,
+		boolean theDeleteSource) {
 
 		// if the client provided a result resource as input then use it to update the target resource
 		if (theResultResource != null) {
@@ -104,9 +119,9 @@ public class MergeResourceHelper {
 		// add the replaces link to the target resource, if the source resource is not to be deleted
 		if (!theDeleteSource) {
 			theTargetResource
-					.addLink()
-					.setType(Patient.LinkType.REPLACES)
-					.setOther(new Reference(theSourceResource.getIdElement().toVersionless()));
+				.addLink()
+				.setType(Patient.LinkType.REPLACES)
+				.setOther(new Reference(theSourceResource.getIdElement().toVersionless()));
 		}
 
 		// copy all identifiers from the source to the target
@@ -118,9 +133,9 @@ public class MergeResourceHelper {
 	private void prepareSourcePatientForUpdate(Patient theSourceResource, Patient theTargetResource) {
 		theSourceResource.setActive(false);
 		theSourceResource
-				.addLink()
-				.setType(Patient.LinkType.REPLACEDBY)
-				.setOther(new Reference(theTargetResource.getIdElement().toVersionless()));
+			.addLink()
+			.setType(Patient.LinkType.REPLACEDBY)
+			.setOther(new Reference(theTargetResource.getIdElement().toVersionless()));
 	}
 
 	/**

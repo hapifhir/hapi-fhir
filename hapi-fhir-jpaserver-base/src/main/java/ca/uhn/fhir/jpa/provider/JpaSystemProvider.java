@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -173,21 +174,24 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 							min = 1,
 							typeName = "string")
 					IPrimitiveType<String> theTargetId,
-			@OperationParam(name = ProviderConstants.OPERATION_REPLACE_REFERENCES_BATCH_SIZE, typeName = "unsignedInt")
-					IPrimitiveType<Integer> theBatchSize,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT,
+							typeName = "unsignedInt")
+					IPrimitiveType<Integer> theResourceLimit,
 			ServletRequestDetails theServletRequest) {
 		startRequest(theServletRequest);
 
 		try {
 			validateReplaceReferencesParams(theSourceId.getValue(), theTargetId.getValue());
-			int batchSize = myStorageSettings.getTransactionWriteBatchSizeFromOperationParameter(theBatchSize);
+
+			int resourceLimit = MergeResourceHelper.setResourceLimitFromParameter(myStorageSettings, theResourceLimit);
 
 			IdDt sourceId = new IdDt(theSourceId.getValue());
 			IdDt targetId = new IdDt(theTargetId.getValue());
 			RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
 					theServletRequest, ReadPartitionIdRequestDetails.forRead(targetId));
 			ReplaceReferencesRequest replaceReferencesRequest =
-					new ReplaceReferencesRequest(sourceId, targetId, batchSize, partitionId);
+					new ReplaceReferencesRequest(sourceId, targetId, resourceLimit, partitionId);
 			IBaseParameters retval =
 					getReplaceReferencesSvc().replaceReferences(replaceReferencesRequest, theServletRequest);
 			if (ParametersUtil.getNamedParameter(getContext(), retval, OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)

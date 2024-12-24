@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
+import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 
@@ -64,12 +66,12 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_RESULT_PATIENT, max = 1)
 					IBaseResource theResultPatient,
 			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_BATCH_SIZE, typeName = "unsignedInt")
-					IPrimitiveType<Integer> theBatchSize) {
+					IPrimitiveType<Integer> theResourceLimit) {
 
 		startRequest(theServletRequest);
 
 		try {
-			int batchSize = myStorageSettings.getTransactionWriteBatchSizeFromOperationParameter(theBatchSize);
+			int resourceLimit = MergeResourceHelper.setResourceLimitFromParameter(myStorageSettings, theResourceLimit);
 
 			BaseMergeOperationInputParameters mergeOperationParameters = buildMergeOperationInputParameters(
 					theSourcePatientIdentifier,
@@ -79,7 +81,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 					thePreview,
 					theDeleteSource,
 					theResultPatient,
-					batchSize);
+					resourceLimit);
 
 			MergeOperationOutcome mergeOutcome =
 					myResourceMergeService.merge(mergeOperationParameters, theRequestDetails);
@@ -130,9 +132,9 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			IPrimitiveType<Boolean> thePreview,
 			IPrimitiveType<Boolean> theDeleteSource,
 			IBaseResource theResultPatient,
-			int theBatchSize) {
+			int theResourceLimit) {
 		BaseMergeOperationInputParameters mergeOperationParameters =
-				new PatientMergeOperationInputParameters(theBatchSize);
+				new PatientMergeOperationInputParameters(theResourceLimit);
 		if (theSourcePatientIdentifier != null) {
 			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourcePatientIdentifier.stream()
 					.map(CanonicalIdentifier::fromIdentifier)

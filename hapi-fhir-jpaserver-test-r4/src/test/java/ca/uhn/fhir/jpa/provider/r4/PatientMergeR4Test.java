@@ -234,7 +234,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		//using a small batch size that would result in multiple chunks to ensure that
 		//the job runs a bit slowly so that we have sometime to add a resource that references the source
 		//after the first step
-		inParams.batchSize = 5;
+		inParams.resourceLimit = 5;
 		Parameters inParameters = inParams.asParametersResource();
 
 		// exec
@@ -341,8 +341,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.returnResourceType(Parameters.class)
 			.execute();
 	}
-
-
 
 	class MyExceptionHandler implements TestExecutionExceptionHandler {
 		@Override

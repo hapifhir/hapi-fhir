@@ -42,20 +42,18 @@ public class ReplaceReferencesRequest {
 	@Nonnull
 	public final IIdType targetId;
 
-	public final int batchSize;
+	public final int resourceLimit;
 
 	public final RequestPartitionId partitionId;
-
-	private boolean myForceSync = false;
 
 	public ReplaceReferencesRequest(
 			@Nonnull IIdType theSourceId,
 			@Nonnull IIdType theTargetId,
-			int theBatchSize,
+			int theResourceLimit,
 			RequestPartitionId thePartitionId) {
 		sourceId = theSourceId.toUnqualifiedVersionless();
 		targetId = theTargetId.toUnqualifiedVersionless();
-		batchSize = theBatchSize;
+		resourceLimit = theResourceLimit;
 		partitionId = thePartitionId;
 	}
 
@@ -78,11 +76,4 @@ public class ReplaceReferencesRequest {
 		}
 	}
 
-	public boolean isForceSync() {
-		return myForceSync;
-	}
-
-	public void setForceSync(boolean theForceSync) {
-		this.myForceSync = theForceSync;
-	}
 }

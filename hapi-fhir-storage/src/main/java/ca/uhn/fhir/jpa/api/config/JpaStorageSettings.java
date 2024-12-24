@@ -36,7 +36,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +46,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @SuppressWarnings("JavadocLinkAsPlainText")
 public class JpaStorageSettings extends StorageSettings {
@@ -135,7 +132,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * transaction be?
 	 * @since 8.0.0
 	 */
-	public static final String DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE_STRING = "512";
+	public static final String DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE_STRING = "1024";
 
 	public static final int DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE =
 			Integer.parseInt(DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE_STRING);
@@ -2721,14 +2718,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setDefaultTransactionEntriesForWrite(int theDefaultTransactionEntriesForWrite) {
 		myDefaultTransactionEntriesForWrite = theDefaultTransactionEntriesForWrite;
-	}
-
-	public int getTransactionWriteBatchSizeFromOperationParameter(IPrimitiveType<Integer> theBatchSize) {
-		int retval = defaultIfNull(IPrimitiveType.toValueOrNull(theBatchSize), getDefaultTransactionEntriesForWrite());
-		if (retval > getMaxTransactionEntriesForWrite()) {
-			retval = getMaxTransactionEntriesForWrite();
-		}
-		return retval;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

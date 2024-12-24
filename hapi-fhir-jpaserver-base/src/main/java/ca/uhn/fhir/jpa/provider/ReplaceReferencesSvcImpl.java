@@ -79,8 +79,6 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		if (theRequestDetails.isPreferAsync()) {
 			return replaceReferencesPreferAsync(theReplaceReferencesRequest, theRequestDetails);
-		} else if (theReplaceReferencesRequest.isForceSync()) {
-			return replaceReferencesForceSync(theReplaceReferencesRequest, theRequestDetails);
 		} else {
 			return replaceReferencesPreferSync(theReplaceReferencesRequest, theRequestDetails);
 		}
@@ -126,38 +124,13 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 				.execute(() -> getAllPidsWithLimit(theReplaceReferencesRequest));
 
 		if (accumulator.isTruncated()) {
+			// FIXME KHS undo this?
 			ourLog.warn("Too many results. Switching to asynchronous reference replacement.");
 			return replaceReferencesPreferAsync(theReplaceReferencesRequest, theRequestDetails);
 		}
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
 				theReplaceReferencesRequest, accumulator.getItemList(), theRequestDetails);
-
-		Parameters retval = new Parameters();
-		retval.addParameter()
-				.setName(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME)
-				.setResource(result);
-		return retval;
-	}
-
-	/**
-	 * Perform the operation synchronously. This should be only called if the number of resources to be
-	 * updated is predetermined before calling, and it is small enough to handle synchronously.
-	 */
-	@Nonnull
-	private IBaseParameters replaceReferencesForceSync(
-			ReplaceReferencesRequest theReplaceReferencesRequest, RequestDetails theRequestDetails) {
-
-		List<IdDt> allIds = myHapiTransactionService
-				.withRequest(theRequestDetails)
-				.execute(() -> myResourceLinkDao
-						.streamSourceIdsForTargetFhirId(
-								theReplaceReferencesRequest.sourceId.getResourceType(),
-								theReplaceReferencesRequest.sourceId.getIdPart())
-						.collect(Collectors.toList()));
-
-		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
-				theReplaceReferencesRequest, allIds, theRequestDetails);
 
 		Parameters retval = new Parameters();
 		retval.addParameter()
@@ -173,7 +146,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 				theReplaceReferencesRequest.sourceId.getResourceType(),
 				theReplaceReferencesRequest.sourceId.getIdPart());
 		StopLimitAccumulator<IdDt> accumulator =
-				StopLimitAccumulator.fromStreamAndLimit(idStream, theReplaceReferencesRequest.batchSize);
+				StopLimitAccumulator.fromStreamAndLimit(idStream, theReplaceReferencesRequest.resourceLimit);
 		return accumulator;
 	}
 }

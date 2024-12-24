@@ -70,7 +70,7 @@ public class ReplaceReferencesQueryIdsStep<PT extends ReplaceReferencesJobParame
 									params.getSourceId().asIdDt())
 							.map(FhirIdJson::new);
 
-					StreamUtil.partition(stream, params.getBatchSize())
+					StreamUtil.partition(stream, params.getResourceLimit())
 							.forEach(chunk ->
 									totalCount.addAndGet(processChunk(theDataSink, chunk, params.getPartitionId())));
 				});

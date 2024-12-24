@@ -261,10 +261,12 @@ public class ProviderConstants {
 	public static final String OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID = "target-reference-id";
 
 	/**
-	 * The number of resources that will be modified at a time. If the number of resources that need to change
-	 * exceeds this amount, the operation will switch to async mode.
+	 * If the request is being performed synchronously and the number of resources that need to change
+	 * exceeds this amount, the operation will fail with 412 Precondition Failed.
 	 */
-	public static final String OPERATION_REPLACE_REFERENCES_BATCH_SIZE = "batch-size";
+
+	// FIXME KHS change tests and var names
+	public static final String OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT = "resource-limit";
 
 	/**
 	 * $replace-references output Parameters names
@@ -296,4 +298,7 @@ public class ProviderConstants {
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_TASK = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 
 	public static final String HAPI_BATCH_JOB_ID_SYSTEM = "http://hapifhir.io/batch/jobId";
+	public static final String OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT_STRING = "512";
+	public static final Integer OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT =
+			Integer.parseInt(OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT_STRING);
 }

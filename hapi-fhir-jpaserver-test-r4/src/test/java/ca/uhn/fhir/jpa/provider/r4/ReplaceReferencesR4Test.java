@@ -77,9 +77,9 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
-	void testReplaceReferencesSmallBatchSize(boolean isAsync) {
+	void testReplaceReferencesSmallResourceLimit(boolean isAsync) {
 		// exec
-		Parameters outParams = myTestHelper.callReplaceReferencesWithBatchSize(myClient, isAsync, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
+		Parameters outParams = myTestHelper.callReplaceReferencesWithResourceLimit(myClient, isAsync, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
 
 		assertThat(getLastHttpStatusCode()).isEqualTo(HttpServletResponse.SC_ACCEPTED);
 

@@ -229,11 +229,11 @@ public class ReplaceReferencesTestHelper {
 	}
 
 	public Parameters callReplaceReferences(IGenericClient theFhirClient, boolean theIsAsync) {
-		return callReplaceReferencesWithBatchSize(theFhirClient, theIsAsync, null);
+		return callReplaceReferencesWithResourceLimit(theFhirClient, theIsAsync, null);
 	}
 
-	public Parameters callReplaceReferencesWithBatchSize(
-			IGenericClient theFhirClient, boolean theIsAsync, Integer theBatchSize) {
+	public Parameters callReplaceReferencesWithResourceLimit(
+			IGenericClient theFhirClient, boolean theIsAsync, Integer theResourceLimit) {
 		IOperationUntypedWithInputAndPartialOutput<Parameters> request = theFhirClient
 				.operation()
 				.onServer()
@@ -245,9 +245,9 @@ public class ReplaceReferencesTestHelper {
 				.andParameter(
 						ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID,
 						new StringType(myTargetPatientId.getValue()));
-		if (theBatchSize != null) {
+		if (theResourceLimit != null) {
 			request.andParameter(
-					ProviderConstants.OPERATION_REPLACE_REFERENCES_BATCH_SIZE, new IntegerType(theBatchSize));
+					ProviderConstants.OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT, new IntegerType(theResourceLimit));
 		}
 
 		if (theIsAsync) {
@@ -339,7 +339,7 @@ public class ReplaceReferencesTestHelper {
 		public Patient resultPatient;
 		public Boolean preview;
 		public Boolean deleteSource;
-		public Integer batchSize;
+		public Integer resourceLimit;
 
 		public Parameters asParametersResource() {
 			Parameters inParams = new Parameters();
@@ -364,8 +364,8 @@ public class ReplaceReferencesTestHelper {
 			if (deleteSource != null) {
 				inParams.addParameter().setName("delete-source").setValue(new BooleanType(deleteSource));
 			}
-			if (batchSize != null) {
-				inParams.addParameter().setName("batch-size").setValue(new IntegerType(batchSize));
+			if (resourceLimit != null) {
+				inParams.addParameter().setName("batch-size").setValue(new IntegerType(resourceLimit));
 			}
 			return inParams;
 		}
