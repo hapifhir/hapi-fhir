@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobSubmitterImpl;
+import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -55,6 +57,7 @@ import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
@@ -176,6 +179,7 @@ import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -931,8 +935,32 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IReplaceReferencesSvc replaceReferencesSvc(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
-		return new ReplaceReferencesSvcImpl(theFhirContext, theDaoRegistry);
+	public Batch2TaskHelper batch2TaskHelper() {
+		return new Batch2TaskHelper();
+	}
+
+	@Bean
+	public IReplaceReferencesSvc replaceReferencesSvc(
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			IResourceLinkDao theResourceLinkDao,
+			IJobCoordinator theJobCoordinator,
+			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle,
+			Batch2TaskHelper theBatch2TaskHelper,
+			JpaStorageSettings theStorageSettings) {
+		return new ReplaceReferencesSvcImpl(
+				theDaoRegistry,
+				theHapiTransactionService,
+				theResourceLinkDao,
+				theJobCoordinator,
+				theReplaceReferencesPatchBundle,
+				theBatch2TaskHelper,
+				theStorageSettings);
+	}
+
+	@Bean
+	public ReplaceReferencesPatchBundleSvc replaceReferencesPatchBundleSvc(DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesPatchBundleSvc(theDaoRegistry);
 	}
 
 	@Bean
