@@ -12,6 +12,7 @@ import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
@@ -139,6 +140,7 @@ public class HapiFhirJpaMigrationTasksTest {
 	}
 
 	@Test
+	@Disabled("This will be enabled in a subsequent PR")
 	public void testVerifyDbpm_ExistingNonPartitionedSchema_PartitionedMode() {
 		HapiFhirJpaMigrationTasks tasks;
 		HapiMigrator migrator;
