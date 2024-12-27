@@ -1,6 +1,7 @@
 package ca.uhn.hapi.fhir.sql.hibernatesvc;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.JoinColumn;
@@ -83,14 +84,15 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * which runs this contributor and verifies the results against the real
  * entities.
  */
-public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.AdditionalMappingContributor {
+public class DatabasePartitionModeIdFilteringMappingContributor
+		implements org.hibernate.boot.spi.AdditionalMappingContributor {
 
 	private final Set<String> myQualifiedIdRemovedColumnNames = new HashSet<>();
 
 	/**
 	 * Constructor
 	 */
-	public PartitionedIdMappingContributor() {
+	public DatabasePartitionModeIdFilteringMappingContributor() {
 		super();
 	}
 
@@ -190,7 +192,7 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 			}
 			if (field == null) {
 				throw new ConfigurationException(
-						"Failed to find field " + fieldName + " on type: " + entityType.getName());
+						Msg.code(2598) + "Failed to find field " + fieldName + " on type: " + entityType.getName());
 			}
 
 			PartitionedIdProperty remove = field.getAnnotation(PartitionedIdProperty.class);
@@ -276,7 +278,7 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 							List<Boolean> insertability = (List<Boolean>) insertabilityField.get(value);
 							insertability.set(0, Boolean.TRUE);
 						} catch (IllegalAccessException e) {
-							throw new IllegalStateException(e);
+							throw new IllegalStateException(Msg.code(2599) + e, e);
 						}
 					}
 				}
@@ -396,7 +398,7 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 				field.set(identifierMapper, filtered);
 				field.set(wrapped, filtered);
 			} catch (NoSuchFieldException | IllegalAccessException e) {
-				throw new IllegalStateException(e);
+				throw new IllegalStateException(Msg.code(2600) + e, e);
 			}
 		}
 	}
