@@ -34,7 +34,7 @@ public class LibraryOperationsProviderTest extends BaseCrR4TestServer{
 			requestDetails);
 
 		assertNotNull(result);
-		assertEquals(16, result.getParameter().size());
+		assertEquals(15, result.getParameter().size());
 	}
 
 	@Test

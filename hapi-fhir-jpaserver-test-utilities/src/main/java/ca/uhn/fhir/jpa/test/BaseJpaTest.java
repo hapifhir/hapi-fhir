@@ -194,10 +194,11 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected static final String CS_URL_4 = "http://example.com/my_code_system4";
 	protected static final String VS_URL = "http://example.com/my_value_set";
 	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
+	protected static final long VALIDATION_CACHE_TIMEOUT_MILLIS = 1000;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
 
 	static {
-		HapiSystemProperties.setTestValidationResourceCachesMs(1000);
+		HapiSystemProperties.setValidationResourceCacheTimeoutMillis(VALIDATION_CACHE_TIMEOUT_MILLIS);
 		HapiSystemProperties.enableTestMode();
 		HapiSystemProperties.enableUnitTestMode();
 		TestUtil.setShouldRandomizeTimezones(false);

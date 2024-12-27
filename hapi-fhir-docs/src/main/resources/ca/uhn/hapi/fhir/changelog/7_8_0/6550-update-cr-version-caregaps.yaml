@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6550
+title: "Upgraded the Clinical Reasoning module to the latest release of 3.15.0.  Many caregaps request errors that 
+previously resulted in HTTP status code of 500 now result in 400 instead."

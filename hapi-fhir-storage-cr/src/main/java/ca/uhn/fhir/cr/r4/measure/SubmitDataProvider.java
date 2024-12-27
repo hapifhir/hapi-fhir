@@ -77,6 +77,6 @@ public class SubmitDataProvider {
 			@IdParam IdType theId,
 			@OperationParam(name = "measureReport", min = 1, max = 1) MeasureReport theReport,
 			@OperationParam(name = "resource") List<IBaseResource> theResources) {
-		return myR4SubmitDataProcessorFactory.create(theRequestDetails).submitData(theId, theReport, theResources);
+		return myR4SubmitDataProcessorFactory.create(theRequestDetails).submitData(theReport, theResources);
 	}
 }
