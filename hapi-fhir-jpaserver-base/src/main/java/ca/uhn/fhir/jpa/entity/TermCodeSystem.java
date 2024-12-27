@@ -66,6 +66,7 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 	public static final int MAX_URL_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
 	private static final int MAX_NAME_LENGTH = 200;
+	public static final String FK_TRMCODESYSTEM_CURVER = "FK_TRMCODESYSTEM_CURVER";
 
 	@Column(name = "CODE_SYSTEM_URI", nullable = false, length = MAX_URL_LENGTH)
 	private String myCodeSystemUri;
@@ -91,7 +92,7 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 						updatable = false,
 						nullable = true)
 			},
-			foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_CURVER"))
+			foreignKey = @ForeignKey(name = FK_TRMCODESYSTEM_CURVER))
 	private TermCodeSystemVersion myCurrentVersion;
 
 	@Column(name = "CURRENT_VERSION_PID", nullable = true, insertable = true, updatable = true)

@@ -68,6 +68,7 @@ public class ResourceLink extends BaseResourceIndex {
 	private static final long serialVersionUID = 1L;
 	public static final String TARGET_RES_PARTITION_ID = "TARGET_RES_PARTITION_ID";
 	public static final String TARGET_RESOURCE_ID = "TARGET_RESOURCE_ID";
+	public static final String FK_RESLINK_TARGET = "FK_RESLINK_TARGET";
 
 	@GenericGenerator(name = "SEQ_RESLINK_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESLINK_ID")
@@ -123,7 +124,7 @@ public class ResourceLink extends BaseResourceIndex {
 						insertable = false,
 						updatable = false),
 			},
-			foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
+			foreignKey = @ForeignKey(name = FK_RESLINK_TARGET))
 	private ResourceTable myTargetResource;
 
 	@Transient
