@@ -98,7 +98,7 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 
 	@Override
 	public String getContributorName() {
-		return "PartitionedIdMappingContributor";
+		return "DatabasePartitionModeIdFilteringMappingContributor";
 	}
 
 	@Override

@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdMappingContributor;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.DatabasePartitionModeIdFilteringMappingContributor;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManagerFactory;
@@ -141,11 +141,11 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		assert classLoaderService != null;
 		Collection<AdditionalMappingContributor> additionalMappingContributors =
 				classLoaderService.loadJavaServices(AdditionalMappingContributor.class);
-		boolean haveConditionalMappingContributor =
-				additionalMappingContributors.stream().anyMatch(t -> t instanceof PartitionedIdMappingContributor);
+		boolean haveConditionalMappingContributor = additionalMappingContributors.stream()
+				.anyMatch(t -> t instanceof DatabasePartitionModeIdFilteringMappingContributor);
 		Validate.isTrue(
 				haveConditionalMappingContributor,
-				"No " + PartitionedIdMappingContributor.class.getSimpleName()
+				"No " + DatabasePartitionModeIdFilteringMappingContributor.class.getSimpleName()
 						+ " found registered with Hibernate. Verify that hapi-fhir-jpa-hibernate-services is on your classpath. Can not start.");
 	}
 }
