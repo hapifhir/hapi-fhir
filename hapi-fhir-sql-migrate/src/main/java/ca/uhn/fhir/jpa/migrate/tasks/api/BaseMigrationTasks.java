@@ -79,7 +79,7 @@ public class BaseMigrationTasks<T extends Enum> {
 		MigrationTaskList retval = new MigrationTaskList();
 		for (T nextVersion : theVersionEnumValues) {
 			Collection<BaseTask> nextValues = myTasks.get(nextVersion);
-			ourLog.info(
+			ourLog.debug(
 					"Version {} has {} migration tasks", nextVersion, nextValues != null ? nextValues.size() : "(no)");
 			if (nextValues != null && !nextValues.isEmpty()) {
 				validate(nextValues);
