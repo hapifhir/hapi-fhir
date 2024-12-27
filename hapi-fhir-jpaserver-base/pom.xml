@@ -526,7 +526,7 @@
 					<goal>generate-ddl</goal>
 				</goals>
 					<configuration>
-						<trimConditionalIdsFromPrimaryKeys>true</trimConditionalIdsFromPrimaryKeys>
+						<databasePartitionMode>false</databasePartitionMode>
 						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
 					</configuration>
 				</execution>
@@ -537,7 +537,7 @@
 					<goal>generate-ddl</goal>
 				</goals>
 					<configuration>
-						<trimConditionalIdsFromPrimaryKeys>false</trimConditionalIdsFromPrimaryKeys>
+						<databasePartitionMode>true</databasePartitionMode>
 						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/partitioned</outputDirectory>
 					</configuration>
 				</execution>

@@ -36,8 +36,8 @@ public class GenerateDdlMojo extends AbstractMojo {
 	@Parameter
 	public String outputDirectory;
 
-	@Parameter(defaultValue = "true")
-	public boolean trimConditionalIdsFromPrimaryKeys;
+	@Parameter(defaultValue = "false")
+	public boolean databasePartitionMode;
 
 	@Parameter(defaultValue = "false")
 	boolean skip;
@@ -59,9 +59,7 @@ public class GenerateDdlMojo extends AbstractMojo {
 		}
 
 		DdlGeneratorHibernate61 generator = new DdlGeneratorHibernate61();
-		generator
-				.getHapiHibernateDialectSettingsService()
-				.setTrimConditionalIdsFromPrimaryKeys(trimConditionalIdsFromPrimaryKeys);
+		generator.getHapiHibernateDialectSettingsService().setDatabasePartitionMode(databasePartitionMode);
 
 		for (String packageName : packageNames) {
 			String t = trim(packageName);

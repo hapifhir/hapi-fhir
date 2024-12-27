@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCountCallbackHandler;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.SQLException;
@@ -44,6 +45,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -199,9 +201,17 @@ public abstract class BaseTask {
 		// 0 means no timeout -- we use this for index rebuilds that may take time.
 		jdbcTemplate.setQueryTimeout(0);
 		try {
-			int changesCount = jdbcTemplate.update(theSql, theArguments);
-			logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
-			return changesCount;
+			if (theSql.toUpperCase(Locale.US).startsWith("SELECT ")) {
+				RowCountCallbackHandler rch = new RowCountCallbackHandler();
+				jdbcTemplate.query(theSql, new Object[0], new int[0], rch);
+				int rows = rch.getRowCount();
+				logInfo(ourLog, "SQL \"{}\" returned {} rows", theSql, rows);
+				return 0;
+			} else {
+				int changesCount = jdbcTemplate.update(theSql, theArguments);
+				logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
+				return changesCount;
+			}
 		} catch (DataAccessException e) {
 			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
 				ourLog.info(

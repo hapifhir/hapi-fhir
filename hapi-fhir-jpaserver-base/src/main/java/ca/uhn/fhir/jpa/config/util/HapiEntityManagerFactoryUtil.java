@@ -84,6 +84,7 @@ public final class HapiEntityManagerFactoryUtil {
 	private static class MyHibernatePersistenceProvider extends HibernatePersistenceProvider {
 
 		private final JpaStorageSettings myStorageSettings;
+		private boolean myDatabasePartitionMode;
 
 		public MyHibernatePersistenceProvider(JpaStorageSettings theStorageSettings) {
 			myStorageSettings = theStorageSettings;
@@ -99,14 +100,18 @@ public final class HapiEntityManagerFactoryUtil {
 			String databasePartitionModeString = (String) theIntegration.get(JpaConstants.HAPI_DATABASE_PARTITION_MODE);
 			databasePartitionModeString =
 					Objects.toString(databasePartitionModeString, JpaConstants.HAPI_DATABASE_PARTITION_MODE_DEFAULT);
-			boolean databasePartitionMode = Boolean.parseBoolean(databasePartitionModeString);
+			myDatabasePartitionMode = Boolean.parseBoolean(databasePartitionModeString);
 
-			return new MyEntityManagerFactoryBuilderImpl(info, theIntegration, databasePartitionMode);
+			return new MyEntityManagerFactoryBuilderImpl(info, theIntegration);
+		}
+
+		protected boolean isDatabasePartitionMode() {
+			return myDatabasePartitionMode;
 		}
 
 		/**
 		 * This class extends the default hibernate EntityManagerFactoryBuilder in order to
-		 * register a custom service (the {@link ISequenceValueMassager}, which is used in
+		 * register a custom service (the {@link ISequenceValueMassager}), which is used in
 		 * {@link ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator}.
 		 * <p>
 		 * In Hibernate 5 we didn't need to do this, since we could just register
@@ -115,20 +120,16 @@ public final class HapiEntityManagerFactoryUtil {
 		 */
 		private class MyEntityManagerFactoryBuilderImpl extends EntityManagerFactoryBuilderImpl {
 
-			private final boolean myDatabasePartitionMode;
-
-			@SuppressWarnings({"unchecked", "rawtypes"})
-			private MyEntityManagerFactoryBuilderImpl(
-					PersistenceUnitInfo theInfo, Map<?, ?> theIntegration, boolean theDatabasePartitionMode) {
-				super(new PersistenceUnitInfoDescriptor(theInfo), (Map) theIntegration);
-				myDatabasePartitionMode = theDatabasePartitionMode;
+			@SuppressWarnings({"unchecked"})
+			private MyEntityManagerFactoryBuilderImpl(PersistenceUnitInfo theInfo, Map<?, ?> theIntegration) {
+				super(new PersistenceUnitInfoDescriptor(theInfo), (Map<String, Object>) theIntegration);
 			}
 
 			@Override
 			protected StandardServiceRegistryBuilder getStandardServiceRegistryBuilder(
 					BootstrapServiceRegistry theBootstrapServiceRegistry) {
 				HapiHibernateDialectSettingsService service = new HapiHibernateDialectSettingsService();
-				service.setTrimConditionalIdsFromPrimaryKeys(!isDatabasePartitionMode());
+				service.setDatabasePartitionMode(isDatabasePartitionMode());
 
 				StandardServiceRegistryBuilder retVal =
 						super.getStandardServiceRegistryBuilder(theBootstrapServiceRegistry);
@@ -137,10 +138,6 @@ public final class HapiEntityManagerFactoryUtil {
 				retVal.addService(ISequenceValueMassager.class, sequenceValueMassager);
 				retVal.addService(HapiHibernateDialectSettingsService.class, service);
 				return retVal;
-			}
-
-			protected boolean isDatabasePartitionMode() {
-				return myDatabasePartitionMode;
 			}
 		}
 	}

@@ -76,7 +76,7 @@
 						</goals>
 				</execution></executions>
 						<configuration>
-							<trimConditionalIdsFromPrimaryKeys>false</trimConditionalIdsFromPrimaryKeys>
+							<databasePartitionMode>true</databasePartitionMode>
 							<outputDirectory>${project.build.directory}/classes/schema</outputDirectory>
 							<packageNames>
 								<packageName>ca.uhn.fhir.jpa.entity</packageName>
@@ -88,30 +88,6 @@
 									<targetFileName>postgres.sql</targetFileName>
 								</dialect>
 							</dialects>
-						</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-jpaserver-base</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			<plugin>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>${project.version}</version>
-				<executions><execution><id>partition-ddl</id>
-					<phase>generate-resources</phase>
-						<goals>
-							<goal>partition-ddl</goal>
-						</goals>
-				</execution></executions>
-						<configuration>
-							<inputFile>${project.build.directory}/classes/schema/postgres.sql</inputFile>
-							<tuningStatementsFile>classpath:ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql</tuningStatementsFile>
-							<outputFile>${project.build.directory}/classes/schema/postgres-partitioned.sql</outputFile>
-							<driverType>POSTGRES_9_4</driverType>
 						</configuration>
 				<dependencies>
 					<dependency>

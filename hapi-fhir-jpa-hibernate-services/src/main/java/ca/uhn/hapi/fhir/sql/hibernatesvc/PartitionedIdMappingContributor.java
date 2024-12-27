@@ -55,7 +55,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * <ul>
  *    <li>
  *        If a field has {@link PartitionedIdProperty} on it, it is removed
- *        from the "identifier mapper", which is the place in hibernate's
+ *        from the "identifier mapper", which is the place in the hibernate
  *        metamodel where the ID columns live.
  *    </li>
  *    <li>
@@ -116,7 +116,7 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 		}
 
 		assert hapiSettingsSvc != null;
-		if (!hapiSettingsSvc.isTrimConditionalIdsFromPrimaryKeys()) {
+		if (hapiSettingsSvc.isDatabasePartitionMode()) {
 			return;
 		}
 
@@ -125,7 +125,6 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 		removeConditionalIdProperties(classLoaderService, theMetadata);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void removeConditionalIdProperties(
 			ClassLoaderService theClassLoaderService, InFlightMetadataCollector theMetadata) {
 
@@ -156,18 +155,6 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 				// @OneToOne mappings
 				filterPartitionedIdsFromUniqueConstraints(uniqueKey, table);
 			}
-		}
-
-		for (Component c : registeredComponents) {
-			String tableName = c.getTable().getName();
-
-			// FIXME: needed?
-			//			c.getColumns().removeIf(t -> {
-			//				String name = tableName + "#" + t.getName();
-			//				return myQualifiedIdRemovedColumnNames.contains(name);
-			//			});
-			//			c.getSelectables().removeIf(t -> myQualifiedIdRemovedColumnNames.contains(tableName + "#" +
-			// t.getText()));
 		}
 
 		// Adjust relations with remote filtered columns (e.g. OneToMany)
@@ -237,17 +224,10 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 			return;
 		}
 
-		// FIXME: needed?
-		//		identifier.getSelectables().removeIf(t -> idRemovedColumnNames.contains(t.getText()));
-		//		identifier.getProperties().removeIf(t -> idRemovedColumnNames.contains(t.getText()));
-		//		identifier.getColumns().removeIf(t -> idRemovedColumnNames.contains(t.getName()));
-
 		Component identifierMapper = entityPersistentClass.getIdentifierMapper();
 		if (identifierMapper != null) {
 			List<Property> finalPropertyList = identifierMapper.getProperties();
 			finalPropertyList.removeIf(t -> idRemovedProperties.contains(t.getName()));
-			// FIXME: needed?
-			//			identifierMapper.getSelectables().removeIf(t -> idRemovedColumnNames.contains(t.getText()));
 			updateComponentWithNewPropertyList(identifierMapper, finalPropertyList);
 		}
 
@@ -256,6 +236,7 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 		removeColumns(pkColumns, idRemovedColumns::contains);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void filterPartitionedIdsFromCompositeComponents(Component c) {
 		Class<?> componentType = c.getComponentClass();
 		String tableName = c.getTable().getName();
@@ -369,15 +350,6 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 							.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
 									propertyValueBag.getCollectionTable().getName() + "#" + t.getName()));
 				}
-			} else if (propertyValue instanceof Component) {
-				// Adjust properties, which accounts for things like @Nested properties with
-				// filtered subproperties
-				Component component = (Component) propertyValue;
-				Set<String> columnNames =
-						component.getColumns().stream().map(Column::getName).collect(Collectors.toSet());
-				// FIXME: needed?
-				//				component.getSelectables().removeIf(t -> (t instanceof Column) &&
-				// !columnNames.contains(t.getText()));
 			}
 		}
 	}

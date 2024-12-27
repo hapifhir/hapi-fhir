@@ -45,6 +45,7 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 	private final boolean myCanInitializeSchema;
 	private String mySchemaFileClassPath;
 	private String mySchemaDescription;
+	private String mySchemaFileName;
 
 	/**
 	 * @param theSchemaFileClassPath        pathname to script used to initialize schema
@@ -60,6 +61,10 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 		mySchemaFileClassPath = theSchemaFileClassPath;
 		mySchemaExistsIndicatorTable = theSchemaExistsIndicatorTable;
 		myCanInitializeSchema = theCanInitializeSchema;
+	}
+
+	public void setSchemaFileName(String theSchemaFileName) {
+		mySchemaFileName = theSchemaFileName;
 	}
 
 	@Override
@@ -111,6 +116,9 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 
 	@Nonnull
 	protected String getInitScript(DriverTypeEnum theDriverType) {
+		if (mySchemaFileName != null) {
+			return mySchemaFileName;
+		}
 		return theDriverType.getSchemaFilename();
 	}
 

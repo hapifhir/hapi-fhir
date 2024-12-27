@@ -61,7 +61,8 @@ public class TestPartitionSelectorInterceptor {
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId selectPartitionCreate(IBaseResource theResource) {
-		String resourceType = FhirContext.forR5Cached().getResourceType(theResource);
+		FhirContext fhirContext = FhirContext.forCached(theResource.getStructureFhirVersionEnum());
+		String resourceType = fhirContext.getResourceType(theResource);
 		return selectPartition(resourceType);
 	}
 

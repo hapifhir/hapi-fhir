@@ -45,7 +45,7 @@ class GenerateDdlMojoTest {
 	}
 
 	@Test
-	public void testPruneComplexId_Enabled() throws MojoExecutionException, MojoFailureException, IOException {
+	public void testDatabasePartitionMode_Disabled() throws MojoExecutionException, MojoFailureException, IOException {
 
 		GenerateDdlMojo m = new GenerateDdlMojo();
 		m.packageNames = List.of("ca.uhn.fhir.tinder.ddl.test.pks");
@@ -53,7 +53,7 @@ class GenerateDdlMojoTest {
 		m.dialects = List.of(
 			new GenerateDdlMojo.Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "postgres.sql")
 		);
-		m.trimConditionalIdsFromPrimaryKeys = true;
+		m.databasePartitionMode = false;
 		m.execute();
 
 		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/postgres.sql"), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
@@ -73,7 +73,28 @@ class GenerateDdlMojoTest {
 	}
 
 	@Test
-	public void testPruneComplexId_Disabled() throws MojoExecutionException, MojoFailureException, IOException {
+	public void testDatabasePartitionMode_Disabled_PruneNonPks() throws MojoExecutionException, MojoFailureException, IOException {
+
+		GenerateDdlMojo m = new GenerateDdlMojo();
+		m.packageNames = List.of("ca.uhn.fhir.tinder.ddl.test.nonpks");
+		m.outputDirectory = "target/generate-ddl-plugin-test/";
+		m.dialects = List.of(
+			new GenerateDdlMojo.Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "postgres.sql")
+		);
+		m.databasePartitionMode = false;
+		m.execute();
+
+		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/postgres.sql"), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
+		ourLog.info("SQL: {}", contents);
+
+		String[] sqlStatements = contents.replaceAll("\\s+", " ").split(";");
+		assertThat(sqlStatements).anyMatch(regex("LB_RES_ID BIGINT,"));
+		assertThat(sqlStatements).anyMatch(regex("LB_RES_PARTITION_ID INTEGER,"));
+
+	}
+
+	@Test
+	public void testDatabasePartitionMode_Enabled() throws MojoExecutionException, MojoFailureException, IOException {
 
 		GenerateDdlMojo m = new GenerateDdlMojo();
 		m.packageNames = List.of("ca.uhn.fhir.tinder.ddl.test.pks");
@@ -81,7 +102,7 @@ class GenerateDdlMojoTest {
 		m.dialects = List.of(
 			new GenerateDdlMojo.Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "postgres.sql")
 		);
-		m.trimConditionalIdsFromPrimaryKeys = false;
+		m.databasePartitionMode = true;
 		m.execute();
 
 		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/postgres.sql"), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
@@ -98,27 +119,6 @@ class GenerateDdlMojoTest {
 
 		// Part of the PK, should be NOT NULL
 		assertThat(sqlStatements).anyMatch(substring("PARTITION_ID INTEGER NOT NULL,"));
-	}
-
-	@Test
-	public void testPruneNonPks_Enabled() throws MojoExecutionException, MojoFailureException, IOException {
-
-		GenerateDdlMojo m = new GenerateDdlMojo();
-		m.packageNames = List.of("ca.uhn.fhir.tinder.ddl.test.nonpks");
-		m.outputDirectory = "target/generate-ddl-plugin-test/";
-		m.dialects = List.of(
-			new GenerateDdlMojo.Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "postgres.sql")
-		);
-		m.trimConditionalIdsFromPrimaryKeys = true;
-		m.execute();
-
-		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/postgres.sql"), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
-		ourLog.info("SQL: {}", contents);
-
-		String[] sqlStatements = contents.replaceAll("\\s+", " ").split(";");
-		assertThat(sqlStatements).anyMatch(regex("LB_RES_ID BIGINT,"));
-		assertThat(sqlStatements).anyMatch(regex("LB_RES_PARTITION_ID INTEGER,"));
-
 	}
 
 	@Nonnull

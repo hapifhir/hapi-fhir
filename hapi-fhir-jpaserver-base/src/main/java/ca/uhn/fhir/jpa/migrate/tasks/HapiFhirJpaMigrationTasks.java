@@ -134,7 +134,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V7_8_0);
 
 		version.addTask(new VerifyDatabasePartitioningModeMigrationTask(
-				version.getRelease(), "20241008.1", myFlags.contains(FlagEnum.DB_PARTITION_MODE)));
+				version.getRelease(), "20241008.1", getFlags().contains(FlagEnum.DB_PARTITION_MODE)));
 
 		version.onTable("HFJ_RES_SEARCH_URL")
 				.dropForeignKey("20241008.100", "FK_RES_SEARCH_URL_RESOURCE", "HFJ_RESOURCE");
@@ -343,6 +343,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.type(ColumnTypeEnum.DATE_ONLY);
 
+		init780_afterPartitionChanges();
+
 		version.onTable("NPM_PACKAGE_VER")
 				.addColumn("20241023.10", "PKG_AUTHOR")
 				.nullable()
@@ -377,6 +379,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.withType(ColumnTypeEnum.TINYINT)
 				.heavyweightSkipByDefault();
+	}
+
+	protected void init780_afterPartitionChanges() {
+		// subclasses may override
 	}
 
 	/**
@@ -3581,7 +3587,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spidxCoords = version.onTable("HFJ_SPIDX_COORDS");
 		version.startSectionWithMessage("Starting work on table: " + spidxCoords.getTableName());
 		spidxCoords.addColumn("20180903.1", "HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxCoords.dropIndex("20180903.2", "IDX_SP_COORDS");
 			spidxCoords
 					.addIndex("20180903.4", "IDX_SP_COORDS_HASH")
@@ -3602,7 +3608,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
 		version.startSectionWithMessage("Starting work on table: " + spidxDate.getTableName());
 		spidxDate.addColumn("20180903.6", "HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxDate.dropIndex("20180903.7", "IDX_SP_TOKEN");
 			spidxDate
 					.addIndex("20180903.8", "IDX_SP_DATE_HASH")
@@ -3625,7 +3631,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spidxNumber = version.onTable("HFJ_SPIDX_NUMBER");
 		version.startSectionWithMessage("Starting work on table: " + spidxNumber.getTableName());
 		spidxNumber.addColumn("20180903.11", "HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxNumber.dropIndex("20180903.12", "IDX_SP_NUMBER");
 			spidxNumber
 					.addIndex("20180903.13", "IDX_SP_NUMBER_HASH_VAL")
@@ -3655,7 +3661,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addColumn("20180903.17", "HASH_IDENTITY_AND_UNITS")
 				.nullable()
 				.type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxQuantity.dropIndex("20180903.18", "IDX_SP_QUANTITY");
 			spidxQuantity
 					.addIndex("20180903.19", "IDX_SP_QUANTITY_HASH")
@@ -3701,7 +3707,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spidxString = version.onTable("HFJ_SPIDX_STRING");
 		version.startSectionWithMessage("Starting work on table: " + spidxString.getTableName());
 		spidxString.addColumn("20180903.23", "HASH_NORM_PREFIX").nullable().type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxString.dropIndex("20180903.24", "IDX_SP_STRING");
 			spidxString
 					.addIndex("20180903.25", "IDX_SP_STRING_HASH_NRM")
@@ -3740,7 +3746,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spidxToken.addColumn("20180903.30", "HASH_SYS").nullable().type(ColumnTypeEnum.LONG);
 		spidxToken.addColumn("20180903.31", "HASH_SYS_AND_VALUE").nullable().type(ColumnTypeEnum.LONG);
 		spidxToken.addColumn("20180903.32", "HASH_VALUE").nullable().type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxToken.dropIndex("20180903.33", "IDX_SP_TOKEN");
 			spidxToken.dropIndex("20180903.34", "IDX_SP_TOKEN_UNQUAL");
 			spidxToken
@@ -3803,7 +3809,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spidxUri = version.onTable("HFJ_SPIDX_URI");
 		version.startSectionWithMessage("Starting work on table: " + spidxUri.getTableName());
 		spidxUri.addColumn("20180903.40", "HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxUri.addIndex("20180903.41", "IDX_SP_URI_HASH_IDENTITY")
 					.unique(false)
 					.withColumns("HASH_IDENTITY", "SP_URI");
@@ -4256,7 +4262,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V3_3_0);
 
 		String schemaPath = "/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned";
-		if (myFlags.contains(FlagEnum.DB_PARTITION_MODE)) {
+		if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
 			schemaPath = "/ca/uhn/hapi/fhir/jpa/docs/database/partitioned";
 		}
 		version.initializeSchema(
@@ -4271,6 +4277,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.startSectionWithMessage("Starting work on table: " + hfjResVer.getTableName());
 		hfjResVer.modifyColumn("20180115.3", "RES_ENCODING").nullable();
 		hfjResVer.modifyColumn("20180115.4", "RES_TEXT").nullable();
+	}
+
+	public Set<FlagEnum> getFlags() {
+		return myFlags;
 	}
 
 	public enum FlagEnum {

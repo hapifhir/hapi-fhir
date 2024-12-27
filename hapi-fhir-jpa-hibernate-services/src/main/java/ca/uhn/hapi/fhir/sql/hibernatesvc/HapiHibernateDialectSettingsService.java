@@ -7,13 +7,13 @@ import org.hibernate.service.Service;
  */
 public class HapiHibernateDialectSettingsService implements Service {
 
-	private boolean myTrimConditionalIdsFromPrimaryKeys;
+	private boolean myDatabasePartitionMode;
 
-	public boolean isTrimConditionalIdsFromPrimaryKeys() {
-		return myTrimConditionalIdsFromPrimaryKeys;
+	public boolean isDatabasePartitionMode() {
+		return myDatabasePartitionMode;
 	}
 
-	public void setTrimConditionalIdsFromPrimaryKeys(boolean theTrimConditionalIdsFromPrimaryKeys) {
-		myTrimConditionalIdsFromPrimaryKeys = theTrimConditionalIdsFromPrimaryKeys;
+	public void setDatabasePartitionMode(boolean theDatabasePartitionMode) {
+		myDatabasePartitionMode = theDatabasePartitionMode;
 	}
 }
