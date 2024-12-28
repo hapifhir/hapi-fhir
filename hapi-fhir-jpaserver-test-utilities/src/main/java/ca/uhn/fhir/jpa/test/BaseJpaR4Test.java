@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.test;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
+import ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx;
+import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesAppCtx;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -224,7 +226,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
-	TestR4Config.class
+	TestR4Config.class,
+	ReplaceReferencesAppCtx.class,  // Batch job
+	MergeAppCtx.class // Batch job
 })
 public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder {
 	public static final String MY_VALUE_SET = "my-value-set";

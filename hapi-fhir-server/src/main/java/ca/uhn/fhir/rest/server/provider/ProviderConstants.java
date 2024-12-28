@@ -132,7 +132,7 @@ public class ProviderConstants {
 	public static final String OPERATION_META = "$meta";
 
 	/**
-	 *  Operation name for the $expunge operation
+	 * Operation name for the $expunge operation
 	 */
 	public static final String OPERATION_EXPUNGE = "$expunge";
 
@@ -253,10 +253,50 @@ public class ProviderConstants {
 	/**
 	 * Parameter for source reference of the "$replace-references" operation
 	 */
-	public static final String PARAM_SOURCE_REFERENCE_ID = "sourceReferenceId";
+	public static final String OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID = "source-reference-id";
 
 	/**
 	 * Parameter for target reference of the "$replace-references" operation
 	 */
-	public static final String PARAM_TARGET_REFERENCE_ID = "targetReferenceId";
+	public static final String OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID = "target-reference-id";
+
+	/**
+	 * If the request is being performed synchronously and the number of resources that need to change
+	 * exceeds this amount, the operation will fail with 412 Precondition Failed.
+	 */
+	public static final String OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT = "resource-limit";
+
+	/**
+	 * $replace-references output Parameters names
+	 */
+	public static final String OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK = "task";
+
+	public static final String OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME = "outcome";
+
+	/**
+	 * Operation name for the Resource "$merge" operation
+	 * Hapi-fhir use is based on https://www.hl7.org/fhir/patient-operation-merge.html
+	 */
+	public static final String OPERATION_MERGE = "$merge";
+	/**
+	 * Patient $merge operation parameters
+	 */
+	public static final String OPERATION_MERGE_PARAM_SOURCE_PATIENT = "source-patient";
+
+	public static final String OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER = "source-patient-identifier";
+	public static final String OPERATION_MERGE_PARAM_TARGET_PATIENT = "target-patient";
+	public static final String OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER = "target-patient-identifier";
+	public static final String OPERATION_MERGE_PARAM_RESULT_PATIENT = "result-patient";
+	public static final String OPERATION_MERGE_PARAM_BATCH_SIZE = "batch-size";
+	public static final String OPERATION_MERGE_PARAM_PREVIEW = "preview";
+	public static final String OPERATION_MERGE_PARAM_DELETE_SOURCE = "delete-source";
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_INPUT = "input";
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_OUTCOME = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_RESULT = "result";
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_TASK = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
+
+	public static final String HAPI_BATCH_JOB_ID_SYSTEM = "http://hapifhir.io/batch/jobId";
+	public static final String OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT_STRING = "512";
+	public static final Integer OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT =
+			Integer.parseInt(OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT_STRING);
 }

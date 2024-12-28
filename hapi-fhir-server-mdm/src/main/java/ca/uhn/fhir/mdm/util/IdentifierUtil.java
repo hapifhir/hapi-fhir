@@ -22,7 +22,6 @@ package ca.uhn.fhir.mdm.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 
@@ -31,23 +30,7 @@ public final class IdentifierUtil {
 	private IdentifierUtil() {}
 
 	public static CanonicalIdentifier identifierDtFromIdentifier(IBase theIdentifier) {
-		CanonicalIdentifier retval = new CanonicalIdentifier();
-
-		// TODO add other fields like "use" etc
-		if (theIdentifier instanceof org.hl7.fhir.dstu3.model.Identifier) {
-			org.hl7.fhir.dstu3.model.Identifier ident = (org.hl7.fhir.dstu3.model.Identifier) theIdentifier;
-			retval.setSystem(ident.getSystem()).setValue(ident.getValue());
-		} else if (theIdentifier instanceof org.hl7.fhir.r4.model.Identifier) {
-			org.hl7.fhir.r4.model.Identifier ident = (org.hl7.fhir.r4.model.Identifier) theIdentifier;
-			retval.setSystem(ident.getSystem()).setValue(ident.getValue());
-		} else if (theIdentifier instanceof org.hl7.fhir.r5.model.Identifier) {
-			org.hl7.fhir.r5.model.Identifier ident = (org.hl7.fhir.r5.model.Identifier) theIdentifier;
-			retval.setSystem(ident.getSystem()).setValue(ident.getValue());
-		} else {
-			throw new InternalErrorException(Msg.code(1486) + "Expected 'Identifier' type but was '"
-					+ theIdentifier.getClass().getName() + "'");
-		}
-		return retval;
+		return ca.uhn.fhir.util.CanonicalIdentifier.fromIdentifier(theIdentifier);
 	}
 
 	/**
