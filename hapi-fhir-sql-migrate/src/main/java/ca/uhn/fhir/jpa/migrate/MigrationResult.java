@@ -32,7 +32,7 @@ public class MigrationResult {
 	public final List<BaseTask> failedTasks = new ArrayList<>();
 	public MigrationTaskExecutionResultEnum executionResult;
 
-    public String summary() {
+	public String summary() {
 		return String.format(
 				"Completed executing %s migration tasks: %s succeeded, %s failed.  %s SQL statements were executed.",
 				succeededTasks.size() + failedTasks.size(),

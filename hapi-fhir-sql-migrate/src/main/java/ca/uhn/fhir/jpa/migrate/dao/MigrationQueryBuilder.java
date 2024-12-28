@@ -137,7 +137,7 @@ public class MigrationQueryBuilder {
 						myInstalledOnCol,
 						myExecutionTimeCol,
 						mySuccessCol,
-					myResultCol)
+						myResultCol)
 				.validate()
 				.toString();
 	}
