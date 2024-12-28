@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cache;
 
+import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
@@ -41,6 +42,7 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 
 import java.util.Collection;
 import java.util.List;
@@ -83,18 +85,27 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	 * to ensure that it runs after the database initializer
 	 */
 	@EventListener(classes = ContextRefreshedEvent.class)
+	@Order(IHapiBootOrder.AFTER_SUBSCRIPTION_INITIALIZED)
 	public void registerListener() {
 		if (myDaoRegistry.getResourceDaoOrNull(myResourceName) == null) {
 			ourLog.info("No resource DAO found for resource type {}, not registering listener", myResourceName);
 			return;
 		}
-		mySearchParameterMap = getSearchParameterMap();
 		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
 
 		IResourceChangeListenerCache resourceCache =
 				myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
-						myResourceName, mySearchParameterMap, this, REFRESH_INTERVAL);
+						myResourceName, provideSearchParameterMap(), this, REFRESH_INTERVAL);
 		resourceCache.forceRefresh();
+	}
+
+	private SearchParameterMap provideSearchParameterMap() {
+		SearchParameterMap searchParameterMap = mySearchParameterMap;
+		if (searchParameterMap == null) {
+			searchParameterMap = getSearchParameterMap();
+			mySearchParameterMap = searchParameterMap;
+		}
+		return searchParameterMap;
 	}
 
 	@PreDestroy
@@ -153,7 +164,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 			ourLog.debug("Starting sync {}s", myResourceName);
 
 			List<IBaseResource> resourceList = (List<IBaseResource>)
-					getResourceDao().searchForResources(mySearchParameterMap, mySystemRequestDetails);
+					getResourceDao().searchForResources(provideSearchParameterMap(), mySystemRequestDetails);
 			return syncResourcesIntoCache(resourceList);
 		}
 	}
