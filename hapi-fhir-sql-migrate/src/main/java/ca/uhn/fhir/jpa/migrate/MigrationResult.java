@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrationTaskExecutionResultEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +30,9 @@ public class MigrationResult {
 	public final List<BaseTask.ExecutedStatement> executedStatements = new ArrayList<>();
 	public final List<BaseTask> succeededTasks = new ArrayList<>();
 	public final List<BaseTask> failedTasks = new ArrayList<>();
+	public MigrationTaskExecutionResultEnum executionResult;
 
-	public String summary() {
+    public String summary() {
 		return String.format(
 				"Completed executing %s migration tasks: %s succeeded, %s failed.  %s SQL statements were executed.",
 				succeededTasks.size() + failedTasks.size(),

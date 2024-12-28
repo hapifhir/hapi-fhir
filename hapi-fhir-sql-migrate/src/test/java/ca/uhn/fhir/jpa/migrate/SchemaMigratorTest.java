@@ -170,10 +170,10 @@ public class SchemaMigratorTest extends BaseTest {
 		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
 
 		assertThat(entities).hasSize(4);
-		assertFalse(entities.get(0).getSkipped());
-		assertTrue(entities.get(1).getSkipped());
-		assertFalse(entities.get(2).getSkipped());
-		assertTrue(entities.get(3).getSkipped());
+		assertThat(entities.get(0).getResult()).isEqualTo("SUCCESS");
+		assertThat(entities.get(1).getResult()).isEqualTo("SKIPPED");
+		assertThat(entities.get(2).getResult()).isEqualTo("SUCCESS");
+		assertThat(entities.get(3).getResult()).isEqualTo("SKIPPED");
 	}
 
 	@Nonnull

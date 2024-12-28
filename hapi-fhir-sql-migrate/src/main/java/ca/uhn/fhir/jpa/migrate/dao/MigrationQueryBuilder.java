@@ -55,7 +55,7 @@ public class MigrationQueryBuilder {
 	private final DbColumn myInstalledOnCol;
 	private final DbColumn myExecutionTimeCol;
 	private final DbColumn mySuccessCol;
-	private final DbColumn mySkippedCol;
+	private final DbColumn myResultCol;
 	private final String myDeleteAll;
 	private final String myHighestKeyQuery;
 	private final DriverTypeEnum myDriverType;
@@ -103,8 +103,7 @@ public class MigrationQueryBuilder {
 		mySuccessCol = myTable.addColumn("\"success\"", myBooleanType, null);
 		mySuccessCol.notNull();
 
-		mySkippedCol = myTable.addColumn("\"skipped\"", myBooleanType, null);
-		mySkippedCol.notNull();
+		myResultCol = myTable.addColumn("\"result\"", Types.VARCHAR, HapiMigrationEntity.RESULT_MAX_SIZE);
 
 		myDeleteAll = new DeleteQuery(myTable).toString();
 		myHighestKeyQuery = buildHighestKeyQuery();
@@ -138,7 +137,7 @@ public class MigrationQueryBuilder {
 						myInstalledOnCol,
 						myExecutionTimeCol,
 						mySuccessCol,
-						mySkippedCol)
+					myResultCol)
 				.validate()
 				.toString();
 	}
