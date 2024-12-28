@@ -25,6 +25,8 @@ import java.util.function.Supplier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -164,6 +166,14 @@ public class SchemaMigratorTest extends BaseTest {
 		DriverTypeEnum.ConnectionProperties connectionProperties = super.getDriverType().newConnectionProperties(getDataSource().getUrl(), getDataSource().getUsername(), getDataSource().getPassword());
 		Set<String> tableNames = JdbcUtils.getTableNames(connectionProperties);
 		assertThat(tableNames).containsExactlyInAnyOrder("SOMETABLE_A", "SOMETABLE_C");
+
+		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
+
+		assertThat(entities).hasSize(4);
+		assertFalse(entities.get(0).getSkipped());
+		assertTrue(entities.get(1).getSkipped());
+		assertFalse(entities.get(2).getSkipped());
+		assertTrue(entities.get(3).getSkipped());
 	}
 
 	@Nonnull

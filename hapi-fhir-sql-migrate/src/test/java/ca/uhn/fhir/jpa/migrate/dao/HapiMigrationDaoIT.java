@@ -44,6 +44,7 @@ class HapiMigrationDaoIT extends BaseMigrationTest {
 		retval.setDescription(theDesc);
 		retval.setExecutionTime(1);
 		retval.setSuccess(true);
+		retval.setSkipped(false);
 		return retval;
 	}
 }

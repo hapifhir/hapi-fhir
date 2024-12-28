@@ -100,6 +100,7 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 			HapiMigrationEntity entity = HapiMigrationEntity.fromBaseTask(task);
 			entity.setExecutionTime(1);
 			entity.setSuccess(!LAST_TASK_VERSION.equals(task.getMigrationVersion()));
+			entity.setSkipped(false);
 			ourHapiMigrationDao.save(entity);
 		});
 	}

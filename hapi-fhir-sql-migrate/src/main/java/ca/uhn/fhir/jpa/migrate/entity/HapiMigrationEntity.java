@@ -80,6 +80,9 @@ public class HapiMigrationEntity {
 	@Column(name = "SUCCESS")
 	private Boolean mySuccess;
 
+	@Column(name = "SKIPPED")
+	private Boolean mySkipped;
+
 	public static HapiMigrationEntity tableCreatedRecord() {
 		HapiMigrationEntity retVal = new HapiMigrationEntity();
 		retVal.setPid(CREATE_TABLE_PID);
@@ -90,6 +93,7 @@ public class HapiMigrationEntity {
 		retVal.setInstalledOn(new Date());
 		retVal.setExecutionTime(0);
 		retVal.setSuccess(true);
+		retVal.setSkipped(false);
 		return retVal;
 	}
 
@@ -195,6 +199,7 @@ public class HapiMigrationEntity {
 			entity.setInstalledOn(rs.getDate(8));
 			entity.setExecutionTime(rs.getInt(9));
 			entity.setSuccess(rs.getBoolean(10));
+			entity.setSkipped(rs.getBoolean(11));
 			return entity;
 		};
 	}
@@ -219,6 +224,15 @@ public class HapiMigrationEntity {
 							: null);
 			ps.setInt(9, getExecutionTime());
 			ps.setBoolean(10, getSuccess());
+			ps.setBoolean(11, getSkipped());
 		};
+	}
+
+	public Boolean getSkipped() {
+		return mySkipped;
+	}
+
+	public void setSkipped(Boolean theSkipped) {
+		mySkipped = theSkipped;
 	}
 }

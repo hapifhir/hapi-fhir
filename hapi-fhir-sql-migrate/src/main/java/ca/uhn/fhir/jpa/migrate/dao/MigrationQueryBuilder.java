@@ -55,6 +55,7 @@ public class MigrationQueryBuilder {
 	private final DbColumn myInstalledOnCol;
 	private final DbColumn myExecutionTimeCol;
 	private final DbColumn mySuccessCol;
+	private final DbColumn mySkippedCol;
 	private final String myDeleteAll;
 	private final String myHighestKeyQuery;
 	private final DriverTypeEnum myDriverType;
@@ -102,6 +103,9 @@ public class MigrationQueryBuilder {
 		mySuccessCol = myTable.addColumn("\"success\"", myBooleanType, null);
 		mySuccessCol.notNull();
 
+		mySkippedCol = myTable.addColumn("\"skipped\"", myBooleanType, null);
+		mySkippedCol.notNull();
+
 		myDeleteAll = new DeleteQuery(myTable).toString();
 		myHighestKeyQuery = buildHighestKeyQuery();
 	}
@@ -133,7 +137,8 @@ public class MigrationQueryBuilder {
 						myInstalledByCol,
 						myInstalledOnCol,
 						myExecutionTimeCol,
-						mySuccessCol)
+						mySuccessCol,
+						mySkippedCol)
 				.validate()
 				.toString();
 	}

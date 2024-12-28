@@ -80,6 +80,7 @@ public class HapiMigrationStorageSvc {
 		HapiMigrationEntity entity = HapiMigrationEntity.fromBaseTask(theBaseTask);
 		entity.setExecutionTime(theMillis);
 		entity.setSuccess(theSuccess);
+		entity.setSkipped(theBaseTask.isDoNothing());
 		myHapiMigrationDao.save(entity);
 	}
 
@@ -120,6 +121,7 @@ public class HapiMigrationStorageSvc {
 		entity.setDescription(theLockDescription);
 		entity.setExecutionTime(0);
 		entity.setSuccess(true);
+		entity.setSkipped(false);
 
 		return myHapiMigrationDao.save(entity);
 	}
