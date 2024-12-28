@@ -52,6 +52,16 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * filters out the fields/columns that are marked with {@link PartitionedIdProperty}
  * so that they no longer appear in PKs and FK.
  * <p>
+ * The TLDR here is that entities like <code>HFJ_RESOURCE</code> include a
+ * compound PK class now that includes both the <code>RES_ID</code> and
+ * the <code>PARTITION_ID</code> class in that PK, and the entities that
+ * have foreign-key constraints to HFJ_RESOURCE have equivalent compound
+ * FK relations. This class strips the <code>PARTITION_ID</code> column
+ * out of these PK/FK entities when Database Partition Mode is not
+ * enabled (basically preserving the existing behaviour from before
+ * Database Partition Mode was introduced in HAPI FHIR 8.0.0.
+ * </p>
+ * <p>
  * Some notes on the logic here:
  * <ul>
  *    <li>
@@ -82,7 +92,15 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * in {@literal hapi-tinder-plugin/src/test/java}. There is also
  * a unit test called {@literal JpaDdlTest} in {@literal hapi-tinder-test}
  * which runs this contributor and verifies the results against the real
- * entities.
+ * entities. You can use this if you need to run a debugger on the whole
+ * process against the actual JPA entities.
+ * </p><p>
+ * This class is automatically instantiated by Hibernate using the Java
+ * Service Provider mechanism. See:
+ * <code>META-INF/services/org.hibernate.boot.spi.AdditionalMappingContributor</code>
+ * </p>
+ *
+ * @since 8.0.0
  */
 public class DatabasePartitionModeIdFilteringMappingContributor
 		implements org.hibernate.boot.spi.AdditionalMappingContributor {
@@ -101,6 +119,15 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 		return "DatabasePartitionModeIdFilteringMappingContributor";
 	}
 
+	/**
+	 * This method is called automatically by Hibernate after it has finished scanning
+	 * the annotations on the various entities.
+	 *
+	 * @param theContributions Collector of the contributions.
+	 * @param theMetadata Current (live) metadata.  Can be used to access already known mappings.
+	 * @param theResourceStreamLocator Delegate for locating XML resources via class-path lookup.
+	 * @param theBuildingContext Access to useful contextual references.
+	 */
 	@Override
 	public void contribute(
 			AdditionalMappingContributions theContributions,
@@ -117,17 +144,21 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			return;
 		}
 
-		assert hapiSettingsSvc != null;
+		if (hapiSettingsSvc == null) {
+			throw new ConfigurationException(
+					Msg.code(2601) + HapiHibernateDialectSettingsService.class.getSimpleName()
+							+ " was not found in the service registry. The Hibernate EntityManager for HAPI FHIR must be constructed using HapiEntityManagerFactoryUtil.");
+		}
+
 		if (hapiSettingsSvc.isDatabasePartitionMode()) {
 			return;
 		}
 
 		ClassLoaderService classLoaderService = serviceRegistry.getService(ClassLoaderService.class);
-
-		removeConditionalIdProperties(classLoaderService, theMetadata);
+		removePartitionedIdColumnsFromMetadata(classLoaderService, theMetadata);
 	}
 
-	private void removeConditionalIdProperties(
+	private void removePartitionedIdColumnsFromMetadata(
 			ClassLoaderService theClassLoaderService, InFlightMetadataCollector theMetadata) {
 
 		// Adjust primary keys - this handles @IdClass PKs, which are the
@@ -143,12 +174,14 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			filterPartitionedIdsFromCompositeComponents(c);
 		}
 
-		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
+		for (Map.Entry<String, PersistentClass> nextEntry :
+				theMetadata.getEntityBindingMap().entrySet()) {
 			PersistentClass entityPersistentClass = nextEntry.getValue();
 			Table table = entityPersistentClass.getTable();
 			for (ForeignKey foreignKey : table.getForeignKeys().values()) {
 				// Adjust relations with local filtered columns (e.g. ManyToOne)
-				filterPartitionedIdsFromLocalFks(theClassLoaderService, theMetadata, nextEntry, foreignKey, table);
+				filterPartitionedIdsFromLocalFks(
+						theClassLoaderService, theMetadata, foreignKey, table, nextEntry.getKey());
 			}
 
 			for (UniqueKey uniqueKey : table.getUniqueKeys().values()) {
@@ -301,10 +334,10 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 	private void filterPartitionedIdsFromLocalFks(
 			ClassLoaderService theClassLoaderService,
 			InFlightMetadataCollector theMetadata,
-			Map.Entry<String, PersistentClass> nextEntry,
-			ForeignKey foreignKey,
-			Table table) {
-		Value value = foreignKey.getColumn(0).getValue();
+			ForeignKey theForeignKey,
+			Table theTable,
+			String theEntityTypeName) {
+		Value value = theForeignKey.getColumn(0).getValue();
 		if (value instanceof ToOne) {
 			ToOne manyToOne = (ToOne) value;
 
@@ -313,22 +346,22 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 					.get(manyToOne.getReferencedEntityName())
 					.getTable()
 					.getName();
-			Class<?> entityType = getType(theClassLoaderService, nextEntry.getKey());
+			Class<?> entityType = getType(theClassLoaderService, theEntityTypeName);
 			String propertyName = manyToOne.getPropertyName();
 			Set<String> columnNamesToRemoveFromFks =
 					determineFilteredColumnNamesInForeignKey(entityType, propertyName, targetTableName);
 
 			removeColumns(manyToOne.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
-			removeColumns(foreignKey.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
+			removeColumns(theForeignKey.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
 
-			columnNamesToRemoveFromFks.forEach(t -> myQualifiedIdRemovedColumnNames.add(table.getName() + "#" + t));
+			columnNamesToRemoveFromFks.forEach(t -> myQualifiedIdRemovedColumnNames.add(theTable.getName() + "#" + t));
 
 		} else {
 
-			foreignKey
+			theForeignKey
 					.getColumns()
 					.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
-							foreignKey.getReferencedTable().getName() + "#" + t.getName()));
+							theForeignKey.getReferencedTable().getName() + "#" + t.getName()));
 		}
 	}
 
@@ -420,10 +453,10 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 	}
 
 	@Nonnull
-	private static Class<?> getType(ClassLoaderService theClassLoaderService, String entityTypeName) {
+	private static Class<?> getType(ClassLoaderService theClassLoaderService, String theEntityTypeName) {
 		Class<?> entityType;
-		entityType = theClassLoaderService.classForTypeName(entityTypeName);
-		Validate.notNull(entityType, "Could not load type: %s", entityTypeName);
+		entityType = theClassLoaderService.classForTypeName(theEntityTypeName);
+		Validate.notNull(entityType, "Could not load type: %s", theEntityTypeName);
 		return entityType;
 	}
 
