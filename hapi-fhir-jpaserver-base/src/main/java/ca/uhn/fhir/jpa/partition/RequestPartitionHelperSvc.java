@@ -42,6 +42,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 
 	public RequestPartitionHelperSvc() {}
 
+	//TODO C: Looks like this code here corrects the null partition and converts it into the actual default partition, but is this called everywhere?
 	@Override
 	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
 		List<String> names = null;
