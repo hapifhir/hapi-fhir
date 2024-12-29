@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 6538
+title: "In HAPI FHIR 8.0.0, transaction processing has been significantly improved thanks
+   to ticket [#6460](https://github.com/hapifhir/hapi-fhir/pull/6460). This enhancement
+   has been partially backported to the 7.6.x release line in order to provide partial improvement
+   prior to the release of HAPI FHIR 8.0.0."
