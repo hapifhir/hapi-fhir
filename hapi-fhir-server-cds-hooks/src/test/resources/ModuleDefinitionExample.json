@@ -1,0 +1,298 @@
+{
+	"resourceType": "Library",
+	"id": "moduledefinition-example",
+	"meta": {
+		"profile": [
+			"http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-moduledefinitionlibrary"
+		]
+	},
+	"url": "http://hl7.org/fhir/uv/crmi/Library/moduledefinition-example",
+	"identifier": [
+		{
+			"use": "official",
+			"system": "http://example.org/fhir/cqi/ecqm/Library/Identifier",
+			"value": "EXMLogic"
+		},
+		{
+			"system": "urn:ietf:rfc:3986",
+			"value": "urn:oid:2.16.840.1.113883.4.642.40.38.28.7"
+		}
+	],
+	"version": "1.0.0-snapshot",
+	"name": "EXMLogicModuleDefinition",
+	"title": "Example Logic Library - Module Definition",
+	"status": "active",
+	"experimental": true,
+	"type": {
+		"coding": [
+			{
+				"system": "http://terminology.hl7.org/CodeSystem/library-type",
+				"code": "module-definition"
+			}
+		]
+	},
+	"date": "2019-09-03",
+	"publisher": "HL7 International / Clinical Decision Support",
+	"contact": [
+		{
+			"telecom": [
+				{
+					"system": "url",
+					"value": "http://www.hl7.org/Special/committees/dss"
+				}
+			]
+		}
+	],
+	"description": "This library is used as an example module definition in the FHIR Quality Measure Implementation Guide",
+	"jurisdiction": [
+		{
+			"coding": [
+				{
+					"system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+					"code": "001",
+					"display": "World"
+				}
+			]
+		}
+	],
+	"relatedArtifact": [
+		{
+			"type": "depends-on",
+			"display": "FHIR model information",
+			"resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+		},
+		{
+			"type": "depends-on",
+			"display": "Library FHIRHelpers",
+			"resource": "http://fhir.org/guides/cqf/common/Library/FHIRHelpers|4.0.1"
+		},
+		{
+			"type": "depends-on",
+			"display": "Code system Diagnosis Role",
+			"resource": "http://terminology.hl7.org/CodeSystem/diagnosis-role"
+		},
+		{
+			"type": "depends-on",
+			"display": "Value set Emergency Department Visit",
+			"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+		},
+		{
+			"type": "depends-on",
+			"display": "Value set Psychiatric/Mental Health Patient",
+			"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.299"
+		},
+		{
+			"type": "depends-on",
+			"display": "Value set Hospital Settings",
+			"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.126"
+		},
+		{
+			"type": "depends-on",
+			"display": "Value set ONC Administrative Sex",
+			"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1"
+		},
+		{
+			"type": "depends-on",
+			"display": "Value set Race",
+			"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.836"
+		},
+		{
+			"type": "depends-on",
+			"display": "Value set Ethnicity",
+			"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.837"
+		},
+		{
+			"type": "depends-on",
+			"display": "Value set Payer",
+			"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+		}
+	],
+	"parameter": [
+		{
+			"name": "Measurement Period",
+			"use": "in",
+			"min": 0,
+			"max": "1",
+			"type": "Period"
+		},
+		{
+			"name": "Patient",
+			"use": "out",
+			"min": 0,
+			"max": "1",
+			"type": "Patient"
+		},
+		{
+			"name": "Inpatient Encounter",
+			"use": "out",
+			"min": 0,
+			"max": "*",
+			"type": "Encounter"
+		},
+		{
+			"name": "Initial Population",
+			"use": "out",
+			"min": 0,
+			"max": "*",
+			"type": "Encounter"
+		},
+		{
+			"name": "Measure Population",
+			"use": "out",
+			"min": 0,
+			"max": "*",
+			"type": "Encounter"
+		},
+		{
+			"name": "Stratifier 1",
+			"use": "out",
+			"min": 0,
+			"max": "*",
+			"type": "Encounter"
+		},
+		{
+			"name": "Stratifier 2",
+			"use": "out",
+			"min": 0,
+			"max": "*",
+			"type": "Encounter"
+		},
+		{
+			"name": "Stratifier 3",
+			"use": "out",
+			"min": 0,
+			"max": "*",
+			"type": "Encounter"
+		},
+		{
+			"name": "Stratifier 4",
+			"use": "out",
+			"min": 0,
+			"max": "*",
+			"type": "Encounter"
+		},
+		{
+			"name": "SDE Ethnicity",
+			"use": "out",
+			"min": 0,
+			"max": "*",
+			"type": "Coding"
+		},
+		{
+			"name": "SDE Payer",
+			"use": "out",
+			"min": 0,
+			"max": "*",
+			"type": "Resource"
+		},
+		{
+			"name": "SDE Race",
+			"use": "out",
+			"min": 0,
+			"max": "*",
+			"type": "Coding"
+		},
+		{
+			"name": "SDE Sex",
+			"use": "out",
+			"min": 0,
+			"max": "1",
+			"type": "Coding"
+		}
+	],
+	"dataRequirement": [
+		{
+			"extension": [
+				{
+					"url": "http://hl7.org/fhir/StructureDefinition/cqf-fhirQueryPattern",
+					"valueString": "Patient?_id={{context.patientId}}"
+				}
+			],
+			"type": "Patient",
+			"profile": [
+				"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+			],
+			"mustSupport": [
+				"extension('http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity')"
+			],
+			"_mustSupport": [
+				{
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/rendered-value",
+							"valueString": "ethnicity"
+						}
+					]
+				}
+			]
+		},
+		{
+			"extension": [
+				{
+					"url": "http://hl7.org/fhir/StructureDefinition/cqf-fhirQueryPattern",
+					"valueString": "Encounter?status=finished&subject=Patient/{{context.patientId}}&type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+				},
+				{
+					"url": "http://hl7.org/fhir/StructureDefinition/cqf-isSelective",
+					"valueBoolean": true
+				},
+				{
+					"extension": [
+						{
+							"url": "path",
+							"valueString": "status"
+						},
+						{
+							"url": "comparator",
+							"valueCode": "eq"
+						},
+						{
+							"url": "value",
+							"valueString": "finished"
+						}
+					],
+					"url": "http://hl7.org/fhir/StructureDefinition/cqf-valueFilter"
+				}
+			],
+			"type": "Encounter",
+			"profile": [
+				"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+			],
+			"codeFilter": [
+				{
+					"path": "type",
+					"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+				}
+			]
+		},
+		{
+			"type": "Condition",
+			"profile": [
+				"http://hl7.org/fhir/StructureDefinition/Condition"
+			],
+			"codeFilter": [
+				{
+					"path": "id"
+				}
+			]
+		},
+		{
+			"extension": [
+				{
+					"url": "http://hl7.org/fhir/StructureDefinition/cqf-fhirQueryPattern",
+					"valueString": "Coverage?policy-holder=Patient/{{context.patientId}}&type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+				}
+			],
+			"type": "Coverage",
+			"profile": [
+				"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-coverage"
+			],
+			"codeFilter": [
+				{
+					"path": "type",
+					"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+				}
+			]
+		}
+	]
+}

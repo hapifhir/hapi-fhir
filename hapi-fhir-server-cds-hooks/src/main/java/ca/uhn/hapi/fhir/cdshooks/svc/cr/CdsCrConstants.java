@@ -20,9 +20,12 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 public class CdsCrConstants {
-	private CdsCrConstants() {}
-
 	public static final String CDS_CR_MODULE_ID = "CR";
+
+	public static final String CRMI_EFFECTIVE_DATA_REQUIREMENTS =
+			"http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-effectiveDataRequirements";
+
+	public static final String CQF_FHIR_QUERY_PATTERN = "http://hl7.org/fhir/StructureDefinition/cqf-fhirQueryPattern";
 
 	// CDS Hook field names
 	public static final String CDS_PARAMETER_USER_ID = "userId";
