@@ -116,6 +116,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -2740,6 +2741,51 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 
 	}
+
+	@Test
+	public void testTransactionWithCreatePlaceholders() {
+		// Setup
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		BiFunction<String, String, Patient> supplier = (patientId, orgRef) -> {
+			Patient patient = new Patient();
+			patient.setId(patientId);
+			patient.setManagingOrganization(new Reference(orgRef));
+			return patient;
+		};
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(supplier.apply("Patient/P0", "Organization/O0"));
+		bb.addTransactionUpdateEntry(supplier.apply("Patient/P1", "Organization/O0"));
+		bb.addTransactionUpdateEntry(supplier.apply("Patient/P2", "Organization/O1"));
+		bb.addTransactionUpdateEntry(supplier.apply("Patient/P3", "Organization/O1"));
+		bb.addTransactionUpdateEntry(supplier.apply("Patient/P4", "Organization/O2"));
+		bb.addTransactionUpdateEntry(supplier.apply("Patient/P5", "Organization/O2"));
+		Bundle input = bb.getBundleTyped();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Verify
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(30, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesRepeated());
+		assertEquals(1, myCaptureQueriesListener.countGetConnections());
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		for (int i = 0; i < 5; i++) {
+			assertNotGone(new IdType("Patient/P" + i));
+		}
+		for (int i = 0; i < 3; i++) {
+			assertNotGone(new IdType("Organization/O" + i));
+		}
+	}
+
+
 
 
 	/**

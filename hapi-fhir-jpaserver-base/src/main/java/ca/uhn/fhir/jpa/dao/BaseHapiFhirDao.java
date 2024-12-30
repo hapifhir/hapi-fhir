@@ -1490,7 +1490,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 
-		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl, outcome.getOperationType());
+		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl, outcome.getOperationType(), theTransactionDetails);
 
 		return outcome;
 	}

@@ -419,6 +419,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
 		myStorageSettings.setAccessMetaSourceInformationFromProvenanceTable(defaultConfig.isAccessMetaSourceInformationFromProvenanceTable());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaultConfig.isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 		myStorageSettings.setDefaultSearchParamsCanBeOverridden(defaultConfig.isDefaultSearchParamsCanBeOverridden());
 		myStorageSettings.setDeleteEnabled(defaultConfig.isDeleteEnabled());

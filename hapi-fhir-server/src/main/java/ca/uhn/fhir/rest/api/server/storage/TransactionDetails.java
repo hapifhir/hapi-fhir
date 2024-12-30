@@ -71,6 +71,7 @@ public class TransactionDetails {
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
 	private boolean myFhirTransaction;
+	private List<IIdType> myAutoCreatedPlaceholderResources;
 
 	/**
 	 * Constructor
@@ -229,6 +230,25 @@ public class TransactionDetails {
 	}
 
 	/**
+	 * Returns true if the given ID was marked as not existing (i.e. someone called
+	 * {@link #addResolvedResourceId(IIdType, IResourcePersistentId)} with an
+	 * ID of null).
+	 *
+	 * @param theId The resource ID
+	 * @since 8.0.0
+	 */
+	public boolean hasNullResolvedResourceId(IIdType theId) {
+		if (myResolvedResourceIds != null) {
+			String key = theId.toVersionless().getValue();
+			if (myResolvedResourceIds.containsKey(key)) {
+				return myResolvedResourceIds.get(key) == null;
+			}
+		}
+		return false;
+	}
+
+
+	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
@@ -276,7 +296,7 @@ public class TransactionDetails {
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
 	public void addResolvedMatchUrl(
-			FhirContext theFhirContext, String theConditionalUrl, @Nonnull IResourcePersistentId<?> thePersistentId) {
+		FhirContext theFhirContext, String theConditionalUrl, @Nonnull IResourcePersistentId<?> thePersistentId) {
 		Validate.notBlank(theConditionalUrl, "theConditionalUrl must not be blank");
 		Validate.notNull(thePersistentId, "thePersistentId must not be null");
 
@@ -284,16 +304,16 @@ public class TransactionDetails {
 			myResolvedMatchUrls = new HashMap<>();
 		} else if (matchUrlWithDiffIdExists(theConditionalUrl, thePersistentId)) {
 			String msg = theFhirContext
-					.getLocalizer()
-					.getMessage(TransactionDetails.class, "invalidMatchUrlMultipleMatches", theConditionalUrl);
+				.getLocalizer()
+				.getMessage(TransactionDetails.class, "invalidMatchUrlMultipleMatches", theConditionalUrl);
 			throw new PreconditionFailedException(Msg.code(2207) + msg);
 		}
 		myResolvedMatchUrls.put(theConditionalUrl, thePersistentId);
 	}
 
 	/**
-	 * @since 6.8.0
 	 * @see #addResolvedMatchUrl(FhirContext, String, IResourcePersistentId)
+	 * @since 6.8.0
 	 */
 	public void removeResolvedMatchUrl(String theMatchUrl) {
 		myResolvedMatchUrls.remove(theMatchUrl);
@@ -301,7 +321,7 @@ public class TransactionDetails {
 
 	private boolean matchUrlWithDiffIdExists(String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
 		if (myResolvedMatchUrls.containsKey(theConditionalUrl)
-				&& myResolvedMatchUrls.get(theConditionalUrl) != NOT_FOUND) {
+			&& myResolvedMatchUrls.get(theConditionalUrl) != NOT_FOUND) {
 			return !myResolvedMatchUrls.get(theConditionalUrl).getId().equals(thePersistentId.getId());
 		}
 		return false;
@@ -424,7 +444,8 @@ public class TransactionDetails {
 		return hookParams == null ? InterceptorInvocationTimingEnum.ACTIVE : InterceptorInvocationTimingEnum.DEFERRED;
 	}
 
-	public void deferredBroadcastProcessingFinished() {}
+	public void deferredBroadcastProcessingFinished() {
+	}
 
 	public void clearResolvedItems() {
 		myResolvedResourceIds.clear();
@@ -441,5 +462,22 @@ public class TransactionDetails {
 
 	public void setFhirTransaction(boolean theFhirTransaction) {
 		myFhirTransaction = theFhirTransaction;
+	}
+
+	public void addAutoCreatedPlaceholderResource(IIdType theResource) {
+		if (myAutoCreatedPlaceholderResources == null) {
+			myAutoCreatedPlaceholderResources = new ArrayList<>();
+		}
+		myAutoCreatedPlaceholderResources.add(theResource);
+	}
+
+	@Nonnull
+	public List<IIdType> getAutoCreatedPlaceholderResourcesAndClear() {
+		List<IIdType> retVal = myAutoCreatedPlaceholderResources;
+		if (retVal == null) {
+			retVal = Collections.emptyList();
+		}
+		myAutoCreatedPlaceholderResources = null;
+		return retVal;
 	}
 }

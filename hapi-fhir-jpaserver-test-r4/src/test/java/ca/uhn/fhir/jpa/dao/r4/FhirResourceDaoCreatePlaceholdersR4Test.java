@@ -29,9 +29,11 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
@@ -96,8 +98,15 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		task.addPartOf().setReference("Task/AAA");
 		task.addPartOf().setReference("Task/AAA");
 		task.addPartOf().setReference("Task/AAA");
-		IIdType id = myTaskDao.create(task).getId().toUnqualifiedVersionless();
+		DaoMethodOutcome methodOutcome = myTaskDao.create(task);
 
+		OperationOutcome oo = (OperationOutcome) methodOutcome.getOperationOutcome();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals("SUCCESSFUL_CREATE", oo.getIssue().get(0).getDetails().getCodingFirstRep().getCode());
+		assertEquals("AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE", oo.getIssue().get(1).getDetails().getCodingFirstRep().getCode());
+		assertEquals("Automatically created placeholder resource with ID: Task/AAA/_history/1", oo.getIssue().get(1).getDiagnostics());
+
+		IIdType id = methodOutcome.getId().toUnqualifiedVersionless();
 		task = myTaskDao.read(id);
 		assertThat(task.getPartOf()).hasSize(3);
 		assertEquals("Task/AAA", task.getPartOf().get(0).getReference());
@@ -653,7 +662,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testAutocreatePlaceholderTest() {
+	public void testTransaction() {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
 		Observation obs = new Observation();
@@ -663,7 +672,12 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.addTransactionUpdateEntry(obs);
 
-		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		OperationOutcome oo = (OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome();
+		assertEquals("SUCCESSFUL_UPDATE_AS_CREATE", oo.getIssue().get(0).getDetails().getCodingFirstRep().getCode());
+		assertEquals("AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE", oo.getIssue().get(1).getDetails().getCodingFirstRep().getCode());
+		assertEquals("Automatically created placeholder resource with ID: Patient/RED/_history/1", oo.getIssue().get(1).getDiagnostics());
 
 		// verify subresource is created
 		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
@@ -672,7 +686,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 
 	@Test
-	public void testAutocreatePlaceholderWithTargetExistingAlreadyTest() {
+	public void testTransaction_TargetExistingAlready() {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		myStorageSettings.setAutoVersionReferenceAtPaths("Observation.subject");
 
@@ -713,7 +727,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	 * This test is the same as above, except it uses the serverid (instead of forcedid)
 	 */
 	@Test
-	public void testAutocreatePlaceholderWithExistingTargetWithServerAssignedIdTest() {
+	public void testTransaction_ExistingTargetWithServerAssignedId() {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		myStorageSettings.setAutoVersionReferenceAtPaths("Observation.subject");
 
