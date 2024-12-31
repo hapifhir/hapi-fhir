@@ -32,12 +32,48 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SqlUtil {
+
+	/**
+	 * This regex parses out the PK of a Postgres CREATE TABLE statement. To work on it,
+	 * import it into <a href="https://regex101.com">https://regex101.com</a>. The
+	 * raw Regex is:
+	 * <pre>
+	 *     create table ([a-zA-Z0-9_]+).*(\s|[a-zA-Z0-9,()_])+?primary key\s+\(([a-zA-Z_, ]+)\).*
+	 * </pre>
+	 * A sample testing value is:
+	 * <pre>
+	 *     create table HFJ_IDX_CMB_TOK_NU (
+	 * 			    PID bigint not null,
+	 * 			    PARTITION_ID integer not null,
+	 * 			    PARTITION_DATE date,
+	 * 			    HASH_COMPLETE bigint not null,
+	 * 			    IDX_STRING varchar(500) not null,
+	 * 			    RES_ID bigint,
+	 * 			    primary key (PID, PARTITION_ID)
+	 * 			);
+	 * </pre>
+	 */
 	private static final Pattern CREATE_TABLE = Pattern.compile(
 			"create table ([a-zA-Z0-9_]+).*(\\s|[a-zA-Z0-9,()_])+?primary key\\s+\\(([a-zA-Z_, ]+)\\).*",
 			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 
+	/**
+	 * This regex parses out the PK of a Postgres ALTER TABLE..ADD CONSTRAINT statement.
+	 * To work on it, import it into <a href="https://regex101.com">https://regex101.com</a>.
+	 * The raw Regex is:
+	 * <pre>
+	 *    alter table\s+(if exists)?\s+(\w+)\s+add constraint\s+(\w+)\s+foreign key \(([a-zA-Z_, ]+)\)\s+references (\w+).*
+	 * </pre>
+	 * A sample testing value is:
+	 * <pre>
+	 *    alter table if exists MPI_LINK
+	 * 		 add constraint FK_EMPI_LINK_GOLDEN_RESOURCE
+	 * 		 foreign key (GOLDEN_RESOURCE_PID, GOLDEN_RESOURCE_PARTITION_ID)
+	 * 		 references HFJ_RESOURCE;
+	 * </pre>
+	 */
 	private static final Pattern ALTER_TABLE_ADD_CONSTRAINT_FOREIGN_KEY = Pattern.compile(
-			"alter table\\s+(if exists)?\\s+([a-zA-Z_]+)\\s+add constraint\\s+([a-zA-Z0-9_]+)\\s+foreign key \\(([a-zA-Z_, ]+)\\)\\s+references ([a-zA-Z_]+).*",
+			"alter table\\s+(if exists)?\\s+(\\w+)\\s+add constraint\\s+(\\w+)\\s+foreign key \\(([a-zA-Z_, ]+)\\)\\s+references (\\w+).*",
 			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 
 	/**

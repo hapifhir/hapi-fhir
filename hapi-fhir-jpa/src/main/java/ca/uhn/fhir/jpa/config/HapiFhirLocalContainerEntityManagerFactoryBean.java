@@ -138,7 +138,7 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		SessionFactoryImplementor sessionFactory = (SessionFactoryImplementor) theEntityManagerFactory;
 		ClassLoaderService classLoaderService =
 				sessionFactory.getServiceRegistry().getService(ClassLoaderService.class);
-		assert classLoaderService != null;
+		Validate.notNull(classLoaderService, "No classloader service available");
 		Collection<AdditionalMappingContributor> additionalMappingContributors =
 				classLoaderService.loadJavaServices(AdditionalMappingContributor.class);
 		boolean haveConditionalMappingContributor = additionalMappingContributors.stream()

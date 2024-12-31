@@ -37,6 +37,7 @@ import org.hibernate.type.Type;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,7 +60,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * FK relations. This class strips the <code>PARTITION_ID</code> column
  * out of these PK/FK entities when Database Partition Mode is not
  * enabled (basically preserving the existing behaviour from before
- * Database Partition Mode was introduced in HAPI FHIR 8.0.0.
+ * Database Partition Mode was introduced in HAPI FHIR 8.0.0).
  * </p>
  * <p>
  * Some notes on the logic here:
@@ -116,7 +117,7 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 
 	@Override
 	public String getContributorName() {
-		return "DatabasePartitionModeIdFilteringMappingContributor";
+		return getClass().getSimpleName();
 	}
 
 	/**
@@ -216,8 +217,8 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 
 		Component identifier = (Component) entityPersistentClass.getIdentifier();
 		List<Property> properties = identifier.getProperties();
-		for (int i = 0; i < properties.size(); i++) {
-			Property property = properties.get(i);
+		for (Iterator<Property> iter = properties.iterator(); iter.hasNext(); ) {
+			Property property = iter.next();
 			String fieldName = property.getName();
 			Field field = getField(entityType, fieldName);
 			if (field == null) {
@@ -230,16 +231,14 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 
 			PartitionedIdProperty remove = field.getAnnotation(PartitionedIdProperty.class);
 			if (remove != null) {
-				Property removedProperty = properties.remove(i);
-				idRemovedColumns.addAll(removedProperty.getColumns());
-				idRemovedColumnNames.addAll(removedProperty.getColumns().stream()
-						.map(Column::getName)
-						.collect(Collectors.toSet()));
-				removedProperty.getColumns().stream()
+				iter.remove();
+				idRemovedColumns.addAll(property.getColumns());
+				idRemovedColumnNames.addAll(
+						property.getColumns().stream().map(Column::getName).collect(Collectors.toSet()));
+				property.getColumns().stream()
 						.map(theColumn -> table.getName() + "#" + theColumn.getName())
 						.forEach(myQualifiedIdRemovedColumnNames::add);
-				idRemovedProperties.add(removedProperty.getName());
-				i--;
+				idRemovedProperties.add(property.getName());
 
 				for (Column next : entityPersistentClass.getTable().getColumns()) {
 					if (idRemovedColumnNames.contains(next.getName())) {
@@ -249,8 +248,8 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 
 				// We're removing it from the identifierMapper so we need to add it to the
 				// entity class itself instead
-				if (getField(entityType, removedProperty.getName()) != null) {
-					entityPersistentClass.addProperty(removedProperty);
+				if (getField(entityType, property.getName()) != null) {
+					entityPersistentClass.addProperty(property);
 				}
 			}
 		}

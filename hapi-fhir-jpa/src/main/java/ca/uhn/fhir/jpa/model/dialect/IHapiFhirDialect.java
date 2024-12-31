@@ -21,6 +21,19 @@ package ca.uhn.fhir.jpa.model.dialect;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 
+/**
+ * HAPI FHIR requires the use of customized Hibernate
+ * {@link org.hibernate.dialect.Dialect} classes. We do this because our schema
+ * migrator isn't compatible with some features that the built-in dialects
+ * use, so we disable those features in the HAPI FHIR dialects. For example,
+ * Postgres users shouldn't use the Hibernate
+ * {@link org.hibernate.dialect.PostgreSQLDialect} and should instead use the
+ * HAPI FHIR {@link HapiFhirPostgresDialect} which extends the former class.
+ */
 public interface IHapiFhirDialect {
+
+	/**
+	 * Provides the HAPI FHIR driver enum associated with this dialect
+	 */
 	DriverTypeEnum getDriverType();
 }
