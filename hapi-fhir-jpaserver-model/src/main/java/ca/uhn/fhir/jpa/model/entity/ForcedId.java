@@ -112,7 +112,9 @@ class ForcedId extends BasePartitionable {
 	public boolean equals(Object theO) {
 		if (!(theO instanceof ForcedId)) return false;
 		ForcedId forcedId = (ForcedId) theO;
-		return Objects.equals(myForcedId, forcedId.myForcedId) && Objects.equals(myResourcePid, forcedId.myResourcePid) && Objects.equals(myResourceType, forcedId.myResourceType);
+		return Objects.equals(myForcedId, forcedId.myForcedId)
+				&& Objects.equals(myResourcePid, forcedId.myResourcePid)
+				&& Objects.equals(myResourceType, forcedId.myResourceType);
 	}
 
 	@Override
