@@ -30,6 +30,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.util.Objects;
+
 /**
  * The old way we handled client-assigned resource ids.
  * Replaced by {@link ResourceTable#myFhirId}.
@@ -104,6 +106,18 @@ class ForcedId extends BasePartitionable {
 		b.append("forcedId", myForcedId);
 		b.append("resourcePid", myResourcePid);
 		return b.toString();
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (!(theO instanceof ForcedId)) return false;
+		ForcedId forcedId = (ForcedId) theO;
+		return Objects.equals(myForcedId, forcedId.myForcedId) && Objects.equals(myResourcePid, forcedId.myResourcePid) && Objects.equals(myResourceType, forcedId.myResourceType);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(myForcedId, myResourcePid, myResourceType);
 	}
 
 	public String asTypedFhirResourceId() {

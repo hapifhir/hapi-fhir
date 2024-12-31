@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -681,7 +682,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
-		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference.json");
+		String encounterId = Integer.toString((int)(Math.random() * (float)Integer.MAX_VALUE));
+		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference.json", encounterId);
 	}
 
 	@Test
@@ -691,7 +693,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
-		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference.json");
+		String encounterId = Integer.toString((int)(Math.random() * (float)Integer.MAX_VALUE));
+		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference.json", encounterId);
 	}
 
 	@Test
@@ -703,15 +706,19 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
+		String encounterId = Integer.toString((int)(Math.random() * (float)Integer.MAX_VALUE));
+
 		Encounter encounter = new Encounter();
-		encounter.setId("242976");
+		encounter.setId(encounterId);
 		myEncounterDao.update(encounter);
 
-		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference.json");
+		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference.json", encounterId);
 	}
 
-	private Provenance postBundleAndAssertProvenanceRefsPreserved(String theBundlePath) throws IOException {
-		Bundle bundle = loadResourceFromClasspath(Bundle.class, theBundlePath);
+	private Provenance postBundleAndAssertProvenanceRefsPreserved(String theBundlePath, String theEncounterId) throws IOException {
+		String bundleString = ClasspathUtil.loadResource(theBundlePath);
+		bundleString = bundleString.replace("ENCOUNTER_ID", theEncounterId);
+		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundleString);
 
 		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), bundle);
 
@@ -719,7 +726,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertThat(provenanceEntry).isPresent();
 		String provenanceLocation = provenanceEntry.get().getResponse().getLocation();
 		Provenance provenance = myProvenanceDao.read(new IdDt(provenanceLocation));
-		assertThat(provenance.getEntity().get(0).getWhat().getReference()).isEqualTo("Encounter/242976/_history/1");
+		assertThat(provenance.getEntity().get(0).getWhat().getReference()).isEqualTo("Encounter/" + theEncounterId + "/_history/1");
 		return provenance;
 	}
 
@@ -732,7 +739,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
-		Provenance provenance = postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-assigned-version-reference-and-auto-version-field.json");
+		Provenance provenance = postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-assigned-version-reference-and-auto-version-field.json", "242976");
 		assertThat(provenance.getAgent().get(0).getWho().getReference()).isEqualTo("Patient/237643/_history/1");
 	}
 
@@ -749,7 +756,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		encounter.setId("242976");
 		myEncounterDao.update(encounter);
 
-		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference-and-pre-existing-ref.json");
+		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference-and-pre-existing-ref.json", "242976");
 	}
 
 	@Test
