@@ -2,7 +2,7 @@
 
 HAPI FHIR 5.0.0 introduced partitioning to the JPA server. In the current partitioning design, each resource-specific table (i.e. each table in the database schema where each row pertains to a single FHIR resource) has two new columns: `PARTITION_ID`, and `PARTITION_DATE`.
 
-The `PARTITION_DATE` column may be set by user code, but is otherwise untouched by HAPI FHIR. The `PARTITION_ID` column is the main partitioning mechanism. It uses an arbitrary Integer value to demote the partition associated with an individual resource.
+The `PARTITION_DATE` column may be set by user code, but is otherwise untouched by HAPI FHIR. The `PARTITION_ID` column is the main partitioning mechanism. It uses an arbitrary Integer value to denote the partition associated with an individual resource.
 
 <a name="original-limitations"/>
 
