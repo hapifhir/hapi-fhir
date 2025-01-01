@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeToDriverTypeToSqlType;
+import com.healthmarketscience.sqlbuilder.AlterTableQuery;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.CreateIndexQuery;
 import com.healthmarketscience.sqlbuilder.CreateTableQuery;
@@ -145,6 +146,11 @@ public class MigrationQueryBuilder {
 	public String createTableStatement() {
 		return new CreateTableQuery(myTable, true).validate().toString();
 	}
+
+	public String addResultColumnStatement() {
+		return new AlterTableQuery(myTable).setAddColumn(myResultCol).validate().toString();
+	}
+
 
 	public String createIndexStatement() {
 		return new CreateIndexQuery(myTable, myMigrationTablename.toUpperCase() + "_PK_INDEX")

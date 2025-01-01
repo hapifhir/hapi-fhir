@@ -106,6 +106,10 @@ public class HapiMigrationDao {
 
 	public boolean createMigrationTableIfRequired() {
 		if (migrationTableExists()) {
+			if (!columnExists("RESULT")) {
+				String addResultColumnStatement = myMigrationQueryBuilder.addResultColumnStatement();
+				ourLog.info(addResultColumnStatement);
+				myJdbcTemplate.execute(addResultColumnStatement);			}
 			return false;
 		}
 		ourLog.info("Creating table {}", myMigrationTablename);
@@ -141,6 +145,21 @@ public class HapiMigrationDao {
 			}
 		} catch (SQLException e) {
 			throw new InternalErrorException(Msg.code(2141) + e);
+		}
+	}
+
+	private boolean columnExists(String theColumnName) {
+		try (Connection connection = myDataSource.getConnection()) {
+			ResultSet columns = connection.getMetaData().getColumns(
+				connection.getCatalog(),
+				connection.getSchema(),
+				myMigrationTablename,
+				theColumnName
+			);
+
+			return columns.next(); // If there's a row, the column exists
+		} catch (SQLException e) {
+			throw new InternalErrorException("Error checking column existence: " + e.getMessage(), e);
 		}
 	}
 
