@@ -19,6 +19,7 @@ public class DbpmEnabledTest extends BaseDbpmJpaR5Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
+		myPartitionSettings.setDatabasePartitionMode(true);
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(0);
 
