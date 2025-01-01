@@ -127,10 +127,10 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 	 * This method is called automatically by Hibernate after it has finished scanning
 	 * the annotations on the various entities.
 	 *
-	 * @param theContributions Collector of the contributions.
-	 * @param theMetadata Current (live) metadata.  Can be used to access already known mappings.
+	 * @param theContributions         Collector of the contributions.
+	 * @param theMetadata              Current (live) metadata.  Can be used to access already known mappings.
 	 * @param theResourceStreamLocator Delegate for locating XML resources via class-path lookup.
-	 * @param theBuildingContext Access to useful contextual references.
+	 * @param theBuildingContext       Access to useful contextual references.
 	 */
 	@Override
 	public void contribute(
@@ -164,46 +164,6 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 
 		// Adjust indexes
 		removeColumnsFromIndexes(theMetadata, classLoaderService);
-	}
-
-	private static void removeColumnsFromIndexes(
-			InFlightMetadataCollector theMetadata, ClassLoaderService classLoaderService) {
-		for (Map.Entry<String, PersistentClass> nextEntry :
-				theMetadata.getEntityBindingMap().entrySet()) {
-
-			Class<?> type = getType(classLoaderService, nextEntry.getKey());
-			Table table = nextEntry.getValue().getTable();
-
-			PartitionedIndexes partitionedIndexes = type.getAnnotation(PartitionedIndexes.class);
-			if (partitionedIndexes != null) {
-				for (PartitionedIndex partitionedIndex : partitionedIndexes.value()) {
-					String indexName = partitionedIndex.name();
-					Set<String> columnNames = Set.of(partitionedIndex.columns());
-					Index index = table.getIndex(indexName);
-					if (index != null) {
-
-						List<Selectable> selectables;
-						try {
-							selectables = (List<Selectable>)
-									getField(index.getClass(), "selectables").get(index);
-						} catch (IllegalAccessException e) {
-							// FIXME: add code
-							throw new InternalErrorException("Failed to access field " + "selectables", e);
-						}
-						for (Iterator<Selectable> iter = selectables.iterator(); iter.hasNext(); ) {
-							Column next = (Column) iter.next();
-							if (!columnNames.contains(next.getName())) {
-								iter.remove();
-							}
-						}
-
-					} else {
-						// FIXME: add code
-						throw new ConfigurationException("@PartitionedIndex refers to unknown index " + indexName);
-					}
-				}
-			}
-		}
 	}
 
 	private void removePartitionedIdColumnsFromMetadata(
@@ -458,6 +418,74 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 		return columnNamesToRemoveFromFks;
 	}
 
+	private static void removeColumnsFromIndexes(
+			InFlightMetadataCollector theMetadata, ClassLoaderService classLoaderService) {
+		for (Map.Entry<String, PersistentClass> nextEntry :
+				theMetadata.getEntityBindingMap().entrySet()) {
+
+			Class<?> type = getType(classLoaderService, nextEntry.getKey());
+			Table table = nextEntry.getValue().getTable();
+
+			PartitionedIndexes partitionedIndexes = type.getAnnotation(PartitionedIndexes.class);
+			if (partitionedIndexes != null) {
+				for (PartitionedIndex partitionedIndex : partitionedIndexes.value()) {
+					String indexName = partitionedIndex.name();
+					Set<String> columnNames = Set.of(partitionedIndex.columns());
+					Index index = table.getIndex(indexName);
+					if (index != null) {
+
+						List<Selectable> selectables = getFieldValue(index, "selectables");
+						for (Iterator<Selectable> iter = selectables.iterator(); iter.hasNext(); ) {
+							Column next = (Column) iter.next();
+							if (!columnNames.contains(next.getName())) {
+								iter.remove();
+							}
+						}
+
+					} else {
+						throw new ConfigurationException(
+								Msg.code(2604) + "@PartitionedIndex refers to unknown index " + indexName);
+					}
+				}
+			}
+		}
+	}
+
+	@Nullable
+	private static Field getField(Class<?> theType, String theFieldName) {
+		Field field;
+		try {
+			field = theType.getDeclaredField(theFieldName);
+		} catch (NoSuchFieldException e) {
+			try {
+				field = theType.getField(theFieldName);
+			} catch (NoSuchFieldException theE) {
+				field = null;
+			}
+		}
+
+		if (field == null && theType.getSuperclass() != null) {
+			field = getField(theType.getSuperclass(), theFieldName);
+		}
+
+		if (field != null) {
+			field.setAccessible(true);
+		}
+
+		return field;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T getFieldValue(Object theTarget, String theFieldName) {
+		T selectables;
+		try {
+			selectables = (T) getField(theTarget.getClass(), theFieldName).get(theTarget);
+		} catch (IllegalAccessException e) {
+			throw new InternalErrorException(Msg.code(2603) + "Failed to access field " + theFieldName, e);
+		}
+		return selectables;
+	}
+
 	private static void updateComponentWithNewPropertyList(
 			Component identifierMapper, List<Property> finalPropertyList) {
 		CompositeType type = identifierMapper.getType();
@@ -504,29 +532,5 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 		entityType = theClassLoaderService.classForTypeName(theEntityTypeName);
 		Validate.notNull(entityType, "Could not load type: %s", theEntityTypeName);
 		return entityType;
-	}
-
-	@Nullable
-	private static Field getField(Class<?> theType, String theFieldName) {
-		Field field;
-		try {
-			field = theType.getDeclaredField(theFieldName);
-		} catch (NoSuchFieldException e) {
-			try {
-				field = theType.getField(theFieldName);
-			} catch (NoSuchFieldException theE) {
-				field = null;
-			}
-		}
-
-		if (field == null && theType.getSuperclass() != null) {
-			field = getField(theType.getSuperclass(), theFieldName);
-		}
-
-		if (field != null) {
-			field.setAccessible(true);
-		}
-
-		return field;
 	}
 }
