@@ -72,6 +72,7 @@ public abstract class BaseTask {
 	private DriverTypeEnum myDriverType;
 	private String myDescription;
 	private Integer myChangesCount = 0;
+	private MigrationTaskExecutionResultEnum myExecutionResult;
 	private boolean myDryRun;
 	private boolean myTransactional = true;
 	private Set<DriverTypeEnum> myOnlyAppliesToPlatforms = new HashSet<>();
@@ -201,6 +202,7 @@ public abstract class BaseTask {
 		try {
 			int changesCount = jdbcTemplate.update(theSql, theArguments);
 			logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
+			myExecutionResult = MigrationTaskExecutionResultEnum.SUCCESS;
 			return changesCount;
 		} catch (DataAccessException e) {
 			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
@@ -208,6 +210,7 @@ public abstract class BaseTask {
 						"Task {} did not exit successfully on doExecuteSql(), but task is allowed to fail",
 						getMigrationVersion());
 				ourLog.debug("Error was: {}", e.getMessage(), e);
+				myExecutionResult = MigrationTaskExecutionResultEnum.ALLOWED_TO_FAIL;
 				return 0;
 			} else {
 				throw new HapiMigrationException(
@@ -252,11 +255,13 @@ public abstract class BaseTask {
 	public void execute() throws SQLException {
 		if (myFlags.contains(TaskFlagEnum.DO_NOTHING)) {
 			ourLog.info("Skipping stubbed task: {}", getDescription());
+			myExecutionResult = MigrationTaskExecutionResultEnum.SKIPPED;
 			return;
 		}
 		if (!myOnlyAppliesToPlatforms.isEmpty()) {
 			if (!myOnlyAppliesToPlatforms.contains(getDriverType())) {
 				ourLog.info("Skipping task {} as it does not apply to {}", getDescription(), getDriverType());
+				myExecutionResult = MigrationTaskExecutionResultEnum.DOES_NOT_APPLY;
 				return;
 			}
 		}
@@ -267,6 +272,7 @@ public abstract class BaseTask {
 				ourLog.info(
 						"Skipping task since one of the preconditions was not met: {}",
 						precondition.getPreconditionReason());
+				myExecutionResult = MigrationTaskExecutionResultEnum.PRECONDITION_FAILED;
 				return;
 			}
 		}
@@ -344,6 +350,10 @@ public abstract class BaseTask {
 
 	public boolean hasFlag(TaskFlagEnum theFlag) {
 		return myFlags.contains(theFlag);
+	}
+
+	public MigrationTaskExecutionResultEnum getExecutionResult() {
+		return myExecutionResult;
 	}
 
 	public static class ExecutedStatement {
