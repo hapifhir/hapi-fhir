@@ -2,6 +2,7 @@ package ca.uhn.hapi.fhir.sql.hibernatesvc;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.JoinColumn;
@@ -20,10 +21,12 @@ import org.hibernate.mapping.Column;
 import org.hibernate.mapping.Component;
 import org.hibernate.mapping.DependantValue;
 import org.hibernate.mapping.ForeignKey;
+import org.hibernate.mapping.Index;
 import org.hibernate.mapping.KeyValue;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.PrimaryKey;
 import org.hibernate.mapping.Property;
+import org.hibernate.mapping.Selectable;
 import org.hibernate.mapping.Table;
 import org.hibernate.mapping.ToOne;
 import org.hibernate.mapping.UniqueKey;
@@ -155,8 +158,52 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			return;
 		}
 
+		// Remove partition ID columns from entity tables
 		ClassLoaderService classLoaderService = serviceRegistry.getService(ClassLoaderService.class);
 		removePartitionedIdColumnsFromMetadata(classLoaderService, theMetadata);
+
+		// Adjust indexes
+		removeColumnsFromIndexes(theMetadata, classLoaderService);
+	}
+
+	private static void removeColumnsFromIndexes(
+			InFlightMetadataCollector theMetadata, ClassLoaderService classLoaderService) {
+		for (Map.Entry<String, PersistentClass> nextEntry :
+				theMetadata.getEntityBindingMap().entrySet()) {
+
+			Class<?> type = getType(classLoaderService, nextEntry.getKey());
+			Table table = nextEntry.getValue().getTable();
+
+			PartitionedIndexes partitionedIndexes = type.getAnnotation(PartitionedIndexes.class);
+			if (partitionedIndexes != null) {
+				for (PartitionedIndex partitionedIndex : partitionedIndexes.value()) {
+					String indexName = partitionedIndex.name();
+					Set<String> columnNames = Set.of(partitionedIndex.columns());
+					Index index = table.getIndex(indexName);
+					if (index != null) {
+
+						List<Selectable> selectables;
+						try {
+							selectables = (List<Selectable>)
+									getField(index.getClass(), "selectables").get(index);
+						} catch (IllegalAccessException e) {
+							// FIXME: add code
+							throw new InternalErrorException("Failed to access field " + "selectables", e);
+						}
+						for (Iterator<Selectable> iter = selectables.iterator(); iter.hasNext(); ) {
+							Column next = (Column) iter.next();
+							if (!columnNames.contains(next.getName())) {
+								iter.remove();
+							}
+						}
+
+					} else {
+						// FIXME: add code
+						throw new ConfigurationException("@PartitionedIndex refers to unknown index " + indexName);
+					}
+				}
+			}
+		}
 	}
 
 	private void removePartitionedIdColumnsFromMetadata(
@@ -474,6 +521,10 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 
 		if (field == null && theType.getSuperclass() != null) {
 			field = getField(theType.getSuperclass(), theFieldName);
+		}
+
+		if (field != null) {
+			field.setAccessible(true);
 		}
 
 		return field;

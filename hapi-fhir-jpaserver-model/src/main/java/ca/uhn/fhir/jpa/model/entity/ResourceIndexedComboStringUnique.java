@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIndex;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIndexes;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -71,6 +73,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 					columnList = "PARTITION_ID,RES_ID",
 					unique = false)
 		})
+@PartitionedIndexes({
+	@PartitionedIndex(
+			name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE,
+			columns = {"RES_ID"})
+})
 @IdClass(IdAndPartitionId.class)
 public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {

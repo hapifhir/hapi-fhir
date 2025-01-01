@@ -698,7 +698,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDontStripVersionsFromRefsAtPaths_withTransactionBundleAndAutoVersionSet_shouldPreserveVersion() throws IOException {
+	public void testDontStripVersionsFromRefsAtPaths_withTransactionBundleAndAutoVersionSet_shouldPreserveVersion() throws Exception {
 		Set<String> referencePaths = Set.of("AuditEvent.entity.what","MessageHeader.focus","Provenance.target","Provenance.entity.what");
 
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(referencePaths);
@@ -712,7 +712,18 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		encounter.setId(encounterId);
 		myEncounterDao.update(encounter);
 
-		postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference.json", encounterId);
+		logAllResources();
+
+		myCaptureQueriesListener.clear();
+		try {
+			postBundleAndAssertProvenanceRefsPreserved("/transaction-bundles/transaction-with-client-supplied-versioned-reference.json", encounterId);
+			myCaptureQueriesListener.logInsertQueries();
+		} catch (Exception e) {
+			String sql = myCaptureQueriesListener.getInsertQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n\n"));
+			throw new Exception(sql, e);
+		}
+
+		logAllResources();
 	}
 
 	private Provenance postBundleAndAssertProvenanceRefsPreserved(String theBundlePath, String theEncounterId) throws IOException {

@@ -60,7 +60,7 @@ import java.util.Date;
 			// TODO GGG DROP this index, and instead use the below one
 			@UniqueConstraint(
 					name = "IDX_EMPI_PERSON_TGT",
-					columnNames = {"PARTITION_ID", "PERSON_PID", "TARGET_PID"}),
+					columnNames = {"PERSON_PID", "TARGET_PID"}),
 			// TODO GGG Should i make individual indices for PERSON/TARGET?
 		},
 		indexes = {

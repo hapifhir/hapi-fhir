@@ -10,6 +10,8 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -17,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JpaDdlTest {
 
@@ -119,8 +122,30 @@ public class JpaDdlTest {
 		} else {
 			assertThat(sql).contains("constraint IDX_RESTAG_TAGID unique (RES_ID, TAG_ID)");
 		}
+
+		sql = findCreateIndex(sqlStatements, "IDX_IDXCMPSTRUNIQ_RESOURCE");
+		if (theDatabasePartitionMode) {
+			assertEquals("create index IDX_IDXCMPSTRUNIQ_RESOURCE on HFJ_IDX_CMP_STRING_UNIQ (PARTITION_ID, RES_ID)", sql);
+		} else {
+			assertEquals("create index IDX_IDXCMPSTRUNIQ_RESOURCE on HFJ_IDX_CMP_STRING_UNIQ (RES_ID)", sql);
+		}
+
+		sql = findCreateTable(sqlStatements, "HFJ_IDX_CMP_STRING_UNIQ");
+		if (theDatabasePartitionMode) {
+			assertThat(sql).contains("constraint IDX_IDXCMPSTRUNIQ_STRING unique (PARTITION_ID, IDX_STRING)");
+		} else {
+			assertThat(sql).contains("constraint IDX_IDXCMPSTRUNIQ_STRING unique (IDX_STRING)");
+		}
+
+
 	}
-    
+
+	private static String findCreateIndex(List<String> sqlStatements, String indexName) {
+		return sqlStatements.stream().filter(t -> t.startsWith("create index " + indexName + " ")).findFirst().orElseThrow(() -> new IllegalStateException("Couldn't find index " + indexName + ". Statements: " + sqlStatements));
+	}
+
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaDdlTest.class);
+
     @SuppressWarnings("SameParameterValue")
 	private static String findCreateConstraint(List<String> theSqlStatements, String theTableName, String theConstraintName) {
         return theSqlStatements.stream().filter(t->t.startsWith("alter table if exists "+ theTableName +" add constraint "+ theConstraintName +" ")).findFirst().orElseThrow(()->new IllegalStateException("Couldn't find create FK constraint "+ theConstraintName +". Statements: " + theSqlStatements));
