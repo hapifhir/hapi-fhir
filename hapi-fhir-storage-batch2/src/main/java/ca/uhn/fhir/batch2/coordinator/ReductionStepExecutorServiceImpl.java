@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.Nonnull;
@@ -109,8 +110,11 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	public void start() {
 		if (myHeartbeatTimer == null) {
 			myHeartbeatTimer = new Timer("batch2-reducer-heartbeat");
-			myHeartbeatTimer.schedule(
-					new HeartbeatTimerTask(), DateUtils.MILLIS_PER_MINUTE, DateUtils.MILLIS_PER_MINUTE);
+			long delay = DateUtils.MILLIS_PER_MINUTE;
+			if (HapiSystemProperties.isUnitTestModeEnabled()) {
+				delay = DateUtils.MILLIS_PER_SECOND;
+			}
+			myHeartbeatTimer.schedule(new HeartbeatTimerTask(), delay, delay);
 		}
 	}
 

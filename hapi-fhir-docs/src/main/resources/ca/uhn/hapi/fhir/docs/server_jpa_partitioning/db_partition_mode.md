@@ -1,4 +1,4 @@
-# Database Partition Mode Introduction --EXPERIMENTAL--
+# Database Partition Mode Introduction
 
 HAPI FHIR 5.0.0 introduced partitioning to the JPA server. In the current partitioning design, each resource-specific table (i.e. each table in the database schema where each row pertains to a single FHIR resource) has two new columns: `PARTITION_ID`, and `PARTITION_DATE`.
 
