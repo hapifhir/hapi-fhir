@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -51,6 +50,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TerserUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -89,7 +89,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	private IHapiTransactionService myTransactionService;
 
 	@Autowired
-	private IRequestPartitionHelperSvc myPartitionHelperSvc;
+	private EntityManager myEntityManager;
 
 	@Override
 	public IResourceLookup findTargetResource(

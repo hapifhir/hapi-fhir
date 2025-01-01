@@ -77,4 +77,9 @@ public class ResourceHistoryTablePk implements IResourceVersionPersistentId, Ser
 	public IdAndPartitionId asIdAndPartitionId() {
 		return new IdAndPartitionId(getId(), getPartitionId());
 	}
+
+	@Override
+	public String toString() {
+		return myVersionId + "/" + myPartitionIdValue;
+	}
 }

@@ -708,6 +708,11 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		String encounterId = Integer.toString((int)(Math.random() * (float)Integer.MAX_VALUE));
 
+		// TODO: JA2 237643 Remove this and this test should still pass
+		Patient pt = new Patient();
+		pt.setId("237643");
+		myPatientDao.update(pt, mySrd);
+
 		Encounter encounter = new Encounter();
 		encounter.setId(encounterId);
 		myEncounterDao.update(encounter);
