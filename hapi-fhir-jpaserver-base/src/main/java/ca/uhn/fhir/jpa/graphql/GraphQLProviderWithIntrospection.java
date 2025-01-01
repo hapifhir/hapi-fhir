@@ -31,6 +31,8 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.VersionUtil;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -78,7 +80,7 @@ import static ca.uhn.fhir.util.MessageSupplier.msg;
 public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(GraphQLProviderWithIntrospection.class);
-	private final GraphQLSchemaGenerator myGenerator;
+	private final Supplier<GraphQLSchemaGenerator> myGenerator;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final VersionSpecificWorkerContextWrapper myContext;
 	private final IDaoRegistry myDaoRegistry;
@@ -99,12 +101,16 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 		myDaoRegistry = theDaoRegistry;
 
 		myContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(theValidationSupport);
-		myGenerator = new GraphQLSchemaGenerator(myContext, VersionUtil.getVersion());
 
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.registerTypeAdapter(Collections.emptyList().getClass(), (JsonSerializer<Object>)
 				(src, typeOfSrc, context) -> new JsonArray());
 		myGson = gsonBuilder.create();
+
+		// Lazy-load this because it's expensive, but more importantly because it makes a bunch of
+		// calls for StructureDefinitions and other such things during startup so we want to be sure
+		// that everything else is initialized first
+		myGenerator = Suppliers.memoize(() -> new GraphQLSchemaGenerator(myContext, VersionUtil.getVersion()));
 	}
 
 	@Override
@@ -153,37 +159,19 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 			Collection<String> theResourceTypes,
 			EnumSet<GraphQLSchemaGenerator.FHIROperationType> theOperations) {
 
+		GraphQLSchemaGenerator generator = myGenerator.get();
+
 		final StringBuilder schemaBuilder = new StringBuilder();
 		try (Writer writer = new StringBuilderWriter(schemaBuilder)) {
 
 			// Generate FHIR base types schemas
-			myGenerator.generateTypes(writer, theOperations);
+			generator.generateTypes(writer, theOperations);
 
 			// Fix up a few things that are missing from the generated schema
 			writer.append("\ninterface Element {")
 					.append("\n  id: ID")
 					.append("\n}")
 					.append("\n");
-			//			writer
-			//				.append("\ninterface Quantity {\n")
-			//						.append("id: String\n")
-			//				.append("extension: [Extension]\n")
-			//				.append("value: decimal  _value: ElementBase\n")
-			//				.append("comparator: code  _comparator: ElementBase\n")
-			//				.append("unit: String  _unit: ElementBase\n")
-			//				.append("system: uri  _system: ElementBase\n")
-			//				.append("code: code  _code: ElementBase\n")
-			//				.append("\n}")
-			//				.append("\n");
-
-			//			writer
-			//				.append("\ntype Resource {")
-			//				.append("\n  id: [token]" + "\n}")
-			//				.append("\n");
-			//			writer
-			//				.append("\ninput ResourceInput {")
-			//				.append("\n  id: [token]" + "\n}")
-			//				.append("\n");
 
 			// Generate schemas for the resource types
 			for (String nextResourceType : theResourceTypes) {
@@ -192,7 +180,7 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 						.getActiveSearchParams(
 								nextResourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
 						.values());
-				myGenerator.generateResource(writer, sd, parameters, theOperations);
+				generator.generateResource(writer, sd, parameters, theOperations);
 			}
 
 			// Generate queries
@@ -210,8 +198,8 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 							.getActiveSearchParams(
 									nextResourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
 							.values());
-					myGenerator.generateListAccessQuery(writer, parameters, nextResourceType);
-					myGenerator.generateConnectionAccessQuery(writer, parameters, nextResourceType);
+					generator.generateListAccessQuery(writer, parameters, nextResourceType);
+					generator.generateConnectionAccessQuery(writer, parameters, nextResourceType);
 				}
 			}
 			writer.append("\n}");

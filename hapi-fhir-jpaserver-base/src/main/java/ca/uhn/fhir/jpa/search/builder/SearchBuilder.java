@@ -285,6 +285,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		mySearchProperties.setMaxResultsRequested(theMaxResultsToFetch);
 	}
 
+	@Override
 	public void setDeduplicateInDatabase(boolean theShouldDeduplicateInDB) {
 		mySearchProperties.setDeduplicateInDatabase(theShouldDeduplicateInDB);
 	}
