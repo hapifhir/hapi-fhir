@@ -23,6 +23,11 @@ indent_style = tab
 tab_width = 3
 indent_size = 3
 
+[*.js]
+indent_style = tab
+tab_width = 3
+indent_size = 3
+
 [*.vm]
 indent_style = tab
 tab_width = 3
