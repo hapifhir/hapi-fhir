@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,6 +25,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -35,6 +37,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -235,7 +238,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		IIdType placeholderPatId = placeholderPat.getIdElement();
 		ourLog.debug("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
 		assertThat(placeholderPat.getIdentifier()).isEmpty();
-		Extension extension = placeholderPat.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
+		Extension extension = placeholderPat.getExtensionByUrl(EXT_RESOURCE_PLACEHOLDER);
 		assertNotNull(extension);
 		assertTrue(extension.hasValue());
 		assertTrue(((BooleanType) extension.getValue()).booleanValue());
@@ -253,7 +256,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Patient updatedPat = myPatientDao.read(updatedPatId);
 		ourLog.debug("\nUpdated Patient:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedPat));
 		assertThat(updatedPat.getIdentifier()).hasSize(1);
-		extension = updatedPat.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
+		extension = updatedPat.getExtensionByUrl(EXT_RESOURCE_PLACEHOLDER);
 		assertNull(extension);
 	}
 
@@ -664,6 +667,39 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Observation createdObs = myObservationDao.read(id);
 		assertEquals("Patient/ABC", createdObs.getSubject().getReference());
 	}
+
+	@Test
+	public void testSearchForPlaceholder() {
+		//Setup
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Patient");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode("placeholder");
+		sp.setName("placeholder");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("extension('" + EXT_RESOURCE_PLACEHOLDER + "').where(value = true)");
+		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		sp.setDescription("Index resources which were automatically created as placeholders");
+		ourLog.info("Search parameter:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		mySearchParameterDao.create(sp, mySrd);
+
+		createPatient(withId("B"), withActiveTrue());
+
+		// Test
+		Observation obsToCreate = new Observation();
+		obsToCreate.getSubject().setReference("Patient/A");
+		myObservationDao.create(obsToCreate, mySrd);
+
+		logAllTokenIndexes("placeholder");
+
+		// Verify
+		SearchParameterMap map = SearchParameterMap.newSynchronous("placeholder", new TokenParam("true"));
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).asList().containsExactly("Patient/A");
+	}
+
 
 	@Test
 	public void testTransaction() {
