@@ -24,6 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
@@ -198,9 +199,22 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	 * definitions get deleted. This test makes sure we act sanely when that happens.
 	 */
 	@ParameterizedTest
-	@ValueSource(strings = {"read", "vread", "search", "history", "update"})
-	public void testTagDefinitionDeleted(String theOperation) {
+	@CsvSource(value = {
+		"NONVERSIONED, read",
+		"NONVERSIONED, vread",
+		"NONVERSIONED, search",
+		"NONVERSIONED, history",
+		"NONVERSIONED, update",
+		"VERSIONED, read",
+		"VERSIONED, vread",
+		"VERSIONED, search",
+		"VERSIONED, history",
+		"VERSIONED, update"
+	})
+	public void testTagDefinitionDeleted(JpaStorageSettings.TagStorageModeEnum theTagStorageMode, String theOperation) {
 		// Setup
+		myStorageSettings.setTagStorageMode(theTagStorageMode);
+
 		Patient patient = new Patient();
 		patient.setId("Patient/A");
 		patient.getMeta().addProfile("http://profile0");
@@ -209,6 +223,9 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		patient.getMeta().addTag("http://tag", "tag1", "display1");
 		patient.getMeta().addSecurity("http://security", "security0", "display0");
 		patient.getMeta().addSecurity("http://security", "security1", "display1");
+		myPatientDao.update(patient, mySrd);
+
+		patient.setActive(false);
 		myPatientDao.update(patient, mySrd);
 
 		// Test
