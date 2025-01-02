@@ -71,7 +71,7 @@ public class TransactionDetails {
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
 	private boolean myFhirTransaction;
-	private List<IIdType> myAutoCreatedPlaceholderResources;
+	private List<IIdType> myAutoCreatedPlaceholderResources = Collections.emptyList();
 
 	/**
 	 * Constructor
@@ -463,7 +463,7 @@ public class TransactionDetails {
 	}
 
 	public void addAutoCreatedPlaceholderResource(IIdType theResource) {
-		if (myAutoCreatedPlaceholderResources == null) {
+		if (myAutoCreatedPlaceholderResources.isEmpty()) {
 			myAutoCreatedPlaceholderResources = new ArrayList<>();
 		}
 		myAutoCreatedPlaceholderResources.add(theResource);
@@ -472,10 +472,9 @@ public class TransactionDetails {
 	@Nonnull
 	public List<IIdType> getAutoCreatedPlaceholderResourcesAndClear() {
 		List<IIdType> retVal = myAutoCreatedPlaceholderResources;
-		if (retVal == null) {
-			retVal = Collections.emptyList();
+		if (!myAutoCreatedPlaceholderResources.isEmpty()) {
+			myAutoCreatedPlaceholderResources = Collections.emptyList();
 		}
-		myAutoCreatedPlaceholderResources = null;
 		return retVal;
 	}
 }

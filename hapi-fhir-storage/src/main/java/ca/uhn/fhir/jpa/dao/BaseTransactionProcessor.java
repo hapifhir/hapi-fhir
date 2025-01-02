@@ -1947,6 +1947,7 @@ public abstract class BaseTransactionProcessor {
 
 			theIdSubstitutions.updateTargets(newId);
 
+			// This will only be null if we're not intending to return an OO
 			IBaseOperationOutcome operationOutcome = theDaoMethodOutcome.getOperationOutcome();
 			if (operationOutcome != null) {
 
