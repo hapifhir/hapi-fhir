@@ -453,7 +453,8 @@ public abstract class BaseStorageDao {
 
 	public IBaseOperationOutcome createInfoOperationOutcome(
 			String theMessage, @Nullable StorageResponseCodeEnum theStorageResponseCode) {
-		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, OO_ISSUE_CODE_INFORMATIONAL, theStorageResponseCode);
+		return createOperationOutcome(
+				OO_SEVERITY_INFO, theMessage, OO_ISSUE_CODE_INFORMATIONAL, theStorageResponseCode);
 	}
 
 	private IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
@@ -728,7 +729,8 @@ public abstract class BaseStorageDao {
 		IBaseOperationOutcome oo = createInfoOperationOutcome(msg, outcome);
 
 		if (theTransactionDetails != null) {
-			List<IIdType> autoCreatedPlaceholderResources = theTransactionDetails.getAutoCreatedPlaceholderResourcesAndClear();
+			List<IIdType> autoCreatedPlaceholderResources =
+					theTransactionDetails.getAutoCreatedPlaceholderResourcesAndClear();
 			for (IIdType next : autoCreatedPlaceholderResources) {
 				msg = addIssueToOperationOutcomeForAutoCreatedPlaceholder(getContext(), next, oo);
 			}
@@ -738,16 +740,25 @@ public abstract class BaseStorageDao {
 		ourLog.debug(msg);
 	}
 
-	public static String addIssueToOperationOutcomeForAutoCreatedPlaceholder(FhirContext theFhirContext, IIdType thePlaceholderId, IBaseOperationOutcome theOperationOutcomeToPopulate) {
+	public static String addIssueToOperationOutcomeForAutoCreatedPlaceholder(
+			FhirContext theFhirContext, IIdType thePlaceholderId, IBaseOperationOutcome theOperationOutcomeToPopulate) {
 		String msg;
 		msg = theFhirContext
-			.getLocalizer()
-			.getMessageSanitized(BaseStorageDao.class, "successfulAutoCreatePlaceholder", thePlaceholderId);
+				.getLocalizer()
+				.getMessageSanitized(BaseStorageDao.class, "successfulAutoCreatePlaceholder", thePlaceholderId);
 		String detailSystem = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getSystem();
 		String detailCode = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getCode();
 		String detailDescription = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getDisplay();
 		OperationOutcomeUtil.addIssue(
-			theFhirContext, theOperationOutcomeToPopulate, OO_SEVERITY_INFO, msg, null, OO_ISSUE_CODE_INFORMATIONAL, detailSystem, detailCode, detailDescription);
+				theFhirContext,
+				theOperationOutcomeToPopulate,
+				OO_SEVERITY_INFO,
+				msg,
+				null,
+				OO_ISSUE_CODE_INFORMATIONAL,
+				detailSystem,
+				detailCode,
+				detailDescription);
 		return msg;
 	}
 

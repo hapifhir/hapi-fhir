@@ -133,7 +133,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 
 				// If we previously looked up the ID, and it was not found, don't bother
 				// looking it up again
-				if (theTransactionDetails != null && theTransactionDetails.hasNullResolvedResourceId(targetResourceId)) {
+				if (theTransactionDetails != null
+						&& theTransactionDetails.hasNullResolvedResourceId(targetResourceId)) {
 					throw new ResourceNotFoundException(Msg.code(2602));
 				}
 
@@ -305,7 +306,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 					theTransactionDetails.addRollbackUndoAction(() -> newResource.setId(existingId));
 				}
 				newResource.setId(resName + "/" + theIdToAssignToPlaceholder);
-				valueOf = placeholderResourceDao.update(newResource, null, true, false, theRequest, theTransactionDetails).getEntity();
+				valueOf = placeholderResourceDao
+						.update(newResource, null, true, false, theRequest, theTransactionDetails)
+						.getEntity();
 			} else {
 				valueOf = placeholderResourceDao.create(newResource, theRequest).getEntity();
 			}

@@ -2470,7 +2470,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				} else {
 					try {
 						entity = readEntityLatestVersion(
-							theRequest, resourceId, theRequestPartitionId, theTransactionDetails);
+								theRequest, resourceId, theRequestPartitionId, theTransactionDetails);
 					} catch (ResourceNotFoundException e) {
 						create = true;
 					}

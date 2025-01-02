@@ -247,7 +247,6 @@ public class TransactionDetails {
 		return false;
 	}
 
-
 	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
@@ -296,7 +295,7 @@ public class TransactionDetails {
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
 	public void addResolvedMatchUrl(
-		FhirContext theFhirContext, String theConditionalUrl, @Nonnull IResourcePersistentId<?> thePersistentId) {
+			FhirContext theFhirContext, String theConditionalUrl, @Nonnull IResourcePersistentId<?> thePersistentId) {
 		Validate.notBlank(theConditionalUrl, "theConditionalUrl must not be blank");
 		Validate.notNull(thePersistentId, "thePersistentId must not be null");
 
@@ -304,8 +303,8 @@ public class TransactionDetails {
 			myResolvedMatchUrls = new HashMap<>();
 		} else if (matchUrlWithDiffIdExists(theConditionalUrl, thePersistentId)) {
 			String msg = theFhirContext
-				.getLocalizer()
-				.getMessage(TransactionDetails.class, "invalidMatchUrlMultipleMatches", theConditionalUrl);
+					.getLocalizer()
+					.getMessage(TransactionDetails.class, "invalidMatchUrlMultipleMatches", theConditionalUrl);
 			throw new PreconditionFailedException(Msg.code(2207) + msg);
 		}
 		myResolvedMatchUrls.put(theConditionalUrl, thePersistentId);
@@ -321,7 +320,7 @@ public class TransactionDetails {
 
 	private boolean matchUrlWithDiffIdExists(String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
 		if (myResolvedMatchUrls.containsKey(theConditionalUrl)
-			&& myResolvedMatchUrls.get(theConditionalUrl) != NOT_FOUND) {
+				&& myResolvedMatchUrls.get(theConditionalUrl) != NOT_FOUND) {
 			return !myResolvedMatchUrls.get(theConditionalUrl).getId().equals(thePersistentId.getId());
 		}
 		return false;
@@ -444,8 +443,7 @@ public class TransactionDetails {
 		return hookParams == null ? InterceptorInvocationTimingEnum.ACTIVE : InterceptorInvocationTimingEnum.DEFERRED;
 	}
 
-	public void deferredBroadcastProcessingFinished() {
-	}
+	public void deferredBroadcastProcessingFinished() {}
 
 	public void clearResolvedItems() {
 		myResolvedResourceIds.clear();

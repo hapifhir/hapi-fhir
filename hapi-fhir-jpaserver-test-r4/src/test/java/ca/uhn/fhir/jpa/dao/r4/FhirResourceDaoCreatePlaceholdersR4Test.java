@@ -113,6 +113,10 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals("Task/AAA", task.getPartOf().get(1).getReference());
 		assertEquals("Task/AAA", task.getPartOf().get(2).getReference());
 
+		Task placeholderTask = myTaskDao.read(new IdType("Task/AAA"), mySrd);
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderTask));
+		assertNotNull(placeholderTask);
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Task.SP_PART_OF, new ReferenceParam("Task/AAA"));
 		List<String> found = toUnqualifiedVersionlessIdValues(myTaskDao.search(params));

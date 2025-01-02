@@ -1949,9 +1949,11 @@ public abstract class BaseTransactionProcessor {
 			IBaseOperationOutcome operationOutcome = theDaoMethodOutcome.getOperationOutcome();
 			if (operationOutcome != null) {
 
-				List<IIdType> autoCreatedPlaceholders = theTransactionDetails.getAutoCreatedPlaceholderResourcesAndClear();
+				List<IIdType> autoCreatedPlaceholders =
+						theTransactionDetails.getAutoCreatedPlaceholderResourcesAndClear();
 				for (IIdType autoCreatedPlaceholder : autoCreatedPlaceholders) {
-					BaseStorageDao.addIssueToOperationOutcomeForAutoCreatedPlaceholder(myContext, autoCreatedPlaceholder, operationOutcome);
+					BaseStorageDao.addIssueToOperationOutcomeForAutoCreatedPlaceholder(
+							myContext, autoCreatedPlaceholder, operationOutcome);
 				}
 
 				IBase responseEntry = theEntriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
