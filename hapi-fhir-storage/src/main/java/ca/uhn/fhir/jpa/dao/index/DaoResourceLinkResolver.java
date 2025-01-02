@@ -50,7 +50,6 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TerserUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.EntityManager;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -87,9 +86,6 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 
 	@Autowired
 	private IHapiTransactionService myTransactionService;
-
-	@Autowired
-	private EntityManager myEntityManager;
 
 	@Override
 	public IResourceLookup findTargetResource(
