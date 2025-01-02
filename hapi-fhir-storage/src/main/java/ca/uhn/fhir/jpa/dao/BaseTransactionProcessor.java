@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,6 +122,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -693,7 +694,7 @@ public abstract class BaseTransactionProcessor {
 		TransactionCallback<EntriesToProcessMap> txCallback = status -> {
 			final Set<IIdType> allIds = new LinkedHashSet<>();
 			final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
-			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
+			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new LinkedHashMap<>();
 
 			EntriesToProcessMap retVal = doTransactionWriteOperations(
 					theRequestDetails,

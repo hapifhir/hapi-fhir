@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.7.16-SNAPSHOT</version>
+	<version>7.7.17-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -126,8 +126,8 @@
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
 		<module>hapi-fhir-server-cds-hooks</module>
-
-	</modules>
+        <module>hapi-fhir-jpa-hibernate-services</module>
+    </modules>
 
 	<dependencies>
 		<dependency>
@@ -1031,7 +1031,7 @@
 		<junit_version>5.10.1</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>10.20.1</flyway_version>
-		<hibernate_version>6.6.2.Final</hibernate_version>
+		<hibernate_version>6.6.4.Final</hibernate_version>
 		<logback_version>1.5.12</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<hibernate_search_version>7.2.1.Final</hibernate_search_version>
@@ -2573,7 +2573,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.6.1</version>
+					<version>3.9.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2665,22 +2665,6 @@
 					</configuration>
 				</plugin>
 
-				<!-- Generate the DDL schema files -->
-				<plugin>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>hapi-tinder-plugin</artifactId>
-					<version>7.7.16-SNAPSHOT</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>generate-ddl</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<skip>true</skip>
-					</configuration>
-				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
@@ -3320,3 +3304,4 @@
 		</profile>
 	</profiles>
 </project>
+

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,14 +62,14 @@ import java.util.Collection;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = ResourceHistoryTable.IDX_RESVER_ID_VER,
-					columnNames = {"RES_ID", "RES_VER"})
+					columnNames = {"PARTITION_ID", "RES_ID", "RES_VER"})
 		},
 		indexes = {
 			@Index(name = "IDX_RESVER_TYPE_DATE", columnList = "RES_TYPE,RES_UPDATED,RES_ID"),
 			@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
 			@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED,RES_ID")
 		})
-public class ResourceHistoryTable extends BaseHasResource implements Serializable {
+public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk> implements Serializable {
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
 	public static final int SOURCE_URI_LENGTH = ResourceIndexedSearchParamString.MAX_LENGTH;
 	/**
@@ -85,7 +85,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@EmbeddedId
 	private ResourceHistoryTablePk myId;
 
-	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = true, updatable = false)
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
 	private Integer myPartitionIdValue;
 
 	@SuppressWarnings("unused")
@@ -102,16 +102,16 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@JoinColumns(
 			value = {
 				@JoinColumn(name = "RES_ID", nullable = false, insertable = false, updatable = false),
-				// @JoinColumn(name = "PARTITION_ID", nullable = false, insertable = false, updatable = false),
+				@JoinColumn(name = "PARTITION_ID", nullable = false, insertable = false, updatable = false),
 			},
 			foreignKey = @ForeignKey(name = "FK_RESOURCE_HISTORY_RESOURCE"))
 	private ResourceTable myResourceTable;
 
 	@Embedded
 	@AttributeOverride(name = "myId", column = @Column(name = "RES_ID", insertable = true, updatable = false))
-	// @AttributeOverride(
-	//		name = "myPartitionIdValue",
-	//		column = @Column(name = "PARTITION_ID", insertable = false, updatable = false))
+	@AttributeOverride(
+			name = "myPartitionIdValue",
+			column = @Column(name = "PARTITION_ID", insertable = false, updatable = false))
 	private JpaPidFk myResourcePid;
 
 	/**

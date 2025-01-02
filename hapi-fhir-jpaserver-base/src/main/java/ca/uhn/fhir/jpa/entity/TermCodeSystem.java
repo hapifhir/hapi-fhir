@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_CS_CODESYSTEM",
-					columnNames = {"CODE_SYSTEM_URI"})
+					columnNames = {"PARTITION_ID", "CODE_SYSTEM_URI"})
 		},
 		indexes = {
 			@Index(name = "FK_TRMCODESYSTEM_RES", columnList = "RES_ID"),
@@ -66,6 +66,7 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 	public static final int MAX_URL_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
 	private static final int MAX_NAME_LENGTH = 200;
+	public static final String FK_TRMCODESYSTEM_CURVER = "FK_TRMCODESYSTEM_CURVER";
 
 	@Column(name = "CODE_SYSTEM_URI", nullable = false, length = MAX_URL_LENGTH)
 	private String myCodeSystemUri;
@@ -84,14 +85,14 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 						insertable = false,
 						updatable = false,
 						nullable = true),
-				//				@JoinColumn(
-				//						name = "CURRENT_VERSION_PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = false,
-				//						updatable = false,
-				//						nullable = true)
+				@JoinColumn(
+						name = "CURRENT_VERSION_PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true)
 			},
-			foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_CURVER"))
+			foreignKey = @ForeignKey(name = FK_TRMCODESYSTEM_CURVER))
 	private TermCodeSystemVersion myCurrentVersion;
 
 	@Column(name = "CURRENT_VERSION_PID", nullable = true, insertable = true, updatable = true)
@@ -115,12 +116,12 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 						nullable = false,
 						updatable = false,
 						insertable = false),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						nullable = false,
-				//						updatable = false,
-				//						insertable = false)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						nullable = false,
+						updatable = false,
+						insertable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_RES"))
 	private ResourceTable myResource;

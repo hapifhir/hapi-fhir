@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.IResourceLoader;
 import ca.uhn.fhir.cr.config.dstu3.ApplyOperationConfig;
 import ca.uhn.fhir.cr.config.dstu3.EvaluateOperationConfig;
+import ca.uhn.fhir.cr.config.test.TestCrStorageSettingsConfigurer;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -45,12 +46,17 @@ public abstract class BaseCrDstu3TestServer extends BaseJpaDstu3Test implements 
 
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
+	@Autowired
+	private TestCrStorageSettingsConfigurer myTestCrStorageSettingsConfigurer;
+
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
 	@Autowired
 	RestfulServer ourRestfulServer;
 	@BeforeEach
 	public void beforeStartServer() throws Exception {
+		myTestCrStorageSettingsConfigurer.setUpConfiguration();
+
 		ourServer = new Server(0);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
