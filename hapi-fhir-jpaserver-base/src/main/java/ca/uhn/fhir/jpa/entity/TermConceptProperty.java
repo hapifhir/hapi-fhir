@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,12 +88,12 @@ public class TermConceptProperty extends BasePartitionable implements Serializab
 						insertable = false,
 						updatable = false,
 						nullable = false),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = false,
-				//						updatable = false,
-				//						nullable = false)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CONCEPT"))
 	private TermConcept myConcept;
@@ -115,12 +115,12 @@ public class TermConceptProperty extends BasePartitionable implements Serializab
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = false,
-				//						updatable = false,
-				//						nullable = false)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CSV"))
 	private TermCodeSystemVersion myCodeSystemVersion;

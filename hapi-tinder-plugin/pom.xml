@@ -35,6 +35,16 @@
 			<artifactId>hapi-fhir-jpa</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-sql-migrate</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpa-hibernate-services</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<!--
 		Because Tinder is a part of the HAPI FHIR build process (it generates
 		a bunch of the actual HAPI structure code), but also uses HAPI FHIR

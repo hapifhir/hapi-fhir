@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.hibernate.dialect.MariaDBDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
@@ -26,7 +27,7 @@ import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
  * Dialect for MySQL database.
  * Minimum version: 10.11.5
  */
-public class HapiFhirMariaDBDialect extends MariaDBDialect {
+public class HapiFhirMariaDBDialect extends MariaDBDialect implements IHapiFhirDialect {
 
 	public HapiFhirMariaDBDialect() {
 		super();
@@ -42,6 +43,11 @@ public class HapiFhirMariaDBDialect extends MariaDBDialect {
 	@Override
 	public boolean supportsColumnCheck() {
 		return false;
+	}
+
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.MARIADB_10_1;
 	}
 
 	/**

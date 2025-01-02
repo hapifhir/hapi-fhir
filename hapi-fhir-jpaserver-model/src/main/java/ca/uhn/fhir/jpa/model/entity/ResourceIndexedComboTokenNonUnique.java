@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,12 +77,12 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 						insertable = false,
 						updatable = false,
 						nullable = true),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = false,
-				//						updatable = false,
-				//						nullable = true)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true)
 			},
 			foreignKey = @ForeignKey(name = "FK_IDXCMBTOKNU_RES_ID"))
 	private ResourceTable myResource;

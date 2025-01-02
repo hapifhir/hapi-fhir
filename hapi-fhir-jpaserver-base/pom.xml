@@ -80,6 +80,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpa-hibernate-services</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -406,13 +411,14 @@
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
 		</dependency>
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
+				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<id>build_dstu2</id>
@@ -479,58 +485,9 @@
 							<version>r5</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r5</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r5.xml</targetResourceSpringBeansFile>
-							<baseResourceNames/>
-						</configuration>
-					</execution>
-					<!-- Generate the DDL schema files -->
-					<execution>
-						<id>generate-ddl</id>
-						<goals>
-							<goal>generate-ddl</goal>
-						</goals>
-						<configuration>
-							<skip>false</skip>
-							<packageNames>
-								<packageName>ca.uhn.fhir.jpa.entity</packageName>
-								<packageName>ca.uhn.fhir.jpa.model.entity</packageName>
-							</packageNames>
-							<dialects>
-								<dialect>
-									<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirDerbyDialect</className>
-									<targetFileName>derby.sql</targetFileName>
-								</dialect>
-								<dialect>
-									<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirMySQLDialect</className>
-									<targetFileName>mysql.sql</targetFileName>
-								</dialect>
-								<dialect>
-									<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirMariaDBDialect</className>
-									<targetFileName>mariadb.sql</targetFileName>
-								</dialect>
-								<dialect>
-									<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect</className>
-									<targetFileName>oracle.sql</targetFileName>
-								</dialect>
-								<dialect>
-									<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect</className>
-									<targetFileName>sqlserver.sql</targetFileName>
-								</dialect>
-								<dialect>
-									<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirCockroachDialect</className>
-									<targetFileName>cockroachdb.sql</targetFileName>
-								</dialect>
-								<dialect>
-									<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect</className>
-									<targetFileName>h2.sql</targetFileName>
-								</dialect>
-								<dialect>
-									<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect</className>
-									<targetFileName>postgres.sql</targetFileName>
-									<appendFile>classpath:ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql</appendFile>
-								</dialect>
-							</dialects>
-							<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r5.xml
+							</targetResourceSpringBeansFile>
+							<baseResourceNames></baseResourceNames>
 						</configuration>
 					</execution>
 				</executions>
@@ -555,6 +512,78 @@
 						<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
 						<version>${project.version}</version>
 					</dependency>
+				</dependencies>
+			</plugin>
+
+			<!-- Generate the DDL schema files -->
+			<plugin>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-tinder-plugin</artifactId>
+				<version>${project.version}</version>
+				<executions><execution><id>generate-ddl-legacy</id>
+					<phase>process-classes</phase>
+				<goals>
+					<goal>generate-ddl</goal>
+				</goals>
+					<configuration>
+						<databasePartitionMode>false</databasePartitionMode>
+						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
+					</configuration>
+				</execution>
+				<execution>
+					<id>generate-ddl-partitioned</id>
+					<phase>process-classes</phase>
+				<goals>
+					<goal>generate-ddl</goal>
+				</goals>
+					<configuration>
+						<databasePartitionMode>true</databasePartitionMode>
+						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/partitioned</outputDirectory>
+					</configuration>
+				</execution>
+				</executions>
+				<configuration>
+					<packageNames>
+						<packageName>ca.uhn.fhir.jpa.entity</packageName>
+						<packageName>ca.uhn.fhir.jpa.model.entity</packageName>
+					</packageNames>
+					<dialects>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirDerbyDialect</className>
+							<targetFileName>derby.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirMySQLDialect</className>
+							<targetFileName>mysql.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirMariaDBDialect</className>
+							<targetFileName>mariadb.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect</className>
+							<targetFileName>oracle.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect</className>
+							<targetFileName>sqlserver.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirCockroachDialect</className>
+							<targetFileName>cockroachdb.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect</className>
+							<targetFileName>h2.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect</className>
+							<targetFileName>postgres.sql</targetFileName>
+							<appendFile>classpath:ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql</appendFile>
+						</dialect>
+					</dialects>
+				</configuration>
+				<dependencies>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-jpaserver-model</artifactId>
@@ -562,6 +591,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>

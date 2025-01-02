@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import java.io.Serializable;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_RESHISTTAG_TAGID",
-					columnNames = {"RES_VER_PID", "TAG_ID"}),
+					columnNames = {"PARTITION_ID", "RES_VER_PID", "TAG_ID"}),
 		},
 		indexes = {@Index(name = "IDX_RESHISTTAG_RESID", columnList = "RES_ID")})
 @IdClass(IdAndPartitionId.class)
@@ -69,12 +69,12 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 						nullable = false,
 						insertable = false,
 						updatable = false),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						nullable = false,
-				//						insertable = false,
-				//						updatable = false)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_HISTORYTAG_HISTORY"))
 	private ResourceHistoryTable myResourceHistory;
