@@ -766,6 +766,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * @return Returns <code>true</code> if the tag should be removed
 	 */
 	protected boolean shouldDroppedTagBeRemovedOnUpdate(RequestDetails theRequest, ResourceTag theTag) {
+		if (theTag.getTag() == null) {
+			return true;
+		}
 
 		Set<TagTypeEnum> metaSnapshotModeTokens = null;
 

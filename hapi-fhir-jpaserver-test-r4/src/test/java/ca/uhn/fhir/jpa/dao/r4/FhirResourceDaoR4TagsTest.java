@@ -2,12 +2,17 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -17,8 +22,10 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +38,9 @@ import static org.mockito.Mockito.when;
 public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TagsTest.class);
+
+	@RegisterExtension
+	private LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(JpaStorageResourceParser.class, Level.WARN);
 
 	@Override
 	@AfterEach
@@ -181,6 +191,66 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		assertThat(toTags(patient)).as(toTags(patient).toString()).containsExactlyInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2");
 
 	}
+
+	/**
+	 * We have removed the FK constraint from {@link ca.uhn.fhir.jpa.model.entity.ResourceTag}
+	 * to {@link ca.uhn.fhir.jpa.model.entity.TagDefinition} so it's possible that tag
+	 * definitions get deleted. This test makes sure we act sanely when that happens.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = {"read", "vread", "search", "history", "update"})
+	public void testTagDefinitionDeleted(String theOperation) {
+		// Setup
+		Patient patient = new Patient();
+		patient.setId("Patient/A");
+		patient.getMeta().addProfile("http://profile0");
+		patient.getMeta().addProfile("http://profile1");
+		patient.getMeta().addTag("http://tag", "tag0", "display0");
+		patient.getMeta().addTag("http://tag", "tag1", "display1");
+		patient.getMeta().addSecurity("http://security", "security0", "display0");
+		patient.getMeta().addSecurity("http://security", "security1", "display1");
+		myPatientDao.update(patient, mySrd);
+
+		// Test
+		runInTransaction(() -> {
+			assertEquals(6, myTagDefinitionDao.count());
+			myTagDefinitionDao.deleteAll();
+			assertEquals(0, myTagDefinitionDao.count());
+		});
+		Patient actualPatient;
+		switch (theOperation) {
+			case "read":
+				actualPatient = myPatientDao.read(new IdType("Patient/A"), mySrd);
+				break;
+			case "vread":
+				actualPatient = myPatientDao.read(new IdType("Patient/A/_history/1"), mySrd);
+				break;
+			case "search":
+				actualPatient = (Patient) myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).getResources(0, 1).get(0);
+				break;
+			case "history":
+				actualPatient = (Patient) mySystemDao.history(null, null, null, mySrd).getResources(0, 1).get(0);
+				break;
+			case "update":
+				Patient updatePatient = new Patient();
+				updatePatient.setId("Patient/A");
+				updatePatient.setActive(true);
+				actualPatient = (Patient) myPatientDao.update(updatePatient, mySrd).getResource();
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown operation: " + theOperation);
+		}
+
+		// Verify
+
+		assertEquals(0, actualPatient.getMeta().getProfile().size());
+		assertEquals(0, actualPatient.getMeta().getTag().size());
+		assertEquals(0, actualPatient.getMeta().getSecurity().size());
+
+		List<ILoggingEvent> logEvents = myLogbackTestExtension.getLogEvents(t -> t.getMessage().contains("Tag definition HFJ_TAG_DEF#{} is missing"));
+		assertThat(logEvents).as(() -> myLogbackTestExtension.getLogEvents().toString()).hasSize(1);
+	}
+
 
 	/**
 	 * Make sure tags are preserved
@@ -510,21 +580,6 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		validatePatientSearchResultsForInlineTags(outcome);
 	}
 
-	@Nonnull
-	public static SearchParameter createSecuritySearchParameter(FhirContext fhirContext) {
-		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.setId("SearchParameter/resource-security");
-		for (String next : fhirContext.getResourceTypes().stream().sorted().collect(Collectors.toList())) {
-			searchParameter.addBase(next);
-		}
-		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
-		searchParameter.setCode("_security");
-		searchParameter.setName("Security");
-		searchParameter.setExpression("meta.security");
-		return searchParameter;
-	}
-
 	private void validatePatientSearchResultsForInlineTags(Bundle outcome) {
 		Patient patient;
 		patient = (Patient) outcome.getEntry().get(0).getResource();
@@ -597,6 +652,21 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		patient.getMeta().addTag("http://tag2", "vtag2", "dtag2");
 		patient.setActive(false);
 		assertEquals("2", myPatientDao.update(patient, mySrd).getId().getVersionIdPart());
+	}
+
+	@Nonnull
+	public static SearchParameter createSecuritySearchParameter(FhirContext fhirContext) {
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("SearchParameter/resource-security");
+		for (String next : fhirContext.getResourceTypes().stream().sorted().collect(Collectors.toList())) {
+			searchParameter.addBase(next);
+		}
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setCode("_security");
+		searchParameter.setName("Security");
+		searchParameter.setExpression("meta.security");
+		return searchParameter;
 	}
 
 	@Nonnull

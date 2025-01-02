@@ -490,7 +490,17 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			res.getMeta().getTag().clear();
 			res.getMeta().getProfile().clear();
 			res.getMeta().getSecurity().clear();
+
+			boolean haveWarnedForMissingTag = false;
 			for (BaseTag next : theTagList) {
+				if (next.getTag() == null) {
+					if (!haveWarnedForMissingTag) {
+						ourLog.warn("Tag definition HFJ_TAG_DEF#{} is missing, returned Resource.meta may not be complete", next.getTagId());
+						haveWarnedForMissingTag = true;
+					}
+					continue;
+				}
+
 				switch (next.getTag().getTagType()) {
 					case PROFILE:
 						res.getMeta().addProfile(next.getTag().getCode());
