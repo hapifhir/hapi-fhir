@@ -126,6 +126,14 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		String idPart = targetResourceId.getIdPart();
 		try {
 			if (persistentId == null) {
+
+				// If we previously looked up the ID, and it was not found, don't bother
+				// looking it up again
+				if (theTransactionDetails != null
+						&& theTransactionDetails.hasNullResolvedResourceId(targetResourceId)) {
+					throw new ResourceNotFoundException(Msg.code(2602));
+				}
+
 				resolvedResource = myIdHelperService.resolveResourceIdentity(
 						theRequestPartitionId,
 						resourceType,
@@ -294,7 +302,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 					theTransactionDetails.addRollbackUndoAction(() -> newResource.setId(existingId));
 				}
 				newResource.setId(resName + "/" + theIdToAssignToPlaceholder);
-				valueOf = placeholderResourceDao.update(newResource, theRequest).getEntity();
+				valueOf = placeholderResourceDao
+						.update(newResource, null, true, false, theRequest, theTransactionDetails)
+						.getEntity();
 			} else {
 				valueOf = placeholderResourceDao.create(newResource, theRequest).getEntity();
 			}
@@ -303,6 +313,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			persistentId = myIdHelperService.newPid(persistentId.getId());
 			persistentId.setAssociatedResourceId(valueOf.getIdDt());
 			theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
+			theTransactionDetails.addAutoCreatedPlaceholderResource(newResource.getIdElement());
 		}
 
 		return Optional.ofNullable(valueOf);

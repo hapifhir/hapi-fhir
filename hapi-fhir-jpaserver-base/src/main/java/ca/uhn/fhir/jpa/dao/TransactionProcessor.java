@@ -311,7 +311,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(
 				theRequestPartitionId, idsToPreResolve.keySet(), resolveMode);
 		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> entry : outcomes.entrySet()) {
-			JpaPid next = (JpaPid) entry.getValue().getPersistentId();
+			JpaPid next = entry.getValue().getPersistentId();
 			IIdType unqualifiedVersionlessId = entry.getKey();
 			foundIds.add(unqualifiedVersionlessId.getValue());
 			theTransactionDetails.addResolvedResourceId(unqualifiedVersionlessId, next);
