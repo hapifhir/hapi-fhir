@@ -31,6 +31,7 @@ import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import org.hl7.fhir.r4.model.Task;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class ReplaceReferencesAppCtx {
@@ -82,8 +83,8 @@ public class ReplaceReferencesAppCtx {
 
 	@Bean
 	public ReplaceReferenceUpdateTaskReducerStep<ReplaceReferencesJobParameters> replaceReferenceUpdateTaskStep(
-			DaoRegistry theDaoRegistry) {
-		return new ReplaceReferenceUpdateTaskReducerStep<>(theDaoRegistry);
+			DaoRegistry theDaoRegistry, ReplaceReferencesProvenanceSvc theReplaceReferencesProvenanceSvc) {
+		return new ReplaceReferenceUpdateTaskReducerStep<>(theDaoRegistry, theReplaceReferencesProvenanceSvc);
 	}
 
 	@Bean
@@ -91,5 +92,11 @@ public class ReplaceReferencesAppCtx {
 			DaoRegistry theDaoRegistry, Batch2TaskHelper theBatch2TaskHelper) {
 		IFhirResourceDao<Task> taskDao = theDaoRegistry.getResourceDao(Task.class);
 		return new ReplaceReferencesErrorHandler<>(theBatch2TaskHelper, taskDao);
+	}
+
+	@Primary
+	@Bean
+	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesProvenanceSvc(theDaoRegistry);
 	}
 }
