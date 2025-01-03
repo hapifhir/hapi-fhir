@@ -548,8 +548,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		 * we fetch it and then refresh-lock it so that we don't fail if someone
 		 * else has touched it.
 		 */
-		Batch2JobInstanceEntity instanceEntity =
-				myEntityManager.find(Batch2JobInstanceEntity.class, theInstanceId);
+		Batch2JobInstanceEntity instanceEntity = myEntityManager.find(Batch2JobInstanceEntity.class, theInstanceId);
 		myEntityManager.refresh(instanceEntity, LockModeType.PESSIMISTIC_WRITE);
 
 		if (null == instanceEntity) {
