@@ -21,9 +21,11 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
+import ca.uhn.fhir.batch2.jobs.replacereferences.ProvenanceAgentJson;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -44,6 +46,8 @@ public abstract class BaseMergeOperationInputParameters {
 	private boolean myDeleteSource;
 	private IBaseResource myResultResource;
 	private final int myResourceLimit;
+	private List<IProvenanceAgent> myProvenanceAgents;
+	private boolean myCreateProvenance = true;
 
 	protected BaseMergeOperationInputParameters(int theResourceLimit) {
 		myResourceLimit = theResourceLimit;
@@ -127,6 +131,22 @@ public abstract class BaseMergeOperationInputParameters {
 		return myResourceLimit;
 	}
 
+	public boolean getCreateProvenance() {
+		return myCreateProvenance;
+	}
+
+	public void setCreateProvenance(boolean theCreateProvenance) {
+		this.myCreateProvenance = theCreateProvenance;
+	}
+
+	public List<IProvenanceAgent> getProvenanceAgents() {
+		return myProvenanceAgents;
+	}
+
+	public void setProvenanceAgents(List<IProvenanceAgent> theProvenanceAgents) {
+		this.myProvenanceAgents = theProvenanceAgents;
+	}
+
 	public MergeJobParameters asMergeJobParameters(
 			FhirContext theFhirContext,
 			JpaStorageSettings theStorageSettings,
@@ -142,6 +162,8 @@ public abstract class BaseMergeOperationInputParameters {
 		retval.setSourceId(new FhirIdJson(theSourceResource.getIdElement().toVersionless()));
 		retval.setTargetId(new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
 		retval.setPartitionId(thePartitionId);
+		retval.setProvenanceAgents(ProvenanceAgentJson.from(myProvenanceAgents, theFhirContext));
+		retval.setCreateProvenance(myCreateProvenance);
 		return retval;
 	}
 }
