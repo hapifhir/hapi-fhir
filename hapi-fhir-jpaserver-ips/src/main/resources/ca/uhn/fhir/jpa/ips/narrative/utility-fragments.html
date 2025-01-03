@@ -138,15 +138,6 @@
    </th:block>
 </th:block>
 
-<th:block th:if="${occurrence}" th:fragment="renderOccurrence (occurrence)">
-   <th:block th:if="${occurrence} != null" th:object="${occurrence}">
-      <th:block th:switch="*{getClass().getSimpleName()}">
-         <th:block th:case="'DateTimeType'" th:text="*{getValue()}">Date</th:block>
-         <th:block th:case="'StringType'" th:text="*{getValue()}">Date</th:block>
-      </th:block>
-   </th:block>
-</th:block>
-
 <th:block th:if="${recorded}" th:fragment="renderRecorded (recorded)">
    <th:block th:if="${recorded} != null" th:object="${recorded}">
       <th:block th:switch="*{getClass().getSimpleName()}">
