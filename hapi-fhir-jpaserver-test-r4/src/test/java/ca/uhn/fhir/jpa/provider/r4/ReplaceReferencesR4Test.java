@@ -146,6 +146,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			int numberOfEntriesInCurrentBundle = patchResultBundle.getEntry().size();
 			// validate
 			totalPatchResultEntriesSeen += numberOfEntriesInCurrentBundle;
+			assertThat(numberOfEntriesInCurrentBundle).isBetween(1, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
 			ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, numberOfEntriesInCurrentBundle, List.of(
 				"Observation",
 				"Encounter", "CarePlan"));
