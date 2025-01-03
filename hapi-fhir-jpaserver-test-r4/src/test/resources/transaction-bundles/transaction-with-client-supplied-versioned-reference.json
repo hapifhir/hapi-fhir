@@ -3,10 +3,10 @@
     "type": "transaction",
     "entry": [
         {
-            "fullUrl": "https://smilecdrmock.harrisarc.ca/fhir-system/Encounter/242976",
+            "fullUrl": "https://smilecdrmock.harrisarc.ca/fhir-system/Encounter/ENCOUNTER_ID",
             "resource": {
                 "resourceType": "Encounter",
-                "id": "242976",
+                "id": "ENCOUNTER_ID",
                 "meta": {
                     "versionId": "4",
                     "lastUpdated": "2024-07-26T10:43:49.287-04:00",
@@ -58,7 +58,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Encounter/242976"
+                "url": "Encounter/ENCOUNTER_ID"
             }
         },
         {
@@ -101,7 +101,7 @@
                     {
                         "role": "source",
                         "what": {
-                            "reference": "Encounter/242976/_history/1"
+                            "reference": "Encounter/ENCOUNTER_ID/_history/1"
                         }
                     }
                 ]

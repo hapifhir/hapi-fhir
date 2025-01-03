@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6550
+title: "Upgrade the Clinical Reasoning module to the latest release of 3.15.0. Please review associated ticket
+    for detailed list of changes which including changes to error handling, measure scoring and support for 
+    Organization subjects."

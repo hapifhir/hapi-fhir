@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
@@ -26,7 +27,7 @@ import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
  * Dialect for MySQL database.
  * Minimum version: 5.7
  */
-public class HapiFhirMySQLDialect extends MySQLDialect {
+public class HapiFhirMySQLDialect extends MySQLDialect implements IHapiFhirDialect {
 
 	public HapiFhirMySQLDialect() {
 		super();
@@ -44,19 +45,16 @@ public class HapiFhirMySQLDialect extends MySQLDialect {
 		return false;
 	}
 
-	//	/**
-	//	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
-	//	 */
-	//	@Override
-	//	public String getEnumTypeDeclaration(Class<? extends Enum<?>> enumType) {
-	//		return null;
-	//	}
-	//
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.MYSQL_5_7;
+	}
+
 	/**
 	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
 	 */
 	@Override
 	public String getEnumTypeDeclaration(String name, String[] values) {
-		return "VARCHAR(99)";
+		return null;
 	}
 }
