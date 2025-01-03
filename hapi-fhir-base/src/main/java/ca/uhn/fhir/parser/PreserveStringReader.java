@@ -13,7 +13,6 @@ public class PreserveStringReader extends Reader {
 	private final StringWriter myWriter;
 
 	public PreserveStringReader(Reader theReader) {
-		System.out.println("reader " + theReader.getClass().getSimpleName());
 		myReader = theReader;
 		myWriter = new StringWriter();
 	}
