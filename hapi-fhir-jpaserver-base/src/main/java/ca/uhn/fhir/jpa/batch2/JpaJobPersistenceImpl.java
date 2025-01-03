@@ -542,8 +542,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier) {
+		/*
+		 * We may already have a copy of the entity in the L1 cache, and it may be
+		 * stale if the scheduled maintenance service has touched it recently. So
+		 * we fetch it and then refresh-lock it so that we don't fail if someone
+		 * else has touched it.
+		 */
 		Batch2JobInstanceEntity instanceEntity =
-				myEntityManager.find(Batch2JobInstanceEntity.class, theInstanceId, LockModeType.PESSIMISTIC_WRITE);
+				myEntityManager.find(Batch2JobInstanceEntity.class, theInstanceId);
+		myEntityManager.refresh(instanceEntity, LockModeType.PESSIMISTIC_WRITE);
+
 		if (null == instanceEntity) {
 			ourLog.error("No instance found with Id {}", theInstanceId);
 			return false;
