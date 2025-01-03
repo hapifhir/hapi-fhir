@@ -7,10 +7,11 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
-import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.ResourceUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.commons.lang.StringUtils;
@@ -29,7 +30,6 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationDispense;
@@ -58,11 +58,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Nonnull;
-import org.testcontainers.shaded.com.trilead.ssh2.packets.PacketDisconnect;
-
 import java.io.IOException;
-import java.sql.Ref;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -83,7 +79,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class JsonParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4();
 
 	private Bundle createBundleWithPatient() {
 		Bundle b = new Bundle();
@@ -101,6 +97,40 @@ public class JsonParserR4Test extends BaseTest {
 	@AfterEach
 	public void afterEach() {
 		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+		ourCtx.setStoreRawJson(false);
+	}
+
+	@Test
+	public void parseResource_withStoreRawJsonTrue_willStoreTheRawJsonOnTheResource() {
+		ourCtx.setStoreRawJson(true);
+		IParser parser = ourCtx.newJsonParser();
+		String patientStr;
+		{
+			patientStr = """
+				{
+					"resourceType": "Patient",
+					"id": "P1212",
+					"contact": [{
+						"name": [{
+							"use": "official",
+							"family": "Simpson",
+							"given": ["Homer" ]
+						}]
+					}],
+					"text": {
+						"status": "additional",
+						"div": "<div>a div element</div>"
+					}
+				}
+				""";
+		}
+
+		// test
+		Patient patient = parser.parseResource(Patient.class, patientStr);
+
+		// verify
+		String rawJson = ResourceUtil.getRawStringFromResourceOrNull(patient);
+		assertEquals(patientStr, rawJson);
 	}
 
 	@Test

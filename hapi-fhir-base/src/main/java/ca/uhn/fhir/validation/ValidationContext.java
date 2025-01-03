@@ -26,7 +26,9 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ObjectUtil;
+import ca.uhn.fhir.util.ResourceUtil;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
@@ -103,7 +105,12 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 		IEncoder encoder = new IEncoder() {
 			@Override
 			public String encode() {
-				return theContext.newJsonParser().encodeResourceToString(theResource);
+				// use the stored json string, if available
+				// otherwise, encode the actual resource
+				return ObjectUtils.firstNonNull(
+					ResourceUtil.getRawStringFromResourceOrNull(theResource),
+					theContext.newJsonParser().encodeResourceToString(theResource)
+				);
 			}
 
 			@Override

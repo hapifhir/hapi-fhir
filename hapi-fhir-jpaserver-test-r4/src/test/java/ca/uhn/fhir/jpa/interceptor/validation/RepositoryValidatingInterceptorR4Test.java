@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -48,6 +49,29 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof RepositoryValidatingInterceptor);
+	}
+
+	@Test
+	public void invalidResource_thatParsesFine_doesNotValidate() {
+		String patientStr;
+		IParser parser = myFhirContext.newJsonParser();
+		{
+			patientStr = """
+				{
+					"resourceType": "Patient",
+					"active": true,
+					"contact": [{
+						"name": [{
+							"use": "official",
+							"family": "Simpson",
+							"given": ["Homer" ]
+						}]
+					}]
+				}
+				 """;
+		}
+
+
 	}
 
 	@Test
@@ -238,7 +262,6 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 
 		patient = myPatientDao.read(id);
 		assertThat(patient.getMeta().getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList())).containsExactlyInAnyOrder("http://foo/Profile1");
-
 	}
 
 	@Test
@@ -386,13 +409,11 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 			assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Observation.status: minimum required = 1, but only found 0");
 		}
-
 	}
 
 
 	@Test
 	public void testMultipleTypedRules() {
-
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Observation")
 			.requireAtLeastProfile("http://hl7.org/fhir/StructureDefinition/Observation")
