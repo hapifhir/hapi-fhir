@@ -78,12 +78,16 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setAllowMultipleDelete(true);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
+		// keep the version on Provenance.target fields to verify that Provenance resources were saved
+		// with versioned target references
+		myFhirContext.getParserOptions()
+			.setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		myTestHelper.beforeEach();
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "{index}: deleteSource={0}, resultPatient={1}, preview={2}, async={3}")
 	@CsvSource({
 		// withDelete, withInputResultPatient, withPreview, isAsync
 		"true, true, true, false",
@@ -106,7 +110,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	})
 	public void testMerge(boolean withDelete, boolean withInputResultPatient, boolean withPreview, boolean isAsync) {
 		// setup
-
 		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
 		myTestHelper.setSourceAndTarget(inParams);
 		inParams.deleteSource = withDelete;
@@ -225,6 +228,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			myTestHelper.assertAllReferencesUpdated(withDelete);
 			myTestHelper.assertSourcePatientUpdatedOrDeleted(withDelete);
 			myTestHelper.assertTargetPatientUpdated(withDelete, expectedIdentifiersOnTargetAfterMerge);
+			myTestHelper.assertMergeProvenance(withDelete);
 		}
 	}
 
@@ -361,8 +365,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	class MyExceptionHandler implements TestExecutionExceptionHandler {
 		@Override
 		public void handleTestExecutionException(ExtensionContext theExtensionContext, Throwable theThrowable) throws Throwable {
-			if (theThrowable instanceof BaseServerResponseException) {
-				BaseServerResponseException ex = (BaseServerResponseException) theThrowable;
+			if (theThrowable instanceof BaseServerResponseException ex) {
 				String message = extractFailureMessage(ex);
 				throw ex.getClass().getDeclaredConstructor(String.class, Throwable.class).newInstance(message, ex);
 			}

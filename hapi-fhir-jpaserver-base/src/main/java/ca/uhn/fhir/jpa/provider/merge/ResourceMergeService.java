@@ -39,9 +39,12 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Date;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
@@ -84,13 +87,18 @@ public class ResourceMergeService {
 		myBatch2TaskHelper = theBatch2TaskHelper;
 		myFhirContext = myPatientDao.getContext();
 		myHapiTransactionService = theHapiTransactionService;
-		myMergeResourceHelper = new MergeResourceHelper(myPatientDao);
+		IFhirResourceDao<Provenance> provenanceDao = theDaoRegistry.getResourceDao(Provenance.class);
+		myMergeResourceHelper = new MergeResourceHelper(myPatientDao, provenanceDao);
 		myMergeValidationService = new MergeValidationService(myFhirContext, theDaoRegistry);
 	}
 
 	/**
-	 * Perform the $merge operation. If the number of resources to be changed exceeds the provided batch size,
-	 * then switch to async mode.  See the <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
+	 * Perform the $merge operation. Operation can be performed synchronously or asynchronously depending on
+	 * the prefer-async request header.
+	 * If the operation is requested to be performed synchronously and the number of
+	 * resources to be changed exceeds the provided batch size,
+	 * and error is returned indicating that operation needs to be performed asynchronously. See the
+	 * <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
 	 * for details on what the difference is between synchronous and asynchronous mode.
 	 *
 	 * @param theMergeOperationParameters the merge operation parameters
@@ -211,6 +219,7 @@ public class ResourceMergeService {
 			MergeOperationOutcome theMergeOutcome,
 			RequestPartitionId partitionId) {
 
+		Date startTime = new Date();
 		ReplaceReferencesRequest replaceReferencesRequest = new ReplaceReferencesRequest(
 				theSourceResource.getIdElement(),
 				theTargetResource.getIdElement(),
@@ -225,7 +234,8 @@ public class ResourceMergeService {
 				theTargetResource,
 				(Patient) theMergeOperationParameters.getResultResource(),
 				theMergeOperationParameters.getDeleteSource(),
-				theRequestDetails);
+				theRequestDetails,
+				startTime);
 		theMergeOutcome.setUpdatedTargetResource(updatedTarget);
 
 		String detailsText = "Merge operation completed successfully.";

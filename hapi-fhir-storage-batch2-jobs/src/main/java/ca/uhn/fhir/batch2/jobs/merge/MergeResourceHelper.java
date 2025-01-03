@@ -23,15 +23,20 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -43,10 +48,17 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  */
 public class MergeResourceHelper {
 
-	private final IFhirResourceDao<Patient> myPatientDao;
+	private static final String ACTIVITY_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle";
+	private static final String ACTIVITY_CODE_MERGE = "merge";
+	private static final String ACT_REASON_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/v3-ActReason";
+	private static final String ACT_REASON_PATIENT_ADMINISTRATION_CODE = "PATADMIN";
 
-	public MergeResourceHelper(IFhirResourceDao<Patient> theDao) {
-		myPatientDao = theDao;
+	private final IFhirResourceDao<Patient> myPatientDao;
+	private final IFhirResourceDao<Provenance> myProvenceDao;
+
+	public MergeResourceHelper(IFhirResourceDao<Patient> thePatientDao, IFhirResourceDao<Provenance> theProvenanceDao) {
+		myPatientDao = thePatientDao;
+		myProvenceDao = theProvenanceDao;
 	}
 
 	public static int setResourceLimitFromParameter(
@@ -66,7 +78,8 @@ public class MergeResourceHelper {
 			IIdType theTargetResourceId,
 			@Nullable Patient theResultResource,
 			boolean theDeleteSource,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails,
+			Date theStartTime) {
 		Patient sourceResource = myPatientDao.read(theSourceResourceId, theRequestDetails);
 		Patient targetResource = myPatientDao.read(theTargetResourceId, theRequestDetails);
 
@@ -76,7 +89,8 @@ public class MergeResourceHelper {
 				targetResource,
 				theResultResource,
 				theDeleteSource,
-				theRequestDetails);
+				theRequestDetails,
+				theStartTime);
 	}
 
 	public Patient updateMergedResourcesAfterReferencesReplaced(
@@ -85,7 +99,8 @@ public class MergeResourceHelper {
 			Patient theTargetResource,
 			@Nullable Patient theResultResource,
 			boolean theDeleteSource,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails,
+			Date theStartTime) {
 
 		AtomicReference<Patient> targetPatientAfterUpdate = new AtomicReference<>();
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
@@ -100,6 +115,13 @@ public class MergeResourceHelper {
 				prepareSourcePatientForUpdate(theSourceResource, theTargetResource);
 				updateResource(theSourceResource, theRequestDetails);
 			}
+
+			createProvenance(
+					theSourceResource,
+					targetPatientAfterUpdate.get(),
+					theDeleteSource,
+					theRequestDetails,
+					theStartTime);
 		});
 
 		return targetPatientAfterUpdate.get();
@@ -183,5 +205,37 @@ public class MergeResourceHelper {
 
 	private void deleteResource(Patient theResource, RequestDetails theRequestDetails) {
 		myPatientDao.delete(theResource.getIdElement(), theRequestDetails);
+	}
+
+	private void createProvenance(
+			Patient theSourcePatient,
+			Patient theTargetPatient,
+			boolean theDeleteSource,
+			RequestDetails theRequestDetails,
+			Date theStartTime) {
+
+		Provenance provenance = new Provenance();
+		provenance.addTarget().setReference(theTargetPatient.getIdElement().getValue());
+		if (!theDeleteSource) {
+			provenance.addTarget().setReference(theSourcePatient.getIdElement().getValue());
+		}
+		Date now = new Date();
+		provenance.setOccurred(new Period()
+				.setStart(theStartTime, TemporalPrecisionEnum.MILLI)
+				.setEnd(now, TemporalPrecisionEnum.MILLI));
+		provenance.setRecorded(now);
+		CodeableConcept activityCodeableConcept = new CodeableConcept();
+		activityCodeableConcept.addCoding().setSystem(ACTIVITY_CODE_SYSTEM).setCode(ACTIVITY_CODE_MERGE);
+		provenance.setActivity(activityCodeableConcept);
+
+		CodeableConcept activityReasonCodeableConcept = new CodeableConcept();
+		activityReasonCodeableConcept
+				.addCoding()
+				.setSystem(ACT_REASON_CODE_SYSTEM)
+				.setCode(ACT_REASON_PATIENT_ADMINISTRATION_CODE);
+		provenance.addReason(activityReasonCodeableConcept);
+
+		// TODO Emre: should we add agent
+		myProvenceDao.create(provenance, theRequestDetails);
 	}
 }

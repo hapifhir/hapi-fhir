@@ -32,6 +32,9 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Provenance;
+
+import java.util.Date;
 
 public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReducerStep<MergeJobParameters> {
 	private final IHapiTransactionService myHapiTransactionService;
@@ -48,6 +51,8 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			@Nonnull IJobDataSink<ReplaceReferenceResultsJson> theDataSink)
 			throws JobExecutionFailedException {
 
+		Date startTime = theStepExecutionDetails.getInstance().getStartTime();
+
 		MergeJobParameters mergeJobParameters = theStepExecutionDetails.getParameters();
 		SystemRequestDetails requestDetails =
 				SystemRequestDetails.forRequestPartitionId(mergeJobParameters.getPartitionId());
@@ -59,8 +64,8 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		}
 
 		IFhirResourceDao<Patient> patientDao = myDaoRegistry.getResourceDao(Patient.class);
-
-		MergeResourceHelper helper = new MergeResourceHelper(patientDao);
+		IFhirResourceDao<Provenance> provenanceDao = myDaoRegistry.getResourceDao(Provenance.class);
+		MergeResourceHelper helper = new MergeResourceHelper(patientDao, provenanceDao);
 
 		helper.updateMergedResourcesAfterReferencesReplaced(
 				myHapiTransactionService,
@@ -68,7 +73,8 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 				mergeJobParameters.getTargetId().asIdDt(),
 				resultResource,
 				mergeJobParameters.getDeleteSource(),
-				requestDetails);
+				requestDetails,
+				startTime);
 
 		return super.run(theStepExecutionDetails, theDataSink);
 	}
