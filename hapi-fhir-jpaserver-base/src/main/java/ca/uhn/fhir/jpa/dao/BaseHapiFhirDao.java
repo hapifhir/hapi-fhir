@@ -671,17 +671,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		allResourceTagsNewAndOldFromTheEntity.forEach(tag -> {
 
-			// Don't keep duplicate tags
-			if (!allTagDefinitionsPresent.add(tag.getTag())) {
+			// Don't keep duplicate tags or tags with a missing definition
+			TagDefinition tagDefinition = tag.getTag();
+			if (tagDefinition == null || !allTagDefinitionsPresent.add(tagDefinition)) {
 				theEntity.getTags().remove(tag);
 			}
 
 			// Drop any tags that have been removed
-			if (!allResourceTagsFromTheResource.contains(tag)) {
+			if (tagDefinition != null && !allResourceTagsFromTheResource.contains(tag)) {
 				if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
 					theEntity.getTags().remove(tag);
 				} else if (HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY.equals(
-						tag.getTag().getSystem())) {
+						tagDefinition.getSystem())) {
 					theEntity.getTags().remove(tag);
 				}
 			}

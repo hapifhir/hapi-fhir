@@ -200,16 +200,16 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	 */
 	@ParameterizedTest
 	@CsvSource(value = {
-		"NONVERSIONED, read",
-		"NONVERSIONED, vread",
-		"NONVERSIONED, search",
-		"NONVERSIONED, history",
-		"NONVERSIONED, update",
-		"VERSIONED, read",
-		"VERSIONED, vread",
-		"VERSIONED, search",
-		"VERSIONED, history",
-		"VERSIONED, update"
+		"NON_VERSIONED, read",
+		"NON_VERSIONED, vread",
+		"NON_VERSIONED, search",
+		"NON_VERSIONED, history",
+		"NON_VERSIONED, update",
+		"VERSIONED,     read",
+		"VERSIONED,     vread",
+		"VERSIONED,     search",
+		"VERSIONED,     history",
+		"VERSIONED,     update"
 	})
 	public void testTagDefinitionDeleted(JpaStorageSettings.TagStorageModeEnum theTagStorageMode, String theOperation) {
 		// Setup
@@ -229,6 +229,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myPatientDao.update(patient, mySrd);
 
 		// Test
+
 		runInTransaction(() -> {
 			assertEquals(6, myTagDefinitionDao.count());
 			myTagDefinitionDao.deleteAll();

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.ForeignKey;
@@ -53,6 +54,12 @@ public abstract class BaseTag extends BasePartitionable implements Serializable 
 		return myTagId;
 	}
 
+	/**
+	 * This can be null if the tag definition has been deleted. This
+	 * should never happen unless someone has manually messed with
+	 * the database, but it could happen.
+	 */
+	@Nullable
 	public TagDefinition getTag() {
 		return myTag;
 	}
