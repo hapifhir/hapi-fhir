@@ -80,7 +80,7 @@ public class CustomTypeDstu2Test {
 		
 		medication = (Medication) mo.getMedication().getResource();
 		assertNotNull(medication);
-		assertEquals("#" + medicationUuid, medication.getId().getValue());
+		assertEquals(medicationUuid, medication.getId().getValue());
 		assertEquals("MED TEXT", medication.getCode().getText());
 		
 	}
