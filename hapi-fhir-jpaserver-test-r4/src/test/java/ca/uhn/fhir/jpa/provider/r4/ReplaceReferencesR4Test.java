@@ -2,16 +2,20 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.interceptor.ex.ProvenanceAgentTestInterceptor;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
+import ca.uhn.fhir.model.api.ProvenanceAgent;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
@@ -21,6 +25,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -53,14 +58,75 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-
+		// we need to keep the version on Provenance.target fields to
+		// verify that Provenance resources were saved with versioned target references
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		myTestHelper.beforeEach();
+	}
+
+
+
+	private void updateSourcePatientToIncrementItsVersion() {
+		//update the source resource for it to have a different version than the target resource.
+		//The reason is to test that when creating the ReplaceReferencesJobParameters object in async mode
+		//we pass the correct versions for target and source.
+		Patient srcPatient = myTestHelper.readSourcePatient();
+		srcPatient.setActive(!srcPatient.getActive());
+		String srcResourceVersion = myClient.update().resource(srcPatient).execute().getId().getVersionIdPart();
+		assertThat(srcResourceVersion).isEqualTo("2");
 	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
 	void testReplaceReferences(boolean isAsync) {
+
+		updateSourcePatientToIncrementItsVersion();
+
+		Bundle patchResultBundle = executeReplaceReferences(isAsync);
+
+		// validate
+		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
+			ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of(
+				"Observation", "Encounter", "CarePlan"));
+
+		// Check that the linked resources were updated
+
+		myTestHelper.assertAllReferencesUpdated();
+		myTestHelper.assertReplaceReferencesProvenance("2", "1", null);
+	}
+
+	@ParameterizedTest(name = "{index}: isAsync={0}, theAgentInterceptorReturnsNull={1}")
+	@CsvSource (value = {
+		"false, false",
+		"false, true",
+		"true, false",
+		"true, true",
+	})
+	void testReplaceReferences_WithProvenanceAgentInterceptor(boolean theIsAsync, boolean theAgentInterceptorReturnsNull) {
+
+		ProvenanceAgent provenanceAgent = null;
+		if (!theAgentInterceptorReturnsNull) {
+			provenanceAgent = myTestHelper.createTestProvenanceAgent();
+		}
+		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
+		ProvenanceAgentTestInterceptor agentInterceptor = new ProvenanceAgentTestInterceptor(provenanceAgent);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(agentInterceptor);
+
+		Bundle patchResultBundle = executeReplaceReferences(theIsAsync);
+
+		// validate
+		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
+			ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of(
+				"Observation", "Encounter", "CarePlan"));
+
+		// Check that the linked resources were updated
+		myTestHelper.assertAllReferencesUpdated();
+		myTestHelper.assertReplaceReferencesProvenance("1", "1", provenanceAgent);
+	}
+
+
+	private Bundle executeReplaceReferences(boolean isAsync) {
 		// exec
 		Parameters outParams = myTestHelper.callReplaceReferences(myClient, isAsync);
 
@@ -80,15 +146,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		} else {
 			patchResultBundle = (Bundle) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME).getResource();
 		}
-
-		// validate
-		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
-			ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of(
-				"Observation", "Encounter", "CarePlan"));
-
-		// Check that the linked resources were updated
-
-		myTestHelper.assertAllReferencesUpdated();
+		return patchResultBundle;
 	}
 
 	private JobInstance awaitJobCompletion(Task task) {
@@ -165,6 +223,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		// Check that the linked resources were updated
 
 		myTestHelper.assertAllReferencesUpdated();
+		myTestHelper.assertReplaceReferencesProvenance("1", "1", null);
 	}
 
 	@ParameterizedTest
@@ -185,6 +244,29 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			myTestHelper.callReplaceReferencesWithResourceLimit(myClient, "source-id", theTargetId, false, null);
 		});
 		assertThat(exception.getMessage()).contains("HAPI-2584: Parameter 'target-reference-id' is blank");
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void testReplaceReferences_NotExistingSourceId_ThrowsNotFoundException(boolean theIsAsync) {
+		String nonExistingSourceId = "Patient/does-not-exist";
+		String targetId = myTestHelper.getTargetPatientId().getValue();
+		assertThatThrownBy(() -> {
+			myTestHelper.callReplaceReferencesWithResourceLimit(myClient, nonExistingSourceId, targetId, theIsAsync, null);
+		}).isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("HAPI-2001: Resource Patient/does-not-exist is not known");
+	}
+
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void testReplaceReferences_NotExistingTargetId_ThrowsNotFoundException(boolean theIsAsync) {
+		String nonExistingTargetId = "Patient/does-not-exist";
+		String sourceId = myTestHelper.getSourcePatientId().getValue();
+		assertThatThrownBy(() -> {
+			myTestHelper.callReplaceReferencesWithResourceLimit(myClient, nonExistingTargetId, sourceId, theIsAsync, null);
+		}).isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("HAPI-2001: Resource Patient/does-not-exist is not known");
 	}
 
 
@@ -285,9 +367,6 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		return myClient.create().resource(observation).execute().getId();
 
 	}
-
-
-
 
 	@Override
 	protected boolean verboseClientLogging() {

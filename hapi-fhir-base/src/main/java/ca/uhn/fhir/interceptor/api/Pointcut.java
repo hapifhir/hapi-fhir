@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.interceptor.api;
 
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -3168,6 +3169,19 @@ public enum Pointcut implements IPointcut {
 	 */
 	BATCH2_CHUNK_PROCESS_FILTER(
 			IInterceptorFilterHook.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
+
+	/**
+	 * <b>Provenance Agent Hook:</b>
+	 * The return value of this hook is used to populate the agent field for Provenance resources that need to be created
+	 * as a result of a request, such as $merge and $hapi.fhir.replace-references operations.
+	 * Parameters:
+	 * <ul>
+	 *     <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that could create a Provenance resource.</li>
+	 * </ul>
+	 * <p> Hooks should return an {@link ca.uhn.fhir.model.api.IProvenanceAgent}.
+	 */
+	PROVENANCE_AGENT(IProvenanceAgent.class, "ca.uhn.fhir.rest.api.server.RequestDetails"),
+
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.

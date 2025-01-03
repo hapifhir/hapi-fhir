@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.replacereferences;
 
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.parameters.BatchJobParametersWithTaskId;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
@@ -44,15 +45,40 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
 
+	@JsonProperty(value = "createProvenance", defaultValue = "true", required = false)
+	private boolean myCreateProvenance;
+
+	/**
+	 * The current version of the source resource, this is used when creating the Provenance resource once the references are replaced.
+	 */
+	@JsonProperty("currentSourceVersion")
+	private String myCurrentSourceVersion;
+
+	@JsonProperty("currentTargetVersion")
+	private String myCurrentTargetVersion;
+
+	@JsonProperty("provenanceAgent")
+	private ProvenanceAgentJson myProvenanceAgent;
+
 	public ReplaceReferencesJobParameters() {}
 
-	public ReplaceReferencesJobParameters(ReplaceReferencesRequest theReplaceReferencesRequest, int theBatchSize) {
+	public ReplaceReferencesJobParameters(
+			ReplaceReferencesRequest theReplaceReferencesRequest,
+			int theBatchSize,
+			String theCurrentSourceVersion,
+			String theCurrentTargetVersion,
+			ProvenanceAgentJson theProvenanceAgent) {
+
 		mySourceId = new FhirIdJson(theReplaceReferencesRequest.sourceId);
 		myTargetId = new FhirIdJson(theReplaceReferencesRequest.targetId);
 		// Note theReplaceReferencesRequest.resourceLimit is only used for the synchronous case. It is ignored in this
 		// async case.
 		myBatchSize = theBatchSize;
 		myPartitionId = theReplaceReferencesRequest.partitionId;
+		myCreateProvenance = theReplaceReferencesRequest.createProvenance;
+		myCurrentSourceVersion = theCurrentSourceVersion;
+		myCurrentTargetVersion = theCurrentTargetVersion;
+		myProvenanceAgent = theProvenanceAgent;
 	}
 
 	public FhirIdJson getSourceId() {
@@ -90,7 +116,37 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 		myPartitionId = thePartitionId;
 	}
 
-	public ReplaceReferencesRequest asReplaceReferencesRequest() {
-		return new ReplaceReferencesRequest(mySourceId.asIdDt(), myTargetId.asIdDt(), myBatchSize, myPartitionId);
+	public ReplaceReferencesRequest asReplaceReferencesRequest(FhirContext theFhirContext) {
+		return new ReplaceReferencesRequest(
+				mySourceId.asIdDt(),
+				myTargetId.asIdDt(),
+				myBatchSize,
+				myPartitionId,
+				myCreateProvenance,
+				ProvenanceAgentJson.toIProvenanceAgent(myProvenanceAgent, theFhirContext));
+	}
+
+	public String getCurrentSourceVersion() {
+		return myCurrentSourceVersion;
+	}
+
+	public void setCurrentSourceVersion(String theCurrentSourceVersion) {
+		this.myCurrentSourceVersion = theCurrentSourceVersion;
+	}
+
+	public String getCurrentTargetVersion() {
+		return myCurrentTargetVersion;
+	}
+
+	public void setCurrentTargetVersion(String theCurrentTargetVersion) {
+		this.myCurrentTargetVersion = theCurrentTargetVersion;
+	}
+
+	public ProvenanceAgentJson getProvenanceAgent() {
+		return myProvenanceAgent;
+	}
+
+	public void setProvenanceAgent(ProvenanceAgentJson theAgent) {
+		this.myProvenanceAgent = theAgent;
 	}
 }
