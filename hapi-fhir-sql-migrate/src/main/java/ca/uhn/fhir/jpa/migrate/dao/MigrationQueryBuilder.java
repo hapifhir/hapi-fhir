@@ -151,7 +151,6 @@ public class MigrationQueryBuilder {
 		return new AlterTableQuery(myTable).setAddColumn(myResultCol).validate().toString();
 	}
 
-
 	public String createIndexStatement() {
 		return new CreateIndexQuery(myTable, myMigrationTablename.toUpperCase() + "_PK_INDEX")
 				.setIndexType(CreateIndexQuery.IndexType.UNIQUE)
