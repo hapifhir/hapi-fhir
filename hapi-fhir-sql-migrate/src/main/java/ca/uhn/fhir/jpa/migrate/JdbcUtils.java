@@ -276,7 +276,8 @@ public class JdbcUtils {
 	}
 
 	/**
-	 * Retrieve all index names
+	 * Retrieve all index names. The returned names will be in upper case
+	 * always.
 	 */
 	public static Set<String> getForeignKeys(
 			DriverTypeEnum.ConnectionProperties theConnectionProperties,
@@ -588,9 +589,9 @@ public class JdbcUtils {
 		}
 	}
 
-	private static String massageIdentifier(DatabaseMetaData theMetadata, String theCatalog) throws SQLException {
-		String retVal = theCatalog;
-		if (theCatalog == null) {
+	public static String massageIdentifier(DatabaseMetaData theMetadata, String theIdentifier) throws SQLException {
+		String retVal = theIdentifier;
+		if (theIdentifier == null) {
 			return null;
 		} else if (theMetadata.storesLowerCaseIdentifiers()) {
 			retVal = retVal.toLowerCase();
