@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@ import java.util.Objects;
  */
 public class IdAndPartitionId implements Serializable {
 	private Long myId;
-	//	private Integer myPartitionIdValue;
+	private Integer myPartitionIdValue;
 
 	public IdAndPartitionId(Long theId, Integer thePartitionId) {
 		myId = theId;
-		//		myPartitionIdValue = thePartitionId;
+		myPartitionIdValue = thePartitionId;
 	}
 
 	public IdAndPartitionId() {
@@ -54,41 +54,39 @@ public class IdAndPartitionId implements Serializable {
 		myId = theId;
 	}
 
-	//	public void setPartitionIdValue(Integer thePartitionIdValue) {
-	//		myPartitionIdValue = thePartitionIdValue;
-	//	}
+	public void setPartitionIdValue(Integer thePartitionIdValue) {
+		myPartitionIdValue = thePartitionIdValue;
+	}
 
-	//	public Integer getPartitionIdValue() {
-	//		return myPartitionIdValue;
-	//	}
+	public Integer getPartitionIdValue() {
+		return myPartitionIdValue;
+	}
 
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
 		if (!(theO instanceof IdAndPartitionId)) return false;
 		IdAndPartitionId that = (IdAndPartitionId) theO;
-		//		return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
-		return Objects.equals(myId, that.myId);
+		return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("id", myId)
-				//				.append("partitionId", myPartitionIdValue)
+				.append("partitionId", myPartitionIdValue)
 				.toString();
 	}
 
 	@Override
 	public int hashCode() {
-		//		return Objects.hash(myId, myPartitionIdValue);
-		return Objects.hash(myId);
+		return Objects.hash(myId, myPartitionIdValue);
 	}
 
 	public static IdAndPartitionId forId(Long theId, BasePartitionable thePartitionable) {
 		IdAndPartitionId retVal = new IdAndPartitionId();
 		retVal.setId(theId);
-		//		retVal.setPartitionIdValue(thePartitionable.getPartitionId().getPartitionId());
+		retVal.setPartitionIdValue(thePartitionable.getPartitionId().getPartitionId());
 		return retVal;
 	}
 }

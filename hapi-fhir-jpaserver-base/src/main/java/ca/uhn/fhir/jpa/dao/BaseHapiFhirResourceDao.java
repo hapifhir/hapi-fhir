@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -621,7 +621,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			outcome.setId(theResource.getIdElement());
 		}
 
-		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl, theOperationType);
+		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl, theOperationType, theTransactionDetails);
 
 		return outcome;
 	}
@@ -2465,11 +2465,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 
 			if (!create) {
-				try {
-					entity = readEntityLatestVersion(
-							theRequest, resourceId, theRequestPartitionId, theTransactionDetails);
-				} catch (ResourceNotFoundException e) {
+				if (theTransactionDetails != null && theTransactionDetails.hasNullResolvedResourceId(resourceId)) {
 					create = true;
+				} else {
+					try {
+						entity = readEntityLatestVersion(
+								theRequest, resourceId, theRequestPartitionId, theTransactionDetails);
+					} catch (ResourceNotFoundException e) {
+						create = true;
+					}
 				}
 			}
 
@@ -2639,7 +2643,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						theRequest, savedEntity, theResource, null, RestOperationTypeEnum.UPDATE)
 				.setCreated(wasDeleted);
 
-		populateOperationOutcomeForUpdate(w, outcome, null, RestOperationTypeEnum.UPDATE);
+		populateOperationOutcomeForUpdate(w, outcome, null, RestOperationTypeEnum.UPDATE, theTransactionDetails);
 
 		return outcome;
 	}

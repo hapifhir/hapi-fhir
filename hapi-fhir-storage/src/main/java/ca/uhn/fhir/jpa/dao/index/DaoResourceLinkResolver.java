@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -88,9 +87,6 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
-	@Autowired
-	private IRequestPartitionHelperSvc myPartitionHelperSvc;
-
 	@Override
 	public IResourceLookup findTargetResource(
 			@Nonnull RequestPartitionId theRequestPartitionId,
@@ -130,6 +126,14 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		String idPart = targetResourceId.getIdPart();
 		try {
 			if (persistentId == null) {
+
+				// If we previously looked up the ID, and it was not found, don't bother
+				// looking it up again
+				if (theTransactionDetails != null
+						&& theTransactionDetails.hasNullResolvedResourceId(targetResourceId)) {
+					throw new ResourceNotFoundException(Msg.code(2602));
+				}
+
 				resolvedResource = myIdHelperService.resolveResourceIdentity(
 						theRequestPartitionId,
 						resourceType,
@@ -298,7 +302,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 					theTransactionDetails.addRollbackUndoAction(() -> newResource.setId(existingId));
 				}
 				newResource.setId(resName + "/" + theIdToAssignToPlaceholder);
-				valueOf = placeholderResourceDao.update(newResource, theRequest).getEntity();
+				valueOf = placeholderResourceDao
+						.update(newResource, null, true, false, theRequest, theTransactionDetails)
+						.getEntity();
 			} else {
 				valueOf = placeholderResourceDao.create(newResource, theRequest).getEntity();
 			}
@@ -307,6 +313,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			persistentId = myIdHelperService.newPid(persistentId.getId());
 			persistentId.setAssociatedResourceId(valueOf.getIdDt());
 			theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
+			theTransactionDetails.addAutoCreatedPlaceholderResource(newResource.getIdElement());
 		}
 
 		return Optional.ofNullable(valueOf);

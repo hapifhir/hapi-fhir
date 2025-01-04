@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -33,6 +34,27 @@ public class SearchTestUtil {
 
 	private SearchTestUtil() {
 	}
+
+	public static List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
+		int fromIndex = 0;
+		Integer toIndex = theFound.size();
+		return toUnqualifiedVersionlessIdValues(theFound, fromIndex, toIndex);
+	}
+
+	private static List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound, int theFromIndex, Integer theToIndex) {
+		if (theToIndex == null) {
+			theToIndex = 99999;
+		}
+
+		List<String> retVal = new ArrayList<>();
+
+		List<IBaseResource> resources = theFound.getResources(theFromIndex, theToIndex);
+		for (IBaseResource next : resources) {
+			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		return retVal;
+	}
+
 
 	public static List<IIdType> toUnqualifiedVersionlessIds(IBaseBundle theFound) {
 		FhirContext ctx = FhirContext.forCached(theFound.getStructureFhirVersionEnum());

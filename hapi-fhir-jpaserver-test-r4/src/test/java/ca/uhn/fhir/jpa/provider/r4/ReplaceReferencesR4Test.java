@@ -22,6 +22,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper.EXPECTED_SMALL_BATCHES;
+import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -123,8 +124,11 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			.element(0)
 			.isInstanceOf(Bundle.class);
 
-		int entriesLeft = ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES;
-		for (int i = 1; i < EXPECTED_SMALL_BATCHES; i++) {
+		// for each batch, there should be a corresponding patch result bundle in the task as a contained resource.
+		// The loop below validates the patch result bundles, and counts total number of bundle entries seen
+		// to ensure that all patch results are accounted for.
+		int totalPatchResultEntriesSeen = 0;
+		for (int i = 0; i < EXPECTED_SMALL_BATCHES; i++) {
 
 			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutput().get(i);
 
@@ -139,12 +143,16 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			patchResultBundle = (Bundle) outputRef.getResource();
 			assertTrue(containedBundle.equalsDeep(patchResultBundle));
 
+			int numberOfEntriesInCurrentBundle = patchResultBundle.getEntry().size();
 			// validate
-			entriesLeft -= ReplaceReferencesTestHelper.SMALL_BATCH_SIZE;
-			int expectedNumberOfEntries = Math.min(entriesLeft, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
-			ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, expectedNumberOfEntries, List.of("Observation",
+			totalPatchResultEntriesSeen += numberOfEntriesInCurrentBundle;
+			assertThat(numberOfEntriesInCurrentBundle).isBetween(1, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
+			ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, numberOfEntriesInCurrentBundle, List.of(
+				"Observation",
 				"Encounter", "CarePlan"));
 		}
+
+		assertThat(totalPatchResultEntriesSeen).isEqualTo(TOTAL_EXPECTED_PATCHES);
 
 		// Check that the linked resources were updated
 

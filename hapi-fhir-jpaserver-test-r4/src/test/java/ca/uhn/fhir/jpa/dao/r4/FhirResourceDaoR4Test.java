@@ -149,6 +149,7 @@ import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
+import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1912,14 +1913,18 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		for (int i = 0; i < fullSize; i++) {
 			ourLog.info("Pass {}", i);
 			if (i == halfSize) {
-				Thread.sleep(fullSize);
+				sleepAtLeast(fullSize);
 				middleDate = new Date();
-				Thread.sleep(fullSize);
+				sleepAtLeast(fullSize);
+			} else {
+				sleepAtLeast(10);
 			}
 			patient.setId(id.getValue());
 			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			myPatientDao.update(patient, mySrd);
 		}
+
+		sleepAtLeast(10);
 
 		// By instance
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
@@ -1927,7 +1932,17 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
-			assertEquals(expected, actual);
+			int finalFullSize = fullSize;
+			int finalI = i;
+			IBundleProvider finalHistory = history;
+			assertEquals(expected, actual, ()->{
+				String retVal = "i=" + finalI + ", fullSize=" + finalFullSize;
+				List<IBaseResource> allResources = finalHistory.getResources(0, finalI + 1);
+				for (int idx = 0; idx < allResources.size(); idx++) {
+					retVal += "\n" + idx + " - " + allResources.get(idx).getIdElement().getValue();
+				}
+				return retVal;
+			});
 		}
 
 		// By type

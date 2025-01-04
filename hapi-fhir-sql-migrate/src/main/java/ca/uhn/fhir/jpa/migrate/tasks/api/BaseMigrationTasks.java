@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class BaseMigrationTasks<T extends Enum> {
 		MigrationTaskList retval = new MigrationTaskList();
 		for (T nextVersion : theVersionEnumValues) {
 			Collection<BaseTask> nextValues = myTasks.get(nextVersion);
-			ourLog.info(
+			ourLog.debug(
 					"Version {} has {} migration tasks", nextVersion, nextValues != null ? nextValues.size() : "(no)");
 			if (nextValues != null && !nextValues.isEmpty()) {
 				validate(nextValues);

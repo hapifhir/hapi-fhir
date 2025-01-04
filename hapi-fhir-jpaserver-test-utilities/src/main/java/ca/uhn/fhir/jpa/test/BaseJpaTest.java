@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,6 +136,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -418,25 +419,13 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
-		myStorageSettings.setAccessMetaSourceInformationFromProvenanceTable(defaultConfig.isAccessMetaSourceInformationFromProvenanceTable());
-		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-		myStorageSettings.setDefaultSearchParamsCanBeOverridden(defaultConfig.isDefaultSearchParamsCanBeOverridden());
-		myStorageSettings.setDeleteEnabled(defaultConfig.isDeleteEnabled());
-		myStorageSettings.setHibernateSearchIndexSearchParams(defaultConfig.isHibernateSearchIndexSearchParams());
-		myStorageSettings.setHibernateSearchIndexFullText(defaultConfig.isHibernateSearchIndexFullText());
-		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultConfig.isIncludeHashIdentityForTokenSearches());
-		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaultConfig.isMarkResourcesForReindexingUponSearchParameterChange());
-		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultConfig.getMaximumIncludesToLoadPerPage());
-		myStorageSettings.setPreExpandValueSets(defaultConfig.isPreExpandValueSets());
-		myStorageSettings.getTreatBaseUrlsAsLocal().clear();
-
+		BeanUtils.copyProperties(defaultConfig, myStorageSettings);
 
 		ParserOptions defaultParserOptions = new ParserOptions();
-		myFhirContext.getParserOptions().setStripVersionsFromReferences(defaultParserOptions.isStripVersionsFromReferences());
+		BeanUtils.copyProperties(defaultParserOptions, myFhirContext.getParserOptions());
 
 		PartitionSettings defaultPartConfig = new PartitionSettings();
-		myPartitionSettings.setIncludePartitionInSearchHashes(defaultPartConfig.isIncludePartitionInSearchHashes());
-		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultPartConfig.getAllowReferencesAcrossPartitions());
+		BeanUtils.copyProperties(defaultPartConfig, myPartitionSettings);
 	}
 
 	@AfterEach

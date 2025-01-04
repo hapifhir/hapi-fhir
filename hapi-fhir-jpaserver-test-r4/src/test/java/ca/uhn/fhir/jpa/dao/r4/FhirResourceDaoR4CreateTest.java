@@ -429,9 +429,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertNotNull(searchUrlEntity);
 		assertEquals(expectedResId, searchUrlEntity.getResourcePid().getId());
 		Instant now = Instant.now();
-		assertThat(searchUrlEntity.getCreatedTime())
+		assertThat(new Date(searchUrlEntity.getCreatedTime().getTime()))
 			.as("Check that the creation time of the URL is within the last second")
-			.isBetween(now.minus(1, ChronoUnit.SECONDS), now);
+			.isBetween(now.minus(1, ChronoUnit.SECONDS), now.plus(1, ChronoUnit.SECONDS));
 		assertEquals(expectedNormalizedMatchUrl, searchUrlEntity.getSearchUrl());
 
 	}

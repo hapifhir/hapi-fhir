@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,6 +173,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.jpa.util.PartitionedIdModeVerificationSvc;
 import ca.uhn.fhir.jpa.util.PersistenceContextProvider;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
@@ -960,5 +961,13 @@ public class JpaConfig {
 	@Bean
 	public ReplaceReferencesPatchBundleSvc replaceReferencesPatchBundleSvc(DaoRegistry theDaoRegistry) {
 		return new ReplaceReferencesPatchBundleSvc(theDaoRegistry);
+	}
+
+	@Bean
+	public PartitionedIdModeVerificationSvc partitionedIdModeVerificationSvc(
+			PartitionSettings thePartitionSettings,
+			HibernatePropertiesProvider theHibernatePropertiesProvider,
+			PlatformTransactionManager theTxManager) {
+		return new PartitionedIdModeVerificationSvc(thePartitionSettings, theHibernatePropertiesProvider, theTxManager);
 	}
 }

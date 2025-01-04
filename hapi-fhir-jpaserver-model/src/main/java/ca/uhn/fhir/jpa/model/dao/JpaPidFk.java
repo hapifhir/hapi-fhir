@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.model.dao;
 
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 
 import java.io.Serializable;
 import java.util.List;
@@ -38,7 +39,8 @@ public class JpaPidFk implements Serializable {
 	@Column(name = "RES_ID", nullable = false)
 	private Long myId;
 
-	@Transient
+	@PartitionedIdProperty
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
 	private Integer myPartitionIdValue;
 
 	/**
@@ -79,7 +81,7 @@ public class JpaPidFk implements Serializable {
 	}
 
 	public static List<JpaPidFk> fromPids(List<JpaPid> thePids) {
-		return thePids.stream().map(JpaPid::toFk).collect(Collectors.toList());
+		return thePids.stream().map(JpaPidFk::fromPid).collect(Collectors.toList());
 	}
 
 	public static JpaPidFk fromPid(JpaPid thePid) {

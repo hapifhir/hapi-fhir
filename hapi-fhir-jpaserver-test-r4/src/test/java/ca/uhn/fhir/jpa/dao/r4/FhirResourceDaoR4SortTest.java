@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static com.google.common.collect.Lists.reverse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -27,6 +29,8 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -90,15 +94,23 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		SearchParameterMap map;
 		List<String> ids;
 
+		List<String> expected = new ArrayList<>();
+		expected.add(id1);
+		expected.add(id2);
+		expected.add("Patient/AA");
+		expected.add("Patient/AB");
+		expected.sort(Comparator.naturalOrder());
+
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("_id", SortOrderEnum.ASC));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids).containsExactly(id1, id2, "Patient/AA", "Patient/AB");
+		assertThat(ids).containsExactly(expected.toArray(new String[0]));
 
+		expected = reverse(expected);
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("_id", SortOrderEnum.DESC));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids).containsExactly("Patient/AB", "Patient/AA", id2, id1);
+		assertThat(ids).containsExactly(expected.toArray(new String[0]));
 	}
 
 	@Test
