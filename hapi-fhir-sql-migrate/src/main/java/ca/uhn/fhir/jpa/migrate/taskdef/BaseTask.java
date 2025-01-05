@@ -211,7 +211,7 @@ public abstract class BaseTask {
 			} else {
 				int changesCount = jdbcTemplate.update(theSql, theArguments);
 				logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
-			myExecutionResult = MigrationTaskExecutionResultEnum.SUCCESS;
+				myExecutionResult = MigrationTaskExecutionResultEnum.SUCCESS;
 				return changesCount;
 			}
 		} catch (DataAccessException e) {
