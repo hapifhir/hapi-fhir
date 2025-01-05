@@ -157,7 +157,7 @@ public class HapiMigrationDao {
 
 			return columns.next(); // If there's a row, the column exists
 		} catch (SQLException e) {
-			throw new InternalErrorException("Error checking column existence: " + e.getMessage(), e);
+			throw new InternalErrorException(Msg.code(2615) + "Error checking column existence: " + e.getMessage(), e);
 		}
 	}
 
