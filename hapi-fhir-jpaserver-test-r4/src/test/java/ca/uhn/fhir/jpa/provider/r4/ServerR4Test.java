@@ -29,6 +29,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -37,6 +39,7 @@ import org.testcontainers.shaded.com.google.common.collect.Multimap;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -107,11 +110,12 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	@Test
-	public void validationTest_invalidResourceWithLenientParsing_createAndValidateShouldParse() throws IOException {
-		// the resource
+	static List<Arguments> validationTestParameters() {
 		@Language("JSON")
 		String patientStr;
+		List<Arguments> arguments = new ArrayList<>();
+
+		// 1 The full resource from bug report
 		{
 			patientStr = """
 				{
@@ -332,83 +336,21 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 				      } ]
 				    }
 				""";
+			arguments.add(
+				Arguments.of(patientStr, "P12312")
+			);
 		}
 
-		/*
-		 * We also require a lenient error handler (the default case).
-		 * BaseJpaR4Test.before resets this to a StrictErrorHandler,
-		 * which breaks this test, but also means we don't have to reset it.
-		 */
-		myFhirContext.setParserErrorHandler(new LenientErrorHandler());
-
-		IParser parser = myFhirContext.newJsonParser();
-
-		DemoValidationInterceptor validatingInterceptor = new DemoValidationInterceptor(myFhirContext, myApplicationContext);
-		validatingInterceptor.start();
-
-		myServer.getInterceptorService().registerInterceptor(validatingInterceptor);
-		try {
-			StringEntity entity = new StringEntity(patientStr, StandardCharsets.UTF_8);
-
-			OperationOutcome validationOutcome;
-			OperationOutcome createOutcome;
-
-			HttpPost post = new HttpPost(myServerBase + "/Patient/$validate");
-			post.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
-			post.setEntity(entity);
-			try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
-				assertEquals(HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
-
-				validationOutcome = getOutcome(resp, parser);
-			}
-
-			HttpPut put = new HttpPut(myServerBase + "/Patient/P12312");
-			put.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
-			put.setEntity(entity);
-			try (CloseableHttpResponse resp = ourHttpClient.execute(put)) {
-				assertEquals(HttpStatus.SC_PRECONDITION_FAILED, resp.getStatusLine().getStatusCode());
-
-				createOutcome = getOutcome(resp, parser);
-			}
-
-			assertNotNull(validationOutcome);
-			assertNotNull(createOutcome);
-
-			assertEquals(validationOutcome.getIssue().size(), createOutcome.getIssue().size());
-
-			Multimap<OperationOutcome.IssueSeverity, String> severityToIssue = HashMultimap.create();
-			validationOutcome.getIssue()
-				.forEach(issue -> {
-					severityToIssue.put(issue.getSeverity(), issue.getDiagnostics());
-				});
-			createOutcome.getIssue()
-				.forEach(issue -> {
-					assertTrue(severityToIssue.containsEntry(issue.getSeverity(), issue.getDiagnostics()));
-				});
-		} finally {
-			myServer.getInterceptorService().unregisterInterceptor(validatingInterceptor);
-		}
-	}
-
-	@Test
-	public void validationTest_invalidResource_createAndValidateShouldBehaveTheSame() throws IOException {
-		// we have to manually create this because it's in the servlet context,
-		// and we only spin up application context
-		DemoValidationInterceptor validatingInterceptor = new DemoValidationInterceptor(myFhirContext, myApplicationContext);
-		validatingInterceptor.start();
-
-		myServer.getInterceptorService().registerInterceptor(validatingInterceptor);
-
-		/*
-		 * This is an invalid patient resource.
-		 * Patient.contact.name has a cardinality of
-		 * 0..1 (so an array should fail).
-		 *
-		 * Our parser can easily handle this (and doesn't care about
-		 * the cardinality), but our endpoints should.
-		 */
-		String patientStr;
+		// 2 A sample resource
 		{
+			/*
+			 * This is an invalid patient resource.
+			 * Patient.contact.name has a cardinality of
+			 * 0..1 (so an array should fail).
+			 *
+			 * Our parser can easily handle this (and doesn't care about
+			 * the cardinality), but our endpoints should.
+			 */
 			patientStr = """
 				{
 					"resourceType": "Patient",
@@ -426,11 +368,32 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 					}
 				}
 				""";
+			arguments.add(
+				Arguments.of(patientStr, "P1212")
+			);
 		}
 
+		return arguments;
+	}
+
+	@ParameterizedTest
+	@MethodSource("validationTestParameters")
+	public void validationTest_invalidResourceWithLenientParsing_createAndValidateShouldParse(String thePatientStr, String theId) throws IOException {
+		/*
+		 * We also require a lenient error handler (the default case).
+		 * BaseJpaR4Test.before resets this to a StrictErrorHandler,
+		 * which breaks this test, but also means we don't have to reset it.
+		 */
+		myFhirContext.setParserErrorHandler(new LenientErrorHandler());
+
 		IParser parser = myFhirContext.newJsonParser();
+
+		DemoValidationInterceptor validatingInterceptor = new DemoValidationInterceptor(myFhirContext, myApplicationContext);
+		validatingInterceptor.start();
+
+		myServer.getInterceptorService().registerInterceptor(validatingInterceptor);
 		try {
-			StringEntity entity = new StringEntity(patientStr, StandardCharsets.UTF_8);
+			StringEntity entity = new StringEntity(thePatientStr, StandardCharsets.UTF_8);
 
 			OperationOutcome validationOutcome;
 			OperationOutcome createOutcome;
@@ -444,7 +407,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 				validationOutcome = getOutcome(resp, parser);
 			}
 
-			HttpPut put = new HttpPut(myServerBase + "/Patient/P1212");
+			HttpPut put = new HttpPut(myServerBase + "/Patient/" + theId);
 			put.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 			put.setEntity(entity);
 			try (CloseableHttpResponse resp = ourHttpClient.execute(put)) {
