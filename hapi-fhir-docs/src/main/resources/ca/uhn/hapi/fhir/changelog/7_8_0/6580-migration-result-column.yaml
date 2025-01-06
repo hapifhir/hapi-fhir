@@ -2,6 +2,6 @@
 type: add
 issue: 6580
 title: "A new RESULT column has been added to the database migration table to record the migration execution result.
-values are SKIPPED (either skipped via the `skip-versions` flag or the migration task was stubbed), 
+values are `SKIPPED` (either skipped via the `skip-versions` flag or if the migration task was stubbed), 
 DOES_NOT_APPLY (does not apply to that database), PRECONDITION_FAILED (not run based on a SQL script outcome),
 ALLOWED_TO_FAIL (the migration failed, but it is permitted to fail), SUCCESS."
