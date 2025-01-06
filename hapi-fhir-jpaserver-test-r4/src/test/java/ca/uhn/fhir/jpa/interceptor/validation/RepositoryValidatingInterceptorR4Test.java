@@ -1,10 +1,7 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -31,6 +28,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
@@ -49,29 +48,6 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof RepositoryValidatingInterceptor);
-	}
-
-	@Test
-	public void invalidResource_thatParsesFine_doesNotValidate() {
-		String patientStr;
-		IParser parser = myFhirContext.newJsonParser();
-		{
-			patientStr = """
-				{
-					"resourceType": "Patient",
-					"active": true,
-					"contact": [{
-						"name": [{
-							"use": "official",
-							"family": "Simpson",
-							"given": ["Homer" ]
-						}]
-					}]
-				}
-				 """;
-		}
-
-
 	}
 
 	@Test

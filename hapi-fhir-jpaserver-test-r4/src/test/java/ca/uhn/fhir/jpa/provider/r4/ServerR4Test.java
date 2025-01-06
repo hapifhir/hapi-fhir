@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -102,6 +103,288 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 
 			// Create the ruleset and pass it to the interceptor
 			setRules(ruleBuilder.build());
+		}
+	}
+
+	@Test
+	public void validationTest_invalidResourceWithLenientParsing_createAndValidateShouldParse() throws IOException {
+		// the resource
+		String patientStr;
+		{
+			patientStr = """
+				{
+				      "resourceType" : "Patient",
+				      "id" : "P12312",
+				      "meta" : {
+				        "profile" : ["http://hl7.org/fhir/StructureDefinition/Patient"]
+				      },
+				      "extension" : [ {
+				        "url" : "http://hl7.org/fhir/StructureDefinition/us-core-ethnicity",
+				        "extension" : [ {
+				          "url" : "ombCategory",
+				          "valueCoding" : {
+				            "code" : "2186-5",
+				            "display" : "Not Hispanic or Latino",
+				            "system" : "urn:oid:2.16.840.1.113883.6.238"
+				          }
+				        }, {
+				          "url" : "text",
+				          "valueString" : "Non-Hisp"
+				        } ]
+				      }, {
+				        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+				        "extension" : [ {
+				          "url" : "ombCategory",
+				          "valueCoding" : {
+				            "code" : "2054-5",
+				            "display" : "Black or African American",
+				            "system" : "urn:oid:2.16.840.1.113883.6.238"
+				          }
+				        }, {
+				          "url" : "text",
+				          "valueString" : "Black"
+				        } ]
+				      }, {
+				        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+				        "valueCode" : "M"
+				      } ],
+				      "communication" : [ {
+				        "language" : {
+				          "coding" : [ {
+				            "code" : "en",
+				            "display" : "English",
+				            "system" : "urn:ietf:bcp:47"
+				          }, {
+				            "code" : "ENG",
+				            "display" : "English",
+				            "system" : "http://fkcfhir.org/fhir/CodeSystem/fmc-language-cs"
+				          } ],
+				          "text" : "EN"
+				        },
+				        "preferred" : true
+				      } ],
+				      "telecom" : [ {
+				        "system" : "phone",
+				        "value" : "393-342-2312"
+				      } ],
+				      "identifier" : [ {
+				        "system" : "http://hl7.org/fhir/sid/us-ssn",
+				        "type" : {
+				          "coding" : [ {
+				            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+				            "code" : "SS",
+				            "display" : "Social Security Number"
+				          } ],
+				          "text" : "Social Security Number"
+				        },
+				        "value" : "12133121"
+				      }, {
+				        "system" : "urn:oid:2.16.840.1.113883.3.7418.2.1",
+				        "type" : {
+				          "coding" : [ {
+				            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+				            "code" : "MR",
+				            "display" : "Medical record number"
+				          } ],
+				          "text" : "Medical record number"
+				        },
+				        "value" : "12312"
+				      } ],
+				      "name" : [ {
+				        "use" : "official",
+				        "family" : "WEIHE",
+				        "given" : [ "FLOREZ,A" ],
+				        "period" : {
+				          "start" : "2020-12-16T00:00:00-04:00"
+				        }
+				      } ],
+				      "gender" : "male",
+				      "birthDate" : "1955-09-19",
+				      "active" : true,
+				      "address" : [ {
+				        "type" : "postal",
+				        "line" : [ "1553 SUMMIT STREET" ],
+				        "city" : "DAVENPORT",
+				        "state" : "IA",
+				        "postalCode" : "52809",
+				        "country" : "USA",
+				        "period" : {
+				          "start" : "2020-12-16T00:00:00-04:00"
+				        }
+				      }, {
+				        "type" : "physical",
+				        "use" : "home",
+				        "line" : [ "1553 SUMMIT STREET" ],
+				        "city" : "DAVENPORT",
+				        "state" : "IA",
+				        "postalCode" : "52809",
+				        "country" : "USA",
+				        "period" : {
+				          "start" : "2020-12-16T00:00:00-04:00"
+				        }
+				      } ],
+				      "maritalStatus" : [ {
+				        "coding" : [ {
+				          "code" : "S",
+				          "display" : "Never Married",
+				          "system" : "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus"
+				        } ],
+				        "text" : "S"
+				      } ],
+				      "contact" : [
+				        {
+				        "relationship" : [ {
+				          "coding" : [ {
+				            "code" : "PRN",
+				            "display" : "parent",
+				            "system" : "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+				          } ],
+				          "text" : "Parnt"
+				        } ],
+				        "name" : [ {
+				          "use" : "official",
+				          "family" : "PRESTIDGE",
+				          "given" : [ "HEINEMAN" ]
+				        } ],
+				        "address" : [ {
+				          "type" : "postal",
+				          "line" : [ "1553 SUMMIT STREET" ],
+				          "city" : "DAVENPORT",
+				          "state" : "IA",
+				          "postalCode" : "52809",
+				          "country" : "USA",
+				          "period" : {
+				            "start" : "2020-12-16T00:00:00-04:00"
+				          }
+				        }, {
+				          "type" : "physical",
+				          "use" : "home",
+				          "line" : [ "1553 SUMMIT STREET" ],
+				          "city" : "DAVENPORT",
+				          "state" : "IA",
+				          "postalCode" : "52809",
+				          "country" : "USA",
+				          "period" : {
+				            "start" : "2020-12-16T00:00:00-04:00"
+				          }
+				        } ],
+				        "extension" : [ {
+				          "url" : "http://fkcfhir.org/fhir/StructureDefinition/fmc-patient-contact-type",
+				          "valueCodeableConcept" : {
+				            "coding" : [ {
+				              "system" : "http://fkcfhir.org/fhir/CodeSystem/fmc-patient-contact-type-cs",
+				              "code" : "PRIMARY",
+				              "display" : "Primary Contact"
+				            } ],
+				            "text" : "Emergency"
+				          }
+				        } ]
+				      },
+				      {
+				        "relationship" : [ {
+				          "coding" : [ {
+				            "code" : "E",
+				            "display" : "Employer",
+				            "system" : "http://terminology.hl7.org/CodeSystem/v2-0131"
+				          } ],
+				          "text" : "EMP"
+				        } ],
+				        "address" : [ {
+				          "type" : "postal",
+				          "line" : [ "1553 SUMMIT STREET" ],
+				          "city" : "DAVENPORT",
+				          "state" : "IA",
+				          "postalCode" : "52809",
+				          "country" : "USA",
+				          "period" : {
+				            "start" : "2020-12-16T00:00:00-04:00"
+				          }
+				        }, {
+				          "type" : "physical",
+				          "use" : "home",
+				          "line" : [ "1553 SUMMIT STREET" ],
+				          "city" : "DAVENPORT",
+				          "state" : "IA",
+				          "postalCode" : "52809",
+				          "country" : "USA",
+				          "period" : {
+				            "start" : "2020-12-16T00:00:00-04:00"
+				          }
+				        } ],
+				        "extension" : [ {
+				          "url" : "http://fkcfhir.org/fhir/StructureDefinition/fmc-patient-contact-type",
+				          "valueCodeableConcept" : {
+				            "coding" : [ {
+				              "system" : "http://fkcfhir.org/fhir/CodeSystem/fmc-patient-contact-type-cs",
+				              "code" : "EMPLOYER",
+				              "display" : "Employer"
+				            } ]
+				          }
+				        }, {
+				          "url" : "http://fkcfhir.org/fhir/StructureDefinition/fmc-patient-contact-primary-emp-ind",
+				          "valueBoolean" : false
+				        }, {
+				          "url" : "http://fkcfhir.org/fhir/StructureDefinition/fmc-patient-contact-emp-status",
+				          "valueString" : "jobStatus"
+				        }]
+				      } ]
+				    }
+				""";
+		}
+
+		/*
+		 * We also require a lenient error handler (the default case).
+		 * BaseJpaR4Test.before resets this to a StrictErrorHandler,
+		 * which breaks this test, but also means we don't have to reset it.
+		 */
+		myFhirContext.setParserErrorHandler(new LenientErrorHandler());
+
+		IParser parser = myFhirContext.newJsonParser();
+
+		DemoValidationInterceptor validatingInterceptor = new DemoValidationInterceptor(myFhirContext, myApplicationContext);
+		validatingInterceptor.start();
+
+		myServer.getInterceptorService().registerInterceptor(validatingInterceptor);
+		try {
+			StringEntity entity = new StringEntity(patientStr, StandardCharsets.UTF_8);
+
+			OperationOutcome validationOutcome;
+			OperationOutcome createOutcome;
+
+			HttpPost post = new HttpPost(myServerBase + "/Patient/$validate");
+			post.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
+			post.setEntity(entity);
+			try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+				assertEquals(HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
+
+				validationOutcome = getOutcome(resp, parser);
+			}
+
+			HttpPut put = new HttpPut(myServerBase + "/Patient/P12312");
+			put.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
+			put.setEntity(entity);
+			try (CloseableHttpResponse resp = ourHttpClient.execute(put)) {
+				assertEquals(HttpStatus.SC_PRECONDITION_FAILED, resp.getStatusLine().getStatusCode());
+
+				createOutcome = getOutcome(resp, parser);
+			}
+
+			assertNotNull(validationOutcome);
+			assertNotNull(createOutcome);
+
+			assertEquals(validationOutcome.getIssue().size(), createOutcome.getIssue().size());
+
+			Multimap<OperationOutcome.IssueSeverity, String> severityToIssue = HashMultimap.create();
+			validationOutcome.getIssue()
+				.forEach(issue -> {
+					severityToIssue.put(issue.getSeverity(), issue.getDiagnostics());
+				});
+			createOutcome.getIssue()
+				.forEach(issue -> {
+					assertTrue(severityToIssue.containsEntry(issue.getSeverity(), issue.getDiagnostics()));
+				});
+		} finally {
+			myServer.getInterceptorService().unregisterInterceptor(validatingInterceptor);
 		}
 	}
 

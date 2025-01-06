@@ -13,6 +13,7 @@ public class PreserveStringReader extends Reader {
 	private final StringWriter myWriter;
 
 	public PreserveStringReader(Reader theReader) {
+		super(theReader);
 		myReader = theReader;
 		myWriter = new StringWriter();
 	}
@@ -21,13 +22,9 @@ public class PreserveStringReader extends Reader {
 	public int read(@Nonnull char[] theBuffer, int theOffset, int theLength) throws IOException {
 		int out = myReader.read(theBuffer, theOffset, theLength);
 		if (out >= 0) {
-			for (int i = theOffset; i < theLength; i++) {
-				// ignore null char
-				if (theBuffer[i] != '\u0000') {
-					myWriter.write(theBuffer, i, 1);
-				}
-			}
+			myWriter.write(theBuffer, theOffset, out);
 		}
+
 		return out;
 	}
 

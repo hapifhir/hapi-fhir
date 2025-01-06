@@ -657,6 +657,7 @@ public abstract class BaseParser implements IParser {
 			if (psr.hasString()) {
 				try {
 					ResourceUtil.addRawDataToResource(retVal, psr.toString());
+					psr.close();
 				} catch (IOException ex) {
 					ourLog.warn("Unable to store raw JSON. This will not break functionality, but could have issues with validation.", ex);
 				}
