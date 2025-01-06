@@ -67,7 +67,6 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	}
 
 	public CustomThymeleafNarrativeGenerator(CustomThymeleafNarrativeGenerator theNarrativeGenerator) {
-		this(theNarrativeGenerator.myPropertyFile);
 		setManifest(theNarrativeGenerator.getManifest());
 	}
 
