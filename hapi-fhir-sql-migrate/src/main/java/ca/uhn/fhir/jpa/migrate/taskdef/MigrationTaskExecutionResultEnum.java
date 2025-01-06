@@ -4,25 +4,25 @@ public enum MigrationTaskExecutionResultEnum {
 	/**
 	 * Was either skipped via the `skip-versions` flag or the migration task was stubbed
 	 */
-	SKIPPED,
+	NOT_APPLIED_SKIPPED,
 
 	/**
 	 * This migration task does not apply to this database
 	 */
-	DOES_NOT_APPLY,
+	NOT_APPLIED_NOT_FOR_THIS_DATABASE,
 
 	/**
 	 * This migration task had precondition criteria (expressed as SQL) that was not met
 	 */
-	PRECONDITION_FAILED,
+	NOT_APPLIED_PRECONDITION_NOT_MET,
 
 	/**
 	 * The migration failed, but the task has the FAILURE_ALLOWED flag set.
 	 */
-	ALLOWED_TO_FAIL,
+	NOT_APPLIED_ALLOWED_FAILURE,
 
 	/**
-	 * The migration executed successfully
+	 * The migration was applied
 	 */
-	SUCCESS,
+	APPLIED,
 }

@@ -283,7 +283,7 @@ public class ModifyColumnTest extends BaseTest {
 
 		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
 		assertThat(entities).hasSize(1);
-		assertThat(entities.get(0).getResult()).isEqualTo(MigrationTaskExecutionResultEnum.ALLOWED_TO_FAIL.name());
+		assertThat(entities.get(0).getResult()).isEqualTo(MigrationTaskExecutionResultEnum.NOT_APPLIED_ALLOWED_FAILURE.name());
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
