@@ -153,10 +153,18 @@ public class HapiMigrationDao {
 		try (Connection connection = myDataSource.getConnection()) {
 			ResultSet columnsUpper = connection
 					.getMetaData()
-					.getColumns(connection.getCatalog(), connection.getSchema(), myMigrationTablename, theColumnName.toUpperCase());
+					.getColumns(
+							connection.getCatalog(),
+							connection.getSchema(),
+							myMigrationTablename,
+							theColumnName.toUpperCase());
 			ResultSet columnsLower = connection
-				.getMetaData()
-				.getColumns(connection.getCatalog(), connection.getSchema(), myMigrationTablename, theColumnName.toLowerCase());
+					.getMetaData()
+					.getColumns(
+							connection.getCatalog(),
+							connection.getSchema(),
+							myMigrationTablename,
+							theColumnName.toLowerCase());
 
 			return columnsUpper.next() || columnsLower.next(); // If there's a row, the column exists
 		} catch (SQLException e) {
