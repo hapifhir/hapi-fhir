@@ -34,19 +34,21 @@
 
 <th:block th:fragment="renderMedication (medicationType)">
    <th:block th:if="${medicationType} != null" th:object="${medicationType}">
-      <th:block th:switch="*{getClass().getSimpleName()}">
-         <th:block th:case="'CodeableConcept'">
-            <th:block th:replace=":: codeableConcept (cc=${medicationType}, attr='display')">Medication</th:block>
-         </th:block>
-         <th:block th:case="'Reference'">
-            <th:block th:replace=":: renderMedicationRef (medicationRef=${medicationType})">Medication</th:block>
-         </th:block>
-      </th:block>
+		<th:block th:if="*{getMedication() != null}">
+			<th:block th:switch="*{getMedication().getClass().getSimpleName()}">
+				<th:block th:case="'CodeableConcept'">
+					<th:block th:replace=":: codeableConcept (cc=${medicationType.getMedication()}, attr='display')">Medication</th:block>
+				</th:block>
+				<th:block th:case="'Reference'">
+					<th:block th:replace=":: renderMedicationRef (medicationRef=${medicationType})">Medication</th:block>
+				</th:block>
+			</th:block>
+		</th:block>
    </th:block>
 </th:block>
 
 <th:block th:if="${medicationRef}" th:fragment="renderMedicationRef (medicationRef)">
-   <th:block th:with="medication = ${#fhirpath.evaluateFirst(medicationRef, 'resolve()')}">
+   <th:block th:with="medication = ${#fhirpath.evaluateFirst(medicationRef, 'medication.resolve()')}">
       <th:block  th:if="${medication != null}">
          <th:block th:replace=":: renderMedicationCode (medication=${medication})">Medication</th:block>
       </th:block>
