@@ -105,6 +105,8 @@ public class JsonParserR4Test extends BaseTest {
 
 	static List<String> patientStrs() {
 		List<String> resources = new ArrayList<>();
+
+		@Language("JSON")
 		String patientStr;
 		// 1 valid simple
 		{

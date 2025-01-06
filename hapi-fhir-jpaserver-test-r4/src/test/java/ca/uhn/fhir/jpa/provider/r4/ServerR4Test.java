@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -109,6 +110,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void validationTest_invalidResourceWithLenientParsing_createAndValidateShouldParse() throws IOException {
 		// the resource
+		@Language("JSON")
 		String patientStr;
 		{
 			patientStr = """
