@@ -643,11 +643,11 @@ public abstract class BaseParser implements IParser {
 		 */
 		Reader readerToUse = theReader;
 		if (theResourceType != null) {
-				myContext.getResourceDefinition(theResourceType);
-				if (myContext.isStoreResourceJson()) {
-					readerToUse = new PreserveStringReader(theReader);
-				}
+			myContext.getResourceDefinition(theResourceType);
+			if (myContext.isStoreResourceJson()) {
+				readerToUse = new PreserveStringReader(theReader);
 			}
+		}
 
 		// Actually do the parse
 		T retVal = doParseResource(theResourceType, readerToUse);
@@ -659,7 +659,9 @@ public abstract class BaseParser implements IParser {
 					ResourceUtil.addRawDataToResource(retVal, psr.toString());
 					psr.close();
 				} catch (IOException ex) {
-					ourLog.warn("Unable to store raw JSON. This will not break functionality, but could have issues with validation.", ex);
+					ourLog.warn(
+							"Unable to store raw JSON. This will not break functionality, but could have issues with validation.",
+							ex);
 				}
 			}
 		}

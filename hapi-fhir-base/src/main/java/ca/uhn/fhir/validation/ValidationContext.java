@@ -108,9 +108,8 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 				// use the stored json string, if available
 				// otherwise, encode the actual resource
 				return ObjectUtils.firstNonNull(
-					ResourceUtil.getRawStringFromResourceOrNull(theResource),
-					theContext.newJsonParser().encodeResourceToString(theResource)
-				);
+						ResourceUtil.getRawStringFromResourceOrNull(theResource),
+						theContext.newJsonParser().encodeResourceToString(theResource));
 			}
 
 			@Override

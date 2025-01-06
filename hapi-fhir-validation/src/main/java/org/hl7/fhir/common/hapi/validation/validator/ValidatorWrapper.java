@@ -220,12 +220,13 @@ class ValidatorWrapper {
 	private ReaderInputStream constructNewReaderInputStream(Reader theReader) {
 		try {
 			return ReaderInputStream.builder()
-				.setCharset(StandardCharsets.UTF_8)
-				.setReader(theReader)
-				.get();
+					.setCharset(StandardCharsets.UTF_8)
+					.setReader(theReader)
+					.get();
 		} catch (Exception ex) {
 			// we don't expect this ever
-			throw new IllegalArgumentException(Msg.code(2596) + "Error constructing input reader stream while validating resource.", ex);
+			throw new IllegalArgumentException(
+					Msg.code(2596) + "Error constructing input reader stream while validating resource.", ex);
 		}
 	}
 

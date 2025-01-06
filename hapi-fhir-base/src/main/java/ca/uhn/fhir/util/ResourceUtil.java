@@ -60,6 +60,6 @@ public class ResourceUtil {
 	}
 
 	public static String getRawStringFromResourceOrNull(@Nonnull IBaseResource theResource) {
-		return (String)theResource.getUserData(RAW_JSON);
+		return (String) theResource.getUserData(RAW_JSON);
 	}
 }
