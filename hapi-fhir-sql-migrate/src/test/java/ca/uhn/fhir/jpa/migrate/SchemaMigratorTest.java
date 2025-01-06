@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrationTaskExecutionResultEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -170,10 +171,10 @@ public class SchemaMigratorTest extends BaseTest {
 		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
 
 		assertThat(entities).hasSize(4);
-		assertThat(entities.get(0).getResult()).isEqualTo("SUCCESS");
-		assertThat(entities.get(1).getResult()).isEqualTo("SKIPPED");
-		assertThat(entities.get(2).getResult()).isEqualTo("SUCCESS");
-		assertThat(entities.get(3).getResult()).isEqualTo("SKIPPED");
+		assertThat(entities.get(0).getResult()).isEqualTo(MigrationTaskExecutionResultEnum.APPLIED.name());
+		assertThat(entities.get(1).getResult()).isEqualTo(MigrationTaskExecutionResultEnum.NOT_APPLIED_SKIPPED.name());
+		assertThat(entities.get(2).getResult()).isEqualTo(MigrationTaskExecutionResultEnum.APPLIED.name());
+		assertThat(entities.get(3).getResult()).isEqualTo(MigrationTaskExecutionResultEnum.NOT_APPLIED_SKIPPED.name());
 	}
 
 	@Nonnull
