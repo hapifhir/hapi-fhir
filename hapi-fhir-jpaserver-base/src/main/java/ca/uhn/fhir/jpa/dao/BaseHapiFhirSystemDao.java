@@ -232,7 +232,8 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 					 * index rows of the given type.
 					 */
 					if (entityChunk == null) {
-						String jqlQuery = "SELECT r FROM ResourceTable r LEFT JOIN FETCH r.myParamsToken WHERE r.myPid IN ( :IDS )";
+						String jqlQuery =
+								"SELECT r FROM ResourceTable r LEFT JOIN FETCH r.myParamsToken WHERE r.myPid IN ( :IDS )";
 						TypedQuery<ResourceTable> query = myEntityManager.createQuery(jqlQuery, ResourceTable.class);
 						query.setParameter("IDS", idChunk);
 						entityChunk = query.getResultList();
