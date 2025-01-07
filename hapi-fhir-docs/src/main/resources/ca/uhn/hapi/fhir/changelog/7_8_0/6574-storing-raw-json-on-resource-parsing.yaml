@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 6574
+jira: SMILE-9432
+title: "The raw json of parsed resources will be kept in the UserData
+        (key: `RAW_JSON`) of the resource itself.
+        This is to allow consistency in handling validation downstream,
+        since otherwise the FhirParser is far more lenient about what
+        it can parse than $validate is for what it accepts.
+"
