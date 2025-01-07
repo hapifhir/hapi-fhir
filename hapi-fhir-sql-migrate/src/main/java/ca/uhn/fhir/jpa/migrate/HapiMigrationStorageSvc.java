@@ -80,6 +80,9 @@ public class HapiMigrationStorageSvc {
 		HapiMigrationEntity entity = HapiMigrationEntity.fromBaseTask(theBaseTask);
 		entity.setExecutionTime(theMillis);
 		entity.setSuccess(theSuccess);
+		if (theBaseTask.getExecutionResult() != null) {
+			entity.setResult(theBaseTask.getExecutionResult().name());
+		}
 		myHapiMigrationDao.save(entity);
 	}
 

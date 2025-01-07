@@ -233,3 +233,18 @@
       <th:block th:if="${!iter.last}" th:text="', '"/>
    </th:block>
 </th:block>
+
+<!-- /* Component list */ -->
+<th:block th:if="${list}" th:fragment="renderComponent (list)">
+	<th:block th:each="item,iter : ${list}" th:if="${!list.empty}">
+		<th:block th:if="${item.getCode().getCodingFirstRep().hasDisplay()}" th:text="${item.getCode().getCodingFirstRep().getDisplay()}">Display</th:block>
+		<th:block th:if="${!item.getCode().getCodingFirstRep().hasDisplay()}" th:text="${item.getCode().getCodingFirstRep().getCode()}">Code</th:block>
+		<th:block th:if="${item.hasValueQuantity()}" th:text="${item.getValueQuantity().getValue().toPlainString()}">Value</th:block>
+		<th:block th:if="${item.hasValueIntegerType()}" th:text="${item.getValueIntegerType().getValueAsString()}">Value</th:block>
+		<th:block th:if="${item.hasValueStringType()}" th:text="${item.getValueStringType().getValueAsString()}">Value</th:block>
+		<th:block th:if="${item.hasValueCodeableConcept()}">
+			<th:block th:insert=":: codeableConcept (cc=${item.getValueCodeableConcept()}, attr='display')"/>
+		</th:block>
+		<th:block th:if="${!iter.last}" th:text="', '"/>
+	</th:block>
+</th:block>
