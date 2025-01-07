@@ -183,9 +183,9 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	}
 
 	private void addParam(DateParam theParsed) throws InvalidRequestException {
-//		if (theParsed.getPrefix() == null) {
-//			theParsed.setPrefix(EQUAL);
-//		}
+		//		if (theParsed.getPrefix() == null) {
+		//			theParsed.setPrefix(EQUAL);
+		//		}
 
 		ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(theParsed.getPrefix(), EQUAL);
 
