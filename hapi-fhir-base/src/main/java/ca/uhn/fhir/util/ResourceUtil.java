@@ -57,7 +57,9 @@ public class ResourceUtil {
 		}
 	}
 
-	public static void addRawDataToResource(@Nonnull IBaseResource theResource, @Nonnull EncodingEnum theEncodingType, String theSerializedData) throws IOException {
+	public static void addRawDataToResource(
+			@Nonnull IBaseResource theResource, @Nonnull EncodingEnum theEncodingType, String theSerializedData)
+			throws IOException {
 		theResource.setUserData(getRawUserDataKey(theEncodingType), theSerializedData);
 		theResource.setUserData(ENCODING, theEncodingType);
 	}
