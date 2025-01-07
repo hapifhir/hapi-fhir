@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.parser.path.EncodeContextPath;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.CollectionUtil;
@@ -656,7 +657,7 @@ public abstract class BaseParser implements IParser {
 			PreserveStringReader psr = (PreserveStringReader) readerToUse;
 			if (psr.hasString()) {
 				try {
-					ResourceUtil.addRawDataToResource(retVal, psr.toString());
+					ResourceUtil.addRawDataToResource(retVal, getEncoding(), psr.toString());
 					psr.close();
 				} catch (IOException ex) {
 					ourLog.warn(

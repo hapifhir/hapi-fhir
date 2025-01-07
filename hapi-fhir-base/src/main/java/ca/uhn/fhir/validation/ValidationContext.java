@@ -114,7 +114,10 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 
 			@Override
 			public EncodingEnum getEncoding() {
-				return EncodingEnum.JSON;
+				return ObjectUtils.defaultIfNull(
+					ResourceUtil.getEncodingTypeFromUserData(theResource),
+					EncodingEnum.JSON
+				);
 			}
 		};
 		return new ValidationContext<>(theContext, theResource, encoder, options);

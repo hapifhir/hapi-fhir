@@ -22,6 +22,7 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,7 +31,8 @@ import java.io.IOException;
 
 public class ResourceUtil {
 
-	private static final String RAW_JSON = "RAW_JSON";
+	private static final String ENCODING = "ENCODING_TYPE";
+	private static final String RAW_ = "RAW_%s";
 
 	private ResourceUtil() {}
 
@@ -55,11 +57,24 @@ public class ResourceUtil {
 		}
 	}
 
-	public static void addRawDataToResource(IBaseResource theResource, String theRawJson) throws IOException {
-		theResource.setUserData(RAW_JSON, theRawJson);
+	public static void addRawDataToResource(@Nonnull IBaseResource theResource, @Nonnull EncodingEnum theEncodingType, String theSerializedData) throws IOException {
+		theResource.setUserData(getRawUserDataKey(theEncodingType), theSerializedData);
+		theResource.setUserData(ENCODING, theEncodingType);
+	}
+
+	public static EncodingEnum getEncodingTypeFromUserData(@Nonnull IBaseResource theResource) {
+		return (EncodingEnum) theResource.getUserData(ENCODING);
 	}
 
 	public static String getRawStringFromResourceOrNull(@Nonnull IBaseResource theResource) {
-		return (String) theResource.getUserData(RAW_JSON);
+		EncodingEnum type = (EncodingEnum) theResource.getUserData(ENCODING);
+		if (type != null) {
+			return (String) theResource.getUserData(getRawUserDataKey(type));
+		}
+		return null;
+	}
+
+	private static String getRawUserDataKey(EncodingEnum theEncodingEnum) {
+		return String.format(RAW_, theEncodingEnum.name());
 	}
 }
