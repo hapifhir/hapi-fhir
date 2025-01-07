@@ -660,7 +660,7 @@ public abstract class BaseParser implements IParser {
 					psr.close();
 				} catch (IOException ex) {
 					ourLog.warn(
-							"Unable to store raw JSON. This will not break functionality, but could have issues with validation.",
+							"Unable to store raw JSON on resource. This won't affect functionality, but validation will use the resource itself, which may result in different validation results than a $validation operation.",
 							ex);
 				}
 			}
