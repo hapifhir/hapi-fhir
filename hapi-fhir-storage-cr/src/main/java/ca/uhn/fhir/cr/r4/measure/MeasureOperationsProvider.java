@@ -89,10 +89,10 @@ public class MeasureOperationsProvider {
 			throws InternalErrorException, FHIRException {
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
-				.evaluate(
-					R4MeasureEvaluatorSingleRequest.builder()
+				.evaluate(R4MeasureEvaluatorSingleRequest.builder()
 						.setMeasure(Eithers.forMiddle3(theId))
-						.setPeriodStart(myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails))
+						.setPeriodStart(
+								myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails))
 						.setPeriodEnd(myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails))
 						.setReportType(theReportType)
 						.setSubjectId(theSubject)
