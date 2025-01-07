@@ -106,23 +106,6 @@
    </th:block>
 </th:block>
 
-<th:block th:if="${onset}" th:fragment="renderOnset (onset)">
-   <th:block th:if="${onset} != null" th:object="${onset}">
-      <th:block th:switch="*{getClass().getSimpleName()}">
-         <th:block th:case="'DateTimeType'" th:text="*{getValue()}">Date</th:block>
-         <th:block th:case="'Period'"
-                   th:text="*{#strings.concatReplaceNulls('', getStartElement().getValue(), '-', getEndElement().getValue() )}">
-            Date
-         </th:block>
-         <th:block th:case="'Age'" th:text="*{getValue()}">Date</th:block>
-         <th:block th:case="'Range'"
-                   th:text="*{#strings.concatReplaceNulls('', getLow().getValue(), '-', getHigh().getValue() )}">Date
-         </th:block>
-         <th:block th:case="'StringType'" th:text="*{getValue()}">Date</th:block>
-      </th:block>
-   </th:block>
-</th:block>
-
 <th:block th:if="${time}" th:fragment="renderTime (time)">
    <th:block th:if="${time} != null" th:object="${time}">
       <th:block th:switch="*{getClass().getSimpleName()}">
