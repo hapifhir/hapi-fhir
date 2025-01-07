@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,25 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
- * Contract for service which replaces references
+ * Find all references to a source resource and replace them with references to the provided target
  */
 public interface IReplaceReferencesSvc {
 
-	IBaseParameters replaceReferences(String theSourceRefId, String theTargetRefId, RequestDetails theRequest);
+	/**
+	 * Find all references to a source resource and replace them with references to the provided target
+	 */
+	IBaseParameters replaceReferences(
+			ReplaceReferencesRequest theReplaceReferencesRequest, RequestDetails theRequestDetails);
+
+	/**
+	 * To support $merge preview mode, provide a count of how many references would be updated if replaceReferences
+	 * was called
+	 */
+	Integer countResourcesReferencingResource(IIdType theResourceId, RequestDetails theRequestDetails);
 }

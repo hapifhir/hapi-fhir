@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCountCallbackHandler;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.SQLException;
@@ -44,6 +45,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -72,6 +74,7 @@ public abstract class BaseTask {
 	private DriverTypeEnum myDriverType;
 	private String myDescription;
 	private Integer myChangesCount = 0;
+	private MigrationTaskExecutionResultEnum myExecutionResult;
 	private boolean myDryRun;
 	private boolean myTransactional = true;
 	private Set<DriverTypeEnum> myOnlyAppliesToPlatforms = new HashSet<>();
@@ -199,15 +202,25 @@ public abstract class BaseTask {
 		// 0 means no timeout -- we use this for index rebuilds that may take time.
 		jdbcTemplate.setQueryTimeout(0);
 		try {
-			int changesCount = jdbcTemplate.update(theSql, theArguments);
-			logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
-			return changesCount;
+			if (theSql.toUpperCase(Locale.US).startsWith("SELECT ")) {
+				RowCountCallbackHandler rch = new RowCountCallbackHandler();
+				jdbcTemplate.query(theSql, new Object[0], new int[0], rch);
+				int rows = rch.getRowCount();
+				logInfo(ourLog, "SQL \"{}\" returned {} rows", theSql, rows);
+				return 0;
+			} else {
+				int changesCount = jdbcTemplate.update(theSql, theArguments);
+				logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
+				myExecutionResult = MigrationTaskExecutionResultEnum.APPLIED;
+				return changesCount;
+			}
 		} catch (DataAccessException e) {
 			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
 				ourLog.info(
 						"Task {} did not exit successfully on doExecuteSql(), but task is allowed to fail",
 						getMigrationVersion());
 				ourLog.debug("Error was: {}", e.getMessage(), e);
+				myExecutionResult = MigrationTaskExecutionResultEnum.NOT_APPLIED_ALLOWED_FAILURE;
 				return 0;
 			} else {
 				throw new HapiMigrationException(
@@ -252,11 +265,13 @@ public abstract class BaseTask {
 	public void execute() throws SQLException {
 		if (myFlags.contains(TaskFlagEnum.DO_NOTHING)) {
 			ourLog.info("Skipping stubbed task: {}", getDescription());
+			myExecutionResult = MigrationTaskExecutionResultEnum.NOT_APPLIED_SKIPPED;
 			return;
 		}
 		if (!myOnlyAppliesToPlatforms.isEmpty()) {
 			if (!myOnlyAppliesToPlatforms.contains(getDriverType())) {
 				ourLog.info("Skipping task {} as it does not apply to {}", getDescription(), getDriverType());
+				myExecutionResult = MigrationTaskExecutionResultEnum.NOT_APPLIED_NOT_FOR_THIS_DATABASE;
 				return;
 			}
 		}
@@ -267,6 +282,7 @@ public abstract class BaseTask {
 				ourLog.info(
 						"Skipping task since one of the preconditions was not met: {}",
 						precondition.getPreconditionReason());
+				myExecutionResult = MigrationTaskExecutionResultEnum.NOT_APPLIED_PRECONDITION_NOT_MET;
 				return;
 			}
 		}
@@ -344,6 +360,10 @@ public abstract class BaseTask {
 
 	public boolean hasFlag(TaskFlagEnum theFlag) {
 		return myFlags.contains(theFlag);
+	}
+
+	public MigrationTaskExecutionResultEnum getExecutionResult() {
+		return myExecutionResult;
 	}
 
 	public static class ExecutedStatement {

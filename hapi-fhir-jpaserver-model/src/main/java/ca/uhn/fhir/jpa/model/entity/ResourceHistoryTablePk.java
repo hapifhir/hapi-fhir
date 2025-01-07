@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.rest.api.server.storage.IResourceVersionPersistentId;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Transient;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
@@ -40,7 +40,8 @@ public class ResourceHistoryTablePk implements IResourceVersionPersistentId, Ser
 	@Column(name = "PID")
 	private Long myVersionId;
 
-	@Transient
+	@PartitionedIdProperty
+	@Column(name = PartitionablePartitionId.PARTITION_ID)
 	private Integer myPartitionIdValue;
 
 	@Override
@@ -75,5 +76,10 @@ public class ResourceHistoryTablePk implements IResourceVersionPersistentId, Ser
 
 	public IdAndPartitionId asIdAndPartitionId() {
 		return new IdAndPartitionId(getId(), getPartitionId());
+	}
+
+	@Override
+	public String toString() {
+		return myVersionId + "/" + myPartitionIdValue;
 	}
 }

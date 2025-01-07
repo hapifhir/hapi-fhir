@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,7 +173,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * is for fast writing of data.
 		 *
 		 * Note that it's probably not necessary to reset it back, it should
-		 * automatically go back to the default value after the transaction but
+		 * automatically go back to the default value after the transaction, but
 		 * we reset it just to be safe.
 		 */
 		FlushModeType initialFlushMode = myEntityManager.getFlushMode();
@@ -311,7 +311,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(
 				theRequestPartitionId, idsToPreResolve.keySet(), resolveMode);
 		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> entry : outcomes.entrySet()) {
-			JpaPid next = (JpaPid) entry.getValue().getPersistentId();
+			JpaPid next = entry.getValue().getPersistentId();
 			IIdType unqualifiedVersionlessId = entry.getKey();
 			foundIds.add(unqualifiedVersionlessId.getValue());
 			theTransactionDetails.addResolvedResourceId(unqualifiedVersionlessId, next);

@@ -112,13 +112,7 @@ public class WebsocketWithSubscriptionIdR5Test extends BaseSubscriptionsR5Test {
 
 		// Then
 		List<String> messages = myWebsocketClientExtension.getMessages();
-		await().until(() -> !messages.isEmpty());
-
-		// Log it
-		ourLog.info("Messages: {}", messages);
-
-		// Verify a ping message shall be returned
-		Assertions.assertTrue(messages.contains("ping " + subscriptionId));
+		await().until(() -> messages, t -> t.contains("ping " + subscriptionId));
 	}
 
 	@Test

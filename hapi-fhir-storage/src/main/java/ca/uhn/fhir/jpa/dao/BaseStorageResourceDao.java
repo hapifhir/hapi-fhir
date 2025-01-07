@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -296,7 +296,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 				theTransactionDetails);
 	}
 
-	public static void validateResourceType(IBasePersistedResource theEntity, String theResourceName) {
+	public static void validateResourceType(IBasePersistedResource<?> theEntity, String theResourceName) {
 		if (!theResourceName.equals(theEntity.getResourceType())) {
 			throw new ResourceNotFoundException(Msg.code(935) + "Resource with ID "
 					+ theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName

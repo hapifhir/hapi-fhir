@@ -56,8 +56,6 @@ import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -127,8 +125,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, List<String> types)
-			throws FileNotFoundException, IOException, FHIRException {
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, List<String> types) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(653));
 	}
 
@@ -233,7 +230,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			 * generate useful error messages for the user.
 			 */
 			retVal = allStructureDefinitions.stream()
-					.map(t -> myVersionCanonicalizer.structureDefinitionToCanonical(t))
+					.map(myVersionCanonicalizer::structureDefinitionToCanonical)
 					.collect(Collectors.toList());
 			myAllStructures = retVal;
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -285,6 +285,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		mySearchProperties.setMaxResultsRequested(theMaxResultsToFetch);
 	}
 
+	@Override
 	public void setDeduplicateInDatabase(boolean theShouldDeduplicateInDB) {
 		mySearchProperties.setDeduplicateInDatabase(theShouldDeduplicateInDB);
 	}
@@ -1709,7 +1710,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (findVersionFieldName != null) {
 				fieldsToLoad += ", r.target_resource_version AS " + RESOURCE_VERSION_ALIAS;
 			}
-			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			if (myPartitionSettings.isDatabasePartitionMode()) {
 				fieldsToLoad += ", r.";
 				fieldsToLoad += findPartitionFieldName.equals(MY_SOURCE_RESOURCE_PARTITION_ID)
 						? "partition_id"
@@ -1738,7 +1739,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					.append(" AND r.")
 					.append(searchPidFieldSqlColumn)
 					.append(" IN (:target_pids) ");
-			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			if (myPartitionSettings.isDatabasePartitionMode()) {
 				String partitionFieldToSearch = findPartitionFieldName.equals(MY_SOURCE_RESOURCE_PARTITION_ID)
 						? "target_res_partition_id"
 						: "partition_id";
@@ -1794,7 +1795,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			for (Collection<JpaPid> nextPartition : partitions) {
 				Query q = entityManager.createNativeQuery(sql, Tuple.class);
 				q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
-				if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+				if (myPartitionSettings.isDatabasePartitionMode()) {
 					q.setParameter(
 							"search_partition_id",
 							nextPartition.iterator().next().getPartitionId());
@@ -1814,7 +1815,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									NumberUtils.createLong(String.valueOf(result.get(RESOURCE_VERSION_ALIAS)));
 						}
 						Integer partitionId = null;
-						if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+						if (myPartitionSettings.isDatabasePartitionMode()) {
 							partitionId = result.get(PARTITION_ID_ALIAS, Integer.class);
 						}
 
@@ -1850,12 +1851,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (findVersionFieldName != null) {
 			sqlBuilder.append(", r.").append(findVersionFieldName);
 		}
-		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+		if (myPartitionSettings.isDatabasePartitionMode()) {
 			sqlBuilder.append(", r.").append(findPartitionFieldName);
 		}
 		sqlBuilder.append(" FROM ResourceLink r WHERE ");
 
-		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+		if (myPartitionSettings.isDatabasePartitionMode()) {
 			sqlBuilder.append("r.").append(searchPartitionFieldName);
 			sqlBuilder.append(" = :target_partition_id AND ");
 		}
@@ -1904,7 +1905,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		for (Collection<JpaPid> nextPartition : partitions) {
 			TypedQuery<?> q = entityManager.createQuery(sql, Object[].class);
 			q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
-			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			if (myPartitionSettings.isDatabasePartitionMode()) {
 				q.setParameter(
 						"target_partition_id", nextPartition.iterator().next().getPartitionId());
 			}
@@ -1936,7 +1937,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					version = (Long) ((Object[]) nextRow)[3];
 					offset++;
 				}
-				if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+				if (myPartitionSettings.isDatabasePartitionMode()) {
 					partitionId = ((Integer) ((Object[]) nextRow)[3 + offset]);
 				}
 
@@ -2053,7 +2054,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			fieldsToLoadFromSpidxUriTable += ", NULL";
 		}
 
-		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+		if (myPartitionSettings.isDatabasePartitionMode()) {
 			if (theReverse) {
 				fieldsToLoadFromSpidxUriTable += ", r.partition_id as " + PARTITION_ID_ALIAS;
 			} else {
@@ -2076,7 +2077,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// join on hash_identity and sp_uri - indexed in IDX_SP_URI_HASH_IDENTITY_V2
 		canonicalUrlQuery.append("JOIN hfj_spidx_uri rUri ON (");
-		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+		if (myPartitionSettings.isDatabasePartitionMode()) {
 			canonicalUrlQuery.append("rUri.partition_id IN (:uri_partition_id) AND ");
 			canonicalUriQueryParams.put("uri_partition_id", canonicalUrlTargets.myPartitionIds);
 		}
@@ -2095,7 +2096,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		canonicalUrlQuery.append(" WHERE r.src_path = :src_path AND");
 		canonicalUrlQuery.append(" r.target_resource_id IS NULL");
 		canonicalUrlQuery.append(" AND");
-		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+		if (myPartitionSettings.isDatabasePartitionMode()) {
 			if (theReverse) {
 				canonicalUrlQuery.append(" rUri.partition_id");
 			} else {

@@ -134,69 +134,72 @@
 										<h4>Includes <small>Also include resources which are referenced by the search results</small></h4>
 									</div>
                            <div class="row">
-										<span th:each="include : ${includes}" class="includeCheckContainer">
-											<span class="includeCheckCheck">
-												<input type="checkbox" th:value="${include}" th:id="'inc_' + ${include}"></input>
+										<div class="col">
+											<span th:each="include : ${includes}" class="includeCheckContainer">
+												<span class="includeCheckCheck">
+													<input type="checkbox" th:value="${include}" th:id="'inc_' + ${include}"></input>
+												</span>
+												<span class="includeCheckName" th:text="${include}"/>
 											</span>
-											<span class="includeCheckName" th:text="${include}"/>
-										</span>
+										</div>
 									</div>
 
 									<!-- Results Sorting -->
-                           <br clear="all"/>
 									<div class="row">
 										<h4>Sort Results</h4>
 									</div>
 									<div class="row">
 										<!-- Sort By... -->
-										<div class='col-sm-6'>
-										<label>Sort By</label>
-										<div class="btn-group">
-											<input type="hidden" id="sort_by" />
-											<button type="button" class="btn btn-info" id="search_sort_button">Default</button>
-											<button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown">
-												<span class="caret"></span>
-												<span class="visually-hidden">Default Sort</span>
-											</button>
-											<ul class="dropdown-menu" role="menu">
-												<li><a href="javascript:updateSort('');">Default Sort</a></li>
-												<li class="divider"></li>
-												<li th:each="nextParam : ${sortParams}"><a th:href="'javascript:updateSort(\'' + ${nextParam} + '\');'" th:text="${nextParam}"></a></li>
-											</ul>
-										</div>
+										<div class='col'>
+											<div class="d-inline-block">
+												<div class="input-group">
+													<label class="input-group-text">Sort By</label>
+													<input type="hidden" id="sort_by" />
+													<label class="input-group-text border border-primary text-primary" id="search_sort_button">Default</label>
+													<button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+														<span class="caret"></span>
+														<span class="visually-hidden">Default Sort</span>
+													</button>
+													<ul class="dropdown-menu" role="menu">
+														<li><a href="javascript:updateSort('');" class="dropdown-item">Default Sort</a></li>
+														<li class="divider"></li>
+														<li th:each="nextParam : ${sortParams}"><a th:href="'javascript:updateSort(\'' + ${nextParam} + '\');'" th:text="${nextParam}" class="dropdown-item"></a></li>
+													</ul>
+												</div>
+											</div>
 
-										<label>Direction</label>
-										<div class="btn-group">
-											<input type="hidden" id="sort_direction" />
-											<button type="button" class="btn btn-info" id="search_sort_direction_button">Default</button>
-											<button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown">
-												<span class="caret"></span>
-												<span class="visually-hidden">Default Sort</span>
-											</button>
-											<ul class="dropdown-menu" role="menu">
-												<li><a href="javascript:updateSortDirection('');">Default</a></li>
-												<li class="divider"></li>
-												<li><a href="javascript:updateSortDirection('asc');">Ascending</a></li>
-												<li><a href="javascript:updateSortDirection('desc');">Descending</a></li>
-											</ul>
-										</div>
+											<div class="d-inline-block ms-3">
+												<div class="input-group">
+													<label class="input-group-text">Direction</label>
+													<input type="hidden" id="sort_direction" />
+													<label class="input-group-text border border-primary text-primary" id="search_sort_direction_button">Default</label>
+													<button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+														<span class="caret"></span>
+														<span class="visually-hidden">Default Sort</span>
+													</button>
+													<ul class="dropdown-menu" role="menu">
+														<li><a href="javascript:updateSortDirection('');" class="dropdown-item">Default</a></li>
+														<li class="divider"></li>
+														<li><a href="javascript:updateSortDirection('asc');" class="dropdown-item">Ascending</a></li>
+														<li><a href="javascript:updateSortDirection('desc');" class="dropdown-item">Descending</a></li>
+													</ul>
+												</div>
+											</div>
 										</div>
 									</div>
-									<br clear="all"/>
 
                            <!-- Other Options -->
-                           <br clear="all"/>
 									<div class="row">
-										<h4>Other Options</h4>
+										<div class="col">
+											<h4>Other Options</h4>
+										</div>
 									</div>
 									
 									<div class="row">
 										<div class='col-sm-3'>
 								            <div class="form-group">
 								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    Limit
-								                    </div>
+								                    <label class="input-group-text">Limit</label>
 								                    <input type="text" class="form-control" id="resource-search-limit" placeholder="max # returned"/>
 								                </div>
 								            </div>
@@ -209,15 +212,17 @@
 										<h4>Reverse Includes <small>Also include resources which reference to the search results</small></h4>
 									</div>									
 									<div class="row">
-										<span class="includeCheckCheck">
-											<input type="checkbox" th:value="'*'" th:id="'revinc_STAR'" />
-										</span>
-										<span class="includeCheckName" th:text="'*'"/>
-										<span th:each="include : ${revincludes}" class="includeCheckContainer">
+										<span class="includeCheckContainer">
 											<span class="includeCheckCheck">
-												<input type="checkbox" th:value="${include}" th:id="'revinc_' + ${include}" />
+												<input type="checkbox" th:value="'*'" th:id="'revinc_STAR'" />
 											</span>
-											<span class="includeCheckName" th:text="${include}"/>
+											<span class="includeCheckName" th:text="'*'"/>
+											<span th:each="include : ${revincludes}" class="includeCheckContainer">
+												<span class="includeCheckCheck">
+													<input type="checkbox" th:value="${include}" th:id="'revinc_' + ${include}" />
+												</span>
+												<span class="includeCheckName" th:text="${include}"/>
+											</span>
 										</span>
 									</div>
 								</div>

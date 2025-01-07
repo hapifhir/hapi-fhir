@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,6 +116,26 @@ public class JpaStorageSettings extends StorageSettings {
 
 	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
 	private static final long DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD = 10000;
+
+	/**
+	 * If we are batching write operations in transactions, what should the maximum number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	public static final String DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING = "10000";
+
+	public static final int DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE =
+			Integer.parseInt(DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING);
+
+	/**
+	 * If we are batching write operations in transactions, what should the default number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	public static final String DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE_STRING = "1024";
+
+	public static final int DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE =
+			Integer.parseInt(DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE_STRING);
 
 	/**
 	 * Do not change default of {@code 0}!
@@ -391,6 +411,20 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	@Beta
 	private boolean myIncludeHashIdentityForTokenSearches = false;
+
+	/**
+	 * If we are batching write operations in transactions, what should the maximum number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	private int myMaxTransactionEntriesForWrite = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE;
+
+	/**
+	 * If we are batching write operations in transactions, what should the default number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	private int myDefaultTransactionEntriesForWrite = DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE;
 
 	/**
 	 * Constructor
@@ -2648,6 +2682,42 @@ public class JpaStorageSettings extends StorageSettings {
 
 	public void setRestDeleteByUrlResourceIdThreshold(long theRestDeleteByUrlResourceIdThreshold) {
 		myRestDeleteByUrlResourceIdThreshold = theRestDeleteByUrlResourceIdThreshold;
+	}
+
+	/**
+	 * If we are batching write operations in transactions, what should the maximum number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	public int getMaxTransactionEntriesForWrite() {
+		return myMaxTransactionEntriesForWrite;
+	}
+
+	/**
+	 * If we are batching write operations in transactions, what should the maximum number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	public void setMaxTransactionEntriesForWrite(int theMaxTransactionEntriesForWrite) {
+		myMaxTransactionEntriesForWrite = theMaxTransactionEntriesForWrite;
+	}
+
+	/**
+	 * If we are batching write operations in transactions, what should the default number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	public int getDefaultTransactionEntriesForWrite() {
+		return myDefaultTransactionEntriesForWrite;
+	}
+
+	/**
+	 * If we are batching write operations in transactions, what should the default number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	public void setDefaultTransactionEntriesForWrite(int theDefaultTransactionEntriesForWrite) {
+		myDefaultTransactionEntriesForWrite = theDefaultTransactionEntriesForWrite;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

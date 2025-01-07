@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
-import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
+import ca.uhn.fhir.cr.r4.R4MeasureEvaluatorSingleFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -38,11 +38,12 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class MeasureOperationsProvider {
 
-	private final IMeasureServiceFactory myR4MeasureServiceFactory;
+	private final R4MeasureEvaluatorSingleFactory myR4MeasureServiceFactory;
 	private final StringTimePeriodHandler myStringTimePeriodHandler;
 
 	public MeasureOperationsProvider(
-			IMeasureServiceFactory theR4MeasureServiceFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+			R4MeasureEvaluatorSingleFactory theR4MeasureServiceFactory,
+			StringTimePeriodHandler theStringTimePeriodHandler) {
 		myR4MeasureServiceFactory = theR4MeasureServiceFactory;
 		myStringTimePeriodHandler = theStringTimePeriodHandler;
 	}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class PartitionRunner {
 	public <T> void runInPartitionedThreads(List<T> theResourceIds, Consumer<List<T>> partitionConsumer) {
 
 		List<Callable<Void>> runnableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
-		if (runnableTasks.size() == 0) {
+		if (runnableTasks.isEmpty()) {
 			return;
 		}
 

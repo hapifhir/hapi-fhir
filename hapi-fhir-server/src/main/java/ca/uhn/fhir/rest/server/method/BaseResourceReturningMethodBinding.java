@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -277,16 +277,27 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		When we write directly to an HttpServletResponse, the invocation returns null. However, we still want to invoke
 		the SERVER_OUTGOING_RESPONSE pointcut.
 		*/
+
+		// if the response status code is set by the method, respect it. Otherwise, use the default 200.
+		int responseCode = Constants.STATUS_HTTP_200_OK;
+		if (theRequest instanceof ServletRequestDetails) {
+			HttpServletResponse servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
+			if (servletResponse != null && servletResponse.getStatus() > 0) {
+				responseCode = servletResponse.getStatus();
+			}
+		}
+
 		if (response == null) {
 			ResponseDetails responseDetails = new ResponseDetails();
-			responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
+			responseDetails.setResponseCode(responseCode);
 			callOutgoingResponseHook(theRequest, responseDetails);
 			return null;
 		} else {
 			Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
 			ResponseDetails responseDetails = new ResponseDetails();
 			responseDetails.setResponseResource(response);
-			responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
+			responseDetails.setResponseCode(responseCode);
+
 			if (!callOutgoingResponseHook(theRequest, responseDetails)) {
 				return null;
 			}
