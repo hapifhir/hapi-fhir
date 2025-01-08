@@ -112,10 +112,10 @@ public class DateRangeParamR4Test {
 		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
 		assertEquals("2012-01-01", ourLastDateRange.getUpperBound().getValueAsString());
 
-//		assertEquals(parseLowerForDatePrecision("2012-01-01 00:00:00.0000"), ourLastDateRange.getLowerBoundAsInstant());
-//		assertEquals(parseUpperForDatePrecision("2012-01-03 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
-		assertEquals(ParamPrefixEnum.EQUAL, ourLastDateRange.getLowerBound().getPrefix());
-		assertEquals(ParamPrefixEnum.EQUAL, ourLastDateRange.getUpperBound().getPrefix());
+		assertEquals(parseLowerForDatePrecision("2012-01-01 00:00:00.0000"), ourLastDateRange.getLowerBoundAsInstant());
+		assertEquals(parseUpperForDatePrecision("2012-01-03 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
+		assertNull(ourLastDateRange.getLowerBound().getPrefix());
+		assertNull(ourLastDateRange.getUpperBound().getPrefix());
 	}
 
 	@Test

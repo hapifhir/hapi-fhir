@@ -183,11 +183,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	}
 
 	private void addParam(DateParam theParsed) throws InvalidRequestException {
-		//		if (theParsed.getPrefix() == null) {
-		//			theParsed.setPrefix(EQUAL);
-		//		}
-
-		ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(theParsed.getPrefix(), EQUAL);
+		ParamPrefixEnum prefix = getPrefixOrDefault(theParsed);
 
 		switch (prefix) {
 			case NOT_EQUAL:
@@ -315,24 +311,24 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		}
 		int retVal = DateUtils.convertDateToDayInteger(myLowerBound.getValue());
 
-		if (myLowerBound.getPrefix() != null) {
-			switch (myLowerBound.getPrefix()) {
-				case GREATERTHAN:
-				case STARTS_AFTER:
-					retVal += 1;
-					break;
-				case EQUAL:
-				case GREATERTHAN_OR_EQUALS:
-				case NOT_EQUAL:
-					break;
-				case LESSTHAN:
-				case LESSTHAN_OR_EQUALS:
-				case APPROXIMATE:
-				case ENDS_BEFORE:
-					throw new IllegalStateException(
-							Msg.code(1926) + "Invalid lower bound comparator: " + myLowerBound.getPrefix());
-			}
+		ParamPrefixEnum prefix = getPrefixOrDefault(myLowerBound);
+
+		switch (prefix) {
+			case GREATERTHAN:
+			case STARTS_AFTER:
+				retVal += 1;
+				break;
+			case EQUAL:
+			case GREATERTHAN_OR_EQUALS:
+			case NOT_EQUAL:
+				break;
+			case LESSTHAN:
+			case LESSTHAN_OR_EQUALS:
+			case APPROXIMATE:
+			case ENDS_BEFORE:
+				throw new IllegalStateException(Msg.code(1926) + "Invalid lower bound comparator: " + prefix);
 		}
+
 		return retVal;
 	}
 
@@ -346,24 +342,25 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			return null;
 		}
 		int retVal = DateUtils.convertDateToDayInteger(myUpperBound.getValue());
-		if (myUpperBound.getPrefix() != null) {
-			switch (myUpperBound.getPrefix()) {
-				case LESSTHAN:
-				case ENDS_BEFORE:
-					retVal -= 1;
-					break;
-				case EQUAL:
-				case LESSTHAN_OR_EQUALS:
-				case NOT_EQUAL:
-					break;
-				case GREATERTHAN_OR_EQUALS:
-				case GREATERTHAN:
-				case APPROXIMATE:
-				case STARTS_AFTER:
-					throw new IllegalStateException(
-							Msg.code(1927) + "Invalid upper bound comparator: " + myUpperBound.getPrefix());
-			}
+
+		ParamPrefixEnum prefix = getPrefixOrDefault(myUpperBound);
+
+		switch (prefix) {
+			case LESSTHAN:
+			case ENDS_BEFORE:
+				retVal -= 1;
+				break;
+			case EQUAL:
+			case LESSTHAN_OR_EQUALS:
+			case NOT_EQUAL:
+				break;
+			case GREATERTHAN_OR_EQUALS:
+			case GREATERTHAN:
+			case APPROXIMATE:
+			case STARTS_AFTER:
+				throw new IllegalStateException(Msg.code(1927) + "Invalid upper bound comparator: " + prefix);
 		}
+
 		return retVal;
 	}
 
@@ -377,28 +374,29 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	@Nonnull
 	private static Date getLowerBoundAsInstant(@Nonnull DateParam theLowerBound) {
 		Date retVal = theLowerBound.getValue();
+
 		if (theLowerBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
 			retVal = DateUtils.getLowestInstantFromDate(retVal);
 		}
 
-		if (theLowerBound.getPrefix() != null) {
-			switch (theLowerBound.getPrefix()) {
-				case GREATERTHAN:
-				case STARTS_AFTER:
-					retVal = theLowerBound.getPrecision().add(retVal, 1);
-					break;
-				case EQUAL:
-				case NOT_EQUAL:
-				case GREATERTHAN_OR_EQUALS:
-					break;
-				case LESSTHAN_OR_EQUALS:
-				case LESSTHAN:
-				case APPROXIMATE:
-				case ENDS_BEFORE:
-					throw new IllegalStateException(
-							Msg.code(1928) + "Invalid lower bound comparator: " + theLowerBound.getPrefix());
-			}
+		ParamPrefixEnum prefix = getPrefixOrDefault(theLowerBound);
+
+		switch (prefix) {
+			case GREATERTHAN:
+			case STARTS_AFTER:
+				retVal = theLowerBound.getPrecision().add(retVal, 1);
+				break;
+			case EQUAL:
+			case NOT_EQUAL:
+			case GREATERTHAN_OR_EQUALS:
+				break;
+			case LESSTHAN_OR_EQUALS:
+			case LESSTHAN:
+			case APPROXIMATE:
+			case ENDS_BEFORE:
+				throw new IllegalStateException(Msg.code(1928) + "Invalid lower bound comparator: " + prefix);
 		}
+
 		return retVal;
 	}
 
@@ -449,26 +447,26 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			retVal = DateUtils.getHighestInstantFromDate(retVal);
 		}
 
-		if (theUpperBound.getPrefix() != null) {
-			switch (theUpperBound.getPrefix()) {
-				case LESSTHAN:
-				case ENDS_BEFORE:
-					retVal = new Date(retVal.getTime() - 1L);
-					break;
-				case EQUAL:
-				case NOT_EQUAL:
-				case LESSTHAN_OR_EQUALS:
-					retVal = theUpperBound.getPrecision().add(retVal, 1);
-					retVal = new Date(retVal.getTime() - 1L);
-					break;
-				case GREATERTHAN_OR_EQUALS:
-				case GREATERTHAN:
-				case APPROXIMATE:
-				case STARTS_AFTER:
-					throw new IllegalStateException(
-							Msg.code(1929) + "Invalid upper bound comparator: " + theUpperBound.getPrefix());
-			}
+		ParamPrefixEnum prefix = getPrefixOrDefault(theUpperBound);
+
+		switch (prefix) {
+			case LESSTHAN:
+			case ENDS_BEFORE:
+				retVal = new Date(retVal.getTime() - 1L);
+				break;
+			case EQUAL:
+			case NOT_EQUAL:
+			case LESSTHAN_OR_EQUALS:
+				retVal = theUpperBound.getPrecision().add(retVal, 1);
+				retVal = new Date(retVal.getTime() - 1L);
+				break;
+			case GREATERTHAN_OR_EQUALS:
+			case GREATERTHAN:
+			case APPROXIMATE:
+			case STARTS_AFTER:
+				throw new IllegalStateException(Msg.code(1929) + "Invalid upper bound comparator: " + prefix);
 		}
+
 		return retVal;
 	}
 
@@ -703,5 +701,23 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 		myLowerBound = lowerBound;
 		myUpperBound = upperBound;
+	}
+
+	/**
+	 * As per FHIR specification "If no prefix is present, the prefix <code>eq</code> is assumed".
+	 *
+	 * All constructors and setters of this class will set the 'prefix' on <code>myLowerBound</code> and <code>myUpperBound</code>
+	 * properties except when a DateRangeParam is created from query parameter (?birthdate=2024-12-02 or ?birthdate=eq2024-12-02). See
+	 * {@link DateRangeParam#setValuesAsQueryTokens}.
+	 *
+	 * In such scenario, it is mandatory to retain the capability to determine whether the 'eq' modifier is provided or
+	 * not by the client as searching against a combo search index parameter can only be invoked when date query parameter
+	 * have no modifier.
+	 *
+	 * This method should be used when performing computation conditional on the prefix value to ensure that a dateParam
+	 * without prefix is treated as if it has one set to 'eq'.
+	 */
+	private static ParamPrefixEnum getPrefixOrDefault(DateParam theDateParam) {
+		return ObjectUtils.defaultIfNull(theDateParam.getPrefix(), EQUAL);
 	}
 }
