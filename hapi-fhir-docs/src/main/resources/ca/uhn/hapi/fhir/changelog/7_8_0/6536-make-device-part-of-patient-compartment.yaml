@@ -1,6 +1,7 @@
 ---
 type: add
 jira: SMILE-9260
+backport: 7.6.1
 title: "The `patient` search parameter for the `Device` resource has been added to the Patient Compartment for the purposes of: 
 
 - AuthorizationInterceptor

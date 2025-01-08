@@ -17,11 +17,11 @@ Date: Procedure.performedDateTime || Procedure.performedPeriod.start && “-“ 
       <tbody>
       <th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
          <th:block th:unless='*{getResourceType().name() == "Composition"}'>
-            <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
-               <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
+            <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink')}">
+               <tr th:id="${extension != null} ? ${#strings.arraySplit(extension.getValue().getValue(), '#')[1]} : ''">
                   <td th:insert="~{IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')}">Procedure</td>
                   <td th:insert="~{IpsUtilityFragments :: concat (list=*{getNote()},attr='text')}">Comments</td>
-                  <td th:insert="~{IpsUtilityFragments :: renderPerformed (performed=*{getPerformed()})}">Date</td>
+                  <td th:insert="~{IpsUtilityFragments :: renderTime (time=*{getPerformed()})}">Date</td>
                </tr>
             </th:block>
          </th:block>

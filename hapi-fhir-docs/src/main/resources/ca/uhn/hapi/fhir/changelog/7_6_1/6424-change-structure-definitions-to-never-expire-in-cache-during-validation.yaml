@@ -1,0 +1,5 @@
+---
+type: change
+issue: 6424
+title: "Changed VersionSpecificWorkerContextWrapper to never expire StructureDefinition entries in the cache, 
+which is needed because the validator makes assumptions about StructureDefinitions never changing."

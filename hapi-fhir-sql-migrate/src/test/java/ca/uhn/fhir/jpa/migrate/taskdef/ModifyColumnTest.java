@@ -3,12 +3,14 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -279,6 +281,9 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().migrate();
 		assertEquals(ColumnTypeEnum.STRING, JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL").getColumnTypeEnum());
 
+		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
+		assertThat(entities).hasSize(1);
+		assertThat(entities.get(0).getResult()).isEqualTo(MigrationTaskExecutionResultEnum.NOT_APPLIED_ALLOWED_FAILURE.name());
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")

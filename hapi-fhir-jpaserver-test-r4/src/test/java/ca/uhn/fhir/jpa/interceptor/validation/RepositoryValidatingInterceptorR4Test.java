@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -30,6 +28,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
@@ -238,7 +238,6 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 
 		patient = myPatientDao.read(id);
 		assertThat(patient.getMeta().getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList())).containsExactlyInAnyOrder("http://foo/Profile1");
-
 	}
 
 	@Test
@@ -386,13 +385,11 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 			assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Observation.status: minimum required = 1, but only found 0");
 		}
-
 	}
 
 
 	@Test
 	public void testMultipleTypedRules() {
-
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Observation")
 			.requireAtLeastProfile("http://hl7.org/fhir/StructureDefinition/Observation")

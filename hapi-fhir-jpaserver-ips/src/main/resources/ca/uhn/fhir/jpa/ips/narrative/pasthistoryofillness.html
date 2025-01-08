@@ -19,12 +19,12 @@ Onset Date: Condition.onsetDateTime || Condition.onsetPeriod.start && “-“ &&
       <tbody>
       <th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
          <th:block th:unless='*{getResourceType().name() == "Composition"}'>
-            <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
-               <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
+            <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink')}">
+               <tr th:id="${extension != null} ? ${#strings.arraySplit(extension.getValue().getValue(), '#')[1]} : ''">
                   <td th:insert="~{IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')}">Medical Problem</td>
                   <td th:insert="~{IpsUtilityFragments :: codeableConcept (cc=*{getClinicalStatus()},attr='code')}">Status</td>
                   <td th:insert="~{IpsUtilityFragments :: concat (list=*{getNote()},attr='text')}">Comments</td>
-                  <td th:insert="~{IpsUtilityFragments :: renderOnset (onset=*{getOnset()})}">Onset Date</td>
+                  <td th:insert="~{IpsUtilityFragments :: renderTime (time=*{getOnset()})}">Onset Date</td>
                </tr>
             </th:block>
          </th:block>

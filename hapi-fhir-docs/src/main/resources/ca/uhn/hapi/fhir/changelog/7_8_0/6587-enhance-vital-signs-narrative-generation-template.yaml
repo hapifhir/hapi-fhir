@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6587
+title: "Enhanced the IPS vital signs narrative template to include code and value information for 
+    all entries in the `Observation.component` property."

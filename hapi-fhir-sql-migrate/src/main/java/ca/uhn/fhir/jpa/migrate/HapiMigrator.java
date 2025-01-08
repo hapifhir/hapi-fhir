@@ -209,6 +209,7 @@ public class HapiMigrator {
 			theTask.execute();
 			recordTaskAsCompletedIfNotDryRun(theTask, sw.getMillis(), true);
 			theMigrationResult.changes += theTask.getChangesCount();
+			theMigrationResult.executionResult = theTask.getExecutionResult();
 			theMigrationResult.executedStatements.addAll(theTask.getExecutedStatements());
 			theMigrationResult.succeededTasks.add(theTask);
 		} catch (SQLException | HapiMigrationException e) {
