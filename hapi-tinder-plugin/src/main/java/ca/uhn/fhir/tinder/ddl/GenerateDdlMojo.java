@@ -36,6 +36,9 @@ public class GenerateDdlMojo extends AbstractMojo {
 	@Parameter
 	public String outputDirectory;
 
+	@Parameter(defaultValue = "true", required = false)
+	public Boolean databasePartitionMode;
+
 	@Parameter(defaultValue = "false")
 	boolean skip;
 
@@ -56,6 +59,16 @@ public class GenerateDdlMojo extends AbstractMojo {
 		}
 
 		DdlGeneratorHibernate61 generator = new DdlGeneratorHibernate61();
+
+		/*
+		 * We default to database partition mode TRUE because that mode means we don't
+		 * modify the entity metadata at all before generating the DDL. When Database
+		 * Partition Mode is disabled (FALSE) we are filtering elements and modifying
+		 * the metadata.
+		 */
+		generator
+				.getHapiHibernateDialectSettingsService()
+				.setDatabasePartitionMode(databasePartitionMode != null ? databasePartitionMode : true);
 
 		for (String packageName : packageNames) {
 			String t = trim(packageName);

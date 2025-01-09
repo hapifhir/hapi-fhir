@@ -1,4 +1,4 @@
-package ca.uhn.fhir.tinder.ddl.test;
+package ca.uhn.fhir.tinder.ddl.test.pks;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,7 +183,7 @@ public class DeleteExpungeSqlBuilder {
 		builder.append("DELETE FROM ");
 		builder.append(theResourceForeignKey.myTable);
 		builder.append(" WHERE ");
-		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+		if (myPartitionSettings.isDatabasePartitionMode()) {
 			builder.append("(");
 			builder.append(theResourceForeignKey.myPartitionIdColumn);
 			builder.append(",");
@@ -196,7 +196,7 @@ public class DeleteExpungeSqlBuilder {
 		builder.append(" IN (");
 		for (Iterator<JpaPid> iter = thePids.iterator(); iter.hasNext(); ) {
 			JpaPid pid = iter.next();
-			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			if (myPartitionSettings.isDatabasePartitionMode()) {
 				builder.append("(");
 				builder.append(pid.getPartitionId());
 				builder.append(",");

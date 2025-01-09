@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
@@ -11,10 +12,8 @@ import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,27 +37,51 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class HapiFhirJpaMigrationTasksTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirJpaMigrationTasksTest.class);
 	private static final String MIGRATION_TABLE_NAME = "HFJ_FLY_MIGRATOR";
 	private final BasicDataSource myDataSource = newDataSource();
 	private final JdbcTemplate myJdbcTemplate = new JdbcTemplate(myDataSource);
+	private final DriverTypeEnum.ConnectionProperties myConnection = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myDataSource);
 
 	@RegisterExtension
 	private LoggingExtension myLoggingExtension = new LoggingExtension();
 
-	@BeforeAll
-	public static void beforeEach() {
-		HapiSystemProperties.enableUnitTestMode();
+	@Test
+	public void testCreate_NonPartitionedIds() throws SQLException {
+		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
+
+		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+		migrator.addTasks(tasks.getAllTasks(VersionEnum.values()));
+		migrator.createMigrationTableIfRequired();
+
+		MigrationResult outcome = migrator.migrate();
+		assertEquals(0, outcome.changes);
+		assertEquals(1, outcome.succeededTasks.size());
+		assertEquals(0, outcome.failedTasks.size());
+
+		Set<String> columns = JdbcUtils.getPrimaryKeyColumns(myConnection, "HFJ_RESOURCE");
+		assertThat(new ArrayList<>(columns)).asList().containsExactlyInAnyOrder("RES_ID");
 	}
 
 	@Test
-	@Order(0)
-	public void testCreate() {
-		new HapiFhirJpaMigrationTasks(Collections.emptySet());
+	public void testCreate_PartitionedIds() throws SQLException {
+		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Set.of(HapiFhirJpaMigrationTasks.FlagEnum.DB_PARTITION_MODE.getCommandLineValue()));
+
+		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+		migrator.addTasks(tasks.getAllTasks(VersionEnum.values()));
+		migrator.createMigrationTableIfRequired();
+
+		MigrationResult outcome = migrator.migrate();
+		assertEquals(0, outcome.changes);
+		assertEquals(1, outcome.succeededTasks.size());
+		assertEquals(0, outcome.failedTasks.size());
+
+		Set<String> columns = JdbcUtils.getPrimaryKeyColumns(myConnection, "HFJ_RESOURCE");
+		assertThat(new ArrayList<>(columns)).asList().containsExactlyInAnyOrder("RES_ID", "PARTITION_ID");
 	}
 
 	/**
@@ -66,7 +90,6 @@ public class HapiFhirJpaMigrationTasksTest {
 	 * added in 7.4.0 so this backfills them.
 	 */
 	@Test
-	@Order(1)
 	public void testCreateUniqueComboParamHashes() {
 		/*
 		 * Setup
@@ -76,7 +99,7 @@ public class HapiFhirJpaMigrationTasksTest {
 		// of the schema from the 7.2.0 release
 		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Set.of());
 		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
-		migrator.addTask(new InitializeSchemaTask("7.2.0",				"20180115.0",
+		migrator.addTask(new InitializeSchemaTask("7.2.0", "20180115.0",
 			new SchemaInitializationProvider(
 				"HAPI FHIR", "/jpa_h2_schema_720", "HFJ_RESOURCE", true)));
 
@@ -116,6 +139,34 @@ public class HapiFhirJpaMigrationTasksTest {
 		assertThat(row.get("HASH_COMPLETE_2")).as(row::toString).isEqualTo(-1513800680307323438L);
 	}
 
+	@Test
+	@Disabled("This will be enabled in a subsequent PR")
+	public void testVerifyDbpm_ExistingNonPartitionedSchema_PartitionedMode() {
+		HapiFhirJpaMigrationTasks tasks;
+		HapiMigrator migrator;
+
+		// Setup: Initialize the database in legacy mode
+		tasks = new HapiFhirJpaMigrationTasks(Set.of());
+		migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+		migrator.createMigrationTableIfRequired();
+		migrator.addAllTasksForUnitTest(tasks.getAllTasks(VersionEnum.values()));
+		migrator.migrate();
+
+		// Test: Run a second time but with DB partitioned mode enabled
+		tasks = new HapiFhirJpaMigrationTasks(Set.of(HapiFhirJpaMigrationTasks.FlagEnum.DB_PARTITION_MODE.getCommandLineValue()));
+		migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+		migrator.createMigrationTableIfRequired();
+		migrator.addAllTasksForUnitTest(tasks.getAllTasks(VersionEnum.values()));
+		try {
+			migrator.migrate();
+			fail();
+		} catch (Exception e) {
+			// Verify: We should fail
+			assertEquals("AA", e.toString());
+		}
+
+	}
+
 	private void insertRow_ResourceIndexedComboStringUnique() {
 		myJdbcTemplate.execute(
 			"""
@@ -131,32 +182,32 @@ public class HapiFhirJpaMigrationTasksTest {
 	private void insertRow_ResourceTable() {
 		myJdbcTemplate.execute(
 			"""
-				insert into
-				HFJ_RESOURCE (
-						RES_DELETED_AT,
-						RES_VERSION,
-						FHIR_ID,
-						HAS_TAGS,
-						RES_PUBLISHED,
-						RES_UPDATED,
-						SP_HAS_LINKS,
-						HASH_SHA256,
-						SP_INDEX_STATUS,
-						RES_LANGUAGE,
-						SP_CMPSTR_UNIQ_PRESENT,
-						SP_COORDS_PRESENT,
-						SP_DATE_PRESENT,
-						SP_NUMBER_PRESENT,
-						SP_QUANTITY_PRESENT,
-						SP_STRING_PRESENT,
-						SP_TOKEN_PRESENT,
-						SP_URI_PRESENT,
-						SP_QUANTITY_NRML_PRESENT,
-						RES_TYPE,
-						RES_VER,
-						RES_ID)
-						values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-			""",
+					insert into
+					HFJ_RESOURCE (
+							RES_DELETED_AT,
+							RES_VERSION,
+							FHIR_ID,
+							HAS_TAGS,
+							RES_PUBLISHED,
+							RES_UPDATED,
+							SP_HAS_LINKS,
+							HASH_SHA256,
+							SP_INDEX_STATUS,
+							RES_LANGUAGE,
+							SP_CMPSTR_UNIQ_PRESENT,
+							SP_COORDS_PRESENT,
+							SP_DATE_PRESENT,
+							SP_NUMBER_PRESENT,
+							SP_QUANTITY_PRESENT,
+							SP_STRING_PRESENT,
+							SP_TOKEN_PRESENT,
+							SP_URI_PRESENT,
+							SP_QUANTITY_NRML_PRESENT,
+							RES_TYPE,
+							RES_VER,
+							RES_ID)
+							values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				""",
 			new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
 				@Override
 				protected void setValues(@Nonnull PreparedStatement thePs, @Nonnull LobCreator theLobCreator) throws SQLException {
@@ -185,6 +236,11 @@ public class HapiFhirJpaMigrationTasksTest {
 					thePs.setLong(i, 1L); // RES_ID
 				}
 			});
+	}
+
+	@BeforeAll
+	public static void beforeEach() {
+		HapiSystemProperties.enableUnitTestMode();
 	}
 
 	static BasicDataSource newDataSource() {

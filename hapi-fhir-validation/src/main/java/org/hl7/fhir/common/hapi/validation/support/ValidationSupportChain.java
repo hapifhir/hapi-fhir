@@ -16,6 +16,7 @@ import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.StopWatch;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
@@ -955,9 +956,19 @@ public class ValidationSupportChain implements IValidationSupport {
 
 				return returnValue;
 			} else {
-				retVal = new CacheValue<>(theLoader.get());
-				myNonExpiringCache.put(theKey, retVal);
-				putInCache(theKey, retVal);
+				// Avoid flooding the validation support modules tons of concurrent
+				// requests for the same thing
+				synchronized (this) {
+					retVal = getFromCache(theKey);
+					if (retVal == null) {
+						StopWatch sw = new StopWatch();
+						ourLog.info("Performing initial retrieval for non-expiring cache: {}", theKey);
+						retVal = new CacheValue<>(theLoader.get());
+						ourLog.info("Initial retrieval for non-expiring cache {} succeeded in {}", theKey, sw);
+						myNonExpiringCache.put(theKey, retVal);
+						putInCache(theKey, retVal);
+					}
+				}
 			}
 		}
 

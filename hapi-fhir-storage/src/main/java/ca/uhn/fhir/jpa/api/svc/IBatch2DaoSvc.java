@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,13 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
+import ca.uhn.fhir.model.primitive.IdDt;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Date;
+import java.util.stream.Stream;
 
 public interface IBatch2DaoSvc {
 
@@ -75,5 +78,14 @@ public interface IBatch2DaoSvc {
 			Date theStart, Date theEnd, RequestPartitionId theTargetPartitionId, String theUrl) {
 		return new ListWrappingPidStream(fetchResourceIdsPage(
 				theStart, theEnd, 20000 /* ResourceIdListStep.DEFAULT_PAGE_SIZE */, theTargetPartitionId, theUrl));
+	}
+
+	/**
+	 * Stream Resource Ids of all resources that have a reference to the provided resource id
+	 *
+	 * @param theTargetId the id of the resource we are searching for references to
+	 */
+	default Stream<IdDt> streamSourceIdsThatReferenceTargetId(IIdType theTargetId) {
+		throw new UnsupportedOperationException(Msg.code(2594) + "Not implemented unless explicitly overridden");
 	}
 }

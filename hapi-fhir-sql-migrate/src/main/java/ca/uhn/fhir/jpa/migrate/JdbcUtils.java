@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,36 @@ import javax.sql.DataSource;
 
 public class JdbcUtils {
 	private static final Logger ourLog = LoggerFactory.getLogger(JdbcUtils.class);
+
+	/**
+	 * Retrieve all index names
+	 */
+	public static Set<String> getPrimaryKeyColumns(
+			DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {
+
+		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
+		try (Connection connection = dataSource.getConnection()) {
+			return theConnectionProperties.getTxTemplate().execute(t -> {
+				DatabaseMetaData metadata;
+				Set<String> retVal = new HashSet<>();
+				try {
+					metadata = connection.getMetaData();
+
+					try (ResultSet results =
+							metadata.getPrimaryKeys(connection.getCatalog(), connection.getSchema(), theTableName)) {
+						while (results.next()) {
+							String columnName = results.getString("COLUMN_NAME");
+							retVal.add(columnName);
+						}
+					}
+
+				} catch (SQLException e) {
+					throw new InternalErrorException(Msg.code(2562) + e);
+				}
+				return retVal;
+			});
+		}
+	}
 
 	/**
 	 * Retrieve all index names

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.to;
 
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.to.mvc.AnnotationMethodHandlerAdapterConfigurer;
 import ca.uhn.fhir.to.util.WebUtil;
 import jakarta.annotation.Nonnull;
@@ -49,7 +50,7 @@ public class FhirTesterMvcConfig implements WebMvcConfigurer {
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCharacterEncoding("UTF-8");
 
-		if (theTesterConfig.getDebugTemplatesMode()) {
+		if (theTesterConfig.getDebugTemplatesMode() || HapiSystemProperties.isUnitTestModeEnabled()) {
 			resolver.setCacheable(false);
 		}
 

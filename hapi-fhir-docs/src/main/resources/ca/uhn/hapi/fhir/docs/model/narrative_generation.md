@@ -77,6 +77,11 @@ observation.narrative=classpath:com/example/narrative/Observation.html
 # You can also assign a template based on profile ID (Resource.meta.profile)
 vitalsigns.profile=http://hl7.org/fhir/StructureDefinition/vitalsigns
 vitalsigns.narrative=classpath:com/example/narrative/Observation_Vitals.html
+
+# You can also assign a template based on tag ID (Resource.meta.tag). Coding
+# must be represented as a code system and code delimited by a pipe character.
+allergyIntolerance.tag=http://loinc.org|48765-2
+allergyIntolerance.narrative=classpath:com/example/narrative/AllergyIntolerance.html
 ```
 
 You may also override/define behaviour for datatypes and other structures. These datatype narrative definitions will be used as content within <code>th:narrative</code> blocks in resource templates. See the [example above](#creating-your-own-templates).

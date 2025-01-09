@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,17 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
@@ -74,6 +78,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	@RegisterExtension
 	protected RestfulServerExtension myServer;
 
+	private MyHttpCodeClientIntercepter myLastHttpResponseCodeCapture = new MyHttpCodeClientIntercepter();
+
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
 			.withServerBeforeAll(s -> {
@@ -94,6 +100,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 				s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
 				s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+				s.registerProvider(myAppCtx.getBean(PatientMergeProvider.class));
 
 				s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
@@ -127,8 +134,10 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 				myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
 				if (shouldLogClient()) {
-					myClient.registerInterceptor(new LoggingInterceptor());
+					myClient.registerInterceptor(new LoggingInterceptor(verboseClientLogging()));
 				}
+
+				myClient.registerInterceptor(myLastHttpResponseCodeCapture);
 			});
 
 	@Autowired
@@ -157,6 +166,10 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		return true;
 	}
 
+	protected boolean verboseClientLogging() {
+		return false;
+	}
+
 	protected List<String> toNameList(Bundle resp) {
 		List<String> names = new ArrayList<>();
 		for (BundleEntryComponent next : resp.getEntry()) {
@@ -170,6 +183,10 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			}
 		}
 		return names;
+	}
+
+	protected int getLastHttpStatusCode() {
+		return myLastHttpResponseCodeCapture.getLastHttpStatusCode();
 	}
 
 	public static int getNumberOfParametersByName(Parameters theParameters, String theName) {
@@ -240,5 +257,22 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 
 		return ids;
+	}
+
+	private class MyHttpCodeClientIntercepter implements IClientInterceptor {
+
+		private int myLastHttpStatusCode;
+
+		@Override
+		public void interceptRequest(IHttpRequest theRequest) {}
+
+		@Override
+		public void interceptResponse(IHttpResponse theResponse) throws IOException {
+			myLastHttpStatusCode = theResponse.getStatus();
+		}
+
+		public int getLastHttpStatusCode() {
+			return myLastHttpStatusCode;
+		}
 	}
 }
