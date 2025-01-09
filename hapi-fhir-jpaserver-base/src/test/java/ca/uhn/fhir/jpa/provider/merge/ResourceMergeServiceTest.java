@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -1464,9 +1465,14 @@ public class ResourceMergeServiceTest {
 
 
 	private void setupReplaceReferencesForSuccessForSync() {
-		// set the count to less that the page size for sync processing
+		Parameters parameters = new Parameters();
+		Parameters.ParametersParameterComponent outcomeParameter = new Parameters.ParametersParameterComponent();
+		outcomeParameter.setName("outcome");
+		outcomeParameter.setResource(new Bundle());
+		parameters.addParameter(outcomeParameter);
+
 		when(myReplaceReferencesSvcMock.replaceReferences(isA(ReplaceReferencesRequest.class),
-			eq(myRequestDetailsMock))).thenReturn(new Parameters());
+			eq(myRequestDetailsMock))).thenReturn(parameters);
 	}
 
 	private void setupBatch2JobTaskHelperMock(Task theTaskToReturn) {

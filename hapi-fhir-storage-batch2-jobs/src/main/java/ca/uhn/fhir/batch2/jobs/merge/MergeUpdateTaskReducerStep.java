@@ -27,21 +27,25 @@ import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencePatchOutcomeJso
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceUpdateTaskReducerStep;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Provenance;
 
 import java.util.Date;
 
 public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReducerStep<MergeJobParameters> {
 	private final IHapiTransactionService myHapiTransactionService;
+	private final MergeResourceHelper myMergeResourceHelper;
 
-	public MergeUpdateTaskReducerStep(DaoRegistry theDaoRegistry, IHapiTransactionService theHapiTransactionService) {
-		super(theDaoRegistry);
+	public MergeUpdateTaskReducerStep(
+			DaoRegistry theDaoRegistry,
+			IHapiTransactionService theHapiTransactionService,
+			MergeResourceHelper theMergeResourceHelper,
+			MergeProvenanceSvc theMergeProvenanceSvc) {
+		super(theDaoRegistry, theMergeProvenanceSvc);
 		this.myHapiTransactionService = theHapiTransactionService;
+		myMergeResourceHelper = theMergeResourceHelper;
 	}
 
 	@Nonnull
@@ -63,19 +67,19 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 					myFhirContext.newJsonParser().parseResource(Patient.class, mergeJobParameters.getResultResource());
 		}
 
-		IFhirResourceDao<Patient> patientDao = myDaoRegistry.getResourceDao(Patient.class);
-		IFhirResourceDao<Provenance> provenanceDao = myDaoRegistry.getResourceDao(Provenance.class);
-		MergeResourceHelper helper = new MergeResourceHelper(patientDao, provenanceDao);
-
-		helper.updateMergedResourcesAfterReferencesReplaced(
+		myMergeResourceHelper.updateMergedResourcesAndCreateProvenance(
 				myHapiTransactionService,
 				mergeJobParameters.getSourceId().asIdDt(),
 				mergeJobParameters.getTargetId().asIdDt(),
+				getPatchOutputBundles(),
 				resultResource,
 				mergeJobParameters.getDeleteSource(),
 				requestDetails,
 				startTime);
 
-		return super.run(theStepExecutionDetails, theDataSink);
+		// setting createProvenance to false, because the provenance resource for merge has been created in the helper
+		// method above. The reason for that is merge updates target and source resources, unlike replace references,
+		// and we would like the merge provenance to reference the target and source versions after the update.
+		return super.run(theStepExecutionDetails, theDataSink, false);
 	}
 }

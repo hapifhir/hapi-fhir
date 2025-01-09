@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -218,21 +219,85 @@ public class ReplaceReferencesTestHelper {
 		return searchBundle.getAllResources();
 	}
 
-	public void assertMergeProvenance(boolean theDeleteSource) {
-		List<IBaseResource> provenances = searchProvenance(myTargetPatientId.getValue());
+	public void assertReplaceReferencesProvenance() {
+		List<IBaseResource> provenances =
+				searchProvenance(myTargetPatientId.toVersionless().getIdPart());
 		assertThat(provenances).hasSize(1);
 		Provenance provenance = (Provenance) provenances.get(0);
 
 		// assert targets
-		assertThat(provenance.getTarget()).hasSize(theDeleteSource ? 1 : 2);
+		int expectedNumberOfProvenanceTargets = TOTAL_EXPECTED_PATCHES + 2;
+		assertThat(provenance.getTarget()).hasSize(expectedNumberOfProvenanceTargets);
 		// the first target reference should be the target patient
-		String targetPatientReference = provenance.getTarget().get(0).getReference();
-		assertThat(targetPatientReference).isEqualTo(myTargetPatientId.getValue() + "/_history/2");
+		String targetPatientReferenceInProvenance =
+				provenance.getTarget().get(0).getReference();
+		assertThat(targetPatientReferenceInProvenance.toString()).isEqualTo(myTargetPatientId.toString());
+		// the second target reference should be the source patient, if it wasn't deleted
+		String sourcePatientReference = provenance.getTarget().get(1).getReference();
+		assertThat(sourcePatientReference.toString()).isEqualTo(mySourcePatientId.toString());
+
+		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
+		assertThat(allActualTargets).containsAll(getExpectedProvenanceTargetsForPatchedResources());
+
+		Instant now = Instant.now();
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		assertThat(provenance.getRecorded()).isBetween(oneMinuteAgo, now);
+
+		Period period = provenance.getOccurredPeriod();
+		assertThat(period.getStart()).isBefore(period.getEnd());
+		assertThat(period.getStart()).isBetween(oneMinuteAgo, now);
+		assertThat(period.getEnd()).isEqualTo(provenance.getRecorded());
+
+		// validate provenance.reason
+		assertThat(provenance.getReason()).hasSize(1);
+		Coding reasonCoding = provenance.getReason().get(0).getCodingFirstRep();
+		assertThat(reasonCoding).isNotNull();
+		assertThat(reasonCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/v3-ActReason");
+		assertThat(reasonCoding.getCode()).isEqualTo("PATADMIN");
+
+		// FIXME KHS: assert provenance activity code for replace-references
+		;
+	}
+
+	public void assertMergeProvenance(boolean theDeleteSource) {
+		assertMergeProvenance(
+				theDeleteSource,
+				mySourcePatientId.withVersion("2"),
+				myTargetPatientId.withVersion("2"),
+				TOTAL_EXPECTED_PATCHES,
+				getExpectedProvenanceTargetsForPatchedResources());
+	}
+
+	public void assertMergeProvenance(
+			boolean theDeleteSource,
+			IIdType theSourcePatientIdWithExpectedVersion,
+			IIdType theTargetPatientIdWithExpectedVersion,
+			int theExpectedPatches,
+			Set<String> theExpectedProvenanceTargetsForPatchedResources) {
+
+		List<IBaseResource> provenances = searchProvenance(
+				theTargetPatientIdWithExpectedVersion.toVersionless().getIdPart());
+		assertThat(provenances).hasSize(1);
+		Provenance provenance = (Provenance) provenances.get(0);
+
+		// assert targets
+		int expectedNumberOfProvenanceTargets = theExpectedPatches;
+		// target patient and source patient if not deleted
+		expectedNumberOfProvenanceTargets += theDeleteSource ? 1 : 2;
+		assertThat(provenance.getTarget()).hasSize(expectedNumberOfProvenanceTargets);
+		// the first target reference should be the target patient
+		String targetPatientReferenceInProvenance =
+				provenance.getTarget().get(0).getReference();
+		assertThat(targetPatientReferenceInProvenance.toString())
+				.isEqualTo(theTargetPatientIdWithExpectedVersion.toString());
 		if (!theDeleteSource) {
 			// the second target reference should be the source patient, if it wasn't deleted
 			String sourcePatientReference = provenance.getTarget().get(1).getReference();
-			assertThat(sourcePatientReference).isEqualTo(mySourcePatientId.getValue() + "/_history/2");
+			assertThat(sourcePatientReference.toString()).isEqualTo(theSourcePatientIdWithExpectedVersion.toString());
 		}
+
+		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
+		assertThat(allActualTargets).containsAll(theExpectedProvenanceTargetsForPatchedResources);
 
 		Instant now = Instant.now();
 		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
@@ -255,6 +320,18 @@ public class ReplaceReferencesTestHelper {
 		assertThat(activityCoding).isNotNull();
 		assertThat(activityCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle");
 		assertThat(activityCoding.getCode()).isEqualTo("merge");
+	}
+
+	private Set<String> getExpectedProvenanceTargetsForPatchedResources() {
+		Set<String> allExpectedTargets = new HashSet<>();
+
+		allExpectedTargets.add(mySourceEncId1.withVersion("2").toString());
+		allExpectedTargets.add(mySourceEncId2.withVersion("2").toString());
+		allExpectedTargets.add(mySourceCarePlanId.withVersion("2").toString());
+		allExpectedTargets.addAll(mySourceObsIds.stream()
+				.map(obsId -> obsId.withVersion("2").toString())
+				.toList());
+		return allExpectedTargets;
 	}
 
 	private Set<IIdType> getTargetEverythingResourceIds() {
@@ -533,5 +610,13 @@ public class ReplaceReferencesTestHelper {
 			Identifier actualIdentifier = theActualIdentifiers.get(i);
 			assertThat(expectedIdentifier.equalsDeep(actualIdentifier)).isTrue();
 		}
+	}
+
+	private static Set<String> extractResourceIdsFromProvenanceTarget(List<Reference> theTargets) {
+		return theTargets.stream()
+				.map(Reference::getReference)
+				.map(IdDt::new)
+				.map(IdDt::toString)
+				.collect(Collectors.toSet());
 	}
 }
