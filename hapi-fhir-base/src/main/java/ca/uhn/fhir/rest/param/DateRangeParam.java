@@ -582,20 +582,22 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		validateAndSet(lowerBound, upperBound);
 	}
 
-	 @Override
+	@Override
 	public void setValuesAsQueryTokens(
 			FhirContext theContext, String theParamName, List<QualifiedParamList> theParameters)
 			throws InvalidRequestException {
 
-		// When we create and populate a DateRangeParam from a query parameter (?birthdate=2024-12-02 or ?birthdate=eq2024-12-02), we
+		// When we create and populate a DateRangeParam from a query parameter (?birthdate=2024-12-02 or
+		// ?birthdate=eq2024-12-02), we
 		// set the prefix only if it was specifically provided by the client as it is mandatory to retain the capability
 		// to make the differentiation. See {@link SearchBuilder#validateParamValuesAreValidForComboParam}.
 		//
 		// Since the FHIR specification says that "If no prefix is present, the prefix <code>eq</code> is assumed",
-		// we will do so by invoking method {@link DateRangeParam#getPrefixOrDefault} everytime computation is conditional on the
+		// we will do so by invoking method {@link DateRangeParam#getPrefixOrDefault} everytime computation is
+		// conditional on the
 		// prefix value.
 
-		 boolean haveHadUnqualifiedParameter = false;
+		boolean haveHadUnqualifiedParameter = false;
 		for (QualifiedParamList paramList : theParameters) {
 			if (paramList.size() == 0) {
 				continue;
