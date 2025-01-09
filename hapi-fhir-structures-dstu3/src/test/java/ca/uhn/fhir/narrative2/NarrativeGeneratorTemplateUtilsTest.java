@@ -80,4 +80,33 @@ class NarrativeGeneratorTemplateUtilsTest {
 		assertFalse(NarrativeGeneratorTemplateUtils.INSTANCE
 			 .bundleHasEntriesWithCode(bundle, "Observation", "http://loinc.org",  "789"));
 	}
+
+	@Test
+	public void testResourcesDoNotHaveCodeValue_isTrue() {
+		Bundle bundle = new Bundle();
+		bundle.addEntry().setResource(new Observation().setCode(
+			 new CodeableConcept(
+				  new Coding("http://loinc.org", "123", ""))));
+		bundle.addEntry().setResource(new Observation().setCode(
+			 new CodeableConcept(
+				  new Coding("http://loinc.org", "456", ""))));
+
+		assertTrue(NarrativeGeneratorTemplateUtils.INSTANCE
+			 .bundleHasEntriesWithoutCode(bundle, "Observation", "http://loinc.org",  "456"));
+	}
+
+	@Test
+	public void testResourcesDoNotHaveCodeValue_isFalse() {
+		Bundle bundle = new Bundle();
+		bundle.addEntry().setResource(new Observation().setCode(
+			 new CodeableConcept(
+				  new Coding("http://loinc.org", "456", ""))));
+		bundle.addEntry().setResource(new Observation().setCode(
+			 new CodeableConcept()
+				  .addCoding(new Coding("http://loinc.org", "abc", ""))
+				  .addCoding(new Coding("http://loinc.org", "456", ""))
+		));
+		assertFalse(NarrativeGeneratorTemplateUtils.INSTANCE
+			 .bundleHasEntriesWithoutCode(bundle, "Observation", "http://loinc.org",  "456"));
+	}
 }

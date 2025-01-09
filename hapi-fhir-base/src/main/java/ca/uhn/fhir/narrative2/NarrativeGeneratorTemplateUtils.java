@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * An instance of this class is added to the Thymeleaf context as a variable with
@@ -58,7 +59,7 @@ public class NarrativeGeneratorTemplateUtils {
 	}
 
 	/**
-	 * Returns if the bundle contains a resource that has a `code` property that contains a matching code system and code.
+	 * Returns if the bundle contains an entry resource whose `code` property contains a matching code system and code.
 	 *
 	 * @param theBundle the bundle to inspect
 	 * @param theResourceType the resource type to look for
@@ -71,19 +72,49 @@ public class NarrativeGeneratorTemplateUtils {
 		FhirVersionEnum fhirVersionEnum = theBundle.getStructureFhirVersionEnum();
 		FhirContext ctx = FhirContext.forCached(fhirVersionEnum);
 
-		List<Pair<String, IBaseResource>> entryResources = BundleUtil.getBundleEntryUrlsAndResources(ctx, theBundle);
+		return getEntryResources(ctx, theBundle, theResourceType).anyMatch(t -> {
+			List<IBase> codeList = TerserUtil.getFieldByFhirPath(ctx, "code.coding", t);
+			return codeList.stream().anyMatch(m -> {
+				IBaseCoding coding = (IBaseCoding) m;
+				return StringUtils.equals(coding.getSystem(), theCodeSystem)
+						&& StringUtils.equals(coding.getCode(), theCode);
+			});
+		});
+	}
 
+	/**
+	 * Gets a boolean indicating if at least one bundle entry resource's `code` property does NOT contain the
+	 * code system/code specified.
+	 *
+	 * @param theBundle the bundle to inspect
+	 * @param theResourceType the resource type to find
+	 * @param theCodeSystem the code system to find
+	 * @param theCode the code to find
+	 * @return Returns true if one entry of resource type requested does not contain the specified code/system
+	 */
+	public boolean bundleHasEntriesWithoutCode(
+			IBaseBundle theBundle, String theResourceType, String theCodeSystem, String theCode) {
+
+		FhirVersionEnum fhirVersionEnum = theBundle.getStructureFhirVersionEnum();
+		FhirContext ctx = FhirContext.forCached(fhirVersionEnum);
+
+		return getEntryResources(ctx, theBundle, theResourceType).anyMatch(t -> {
+			List<IBase> codeList = TerserUtil.getFieldByFhirPath(ctx, "code.coding", t);
+			return codeList.stream().allMatch(m -> {
+				IBaseCoding coding = (IBaseCoding) m;
+				return !(StringUtils.equals(coding.getSystem(), theCodeSystem)
+						&& StringUtils.equals(coding.getCode(), theCode));
+			});
+		});
+	}
+
+	private Stream<IBaseResource> getEntryResources(
+			FhirContext theContext, IBaseBundle theBundle, String theResourceType) {
+		List<Pair<String, IBaseResource>> entryResources =
+				BundleUtil.getBundleEntryUrlsAndResources(theContext, theBundle);
 		return entryResources.stream()
 				.map(Pair::getValue)
 				.filter(Objects::nonNull)
-				.filter(t -> ctx.getResourceType(t).equals(theResourceType))
-				.anyMatch(t -> {
-					List<IBase> codeList = TerserUtil.getFieldByFhirPath(ctx, "code.coding", t);
-					return codeList.stream().anyMatch(m -> {
-						IBaseCoding coding = (IBaseCoding) m;
-						return StringUtils.equals(coding.getSystem(), theCodeSystem)
-								&& StringUtils.equals(coding.getCode(), theCode);
-					});
-				});
+				.filter(t -> theContext.getResourceType(t).equals(theResourceType));
 	}
 }
