@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
+import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
 import java.io.Serializable;
@@ -35,6 +37,8 @@ import java.time.LocalDate;
 public abstract class BasePartitionable implements Serializable {
 
 	@SuppressWarnings("unused")
+	@Id
+	@PartitionedIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
 	Integer myPartitionIdValue;
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,8 @@ public class TestPartitionSelectorInterceptor {
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId selectPartitionCreate(IBaseResource theResource) {
-		String resourceType = FhirContext.forR5Cached().getResourceType(theResource);
+		FhirContext fhirContext = FhirContext.forCached(theResource.getStructureFhirVersionEnum());
+		String resourceType = fhirContext.getResourceType(theResource);
 		return selectPartition(resourceType);
 	}
 

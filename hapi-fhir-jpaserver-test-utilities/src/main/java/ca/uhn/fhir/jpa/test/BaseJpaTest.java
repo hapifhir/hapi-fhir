@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,8 +136,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
@@ -194,10 +196,11 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected static final String CS_URL_4 = "http://example.com/my_code_system4";
 	protected static final String VS_URL = "http://example.com/my_value_set";
 	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
+	protected static final long VALIDATION_CACHE_TIMEOUT_MILLIS = 1000;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
 
 	static {
-		HapiSystemProperties.setTestValidationResourceCachesMs(1000);
+		HapiSystemProperties.setValidationResourceCacheTimeoutMillis(VALIDATION_CACHE_TIMEOUT_MILLIS);
 		HapiSystemProperties.enableTestMode();
 		HapiSystemProperties.enableUnitTestMode();
 		TestUtil.setShouldRandomizeTimezones(false);
@@ -300,6 +303,9 @@ public abstract class BaseJpaTest extends BaseTest {
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
+
+	@Autowired
+	protected ApplicationContext myApplicationContext;
 
 	@SuppressWarnings("BusyWait")
 	public static void waitForSize(int theTarget, List<?> theList) {
@@ -417,25 +423,13 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
-		myStorageSettings.setAccessMetaSourceInformationFromProvenanceTable(defaultConfig.isAccessMetaSourceInformationFromProvenanceTable());
-		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-		myStorageSettings.setDefaultSearchParamsCanBeOverridden(defaultConfig.isDefaultSearchParamsCanBeOverridden());
-		myStorageSettings.setDeleteEnabled(defaultConfig.isDeleteEnabled());
-		myStorageSettings.setHibernateSearchIndexSearchParams(defaultConfig.isHibernateSearchIndexSearchParams());
-		myStorageSettings.setHibernateSearchIndexFullText(defaultConfig.isHibernateSearchIndexFullText());
-		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultConfig.isIncludeHashIdentityForTokenSearches());
-		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaultConfig.isMarkResourcesForReindexingUponSearchParameterChange());
-		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultConfig.getMaximumIncludesToLoadPerPage());
-		myStorageSettings.setPreExpandValueSets(defaultConfig.isPreExpandValueSets());
-		myStorageSettings.getTreatBaseUrlsAsLocal().clear();
-
+		BeanUtils.copyProperties(defaultConfig, myStorageSettings);
 
 		ParserOptions defaultParserOptions = new ParserOptions();
-		myFhirContext.getParserOptions().setStripVersionsFromReferences(defaultParserOptions.isStripVersionsFromReferences());
+		BeanUtils.copyProperties(defaultParserOptions, myFhirContext.getParserOptions());
 
 		PartitionSettings defaultPartConfig = new PartitionSettings();
-		myPartitionSettings.setIncludePartitionInSearchHashes(defaultPartConfig.isIncludePartitionInSearchHashes());
-		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultPartConfig.getAllowReferencesAcrossPartitions());
+		BeanUtils.copyProperties(defaultPartConfig, myPartitionSettings);
 	}
 
 	@AfterEach

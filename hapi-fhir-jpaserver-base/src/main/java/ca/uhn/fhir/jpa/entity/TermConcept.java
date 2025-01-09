@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingRoutingBinder;
 import ca.uhn.fhir.util.ValidateUtil;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
@@ -98,7 +99,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_CONCEPT_CS_CODE",
-					columnNames = {"CODESYSTEM_PID", "CODEVAL"})
+					columnNames = {"PARTITION_ID", "CODESYSTEM_PID", "CODEVAL"})
 		},
 		indexes = {
 			@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS"),
@@ -138,12 +139,12 @@ public class TermConcept implements Serializable {
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = false,
-				//						updatable = false,
-				//						nullable = false)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
@@ -352,6 +353,7 @@ public class TermConcept implements Serializable {
 			myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 			assert myCodeSystemVersionPid != null;
 			myPartitionIdValue = theCodeSystemVersion.getPartitionId().getPartitionId();
+			getPid().myPartitionIdValue = myPartitionIdValue;
 		}
 		return this;
 	}
@@ -598,6 +600,10 @@ public class TermConcept implements Serializable {
 		@GenericField(projectable = Projectable.YES)
 		private Long myId;
 
+		@PartitionedIdProperty
+		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
+		private Integer myPartitionIdValue;
+
 		/**
 		 * Constructor
 		 */
@@ -610,6 +616,15 @@ public class TermConcept implements Serializable {
 		 */
 		public TermConceptPk(Long theId, Integer thePartitionId) {
 			myId = theId;
+			myPartitionIdValue = thePartitionId;
+		}
+
+		public Integer getPartitionIdValue() {
+			return myPartitionIdValue;
+		}
+
+		public void setPartitionIdValue(Integer thePartitionIdValue) {
+			myPartitionIdValue = thePartitionIdValue;
 		}
 
 		@Override
@@ -621,17 +636,21 @@ public class TermConcept implements Serializable {
 				return false;
 			}
 			TermConceptPk that = (TermConceptPk) theO;
-			return Objects.equals(myId, that.myId);
+			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(myId);
+			return Objects.hash(myId, myPartitionIdValue);
 		}
 
 		@Override
 		public String toString() {
-			return String.valueOf(myId);
+			return myPartitionIdValue + "/" + myId;
+		}
+
+		public Long getId() {
+			return myId;
 		}
 	}
 }

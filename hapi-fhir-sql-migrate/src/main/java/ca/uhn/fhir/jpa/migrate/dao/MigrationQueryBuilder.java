@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeToDriverTypeToSqlType;
+import com.healthmarketscience.sqlbuilder.AlterTableQuery;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.CreateIndexQuery;
 import com.healthmarketscience.sqlbuilder.CreateTableQuery;
@@ -55,6 +56,7 @@ public class MigrationQueryBuilder {
 	private final DbColumn myInstalledOnCol;
 	private final DbColumn myExecutionTimeCol;
 	private final DbColumn mySuccessCol;
+	private final DbColumn myResultCol;
 	private final String myDeleteAll;
 	private final String myHighestKeyQuery;
 	private final DriverTypeEnum myDriverType;
@@ -102,6 +104,8 @@ public class MigrationQueryBuilder {
 		mySuccessCol = myTable.addColumn("\"success\"", myBooleanType, null);
 		mySuccessCol.notNull();
 
+		myResultCol = myTable.addColumn("\"result\"", Types.VARCHAR, HapiMigrationEntity.RESULT_MAX_SIZE);
+
 		myDeleteAll = new DeleteQuery(myTable).toString();
 		myHighestKeyQuery = buildHighestKeyQuery();
 	}
@@ -133,13 +137,18 @@ public class MigrationQueryBuilder {
 						myInstalledByCol,
 						myInstalledOnCol,
 						myExecutionTimeCol,
-						mySuccessCol)
+						mySuccessCol,
+						myResultCol)
 				.validate()
 				.toString();
 	}
 
 	public String createTableStatement() {
 		return new CreateTableQuery(myTable, true).validate().toString();
+	}
+
+	public String addResultColumnStatement() {
+		return new AlterTableQuery(myTable).setAddColumn(myResultCol).validate().toString();
 	}
 
 	public String createIndexStatement() {

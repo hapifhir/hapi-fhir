@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -791,6 +791,17 @@ public class RestfulServerUtils {
 
 	@Nonnull
 	public static PreferHeader parsePreferHeader(IRestfulServer<?> theServer, String theValue) {
+		PreferHeader retVal = parsePreferHeader(theValue);
+
+		if (retVal.getReturn() == null && theServer != null && theServer.getDefaultPreferReturn() != null) {
+			retVal.setReturn(theServer.getDefaultPreferReturn());
+		}
+
+		return retVal;
+	}
+
+	@Nonnull
+	public static PreferHeader parsePreferHeader(String theValue) {
 		PreferHeader retVal = new PreferHeader();
 
 		if (isNotBlank(theValue)) {
@@ -825,11 +836,6 @@ public class RestfulServerUtils {
 				}
 			}
 		}
-
-		if (retVal.getReturn() == null && theServer != null && theServer.getDefaultPreferReturn() != null) {
-			retVal.setReturn(theServer.getDefaultPreferReturn());
-		}
-
 		return retVal;
 	}
 

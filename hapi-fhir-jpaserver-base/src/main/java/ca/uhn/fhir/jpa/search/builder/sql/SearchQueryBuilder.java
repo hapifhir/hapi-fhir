@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -496,7 +496,7 @@ public class SearchQueryBuilder {
 	}
 
 	public boolean isIncludePartitionIdInJoins() {
-		return mySelectPartitionId && myPartitionSettings.isPartitionIdsInPrimaryKeys();
+		return mySelectPartitionId && myPartitionSettings.isDatabasePartitionMode();
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {

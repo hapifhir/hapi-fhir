@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,7 @@ public abstract class BaseStorageDao {
 
 	protected static final String MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING = "deleteResourceNotExisting";
 	protected static final String MESSAGE_KEY_DELETE_RESOURCE_ALREADY_DELETED = "deleteResourceAlreadyDeleted";
+	public static final String OO_ISSUE_CODE_INFORMATIONAL = "informational";
 
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
@@ -452,7 +453,8 @@ public abstract class BaseStorageDao {
 
 	public IBaseOperationOutcome createInfoOperationOutcome(
 			String theMessage, @Nullable StorageResponseCodeEnum theStorageResponseCode) {
-		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, "informational", theStorageResponseCode);
+		return createOperationOutcome(
+				OO_SEVERITY_INFO, theMessage, OO_ISSUE_CODE_INFORMATIONAL, theStorageResponseCode);
 	}
 
 	private IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
@@ -592,7 +594,8 @@ public abstract class BaseStorageDao {
 			@Nullable StopWatch theItemStopwatch,
 			DaoMethodOutcome theMethodOutcome,
 			String theMatchUrl,
-			RestOperationTypeEnum theOperationType) {
+			RestOperationTypeEnum theOperationType,
+			TransactionDetails theTransactionDetails) {
 		String msg;
 		StorageResponseCodeEnum outcome;
 
@@ -723,8 +726,40 @@ public abstract class BaseStorageDao {
 			msg = msg + " " + msgSuffix;
 		}
 
-		theMethodOutcome.setOperationOutcome(createInfoOperationOutcome(msg, outcome));
+		IBaseOperationOutcome oo = createInfoOperationOutcome(msg, outcome);
+
+		if (theTransactionDetails != null) {
+			List<IIdType> autoCreatedPlaceholderResources =
+					theTransactionDetails.getAutoCreatedPlaceholderResourcesAndClear();
+			for (IIdType next : autoCreatedPlaceholderResources) {
+				msg = addIssueToOperationOutcomeForAutoCreatedPlaceholder(getContext(), next, oo);
+			}
+		}
+
+		theMethodOutcome.setOperationOutcome(oo);
 		ourLog.debug(msg);
+	}
+
+	public static String addIssueToOperationOutcomeForAutoCreatedPlaceholder(
+			FhirContext theFhirContext, IIdType thePlaceholderId, IBaseOperationOutcome theOperationOutcomeToPopulate) {
+		String msg;
+		msg = theFhirContext
+				.getLocalizer()
+				.getMessageSanitized(BaseStorageDao.class, "successfulAutoCreatePlaceholder", thePlaceholderId);
+		String detailSystem = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getSystem();
+		String detailCode = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getCode();
+		String detailDescription = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getDisplay();
+		OperationOutcomeUtil.addIssue(
+				theFhirContext,
+				theOperationOutcomeToPopulate,
+				OO_SEVERITY_INFO,
+				msg,
+				null,
+				OO_ISSUE_CODE_INFORMATIONAL,
+				detailSystem,
+				detailCode,
+				detailDescription);
+		return msg;
 	}
 
 	/**

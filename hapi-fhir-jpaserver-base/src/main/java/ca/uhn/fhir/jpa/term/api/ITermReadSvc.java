@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,11 @@ import java.util.Set;
  * </p>
  */
 public interface ITermReadSvc extends IValidationSupport {
+
+	@Override
+	default String getName() {
+		return getClass().getSimpleName() + " JPA Term Read Service";
+	}
 
 	ValueSet expandValueSet(
 			@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl);

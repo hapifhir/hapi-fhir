@@ -60,7 +60,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		myCtx = theCtx;
 		myValidationSupport = theValidationSupport;
 
-		long timeoutMillis = HapiSystemProperties.getTestValidationResourceCachesMs();
+		long timeoutMillis = HapiSystemProperties.getValidationResourceCacheTimeoutMillis();
 		myFetchedResourceCache = CacheFactory.build(timeoutMillis);
 		// Set a default locale
 		setValidationMessageLanguage(getLocale());

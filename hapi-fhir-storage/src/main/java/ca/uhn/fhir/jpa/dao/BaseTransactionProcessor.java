@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,6 +98,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -122,6 +123,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -693,7 +695,7 @@ public abstract class BaseTransactionProcessor {
 		TransactionCallback<EntriesToProcessMap> txCallback = status -> {
 			final Set<IIdType> allIds = new LinkedHashSet<>();
 			final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
-			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
+			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new LinkedHashMap<>();
 
 			EntriesToProcessMap retVal = doTransactionWriteOperations(
 					theRequestDetails,
@@ -1945,9 +1947,19 @@ public abstract class BaseTransactionProcessor {
 
 			theIdSubstitutions.updateTargets(newId);
 
-			if (theDaoMethodOutcome.getOperationOutcome() != null) {
+			// This will only be null if we're not intending to return an OO
+			IBaseOperationOutcome operationOutcome = theDaoMethodOutcome.getOperationOutcome();
+			if (operationOutcome != null) {
+
+				List<IIdType> autoCreatedPlaceholders =
+						theTransactionDetails.getAutoCreatedPlaceholderResourcesAndClear();
+				for (IIdType autoCreatedPlaceholder : autoCreatedPlaceholders) {
+					BaseStorageDao.addIssueToOperationOutcomeForAutoCreatedPlaceholder(
+							myContext, autoCreatedPlaceholder, operationOutcome);
+				}
+
 				IBase responseEntry = theEntriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
-				myVersionAdapter.setResponseOutcome(responseEntry, theDaoMethodOutcome.getOperationOutcome());
+				myVersionAdapter.setResponseOutcome(responseEntry, operationOutcome);
 			}
 		}
 	}
