@@ -6,6 +6,7 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Procedure;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -76,6 +77,7 @@ class NarrativeGeneratorTemplateUtilsTest {
 		Bundle bundle = new Bundle();
 		bundle.addEntry().setResource(new Patient().setActive(true));
 		bundle.addEntry().setResource(new Medication().setIsBrand(true));
+		bundle.addEntry().setResource(new Procedure().setCode(new CodeableConcept(new Coding("http://loinc.org", "789", ""))));
 
 		assertFalse(NarrativeGeneratorTemplateUtils.INSTANCE
 			 .bundleHasEntriesWithCode(bundle, "Observation", "http://loinc.org",  "789"));
