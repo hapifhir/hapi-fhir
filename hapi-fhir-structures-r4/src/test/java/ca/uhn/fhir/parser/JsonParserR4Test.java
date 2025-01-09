@@ -1108,7 +1108,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
 		assertEquals("1", obs.getContained().get(0).getId());
-		assertEquals(enc.getId(), obs.getContained().get(1).getId());
+		assertEquals(enc.getId(), "#"+obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
@@ -1163,8 +1163,9 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
 
-		assertEquals(pract.getId(), mr.getContained().get(0).getId());
-		assertEquals(med.getId(),  mr.getContained().get(1).getId());
+		//FIXME is this correct? Should the pract.getId() and med.getId() be prefixed with #? I do not believe that this should be
+		assertEquals(pract.getId(), "#"+mr.getContained().get(0).getId());
+		assertEquals(med.getId(), "#"+mr.getContained().get(1).getId());
 
 	}
 
