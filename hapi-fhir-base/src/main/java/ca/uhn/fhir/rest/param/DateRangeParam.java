@@ -582,12 +582,20 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		validateAndSet(lowerBound, upperBound);
 	}
 
-	@Override
+	 @Override
 	public void setValuesAsQueryTokens(
 			FhirContext theContext, String theParamName, List<QualifiedParamList> theParameters)
 			throws InvalidRequestException {
 
-		boolean haveHadUnqualifiedParameter = false;
+		// When we create and populate a DateRangeParam from a query parameter (?birthdate=2024-12-02 or ?birthdate=eq2024-12-02), we
+		// set the prefix only if it was specifically provided by the client as it is mandatory to retain the capability
+		// to make the differentiation. See {@link SearchBuilder#validateParamValuesAreValidForComboParam}.
+		//
+		// Since the FHIR specification says that "If no prefix is present, the prefix <code>eq</code> is assumed",
+		// we will do so by invoking method {@link DateRangeParam#getPrefixOrDefault} everytime computation is conditional on the
+		// prefix value.
+
+		 boolean haveHadUnqualifiedParameter = false;
 		for (QualifiedParamList paramList : theParameters) {
 			if (paramList.size() == 0) {
 				continue;
@@ -704,15 +712,6 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	}
 
 	/**
-	 * As per FHIR specification "If no prefix is present, the prefix <code>eq</code> is assumed".
-	 *
-	 * All constructors and setters of this class will set the 'prefix' on <code>myLowerBound</code> and <code>myUpperBound</code>
-	 * properties except when a DateRangeParam is created from query parameter (?birthdate=2024-12-02 or ?birthdate=eq2024-12-02). See
-	 * {@link DateRangeParam#setValuesAsQueryTokens}.
-	 *
-	 * In such scenario, it is mandatory to retain the capability to determine whether the 'eq' modifier is provided or
-	 * not by the client as searching against a combo search index parameter can only be invoked when date query parameter
-	 * have no modifier.
 	 *
 	 * This method should be used when performing computation conditional on the prefix value to ensure that a dateParam
 	 * without prefix is treated as if it has one set to 'eq'.
