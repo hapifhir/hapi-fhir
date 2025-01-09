@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationDispense;
@@ -1163,7 +1164,7 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
 
-		//FIXME is this correct? Should the pract.getId() and med.getId() be prefixed with #? I do not believe that this should be
+		//TODO is this correct? Should the pract.getId() and med.getId() be prefixed with #? I do not believe that this should be
 		assertEquals(pract.getId(), "#"+mr.getContained().get(0).getId());
 		assertEquals(med.getId(), "#"+mr.getContained().get(1).getId());
 

@@ -1801,7 +1801,7 @@ public class FhirTerser {
 			if (existing != null) {
 				return existing;
 			}
-			
+
 			IIdType newId = new IdDt(theResource.getIdElement());
 			if (isBlank(newId.getValue())) {
 				UUID randomUUID = UUID.randomUUID();
