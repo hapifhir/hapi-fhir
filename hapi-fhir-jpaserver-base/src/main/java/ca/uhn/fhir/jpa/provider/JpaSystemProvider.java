@@ -191,7 +191,7 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 			RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
 					theServletRequest, ReadPartitionIdRequestDetails.forRead(targetId));
 			ReplaceReferencesRequest replaceReferencesRequest =
-					new ReplaceReferencesRequest(sourceId, targetId, resourceLimit, partitionId);
+					new ReplaceReferencesRequest(sourceId, targetId, resourceLimit, partitionId, true);
 			IBaseParameters retval =
 					getReplaceReferencesSvc().replaceReferences(replaceReferencesRequest, theServletRequest);
 			if (ParametersUtil.getNamedParameter(getContext(), retval, OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)

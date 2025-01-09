@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
+import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -42,6 +43,8 @@ import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesAppCtx.JOB_REPLACE_REFERENCES;
@@ -58,6 +61,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private final ReplaceReferencesPatchBundleSvc myReplaceReferencesPatchBundleSvc;
 	private final Batch2TaskHelper myBatch2TaskHelper;
 	private final JpaStorageSettings myStorageSettings;
+	private final ReplaceReferencesProvenanceSvc myReplaceReferencesProvenanceSvc;
 
 	public ReplaceReferencesSvcImpl(
 			DaoRegistry theDaoRegistry,
@@ -74,6 +78,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		myReplaceReferencesPatchBundleSvc = theReplaceReferencesPatchBundleSvc;
 		myBatch2TaskHelper = theBatch2TaskHelper;
 		myStorageSettings = theStorageSettings;
+		myReplaceReferencesProvenanceSvc = new ReplaceReferencesProvenanceSvc(theDaoRegistry);
 	}
 
 	@Override
@@ -123,6 +128,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private IBaseParameters replaceReferencesPreferSync(
 			ReplaceReferencesRequest theReplaceReferencesRequest, RequestDetails theRequestDetails) {
 
+		Date startTime = new Date();
 		// TODO KHS get partition from request
 		StopLimitAccumulator<IdDt> accumulator = myHapiTransactionService
 				.withRequest(theRequestDetails)
@@ -138,6 +144,15 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
 				theReplaceReferencesRequest, accumulator.getItemList(), theRequestDetails);
+
+		if (theReplaceReferencesRequest.createProvenance) {
+			myReplaceReferencesProvenanceSvc.createProvenance(
+					theReplaceReferencesRequest.targetId,
+					theReplaceReferencesRequest.sourceId,
+					List.of(result),
+					startTime,
+					theRequestDetails);
+		}
 
 		Parameters retval = new Parameters();
 		retval.addParameter()
