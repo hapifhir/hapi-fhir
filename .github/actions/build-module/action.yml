@@ -1,0 +1,166 @@
+name: 'Build Module'
+description: "Reusable action to build and test Maven projects"
+
+inputs:
+  module:
+    description: "The Maven module to build"
+    required: true
+    default: ""
+  name:
+    description: "The name of the build or artifact"
+    required: true
+    default: "default_name"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+
+    - name: Install Docker
+      shell: bash
+      run: |
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sudo sh get-docker.sh
+        docker --version
+    
+    - name: Create and List Maven Cache Directory
+      shell: bash
+      run: |
+        mkdir -p $HOME/.m2/repository
+        pwd
+        ls -al $HOME/.m2/repository
+      env:
+        MAVEN_CACHE_FOLDER: $HOME/.m2/repository 
+
+    - name: Restore Maven Cache
+      uses: actions/cache@v4
+      with:
+        path: $HOME/.m2/repository
+        enableCrossOsArchive: true  
+        key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+            maven-${{ runner.os }}-
+
+    - name: Verify cache was restored
+      shell: bash
+      run: |
+        if [ -d "$HOME/.m2/repository" ]; then
+          echo "Cache exists"
+          ls -R $HOME/.m2/repository
+        else
+          echo "Cache not found"
+        fi
+
+    - name: Build Maven Module
+      shell: bash
+      env:
+        MAVEN_CACHE_FOLDER: $HOME/.m2/repository  
+        MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+      run: |
+        mvn clean verify jacoco:report -pl ${{ inputs.module }} \
+          -P JACOCO,CI -e -B \
+          -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
+          -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false \
+          -Dstyle.color=always -Djansi.force=true
+    
+    - name: Copy Test Logs
+      shell: bash
+      if: always()
+      run: |
+        ls -R $GITHUB_WORKSPACE/${{ inputs.module }}
+        mkdir -p $GITHUB_WORKSPACE/reports
+        cp $GITHUB_WORKSPACE/${{ inputs.module }}/target/*-reports/*.txt $GITHUB_WORKSPACE/reports/
+
+    - name: Upload Test Logs as Artifact
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: ${{ inputs.name }}_full_logs_${{ github.run_id }}_${{ github.run_number }}
+        path: $GITHUB_WORKSPACE/reports
+
+    - name: Upload Target Artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: ${{ inputs.name }}_target
+        path: ${{ github.workspace }}/${{ inputs.module }}/target
+
+
+
+
+
+
+
+
+
+
+# inputs:
+#   module:
+#     description: 'Name of module to build.'
+#     required: true
+
+# runs:
+#   using: "composite"
+#   steps:
+#     - uses: actions/checkout@v4
+
+#     - name: Set up JDK 11 for x64
+#       uses: actions/setup-java@v4
+#       with:
+#         java-version: '11'
+#         distribution: 'temurin'
+#         architecture: x64
+
+#     - name: Print module name
+#       shell: bash
+#       run: echo "Testing module ${{ inputs.module }}"
+
+      # - name: Print source branch name
+      #   run: echo "${{ github.ref_name }}"
+
+      # - name: Install Docker
+      #   uses: docker/setup-buildx-action@v2
+      #   with:
+      #     version: 17.09.0-ce
+
+      # - name: Cache Maven dependencies
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ~/.m2/repository
+      #     key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+
+      # - name: Set up JDK 11
+      #   uses: actions/setup-java@v3
+      #   with:
+      #     distribution: 'temurin'
+      #     java-version: '11'
+
+      # - name: Build Maven module
+      #   run: mvn clean verify jacoco:report -pl ${{ github.event.inputs.module }} -P JACOCO,CI -e -B \
+      #        -Dmaven.repo.local=${{ runner.temp }}/maven_cache -Dmaven.wagon.http.pool=false \
+      #        -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true
+      #   env:
+      #     MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+
+      # - name: Archive test reports
+      #   if: always()
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: '${{ matrix.module }}_test_reports'
+      #     path: '**/target/*-reports/*.txt'
+
+      # - name: Publish build artifacts
+      #   if: always()
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: '${{ matrix.module }}_target'
+      #     path: '${{ github.workspace }}/${{ matrix.module }}/target/'

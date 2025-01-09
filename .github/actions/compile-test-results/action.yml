@@ -1,0 +1,68 @@
+name: Download and Process Artifacts
+description: Downloads artifacts for a list of modules and prepares them for further steps.
+inputs:
+  modules:
+    description: A JSON list of modules to process
+    required: true
+    type: string
+  github_token:
+    description: GitHub token for API authentication
+    required: true
+    type: string
+    
+runs:
+  using: composite
+  steps:
+    - name: List available artifacts (debug)
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}  
+      run: |
+        gh api -H "Authorization: token $GH_TOKEN" \
+               -H "Accept: application/vnd.github.v3+json" \
+               "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+        | jq -r '.artifacts[] | .name'
+        
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: '${{ github.workspace }}/artifacts'
+
+    - name: List top-level directories and files in artifacts
+      shell: bash
+      run: |
+        echo "Listing top-level directories and files in ${GITHUB_WORKSPACE}/artifacts:"
+        ls -lh "${GITHUB_WORKSPACE}/artifacts"
+    
+    - name: Iterate through modules and process downloaded artifacts
+      shell: bash
+      run: |
+        modules='${{ inputs.modules }}'
+
+        echo "Processing modules: $modules"
+
+        # Iterate through modules
+        echo "$modules" | jq -r '.[]' | while read -r module; do
+          echo "Processing module: $module"
+
+          # Clean module name
+          cleaned_name=$(basename "$module")
+          echo "Cleaned module name: $cleaned_name"
+
+          # Check if the directory exists
+          artifact_dir="${GITHUB_WORKSPACE}/artifacts/${cleaned_name}_target"
+          if [ ! -d "$artifact_dir" ]; then
+            echo "Error: Directory not found for ${cleaned_name}_target at expected path: $artifact_dir"
+            echo "Available directories in ${GITHUB_WORKSPACE}/artifacts/:"
+            find "${GITHUB_WORKSPACE}/artifacts" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;
+            exit 1
+          fi
+
+          # Create target directory
+          mkdir -p "${GITHUB_WORKSPACE}/${module}/target/"
+          
+          # Move all contents from the artifact directory to the target directory
+          echo "Moving contents of $artifact_dir to $target_dir..."
+          mv "${GITHUB_WORKSPACE}/artifacts/${cleaned_name}_target"/* "${GITHUB_WORKSPACE}/${module}/target/"
+          echo "Moved contents for $module."
+        done

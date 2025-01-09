@@ -1,0 +1,64 @@
+name: "Build Cache Maven Dependencies"
+description: "Caches Maven dependencies, resolves plugins, and builds if the cache is not hit."
+inputs:
+  java-version:
+    description: "The Java version to use"
+    required: true
+    default: "17"
+  cache-path:
+    description: "The path for the Maven cache"
+    required: true
+    default: "$HOME/.m2/repository"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up JDK ${{ inputs.java-version }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.java-version }}
+        distribution: "temurin"
+
+    - name: Cache Maven dependencies
+      id: cache-maven
+      uses: actions/cache@v4
+      with:
+        path: ${{ inputs.cache-path }}
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Populate Cache with Remote Dependencies
+      shell: bash      
+      if: steps.cache-maven.outputs.cache-hit != 'true'
+      env:
+        MAVEN_CACHE_FOLDER: ${{ inputs.cache-path }}
+      run: |
+        mvn dependency:resolve-plugins dependency:resolve test-compile \
+          -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
+          -Dstyle.color=always -Djansi.force=true
+
+    - name: Build with Maven
+      shell: bash   
+      if: steps.cache-maven.outputs.cache-hit != 'true'
+      env:
+        MAVEN_CACHE_FOLDER: ${{ inputs.cache-path }}
+        MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+      run: |
+        mvn clean install -P CI,CHECKSTYLE \
+          -Dmaven.test.skip=true -e -B \
+          -Dmaven.javadoc.skip=true \
+          -Dmaven.wagon.http.pool=false \
+          -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
+          -Dhttp.keepAlive=false \
+          -Dstyle.color=always -Djansi.force=true
+
+    # Debug cache hit
+    - name: Cache Hit or Miss
+      shell: bash   
+      run: |
+        if [[ "${{ steps.cache-maven.outputs.cache-hit }}" == "true" ]]; then
+          echo "Cache hit, skipping dependency resolution.";
+        else
+          echo "Cache miss, dependencies have been downloaded.";
+        fi
