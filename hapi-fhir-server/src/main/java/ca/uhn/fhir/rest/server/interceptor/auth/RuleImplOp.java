@@ -63,7 +63,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 
 @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-class RuleImplOp extends BaseRule /* implements IAuthRule */ {
+public class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	private static final Logger ourLog = LoggerFactory.getLogger(RuleImplOp.class);
 	private static final String PARAMETERS = "Parameters";
 	private static final String BUNDLE = "Bundle";
@@ -83,7 +83,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	/**
 	 * Constructor
 	 */
-	RuleImplOp(String theRuleName) {
+	protected RuleImplOp(String theRuleName) {
 		super(theRuleName);
 	}
 
