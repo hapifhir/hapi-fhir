@@ -1,7 +1,10 @@
 package ca.uhn.fhir.narrative2;
 
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Medication;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
 
@@ -24,5 +27,57 @@ class NarrativeGeneratorTemplateUtilsTest {
 		assertFalse(NarrativeGeneratorTemplateUtils.INSTANCE.bundleHasEntriesWithResourceType(bundle, "Patient"));
 	}
 
+	@Test
+	public void testResourcesHaveCodeValue_isTrue() {
+		Bundle bundle = new Bundle();
+		bundle.addEntry().setResource(new Observation().setCode(
+			 new CodeableConcept(
+				  new Coding("http://loinc.org", "123", ""))));
+		bundle.addEntry().setResource(new Observation().setCode(
+			 new CodeableConcept(
+				  new Coding("http://loinc.org", "456", ""))));
 
+		assertTrue(NarrativeGeneratorTemplateUtils.INSTANCE
+			 .bundleHasEntriesWithCode(bundle, "Observation", "http://loinc.org",  "123"));
+	}
+
+	@Test
+	public void testResourcesHaveCodeValue_isTrueWhenOneCodeMatches() {
+		Bundle bundle = new Bundle();
+		bundle.addEntry().setResource(new Observation().setCode(
+			 new CodeableConcept()
+				  .addCoding(new Coding("http://loinc.org", "abc", ""))
+				  .addCoding(new Coding("http://loinc.org", "123", ""))
+		));
+		bundle.addEntry().setResource(new Observation().setCode(
+			 new CodeableConcept(
+				  new Coding("http://loinc.org", "456", ""))));
+
+		assertTrue(NarrativeGeneratorTemplateUtils.INSTANCE
+			 .bundleHasEntriesWithCode(bundle, "Observation", "http://loinc.org",  "123"));
+	}
+
+	@Test
+	public void testResourcesHaveCodeValue_isFalse() {
+		Bundle bundle = new Bundle();
+		bundle.addEntry().setResource(new Observation().setCode(
+			 new CodeableConcept(
+				  new Coding("http://loinc.org", "123", ""))));
+		bundle.addEntry().setResource(new Observation().setCode(
+			 new CodeableConcept(
+				  new Coding("http://loinc.org", "456", ""))));
+
+		assertFalse(NarrativeGeneratorTemplateUtils.INSTANCE
+			 .bundleHasEntriesWithCode(bundle, "Observation", "http://loinc.org",  "789"));
+	}
+
+	@Test
+	public void testResourcesHaveCodeValue_isFalseWhenNoResourcePresent() {
+		Bundle bundle = new Bundle();
+		bundle.addEntry().setResource(new Patient().setActive(true));
+		bundle.addEntry().setResource(new Medication().setIsBrand(true));
+
+		assertFalse(NarrativeGeneratorTemplateUtils.INSTANCE
+			 .bundleHasEntriesWithCode(bundle, "Observation", "http://loinc.org",  "789"));
+	}
 }

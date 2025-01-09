@@ -22,8 +22,12 @@ package ca.uhn.fhir.narrative2;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.TerserUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
@@ -51,5 +55,35 @@ public class NarrativeGeneratorTemplateUtils {
 				.map(Pair::getValue)
 				.filter(Objects::nonNull)
 				.anyMatch(t -> ctx.getResourceType(t).equals(theResourceType));
+	}
+
+	/**
+	 * Returns if the bundle contains a resource that has a `code` property that contains a matching code system and code.
+	 *
+	 * @param theBundle the bundle to inspect
+	 * @param theResourceType the resource type to look for
+	 * @param theCodeSystem the code system to find
+	 * @param theCode the code to find
+	 * @return returns true if bundle has a resource that with matching code/code system
+	 */
+	public boolean bundleHasEntriesWithCode(
+			IBaseBundle theBundle, String theResourceType, String theCodeSystem, String theCode) {
+		FhirVersionEnum fhirVersionEnum = theBundle.getStructureFhirVersionEnum();
+		FhirContext ctx = FhirContext.forCached(fhirVersionEnum);
+
+		List<Pair<String, IBaseResource>> entryResources = BundleUtil.getBundleEntryUrlsAndResources(ctx, theBundle);
+
+		return entryResources.stream()
+				.map(Pair::getValue)
+				.filter(Objects::nonNull)
+				.filter(t -> ctx.getResourceType(t).equals(theResourceType))
+				.anyMatch(t -> {
+					List<IBase> codeList = TerserUtil.getFieldByFhirPath(ctx, "code.coding", t);
+					return codeList.stream().anyMatch(m -> {
+						IBaseCoding coding = (IBaseCoding) m;
+						return StringUtils.equals(coding.getSystem(), theCodeSystem)
+								&& StringUtils.equals(coding.getCode(), theCode);
+					});
+				});
 	}
 }
