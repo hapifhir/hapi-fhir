@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.helger.commons.lang.StackTraceHelper;
@@ -52,6 +53,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	private boolean myHaveDroppedForcedIdUniqueConstraint;
 	@Autowired
 	private IPartitionLookupSvc myPartitionConfigSvc;
+	@Autowired
+	private SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
+	private boolean myRegisteredSearchParamValidatingInterceptor;
 
 	@AfterEach
 	public void after() {
@@ -68,6 +72,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
 		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().getMatchUrlCache());
+
+		if (myRegisteredSearchParamValidatingInterceptor) {
+			myInterceptorRegistry.unregisterInterceptor(mySearchParamValidatingInterceptor);
+		}
 	}
 
 	protected void assertNoRemainingPartitionIds() {
@@ -112,6 +120,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			myPartitionConfigSvc.getPartitionById(i);
 		}
 
+		if (myInterceptorRegistry.getAllRegisteredInterceptors().stream().noneMatch(t->t instanceof SearchParamValidatingInterceptor)) {
+			myRegisteredSearchParamValidatingInterceptor = true;
+			myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
+		}
 	}
 
 	protected void registerPartitionInterceptor() {
@@ -172,6 +184,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		mySearchParameterDao.update(sp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
+
+		assertNoRemainingPartitionIds();
 	}
 
 	protected void createNonUniqueComboSp() {
@@ -271,6 +285,18 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			if (thePartitionId != null) {
 				addCreatePartition(thePartitionId, null);
 			} else {
+				addCreateDefaultPartition();
+			}
+		};
+	}
+
+	protected ICreationArgument withReadWritePartitions(Integer thePartitionId) {
+		return t -> {
+			if (thePartitionId != null) {
+				addReadPartition(thePartitionId);
+				addCreatePartition(thePartitionId, null);
+			} else {
+				addReadDefaultPartition();
 				addCreateDefaultPartition();
 			}
 		};

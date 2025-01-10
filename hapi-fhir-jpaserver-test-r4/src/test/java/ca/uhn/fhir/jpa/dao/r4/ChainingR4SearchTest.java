@@ -76,7 +76,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		msgHeader.setEvent(new Coding("http://foo", "bar", "blah"));
 		inputBundle.addEntry().setResource(msgHeader);
 
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Bundle", "message");
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Bundle", "message", null);
 		assertEquals("Bundle.entry[0].resource", sp.getPath());
 		assertThat(sp.getBase()).containsExactly("Bundle");
 		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, sp.getStatus());

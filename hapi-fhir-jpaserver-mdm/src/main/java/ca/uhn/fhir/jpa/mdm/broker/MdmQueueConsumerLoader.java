@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PreDestroy;
@@ -46,12 +47,21 @@ public class MdmQueueConsumerLoader {
 		myMdmSettings = theMdmSettings;
 		myMdmMessageHandler = theMdmMessageHandler;
 
+		if (myMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY) {
+			ourLog.info("MDM running in {} mode. MDM channel consumer disabled.", myMdmSettings.getMode());
+			return;
+		}
+
 		startListeningToMdmChannel();
+	}
+
+	protected ChannelConsumerSettings getChannelConsumerSettings() {
+		return new ChannelConsumerSettings();
 	}
 
 	private void startListeningToMdmChannel() {
 		if (myMdmChannel == null) {
-			ChannelConsumerSettings config = new ChannelConsumerSettings();
+			ChannelConsumerSettings config = getChannelConsumerSettings();
 
 			config.setConcurrentConsumers(myMdmSettings.getConcurrentConsumers());
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.to;
 
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.to.mvc.AnnotationMethodHandlerAdapterConfigurer;
 import ca.uhn.fhir.to.util.WebUtil;
 import jakarta.annotation.Nonnull;
@@ -23,8 +24,8 @@ public class FhirTesterMvcConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addResourceHandlers(@Nonnull ResourceHandlerRegistry theRegistry) {
-		WebUtil.webJarAddAceBuilds(theRegistry);
 		WebUtil.webJarAddBoostrap(theRegistry);
+		WebUtil.webJarAddAceBuilds(theRegistry);
 		WebUtil.webJarAddJQuery(theRegistry);
 		WebUtil.webJarAddFontAwesome(theRegistry);
 		WebUtil.webJarAddJSTZ(theRegistry);
@@ -49,7 +50,7 @@ public class FhirTesterMvcConfig implements WebMvcConfigurer {
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCharacterEncoding("UTF-8");
 
-		if (theTesterConfig.getDebugTemplatesMode()) {
+		if (theTesterConfig.getDebugTemplatesMode() || HapiSystemProperties.isUnitTestModeEnabled()) {
 			resolver.setCacheable(false);
 		}
 

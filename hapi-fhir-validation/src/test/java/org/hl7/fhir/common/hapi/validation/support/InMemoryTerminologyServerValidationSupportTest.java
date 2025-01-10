@@ -190,7 +190,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, theCodeSystem, codeToValidate, null, vs.getUrl());
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code '" + theCodeSystem + "#" + codeToValidate + "' for in-memory expansion of ValueSet '" + vs.getUrl() + "'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code '" + theCodeSystem + "#" + codeToValidate + "' for in-memory expansion of ValueSet '" + vs.getUrl() + "'");
 	}
 
 	@Test
@@ -240,7 +240,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'");
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 
 	}
@@ -506,6 +506,8 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		code = "123";
 		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
 		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains("for in-memory expansion of ValueSet");
+		assertThat(outcome.getSourceDetails()).contains("In-memory expansion containing 0 codes");
 
 		IValidationSupport.ValueSetExpansionOutcome expansion = mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
 		assertNull(expansion.getError());

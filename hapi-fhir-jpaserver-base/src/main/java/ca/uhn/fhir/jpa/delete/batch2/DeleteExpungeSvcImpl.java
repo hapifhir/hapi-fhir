@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSvcImpl.class);
@@ -78,8 +78,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	 */
 	private void clearHibernateSearchIndex(List<JpaPid> thePersistentIds) {
 		if (myFullTextSearchSvc != null && !myFullTextSearchSvc.isDisabled()) {
-			List<Object> objectIds =
-					thePersistentIds.stream().map(JpaPid::getId).collect(Collectors.toList());
+			List<Object> objectIds = new ArrayList<>(thePersistentIds);
 			myFullTextSearchSvc.deleteIndexedDocumentsByTypeAndId(ResourceTable.class, objectIds);
 			ourLog.info("Cleared Hibernate Search indexes.");
 		}

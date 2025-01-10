@@ -17,8 +17,8 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -54,6 +54,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hl7.fhir.dstu3.model.Age;
 import org.hl7.fhir.dstu3.model.Attachment;
@@ -595,33 +596,24 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			// fetch the resource from the db and verify
 			ResourceTable readBackResource = myEntityManager
-				.find(ResourceTable.class, myMethodOutcome.getPersistentId().getId());
+				.find(ResourceTable.class, myMethodOutcome.getPersistentId());
 			assertThat(readBackResource).as("found entity").isNotNull();
 			assertThat(readBackResource.getVersion()).as("first version").isEqualTo(1);
 			assertThat(readBackResource.getFhirId()).as("inline column populated on readback").isEqualTo(myExpectedId);
 
 			ResourceHistoryTable readBackHistory = myEntityManager
-				.createQuery("select h from ResourceHistoryTable h where h.myResourceId = :resId and h.myResourceVersion = 1", ResourceHistoryTable.class)
-				.setParameter("resId", myMethodOutcome.getPersistentId().getId())
+				.createQuery("select h from ResourceHistoryTable h where h.myResourcePid = :resId and h.myResourceVersion = 1", ResourceHistoryTable.class)
+				.setParameter("resId", ((JpaPid) myMethodOutcome.getPersistentId()).toFk())
 				.getSingleResult();
 			assertThat(readBackHistory).as("found history").isNotNull();
 
 			// no extra history
 			long historyCount = myEntityManager
-				.createQuery("select count(h) from ResourceHistoryTable h where h.myResourceId = :resId", Long.class)
-				.setParameter("resId", myMethodOutcome.getPersistentId().getId())
+				.createQuery("select count(h) from ResourceHistoryTable h where h.myResourcePid = :resId", Long.class)
+				.setParameter("resId", ((JpaPid) myMethodOutcome.getPersistentId()).toFk())
 				.getSingleResult();
 			assertThat(historyCount).as("only create one history version").isEqualTo(1);
 
-			// make sure the search view works too
-			ResourceSearchView readBackView = myEntityManager
-				.createQuery("select v from ResourceSearchView v where v.myResourceId = :resId", ResourceSearchView.class)
-				.setParameter("resId", myMethodOutcome.getPersistentId().getId())
-				.getSingleResult();
-			assertThat(readBackView).as("found search view").isNotNull();
-
-			assertEquals(myExpectedId, readBackView.getFhirId(),
-				"fhir_id populated");
 		}
 	}
 
@@ -795,57 +787,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals(id.getIdPart(), results.getId().getIdPart());
 		assertEquals(id.getVersionIdPart(), results.getId().getVersionIdPart());
 		assertFalse(results.getCreated().booleanValue());
-
-	}
-
-	@Test
-	public void testCreateWithIllegalReference() {
-		Observation o1 = new Observation();
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(id1);
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
-		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(new IdType("Organization", id1.getIdPart()));
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1095) + "Resource contains reference to unknown resource ID Organization/" + id1.getIdPart(), e.getMessage());
-		}
-
-		// Now with a forced ID
-
-		o1 = new Observation();
-		o1.setId("testCreateWithIllegalReference");
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		id1 = myObservationDao.update(o1, mySrd).getId().toUnqualifiedVersionless();
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(id1);
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
-		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReferenceElement(new IdType("Organization", id1.getIdPart()));
-			myPatientDao.create(p, mySrd);
-			fail("");
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1094) + "Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
-		}
 
 	}
 
@@ -2345,7 +2286,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.read(new IdType("Patient/9999999999999/_history/1"), mySrd);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1996) + "Resource Patient/9999999999999/_history/1 is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Patient/9999999999999 is not known", e.getMessage());
 		}
 
 	}
@@ -2862,6 +2803,10 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		IIdType id4 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
+		ArrayList<IIdType> expected = new ArrayList<>(List.of(id1, id2, id3, id4, idMethodName));
+		expected.sort(Comparator.comparing(IIdType::getIdPart));
+		IdType[] expectedArray = expected.toArray(new IdType[0]);
+
 		SearchParameterMap pm;
 		List<IIdType> actual;
 
@@ -2870,21 +2815,22 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertThat(actual).hasSize(5);
-		assertThat(actual).as(actual.toString()).containsExactly(id1, id2, id3, id4, idMethodName);
+		assertThat(actual).as(actual.toString()).containsExactly(expectedArray);
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertThat(actual).hasSize(5);
-		assertThat(actual).as(actual.toString()).containsExactly(id1, id2, id3, id4, idMethodName);
+		assertThat(actual).as(actual.toString()).containsExactly(expectedArray);
 
+		ArrayUtils.reverse(expectedArray);
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertThat(actual).hasSize(5);
-		assertThat(actual).as(actual.toString()).containsExactly(idMethodName, id4, id3, id2, id1);
+		assertThat(actual).as(actual.toString()).containsExactly(expectedArray);
 	}
 
 	@Test

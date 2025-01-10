@@ -7,9 +7,11 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
+import ca.uhn.fhir.util.ResourceUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +25,7 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
@@ -43,18 +46,21 @@ import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.codesystems.DataAbsentReason;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -76,7 +82,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class JsonParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4();
 
 	private Bundle createBundleWithPatient() {
 		Bundle b = new Bundle();
@@ -94,6 +100,505 @@ public class JsonParserR4Test extends BaseTest {
 	@AfterEach
 	public void afterEach() {
 		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+		ourCtx.setStoreRawJson(false);
+	}
+
+	static List<String> patientStrs() {
+		List<String> resources = new ArrayList<>();
+
+		@Language("JSON")
+		String patientStr;
+		// 1 valid simple
+		{
+			patientStr = """
+				{
+					"resourceType": "Patient",
+					"id": "P1212",
+					"contact": [{
+						"name": [{
+							"use": "official",
+							"family": "Simpson",
+							"given": ["Homer" ]
+						}]
+					}],
+					"text": {
+						"status": "additional",
+						"div": "<div>a div element</div>"
+					}
+				}
+				""";
+		}
+		resources.add(patientStr);
+
+		// 2 invalid simple
+		{
+			patientStr = """
+				{
+					"resourceType": "Patient",
+					"id": "P1212",
+					"contact": [{
+						"name": [{
+							"use": "official",
+							"family": "Simpson",
+							"given": ["Homer" ]
+						}]
+					}, {
+						"name": [{
+							"use": "official",
+							"family": "Flanders",
+							"given": ["Ned"]
+						}]
+					}],
+					"text": {
+						"status": "additional",
+						"div": "<div>a div element</div>"
+					}
+				}
+				""";
+		}
+		resources.add(patientStr);
+
+		// 3 invalid complex
+		{
+			patientStr = """
+				{
+				      "resourceType" : "Patient",
+				      "id" : "P12312",
+				      "meta" : {
+				        "profile" : ["http://hl7.org/fhir/StructureDefinition/Patient"]
+				      },
+				      "extension" : [ {
+				        "url" : "http://hl7.org/fhir/StructureDefinition/us-core-ethnicity",
+				        "extension" : [ {
+				          "url" : "ombCategory",
+				          "valueCoding" : {
+				            "code" : "2186-5",
+				            "display" : "Not Hispanic or Latino",
+				            "system" : "urn:oid:2.16.840.1.113883.6.238"
+				          }
+				        }, {
+				          "url" : "text",
+				          "valueString" : "Non-Hisp"
+				        } ]
+				      }, {
+				        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+				        "extension" : [ {
+				          "url" : "ombCategory",
+				          "valueCoding" : {
+				            "code" : "2054-5",
+				            "display" : "Black or African American",
+				            "system" : "urn:oid:2.16.840.1.113883.6.238"
+				          }
+				        }, {
+				          "url" : "text",
+				          "valueString" : "Black"
+				        } ]
+				      }, {
+				        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+				        "valueCode" : "M"
+				      } ],
+				      "communication" : [ {
+				        "language" : {
+				          "coding" : [ {
+				            "code" : "en",
+				            "display" : "English",
+				            "system" : "urn:ietf:bcp:47"
+				          }, {
+				            "code" : "ENG",
+				            "display" : "English",
+				            "system" : "http://fkcfhir.org/fhir/CodeSystem/fmc-language-cs"
+				          } ],
+				          "text" : "EN"
+				        },
+				        "preferred" : true
+				      } ],
+				      "telecom" : [ {
+				        "system" : "phone",
+				        "value" : "393-342-2312"
+				      } ],
+				      "identifier" : [ {
+				        "system" : "http://hl7.org/fhir/sid/us-ssn",
+				        "type" : {
+				          "coding" : [ {
+				            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+				            "code" : "SS",
+				            "display" : "Social Security Number"
+				          } ],
+				          "text" : "Social Security Number"
+				        },
+				        "value" : "12133121"
+				      }, {
+				        "system" : "urn:oid:2.16.840.1.113883.3.7418.2.1",
+				        "type" : {
+				          "coding" : [ {
+				            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+				            "code" : "MR",
+				            "display" : "Medical record number"
+				          } ],
+				          "text" : "Medical record number"
+				        },
+				        "value" : "12312"
+				      } ],
+				      "name" : [ {
+				        "use" : "official",
+				        "family" : "WEIHE",
+				        "given" : [ "FLOREZ,A" ],
+				        "period" : {
+				          "start" : "2020-12-16T00:00:00-04:00"
+				        }
+				      } ],
+				      "gender" : "male",
+				      "birthDate" : "1955-09-19",
+				      "active" : true,
+				      "address" : [ {
+				        "type" : "postal",
+				        "line" : [ "1553 SUMMIT STREET" ],
+				        "city" : "DAVENPORT",
+				        "state" : "IA",
+				        "postalCode" : "52809",
+				        "country" : "USA",
+				        "period" : {
+				          "start" : "2020-12-16T00:00:00-04:00"
+				        }
+				      }, {
+				        "type" : "physical",
+				        "use" : "home",
+				        "line" : [ "1553 SUMMIT STREET" ],
+				        "city" : "DAVENPORT",
+				        "state" : "IA",
+				        "postalCode" : "52809",
+				        "country" : "USA",
+				        "period" : {
+				          "start" : "2020-12-16T00:00:00-04:00"
+				        }
+				      } ],
+				      "maritalStatus" : [ {
+				        "coding" : [ {
+				          "code" : "S",
+				          "display" : "Never Married",
+				          "system" : "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus"
+				        } ],
+				        "text" : "S"
+				      } ],
+				      "contact" : [
+				        {
+				        "relationship" : [ {
+				          "coding" : [ {
+				            "code" : "PRN",
+				            "display" : "parent",
+				            "system" : "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+				          } ],
+				          "text" : "Parnt"
+				        } ],
+				        "name" : [ {
+				          "use" : "official",
+				          "family" : "PRESTIDGE",
+				          "given" : [ "HEINEMAN" ]
+				        } ],
+				        "address" : [ {
+				          "type" : "postal",
+				          "line" : [ "1553 SUMMIT STREET" ],
+				          "city" : "DAVENPORT",
+				          "state" : "IA",
+				          "postalCode" : "52809",
+				          "country" : "USA",
+				          "period" : {
+				            "start" : "2020-12-16T00:00:00-04:00"
+				          }
+				        }, {
+				          "type" : "physical",
+				          "use" : "home",
+				          "line" : [ "1553 SUMMIT STREET" ],
+				          "city" : "DAVENPORT",
+				          "state" : "IA",
+				          "postalCode" : "52809",
+				          "country" : "USA",
+				          "period" : {
+				            "start" : "2020-12-16T00:00:00-04:00"
+				          }
+				        } ],
+				        "extension" : [ {
+				          "url" : "http://fkcfhir.org/fhir/StructureDefinition/fmc-patient-contact-type",
+				          "valueCodeableConcept" : {
+				            "coding" : [ {
+				              "system" : "http://fkcfhir.org/fhir/CodeSystem/fmc-patient-contact-type-cs",
+				              "code" : "PRIMARY",
+				              "display" : "Primary Contact"
+				            } ],
+				            "text" : "Emergency"
+				          }
+				        } ]
+				      },
+				      {
+				        "relationship" : [ {
+				          "coding" : [ {
+				            "code" : "E",
+				            "display" : "Employer",
+				            "system" : "http://terminology.hl7.org/CodeSystem/v2-0131"
+				          } ],
+				          "text" : "EMP"
+				        } ],
+				        "address" : [ {
+				          "type" : "postal",
+				          "line" : [ "1553 SUMMIT STREET" ],
+				          "city" : "DAVENPORT",
+				          "state" : "IA",
+				          "postalCode" : "52809",
+				          "country" : "USA",
+				          "period" : {
+				            "start" : "2020-12-16T00:00:00-04:00"
+				          }
+				        }, {
+				          "type" : "physical",
+				          "use" : "home",
+				          "line" : [ "1553 SUMMIT STREET" ],
+				          "city" : "DAVENPORT",
+				          "state" : "IA",
+				          "postalCode" : "52809",
+				          "country" : "USA",
+				          "period" : {
+				            "start" : "2020-12-16T00:00:00-04:00"
+				          }
+				        } ],
+				        "extension" : [ {
+				          "url" : "http://fkcfhir.org/fhir/StructureDefinition/fmc-patient-contact-type",
+				          "valueCodeableConcept" : {
+				            "coding" : [ {
+				              "system" : "http://fkcfhir.org/fhir/CodeSystem/fmc-patient-contact-type-cs",
+				              "code" : "EMPLOYER",
+				              "display" : "Employer"
+				            } ]
+				          }
+				        }, {
+				          "url" : "http://fkcfhir.org/fhir/StructureDefinition/fmc-patient-contact-primary-emp-ind",
+				          "valueBoolean" : false
+				        }, {
+				          "url" : "http://fkcfhir.org/fhir/StructureDefinition/fmc-patient-contact-emp-status",
+				          "valueString" : "jobStatus"
+				        }]
+				      } ]
+				    }
+				""";
+		}
+		resources.add(patientStr);
+
+		// 3 valid complex
+		{
+			patientStr = """
+				{
+				      "resourceType" : "Patient",
+				      "id" : "P12312",
+				      "meta" : {
+				        "profile" : ["http://hl7.org/fhir/StructureDefinition/Patient"]
+				      },
+				      "extension" : [ {
+				        "url" : "http://hl7.org/fhir/StructureDefinition/us-core-ethnicity",
+				        "extension" : [ {
+				          "url" : "ombCategory",
+				          "valueCoding" : {
+				            "code" : "2186-5",
+				            "display" : "Not Hispanic or Latino",
+				            "system" : "urn:oid:2.16.840.1.113883.6.238"
+				          }
+				        }, {
+				          "url" : "text",
+				          "valueString" : "Non-Hisp"
+				        } ]
+				      }, {
+				        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+				        "extension" : [ {
+				          "url" : "ombCategory",
+				          "valueCoding" : {
+				            "code" : "2054-5",
+				            "display" : "Black or African American",
+				            "system" : "urn:oid:2.16.840.1.113883.6.238"
+				          }
+				        }, {
+				          "url" : "text",
+				          "valueString" : "Black"
+				        } ]
+				      }, {
+				        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+				        "valueCode" : "M"
+				      } ],
+				      "communication" : [ {
+				        "language" : {
+				          "coding" : [ {
+				            "code" : "en",
+				            "display" : "English",
+				            "system" : "urn:ietf:bcp:47"
+				          }, {
+				            "code" : "ENG",
+				            "display" : "English",
+				            "system" : "http://fkcfhir.org/fhir/CodeSystem/fmc-language-cs"
+				          } ],
+				          "text" : "EN"
+				        },
+				        "preferred" : true
+				      } ],
+				      "telecom" : [ {
+				        "system" : "phone",
+				        "value" : "393-342-2312"
+				      } ],
+				      "identifier" : [ {
+				        "system" : "http://hl7.org/fhir/sid/us-ssn",
+				        "type" : {
+				          "coding" : [ {
+				            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+				            "code" : "SS",
+				            "display" : "Social Security Number"
+				          } ],
+				          "text" : "Social Security Number"
+				        },
+				        "value" : "12133121"
+				      }, {
+				        "system" : "urn:oid:2.16.840.1.113883.3.7418.2.1",
+				        "type" : {
+				          "coding" : [ {
+				            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+				            "code" : "MR",
+				            "display" : "Medical record number"
+				          } ],
+				          "text" : "Medical record number"
+				        },
+				        "value" : "12312"
+				      } ],
+				      "name" : [ {
+				        "use" : "official",
+				        "family" : "WEIHE",
+				        "given" : [ "FLOREZ,A" ],
+				        "period" : {
+				          "start" : "2020-12-16T00:00:00-04:00"
+				        }
+				      } ],
+				      "gender" : "male",
+				      "birthDate" : "1955-09-19",
+				      "active" : true,
+				      "address" : [ {
+				        "type" : "postal",
+				        "line" : [ "1553 SUMMIT STREET" ],
+				        "city" : "DAVENPORT",
+				        "state" : "IA",
+				        "postalCode" : "52809",
+				        "country" : "USA",
+				        "period" : {
+				          "start" : "2020-12-16T00:00:00-04:00"
+				        }
+				      }, {
+				        "type" : "physical",
+				        "use" : "home",
+				        "line" : [ "1554 SUMMIT STREET" ],
+				        "city" : "DAVENPORT",
+				        "state" : "IA",
+				        "postalCode" : "52809",
+				        "country" : "USA",
+				        "period" : {
+				          "start" : "2020-12-16T00:00:00-04:00"
+				        }
+				      } ],
+				      "maritalStatus" : [ {
+				        "coding" : [ {
+				          "code" : "S",
+				          "display" : "Never Married",
+				          "system" : "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus"
+				        } ],
+				        "text" : "S"
+				      } ],
+				      "contact" : [
+				        {
+				        "relationship" : [ {
+				          "coding" : [ {
+				            "code" : "PRN",
+				            "display" : "parent",
+				            "system" : "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+				          } ],
+				          "text" : "Parnt"
+				        } ],
+				        "name" : [ {
+				          "use" : "official",
+				          "family" : "PRESTIDGE",
+				          "given" : [ "HEINEMAN" ]
+				        } ],
+				        "address" : [ {
+				          "type" : "postal",
+				          "line" : [ "1555 SUMMIT STREET" ],
+				          "city" : "DAVENPORT",
+				          "state" : "IA",
+				          "postalCode" : "52809",
+				          "country" : "USA",
+				          "period" : {
+				            "start" : "2020-12-16T00:00:00-04:00"
+				          }
+				        } ],
+				        "extension" : [ {
+				          "url" : "http://fkcfhir.org/fhir/StructureDefinition/fmc-patient-contact-type",
+				          "valueCodeableConcept" : {
+				            "coding" : [ {
+				              "system" : "http://fkcfhir.org/fhir/CodeSystem/fmc-patient-contact-type-cs",
+				              "code" : "PRIMARY",
+				              "display" : "Primary Contact"
+				            } ],
+				            "text" : "Emergency"
+				          }
+				        } ]
+				      },
+				      {
+				        "relationship" : [ {
+				          "coding" : [ {
+				            "code" : "E",
+				            "display" : "Employer",
+				            "system" : "http://terminology.hl7.org/CodeSystem/v2-0131"
+				          } ],
+				          "text" : "EMP"
+				        } ],
+				        "address" : [ {
+				          "type" : "postal",
+				          "line" : [ "1557 SUMMIT STREET" ],
+				          "city" : "DAVENPORT",
+				          "state" : "IA",
+				          "postalCode" : "52809",
+				          "country" : "USA",
+				          "period" : {
+				            "start" : "2020-12-16T00:00:00-04:00"
+				          }
+				        } ],
+				        "extension" : [ {
+				          "url" : "http://fkcfhir.org/fhir/StructureDefinition/fmc-patient-contact-type",
+				          "valueCodeableConcept" : {
+				            "coding" : [ {
+				              "system" : "http://fkcfhir.org/fhir/CodeSystem/fmc-patient-contact-type-cs",
+				              "code" : "EMPLOYER",
+				              "display" : "Employer"
+				            } ]
+				          }
+				        }, {
+				          "url" : "http://fkcfhir.org/fhir/StructureDefinition/fmc-patient-contact-primary-emp-ind",
+				          "valueBoolean" : false
+				        }, {
+				          "url" : "http://fkcfhir.org/fhir/StructureDefinition/fmc-patient-contact-emp-status",
+				          "valueString" : "jobStatus"
+				        }]
+				      } ]
+				    }
+				""";
+		}
+		resources.add(patientStr);
+
+		return resources;
+	}
+
+	@ParameterizedTest
+	@MethodSource("patientStrs")
+	public void parseResource_withStoreRawJsonTrue_willStoreTheRawJsonOnTheResource(String thePatientStr) {
+		ourCtx.setStoreRawJson(true);
+		IParser parser = ourCtx.newJsonParser();
+
+		// test
+		Patient patient = parser.parseResource(Patient.class, thePatientStr);
+
+		// verify
+		String rawJson = ResourceUtil.getRawStringFromResourceOrNull(patient);
+		assertEquals(thePatientStr, rawJson);
 	}
 
 	@Test
@@ -261,6 +766,36 @@ public class JsonParserR4Test extends BaseTest {
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
+	}
+
+	@Test
+	public void testDuplicateContainedResourcesAcrossABundleAreReplicated() {
+		Bundle b = new Bundle();
+		Specimen specimen = new Specimen();
+		Practitioner practitioner = new Practitioner();
+		DiagnosticReport report = new DiagnosticReport();
+		report.addSpecimen(new Reference(specimen));
+		b.addEntry().setResource(report).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/DiagnosticReport");
+
+		Observation obs = new Observation();
+		obs.addPerformer(new Reference(practitioner));
+		obs.setSpecimen(new Reference(specimen));
+
+		b.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/Observation");
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
+		//Then: Diag should contain one local contained specimen
+		assertThat(encoded).contains("[{\"resource\":{\"resourceType\":\"DiagnosticReport\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\""+ specimen.getId().replaceFirst("#", "") +"\"}]");
+		//Then: Obs should contain one local contained specimen, and one local contained pract
+		assertThat(encoded).contains("\"resource\":{\"resourceType\":\"Observation\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\""+ specimen.getId().replaceFirst("#", "") +"\"},{\"resourceType\":\"Practitioner\",\"id\":\"" + practitioner.getId().replaceAll("#","") + "\"}]");
+		assertThat(encoded).contains("\"performer\":[{\"reference\":\""+practitioner.getId()+"\"}],\"specimen\":{\"reference\":\""+specimen.getId()+"\"}");
+
+		//Also, reverting the operation should work too!
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
+		IBaseResource resource1 = ((DiagnosticReport) bundle.getEntry().get(0).getResource()).getSpecimenFirstRep().getResource();
+		IBaseResource resource = ((Observation) bundle.getEntry().get(1).getResource()).getSpecimen().getResource();
+		assertThat(resource1.getIdElement().getIdPart()).isEqualTo(resource.getIdElement().getIdPart());
+		assertThat(resource1).isNotSameAs(resource);
 
 	}
 
@@ -279,8 +814,9 @@ public class JsonParserR4Test extends BaseTest {
 
 		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
-		assertEquals("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"1\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"#1\"}}", encoded);
-
+		String guidWithHash = med.getId();
+		String withoutHash = guidWithHash.replace("#", "");
+		assertThat(encoded).contains("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"" + withoutHash + "\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"" + guidWithHash +"\"}}"); //Note we dont check exact ID since its a GUID
 	}
 
 	@Test
@@ -571,7 +1107,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
 		assertEquals("#1", obs.getContained().get(0).getId());
-		assertEquals("#2", obs.getContained().get(1).getId());
+		assertEquals(enc.getId(), obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
@@ -600,7 +1136,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
 		assertEquals("#1", obs.getContained().get(0).getId());
-		assertEquals("#2", obs.getContained().get(1).getId());
+		assertEquals(pt.getId(), obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
@@ -620,13 +1156,14 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
 
-		mr.setMedication(new Reference(new Medication().setStatus(Medication.MedicationStatus.ACTIVE)));
+		Medication med = new Medication().setStatus(Medication.MedicationStatus.ACTIVE);
+		mr.setMedication(new Reference(med));
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(mr);
 		ourLog.info(encoded);
 		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
 
-		assertEquals("#1", mr.getContained().get(0).getId());
-		assertEquals("#2", mr.getContained().get(1).getId());
+		assertEquals(pract.getId(), mr.getContained().get(0).getId());
+		assertEquals(med.getId(), mr.getContained().get(1).getId());
 
 	}
 

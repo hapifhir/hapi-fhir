@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -318,6 +318,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 							case UPDATE:
 								terser.setElement(resource, "conditionalUpdate", "true");
 								break;
+							case UPDATE_REWRITE_HISTORY:
 							case HISTORY_INSTANCE:
 							case HISTORY_SYSTEM:
 							case HISTORY_TYPE:
@@ -401,12 +402,13 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				 */
 				ResourceSearchParams searchParams;
 				ISearchParamRegistry searchParamRegistry;
-				ResourceSearchParams serverConfigurationActiveSearchParams =
-						serverConfiguration.getActiveSearchParams(resourceName);
+				ResourceSearchParams serverConfigurationActiveSearchParams = serverConfiguration.getActiveSearchParams(
+						resourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (mySearchParamRegistry != null) {
 					searchParamRegistry = mySearchParamRegistry;
 					searchParams = mySearchParamRegistry
-							.getActiveSearchParams(resourceName)
+							.getActiveSearchParams(
+									resourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
 							.makeCopy();
 					for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
 						if (nextBuiltInSpName.startsWith("_")
@@ -465,7 +467,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 							}
 
 							for (RuntimeSearchParam t : searchParamRegistry
-									.getActiveSearchParams(nextResourceName)
+									.getActiveSearchParams(
+											nextResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
 									.values()) {
 								if (t.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 									if (isNotBlank(t.getName())) {

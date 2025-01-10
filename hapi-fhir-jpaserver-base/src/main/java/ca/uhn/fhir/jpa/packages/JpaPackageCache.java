@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,8 +217,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	private IHapiPackageCacheManager.PackageContents loadPackageContents(NpmPackageVersionEntity thePackageVersion) {
 		IFhirResourceDao<? extends IBaseBinary> binaryDao = getBinaryDao();
-		IBaseBinary binary = binaryDao.readByPid(
-				JpaPid.fromId(thePackageVersion.getPackageBinary().getId()));
+		IBaseBinary binary =
+				binaryDao.readByPid(thePackageVersion.getPackageBinary().getId());
 		try {
 			byte[] content = fetchBlobFromBinary(binary);
 			PackageContents retVal = new PackageContents()
@@ -301,15 +301,10 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			boolean currentVersion =
 					updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(packageId, packageVersionId);
-			String packageDesc = null;
-			if (npmPackage.description() != null) {
-				if (npmPackage.description().length() > NpmPackageVersionEntity.PACKAGE_DESC_LENGTH) {
-					packageDesc = npmPackage.description().substring(0, NpmPackageVersionEntity.PACKAGE_DESC_LENGTH - 4)
-							+ "...";
-				} else {
-					packageDesc = npmPackage.description();
-				}
-			}
+
+			String packageDesc = truncateStorageString(npmPackage.description());
+			String packageAuthor = truncateStorageString(npmPackage.getNpm().asString("author"));
+
 			if (currentVersion) {
 				getProcessingMessages(npmPackage)
 						.add("Marking package " + packageId + "#" + initialPackageVersionId + " as current version");
@@ -327,6 +322,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			packageVersion.setPackage(pkg);
 			packageVersion.setPackageBinary(persistedPackage);
 			packageVersion.setSavedTime(new Date());
+			packageVersion.setAuthor(packageAuthor);
 			packageVersion.setDescription(packageDesc);
 			packageVersion.setFhirVersionId(npmPackage.fhirVersion());
 			packageVersion.setFhirVersion(fhirVersion);
@@ -563,7 +559,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
-	@Transactional
+	@Transactional(readOnly = true)
 	public IBaseResource loadPackageAssetByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl) {
 
 		String canonicalUrl = theCanonicalUrl;
@@ -590,7 +586,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	private IBaseResource loadPackageEntity(NpmPackageVersionResourceEntity contents) {
 		try {
-			JpaPid binaryPid = JpaPid.fromId(contents.getResourceBinary().getId());
+			JpaPid binaryPid = contents.getResourceBinary().getId();
 			IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
 			byte[] resourceContentsBytes = fetchBlobFromBinary(binary);
 			String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
@@ -625,6 +621,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			NpmPackageMetadataJson.Version version = new NpmPackageMetadataJson.Version();
 			version.setFhirVersion(next.getFhirVersionId());
+			version.setAuthor(next.getAuthor());
 			version.setDescription(next.getDescription());
 			version.setName(next.getPackageId());
 			version.setVersion(next.getVersionId());
@@ -682,7 +679,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					retVal.addObject()
 							.getPackage()
 							.setName(next.getPackageId())
-							.setDescription(next.getPackage().getDescription())
+							.setAuthor(next.getAuthor())
+							.setDescription(next.getDescription())
 							.setVersion(next.getVersionId())
 							.addFhirVersion(next.getFhirVersionId())
 							.setBytes(next.getPackageSizeBytes());
@@ -791,10 +789,21 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			predicates.add(theCb.equal(resources.get("myCanonicalUrl"), thePackageSearchSpec.getResourceUrl()));
 		}
 
+		if (isNotBlank(thePackageSearchSpec.getVersion())) {
+			String searchTerm = thePackageSearchSpec.getVersion() + "%";
+			predicates.add(theCb.like(theRoot.get("myVersionId"), searchTerm));
+		}
+
 		if (isNotBlank(thePackageSearchSpec.getDescription())) {
 			String searchTerm = "%" + thePackageSearchSpec.getDescription() + "%";
 			searchTerm = StringUtil.normalizeStringForSearchIndexing(searchTerm);
-			predicates.add(theCb.like(theRoot.get("myDescriptionUpper"), searchTerm));
+			predicates.add(theCb.like(theCb.upper(theRoot.get("myDescriptionUpper")), searchTerm));
+		}
+
+		if (isNotBlank(thePackageSearchSpec.getAuthor())) {
+			String searchTerm = "%" + thePackageSearchSpec.getAuthor() + "%";
+			searchTerm = StringUtil.normalizeStringForSearchIndexing(searchTerm);
+			predicates.add(theCb.like(theRoot.get("myAuthorUpper"), searchTerm));
 		}
 
 		if (isNotBlank(thePackageSearchSpec.getFhirVersion())) {
@@ -815,5 +824,22 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	public static List<String> getProcessingMessages(NpmPackage thePackage) {
 		return (List<String>)
 				thePackage.getUserData().computeIfAbsent("JpPackageCache_ProcessingMessages", t -> new ArrayList<>());
+	}
+
+	/**
+	 * Truncates a string to {@link NpmPackageVersionEntity#PACKAGE_DESC_LENGTH} which is
+	 * the maximum length used on several columns in {@link NpmPackageVersionEntity}. If the
+	 * string is longer than the maximum allowed, the last 3 characters are replaced with "..."
+	 */
+	private static String truncateStorageString(String theInput) {
+		String retVal = null;
+		if (theInput != null) {
+			if (theInput.length() > NpmPackageVersionEntity.PACKAGE_DESC_LENGTH) {
+				retVal = theInput.substring(0, NpmPackageVersionEntity.PACKAGE_DESC_LENGTH - 4) + "...";
+			} else {
+				retVal = theInput;
+			}
+		}
+		return retVal;
 	}
 }

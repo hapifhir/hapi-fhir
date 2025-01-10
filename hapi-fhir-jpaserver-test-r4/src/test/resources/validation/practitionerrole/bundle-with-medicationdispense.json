@@ -1,0 +1,102 @@
+{
+  "resourceType": "Bundle",
+  "type": "document",
+  "identifier": {
+    "system": "http://example.com/fhir/NamingSystem/id-pharmacy-med-document",
+    "value": "11111121"
+  },
+  "timestamp": "2024-11-01T19:33:57-05:00",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:5d7d0abe-578a-4a9c-90c0-1f8184911648",
+      "resource": {
+        "resourceType": "Composition",
+        "text": {
+          "status": "empty",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">empty</div>"
+        },
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29550-1",
+              "display": "Medication dispensed"
+            }
+          ]
+        },
+        "date": "2023-10-10T12:30:02Z",
+        "author": [
+          {
+            "reference": "urn:uuid:9fb30dc4-c210-418a-98cd-2ef0936081d4"
+          }
+        ],
+        "title": "Medication dispensed",
+        "section": [
+          {
+            "title": "Medication dispensed",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "29550-1",
+                  "display": "Medication dispensed"
+                }
+              ]
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:1e88351c-9018-4c48-b596-ed22ead5ec6a"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9fb30dc4-c210-418a-98cd-2ef0936081d4",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "meta": {
+          "profile": [
+            "http://example.com/fhir/StructureDefinition/profile-PractitionerRole"
+          ]
+        },
+        "text": {
+          "status": "empty",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">empty</div>"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1e88351c-9018-4c48-b596-ed22ead5ec6a",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "meta": {
+          "profile": [
+            "http://example.com/fhir/StructureDefinition/profile-PractitionerRole"
+          ]
+        },
+        "text": {
+          "status": "empty",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">empty</div>"
+        },
+        "practitioner": {
+          "reference": "urn:uuid:a902ede0-414e-41a8-a99d-970ff5ee6ea9"
+        },
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "905-555-5556",
+            "use": "work"
+          },
+          {
+            "system": "fax",
+            "value": "416-555-5555",
+            "use": "work"
+          }
+        ]
+      }
+    }
+  ]
+}

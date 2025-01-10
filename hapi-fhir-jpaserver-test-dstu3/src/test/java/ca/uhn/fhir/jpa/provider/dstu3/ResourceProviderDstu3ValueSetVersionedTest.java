@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -63,8 +64,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 	private IIdType myExtensionalVsId_v2;
 	private IIdType myLocalValueSetId_v1;
 	private IIdType myLocalValueSetId_v2;
-	private Long myExtensionalVsIdOnResourceTable_v1;
-	private Long myExtensionalVsIdOnResourceTable_v2;
+	private JpaPid myExtensionalVsIdOnResourceTable_v1;
+	private JpaPid myExtensionalVsIdOnResourceTable_v2;
 	private ValueSet myLocalVs_v1;
 	private ValueSet myLocalVs_v2;
 
@@ -120,13 +121,13 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		valueSet.setId("ValueSet/vs1");
 		valueSet.getCompose().getInclude().get(0).setVersion("1");
 		myExtensionalVsId_v1 = persistSingleValueSet(valueSet, HttpVerb.POST);
-		myExtensionalVsIdOnResourceTable_v1 = myValueSetDao.readEntity(myExtensionalVsId_v1, null).getIdDt().getIdPartAsLong();
+		myExtensionalVsIdOnResourceTable_v1 = JpaPid.fromId(myValueSetDao.readEntity(myExtensionalVsId_v1, null).getIdDt().getIdPartAsLong());
 
 		valueSet.setVersion("2");
 		valueSet.setId("ValueSet/vs2");
 		valueSet.getCompose().getInclude().get(0).setVersion("2");
 		myExtensionalVsId_v2 = persistSingleValueSet(valueSet, HttpVerb.POST);
-		myExtensionalVsIdOnResourceTable_v2 = myValueSetDao.readEntity(myExtensionalVsId_v2, null).getIdDt().getIdPartAsLong();
+		myExtensionalVsIdOnResourceTable_v2 = JpaPid.fromId(myValueSetDao.readEntity(myExtensionalVsId_v2, null).getIdDt().getIdPartAsLong());
 
 	}
 
@@ -163,7 +164,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		IFhirResourceDao<CodeSystem> codeSystemDao = myCodeSystemDao;
 		IResourceTableDao resourceTableDao = myResourceTableDao;
 
-		return createExternalCs(codeSystemDao, resourceTableDao, myTermCodeSystemStorageSvc, mySrd, theCodeSystemVersion).getUrl();
+		return createExternalCs(this, codeSystemDao, resourceTableDao, myTermCodeSystemStorageSvc, mySrd, theCodeSystemVersion).getUrl();
 	}
 
 	private void createExternalCsAndLocalVs() {
@@ -174,46 +175,6 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		codeSystemUrl = createExternalCs("2");
 		myLocalVs_v2 = createLocalVs(codeSystemUrl, "2");
 		myLocalValueSetId_v2 = persistLocalVs(myLocalVs_v2);
-
-	}
-
-	private void createLocalCs() {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
-		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
-		codeSystem
-			.addConcept().setCode("A").setDisplay("Code A")
-			.addConcept(new ConceptDefinitionComponent().setCode("AA").setDisplay("Code AA")
-				.addConcept(new ConceptDefinitionComponent().setCode("AAA").setDisplay("Code AAA"))
-			)
-			.addConcept(new ConceptDefinitionComponent().setCode("AB").setDisplay("Code AB"));
-		codeSystem
-			.addConcept().setCode("B").setDisplay("Code B")
-			.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
-			.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
-		myCodeSystemDao.create(codeSystem, mySrd);
-	}
-
-	private void createLocalVsWithIncludeConcept() {
-		myLocalVs_v1 = new ValueSet();
-		myLocalVs_v1.setUrl(URL_MY_VALUE_SET);
-		myLocalVs_v1.setVersion("1");
-		ConceptSetComponent include = myLocalVs_v1.getCompose().addInclude();
-		include.setSystem(URL_MY_CODE_SYSTEM);
-		include.setVersion("1");
-		include.addConcept().setCode("A").setDisplay("A v1");
-		include.addConcept().setCode("AA").setDisplay("AA v1");
-		myLocalValueSetId_v1 = myValueSetDao.create(myLocalVs_v1, mySrd).getId().toUnqualifiedVersionless();
-
-		myLocalVs_v2 = new ValueSet();
-		myLocalVs_v2.setUrl(URL_MY_VALUE_SET);
-		myLocalVs_v2.setVersion("2");
-		include = myLocalVs_v2.getCompose().addInclude();
-		include.setSystem(URL_MY_CODE_SYSTEM);
-		include.setVersion("2");
-		include.addConcept().setCode("A").setDisplay("A v2");
-		include.addConcept().setCode("AA").setDisplay("AA v2");
-		myLocalValueSetId_v2 = myValueSetDao.create(myLocalVs_v2, mySrd).getId().toUnqualifiedVersionless();
 
 	}
 
@@ -231,27 +192,6 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 	private IIdType persistLocalVs(ValueSet theValueSet) {
 		return myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-	}
-
-	private void createLocalVsWithUnknownCode(String codeSystemUrl) {
-		myLocalVs_v1 = new ValueSet();
-		myLocalVs_v1.setUrl(URL_MY_VALUE_SET);
-		myLocalVs_v1.setVersion("1");
-		ConceptSetComponent include = myLocalVs_v1.getCompose().addInclude();
-		include.setSystem(codeSystemUrl);
-		include.setSystem("1");
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("childFOOOOOOO");
-		myLocalValueSetId_v1 = myValueSetDao.create(myLocalVs_v1, mySrd).getId().toUnqualifiedVersionless();
-
-		myLocalVs_v2 = new ValueSet();
-		myLocalVs_v2.setUrl(URL_MY_VALUE_SET);
-		myLocalVs_v2.setVersion("2");
-		include = myLocalVs_v2.getCompose().addInclude();
-		include.setSystem(codeSystemUrl);
-		include.setSystem("2");
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("childFOOOOOOO");
-		myLocalValueSetId_v2 = myValueSetDao.create(myLocalVs_v2, mySrd).getId().toUnqualifiedVersionless();
-
 	}
 
 	@Test
@@ -1024,6 +964,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		ValueSet updatedValueSet_v1 = valueSet_v1;
 		updatedValueSet_v1.setName(valueSet_v1.getName().concat(" - MODIFIED"));
 
+		logAllValueSets();
+
 		String url = myClient.getServerBase().concat("/").concat(myExtensionalVsId_v1.getValueAsString());
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
@@ -1056,7 +998,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.PUT)
 			.setUrl("ValueSet/" + updatedValueSet_v2.getIdElement().getIdPart());
-		ourLog.debug("Transaction Bundle:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info("Transaction Bundle:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myClient.transaction().withBundle(bundle).execute();
 
 		updatedValueSet_v2 = myValueSetDao.read(myExtensionalVsId_v2);
@@ -1071,7 +1013,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 	}
 
-	private void validateTermValueSetNotExpanded(String theValueSetName, String theVersion, Long theId) {
+	private void validateTermValueSetNotExpanded(String theValueSetName, String theVersion, JpaPid theId) {
 		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(theId);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
@@ -1482,18 +1424,18 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 
-	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails, String theCodeSystemVersion) {
+	public static CodeSystem createExternalCs(BaseJpaTest theTest, IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails, String theCodeSystemVersion) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setVersion(theCodeSystemVersion);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
-		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = theTest.runInTransaction(()->theResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalStateException::new));
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -1516,7 +1458,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B" + theCodeSystemVersion);
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", theCodeSystemVersion, cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", theCodeSystemVersion, cs, table);
 		return codeSystem;
 	}
 

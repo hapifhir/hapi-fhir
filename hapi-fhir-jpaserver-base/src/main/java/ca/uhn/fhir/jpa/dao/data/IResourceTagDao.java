@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -28,10 +29,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.Collection;
 
 public interface IResourceTagDao extends JpaRepository<ResourceTag, Long>, IHapiFhirJpaRepository {
-	@Query("" + "SELECT t FROM ResourceTag t " + "INNER JOIN FETCH t.myTag td " + "WHERE t.myResourceId in (:pids)")
-	Collection<ResourceTag> findByResourceIds(@Param("pids") Collection<Long> pids);
+	@Query("SELECT t FROM ResourceTag t INNER JOIN FETCH t.myTag td WHERE t.myResource.myPid in (:pids)")
+	Collection<ResourceTag> findByResourceIds(@Param("pids") Collection<JpaPid> pids);
 
 	@Modifying
-	@Query("delete from ResourceTag t WHERE t.myResourceId = :resId")
-	void deleteByResourceId(@Param("resId") Long theResourcePid);
+	@Query("delete from ResourceTag t WHERE t.myResource.myPid = :resId")
+	void deleteByResourceId(@Param("resId") JpaPid theResourcePid);
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class ValidationSupportContext {
 	private final Set<String> myCurrentlyGeneratingSnapshots = new HashSet<>();
 
 	public ValidationSupportContext(IValidationSupport theRootValidationSupport) {
-		Validate.notNull(theRootValidationSupport, "theRootValidationSupport musty not be null");
+		Validate.notNull(theRootValidationSupport, "theRootValidationSupport must not be null");
 		myRootValidationSupport = theRootValidationSupport;
 	}
 
@@ -42,7 +42,7 @@ public class ValidationSupportContext {
 		return myCurrentlyGeneratingSnapshots;
 	}
 
-	public boolean isEnabledValidationForCodingsLogicalAnd() {
-		return myRootValidationSupport.isEnabledValidationForCodingsLogicalAnd();
+	public boolean isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid() {
+		return myRootValidationSupport.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid();
 	}
 }

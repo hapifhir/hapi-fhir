@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
@@ -28,9 +30,12 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -53,18 +58,34 @@ import static org.apache.commons.lang3.StringUtils.length;
 			@Index(name = "FK_CONCEPTDESIG_CONCEPT", columnList = "CONCEPT_PID", unique = false),
 			@Index(name = "FK_CONCEPTDESIG_CSV", columnList = "CS_VER_PID")
 		})
-public class TermConceptDesignation implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermConceptDesignation extends BasePartitionable implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static final int MAX_LENGTH = 500;
 	public static final int MAX_VAL_LENGTH = 2000;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "CONCEPT_PID",
-			referencedColumnName = "PID",
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CONCEPT_PID",
+						referencedColumnName = "PID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CONCEPT"))
 	private TermConcept myConcept;
+
+	@Column(name = "CONCEPT_PID", insertable = true, updatable = true, nullable = false)
+	private Long myConceptPid;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_DESIG_PID", sequenceName = "SEQ_CONCEPT_DESIG_PID")
@@ -95,10 +116,21 @@ public class TermConceptDesignation implements Serializable {
 	 * @since 3.5.0
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "CS_VER_PID",
-			nullable = true,
-			referencedColumnName = "PID",
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CS_VER_PID",
+						insertable = true,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "PID"),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = true,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CSV"))
 	private TermCodeSystemVersion myCodeSystemVersion;
 
@@ -164,11 +196,25 @@ public class TermConceptDesignation implements Serializable {
 
 	public TermConceptDesignation setConcept(TermConcept theConcept) {
 		myConcept = theConcept;
+		myConceptPid = theConcept.getId();
+		setPartitionId(theConcept.getPartitionId());
 		return this;
+	}
+
+	@PrePersist
+	public void prePersist() {
+		if (myConceptPid == null) {
+			myConceptPid = myConcept.getId();
+			assert myConceptPid != null;
+		}
 	}
 
 	public Long getPid() {
 		return myId;
+	}
+
+	public IdAndPartitionId getPartitionedId() {
+		return IdAndPartitionId.forId(myId, this);
 	}
 
 	@Override
@@ -182,5 +228,9 @@ public class TermConceptDesignation implements Serializable {
 				.append("useDisplay", myUseDisplay)
 				.append("value", myValue)
 				.toString();
+	}
+
+	public Long getId() {
+		return myId;
 	}
 }

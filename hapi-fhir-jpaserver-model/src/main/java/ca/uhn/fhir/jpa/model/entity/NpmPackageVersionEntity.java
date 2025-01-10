@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
@@ -40,6 +41,8 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.Date;
 import java.util.List;
@@ -56,7 +59,7 @@ import java.util.List;
 public class NpmPackageVersionEntity {
 
 	public static final int VERSION_ID_LENGTH = 200;
-	public static final int PACKAGE_DESC_LENGTH = 200;
+	public static final int PACKAGE_DESC_LENGTH = 512;
 	public static final int FHIR_VERSION_LENGTH = 10;
 	public static final int FHIR_VERSION_ID_LENGTH = 20;
 
@@ -77,12 +80,29 @@ public class NpmPackageVersionEntity {
 	private NpmPackageEntity myPackage;
 
 	@ManyToOne
-	@JoinColumn(
-			name = "BINARY_RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "BINARY_RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_NPM_PKV_RESID"))
 	private ResourceTable myPackageBinary;
+
+	@Column(name = "BINARY_RES_ID", nullable = false)
+	private Long myPackageBinaryResourceId;
+
+	@Column(name = "PARTITION_ID", nullable = true)
+	private Integer myPackageBinaryPartitionId;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SAVED_TIME", nullable = false)
@@ -94,6 +114,12 @@ public class NpmPackageVersionEntity {
 	@Column(name = "DESC_UPPER", nullable = true, length = PACKAGE_DESC_LENGTH)
 	private String myDescriptionUpper;
 
+	@Column(name = "PKG_AUTHOR", nullable = true, length = PACKAGE_DESC_LENGTH)
+	private String myAuthor;
+
+	@Column(name = "AUTHOR_UPPER", nullable = true, length = PACKAGE_DESC_LENGTH)
+	private String myAuthorUpper;
+
 	@Column(name = "CURRENT_VERSION", nullable = false)
 	private boolean myCurrentVersion;
 
@@ -101,6 +127,7 @@ public class NpmPackageVersionEntity {
 	private String myFhirVersionId;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(name = "FHIR_VERSION", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
 	private FhirVersionEnum myFhirVersion;
 
@@ -181,6 +208,8 @@ public class NpmPackageVersionEntity {
 
 	public void setPackageBinary(ResourceTable thePackageBinary) {
 		myPackageBinary = thePackageBinary;
+		myPackageBinaryResourceId = thePackageBinary.getId().getId();
+		myPackageBinaryPartitionId = thePackageBinary.getPersistentId().getPartitionId();
 	}
 
 	public void setSavedTime(Date theSavedTime) {
@@ -194,6 +223,15 @@ public class NpmPackageVersionEntity {
 	public void setDescription(String theDescription) {
 		myDescription = theDescription;
 		myDescriptionUpper = StringUtil.normalizeStringForSearchIndexing(theDescription);
+	}
+
+	public String getAuthor() {
+		return myAuthor;
+	}
+
+	public void setAuthor(String theAuthor) {
+		myAuthor = theAuthor;
+		myAuthorUpper = StringUtil.normalizeStringForSearchIndexing(theAuthor);
 	}
 
 	@Override

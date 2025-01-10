@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 public abstract class BaseResourcePersistentId<T> implements IResourcePersistentId<T> {
 	private Long myVersion;
-	private final String myResourceType;
+	private String myResourceType;
 	private IIdType myAssociatedResourceId;
 
 	protected BaseResourcePersistentId(String theResourceType) {
@@ -82,5 +82,9 @@ public abstract class BaseResourcePersistentId<T> implements IResourcePersistent
 	@Override
 	public String getResourceType() {
 		return myResourceType;
+	}
+
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
 	}
 }

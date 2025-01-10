@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+
+import java.util.UUID;
 
 public final class DatabaseSupportUtil {
 
@@ -49,5 +52,13 @@ public final class DatabaseSupportUtil {
 		return StringUtils.isNotBlank(System.getenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"))
 				&& StringUtils.isNotBlank(System.getenv("DOCKER_HOST"))
 				&& System.getenv("DOCKER_HOST").contains("colima");
+	}
+
+	/**
+	 * Create a new connection to a randomized H2 database for testing
+	 */
+	public static DriverTypeEnum.ConnectionProperties newConnection() {
+		String url = "jdbc:h2:mem:test_migration-" + UUID.randomUUID() + ";CASE_INSENSITIVE_IDENTIFIERS=TRUE;";
+		return DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
 	}
 }

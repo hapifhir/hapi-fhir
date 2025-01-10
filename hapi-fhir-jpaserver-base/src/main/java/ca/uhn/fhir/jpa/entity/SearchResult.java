@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,9 @@ public class SearchResult implements Serializable {
 	@Column(name = "RESOURCE_PID", insertable = true, updatable = false, nullable = false)
 	private Long myResourcePid;
 
+	@Column(name = "RESOURCE_PARTITION_ID", insertable = true, updatable = false, nullable = true)
+	private Integer myResourcePartitionId;
+
 	/**
 	 * Constructor
 	 */
@@ -81,6 +84,7 @@ public class SearchResult implements Serializable {
 				.append("search", mySearchPid)
 				.append("order", myOrder)
 				.append("resourcePid", myResourcePid)
+				.append("resourcePartitionId", myResourcePartitionId)
 				.toString();
 	}
 
@@ -107,6 +111,14 @@ public class SearchResult implements Serializable {
 	public SearchResult setResourcePid(Long theResourcePid) {
 		myResourcePid = theResourcePid;
 		return this;
+	}
+
+	public Integer getResourcePartitionId() {
+		return myResourcePartitionId;
+	}
+
+	public void setResourcePartitionId(Integer theResourcePartitionId) {
+		myResourcePartitionId = theResourcePartitionId;
 	}
 
 	@Override

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.validation.ValidationResult;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 import java.io.Writer;
@@ -3107,6 +3108,10 @@ public enum Pointcut implements IPointcut {
 			@Nonnull Class<?> theReturnType,
 			@Nonnull ExceptionHandlingSpec theExceptionHandlingSpec,
 			String... theParameterTypes) {
+
+		// This enum uses the lowercase-b boolean type to indicate boolean return pointcuts
+		Validate.isTrue(!theReturnType.equals(Boolean.class), "Return type Boolean not allowed here, must be boolean");
+
 		myReturnType = theReturnType;
 		myExceptionHandlingSpec = theExceptionHandlingSpec;
 		myParameterTypes = Collections.unmodifiableList(Arrays.asList(theParameterTypes));
@@ -3130,6 +3135,11 @@ public enum Pointcut implements IPointcut {
 	@Nonnull
 	public Class<?> getReturnType() {
 		return myReturnType;
+	}
+
+	@Override
+	public Class<?> getBooleanReturnTypeForEnum() {
+		return boolean.class;
 	}
 
 	@Override

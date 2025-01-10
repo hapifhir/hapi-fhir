@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@
 package ca.uhn.hapi.fhir.cdshooks.module;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.serializer.FhirResourceDeserializer;
 import ca.uhn.fhir.serializer.FhirResourceSerializer;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;

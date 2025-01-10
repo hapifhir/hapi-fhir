@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -43,12 +44,15 @@ import org.hl7.fhir.utilities.CanonicalPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * Please note that this bean is not currently used as part of the $validate operation.
+ * The FHIR Core validation library uses {@link VersionSpecificWorkerContextWrapper} to retrieve validation resources.
+ */
 public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorResourceFetcher.class);
@@ -75,10 +79,16 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 			target = dao.read(id, (RequestDetails) appContext);
 		} catch (ResourceNotFoundException e) {
 			ourLog.info("Failed to resolve local reference: {}", theUrl);
-			try {
-				target = fetchByUrl(theUrl, dao, (RequestDetails) appContext);
-			} catch (ResourceNotFoundException e2) {
-				ourLog.info("Failed to find resource by URL: {}", theUrl);
+
+			RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
+			if (def.getChildByName("url") != null) {
+				try {
+					target = fetchByUrl(theUrl, dao, (RequestDetails) appContext);
+				} catch (ResourceNotFoundException e2) {
+					ourLog.info("Failed to find resource by URL: {}", theUrl);
+					return null;
+				}
+			} else {
 				return null;
 			}
 		}
@@ -86,7 +96,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 			return new JsonParser(myVersionSpecificContextWrapper)
 					.parse(myFhirContext.newJsonParser().encodeResourceToString(target), resourceType);
 		} catch (Exception e) {
-			throw new FHIRException(Msg.code(576) + e);
+			throw new FHIRException(Msg.code(576) + e, e);
 		}
 	}
 
@@ -105,10 +115,9 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 		} catch (InvalidRequestException e) {
 			ourLog.info("Resource does not support 'url' or 'version' Search Parameters");
 		}
-		if (results != null && results.size() > 0) {
+		if (results != null && !results.isEmpty()) {
 			if (results.size() > 1) {
-				ourLog.warn(
-						String.format("Multiple results found for URL '%s', only the first will be considered.", url));
+				ourLog.warn("Multiple results found for URL '{}', only the first will be considered.", url);
 			}
 			return results.get(0);
 		} else {
@@ -134,8 +143,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 	}
 
 	@Override
-	public CanonicalResource fetchCanonicalResource(IResourceValidator validator, Object appContext, String url)
-			throws URISyntaxException {
+	public CanonicalResource fetchCanonicalResource(IResourceValidator validator, Object appContext, String url) {
 		return null;
 	}
 

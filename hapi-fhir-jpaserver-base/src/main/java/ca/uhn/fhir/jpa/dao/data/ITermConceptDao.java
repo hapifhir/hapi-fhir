@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ITermConceptDao extends JpaRepository<TermConcept, Long>, IHapiFhirJpaRepository {
+public interface ITermConceptDao extends JpaRepository<TermConcept, TermConcept.TermConceptPk>, IHapiFhirJpaRepository {
 
 	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myDesignations d " + "WHERE t.myId IN :pids")
-	List<TermConcept> fetchConceptsAndDesignationsByPid(@Param("pids") List<Long> thePids);
+	List<TermConcept> fetchConceptsAndDesignationsByPid(@Param("pids") List<TermConcept.TermConceptPk> thePids);
 
 	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myDesignations d "
 			+ "WHERE t.myCodeSystemVersionPid = :pid")

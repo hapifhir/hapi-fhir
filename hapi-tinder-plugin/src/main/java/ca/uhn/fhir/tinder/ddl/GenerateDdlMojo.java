@@ -28,19 +28,29 @@ public class GenerateDdlMojo extends AbstractMojo {
 	private static final Logger ourLog = LoggerFactory.getLogger(GenerateDdlMojo.class);
 
 	@Parameter
-	List<String> packageNames;
+	public List<String> packageNames;
 
 	@Parameter
-	List<Dialect> dialects;
+	public List<Dialect> dialects;
 
 	@Parameter
-	String outputDirectory;
+	public String outputDirectory;
+
+	@Parameter(defaultValue = "true", required = false)
+	public Boolean databasePartitionMode;
+
+	@Parameter(defaultValue = "false")
+	boolean skip;
 
 	@Parameter(defaultValue = "${project}", readonly = true)
 	private transient MavenProject project;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
+		if (skip) {
+			return;
+		}
+
 		ourLog.info("Going to generate DDL files in directory: {}", outputDirectory);
 
 		File outputDirectoryFile = new File(outputDirectory);
@@ -49,6 +59,16 @@ public class GenerateDdlMojo extends AbstractMojo {
 		}
 
 		DdlGeneratorHibernate61 generator = new DdlGeneratorHibernate61();
+
+		/*
+		 * We default to database partition mode TRUE because that mode means we don't
+		 * modify the entity metadata at all before generating the DDL. When Database
+		 * Partition Mode is disabled (FALSE) we are filtering elements and modifying
+		 * the metadata.
+		 */
+		generator
+				.getHapiHibernateDialectSettingsService()
+				.setDatabasePartitionMode(databasePartitionMode != null ? databasePartitionMode : true);
 
 		for (String packageName : packageNames) {
 			String t = trim(packageName);

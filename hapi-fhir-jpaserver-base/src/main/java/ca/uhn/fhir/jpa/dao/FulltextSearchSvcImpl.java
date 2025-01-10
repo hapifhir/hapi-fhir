@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -135,12 +136,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public ExtendedHSearchIndexData extractLuceneIndexData(
-			IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
+			IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(resourceType);
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
+				resourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 				myStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
-		return extractor.extract(theResource, theNewParams);
+		return extractor.extract(theResource, theEntity, theNewParams);
 	}
 
 	@Override
@@ -191,7 +193,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		validateHibernateSearchIsEnabled();
 
-		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
+		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
 				getSearchQueryOptionsStep(theResourceType, theParams, null);
 		logQuery(searchQueryOptionsStep, theRequestDetails);
 
@@ -211,10 +213,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		int count = getMaxFetchSize(theParams, theMaxResultsToFetch);
 
 		// perform an offset search instead of a scroll one, which doesn't allow for offset
-		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
+		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
 				getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid);
 		logQuery(searchQueryOptionsStep, theRequestDetails);
-		List<Long> longs = searchQueryOptionsStep.fetchHits(offset, count);
+		List<JpaPid> longs = searchQueryOptionsStep.fetchHits(offset, count);
 
 		// indicate param was already processed, otherwise queries DB to process it
 		theParams.setOffset(null);
@@ -235,16 +237,16 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
+	private SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
 			String theResourceType, SearchParameterMap theParams, IResourcePersistentId theReferencingPid) {
 
 		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
-		var query = getSearchSession()
+		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> query = getSearchSession()
 				.search(ResourceTable.class)
 				// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
 				.select(
 						// adapt the String docRef.id() to the Long that it really is.
-						f -> f.composite(docRef -> Long.valueOf(docRef.id()), f.documentReference()))
+						f -> f.composite(docRef -> JpaPid.fromId(Long.valueOf(docRef.id())), f.documentReference()))
 				.where(f -> buildWhereClause(f, theResourceType, theParams, theReferencingPid));
 
 		if (theParams.getSort() != null) {
@@ -263,6 +265,20 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			String theResourceType,
 			SearchParameterMap theParams,
 			IResourcePersistentId theReferencingPid) {
+
+		if (theParams.containsKey(Constants.PARAM_TEXT) || theParams.containsKey(Constants.PARAM_CONTENT)) {
+			if (!myStorageSettings.isHibernateSearchIndexFullText()) {
+				String params = theParams.keySet().stream()
+						.filter(t -> t.equals(Constants.PARAM_TEXT) || t.equals(Constants.PARAM_CONTENT))
+						.sorted()
+						.collect(Collectors.joining(", "));
+				String msg = myFhirContext
+						.getLocalizer()
+						.getMessage(FulltextSearchSvcImpl.class, "fullTextSearchingNotPossible", params);
+				throw new InvalidRequestException(Msg.code(2566) + msg);
+			}
+		}
+
 		return f.bool(b -> {
 			ExtendedHSearchClauseBuilder builder =
 					new ExtendedHSearchClauseBuilder(myFhirContext, myStorageSettings, b, f);
@@ -385,7 +401,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@SuppressWarnings("rawtypes")
 	private List<IResourcePersistentId> toList(ISearchQueryExecutor theSearchResultStream, long theMaxSize) {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(theSearchResultStream, 0), false)
-				.map(JpaPid::fromId)
 				.limit(theMaxSize)
 				.collect(Collectors.toList());
 	}
@@ -441,7 +456,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		List<ExtendedHSearchResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 				.select(this::buildResourceSelectClause)
 				.where(
-						f -> f.id().matchingAny(thePids) // matches '_id' from resource index
+						f -> f.id().matchingAny(JpaPid.fromLongList(thePids)) // matches '_id' from resource index
 						)
 				.fetchAllHits();
 
@@ -465,14 +480,14 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			SearchProjectionFactory<EntityReference, ResourceTable> f) {
 		return f.composite(
 				ExtendedHSearchResourceProjection::new,
-				f.field("myId", Long.class),
+				f.field("myId", JpaPid.class),
 				f.field("myForcedId", String.class),
 				f.field("myRawResource", String.class));
 	}
 
 	@Override
 	public long count(String theResourceName, SearchParameterMap theParams) {
-		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> queryOptionsStep =
+		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> queryOptionsStep =
 				getSearchQueryOptionsStep(theResourceName, theParams, null);
 
 		return queryOptionsStep.fetchTotalHitCount();
@@ -515,8 +530,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	 */
 	@SuppressWarnings("rawtypes")
 	private void logQuery(SearchQueryOptionsStep theQuery, RequestDetails theRequestDetails) {
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 			StorageProcessingMessage storageProcessingMessage = new StorageProcessingMessage();
 			String queryString = theQuery.toQuery().queryString();
 			storageProcessingMessage.setMessage(queryString);
@@ -524,8 +540,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(StorageProcessingMessage.class, storageProcessingMessage);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
+			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 		}
 	}
 

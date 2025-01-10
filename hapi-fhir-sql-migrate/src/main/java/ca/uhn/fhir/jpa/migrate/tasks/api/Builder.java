@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -397,7 +397,7 @@ public class Builder {
 				private final String myVersion;
 				private final boolean myUnique;
 				private String[] myIncludeColumns;
-				private boolean myOnline;
+				private boolean myOnline = true;
 
 				public BuilderAddIndexUnique(String theVersion, boolean theUnique) {
 					myVersion = theVersion;

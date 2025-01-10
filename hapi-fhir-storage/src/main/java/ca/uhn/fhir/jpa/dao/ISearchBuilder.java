@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,15 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 			RequestPartitionId theRequestPartitionId);
 
 	void setMaxResultsToFetch(Integer theMaxResultsToFetch);
+
+	void setDeduplicateInDatabase(boolean theShouldDeduplicateInDB);
+
+	void setRequireTotal(boolean theRequireTotal);
+
+	/**
+	 * True if the results should have a 'total' value
+	 */
+	boolean requiresTotal();
 
 	void loadResourcesByPid(
 			Collection<T> thePids,

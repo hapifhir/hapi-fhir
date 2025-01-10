@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,11 @@ public class ExportPIDIteratorParameters {
 	 * The earliest date from which to retrieve records
 	 */
 	private Date myStartDate;
+
+	/**
+	 * The latest date to which to retrieve records
+	 */
+	private Date myEndDate;
 
 	/**
 	 * List of filters to be applied to the search.
@@ -106,6 +111,14 @@ public class ExportPIDIteratorParameters {
 
 	public void setStartDate(Date theStartDate) {
 		myStartDate = theStartDate;
+	}
+
+	public Date getEndDate() {
+		return myEndDate;
+	}
+
+	public void setEndDate(Date theEndDate) {
+		myEndDate = theEndDate;
 	}
 
 	public List<String> getFilters() {

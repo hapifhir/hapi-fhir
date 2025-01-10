@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6480
+title: "Updated front-end bootstrap dependency due to
+        security vulnerabilities.
+"

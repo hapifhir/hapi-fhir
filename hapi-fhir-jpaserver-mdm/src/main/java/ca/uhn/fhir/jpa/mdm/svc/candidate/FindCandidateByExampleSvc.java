@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends BaseCandidateFinder {
+public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> extends BaseCandidateFinder {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired

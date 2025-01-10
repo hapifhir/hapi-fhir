@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,13 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 	}
 
 	/**
+	 * Sets the root logger to the given level
+	 */
+	public LogbackTestExtension(Level theLevel) {
+		this(org.slf4j.Logger.ROOT_LOGGER_NAME, theLevel);
+	}
+
+	/**
 	 * Returns a copy to avoid concurrent modification errors.
 	 * @return A copy of the log events so far.
 	 */
@@ -95,28 +102,49 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
-		setUp();
-	}
-
-	public void setUp() {
-		setUp(myLevel);
-	}
-
-	public void setUp(Level theLevel) {
+		assert myListAppender == null;
 		myListAppender = new ListAppender<>();
 		myListAppender.start();
 		myLogger.addAppender(myListAppender);
+
+		mySavedLevel = myLogger.getLevel();
+		setLoggerLevel(myLevel);
+	}
+
+	/**
+	 * Temporarily set the logger level - It will be reset after the current test method is done
+	 */
+	public void setLoggerLevel(Level theLevel) {
 		if (theLevel != null) {
-			mySavedLevel = myLogger.getLevel();
 			myLogger.setLevel(theLevel);
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #setLoggerLevel(Level)} instead
+	 */
+	@Deprecated
+	public void setUp(Level theLevel) {
+		setLoggerLevel(theLevel);
+	}
+
+	/**
+	 * @deprecated This class should be registered as a junit5 extension, and will be set
+	 * up automatically.
+	 */
+	@Deprecated
+	public void setUp() {
+		// nothing
+	}
+
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
-		myLogger.detachAppender(myListAppender);
-		myListAppender.stop();
-		if (myLevel != null) {
+		if (myListAppender != null) {
+			myLogger.detachAppender(myListAppender);
+			myListAppender.stop();
+			myListAppender = null;
+		}
+		if (mySavedLevel != null) {
 			myLogger.setLevel(mySavedLevel);
 		}
 	}
@@ -128,6 +156,18 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 	@Nonnull
 	public List<String> getLogMessages() {
 		return getLogEvents().stream().map(ILoggingEvent::getMessage).toList();
+	}
+
+	public void reRegister() throws Exception {
+		afterEach(null);
+		beforeEach(null);
+	}
+
+	/**
+	 * Predicate for passing to {@link #getLogEvents(Predicate)}
+	 */
+	public static Predicate<ILoggingEvent> atLeastLevel(Level theLevel) {
+		return e -> e.getLevel().isGreaterOrEqual(theLevel);
 	}
 
 }

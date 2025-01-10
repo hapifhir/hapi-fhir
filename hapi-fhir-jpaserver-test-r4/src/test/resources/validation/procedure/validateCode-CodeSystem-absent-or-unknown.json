@@ -1,0 +1,46 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "result",
+      "valueBoolean": true
+    },
+    {
+      "name": "code",
+      "valueCode": "no-procedure-info"
+    },
+    {
+      "name": "system",
+      "valueUri": "http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips"
+    },
+    {
+      "name": "version",
+      "valueString": "1.1.0"
+    },
+    {
+      "name": "display",
+      "valueString": "No information about past history of procedures"
+    },
+    {
+      "name": "issues",
+      "resource": {
+        "resourceType": "OperationOutcome",
+        "issue": [
+          {
+            "severity": "information",
+            "code": "business-rule",
+            "details": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+                  "code": "status-check"
+                }
+              ],
+              "text": "Reference to trial-use CodeSystem http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips|1.1.0"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

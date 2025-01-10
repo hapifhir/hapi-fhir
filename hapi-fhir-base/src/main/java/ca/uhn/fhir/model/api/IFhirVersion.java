@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,28 @@ public interface IFhirVersion {
 	IBase newCodingDt();
 
 	IIdType newIdType();
+
+	/**
+	 * Creates a new {@link IIdType} instance for the given version with the given value
+	 *
+	 * @since 8.0.0
+	 */
+	default IIdType newIdType(String theValue) {
+		IIdType retVal = newIdType();
+		retVal.setValue(theValue);
+		return retVal;
+	}
+
+	/**
+	 * Creates a new {@link IIdType} instance for the given version with the given value
+	 *
+	 * @since 8.0.0
+	 */
+	default IIdType newIdType(String theResourceType, String theIdPart) {
+		IIdType retVal = newIdType();
+		retVal.setParts(null, theResourceType, theIdPart, null);
+		return retVal;
+	}
 
 	/**
 	 * Returns an instance of <code>IFhirVersionServer<code> for this version.

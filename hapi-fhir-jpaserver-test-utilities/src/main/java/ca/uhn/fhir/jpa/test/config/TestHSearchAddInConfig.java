@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,6 @@ public class TestHSearchAddInConfig {
 			Path tempDirPath = Files.createTempDirectory(null);
 			String dirPath = tempDirPath.toString();
 
-
 			Map<String, String> luceneProperties = new HashMap<>();
 			luceneProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 			luceneProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
@@ -116,7 +115,6 @@ public class TestHSearchAddInConfig {
 		}
 
 	}
-
 
 	/**
 	 * Our default config - Lucene in-memory.

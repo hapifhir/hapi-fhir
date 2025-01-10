@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6578
+title: "The search parameter picker in the Testpage Overlay module has been adjusted to
+  correct several display issues which appeared after the upgrade from Bootstrap 4 to
+  Bootstrap 5."

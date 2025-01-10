@@ -1,0 +1,4 @@
+---
+type: add
+issue: 6600
+title: "When submitting a FHIR transaction, we previously did not throw an error if a resource was submitted with a resource type in the URL that did not match the actual resource type (e.g. an entry containing a Patient, with the URL `Observation/123`). This will now correctly throw an error."

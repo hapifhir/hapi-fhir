@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,6 +111,9 @@ public class NpmPackageSearchResultJson {
 		@JsonProperty("version")
 		private String myVersion;
 
+		@JsonProperty("author")
+		private String myAuthor;
+
 		@JsonProperty("description")
 		private String myDescription;
 
@@ -169,6 +172,15 @@ public class NpmPackageSearchResultJson {
 				getFhirVersion().add(theFhirVersionId);
 				getFhirVersion().sort(PackageVersionComparator.INSTANCE);
 			}
+			return this;
+		}
+
+		public String getAuthor() {
+			return myAuthor;
+		}
+
+		public Package setAuthor(String theAuthor) {
+			myAuthor = theAuthor;
 			return this;
 		}
 	}

@@ -41,7 +41,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearch() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any()))
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any()))
 			.thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
@@ -65,7 +65,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearchWithOffset() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setCount(10);
@@ -87,7 +87,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearchUpTo() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 		when(myStorageSettings.getDefaultTotalMode()).thenReturn(null);
 
 		SearchParameterMap params = new SearchParameterMap();

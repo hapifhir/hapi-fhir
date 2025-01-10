@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,12 @@ public class HapiExtensions {
 	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
 
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
+
+	/**
+	 * URL for extension on a Search Parameter which determines whether it should be enabled for searching for resources
+	 */
+	public static final String EXT_SEARCHPARAM_ENABLED_FOR_SEARCHING =
+			"http://hapifhir.io/fhir/StructureDefinition/searchparameter-enabled-for-searching";
 
 	/**
 	 * URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder

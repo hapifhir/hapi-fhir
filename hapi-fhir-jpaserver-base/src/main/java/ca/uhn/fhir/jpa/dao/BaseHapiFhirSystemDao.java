@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,9 +190,9 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	public <P extends IResourcePersistentId> void preFetchResources(
 			List<P> theResolvedIds, boolean thePreFetchIndexes) {
 		HapiTransactionService.requireTransaction();
-		List<Long> pids = theResolvedIds.stream().map(t -> ((JpaPid) t).getId()).collect(Collectors.toList());
+		List<JpaPid> pids = theResolvedIds.stream().map(t -> ((JpaPid) t)).collect(Collectors.toList());
 
-		new QueryChunker<Long>().chunk(pids, idChunk -> {
+		QueryChunker.chunk(pids, idChunk -> {
 
 			/*
 			 * Pre-fetch the resources we're touching in this transaction in mass - this reduced the
@@ -205,17 +205,53 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			 *
 			 * However, for realistic average workloads, this should reduce the number of round trips.
 			 */
-			if (idChunk.size() >= 2) {
-				List<ResourceTable> entityChunk = prefetchResourceTableHistoryAndProvenance(idChunk);
+			if (!idChunk.isEmpty()) {
+				List<ResourceTable> entityChunk = null;
+
+				/*
+				 * Unless we're in Mass Ingestion mode, we will pre-fetch the current
+				 * saved resource text in HFJ_RES_VER (ResourceHistoryTable). If we're
+				 * in Mass Ingestion Mode, we don't need to do that because every update
+				 * will generate a new version anyway so the system never needs to know
+				 * the current contents.
+				 */
+				if (!myStorageSettings.isMassIngestionMode()) {
+					entityChunk = prefetchResourceTableAndHistory(idChunk);
+				}
 
 				if (thePreFetchIndexes) {
 
+					/*
+					 * If we're in mass ingestion mode, then we still need to load the resource
+					 * entries in HFJ_RESOURCE (ResourceTable). We combine that with the search
+					 * for tokens (since token is the most likely kind of index to be populated
+					 * for any arbitrary resource type).
+					 *
+					 * For all other index types, we only load indexes if at least one
+					 * HFJ_RESOURCE row indicates that a resource we care about actually has
+					 * index rows of the given type.
+					 */
+					if (entityChunk == null) {
+						String jqlQuery =
+								"SELECT r FROM ResourceTable r LEFT JOIN FETCH r.myParamsToken WHERE r.myPid IN ( :IDS )";
+						TypedQuery<ResourceTable> query = myEntityManager.createQuery(jqlQuery, ResourceTable.class);
+						query.setParameter("IDS", idChunk);
+						entityChunk = query.getResultList();
+					} else {
+						prefetchByField("token", "myParamsToken", ResourceTable::isParamsTokenPopulated, entityChunk);
+					}
+
 					prefetchByField("string", "myParamsString", ResourceTable::isParamsStringPopulated, entityChunk);
-					prefetchByField("token", "myParamsToken", ResourceTable::isParamsTokenPopulated, entityChunk);
 					prefetchByField("date", "myParamsDate", ResourceTable::isParamsDatePopulated, entityChunk);
 					prefetchByField(
 							"quantity", "myParamsQuantity", ResourceTable::isParamsQuantityPopulated, entityChunk);
-					prefetchByField("resourceLinks", "myResourceLinks", ResourceTable::isHasLinks, entityChunk);
+
+					prefetchByJoinClause(
+							"resourceLinks",
+							// fetch the ResourceLink but also the target resource for that link
+							"LEFT JOIN FETCH r.myResourceLinks l LEFT JOIN FETCH l.myTargetResource",
+							ResourceTable::isHasLinks,
+							entityChunk);
 
 					prefetchByJoinClause(
 							"tags",
@@ -244,15 +280,14 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	}
 
 	@Nonnull
-	private List<ResourceTable> prefetchResourceTableHistoryAndProvenance(List<Long> idChunk) {
+	private List<ResourceTable> prefetchResourceTableAndHistory(List<JpaPid> idChunk) {
 		assert idChunk.size() < SearchConstants.MAX_PAGE_SIZE : "assume pre-chunked";
 
 		Query query = myEntityManager.createQuery("select r, h "
 				+ " FROM ResourceTable r "
 				+ " LEFT JOIN fetch ResourceHistoryTable h "
-				+ "      on r.myVersion = h.myResourceVersion and r.id = h.myResourceId "
-				+ " left join fetch h.myProvenance "
-				+ " WHERE r.myId IN ( :IDS ) ");
+				+ "      on r.myVersion = h.myResourceVersion and r = h.myResourceTable "
+				+ " WHERE r.myPid IN ( :IDS ) ");
 		query.setParameter("IDS", idChunk);
 
 		@SuppressWarnings("unchecked")
@@ -303,7 +338,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			List<ResourceTable> theEntities) {
 
 		// Which entities need this prefetch?
-		List<Long> idSubset = theEntities.stream()
+		List<JpaPid> idSubset = theEntities.stream()
 				.filter(theEntityPredicate)
 				.map(ResourceTable::getId)
 				.collect(Collectors.toList());
@@ -313,7 +348,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			return;
 		}
 
-		String jqlQuery = "FROM ResourceTable r " + theJoinClause + " WHERE r.myId IN ( :IDS )";
+		String jqlQuery = "FROM ResourceTable r " + theJoinClause + " WHERE r.myPid IN ( :IDS )";
 
 		TypedQuery<ResourceTable> query = myEntityManager.createQuery(jqlQuery, ResourceTable.class);
 		query.setParameter("IDS", idSubset);

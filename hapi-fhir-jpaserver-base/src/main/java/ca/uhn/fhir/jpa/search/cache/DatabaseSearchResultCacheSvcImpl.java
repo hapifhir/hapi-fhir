@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,13 +62,13 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 						return Collections.emptyList();
 					}
 
-					List<Long> retVal = mySearchResultDao
+					List<Object[]> retVal = mySearchResultDao
 							.findWithSearchPid(theSearch.getId(), page)
 							.getContent();
 
 					ourLog.debug("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
 
-					return JpaPid.fromLongList(retVal);
+					return ISearchResultDao.toJpaPidList(retVal);
 				});
 	}
 
@@ -79,9 +79,9 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(theRequestPartitionId)
 				.execute(() -> {
-					List<Long> retVal = mySearchResultDao.findWithSearchPidOrderIndependent(theSearch.getId());
+					List<Object[]> retVal = mySearchResultDao.findWithSearchPidOrderIndependent(theSearch.getId());
 					ourLog.trace("fetchAllResultPids returned {} pids", retVal.size());
-					return JpaPid.fromLongList(retVal);
+					return ISearchResultDao.toJpaPidList(retVal);
 				});
 	}
 
@@ -107,6 +107,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 					for (JpaPid nextPid : theNewResourcePids) {
 						SearchResult nextResult = new SearchResult(theSearch);
 						nextResult.setResourcePid(nextPid.getId());
+						nextResult.setResourcePartitionId(nextPid.getPartitionId());
 						nextResult.setOrder(order);
 						resultsToSave.add(nextResult);
 						ourLog.trace("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());

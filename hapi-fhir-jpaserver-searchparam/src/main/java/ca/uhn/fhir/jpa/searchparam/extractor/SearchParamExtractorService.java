@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IResourceIndexComboSearchParameter;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -199,8 +200,8 @@ public class SearchParamExtractorService {
 			});
 
 			// Everything else
-			ResourceSearchParams activeSearchParams =
-					mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType());
+			ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
+					theEntity.getResourceType(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 			theNewParams.findMissingSearchParams(myPartitionSettings, myStorageSettings, theEntity, activeSearchParams);
 		}
 
@@ -228,7 +229,8 @@ public class SearchParamExtractorService {
 			retval.put(nextKey, Boolean.TRUE);
 		}
 
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(entity.getResourceType());
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
+				entity.getResourceType(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 		activeSearchParams.getReferenceSearchParamNames().forEach(key -> retval.putIfAbsent(key, Boolean.FALSE));
 		return retval;
 	}
@@ -308,8 +310,10 @@ public class SearchParamExtractorService {
 			@Override
 			public ISearchParamExtractor.ISearchParamFilter getSearchParamFilter(@Nonnull PathAndRef thePathAndRef) {
 				String searchParamName = thePathAndRef.getSearchParamName();
-				RuntimeSearchParam searchParam =
-						mySearchParamRegistry.getActiveSearchParam(theEntity.getResourceType(), searchParamName);
+				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
+						theEntity.getResourceType(),
+						searchParamName,
+						ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 				Set<String> upliftRefchainCodes = searchParam.getUpliftRefchainCodes();
 				if (upliftRefchainCodes.isEmpty()) {
 					return ISearchParamExtractor.NO_PARAMS;
@@ -533,7 +537,9 @@ public class SearchParamExtractorService {
 				}
 
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
-						sourceResourceName, nextPathAndRef.getSearchParamName());
+						sourceResourceName,
+						nextPathAndRef.getSearchParamName(),
+						ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 				extractResourceLinks(
 						theRequestPartitionId,
 						theExistingParams,
@@ -734,8 +740,10 @@ public class SearchParamExtractorService {
 				return;
 			} else {
 				// Cache the outcome in the current transaction in case there are more references
-				JpaPid persistentId = JpaPid.fromId(resourceLink.getTargetResourcePid());
-				persistentId.setPartitionablePartitionId(resourceLink.getTargetResourcePartitionId());
+				JpaPid persistentId =
+						JpaPid.fromId(resourceLink.getTargetResourcePid(), resourceLink.getTargetResourcePartitionId());
+				persistentId.setPartitionablePartitionId(PartitionablePartitionId.with(
+						resourceLink.getTargetResourcePartitionId(), resourceLink.getTargetResourcePartitionDate()));
 				theTransactionDetails.addResolvedResourceId(referenceElement, persistentId);
 			}
 
@@ -936,8 +944,9 @@ public class SearchParamExtractorService {
 			if (myPartitionSettings.getAllowReferencesAcrossPartitions() == ALLOWED_UNQUALIFIED) {
 
 				// Interceptor: Pointcut.JPA_CROSS_PARTITION_REFERENCE_DETECTED
-				if (CompositeInterceptorBroadcaster.hasHooks(
-						Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE, myInterceptorBroadcaster, theRequest)) {
+				IInterceptorBroadcaster compositeBroadcaster =
+						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE)) {
 					CrossPartitionReferenceDetails referenceDetails = new CrossPartitionReferenceDetails(
 							theRequestPartitionId,
 							theSourceResourceName,
@@ -945,12 +954,8 @@ public class SearchParamExtractorService {
 							theRequest,
 							theTransactionDetails);
 					HookParams params = new HookParams(referenceDetails);
-					targetResource =
-							(IResourceLookup<JpaPid>) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-									myInterceptorBroadcaster,
-									theRequest,
-									Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE,
-									params);
+					targetResource = (IResourceLookup<JpaPid>) compositeBroadcaster.callHooksAndReturnObject(
+							Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE, params);
 				} else {
 					targetResource = myResourceLinkResolver.findTargetResource(
 							RequestPartitionId.allPartitions(),
@@ -986,8 +991,7 @@ public class SearchParamExtractorService {
 				.setTargetResourceId(targetResourceIdPart)
 				.setUpdated(theUpdateTime)
 				.setTargetResourceVersion(targetVersion)
-				.setTargetResourcePartitionablePartitionId(
-						targetResource.getPersistentId().getPartitionablePartitionId());
+				.setTargetResourcePartitionablePartitionId(targetResource.getPartitionId());
 
 		return forLocalReference(params);
 	}
@@ -1084,8 +1088,9 @@ public class SearchParamExtractorService {
 		}
 
 		// If extraction generated any warnings, broadcast an error
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.JPA_PERFTRACE_WARNING, theInterceptorBroadcaster, theRequestDetails)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(theInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_WARNING)) {
 			for (String next : theSearchParamSet.getWarnings()) {
 				StorageProcessingMessage messageHolder = new StorageProcessingMessage();
 				messageHolder.setMessage(next);
@@ -1093,8 +1098,7 @@ public class SearchParamExtractorService {
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 						.add(StorageProcessingMessage.class, messageHolder);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						theInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
+				compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
 			}
 		}
 	}

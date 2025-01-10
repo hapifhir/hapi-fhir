@@ -1,17 +1,19 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
+import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -43,6 +45,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
@@ -56,8 +59,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
-import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
-import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -71,6 +72,12 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+	private ComboSearchParameterTestHelper myComboSearchParameterTestHelper;
+
+	@BeforeEach
+	public void beforeEach() {
+		myComboSearchParameterTestHelper = new ComboSearchParameterTestHelper(mySearchParameterDao, mySearchParamRegistry);
+	}
 
 	@AfterEach
 	public void purgeUniqueIndexes() {
@@ -78,42 +85,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	private void createUniqueBirthdateAndGenderSps() {
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-gender");
-		sp.setType(Enumerations.SearchParamType.TOKEN);
-		sp.setCode("gender");
-		sp.setExpression("Patient.gender");
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		mySearchParameterDao.update(sp, mySrd);
-
-		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-birthdate");
-		sp.setType(Enumerations.SearchParamType.DATE);
-		sp.setCode("birthdate");
-		sp.setExpression("Patient.birthDate");
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		mySearchParameterDao.update(sp, mySrd);
-
-		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-gender-birthdate");
-		sp.setType(Enumerations.SearchParamType.COMPOSITE);
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-gender");
-		sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-birthdate");
-		sp.addExtension()
-			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
-			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(sp, mySrd);
-
-		mySearchParamRegistry.forceRefresh();
-
+		myComboSearchParameterTestHelper.createBirthdateAndGenderSps(true);
 		myMessages.clear();
 	}
 
@@ -454,7 +426,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testHashesCalculated() {
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		createUniqueIndexPatientIdentifier();
 
 		Patient pt = new Patient();
@@ -466,7 +438,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		IIdType id = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 		myCaptureQueriesListener.logInsertQueries();
 
-		List<ResourceIndexedComboStringUnique> values = runInTransaction(()-> myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong()));
+		List<ResourceIndexedComboStringUnique> values = runInTransaction(()-> myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(JpaPid.fromId(id.getIdPartAsLong())));
 		assertEquals(2, values.size());
 		values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
 		assertEquals("Patient?identifier=urn%7C111", values.get(0).getIndexString());
@@ -486,7 +458,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		myPatientDao.update(pt, mySrd);
 
 		values = runInTransaction(()->{
-			return myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong());
+			return myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(JpaPid.fromId(id.getIdPartAsLong()));
 		});
 		assertEquals(2, values.size());
 		values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
@@ -543,7 +515,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
 		String unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN ('Patient?identifier=urn%7C111','Patient?identifier=urn%7C222') )", unformattedSql);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN ('Patient?identifier=urn%7C111','Patient?identifier=urn%7C222') ) fetch first '10000' rows only", unformattedSql);
 
 	}
 
@@ -580,10 +552,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 			"'Patient?family=Family1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cfemale'," +
 			"'Patient?family=Family1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale'," +
 			"'Patient?family=Family2&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cfemale'," +
-			"'Patient?family=Family2&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale') )", unformattedSql);
+			"'Patient?family=Family2&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale') )" +
+			" fetch first '10000' rows only", unformattedSql);
 	}
-
-
 
 	@Test
 	public void testDoubleMatchingOnAnd_Search_NonMatching() {
@@ -612,7 +583,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	private Pair<String, String> prepareDoubleMatchingSearchParameterAndPatient() {
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		createUniqueIndexPatientIdentifier();
 
 		Patient pt = new Patient();
@@ -860,7 +831,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		myStorageSettings.setSchedulingDisabled(true);
 		myStorageSettings.setReindexThreadCount(1);
 
-		List<RuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation");
+		List<RuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation", null);
 		assertThat(uniqueSearchParams).isEmpty();
 
 		Patient pt1 = new Patient();
@@ -889,7 +860,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 		createUniqueObservationSubjectDateCode();
 
-		uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation");
+		uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation", null);
 		assertThat(uniqueSearchParams).hasSize(1);
 		assertThat(uniqueSearchParams.get(0).getComponents()).hasSize(3);
 
@@ -906,7 +877,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 			myResourceIndexedComboStringUniqueDao.deleteAll();
 		});
 
-		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Observation")).hasSize(1);
+		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Observation", null)).hasSize(1);
 
 		executeReindex();
 
@@ -1053,9 +1024,8 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 			// 1 patient, 1 coverage, 3 search parameters
 			assertEquals(5, resources.size(), resourceIds);
 			for (int i = 0; i < resources.size(); i++) {
-				int indexStatus = resources.get(i).getIndexStatus().intValue();
-				assertEquals(INDEX_STATUS_INDEXED, indexStatus, "Expected resource " + i + " to have index status INDEXED but was " +
-					(indexStatus == INDEX_STATUS_INDEXING_FAILED ? "FAILED" : "UNKNOWN(" + indexStatus + ")"));
+				EntityIndexStatusEnum indexStatus = resources.get(i).getIndexStatus();
+				assertEquals(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY, indexStatus, "Expected resource " + i + " to have index status INDEXED but was " + indexStatus.name());
 			}
 		});
 
@@ -1252,7 +1222,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testOrQuery() {
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		createUniqueGenderFamilyComboSp();
 
 		Patient pt1 = new Patient();
@@ -1291,7 +1261,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testSearchSynchronousUsingUniqueComposite() {
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		createUniqueGenderFamilyComboSp();
 
 		Patient pt1 = new Patient();
@@ -1437,7 +1407,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testUniqueValuesAreIndexed_Reference_UsingModifierSyntax() {
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		createUniqueNameAndManagingOrganizationSps();
 
 		Organization org = new Organization();
@@ -1747,7 +1717,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	@Test
 	public void testDetectUniqueSearchParams() {
 		createUniqueBirthdateAndGenderSps();
-		List<RuntimeSearchParam> params = mySearchParamRegistry.getActiveComboSearchParams("Patient");
+		List<RuntimeSearchParam> params = mySearchParamRegistry.getActiveComboSearchParams("Patient", null);
 
 		assertThat(params).hasSize(1);
 		assertEquals(ComboSearchParamType.UNIQUE, params.get(0).getComboSearchParamType());
@@ -1856,7 +1826,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testReplaceOneWithAnother() {
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		createUniqueGenderFamilyComboSp();
 
 		Patient pt1 = new Patient();

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,23 +35,19 @@ import java.util.Map;
  *
  * @see <a href="https://www.testcontainers.org/modules/databases/postgres/">Postgres TestContainer</a>
  */
-public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
-
-	private final PostgreSQLContainer myContainer;
+public class PostgresEmbeddedDatabase extends JpaContainerDatabase {
 
 	public PostgresEmbeddedDatabase() {
-		myContainer = new PostgreSQLContainer(DockerImageName.parse("postgres:latest"));
-		myContainer.start();
+		this(new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest")));
+	}
+
+	public PostgresEmbeddedDatabase(PostgreSQLContainer<?> theContainer) {
+		super(theContainer);
 		super.initialize(
 				DriverTypeEnum.POSTGRES_9_4,
 				myContainer.getJdbcUrl(),
 				myContainer.getUsername(),
 				myContainer.getPassword());
-	}
-
-	@Override
-	public void stop() {
-		myContainer.stop();
 	}
 
 	@Override

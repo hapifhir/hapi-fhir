@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class NpmPackageEntity {
 	@Column(name = "UPDATED_TIME", nullable = false)
 	private Date myVersion;
 
-	@Column(name = "PACKAGE_DESC", length = NpmPackageVersionEntity.VERSION_ID_LENGTH, nullable = true)
+	@Column(name = "PACKAGE_DESC", length = NpmPackageVersionEntity.PACKAGE_DESC_LENGTH, nullable = true)
 	private String myDescription;
 
 	@OneToMany(mappedBy = "myPackage")

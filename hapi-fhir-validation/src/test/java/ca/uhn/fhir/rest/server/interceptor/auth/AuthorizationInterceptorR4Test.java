@@ -415,23 +415,19 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
-
 	}
 
 	@Test
-	public void testCustomCompartmentSpsOnMultipleInstances() throws Exception {
+	public void testDeviceIsNativelyInPatientCompartmentForAuthorizationPurposes() throws Exception {
 		//Given
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
-				additionalCompartmentSearchParameters.addSearchParameters("Device:patient");
 				List<IdType> relatedIds = new ArrayList<>();
 				relatedIds.add(new IdType("Patient/123"));
-				relatedIds.add(new IdType("Patient/456"));
 				return new RuleBuilder()
 					.allow().read().allResources()
-					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, additionalCompartmentSearchParameters)
+					.inCompartment("Patient", relatedIds)
 					.andThen().denyAll()
 					.build();
 			}
@@ -459,19 +455,19 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 
+
 	@Test
-	public void testCustomSearchParamsDontOverPermit() throws Exception {
+	public void testCustomCompartmentSpsOnMultipleInstances() throws Exception {
 		//Given
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
-				additionalCompartmentSearchParameters.addSearchParameters("Encounter:patient");
 				List<IdType> relatedIds = new ArrayList<>();
 				relatedIds.add(new IdType("Patient/123"));
+				relatedIds.add(new IdType("Patient/456"));
 				return new RuleBuilder()
 					.allow().read().allResources()
-					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, additionalCompartmentSearchParameters)
+					.inCompartment("Patient", relatedIds)
 					.andThen().denyAll()
 					.build();
 			}
@@ -494,11 +490,10 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 
-		//then
-		assertFalse(ourHitMethod);
-		assertEquals(403, status.getStatusLine().getStatusCode());
+		//Then
+		assertTrue(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
-
 
 	@Test
 	public void testNonsenseParametersThrowAtRuntime() throws Exception {
@@ -531,7 +526,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourReturn = Collections.singletonList(d);
 
 		//When
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Device/124456");
+		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Device/");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 
@@ -4230,7 +4225,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setResourceName("Bundle");
 
-		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(searchSet, ourCtx);
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainerUnlessStandalone(searchSet, ourCtx);
 		assertEquals(1, resources.size());
 		assertTrue(resources.contains(bundle));
 	}
@@ -4247,7 +4242,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setResourceName("Patient");
 
-		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(searchSet, ourCtx);
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainerUnlessStandalone(searchSet, ourCtx);
 		assertEquals(2, resources.size());
 		assertTrue(resources.contains(patient1));
 		assertTrue(resources.contains(patient2));

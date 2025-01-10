@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -120,9 +120,9 @@ public class ExpandResourcesStep
 				data.getIds().size());
 
 		// Partition the ID list in order to only fetch a reasonable number at a time
-		List<List<BatchResourceId>> idLists = ListUtils.partition(data.getIds(), 100);
+		List<List<TypedPidJson>> idLists = ListUtils.partition(data.getIds(), 100);
 
-		for (List<BatchResourceId> idList : idLists) {
+		for (List<TypedPidJson> idList : idLists) {
 
 			// search the resources
 			List<IBaseResource> allResources = fetchAllResources(idList, parameters.getPartitionId());
@@ -253,20 +253,20 @@ public class ExpandResourcesStep
 		return false;
 	}
 
-	private List<IBaseResource> fetchAllResources(
-			List<BatchResourceId> theIds, RequestPartitionId theRequestPartitionId) {
-		ArrayListMultimap<String, String> typeToIds = ArrayListMultimap.create();
-		theIds.forEach(t -> typeToIds.put(t.getResourceType(), t.getId()));
+	private List<IBaseResource> fetchAllResources(List<TypedPidJson> theIds, RequestPartitionId theRequestPartitionId) {
+		ArrayListMultimap<String, TypedPidJson> typeToIds = ArrayListMultimap.create();
+		theIds.forEach(t -> typeToIds.put(t.getResourceType(), t));
 
 		List<IBaseResource> resources = new ArrayList<>(theIds.size());
 
 		for (String resourceType : typeToIds.keySet()) {
 
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-			List<String> allIds = typeToIds.get(resourceType);
+			List<TypedPidJson> allIds = typeToIds.get(resourceType);
 
 			Set<IResourcePersistentId> nextBatchOfPids = allIds.stream()
-					.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(t, resourceType))
+					.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(
+							t.getPartitionId(), t.getPid(), resourceType))
 					.collect(Collectors.toSet());
 
 			PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
@@ -274,7 +274,7 @@ public class ExpandResourcesStep
 					.execute(() -> myIdHelperService.translatePidsToForcedIds(nextBatchOfPids));
 
 			TokenOrListParam idListParam = new TokenOrListParam();
-			for (IResourcePersistentId nextPid : nextBatchOfPids) {
+			for (IResourcePersistentId<?> nextPid : nextBatchOfPids) {
 				Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
 				idListParam.add(resourceId.orElse(nextPid.getId().toString()));
 			}
