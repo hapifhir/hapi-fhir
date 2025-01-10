@@ -231,10 +231,10 @@ public class ReplaceReferencesTestHelper {
 		// the first target reference should be the target patient
 		String targetPatientReferenceInProvenance =
 				provenance.getTarget().get(0).getReference();
-		assertThat(targetPatientReferenceInProvenance.toString()).isEqualTo(myTargetPatientId.toString());
-		// the second target reference should be the source patient, if it wasn't deleted
+		assertThat(targetPatientReferenceInProvenance).isEqualTo(myTargetPatientId.toString());
+		// the second target reference should be the source patient
 		String sourcePatientReference = provenance.getTarget().get(1).getReference();
-		assertThat(sourcePatientReference.toString()).isEqualTo(mySourcePatientId.toString());
+		assertThat(sourcePatientReference).isEqualTo(mySourcePatientId.toString());
 
 		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
 		assertThat(allActualTargets).containsAll(getExpectedProvenanceTargetsForPatchedResources());
@@ -256,7 +256,6 @@ public class ReplaceReferencesTestHelper {
 		assertThat(reasonCoding.getCode()).isEqualTo("PATADMIN");
 
 		// FIXME KHS: assert provenance activity code for replace-references
-		;
 	}
 
 	public void assertMergeProvenance(boolean theDeleteSource) {
@@ -288,12 +287,11 @@ public class ReplaceReferencesTestHelper {
 		// the first target reference should be the target patient
 		String targetPatientReferenceInProvenance =
 				provenance.getTarget().get(0).getReference();
-		assertThat(targetPatientReferenceInProvenance.toString())
-				.isEqualTo(theTargetPatientIdWithExpectedVersion.toString());
+		assertThat(targetPatientReferenceInProvenance).isEqualTo(theTargetPatientIdWithExpectedVersion.toString());
 		if (!theDeleteSource) {
 			// the second target reference should be the source patient, if it wasn't deleted
 			String sourcePatientReference = provenance.getTarget().get(1).getReference();
-			assertThat(sourcePatientReference.toString()).isEqualTo(theSourcePatientIdWithExpectedVersion.toString());
+			assertThat(sourcePatientReference).isEqualTo(theSourcePatientIdWithExpectedVersion.toString());
 		}
 
 		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());

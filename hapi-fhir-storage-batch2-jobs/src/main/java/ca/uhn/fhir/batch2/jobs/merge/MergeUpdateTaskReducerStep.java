@@ -77,9 +77,10 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 				requestDetails,
 				startTime);
 
-		// setting createProvenance to false, because the provenance resource for merge has been created in the helper
-		// method above. The reason for that is merge updates target and source resources, unlike replace references,
-		// and we would like the merge provenance to reference the target and source versions after the update.
+		// Setting createProvenance to false. Because the provenance resource for merge has been created in the helper
+		// method above. The reason is that the merge operation updates the target and source resources, unlike replace
+		// references, and we would like the merge provenance to reference the target and source versions after the
+		// update.
 		return super.run(theStepExecutionDetails, theDataSink, false);
 	}
 }

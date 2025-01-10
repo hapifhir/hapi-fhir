@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
@@ -46,6 +47,7 @@ import org.mockito.stubbing.OngoingStubbing;
 import org.testcontainers.shaded.org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 
@@ -457,8 +459,8 @@ public class ResourceMergeServiceTest {
 		"true, true",
 		"false, false"
 	})
-	void testMerge_AsyncBecauseOfLargeNumberOfRefs_PreconditionFailed(boolean theWithResultResource,
-																	  boolean theWithDeleteSource) {
+	void testMerge_SyncRequest_ReplaceReferencesThrowsPreconditionFailedException_TheExceptionReturnedToClientInOutcome(boolean theWithResultResource,
+																	  				 									   boolean theWithDeleteSource) {
 		// Given
 		BaseMergeOperationInputParameters mergeOperationParameters = new PatientMergeOperationInputParameters(PAGE_SIZE);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
@@ -1439,14 +1441,22 @@ public class ResourceMergeServiceTest {
 		assertThat(provenance.getTarget()).hasSize(theDeleteSource ? 1 : 2);
 		// the first target reference should be the target patient
 		String targetPatientReference = provenance.getTarget().get(0).getReference();
-		assertThat(provenance.getTarget().get(0).getReference()).isEqualTo(TARGET_PATIENT_TEST_ID_WITH_VERSION_2);
+		assertThat(targetPatientReference).isEqualTo(TARGET_PATIENT_TEST_ID_WITH_VERSION_2);
 		if (!theDeleteSource) {
 			// the second target reference should be the source patient, if it wasn't deleted
 			String sourcePatientReference = provenance.getTarget().get(1).getReference();
 			assertThat(sourcePatientReference).isEqualTo(SOURCE_PATIENT_TEST_ID_WITH_VERSION_2);
 		}
 
-		assertThat(provenance.getRecorded()).isCloseTo(Instant.now(), 60000);
+		Instant now = Instant.now();
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		assertThat(provenance.getRecorded()).isBetween(oneMinuteAgo, now, true, true);
+
+		Period period = provenance.getOccurredPeriod();
+		// since this is unit test and the test runs fast, the start time could be same as the end time
+		assertThat(period.getStart()).isBeforeOrEqualTo(period.getEnd());
+		assertThat(period.getStart()).isBetween(oneMinuteAgo, now, true, true);
+		assertThat(period.getEnd()).isEqualTo(provenance.getRecorded());
 
 		// validate provenance.reason
 		assertThat(provenance.getReason()).hasSize(1);

@@ -257,10 +257,10 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		"true, true",
 		"false, true",
 	})
-	void testMerge_resourcesWithNoReferences(boolean theDeleteSource, boolean theAsync) {
+	void testMerge_sourceResourceWithoutAnyReference(boolean theDeleteSource, boolean theAsync) {
 
 		Patient sourcePatient = new Patient();
-		sourcePatient = (Patient )myPatientDao.create(sourcePatient, mySrd).getResource();
+		sourcePatient = (Patient)myPatientDao.create(sourcePatient, mySrd).getResource();
 
 
 		Patient targetPatient = new Patient();
