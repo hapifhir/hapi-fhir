@@ -2565,6 +2565,7 @@
 						<perCoreThreadCount>true</perCoreThreadCount>
 						<runOrder>alphabetical</runOrder>
 						<useModulePath>false</useModulePath>
+						<trimStackTrace>false</trimStackTrace>
 						<includes>
 							<include>**/*IT.java</include>
 						</includes>
