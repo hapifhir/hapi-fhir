@@ -109,6 +109,7 @@
 <th:block th:if="${time}" th:fragment="renderTime (time)">
    <th:block th:if="${time} != null" th:object="${time}">
       <th:block th:switch="*{getClass().getSimpleName()}">
+			<th:block th:case="'DateType'" th:text="*{getValueAsString()}">Date</th:block>
          <th:block th:case="'DateTimeType'" th:text="*{getValueAsString()}">Date</th:block>
          <th:block th:case="'Period'"
                    th:text="*{#strings.concatReplaceNulls('', getStartElement().getValueAsString(), ' - ', getEndElement().getValueAsString() )}">
