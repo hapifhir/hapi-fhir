@@ -64,7 +64,6 @@ public class SearchParameterValidatingInterceptorTest {
 		mySearchParamValidatingInterceptor.setDaoRegistry(myDaoRegistry);
 
 		myExistingSearchParameter = buildSearchParameterWithId(ID1);
-
 	}
 
 	@Test
@@ -84,7 +83,6 @@ public class SearchParameterValidatingInterceptorTest {
 		SearchParameter newSearchParam = buildSearchParameterWithId(ID1);
 
 		mySearchParamValidatingInterceptor.resourcePreCreate(newSearchParam, myRequestDetails);
-
 	}
 
 	@Test
