@@ -13,12 +13,22 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.hibernate.sql.results.internal.TupleImpl;
 import org.hl7.fhir.r4.model.Patient;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
+
+import static org.mockito.ArgumentMatchers.anyBoolean;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -79,57 +89,6 @@ public class IdHelperServiceTest {
 		lenient().doReturn(true).when(myStorageSettings).isDeleteEnabled();
     }
 
-    @Test
-    public void testResolveResourcePersistentIds() {
-		lenient().doReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY).when(myStorageSettings).getResourceClientIdStrategy();
-
-        //prepare params
-        RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionIdAndName(1, "Partition-A");
-        String resourceType = "Patient";
-        Long id = 123L;
-        List<String> ids = List.of(String.valueOf(id));
-        ResolveIdentityMode mode = ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled();
-
-        //prepare results
-        Patient expectedPatient = new Patient();
-        expectedPatient.setId(ids.get(0));
-
-        // configure mock behaviour
-		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
-
-		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, mode));
-		assertEquals("HAPI-2001: Resource Patient/123 is not known", resourceNotFoundException.getMessage());
-    }
-
-    @Test
-    public void testResolveResourcePersistentIdsDeleteFalse() {
-		lenient().doReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY).when(myStorageSettings).getResourceClientIdStrategy();
-
-        //prepare Params
-        RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionIdAndName(1, "Partition-A");
-        Long id = 123L;
-        String resourceType = "Patient";
-        List<String> ids = List.of(String.valueOf(id));
-        String forcedId = "(all)/" + resourceType + "/" + id;
-        ResolveIdentityMode mode = ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled();
-
-        //prepare results
-        Patient expectedPatient = new Patient();
-        expectedPatient.setId(ids.get(0));
-
-        // configure mock behaviour
-        when(myStorageSettings.isDeleteEnabled()).thenReturn(false);
-
-		Map<String, JpaPid> actualIds = myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, mode);
-
-		//verifyResult
-		assertFalse(actualIds.isEmpty());
-		assertNull(actualIds.get(ids.get(0)));
-    }
-
-
-
-
 
 	@Test
 	public void testResolveResourceIdentity_defaultFunctionality(){
@@ -140,7 +99,7 @@ public class IdHelperServiceTest {
 		String resourceForcedId = "AAA";
 
 		Object[] tuple = new Object[] {
-			1L,
+			JpaPid.fromId(1L),
 			"Patient",
 			"AAA",
 			new Date(),
@@ -153,10 +112,35 @@ public class IdHelperServiceTest {
 		));
 
 		IResourceLookup<JpaPid> result = myHelperSvc.resolveResourceIdentity(partitionId, resourceType, resourceForcedId, ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled());
-		assertEquals(tuple[0], result.getPersistentId().getId());
+		assertEquals(tuple[0], result.getPersistentId());
 		assertEquals(tuple[1], result.getResourceType());
 		assertEquals(tuple[3], result.getDeleted());
 	}
 
+	@Test
+	public void testResolveResourceIdentity_withPersistentIdOfResourceWithForcedIdAndDefaultClientIdStrategy_returnsNotFound(){
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
+		String resourceType = "Patient";
 
+		Object[] tuple = new Object[] {
+			JpaPid.fromId(1L),
+			"Patient",
+			"AAA",
+			new Date(),
+			null
+		};
+
+		when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(myTypedQuery);
+		when(myTypedQuery.getResultList()).thenReturn(List.of(
+			new TupleImpl(null, tuple)
+		));
+
+		try {
+			// Search by the PID of the resource that has a client assigned FHIR Id
+			myHelperSvc.resolveResourceIdentity(partitionId, resourceType, "1", ResolveIdentityMode.includeDeleted().cacheOk());
+			fail();
+		} catch(ResourceNotFoundException e) {
+			assertThat(e.getMessage()).isEqualTo("HAPI-2001: Resource Patient/1 is not known");
+		}
+	}
 }

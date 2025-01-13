@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -150,7 +151,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// In memory - Enumerated in non-present CS
 
@@ -162,14 +163,14 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// Precalculated
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		logAllValueSets();
-		myCachingValidationSupport.invalidateCaches();
+		myValidationSupport.invalidateCaches();
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
@@ -253,7 +254,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// In memory - Enumerated in non-present CS
 
@@ -265,14 +266,14 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// Precalculated
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		logAllValueSets();
-		myCachingValidationSupport.invalidateCaches();
+		myValidationSupport.invalidateCaches();
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
@@ -343,7 +344,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for 'http://acme.org#11378-7' for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
+		assertThat(result.getMessage()).contains("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for 'http://acme.org#11378-7' for in-memory expansion of ValueSet 'http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2'");
 	}
 
 	@Test
@@ -551,9 +552,16 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		vsInclude.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
 		myValueSetDao.update(vs);
 
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
+		myCaptureQueriesListener.clear();;
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, new IdType("ValueSet/vaccinecode"), new CodeType("28571000087109"), new CodeType("http://snomed.info/sct"), null, null, null, mySrd);
-		assertTrue(outcome.isOk());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(9, myCaptureQueriesListener.countSelectQueries(), ()->myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n")));
+		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated");
+		assertTrue(outcome.isOk(), outcome.getMessage());
 		outcome = myTermSvc.validateCodeInValueSet(
 			new ValidationSupportContext(myValidationSupport),
 			new ConceptValidationOptions(),
@@ -563,10 +571,6 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			vs
 		);
 		assertTrue(outcome.isOk());
-
-		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/vaccinecode"), new ValueSetExpansionOptions(), mySrd);
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-
 	}
 
 	/** See #4449 */

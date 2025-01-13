@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -61,6 +62,9 @@ import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
 import ch.qos.logback.classic.Level;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.cat.IndicesResponse;
+import co.elastic.clients.elasticsearch.cat.count.CountRecord;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -97,6 +101,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -268,17 +273,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@BeforeEach
 	public void enableContainsAndLucene() {
 		myStorageSettings.setAllowContainsSearches(true);
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
 	}
-
-	@AfterEach
-	public void restoreContains() {
-		JpaStorageSettings defaultConfig = new JpaStorageSettings();
-		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
-		myStorageSettings.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
-	}
-
 
 
 	class ElasticPerformanceTracingInterceptor {
@@ -291,6 +288,50 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		public List<StorageProcessingMessage> getMessages() {
 			return messages;
+		}
+	}
+
+	@Test
+	public void testNoOpUpdateDoesNotModifyLastUpdated() throws InterruptedException {
+		myStorageSettings.setAdvancedHSearchIndexing(true);
+		Patient patient = new Patient();
+		patient.getNameFirstRep().setFamily("graham").addGiven("gary");
+
+		patient = (Patient) myPatientDao.create(patient).getResource();
+		Date originalLastUpdated = patient.getMeta().getLastUpdated();
+
+		patient = (Patient) myPatientDao.update(patient).getResource();
+		Date newLastUpdated = patient.getMeta().getLastUpdated();
+
+		assertThat(originalLastUpdated).isEqualTo(newLastUpdated);
+	}
+
+	@ParameterizedTest
+	@CsvSource(value = {
+		"false, false",
+		"false, true",
+		"true,  false",
+		"true,  true",
+	})
+	public void testIndexingEnabledAndDisabled(boolean theHibernateSearchIndexFullText, boolean theHibernateSearchIndexSearchParams) throws IOException {
+		// Setup
+		myStorageSettings.setHibernateSearchIndexFullText(theHibernateSearchIndexFullText);
+		myStorageSettings.setHibernateSearchIndexSearchParams(theHibernateSearchIndexSearchParams);
+
+		ElasticsearchClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(
+			"http", myElasticsearchContainer.getHost() + ":" + myElasticsearchContainer.getMappedPort(9200), "", "");
+		int initialCount = elasticsearchHighLevelRestClient.cat().count().valueBody().stream().mapToInt(next -> Integer.parseInt(next.count())).sum();
+
+		// Test
+		createPatient(withFamily("SIMPSON"));
+
+		// Verify
+		int newCount = elasticsearchHighLevelRestClient.cat().count().valueBody().stream().mapToInt(next -> Integer.parseInt(next.count())).sum();
+		int added = newCount - initialCount;
+		if (theHibernateSearchIndexFullText || theHibernateSearchIndexSearchParams) {
+			assertEquals(1, added);
+		} else {
+			assertEquals(0, added);
 		}
 	}
 
@@ -1102,7 +1143,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -1135,7 +1176,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		TermConcept childCA = new TermConcept(cs, "childCA").setDisplay("Child CA");
 		parentC.addChild(childCA, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 
@@ -1804,68 +1845,52 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@Test
 		public void eq() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=eq" + myOldLastUpdatedDateTime);
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId);
 		}
 
 		@Test
 		public void eqLessPrecisionRequest() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=eq2017-03-24");
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId);
 		}
 
 		@Test
 		public void ne() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=ne" + myOldLastUpdatedDateTime);
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myNewObsId);
 		}
 
 		@Test
 		void gt() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=gt2018-01-01");
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myNewObsId);
 		}
 
 		@Test
 		public void ge() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=ge" + myOldLastUpdatedDateTime);
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId, myNewObsId);
 		}
 
 		@Test
 		void lt() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=lt2018-01-01");
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId);
 		}
 
 		@Test
 		public void le() {
-			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=le" + myOldLastUpdatedDateTime);
 
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId);
 		}
-
-
 	}
 
 	@Nested

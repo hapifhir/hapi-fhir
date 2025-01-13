@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,33 @@ import java.util.Date;
 public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 
 	private final String myResourceType;
-	private final Long myResourcePid;
+	private final JpaPid myResourcePid;
 	private final Date myDeletedAt;
 	private final PartitionablePartitionId myPartitionablePartitionId;
+	private final String myFhirId;
 
 	public JpaResourceLookup(
 			String theResourceType,
+			String theFhirId,
 			Long theResourcePid,
 			Date theDeletedAt,
 			PartitionablePartitionId thePartitionablePartitionId) {
 		myResourceType = theResourceType;
+		myFhirId = theFhirId;
+		myDeletedAt = theDeletedAt;
+		myPartitionablePartitionId = thePartitionablePartitionId;
+
+		myResourcePid = JpaPid.fromId(theResourcePid, myPartitionablePartitionId);
+	}
+
+	public JpaResourceLookup(
+			String theResourceType,
+			String theFhirId,
+			JpaPid theResourcePid,
+			Date theDeletedAt,
+			PartitionablePartitionId thePartitionablePartitionId) {
+		myResourceType = theResourceType;
+		myFhirId = theFhirId;
 		myResourcePid = theResourcePid;
 		myDeletedAt = theDeletedAt;
 		myPartitionablePartitionId = thePartitionablePartitionId;
@@ -50,16 +67,18 @@ public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 	}
 
 	@Override
+	public String getFhirId() {
+		return myFhirId;
+	}
+
+	@Override
 	public Date getDeleted() {
 		return myDeletedAt;
 	}
 
 	@Override
 	public JpaPid getPersistentId() {
-		JpaPid jpaPid = JpaPid.fromId(myResourcePid);
-		jpaPid.setPartitionablePartitionId(myPartitionablePartitionId);
-
-		return jpaPid;
+		return myResourcePid;
 	}
 
 	@Override
@@ -70,5 +89,10 @@ public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 				.append("deletedAt", myDeletedAt)
 				.append("partId", myPartitionablePartitionId)
 				.toString();
+	}
+
+	@Override
+	public PartitionablePartitionId getPartitionId() {
+		return myPartitionablePartitionId;
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -116,7 +117,8 @@ public interface IValidationSupport {
 			@Nonnull String theValueSetUrlToExpand)
 			throws ResourceNotFoundException {
 		Validate.notBlank(theValueSetUrlToExpand, "theValueSetUrlToExpand must not be null or blank");
-		IBaseResource valueSet = fetchValueSet(theValueSetUrlToExpand);
+		IBaseResource valueSet =
+				theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrlToExpand);
 		if (valueSet == null) {
 			throw new ResourceNotFoundException(
 					Msg.code(2024) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetUrlToExpand));
@@ -212,8 +214,8 @@ public interface IValidationSupport {
 				() -> fetchStructureDefinition(theUri), () -> fetchValueSet(theUri), () -> fetchCodeSystem(theUri)
 			};
 			return (T) Arrays.stream(sources)
-					.map(t -> t.get())
-					.filter(t -> t != null)
+					.map(Supplier::get)
+					.filter(Objects::nonNull)
 					.findFirst()
 					.orElse(null);
 		}
@@ -792,6 +794,7 @@ public interface IValidationSupport {
 			return myValue;
 		}
 
+		@Override
 		public String getType() {
 			return TYPE_STRING;
 		}
@@ -826,6 +829,7 @@ public interface IValidationSupport {
 			return myDisplay;
 		}
 
+		@Override
 		public String getType() {
 			return TYPE_CODING;
 		}
@@ -1431,10 +1435,9 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * <p
-	 * Warning: This method's behaviour and naming is preserved for backwards compatibility, BUT the actual naming and
-	 * function are not aligned.
-	 * </p
+	 * When validating a CodeableConcept containing multiple codings, this method can be used to control whether
+	 * the validator requires all codings in the CodeableConcept to be valid in order to consider the
+	 * CodeableConcept valid.
 	 * <p>
 	 * See VersionSpecificWorkerContextWrapper#validateCode in hapi-fhir-validation, and the refer to the values below
 	 * for the behaviour associated with each value.
@@ -1449,7 +1452,7 @@ public interface IValidationSupport {
 	 * </p>
 	 * @return true or false depending on the desired coding validation behaviour.
 	 */
-	default boolean isEnabledValidationForCodingsLogicalAnd() {
+	default boolean isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid() {
 		return false;
 	}
 }

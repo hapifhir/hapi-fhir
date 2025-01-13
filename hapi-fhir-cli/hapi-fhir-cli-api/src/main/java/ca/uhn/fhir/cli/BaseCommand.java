@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -668,7 +668,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 	protected void parseFhirContext(CommandLine theCommandLine) throws ParseException {
 		FhirVersionEnum versionEnum = parseFhirVersion(theCommandLine);
-		myFhirCtx = versionEnum.newContext();
+		myFhirCtx = FhirContext.forVersion(versionEnum);
 	}
 
 	public abstract void run(CommandLine theCommandLine) throws ParseException, ExecutionException;

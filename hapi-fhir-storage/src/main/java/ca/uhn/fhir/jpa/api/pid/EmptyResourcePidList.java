@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * An empty resource pid list
  */
-public class EmptyResourcePidList implements IResourcePidList {
+public class EmptyResourcePidList<T extends IResourcePersistentId<?>> implements IResourcePidList<T> {
 	@Override
 	public RequestPartitionId getRequestPartitionId() {
 		return null;
@@ -60,7 +60,7 @@ public class EmptyResourcePidList implements IResourcePidList {
 	}
 
 	@Override
-	public List<IResourcePersistentId> getIds() {
+	public List<T> getIds() {
 		return Collections.emptyList();
 	}
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public class MdmSearchParamSvc {
 
 	public ISearchBuilder generateSearchBuilderForType(String theSourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theSourceType);
-		return mySearchBuilderFactory.newSearchBuilder(resourceDao, theSourceType, resourceDao.getResourceType());
+		return mySearchBuilderFactory.newSearchBuilder(theSourceType, resourceDao.getResourceType());
 	}
 
 	/**

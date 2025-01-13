@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>7.7.7-SNAPSHOT</version>
+		<version>7.7.17-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -55,12 +55,14 @@
 			<artifactId>derby</artifactId>
 			<scope>test</scope>
 			<version>10.16.1.1</version>
+			<!--	Don't bump this, they drop support for JRE 17	-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derbytools</artifactId>
 			<scope>test</scope>
 			<version>10.16.1.1</version>
+			<!--	Don't bump this, they drop support for JRE 17	-->
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -78,13 +80,6 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-test-utilities</artifactId>
-			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -131,7 +126,6 @@
 		</dependency>
 
 		<!-- test -->
-
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-test-utilities</artifactId>

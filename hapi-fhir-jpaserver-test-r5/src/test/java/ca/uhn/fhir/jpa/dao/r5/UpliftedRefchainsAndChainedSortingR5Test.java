@@ -296,10 +296,9 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 		// Verify correct indexes are written
+		logAllStringIndexes();
 
 		runInTransaction(() -> {
-			logAllStringIndexes();
-
 			List<String> params = myResourceIndexedSearchParamStringDao
 				.findAll()
 				.stream()
@@ -309,7 +308,6 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 			assertThat(params).as(params.toString()).containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
 		});
 	}
-
 
 	@Test
 	public void testCreate_InTransaction_TargetConditionalUpdated_NotAlreadyExisting() {
@@ -382,7 +380,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// 1- Resolve resource forced IDs, and 2- Resolve Practitioner/PR1 reference
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 		// Verify correct indexes are written
 

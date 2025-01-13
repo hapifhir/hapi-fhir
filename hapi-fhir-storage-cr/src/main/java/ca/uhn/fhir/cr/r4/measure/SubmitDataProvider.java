@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,6 @@ public class SubmitDataProvider {
 			@IdParam IdType theId,
 			@OperationParam(name = "measureReport", min = 1, max = 1) MeasureReport theReport,
 			@OperationParam(name = "resource") List<IBaseResource> theResources) {
-		return myR4SubmitDataProcessorFactory.create(theRequestDetails).submitData(theId, theReport, theResources);
+		return myR4SubmitDataProcessorFactory.create(theRequestDetails).submitData(theReport, theResources);
 	}
 }

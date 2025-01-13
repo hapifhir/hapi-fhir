@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.model.TranslationQuery;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
@@ -30,12 +30,15 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -69,14 +72,9 @@ public class MemoryCacheService {
 			int maximumSize;
 
 			switch (next) {
-				case CONCEPT_TRANSLATION:
-				case CONCEPT_TRANSLATION_REVERSE:
-					timeoutSeconds =
-							SECONDS.convert(myStorageSettings.getTranslationCachesExpireAfterWriteInMinutes(), MINUTES);
-					maximumSize = 500000;
-					break;
+				case NAME_TO_PARTITION:
+				case ID_TO_PARTITION:
 				case PID_TO_FORCED_ID:
-				case FORCED_ID_TO_PID:
 				case MATCH_URL:
 				case RESOURCE_LOOKUP_BY_FORCED_ID:
 				case HISTORY_COUNT:
@@ -207,35 +205,26 @@ public class MemoryCacheService {
 		 * Value type: {@literal JpaResourceLookup}
 		 */
 		RESOURCE_LOOKUP_BY_FORCED_ID(ForcedIdCacheKey.class),
-		FORCED_ID_TO_PID(String.class),
 		FHIRPATH_EXPRESSION(String.class),
 		/**
 		 * Key type: {@literal Long}
 		 * Value type: {@literal Optional<String>}
 		 */
-		PID_TO_FORCED_ID(Long.class),
-		/**
-		 * TODO: JA this is duplicate with the CachingValidationSupport cache.
-		 * A better solution would be to drop this cache for this item, and to
-		 * create a new CachingValidationSupport implementation which uses
-		 * the MemoryCacheService for all of its caches.
-		 */
-		CONCEPT_TRANSLATION(TranslationQuery.class),
+		PID_TO_FORCED_ID(JpaPid.class),
 		MATCH_URL(String.class),
-		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class),
 		RESOURCE_CONDITIONAL_CREATE_VERSION(Long.class),
 		HISTORY_COUNT(HistoryCountKey.class),
 		NAME_TO_PARTITION(String.class),
 		ID_TO_PARTITION(Integer.class);
 
-		public Class<?> getKeyType() {
-			return myKeyType;
-		}
-
 		private final Class<?> myKeyType;
 
 		CacheEnum(Class<?> theKeyType) {
 			myKeyType = theKeyType;
+		}
+
+		public Class<?> getKeyType() {
+			return myKeyType;
 		}
 	}
 
@@ -245,8 +234,8 @@ public class MemoryCacheService {
 		private final String mySystem;
 		private final String myCode;
 		private final String myVersion;
-		private Boolean myUserSelected;
 		private final int myHashCode;
+		private Boolean myUserSelected;
 
 		public TagDefinitionCacheKey(
 				TagTypeEnum theType, String theSystem, String theCode, String theVersion, Boolean theUserSelected) {
@@ -288,29 +277,23 @@ public class MemoryCacheService {
 	public static class HistoryCountKey {
 		private final String myTypeName;
 		private final Long myInstanceId;
+		private final Integer myPartitionId;
 		private final int myHashCode;
 
-		private HistoryCountKey(String theTypeName, Long theInstanceId) {
+		private HistoryCountKey(@Nullable String theTypeName, @Nullable JpaPid theInstanceId) {
 			myTypeName = theTypeName;
-			myInstanceId = theInstanceId;
+			if (theInstanceId != null) {
+				myInstanceId = theInstanceId.getId();
+				myPartitionId = theInstanceId.getPartitionId();
+			} else {
+				myInstanceId = null;
+				myPartitionId = null;
+			}
 			myHashCode = new HashCodeBuilder()
 					.append(myTypeName)
 					.append(myInstanceId)
+					.append(myPartitionId)
 					.toHashCode();
-		}
-
-		public static HistoryCountKey forSystem() {
-			return new HistoryCountKey(null, null);
-		}
-
-		public static HistoryCountKey forType(@Nonnull String theType) {
-			assert isNotBlank(theType);
-			return new HistoryCountKey(theType, null);
-		}
-
-		public static HistoryCountKey forInstance(@Nonnull Long theInstanceId) {
-			assert theInstanceId != null;
-			return new HistoryCountKey(null, theInstanceId);
 		}
 
 		@Override
@@ -330,13 +313,26 @@ public class MemoryCacheService {
 		public int hashCode() {
 			return myHashCode;
 		}
+
+		public static HistoryCountKey forSystem() {
+			return new HistoryCountKey(null, null);
+		}
+
+		public static HistoryCountKey forType(@Nonnull String theType) {
+			assert isNotBlank(theType);
+			return new HistoryCountKey(theType, null);
+		}
+
+		public static HistoryCountKey forInstance(@Nonnull JpaPid theInstanceId) {
+			return new HistoryCountKey(null, theInstanceId);
+		}
 	}
 
 	public static class ForcedIdCacheKey {
 
 		private final String myResourceType;
 		private final String myResourceId;
-		private final RequestPartitionId myRequestPartitionId;
+		private final List<Integer> myRequestPartitionIds;
 		private final int myHashCode;
 
 		public ForcedIdCacheKey(
@@ -345,8 +341,21 @@ public class MemoryCacheService {
 				@Nonnull RequestPartitionId theRequestPartitionId) {
 			myResourceType = theResourceType;
 			myResourceId = theResourceId;
-			myRequestPartitionId = theRequestPartitionId;
-			myHashCode = Objects.hash(myResourceType, myResourceId, myRequestPartitionId);
+			if (theRequestPartitionId.hasPartitionIds()) {
+				myRequestPartitionIds = theRequestPartitionId.getPartitionIds();
+			} else {
+				myRequestPartitionIds = null;
+			}
+			myHashCode = Objects.hash(myResourceType, myResourceId, myRequestPartitionIds);
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+					.append("resType", myResourceType)
+					.append("resId", myResourceId)
+					.append("partId", myRequestPartitionIds)
+					.toString();
 		}
 
 		@Override
@@ -360,7 +369,7 @@ public class MemoryCacheService {
 			ForcedIdCacheKey that = (ForcedIdCacheKey) theO;
 			return Objects.equals(myResourceType, that.myResourceType)
 					&& Objects.equals(myResourceId, that.myResourceId)
-					&& Objects.equals(myRequestPartitionId, that.myRequestPartitionId);
+					&& Objects.equals(myRequestPartitionIds, that.myRequestPartitionIds);
 		}
 
 		@Override
@@ -372,21 +381,7 @@ public class MemoryCacheService {
 		 * Creates and returns a new unqualified versionless IIdType instance
 		 */
 		public IIdType toIdType(FhirContext theFhirCtx) {
-			if (myResourceType == null) {
-				return toIdTypeWithoutResourceType(theFhirCtx);
-			}
-			IIdType retVal = theFhirCtx.getVersion().newIdType();
-			retVal.setValue(myResourceType + "/" + myResourceId);
-			return retVal;
-		}
-
-		/**
-		 * Creates and returns a new unqualified versionless IIdType instance
-		 */
-		public IIdType toIdTypeWithoutResourceType(FhirContext theFhirCtx) {
-			IIdType retVal = theFhirCtx.getVersion().newIdType();
-			retVal.setValue(myResourceId);
-			return retVal;
+			return theFhirCtx.getVersion().newIdType(myResourceType, myResourceId);
 		}
 	}
 }

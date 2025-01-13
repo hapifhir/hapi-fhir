@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -71,7 +73,7 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 	private HapiTransactionService myHapiTransactionService;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<?> myIdHelperService;
 
 	@Autowired
 	private IFhirSystemDao<?, ?> mySystemDao;
@@ -139,16 +141,22 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 			ids.put(id, next);
 		}
 
-		List<IIdType> idsList = new ArrayList<>(ids.keySet());
-		List<IResourcePersistentId> resolvedIds = myIdHelperService.resolveResourcePersistentIdsWithCache(
-				theRequestDetails.getRequestPartitionId(), idsList, true);
-		for (IResourcePersistentId next : resolvedIds) {
-			IIdType resId = next.getAssociatedResourceId();
-			theTransactionDetails.addResolvedResourceId(resId, next);
-			ids.remove(resId);
-		}
 		for (IIdType next : ids.keySet()) {
 			theTransactionDetails.addResolvedResourceId(next, null);
+		}
+
+		List<IIdType> idsList = new ArrayList<>(ids.keySet());
+		Map<IIdType, ? extends IResourceLookup<?>> resolvedIdentities = myIdHelperService.resolveResourceIdentities(
+				theRequestDetails.getRequestPartitionId(),
+				idsList,
+				ResolveIdentityMode.includeDeleted().cacheOk());
+		List<IResourcePersistentId<?>> resolvedIds = new ArrayList<>(resolvedIdentities.size());
+		for (Map.Entry<IIdType, ? extends IResourceLookup<?>> next : resolvedIdentities.entrySet()) {
+			IIdType resId = next.getKey();
+			IResourcePersistentId<?> persistentId = next.getValue().getPersistentId();
+			resolvedIds.add(persistentId);
+			theTransactionDetails.addResolvedResourceId(resId, persistentId);
+			ids.remove(resId);
 		}
 
 		mySystemDao.preFetchResources(resolvedIds, true);

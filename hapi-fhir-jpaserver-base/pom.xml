@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>7.7.7-SNAPSHOT</version>
+		<version>7.7.17-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -76,6 +76,11 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-sql-migrate</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpa-hibernate-services</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -406,14 +411,14 @@
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
 		</dependency>
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>
-			<!-- Generate the Spring ContextCfg classes for loading JPA DAOs and RPs -->
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
+				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<id>build_dstu2</id>
@@ -424,12 +429,9 @@
 							<version>dstu2</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu2</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml
-							</targetResourceSpringBeansFile>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml</targetResourceSpringBeansFile>
 							<baseResourceNames/>
-							<excludeResourceNames>
-								<!-- <excludeResourceName>OperationDefinition</excludeResourceName> <excludeResourceName>OperationOutcome</excludeResourceName> -->
-							</excludeResourceNames>
+							<excludeResourceNames/>
 						</configuration>
 					</execution>
 					<execution>
@@ -441,11 +443,9 @@
 							<version>dstu3</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu3</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu3.xml
-							</targetResourceSpringBeansFile>
-							<baseResourceNames></baseResourceNames>
-							<excludeResourceNames>
-							</excludeResourceNames>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu3.xml</targetResourceSpringBeansFile>
+							<baseResourceNames/>
+							<excludeResourceNames/>
 						</configuration>
 					</execution>
 					<execution>
@@ -457,11 +457,9 @@
 							<version>r4</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r4</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4.xml
-							</targetResourceSpringBeansFile>
-							<baseResourceNames></baseResourceNames>
-							<excludeResourceNames>
-							</excludeResourceNames>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4.xml</targetResourceSpringBeansFile>
+							<baseResourceNames/>
+							<excludeResourceNames/>
 						</configuration>
 					</execution>
 					<execution>
@@ -473,11 +471,9 @@
 							<version>r4b</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r4b</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4b.xml
-							</targetResourceSpringBeansFile>
-							<baseResourceNames></baseResourceNames>
-							<excludeResourceNames>
-							</excludeResourceNames>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4b.xml</targetResourceSpringBeansFile>
+							<baseResourceNames/>
+							<excludeResourceNames/>
 						</configuration>
 					</execution>
 					<execution>
@@ -495,7 +491,6 @@
 						</configuration>
 					</execution>
 				</executions>
-
 				<dependencies>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
@@ -512,7 +507,6 @@
 						<artifactId>hapi-fhir-structures-r4</artifactId>
 						<version>${project.version}</version>
 					</dependency>
-
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
@@ -520,19 +514,35 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+
 			<!-- Generate the DDL schema files -->
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate-ddl</goal>
-						</goals>
-					</execution>
+				<version>${project.version}</version>
+				<executions><execution><id>generate-ddl-legacy</id>
+					<phase>process-classes</phase>
+				<goals>
+					<goal>generate-ddl</goal>
+				</goals>
+					<configuration>
+						<databasePartitionMode>false</databasePartitionMode>
+						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
+					</configuration>
+				</execution>
+				<execution>
+					<id>generate-ddl-partitioned</id>
+					<phase>process-classes</phase>
+				<goals>
+					<goal>generate-ddl</goal>
+				</goals>
+					<configuration>
+						<databasePartitionMode>true</databasePartitionMode>
+						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/partitioned</outputDirectory>
+					</configuration>
+				</execution>
 				</executions>
 				<configuration>
-					<skip>false</skip>
 					<packageNames>
 						<packageName>ca.uhn.fhir.jpa.entity</packageName>
 						<packageName>ca.uhn.fhir.jpa.model.entity</packageName>
@@ -572,7 +582,6 @@
 							<appendFile>classpath:ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql</appendFile>
 						</dialect>
 					</dialects>
-					<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>
 				</configuration>
 				<dependencies>
 					<dependency>
@@ -582,6 +591,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>

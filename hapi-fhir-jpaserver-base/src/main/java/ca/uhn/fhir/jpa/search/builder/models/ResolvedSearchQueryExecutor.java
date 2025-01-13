@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.search.builder.models;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import jakarta.annotation.Nonnull;
 
@@ -26,18 +27,18 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
-	private final Iterator<Long> myIterator;
+	private final Iterator<JpaPid> myIterator;
 
-	public ResolvedSearchQueryExecutor(Iterable<Long> theIterable) {
+	public ResolvedSearchQueryExecutor(Iterable<JpaPid> theIterable) {
 		this(theIterable.iterator());
 	}
 
-	public ResolvedSearchQueryExecutor(Iterator<Long> theIterator) {
+	public ResolvedSearchQueryExecutor(Iterator<JpaPid> theIterator) {
 		myIterator = theIterator;
 	}
 
 	@Nonnull
-	public static ResolvedSearchQueryExecutor from(List<Long> rawPids) {
+	public static ResolvedSearchQueryExecutor from(List<JpaPid> rawPids) {
 		return new ResolvedSearchQueryExecutor(rawPids);
 	}
 
@@ -47,7 +48,7 @@ public class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
 	}
 
 	@Override
-	public Long next() {
+	public JpaPid next() {
 		return myIterator.next();
 	}
 

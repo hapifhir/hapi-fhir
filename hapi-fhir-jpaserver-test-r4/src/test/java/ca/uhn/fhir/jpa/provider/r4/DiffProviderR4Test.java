@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.patch.FhirPatchApplyR4Test;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -104,7 +105,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 		createPatient(withId(id), withActiveTrue(), withFamily("SMITH"));
 
 		runInTransaction(() -> {
-			ResourceHistoryTable version2 = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 2);
+			ResourceHistoryTable version2 = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id.getIdPartAsLong()), 2);
 			myResourceHistoryTableDao.deleteByPid(version2.getId());
 		});
 

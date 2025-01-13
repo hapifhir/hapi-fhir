@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
@@ -61,6 +62,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +90,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	@AfterEach
 	public void afterEach() {
 		SearchBuilder.setMaxPageSizeForTest(null);
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
 	}
 
 	@Override
@@ -502,7 +505,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		code = "AAA";
 		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://hl7.org/fhir/administrative-gender#AAA' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://hl7.org/fhir/administrative-gender#AAA' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender'");
 		assertEquals("error", outcome.getSeverityCode());
 
 	}
@@ -986,7 +989,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		String code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://invalid-cs#28571000087109' for in-memory expansion of ValueSet 'http://vs-with-invalid-cs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://invalid-cs#28571000087109' for in-memory expansion of ValueSet 'http://vs-with-invalid-cs'");
 		assertEquals("error", outcome.getSeverityCode());
 
 		// Try validating a code that is in the missing CS that is imported by the VS
@@ -1280,7 +1283,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				ResourceTable resourceTable = (ResourceTable) myCodeSystemDao.readEntity(codeSystemResource.getIdElement(), null);
-				Long codeSystemResourcePid = resourceTable.getId();
+				JpaPid codeSystemResourcePid = resourceTable.getId();
 				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemResourcePid);
 				assertEquals(CS_URL, codeSystem.getCodeSystemUri());
 				assertEquals("SYSTEM NAME", codeSystem.getName());
@@ -1289,32 +1292,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 				assertEquals(9, codeSystemVersion.getConcepts().size());
 
 				List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
+				concepts.sort(Comparator.comparing(t->t.getCode()));
 
-				TermConcept parentWithNoChildrenA = concepts.get(0);
-				assertEquals("ParentWithNoChildrenA", parentWithNoChildrenA.getCode());
-				assertNull(parentWithNoChildrenA.getDisplay());
-				assertEquals(0, parentWithNoChildrenA.getChildren().size());
-				assertEquals(0, parentWithNoChildrenA.getParents().size());
-				assertEquals(0, parentWithNoChildrenA.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenA.getProperties().size());
+				int index = 0;
 
-				TermConcept parentWithNoChildrenB = concepts.get(1);
-				assertEquals("ParentWithNoChildrenB", parentWithNoChildrenB.getCode());
-				assertNull(parentWithNoChildrenB.getDisplay());
-				assertEquals(0, parentWithNoChildrenB.getChildren().size());
-				assertEquals(0, parentWithNoChildrenB.getParents().size());
-				assertEquals(0, parentWithNoChildrenB.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenB.getProperties().size());
-
-				TermConcept parentWithNoChildrenC = concepts.get(2);
-				assertEquals("ParentWithNoChildrenC", parentWithNoChildrenC.getCode());
-				assertNull(parentWithNoChildrenC.getDisplay());
-				assertEquals(0, parentWithNoChildrenC.getChildren().size());
-				assertEquals(0, parentWithNoChildrenC.getParents().size());
-				assertEquals(0, parentWithNoChildrenC.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenC.getProperties().size());
-
-				TermConcept parentA = concepts.get(3);
+				TermConcept parentA = concepts.get(index++);
 				assertEquals("ParentA", parentA.getCode());
 				assertNull(parentA.getDisplay());
 				assertEquals(2, parentA.getChildren().size());
@@ -1322,7 +1304,38 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 				assertEquals(0, parentA.getDesignations().size());
 				assertEquals(0, parentA.getProperties().size());
 
-				TermConcept childAA = concepts.get(4);
+				TermConcept parentB = concepts.get(index++);
+				assertEquals("ParentB", parentB.getCode());
+				assertNull(parentB.getDisplay());
+				assertEquals(0, parentB.getChildren().size());
+				assertEquals(0, parentB.getParents().size());
+				assertEquals(0, parentB.getDesignations().size());
+				assertEquals(0, parentB.getProperties().size());
+				TermConcept parentWithNoChildrenA = concepts.get(index++);
+				assertEquals("ParentWithNoChildrenA", parentWithNoChildrenA.getCode());
+				assertNull(parentWithNoChildrenA.getDisplay());
+				assertEquals(0, parentWithNoChildrenA.getChildren().size());
+				assertEquals(0, parentWithNoChildrenA.getParents().size());
+				assertEquals(0, parentWithNoChildrenA.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenA.getProperties().size());
+
+				TermConcept parentWithNoChildrenB = concepts.get(index++);
+				assertEquals("ParentWithNoChildrenB", parentWithNoChildrenB.getCode());
+				assertNull(parentWithNoChildrenB.getDisplay());
+				assertEquals(0, parentWithNoChildrenB.getChildren().size());
+				assertEquals(0, parentWithNoChildrenB.getParents().size());
+				assertEquals(0, parentWithNoChildrenB.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenB.getProperties().size());
+
+				TermConcept parentWithNoChildrenC = concepts.get(index++);
+				assertEquals("ParentWithNoChildrenC", parentWithNoChildrenC.getCode());
+				assertNull(parentWithNoChildrenC.getDisplay());
+				assertEquals(0, parentWithNoChildrenC.getChildren().size());
+				assertEquals(0, parentWithNoChildrenC.getParents().size());
+				assertEquals(0, parentWithNoChildrenC.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenC.getProperties().size());
+
+				TermConcept childAA = concepts.get(index++);
 				assertEquals("childAA", childAA.getCode());
 				assertNull(childAA.getDisplay());
 				assertEquals(2, childAA.getChildren().size());
@@ -1331,7 +1344,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 				assertEquals(0, childAA.getDesignations().size());
 				assertEquals(0, childAA.getProperties().size());
 
-				TermConcept childAAA = concepts.get(5);
+				TermConcept childAAA = concepts.get(index++);
 				assertEquals("childAAA", childAAA.getCode());
 				assertNull(childAAA.getDisplay());
 				assertEquals(0, childAAA.getChildren().size());
@@ -1340,7 +1353,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 				assertEquals(0, childAAA.getDesignations().size());
 				assertEquals(2, childAAA.getProperties().size());
 
-				TermConcept childAAB = concepts.get(6);
+				TermConcept childAAB = concepts.get(index++);
 				assertEquals("childAAB", childAAB.getCode());
 				assertNull(childAAB.getDisplay());
 				assertEquals(0, childAAB.getChildren().size());
@@ -1349,7 +1362,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 				assertEquals(1, childAAB.getDesignations().size());
 				assertEquals(2, childAAB.getProperties().size());
 
-				TermConcept childAB = concepts.get(7);
+				TermConcept childAB = concepts.get(index++);
 				assertEquals("childAB", childAB.getCode());
 				assertNull(childAB.getDisplay());
 				assertEquals(0, childAB.getChildren().size());
@@ -1357,14 +1370,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 				assertSame(parentA, childAB.getParents().iterator().next().getParent());
 				assertEquals(0, childAB.getDesignations().size());
 				assertEquals(0, childAB.getProperties().size());
-
-				TermConcept parentB = concepts.get(8);
-				assertEquals("ParentB", parentB.getCode());
-				assertNull(parentB.getDisplay());
-				assertEquals(0, parentB.getChildren().size());
-				assertEquals(0, parentB.getParents().size());
-				assertEquals(0, parentB.getDesignations().size());
-				assertEquals(0, parentB.getProperties().size());
 			}
 		});
 	}
@@ -1390,7 +1395,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
-			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			ourLog.info("ValueSet:\n" + termValueSet);
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(0, termValueSet.getConcepts().size());
@@ -1408,7 +1413,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
-			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			ourLog.info("ValueSet:\n" + termValueSet);
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(codeSystem.getConcept().size(), termValueSet.getConcepts().size());
@@ -1451,7 +1456,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
-			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			ourLog.info("ValueSet:\n" + termValueSet);
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(0, termValueSet.getConcepts().size());
@@ -1469,7 +1474,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
-			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			ourLog.info("ValueSet:\n" + termValueSet);
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(codeSystem.getConcept().size(), termValueSet.getConcepts().size());
@@ -1509,7 +1514,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
-			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			ourLog.info("ValueSet:\n" + termValueSet);
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(0, termValueSet.getConcepts().size());
@@ -1527,7 +1532,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
-			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			ourLog.info("ValueSet:\n" + termValueSet);
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(codeSystem.getConcept().size() - 2, termValueSet.getConcepts().size());
@@ -1569,7 +1574,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
-			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			ourLog.info("ValueSet:\n" + termValueSet);
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(0, termValueSet.getConcepts().size());
@@ -1587,7 +1592,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
-			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			ourLog.info("ValueSet:\n" + termValueSet);
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(codeSystem.getConcept().size() - 2, termValueSet.getConcepts().size());
@@ -1641,6 +1646,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		ValueSet expansion;
 		IdType vsId = new IdType("ValueSet/vaccinecode");
 
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+
 		// Expand VS
 		expansion = myValueSetDao.expand(vsId, new ValueSetExpansionOptions(), mySrd);
 		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).contains("Current status: NOT_EXPANDED");
@@ -1651,10 +1658,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		code = "28571000087109";
 		String display = null;
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
+		assertTrue(outcome.isOk(), outcome.getMessage() + "\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toParameters(myFhirContext)) + "\n" + outcome.getSourceDetails());
 		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
+		assertThat(outcome.getSourceDetails()).contains("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
 
 		// Validate code - good code, bad display
 		codeSystemUrl = "http://snomed.info/sct";
@@ -1664,7 +1672,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertTrue(outcome.isOk());
 		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
 		assertEquals("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getSourceDetails());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
 
@@ -1735,6 +1743,50 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 
 	@Test
+	public void testExpandValueSet_VsHasNoCodes() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("snomed-ct-ca-imm");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
+		cs.setUrl("http://snomed.info/sct");
+		cs.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		cs.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myCodeSystemDao.update(cs);
+
+		// No codes in this valueset
+		ValueSet vs = new ValueSet();
+		vs.setId("vaccinecode");
+		vs.setUrl("http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
+		vs.setVersion("0.1.17");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myValueSetDao.update(vs);
+
+		ConceptValidationOptions options = new ConceptValidationOptions();
+		options.setValidateDisplay(true);
+
+		String codeSystemUrl;
+		String code;
+		ValueSet expansion;
+		IdType vsId = new IdType("ValueSet/vaccinecode");
+
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+
+		// Expand VS
+		expansion = myValueSetDao.expand(vsId, new ValueSetExpansionOptions(), mySrd);
+		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).contains("Current status: NOT_EXPANDED");
+		assertThat(myValueSetTestUtil.toCodes(expansion)).isEmpty();
+
+		// Validate code
+		codeSystemUrl = "http://snomed.info/sct";
+		code = "38765352";
+		String display = null;
+		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains("in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
+		assertThat(outcome.getMessage()).contains("Empty compose list for include");
+	}
+
+	@Test
 	public void testExpandValueSet_VsIsEnumeratedWithVersionedSystem_CsIsFragmentWithWrongVersion() {
 		CodeSystem cs = new CodeSystem();
 		cs.setId("snomed-ct-ca-imm");
@@ -1776,7 +1828,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
 		assertEquals("error", outcome.getSeverityCode());
 
 		// Perform Pre-Expansion
@@ -1835,7 +1887,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
 		assertEquals("error", outcome.getSeverityCode());
 
 		// Perform Pre-Expansion
@@ -2087,12 +2139,12 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 		// Validate code that is good
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(vs.getUrlElement(), null, new StringType("B"), cs.getUrlElement(), null, null, null, mySrd);
-		assertEquals(true, outcome.isOk());
+		assertTrue(outcome.isOk());
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated");
 
 		// Validate code that is bad
 		outcome = myValueSetDao.validateCode(vs.getUrlElement(), null, new StringType("A"), cs.getUrlElement(), null, null, null, mySrd);
-		assertEquals(false, outcome.isOk());
+		assertFalse(outcome.isOk());
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated");
 	}
 

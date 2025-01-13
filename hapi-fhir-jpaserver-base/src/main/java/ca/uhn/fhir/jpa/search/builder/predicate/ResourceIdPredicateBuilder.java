@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
+import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -34,8 +36,6 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
@@ -48,7 +48,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceIdPredicateBuilder.class);
 
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
@@ -129,27 +128,34 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 			assert operation == SearchFilterParser.CompareOperation.eq
 					|| operation == SearchFilterParser.CompareOperation.ne;
 
-			List<Long> resourceIds = JpaPid.toLongList(allOrPids);
 			if (theSourceJoinColumn == null) {
 				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable(true);
 				Condition predicate;
 				switch (operation) {
 					default:
 					case eq:
-						predicate = queryRootTable.createPredicateResourceIds(false, resourceIds);
+						predicate = queryRootTable.createPredicateResourceIds(false, allOrPids);
 						break;
 					case ne:
-						predicate = queryRootTable.createPredicateResourceIds(true, resourceIds);
+						predicate = queryRootTable.createPredicateResourceIds(true, allOrPids);
 						break;
 				}
 				predicate = queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 				return predicate;
 			} else {
-				DbColumn resIdColumn = getResourceIdColumn(theSourceJoinColumn);
-				return QueryParameterUtils.toEqualToOrInPredicate(
-						resIdColumn,
-						generatePlaceholders(resourceIds),
-						operation == SearchFilterParser.CompareOperation.ne);
+				if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
+					ColumnTupleObject left = new ColumnTupleObject(theSourceJoinColumn);
+					JpaPidValueTuples right = JpaPidValueTuples.from(getSearchQueryBuilder(), allOrPids);
+					return QueryParameterUtils.toInPredicate(
+							left, right, operation == SearchFilterParser.CompareOperation.ne);
+				} else {
+					DbColumn resIdColumn = getResourceIdColumn(theSourceJoinColumn);
+					List<Long> resourceIds = JpaPid.toLongList(allOrPids);
+					return QueryParameterUtils.toEqualToOrInPredicate(
+							resIdColumn,
+							generatePlaceholders(resourceIds),
+							operation == SearchFilterParser.CompareOperation.ne);
+				}
 			}
 		}
 

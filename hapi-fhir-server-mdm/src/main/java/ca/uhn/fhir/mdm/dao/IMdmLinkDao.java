@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink<P>> {
+public interface IMdmLinkDao<P extends IResourcePersistentId<?>, M extends IMdmLink<P>> {
 	int deleteWithAnyReferenceToPid(P thePid);
 
 	int deleteWithAnyReferenceToPidAndMatchResultNot(P thePid, MdmMatchResultEnum theMatchResult);

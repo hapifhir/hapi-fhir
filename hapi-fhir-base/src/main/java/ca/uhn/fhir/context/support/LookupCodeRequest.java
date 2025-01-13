@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.context.support;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * Represents parameters which can be passed to the $lookup operation for codes.
@@ -71,5 +72,21 @@ public class LookupCodeRequest {
 			return Collections.emptyList();
 		}
 		return myPropertyNames;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (!(theO instanceof LookupCodeRequest)) return false;
+		LookupCodeRequest that = (LookupCodeRequest) theO;
+		return Objects.equals(mySystem, that.mySystem)
+				&& Objects.equals(myCode, that.myCode)
+				&& Objects.equals(myDisplayLanguage, that.myDisplayLanguage)
+				&& Objects.equals(myPropertyNames, that.myPropertyNames);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(mySystem, myCode, myDisplayLanguage, myPropertyNames);
 	}
 }

@@ -80,8 +80,10 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myPartitionSettings.setDefaultPartitionId(ALTERNATE_DEFAULT_ID);
 	}
 
+	@Override
 	@AfterEach
-	public void after() {
+	public void after() throws Exception {
+		super.after();
 		myInterceptorRegistry.unregisterInterceptor(mySvc);
 		myInterceptorRegistry.unregisterInterceptor(myForceOffsetSearchModeInterceptor);
 
@@ -171,7 +173,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	public void testCreateOrganization_ValidMembershipInCompartment() {
 		Organization org = new Organization();
 		org.setName("Foo");
-		Long id = myOrganizationDao.create(org).getId().getIdPartAsLong();
+		Long id = myOrganizationDao.create(org, mySrd).getId().getIdPartAsLong();
 
 		runInTransaction(() -> {
 			ResourceTable observation = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
@@ -222,8 +224,10 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		List<SqlQuery> selectQueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-		assertEquals(3, selectQueriesForCurrentThread.size());
+		assertEquals(2, selectQueriesForCurrentThread.size());
 		assertThat(selectQueriesForCurrentThread.get(0).getSql(false, false)).contains("PARTITION_ID=?");
+		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).doesNotContain("PARTITION_ID=");
+		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).doesNotContain("PARTITION_ID in");
 	}
 
 
@@ -270,7 +274,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myCaptureQueriesListener.clear();
 		myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd);
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Observation') AND (t0.RES_DELETED_AT IS NULL))", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
+		assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Observation') AND (t0.RES_DELETED_AT IS NULL)) fetch first '10000' rows only", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
 	}
 
 	@Test
@@ -351,7 +355,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		assertEquals(2, outcome.size());
 		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("PARTITION_ID=?");
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("PARTITION_ID in (?)");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("PARTITION_ID=?");
 	}
 
 

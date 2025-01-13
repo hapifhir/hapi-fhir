@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,12 +69,19 @@ public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProv
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 
+	@Autowired
+	private IReplaceReferencesSvc myReplaceReferencesSvc;
+
 	public BaseJpaSystemProvider() {
 		// nothing
 	}
 
 	protected IResourceReindexingSvc getResourceReindexingSvc() {
 		return myResourceReindexingSvc;
+	}
+
+	public IReplaceReferencesSvc getReplaceReferencesSvc() {
+		return myReplaceReferencesSvc;
 	}
 
 	@History

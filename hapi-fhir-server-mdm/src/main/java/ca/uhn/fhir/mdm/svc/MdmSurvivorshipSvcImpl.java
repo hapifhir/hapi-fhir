@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.TerserUtil;
@@ -108,13 +109,13 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public <T extends IBase> T rebuildGoldenResourceWithSurvivorshipRules(
-			T theGoldenResourceBase, MdmTransactionContext theMdmTransactionContext) {
+			RequestDetails theRequestDetails, T theGoldenResourceBase, MdmTransactionContext theMdmTransactionContext) {
 		IBaseResource goldenResource = (IBaseResource) theGoldenResourceBase;
 
 		// we want a list of source ids linked to this
 		// golden resource id; sorted and filtered for only MATCH results
 		Stream<IBaseResource> sourceResources =
-				getMatchedSourceIdsByLinkUpdateDate(goldenResource, theMdmTransactionContext);
+				getMatchedSourceIdsByLinkUpdateDate(theRequestDetails, goldenResource, theMdmTransactionContext);
 
 		IBaseResource toSave = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
 				(IAnyResource) goldenResource,
@@ -145,7 +146,9 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 	@SuppressWarnings("rawtypes")
 	private Stream<IBaseResource> getMatchedSourceIdsByLinkUpdateDate(
-			IBaseResource theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+			RequestDetails theRequestDetails,
+			IBaseResource theGoldenResource,
+			MdmTransactionContext theMdmTransactionContext) {
 		String resourceType = theGoldenResource.fhirType();
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 

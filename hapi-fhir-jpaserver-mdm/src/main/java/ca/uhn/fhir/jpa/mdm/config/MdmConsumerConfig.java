@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmQueueConsumerLoader mdmQueueConsumerLoader(
+	public MdmQueueConsumerLoader mdmQueueConsumerLoader(
 			IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
 		return new MdmQueueConsumerLoader(theChannelFactory, theMdmSettings, theMdmMessageHandler);
 	}
@@ -139,7 +139,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmSubscriptionLoader mdmSubscriptionLoader() {
+	public MdmSubscriptionLoader mdmSubscriptionLoader() {
 		return new MdmSubscriptionLoader();
 	}
 

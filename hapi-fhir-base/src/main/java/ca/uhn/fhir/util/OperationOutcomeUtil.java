@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -265,30 +265,48 @@ public class OperationOutcomeUtil {
 	}
 
 	public static void addDetailsToIssue(FhirContext theFhirContext, IBase theIssue, String theSystem, String theCode) {
+		addDetailsToIssue(theFhirContext, theIssue, theSystem, theCode, null);
+	}
+
+	public static void addDetailsToIssue(
+			FhirContext theFhirContext, IBase theIssue, String theSystem, String theCode, String theText) {
 		BaseRuntimeElementCompositeDefinition<?> issueElement =
 				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition(theIssue.getClass());
 		BaseRuntimeChildDefinition detailsChildDef = issueElement.getChildByName("details");
-
-		BaseRuntimeElementCompositeDefinition<?> codingDef =
-				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition("Coding");
-		ICompositeType coding = (ICompositeType) codingDef.newInstance();
-
-		// System
-		IPrimitiveType<?> system =
-				(IPrimitiveType<?>) theFhirContext.getElementDefinition("uri").newInstance();
-		system.setValueAsString(theSystem);
-		codingDef.getChildByName("system").getMutator().addValue(coding, system);
-
-		// Code
-		IPrimitiveType<?> code =
-				(IPrimitiveType<?>) theFhirContext.getElementDefinition("code").newInstance();
-		code.setValueAsString(theCode);
-		codingDef.getChildByName("code").getMutator().addValue(coding, code);
 		BaseRuntimeElementCompositeDefinition<?> ccDef =
 				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition("CodeableConcept");
-
 		ICompositeType codeableConcept = (ICompositeType) ccDef.newInstance();
-		ccDef.getChildByName("coding").getMutator().addValue(codeableConcept, coding);
+
+		if (isNotBlank(theSystem) || isNotBlank(theCode)) {
+			BaseRuntimeElementCompositeDefinition<?> codingDef =
+					(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition("Coding");
+			ICompositeType coding = (ICompositeType) codingDef.newInstance();
+
+			// System
+			if (isNotBlank(theSystem)) {
+				IPrimitiveType<?> system = (IPrimitiveType<?>)
+						theFhirContext.getElementDefinition("uri").newInstance();
+				system.setValueAsString(theSystem);
+				codingDef.getChildByName("system").getMutator().addValue(coding, system);
+			}
+
+			// Code
+			if (isNotBlank(theCode)) {
+				IPrimitiveType<?> code = (IPrimitiveType<?>)
+						theFhirContext.getElementDefinition("code").newInstance();
+				code.setValueAsString(theCode);
+				codingDef.getChildByName("code").getMutator().addValue(coding, code);
+			}
+
+			ccDef.getChildByName("coding").getMutator().addValue(codeableConcept, coding);
+		}
+
+		if (isNotBlank(theText)) {
+			IPrimitiveType<?> textElem = (IPrimitiveType<?>)
+					ccDef.getChildByName("text").getChildByName("text").newInstance(theText);
+			ccDef.getChildByName("text").getMutator().addValue(codeableConcept, textElem);
+		}
+
 		detailsChildDef.getMutator().addValue(theIssue, codeableConcept);
 	}
 

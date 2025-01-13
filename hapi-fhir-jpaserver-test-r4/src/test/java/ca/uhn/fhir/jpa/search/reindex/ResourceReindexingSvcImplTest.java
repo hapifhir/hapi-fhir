@@ -10,8 +10,11 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
@@ -58,6 +61,10 @@ public class ResourceReindexingSvcImplTest {
 	@Mock
 	private PlatformTransactionManager myTxManager;
 
+	@Mock
+	private EntityManager myEntityManager;
+	@Mock
+	private Query myQuery;
 	@Mock
 	private DaoRegistry myDaoRegistry;
 	@Mock
@@ -136,7 +143,7 @@ public class ResourceReindexingSvcImplTest {
 		mockNothingToExpunge();
 		mockSingleReindexingJob(null);
 		// Mock resource fetch
-		List<Long> values = Collections.emptyList();
+		List<JpaPid> values = Collections.emptyList();
 		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(), any(), any())).thenReturn(new SliceImpl<>(values));
 
 		mySingleJob.setThresholdLow(new Date(40 * DateUtils.MILLIS_PER_DAY));
@@ -203,7 +210,7 @@ public class ResourceReindexingSvcImplTest {
 		mockNothingToExpunge();
 		mockSingleReindexingJob("Patient");
 		// Mock resource fetch
-		List<Long> values = Arrays.asList(0L, 1L, 2L, 3L);
+		List<JpaPid> values = JpaPid.fromLongList(Arrays.asList(0L, 1L, 2L, 3L));
 		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(myPageRequestCaptor.capture(), myTypeCaptor.capture(), myLowCaptor.capture(), myHighCaptor.capture())).thenReturn(new SliceImpl<>(values));
 		// Mock fetching resources
 		long[] updatedTimes = new long[]{
@@ -256,10 +263,11 @@ public class ResourceReindexingSvcImplTest {
 	public void testReindexDeletedResource() {
 		// setup
 		when(myTxManager.getTransaction(any())).thenReturn(myTxStatus);
+		when(myEntityManager.createQuery(any(String.class))).thenReturn(myQuery);
 		mockNothingToExpunge();
 		mockSingleReindexingJob("Patient");
 		// Mock resource fetch
-		List<Long> values = Arrays.asList(0L);
+		List<JpaPid> values = JpaPid.fromLongList(Arrays.asList(0L));
 		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(myPageRequestCaptor.capture(), myTypeCaptor.capture(), myLowCaptor.capture(), myHighCaptor.capture())).thenReturn(new SliceImpl<>(values));
 		// Mock fetching resources
 		long[] updatedTimes = new long[]{
@@ -280,16 +288,16 @@ public class ResourceReindexingSvcImplTest {
 
 		// verify
 		assertEquals(0, count);
-		verify(myResourceTableDao, times(1)).updateIndexStatus(eq(0L), eq(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED));
+		verify(myResourceTableDao, times(1)).updateIndexStatus(eq(JpaPid.fromId(0L)), eq(EntityIndexStatusEnum.INDEXING_FAILED));
 	}
 
 	@Test
 	public void testReindexThrowsError() {
 		mockNothingToExpunge();
 		mockSingleReindexingJob("Patient");
-		List<Long> values = Arrays.asList(0L, 1L, 2L, 3L);
+		List<JpaPid> values = JpaPid.fromLongList(Arrays.asList(0L, 1L, 2L, 3L));
 		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(myPageRequestCaptor.capture(), myTypeCaptor.capture(), myLowCaptor.capture(), myHighCaptor.capture())).thenReturn(new SliceImpl<>(values));
-		when(myResourceTableDao.findById(anyLong())).thenThrow(new NullPointerException("A MESSAGE"));
+		when(myResourceTableDao.findById(any(JpaPid.class))).thenThrow(new NullPointerException("A MESSAGE"));
 
 		int count = mySvc.forceReindexingPass();
 		assertEquals(0, count);
@@ -302,12 +310,12 @@ public class ResourceReindexingSvcImplTest {
 	}
 
 	private void mockWhenResourceTableFindById(long[] theUpdatedTimes, String[] theResourceTypes) {
-		when(myResourceTableDao.findById(any())).thenAnswer(t -> {
+		when(myResourceTableDao.findById(any(JpaPid.class))).thenAnswer(t -> {
 			ResourceTable retVal = new ResourceTable();
-			Long id = (Long) t.getArguments()[0];
-			retVal.setId(id);
-			retVal.setResourceType(theResourceTypes[id.intValue()]);
-			retVal.setUpdated(new Date(theUpdatedTimes[id.intValue()]));
+			JpaPid id = (JpaPid) t.getArguments()[0];
+			retVal.setIdForUnitTest(id.getId());
+			retVal.setResourceType(theResourceTypes[id.getId().intValue()]);
+			retVal.setUpdated(new Date(theUpdatedTimes[id.getId().intValue()]));
 			return Optional.of(retVal);
 		});
 	}
@@ -343,13 +351,13 @@ public class ResourceReindexingSvcImplTest {
 
 	private void mockFourResourcesNeedReindexing() {
 		// Mock resource fetch
-		List<Long> values = Arrays.asList(0L, 1L, 2L, 3L);
+		List<JpaPid> values = JpaPid.fromLongList(Arrays.asList(0L, 1L, 2L, 3L));
 		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(), any(), any())).thenReturn(new SliceImpl<>(values));
 	}
 
 	private void mockFinalResourceNeedsReindexing() {
 		// Mock resource fetch
-		List<Long> values = Arrays.asList(2L); // the second-last one has the highest time
+		List<JpaPid> values = JpaPid.fromLongList(List.of(2L)); // the second-last one has the highest time
 		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(), any(), any())).thenReturn(new SliceImpl<>(values));
 	}
 

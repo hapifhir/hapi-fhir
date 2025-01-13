@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.rp.dstu3.ObservationResourceProvider;
@@ -15,12 +12,9 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.base.Charsets;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.server.Server;
 import org.hl7.fhir.dstu3.model.Binary;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -35,17 +29,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
 	private static RestfulServer myRestServer;
 	private static IGenericClient ourClient;
 	private static FhirContext ourCtx;
-	private static CloseableHttpClient ourHttpClient;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderTransactionSearchDstu3Test.class);
 	private static Server ourServer;
 	private static String ourServerBase;
@@ -97,14 +94,8 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
             int myPort = JettyUtil.getPortForStartedServer(ourServer);
             ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-			HttpClientBuilder builder = HttpClientBuilder.create();
-			builder.setConnectionManager(connectionManager);
-			ourHttpClient = builder.build();
-
 			ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
 			ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
-			ourClient.setLogRequestAndResponse(true);
 			myRestServer = restServer;
 		}
 		
@@ -117,13 +108,13 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 	
 
 	private List<String> create20Patients() {
-		List<String> ids = new ArrayList<String>();
+		List<String> ids = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
 			Patient patient = new Patient();
 			patient.setGender(AdministrativeGender.MALE);
 			patient.addIdentifier().setSystem("urn:foo").setValue("A");
 			patient.addName().setFamily("abcdefghijklmnopqrstuvwxyz".substring(i, i+1));
-			String id = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+			String id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 			ids.add(id);
 		}
 		return ids;
@@ -132,6 +123,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testBatchWithGetHardLimitLargeSynchronous() {
 		List<String> ids = create20Patients();
+		ids.sort(Comparator.naturalOrder());
 		
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
@@ -227,7 +219,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
 		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
 		assertEquals("2", newPt.getIdElement().getVersionIdPart());
-		assertEquals(false, newPt.getActive());
+		assertFalse(newPt.getActive());
 	}
 
 
@@ -336,7 +328,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	private List<String> toIds(Bundle theRespBundle) {
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		for (BundleEntryComponent next : theRespBundle.getEntry()) {
 			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.interceptor.api;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
@@ -73,4 +74,15 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 	 * @since 4.0.0
 	 */
 	boolean hasHooks(POINTCUT thePointcut);
+
+	List<IInvoker> getInvokersForPointcut(POINTCUT thePointcut);
+
+	interface IInvoker extends Comparable<IInvoker> {
+
+		Object invoke(HookParams theParams);
+
+		int getOrder();
+
+		Object getInterceptor();
+	}
 }

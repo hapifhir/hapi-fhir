@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.StopWatch;
@@ -83,11 +82,10 @@ public class PartitionRunner {
 		myRequestDetails = theRequestDetails;
 	}
 
-	public void runInPartitionedThreads(
-			List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
+	public <T> void runInPartitionedThreads(List<T> theResourceIds, Consumer<List<T>> partitionConsumer) {
 
 		List<Callable<Void>> runnableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
-		if (runnableTasks.size() == 0) {
+		if (runnableTasks.isEmpty()) {
 			return;
 		}
 
@@ -134,8 +132,7 @@ public class PartitionRunner {
 		}
 	}
 
-	private List<Callable<Void>> buildCallableTasks(
-			List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
+	private <T> List<Callable<Void>> buildCallableTasks(List<T> theResourceIds, Consumer<List<T>> partitionConsumer) {
 		List<Callable<Void>> retval = new ArrayList<>();
 
 		if (myBatchSize > theResourceIds.size()) {
@@ -143,10 +140,10 @@ public class PartitionRunner {
 		} else {
 			ourLog.info("Creating batch job of {} entries", theResourceIds.size());
 		}
-		List<List<IResourcePersistentId>> partitions = Lists.partition(theResourceIds, myBatchSize);
+		List<List<T>> partitions = Lists.partition(theResourceIds, myBatchSize);
 
-		for (List<IResourcePersistentId> nextPartition : partitions) {
-			if (nextPartition.size() > 0) {
+		for (List<T> nextPartition : partitions) {
+			if (!nextPartition.isEmpty()) {
 				Callable<Void> callableTask = () -> {
 					ourLog.info(myProcessName + " {} resources", nextPartition.size());
 					partitionConsumer.accept(nextPartition);

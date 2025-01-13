@@ -1,12 +1,20 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
@@ -48,12 +56,21 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 	@AfterEach
 	public void after() {
-		JpaStorageSettings defaults = new JpaStorageSettings();
-		myStorageSettings.setIndexMissingFields(defaults.getIndexMissingFields());
-		myStorageSettings.setMatchUrlCacheEnabled(defaults.isMatchUrlCacheEnabled());
-		myStorageSettings.setDeleteEnabled(defaults.isDeleteEnabled());
-		myStorageSettings.setInlineResourceTextBelowSize(defaults.getInlineResourceTextBelowSize());
-		myStorageSettings.setAllowExternalReferences(defaults.isAllowExternalReferences());
+		{
+			JpaStorageSettings defaults = new JpaStorageSettings();
+			myStorageSettings.setIndexMissingFields(defaults.getIndexMissingFields());
+			myStorageSettings.setMatchUrlCacheEnabled(defaults.isMatchUrlCacheEnabled());
+			myStorageSettings.setDeleteEnabled(defaults.isDeleteEnabled());
+			myStorageSettings.setInlineResourceTextBelowSize(defaults.getInlineResourceTextBelowSize());
+			myStorageSettings.setAllowExternalReferences(defaults.isAllowExternalReferences());
+		}
+		{
+			PartitionSettings defaults = new PartitionSettings();
+			myPartitionSettings.setDefaultPartitionId(defaults.getDefaultPartitionId());
+			myPartitionSettings.setPartitioningEnabled(defaults.isPartitioningEnabled());
+		}
+
+		myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof FixedPartitionInterceptor);
 	}
 
 
@@ -162,7 +179,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals(theMatchUrlCacheEnabled ? 3 : 4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(4, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
@@ -239,12 +256,41 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@CsvSource({
-		"Pre-existing with cache,    true  ,true",
-		"Pre-existing without cache, true  ,false",
-		"No match with cache,        false ,true",
-		"No match without cache,     false ,false",
+		"Pre-existing with cache ttf,     true  ,true,  false, ",
+		"Pre-existing without cache tff,  true  ,false, false, ",
+		"No match with cache ftf,         false ,true,  false, ",
+		"No match without cache fff,      false ,false, false, ",
+		"Pre-existing with cache ttt,     true  ,true,  true,  ",
+		"Pre-existing without cache tft,  true  ,false, true,  ",
+		"No match with cache ftt,         false ,true,  true,  ",
+		"No match without cache fft,      false ,false, true,  ",
+		"Pre-existing with cache ttt0,    true  ,true,  true,  0",
+		"Pre-existing without cache tft0, true  ,false, true,  0",
+		"No match with cache ftt0,        false ,true,  true,  0",
+		"No match without cache fft0,     false ,false, true,  0",
+		"Pre-existing with cache ttf0,    true  ,true,  false, 0",
+		"Pre-existing without cache tff0, true  ,false, false, 0",
+		"No match with cache ftf0,        false ,true,  false, 0",
+		"No match without cache fff0,     false ,false, false, 0",
 	})
-	public void testRepeatedInlineMatchUrls(@SuppressWarnings("unused") String theName, boolean theTargetAlreadyExists, boolean theMatchUrlCacheEnabled) {
+	public void testRepeatedInlineMatchUrls(@SuppressWarnings("unused") String theName, boolean theTargetAlreadyExists, boolean theMatchUrlCacheEnabled, boolean thePartitioningEnabled, Integer theDefaultPartitionId) {
+		if (thePartitioningEnabled) {
+			myPartitionSettings.setPartitioningEnabled(true);
+			myInterceptorRegistry.registerInterceptor(new FixedPartitionInterceptor());
+			try {
+				myPartitionConfigSvc.getPartitionById(1);
+			} catch (ResourceNotFoundException e) {
+				PartitionEntity partition = new PartitionEntity();
+				partition.setId(1);
+				partition.setName("1");
+				myPartitionConfigSvc.createPartition(partition, new SystemRequestDetails());
+			}
+			// Pre-cache
+			myPartitionConfigSvc.getPartitionById(1);
+			myPartitionConfigSvc.getPartitionByName("1");
+		}
+		myPartitionSettings.setDefaultPartitionId(theDefaultPartitionId);
+
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
@@ -656,6 +702,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		try {
 			outcome = mySystemDao.transaction(mySrd, createBundleWithDeleteAndUpdateOnSameResource(myFhirContext));
 		} finally {
+			myCaptureQueriesListener.logUpdateQueries();
 			myCaptureQueriesListener.logInsertQueries();
 		}
 		myCaptureQueriesListener.logUpdateQueries();
@@ -917,6 +964,21 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		return patient;
 	}
 
+	@Interceptor
+	public static class FixedPartitionInterceptor {
+
+		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+		public RequestPartitionId readPartition() {
+			return RequestPartitionId.fromPartitionId(1);
+		}
+
+		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
+		public RequestPartitionId createPartition() {
+			return RequestPartitionId.fromPartitionId(1);
+		}
+
+
+	}
 
 }
 

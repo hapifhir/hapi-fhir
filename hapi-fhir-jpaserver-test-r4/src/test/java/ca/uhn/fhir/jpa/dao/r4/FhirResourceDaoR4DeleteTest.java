@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -12,19 +12,18 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import jakarta.persistence.Id;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -32,11 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4DeleteTest.class);
-
-	@AfterEach
-	public void after() {
-		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
-	}
 
 	@Test
 	public void testPreventUnDeleteIfDeletesDisabled() {
@@ -73,12 +67,12 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		// Current version should be marked as deleted
 		runInTransaction(() -> {
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1);
+			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id.getIdPartAsLong()), 1);
 			assertNull(resourceTable.getDeleted());
 			assertNotNull(resourceTable.getPersistentId());
 		});
 		runInTransaction(() -> {
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 2);
+			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id.getIdPartAsLong()), 2);
 			assertNotNull(resourceTable.getDeleted());
 		});
 
@@ -215,7 +209,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		// Mark the current history version as not-deleted even though the actual resource
 		// table entry is marked deleted
 		runInTransaction(() -> {
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 2);
+			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id.getIdPartAsLong()), 2);
 			resourceTable.setDeleted(null);
 			myResourceHistoryTableDao.save(resourceTable);
 		});
@@ -245,13 +239,20 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue(identifierCode);
 		IIdType firstObservationId = myObservationDao.create(obs, matchUrl, new SystemRequestDetails()).getId();
+		long originalId = firstObservationId.getIdPartAsLong();
 		assertThat(myResourceSearchUrlDao.findAll()).hasSize(1);
 
-		// when
 		myObservationDao.delete(obs.getIdElement(), mySrd);
+		logAllResources();
+		logAllResourceSearchUrls();
+
+		// when
 		DaoMethodOutcome daoMethodOutcome = myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
 
 		// then
+		logAllResources();
+		logAllResourceSearchUrls();
+		assertNotEquals(originalId, daoMethodOutcome.getId().getIdPartAsLong());
 		assertTrue(daoMethodOutcome.getCreated().booleanValue());
 		assertThat(firstObservationId.getIdPart()).isNotEqualTo(daoMethodOutcome.getId());
 	}

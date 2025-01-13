@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,30 +40,16 @@ public class FhirResourceDaoSubscriptionR4 extends BaseHapiFhirResourceDao<Subsc
 	@Autowired
 	private ISubscriptionTableDao mySubscriptionTableDao;
 
-	private void createSubscriptionTable(ResourceTable theEntity, Subscription theSubscription) {
-		SubscriptionTable subscriptionEntity = new SubscriptionTable();
-		subscriptionEntity.setCreated(new Date());
-		subscriptionEntity.setSubscriptionResource(theEntity);
-		myEntityManager.persist(subscriptionEntity);
-	}
-
 	@Override
 	public Long getSubscriptionTablePidForSubscriptionResource(
 			IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		ResourceTable entity = readEntityLatestVersion(theId, theRequest, theTransactionDetails);
-		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
+		SubscriptionTable table =
+				mySubscriptionTableDao.findOneByResourcePid(entity.getId().getId());
 		if (table == null) {
 			return null;
 		}
 		return table.getId();
-	}
-
-	@Override
-	protected void postPersist(
-			ResourceTable theEntity, Subscription theSubscription, RequestDetails theRequestDetails) {
-		super.postPersist(theEntity, theSubscription, theRequestDetails);
-
-		createSubscriptionTable(theEntity, theSubscription);
 	}
 
 	@Override
@@ -92,7 +78,8 @@ public class FhirResourceDaoSubscriptionR4 extends BaseHapiFhirResourceDao<Subsc
 			Long subscriptionId = getSubscriptionTablePidForSubscriptionResource(
 					theEntity.getIdDt(), theRequest, theTransactionDetails);
 			if (subscriptionId != null) {
-				mySubscriptionTableDao.deleteAllForSubscription(retVal);
+				mySubscriptionTableDao.deleteAllForSubscription(
+						retVal.getResourceId().getId());
 			}
 		}
 

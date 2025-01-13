@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,8 +85,12 @@ public interface IValidationProviders {
 			myTerminologyResourceMap.put(theUrl, theResource);
 		}
 
+		protected void addVersionedTerminologyResource(String theUrl, String theVersion, T theResource) {
+			myTerminologyResourceMap.put(theUrl + "|" + theVersion, theResource);
+		}
 		public abstract T addTerminologyResource(String theUrl);
 
+		public abstract T addTerminologyResource(String theUrl, String theVersion);
 		protected IBaseParameters getTerminologyResponse(String theOperation, String theUrl, String theCode) throws Exception {
 			String inputKey = getInputKey(theOperation, theUrl, theCode);
 			if (myExceptionMap.containsKey(inputKey)) {

@@ -1030,7 +1030,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 	private void validateTermValueSetNotExpanded(String theValueSetName, String theVersion, Long theId) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(theId);
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(JpaPid.fromId(theId));
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", theVersion);
@@ -1048,7 +1048,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 	private void validateTermValueSetExpandedAndChildrenV1(String theValueSetName, CodeSystem theCodeSystem) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable_v1);
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(JpaPid.fromId(myExtensionalVsIdOnResourceTable_v1));
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "1");
@@ -1080,7 +1080,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 	private void validateTermValueSetExpandedAndChildrenV2(String theValueSetName, CodeSystem theCodeSystem) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable_v2);
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(JpaPid.fromId(myExtensionalVsIdOnResourceTable_v2));
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "2");
@@ -1712,7 +1712,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 
@@ -1746,7 +1746,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B" + theCodeSystemVersion);
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", theCodeSystemVersion, cs, table);
+ 		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", theCodeSystemVersion, cs, table);
 		return codeSystem;
 	}
 

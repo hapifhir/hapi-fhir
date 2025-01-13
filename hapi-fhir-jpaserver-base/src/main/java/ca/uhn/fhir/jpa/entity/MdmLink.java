@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -79,6 +80,12 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 	private static final int MATCH_RESULT_LENGTH = 16;
 	private static final int LINK_SOURCE_LENGTH = 16;
 	public static final int SOURCE_TYPE_LENGTH = 40;
+	public static final String GOLDEN_RESOURCE_PID = "GOLDEN_RESOURCE_PID";
+	public static final String GOLDEN_RESOURCE_PARTITION_ID = "GOLDEN_RESOURCE_PARTITION_ID";
+	public static final String PERSON_PID = "PERSON_PID";
+	public static final String PERSON_PARTITION_ID = "PERSON_PARTITION_ID";
+	public static final String TARGET_PID = "TARGET_PID";
+	public static final String TARGET_PARTITION_ID = "TARGET_PARTITION_ID";
 
 	@SequenceGenerator(name = "SEQ_EMPI_LINK_ID", sequenceName = "SEQ_EMPI_LINK_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_EMPI_LINK_ID")
@@ -90,31 +97,52 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumn(
-			name = "GOLDEN_RESOURCE_PID",
-			referencedColumnName = "RES_ID",
-			foreignKey = @ForeignKey(name = "FK_EMPI_LINK_GOLDEN_RESOURCE"),
-			insertable = false,
-			updatable = false,
-			nullable = false)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = GOLDEN_RESOURCE_PID,
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = GOLDEN_RESOURCE_PARTITION_ID,
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_EMPI_LINK_GOLDEN_RESOURCE"))
 	@NotAudited
 	private ResourceTable myGoldenResource;
 
-	@Column(name = "GOLDEN_RESOURCE_PID", nullable = false)
+	@Column(name = GOLDEN_RESOURCE_PID, nullable = false)
 	private Long myGoldenResourcePid;
+
+	@Column(name = GOLDEN_RESOURCE_PARTITION_ID, nullable = true)
+	private Integer myGoldenResourcePartitionId;
 
 	@Deprecated
 	@ManyToOne(
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumn(
-			name = "PERSON_PID",
-			referencedColumnName = "RES_ID",
-			foreignKey = @ForeignKey(name = "FK_EMPI_LINK_PERSON"),
-			insertable = false,
-			updatable = false,
-			nullable = false)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = PERSON_PID,
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = PERSON_PARTITION_ID,
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_EMPI_LINK_PERSON"))
 	@NotAudited
 	private ResourceTable myPerson;
 
@@ -122,22 +150,38 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 	@Column(name = "PERSON_PID", nullable = false)
 	private Long myPersonPid;
 
+	@Deprecated
+	@Column(name = PERSON_PARTITION_ID, nullable = true)
+	private Integer myPersonPartitionId;
+
 	@ManyToOne(
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumn(
-			name = "TARGET_PID",
-			referencedColumnName = "RES_ID",
-			foreignKey = @ForeignKey(name = "FK_EMPI_LINK_TARGET"),
-			insertable = false,
-			updatable = false,
-			nullable = false)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = TARGET_PID,
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = TARGET_PARTITION_ID,
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_EMPI_LINK_TARGET"))
 	@NotAudited
 	private ResourceTable mySource;
 
 	@Column(name = "TARGET_PID", updatable = false, nullable = false)
 	private Long mySourcePid;
+
+	@Column(name = TARGET_PARTITION_ID, updatable = false, nullable = true)
+	private Integer mySourcePartitionId;
 
 	@Column(name = "MATCH_RESULT", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
@@ -210,6 +254,7 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 		setPersonPid(longPid);
 
 		myGoldenResourcePid = longPid;
+		myGoldenResourcePartitionId = theGoldenResourcePid.getPartitionId();
 		return this;
 	}
 
@@ -221,6 +266,7 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 	@Override
 	public IMdmLink setSourcePersistenceId(JpaPid theSourcePid) {
 		mySourcePid = theSourcePid.getId();
+		mySourcePartitionId = theSourcePid.getPartitionId();
 		return this;
 	}
 
@@ -230,10 +276,12 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 
 	public MdmLink setGoldenResource(ResourceTable theGoldenResource) {
 		myGoldenResource = theGoldenResource;
-		myGoldenResourcePid = theGoldenResource.getId();
+		myGoldenResourcePid = theGoldenResource.getId().getId();
+		myGoldenResourcePartitionId = theGoldenResource.getPersistentId().getPartitionId();
 
 		myPerson = theGoldenResource;
-		myPersonPid = theGoldenResource.getId();
+		myPersonPid = theGoldenResource.getId().getId();
+		myPersonPartitionId = theGoldenResource.getPersistentId().getPartitionId();
 
 		return this;
 	}
@@ -269,7 +317,8 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 
 	public MdmLink setSource(ResourceTable theSource) {
 		mySource = theSource;
-		mySourcePid = theSource.getId();
+		mySourcePid = theSource.getId().getId();
+		mySourcePartitionId = theSource.getPersistentId().getPartitionId();
 		return this;
 	}
 
@@ -364,6 +413,7 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 		return this;
 	}
 
+	@Override
 	public Boolean getEidMatch() {
 		return myEidMatch;
 	}
@@ -395,6 +445,7 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 		return this;
 	}
 
+	@Override
 	public MdmLink setMdmSourceType(String mdmSourceType) {
 		myMdmSourceType = mdmSourceType;
 		return this;
@@ -417,14 +468,17 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 				.toString();
 	}
 
+	@Override
 	public String getMdmSourceType() {
 		return myMdmSourceType;
 	}
 
+	@Override
 	public Long getRuleCount() {
 		return myRuleCount;
 	}
 
+	@Override
 	public MdmLink setRuleCount(Long theRuleCount) {
 		myRuleCount = theRuleCount;
 		return this;

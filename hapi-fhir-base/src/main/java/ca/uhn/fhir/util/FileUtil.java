@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,13 @@
  */
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 
 public class FileUtil {
@@ -29,8 +36,21 @@ public class FileUtil {
 		if (theBytes <= 0) {
 			return "0 " + UNITS[0];
 		}
-		int digitGroups = (int) (Math.log10(theBytes) / Math.log10(1024));
+		int digitGroups = (int) (Math.log10((double) theBytes) / Math.log10(1024));
 		digitGroups = Math.min(digitGroups, UNITS.length - 1);
 		return new DecimalFormat("###0.#").format(theBytes / Math.pow(1024, digitGroups)) + " " + UNITS[digitGroups];
+	}
+
+	/**
+	 * Loads the contents of a File as a UTF-8 encoded string, and wraps any exceptions in an unchecked exception
+	 *
+	 * @throws InternalErrorException If any IOException occurs
+	 */
+	public static String loadFileAsString(File theFile) throws InternalErrorException {
+		try {
+			return FileUtils.readFileToString(theFile, StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			throw new InternalErrorException(Msg.code(2592) + e, e);
+		}
 	}
 }

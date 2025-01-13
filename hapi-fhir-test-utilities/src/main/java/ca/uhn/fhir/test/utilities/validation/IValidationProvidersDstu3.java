@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,10 @@ public interface IValidationProvidersDstu3 {
 			addTerminologyResource(theUrl, codeSystem);
 			return codeSystem;
 		}
+		@Override
+		public CodeSystem addTerminologyResource(String theUrl, String theVersion) {
+			return addTerminologyResource(theUrl);
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -132,6 +136,10 @@ public interface IValidationProvidersDstu3 {
 			valueSet.setUrl(theUrl);
 			addTerminologyResource(theUrl, valueSet);
 			return valueSet;
+		}
+		@Override
+		public ValueSet addTerminologyResource(String theUrl, String theVersion) {
+			return addTerminologyResource(theUrl);
 		}
 	}
 }

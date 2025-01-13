@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,12 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.FhirTerser;
@@ -87,8 +89,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TransactionProcessor extends BaseTransactionProcessor {
 
 	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]+[?][a-z0-9-]+=[^&,]+$");
-	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
 	public static final int CONDITIONAL_URL_FETCH_CHUNK_SIZE = 100;
+	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
@@ -113,6 +115,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
+
+	@Autowired
+	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionSvc;
@@ -168,7 +173,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * is for fast writing of data.
 		 *
 		 * Note that it's probably not necessary to reset it back, it should
-		 * automatically go back to the default value after the transaction but
+		 * automatically go back to the default value after the transaction, but
 		 * we reset it just to be safe.
 		 */
 		FlushModeType initialFlushMode = myEntityManager.getFlushMode();
@@ -222,6 +227,16 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		IFhirSystemDao<?, ?> systemDao = myApplicationContext.getBean(IFhirSystemDao.class);
 		systemDao.preFetchResources(JpaPid.fromLongList(idsToPreFetch), true);
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	protected void postTransactionProcess(TransactionDetails theTransactionDetails) {
+		Set<IResourcePersistentId> resourceIds = theTransactionDetails.getUpdatedResourceIds();
+		if (resourceIds != null && !resourceIds.isEmpty()) {
+			List<JpaPid> ids = resourceIds.stream().map(r -> (JpaPid) r).collect(Collectors.toList());
+			myResourceSearchUrlSvc.deleteByResIds(ids);
+		}
 	}
 
 	private void preFetchResourcesById(
@@ -296,7 +311,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(
 				theRequestPartitionId, idsToPreResolve.keySet(), resolveMode);
 		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> entry : outcomes.entrySet()) {
-			JpaPid next = (JpaPid) entry.getValue().getPersistentId();
+			JpaPid next = entry.getValue().getPersistentId();
 			IIdType unqualifiedVersionlessId = entry.getKey();
 			foundIds.add(unqualifiedVersionlessId.getValue());
 			theTransactionDetails.addResolvedResourceId(unqualifiedVersionlessId, next);
@@ -448,7 +463,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<Tuple> cq = cb.createTupleQuery();
 			Root<ResourceIndexedSearchParamToken> from = cq.from(ResourceIndexedSearchParamToken.class);
-			cq.multiselect(from.get("myResourcePid"), from.get(theIndexColumnName));
+			cq.multiselect(from.get("myPartitionIdValue"), from.get("myResourcePid"), from.get(theIndexColumnName));
 
 			Predicate masterPredicate;
 			if (theHashesForIndexColumn.size() == 1) {
@@ -492,21 +507,20 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			List<Tuple> results = query.getResultList();
 
 			for (Tuple nextResult : results) {
-				Long nextResourcePid = nextResult.get(0, Long.class);
-				Long nextHash = nextResult.get(1, Long.class);
+				Integer nextPartitionId = nextResult.get(0, Integer.class);
+				Long nextResourcePid = nextResult.get(1, Long.class);
+				Long nextHash = nextResult.get(2, Long.class);
+
 				List<MatchUrlToResolve> matchedSearch = hashToSearchMap.get(nextHash);
 				matchedSearch.forEach(matchUrl -> {
 					ourLog.debug("Matched url {} from database", matchUrl.myRequestUrl);
 					if (matchUrl.myShouldPreFetchResourceBody) {
 						theOutputPidsToLoadFully.add(nextResourcePid);
 					}
+					JpaPid pid = JpaPid.fromId(nextResourcePid, nextPartitionId);
 					myMatchResourceUrlService.matchUrlResolved(
-							theTransactionDetails,
-							matchUrl.myResourceDefinition.getName(),
-							matchUrl.myRequestUrl,
-							JpaPid.fromId(nextResourcePid));
-					theTransactionDetails.addResolvedMatchUrl(
-							myFhirContext, matchUrl.myRequestUrl, JpaPid.fromId(nextResourcePid));
+							theTransactionDetails, matchUrl.myResourceDefinition.getName(), matchUrl.myRequestUrl, pid);
+					theTransactionDetails.addResolvedMatchUrl(myFhirContext, matchUrl.myRequestUrl, pid);
 					matchUrl.setResolved(true);
 				});
 			}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,12 +118,15 @@ public class SubscriptionMatcherInterceptor {
 		ResourceModifiedMessage msg = createResourceModifiedMessage(theNewResource, theOperationType, theRequest);
 
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
-		HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);
-		boolean outcome = CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED)) {
+			HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);
+			boolean outcome = compositeBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
 
-		if (!outcome) {
-			return;
+			if (!outcome) {
+				return;
+			}
 		}
 
 		processResourceModifiedMessage(msg);
