@@ -35,6 +35,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -69,6 +70,8 @@ import java.util.function.Consumer;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class OperationParameter implements IParameter {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationParameter.class);
 
 	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationParam.class.getName() + "_PARSED_RESOURCE";
 
@@ -200,11 +203,14 @@ public class OperationParameter implements IParameter {
 				|| isSearchParam
 				|| ValidationModeEnum.class.equals(myParameterType);
 
+		final boolean isAnnotationPresent = myParameterType.isAnnotationPresent(OperationEmbeddedType.class);
+
 		/*
 		 * The parameter can be of type string for validation methods - This is a bit weird. See ValidateDstu2Test. We
 		 * should probably clean this up..
 		 */
 		if (!myParameterType.equals(IBase.class) && !myParameterType.equals(String.class)) {
+			// LUKETODO:  this is where we get the Exception:  add an else if
 			if (IBaseResource.class.isAssignableFrom(myParameterType) && myParameterType.isInterface()) {
 				myParamType = "Resource";
 			} else if (IBaseReference.class.isAssignableFrom(myParameterType)) {

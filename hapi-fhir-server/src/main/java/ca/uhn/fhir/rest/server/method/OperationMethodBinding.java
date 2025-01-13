@@ -58,6 +58,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationMethodBinding.class);
+
 	public static final String WILDCARD_NAME = "$" + Operation.NAME_MATCH_ALL;
 	private final boolean myIdempotent;
 	private final boolean myDeleteEnabled;
@@ -185,10 +187,12 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 			myCanOperateAtInstanceLevel = true;
 
-			// JP TODO: Here, we need to check the operation's parameters class for the Id.
+			// LUKETODO: Here, we need to check the operation's parameters class for the Id.
 			for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
+				//				ourLog.info("1234: method: {}, param: {}, paramType: {}", theMethod.getName(), myIdParamIndex,
+				// next.annotationType());
 				if (next instanceof IdParam) {
-					myCanOperateAtTypeLevel = ((IdParam) next).optional() == true;
+					myCanOperateAtTypeLevel = ((IdParam) next).optional();
 				}
 			}
 		}

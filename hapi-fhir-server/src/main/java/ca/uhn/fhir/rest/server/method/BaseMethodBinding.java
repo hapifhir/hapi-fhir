@@ -110,8 +110,9 @@ public abstract class BaseMethodBinding {
 		return myQueryParameters;
 	}
 
-	// JP TODO: Alternatively, do the mapping here?
+	// LUKETODO: Alternatively, do the mapping here?
 	protected Object[] createMethodParams(RequestDetails theRequest) {
+		ourLog.info("1234: Creating parameters for method {}, and requestDetails: {}", myMethod.getName(), theRequest);
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
 			IParameter param = getParameters().get(i);
@@ -249,9 +250,10 @@ public abstract class BaseMethodBinding {
 
 		// Actually invoke the method
 		try {
-			// JP - TODO: check to see if we have a single
+			// LUKETODO: check to see if we have a single
 			// class, bind to the fields, then invoke.
 			Method method = getMethod();
+			ourLog.info("1234: invoking method for: {} and params: {}", method.getName(), theMethodParams);
 			return method.invoke(getProvider(), theMethodParams);
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof BaseServerResponseException) {
