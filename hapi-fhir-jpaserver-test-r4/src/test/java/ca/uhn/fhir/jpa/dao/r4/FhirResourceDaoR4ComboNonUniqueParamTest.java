@@ -6,9 +6,11 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -37,6 +39,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -216,7 +219,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IIdType id1 = createPatient1(null);
 		assertNotNull(id1);
 
-		assertThat(myCaptureQueriesListener.countSelectQueries()).as(String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(SqlQuery::getThreadName).toList())).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countSelectQueries()).as(String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(SqlQuery::getThreadName).toList())).isZero();
 		assertEquals(12, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -422,7 +425,6 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
 
 		myCaptureQueriesListener.logSelectQueries();
-		String expected;
 		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false)).contains("where (rt1_0.FHIR_ID='my-org')");
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
 		assertThat(sql).contains("SP_VALUE_NORMALIZED LIKE 'FAMILY1%'");
@@ -905,6 +907,44 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 				assertComboIndexUsed();
 			}
 
+		}
+
+		@ParameterizedTest
+		@CsvSource(value = {
+			"2025-01-01, true",
+			"eq2025-01-01, false"
+		})
+		public void testSearchWithDateQueryString_whenModifierEqualIsMissing_willUseComboIndexes(String theDateQueryParameter, boolean theShouldUseComboIndex){
+			// given
+			createBirthdateAndGenderSps(false);
+			IIdType patientId = createPatient(withBirthdate("2025-01-01"), withGender("male"));
+
+			logAllNonUniqueIndexes();
+			logAllDateIndexes();
+
+			List<QualifiedParamList> tokens = new ArrayList<>();
+			tokens.add(QualifiedParamList.singleton(null, theDateQueryParameter));
+			DateRangeParam dateRangeParam = new DateRangeParam();
+			dateRangeParam.setValuesAsQueryTokens(myFhirContext, Patient.SP_BIRTHDATE, tokens);
+
+			myCaptureQueriesListener.clear();
+			SearchParameterMap sp = new SearchParameterMap();
+			sp.setLoadSynchronous(true);
+			sp.add(Patient.SP_GENDER, new TokenParam(null, "male"));
+			sp.add(Patient.SP_BIRTHDATE, dateRangeParam);
+
+			// when
+			IBundleProvider results = myPatientDao.search(sp, mySrd);
+
+			// then
+			if(theShouldUseComboIndex){
+				assertComboIndexUsed();
+			} else {
+				assertComboIndexNotUsed();
+			}
+
+			List<String> actual = toUnqualifiedVersionlessIdValues(results);
+			assertThat(actual).contains(patientId.toUnqualifiedVersionless().getValue());
 		}
 
 		@ParameterizedTest
