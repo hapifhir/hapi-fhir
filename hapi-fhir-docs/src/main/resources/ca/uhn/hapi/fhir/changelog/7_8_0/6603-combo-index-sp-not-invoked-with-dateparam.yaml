@@ -3,5 +3,5 @@ type: fix
 issue: 6603
 jira: SMILE-8048
 title: "Previously, searches where processing was optimised with a combo index search parameters would skip searching the 
-optimised indexes when the query string included a date ragne (i.e. multiple instances of the same date parameter). This
+optimised indexes when the query string included a date range (i.e. multiple instances of the same date parameter). This
 issue is fixed."

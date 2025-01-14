@@ -909,12 +909,32 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 		}
 
+		/**
+		 * Given:
+		 * - a combo search index parameters combining Patient.gender and Patient.birthdate;
+		 * - two search invocations with query parameters:
+		 *
+		 * Patient?birthdate=2025-01-01&gender=male
+		 * Patient?birthdate=eq2025-01-01&gender=male
+		 *
+		 * The above searches will provide the same result bundle with the execution time of the second one being
+		 * significantly longer when invoked against a large dataset. The difference is in the 'eq' prefix or modifier
+		 * added in the second invocation causing the search layer to skip inspection of combo search indexes.
+		 *
+		 * To retain the optimized searching functionalities provided by combo search index parameters, it is crucial
+		 * that the un-modified aspect of a date query string (i.e. birthdate=2025-01-01) gets preserved when marshalled
+		 * into objects suitable for submission to the search layer.
+		 *
+		 * The purpose of this test is to ensure the necessity described above.  It marshals a date query string into a
+		 * DateRangeParam object, submits the param object to the search layer and asserts that combo search indexes
+		 * are used to generate the result bundle when the date query string is un-modified.
+		 */
 		@ParameterizedTest
 		@CsvSource(value = {
 			"2025-01-01, true",
 			"eq2025-01-01, false"
 		})
-		public void testSearchWithDateQueryString_whenModifierEqualIsMissing_willUseComboIndexes(String theDateQueryParameter, boolean theShouldUseComboIndex){
+		public void testSearchWithDateQueryString_whenModifierEqualIsMissing_willUseComboSearchIndexes(String theDateQueryParameter, boolean theShouldUseComboIndex){
 			// given
 			createBirthdateAndGenderSps(false);
 			IIdType patientId = createPatient(withBirthdate("2025-01-01"), withGender("male"));
@@ -1022,6 +1042,4 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		}
 
 	}
-
-
 }
