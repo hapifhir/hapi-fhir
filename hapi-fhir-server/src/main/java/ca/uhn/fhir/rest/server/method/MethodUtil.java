@@ -111,6 +111,7 @@ public class MethodUtil {
 		int paramIndex = 0;
 		// LUKETODO:  one param per method parameter:  what happens if we expand this?
 
+		// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		if (Arrays.stream(parameterTypes)
 				.anyMatch(paramType -> paramType.isAnnotationPresent(OperationEmbeddedType.class))) {
 			ourLog.info("1234: isOperationEmbeddedType!!!!!!! method: {}", theMethod.getName());

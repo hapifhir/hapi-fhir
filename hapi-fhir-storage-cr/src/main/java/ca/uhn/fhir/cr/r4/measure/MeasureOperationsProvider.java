@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.OperationOutcome;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -116,10 +117,17 @@ public class MeasureOperationsProvider {
 
 	@Operation(name = "$fooBar", manualResponse = true, idempotent = true)
 	public void fooBar(@OperationParam(name = "params") FooBarParams theParams) {
-		ourLog.info("fooBar params: {}", theParams);
+		ourLog.info("1234: fooBar params: {}", theParams);
 	}
 
+//	@Operation(name = "$returnsOutcome", manualResponse = true, idempotent = true)
+//	public OperationOutcome returnsOutcome(@OperationParam(name = "params") ReturnsOutcomeParams theParams) {
+//		ourLog.info("1234: returnsOutcome params: {}", theParams);
+//
+//		return new OperationOutcome();
+//	}
+
 	void example() {
-		fooBar(new FooBarParams());
+		fooBar(new FooBarParams(null, null));
 	}
 }

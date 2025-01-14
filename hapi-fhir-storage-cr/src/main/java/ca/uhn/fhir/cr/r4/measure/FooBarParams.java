@@ -42,6 +42,11 @@ public class FooBarParams {
 	@OperationParam(name = "count")
 	private IntegerType myCount;
 
+	public FooBarParams(BooleanType myDoFoo, IntegerType myCount) {
+		this.myDoFoo = myDoFoo;
+		this.myCount = myCount;
+	}
+
 	public BooleanType getDoFoo() {
 		return myDoFoo;
 	}
@@ -62,8 +67,8 @@ public class FooBarParams {
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", FooBarParams.class.getSimpleName() + "[", "]")
-				.add("myDoFoo=" + myDoFoo)
-				.add("myCount=" + myCount)
+				.add("myDoFoo=" + myDoFoo.getValue())
+				.add("myCount=" + myCount.asStringValue())
 				.toString();
 	}
 }

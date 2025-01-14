@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.annotation.GraphQL;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -56,9 +57,13 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -252,8 +257,61 @@ public abstract class BaseMethodBinding {
 		try {
 			// LUKETODO: check to see if we have a single
 			// class, bind to the fields, then invoke.
-			Method method = getMethod();
-			ourLog.info("1234: invoking method for: {} and params: {}", method.getName(), theMethodParams);
+			final Method method = getMethod();
+
+			// LUKETODO:  split this up into private methods
+			final Class<?>[] parameterTypes = method.getParameterTypes();
+
+			ourLog.info("1234: invoking method for: {} and params: {} and parameterTypes: {}", method.getName(), theMethodParams, Arrays.toString(parameterTypes));
+
+			for (Class<?> parameterType : parameterTypes) {
+				ourLog.info("1234: invoking parameterType: {} and method: {}", parameterType, method.getName());
+				final Annotation[] parameterTypeAnnotations = parameterType.getAnnotations();
+
+				final boolean hasOperationEmbeddedTypeAnnotation =
+					Arrays.stream(parameterTypeAnnotations)
+						.anyMatch(OperationEmbeddedType.class::isInstance);
+
+				if (hasOperationEmbeddedTypeAnnotation) {
+					final Constructor<?>[] constructors = parameterType.getConstructors();
+
+					// LUKETODO:  what if there's a noarg constructor and all we have is setters?
+					// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+					if (constructors.length > 0) {
+						// LUKETODO:  if there are multiple constructors, cycle through them until you find one that matches the params list
+						final Constructor<?> constructor = constructors[0];
+
+						final Parameter[] parameters = constructor.getParameters();
+
+						if (parameters.length > 0) {
+							// LUKETODO:  call setters
+						}
+
+						// LUKETODO:  else?
+						if (theMethodParams.length != parameters.length) {
+							throw new RuntimeException("1234: bad params");
+						}
+
+						for (int index = 0; index < theMethodParams.length; index++) {
+							final Class<?> methodParamAtIndex = theMethodParams[index].getClass();
+							final Class<?> parameterAtIndex = parameters[index].getType();
+
+							ourLog.info("1234: methodParamAtIndex: {}, parameterAtIndex: {}", methodParamAtIndex, parameterAtIndex);
+							if (methodParamAtIndex != parameterAtIndex) {
+								throw new RuntimeException("1234: bad params");
+							}
+						}
+
+						final Object operationEmbeddedType = constructor.newInstance(theMethodParams);
+
+						ourLog.info("1234: invoking method with operationEmbeddedType: {}", operationEmbeddedType);
+						return method.invoke(getProvider(), operationEmbeddedType);
+					}
+				}
+			}
+
+			// LUKETODO:  here we fail with: java.lang.IllegalArgumentException: wrong number of arguments
 			return method.invoke(getProvider(), theMethodParams);
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof BaseServerResponseException) {
