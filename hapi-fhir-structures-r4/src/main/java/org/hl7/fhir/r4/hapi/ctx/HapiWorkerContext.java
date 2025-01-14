@@ -40,6 +40,7 @@ import org.hl7.fhir.utilities.validation.ValidationOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -487,5 +488,28 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public boolean isPrimitiveType(String theType) {
 		return PRIMITIVE_TYPES.contains(theType);
+	}
+
+	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
+		List<T> res = new ArrayList<>();
+		if (theClass == StructureDefinition.class) {
+			res.addAll((Collection<? extends T>) getStructures());
+		}
+		return res;
+	}
+
+	public <T extends Resource> T fetchResource(Class<T> class_, String uri, Resource source) {
+		return fetchResource(class_, uri);
+	}
+
+	@Override
+	public List<StructureDefinition> fetchTypeDefinitions(String n) {
+		List<StructureDefinition> types = new ArrayList<>();
+		for (StructureDefinition sd : allStructures()) {
+			if (n.equals(sd.getTypeTail())) {
+				types.add(sd);
+			}
+		}
+		return types;
 	}
 }
