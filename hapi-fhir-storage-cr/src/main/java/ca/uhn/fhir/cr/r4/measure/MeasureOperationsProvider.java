@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.R4MeasureEvaluatorSingleFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -27,11 +28,11 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.hl7.fhir.OperationOutcome;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
@@ -116,16 +117,22 @@ public class MeasureOperationsProvider {
 	//	}
 
 	@Operation(name = "$fooBar", manualResponse = true, idempotent = true)
+	// LUKETODO:  consider defining a new @OperationEmbeddedParam
 	public void fooBar(@OperationParam(name = "params") FooBarParams theParams) {
 		ourLog.info("1234: fooBar params: {}", theParams);
 	}
 
-//	@Operation(name = "$returnsOutcome", manualResponse = true, idempotent = true)
-//	public OperationOutcome returnsOutcome(@OperationParam(name = "params") ReturnsOutcomeParams theParams) {
-//		ourLog.info("1234: returnsOutcome params: {}", theParams);
-//
-//		return new OperationOutcome();
-//	}
+	@Operation(name = "$returnsBundle", manualResponse = true, idempotent = true)
+	public Bundle returnsBundle(@OperationParam(name = "params") ReturnsBundleParams theParams) {
+		final Bundle bundle = new Bundle();
+		bundle.setIdentifier(new Identifier().setValue("aValue"));
+
+		final String bundleString = FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+
+		ourLog.info("1234: returnsBundle params: {}, bundle:{}", theParams, bundleString);
+
+		return bundle;
+	}
 
 	void example() {
 		fooBar(new FooBarParams(null, null));

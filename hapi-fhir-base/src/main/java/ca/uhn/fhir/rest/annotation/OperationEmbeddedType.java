@@ -5,6 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+// LUKETODO: consider not using this but instead using ONLY the replacemenet for @OperationParam
 // LUKETODO:  better name?
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.TYPE})

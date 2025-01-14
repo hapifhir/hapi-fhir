@@ -19,17 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.IRuntimeDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -51,30 +42,20 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-// LUKETODO:  DO NOT HIJACK THIS
-// LUKETODO:  clone this and use this for Embedded object params
-// LUKETODO:  like EmbeddedOperationParameter
-public class OperationParameter implements IParameter {
+// LUKETODO:  use this for Embedded object params
+// LUKETODO:   consider deleting whatever code may be unused
+public class OperationEmbeddedParameter implements IParameter {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationParameter.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationEmbeddedParameter.class);
 
 	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationParam.class.getName() + "_PARSED_RESOURCE";
 
@@ -98,7 +79,7 @@ public class OperationParameter implements IParameter {
 	private final String myDescription;
 	private final List<String> myExampleValues;
 
-	OperationParameter(
+	OperationEmbeddedParameter(
 			FhirContext theCtx,
 			String theOperationName,
 			String theParameterName,
@@ -267,7 +248,7 @@ public class OperationParameter implements IParameter {
 		}
 	}
 
-	OperationParameter setConverter(IOperationParamConverter theConverter) {
+	OperationEmbeddedParameter setConverter(IOperationParamConverter theConverter) {
 		myConverter = theConverter;
 		return this;
 	}
@@ -403,7 +384,7 @@ public class OperationParameter implements IParameter {
 					HapiLocalizer localizer =
 							theRequest.getServer().getFhirContext().getLocalizer();
 					String msg = localizer.getMessage(
-							OperationParameter.class, "urlParamNotPrimitive", myOperationName, myName);
+							OperationEmbeddedParameter.class, "urlParamNotPrimitive", myOperationName, myName);
 					throw new MethodNotAllowedException(Msg.code(363) + msg, RequestTypeEnum.POST);
 				}
 			}

@@ -32,6 +32,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.PARAMETER, ElementType.FIELD})
+// LUKETODO:  1-1 with OperationParameter (subclass of IParameter)
 public @interface OperationParam {
 
 	/**

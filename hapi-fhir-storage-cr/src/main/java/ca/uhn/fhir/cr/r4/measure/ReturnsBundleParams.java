@@ -3,17 +3,17 @@ package ca.uhn.fhir.cr.r4.measure;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 
-import java.util.List;
 import java.util.StringJoiner;
 
 @OperationEmbeddedType
-public class ReturnsOutcomeParams {
-	@OperationParam(name = "oneString")
+public class ReturnsBundleParams {
+	@OperationParam(name = "string")
 	// LUKETODO:  do I always need to make it a BooleanType and not a Boolean?
 	private String myString;
 
-	@OperationParam(name = "multStrings")
-	private List<String> myStrings;
+	public ReturnsBundleParams(String myString) {
+		this.myString = myString;
+	}
 
 	public String getString() {
 		return myString;
@@ -23,19 +23,10 @@ public class ReturnsOutcomeParams {
 		this.myString = myString;
 	}
 
-	public List<String> getStrings() {
-		return myStrings;
-	}
-
-	public void setStrings(List<String> myStrings) {
-		this.myStrings = myStrings;
-	}
-
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ReturnsOutcomeParams.class.getSimpleName() + "[", "]")
+		return new StringJoiner(", ", ReturnsBundleParams.class.getSimpleName() + "[", "]")
 			.add("myString='" + myString + "'")
-			.add("myStrings=" + myStrings)
 			.toString();
 	}
 }

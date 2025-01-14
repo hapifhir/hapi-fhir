@@ -107,6 +107,7 @@ public class MethodUtil {
 			final FhirContext theContext, Method theMethod, Object theProvider) {
 		List<IParameter> parameters = new ArrayList<>();
 
+		// LUKETODO:  why no caregaps here????
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		int paramIndex = 0;
 		// LUKETODO:  one param per method parameter:  what happens if we expand this?
@@ -165,7 +166,10 @@ public class MethodUtil {
 					final String description = ParametersUtil.extractDescription(fieldAnnotationArray);
 					final List<String> examples = ParametersUtil.extractExamples(fieldAnnotationArray);
 
-					final OperationParameter operationParameter = new OperationParameter(
+					// LUKETODO:  capabilities statemenet provider
+					// LUKETODO:  consider taking  ALL  hapi-fhir storage-cr INTO the clinical-reasoning repo
+//					final OperationParameter operationParameter = new OperationParameter(
+					final OperationEmbeddedParameter operationParameter = new OperationEmbeddedParameter(
 							theContext,
 							op.name(),
 							operationParam.name(),
@@ -179,10 +183,6 @@ public class MethodUtil {
 					final Class<? extends java.util.Collection<?>> outerCollectionType = null;
 					final Class<? extends java.util.Collection<?>> innerCollectionType = null;
 
-					// LUKETODO:  how is this thing supposed to work?????
-					//					final String paramTypeName = operationParam.typeName();
-					final String paramTypeName = operationParam.name();
-
 					operationParameter.initializeTypes(theMethod, outerCollectionType, innerCollectionType, fieldType);
 
 					param = operationParameter;
@@ -194,26 +194,6 @@ public class MethodUtil {
 
 				// LUKETODO:  DO NOT ALLOW an OperationEmbeddedType within an OperationEmbeddedType
 				// LUKETODO:  DO NOT ALLOW an OperationEmbeddedType within an OperationEmbeddedType
-
-				//				// This is a 2x array that contains fieldAnnotations across all methods and each method can have
-				// multiple fieldAnnotations
-				//				final Annotation[][] parameterAnnotations = theMethod.getParameterAnnotations();
-				//
-				//				// This corresponds to a single @OperationParam, like a single parameter in evaluateMeasure
-				//				// in OUR case, we want this to correspond to a single FIELD in our @OperationEmbeddedType
-				//				final OperationParam operationParam = (OperationParam) fieldAnnotations[0];
-				//
-				//				final String description = ParametersUtil.extractDescription(nextParameterAnnotations);
-				//				final List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);
-				//
-				//				final IParameter param = param = new OperationParameter(
-				//					theContext,
-				//					op.name(),
-				//					operationParam.name(),
-				//					operationParam.min(),
-				//					operationParam.max(),
-				//					description,
-				//					examples);
 
 				parameters.add(param);
 			}
@@ -227,6 +207,7 @@ public class MethodUtil {
 			IParameter param = null;
 			Class<?> declaredParameterType = parameterTypes[paramIndex];
 			Class<?> parameterType = declaredParameterType;
+
 			Class<? extends java.util.Collection<?>> outerCollectionType = null;
 			Class<? extends java.util.Collection<?>> innerCollectionType = null;
 			if (TagList.class.isAssignableFrom(parameterType)) {

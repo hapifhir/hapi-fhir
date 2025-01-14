@@ -282,31 +282,55 @@ public abstract class BaseMethodBinding {
 						// LUKETODO:  if there are multiple constructors, cycle through them until you find one that matches the params list
 						final Constructor<?> constructor = constructors[0];
 
-						final Parameter[] parameters = constructor.getParameters();
+						final Parameter[] constructorParameters = constructor.getParameters();
 
-						if (parameters.length > 0) {
+						// LUKETODO:  mandate an immutable class with a constructor to set params
+						if (constructorParameters.length == 0) {
 							// LUKETODO:  call setters
-						}
+							final Object operationEmbeddedType = constructor.newInstance();
+							final List<Method> setters = Arrays.stream(parameterType.getDeclaredMethods())
+								.filter(paramMethod -> paramMethod.getName().startsWith("set")) // LUKETODO:  this is nasty
+								.collect(Collectors.toUnmodifiableList());
 
-						// LUKETODO:  else?
-						if (theMethodParams.length != parameters.length) {
-							throw new RuntimeException("1234: bad params");
-						}
+							for (int index = 0; index < theMethodParams.length; index++) {
+								final Object methodParam = theMethodParams[index];
+								final Class<?> methodParamAtIndex = methodParam.getClass();
+								// LUKETODO:  check at least one param
+								final Method setter = setters.get(index);
+								final Class<?> setterParamType = setter.getParameterTypes()[0];
 
-						for (int index = 0; index < theMethodParams.length; index++) {
-							final Class<?> methodParamAtIndex = theMethodParams[index].getClass();
-							final Class<?> parameterAtIndex = parameters[index].getType();
+								ourLog.info("1234: methodParamAtIndex: {}, setterParamType: {}", methodParamAtIndex, setterParamType);
+								if (methodParamAtIndex != setterParamType) {
+									throw new RuntimeException("1234: bad params");
+								}
 
-							ourLog.info("1234: methodParamAtIndex: {}, parameterAtIndex: {}", methodParamAtIndex, parameterAtIndex);
-							if (methodParamAtIndex != parameterAtIndex) {
+								setter.invoke(methodParam);
+							}
+
+							ourLog.info("1234: invoking method with operationEmbeddedType: {}", operationEmbeddedType);
+							return method.invoke(getProvider(), operationEmbeddedType);
+						} else {
+							// LUKETODO:  else?
+							if (theMethodParams.length != constructorParameters.length) {
 								throw new RuntimeException("1234: bad params");
 							}
+
+							for (int index = 0; index < theMethodParams.length; index++) {
+								final Class<?> methodParamAtIndex = theMethodParams[index].getClass();
+								final Class<?> parameterAtIndex = constructorParameters[index].getType();
+
+								ourLog.info("1234: methodParamAtIndex: {}, parameterAtIndex: {}", methodParamAtIndex, parameterAtIndex);
+								if (methodParamAtIndex != parameterAtIndex) {
+									throw new RuntimeException("1234: bad params");
+								}
+							}
+
+							final Object operationEmbeddedType = constructor.newInstance(theMethodParams);
+
+							ourLog.info("1234: invoking method with operationEmbeddedType: {}", operationEmbeddedType);
+							return method.invoke(getProvider(), operationEmbeddedType);
 						}
 
-						final Object operationEmbeddedType = constructor.newInstance(theMethodParams);
-
-						ourLog.info("1234: invoking method with operationEmbeddedType: {}", operationEmbeddedType);
-						return method.invoke(getProvider(), operationEmbeddedType);
 					}
 				}
 			}
