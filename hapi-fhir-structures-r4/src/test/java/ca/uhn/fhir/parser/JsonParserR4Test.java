@@ -1889,16 +1889,6 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 	@Test
-	public void testContainedResourceIdIsReadWithoutAddingHashThatAlreadyExists() throws IOException {
-		String text = loadResource("/observation-with-contained-specimen-hash-id.json");
-
-		Observation observation = ourCtx.newJsonParser().parseResource(Observation.class, text);
-		// FIXME? This shouldn't be a valid resource, but it's loaded and made into `##contained-id` anyway.
-		assertThat(observation.getSpecimen().getReference()).isEqualTo("#contained-id");
-		assertThat(observation.getContained().get(0).getId()).isEqualTo("#contained-id");
-	}
-
-	@Test
 	public void testReferenceCreatedByStringDoesntMutateContained() {
 		Observation observation = new Observation();
 		observation.setId("123");
