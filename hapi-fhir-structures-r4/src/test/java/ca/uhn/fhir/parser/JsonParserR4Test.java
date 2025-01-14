@@ -1799,30 +1799,31 @@ public class JsonParserR4Test extends BaseTest {
 		 */
 		@Test
 		public void testEncodeContainedBundle() {
-			String auditEvent = "{\n" +
-				 "  \"resourceType\": \"AuditEvent\",\n" +
-				 "  \"contained\": [ {\n" +
-				 "    \"resourceType\": \"Bundle\",\n" +
-				 "    \"id\": \"REASONS\",\n" +
-				 "    \"entry\": [ {\n" +
-				 "      \"resource\": {\n" +
-				 "        \"resourceType\": \"Condition\",\n" +
-				 "        \"id\": \"123\"\n" +
-				 "      }\n" +
-				 "    } ]\n" +
-				 "  }, {\n" +
-				 "    \"resourceType\": \"MeasureReport\",\n" +
-				 "    \"id\": \"MRPT5000602611RD\",\n" +
-				 "    \"evaluatedResource\": [ {\n" +
-				 "      \"reference\": \"#REASONS\"\n" +
-				 "    } ]\n" +
-				 "  } ],\n" +
-				 "  \"entity\": [ {\n" +
-				 "    \"what\": {\n" +
-				 "      \"reference\": \"#MRPT5000602611RD\"\n" +
-				 "    }\n" +
-				 "  } ]\n" +
-				 "}";
+			String auditEvent = """
+				 {
+				   "resourceType": "AuditEvent",
+				   "contained": [ {
+				     "resourceType": "Bundle",
+				     "id": "REASONS",
+				     "entry": [ {
+				       "resource": {
+				         "resourceType": "Condition",
+				         "id": "123"
+				       }
+				     } ]
+				   }, {
+				     "resourceType": "MeasureReport",
+				     "id": "MRPT5000602611RD",
+				     "evaluatedResource": [ {
+				       "reference": "#REASONS"
+				     } ]
+				   } ],
+				   "entity": [ {
+				     "what": {
+				       "reference": "#MRPT5000602611RD"
+				     }
+				   } ]
+				 }""";
 			AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
 			String auditEventAsString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
 			assertEquals(auditEvent, auditEventAsString);
@@ -1834,31 +1835,32 @@ public class JsonParserR4Test extends BaseTest {
 		 */
 		@Test
 		public void testParseAndEncodePreservesContainedResourceOrder() {
-			String auditEvent = "{\n" +
-				 "  \"resourceType\": \"AuditEvent\",\n" +
-				 "  \"contained\": [ {\n" +
-				 "    \"resourceType\": \"Observation\",\n" +
-				 "    \"id\": \"A\",\n" +
-				 "    \"identifier\": [ {\n" +
-				 "      \"value\": \"A\"\n" +
-				 "    } ]\n" +
-				 "  }, {\n" +
-				 "    \"resourceType\": \"Observation\",\n" +
-				 "    \"id\": \"B\",\n" +
-				 "    \"identifier\": [ {\n" +
-				 "      \"value\": \"B\"\n" +
-				 "    } ]\n" +
-				 "  } ],\n" +
-				 "  \"entity\": [ {\n" +
-				 "    \"what\": {\n" +
-				 "      \"reference\": \"#B\"\n" +
-				 "    }\n" +
-				 "  }, {\n" +
-				 "    \"what\": {\n" +
-				 "      \"reference\": \"#A\"\n" +
-				 "    }\n" +
-				 "  } ]\n" +
-				 "}";
+			String auditEvent = """
+				 {
+				   "resourceType": "AuditEvent",
+				   "contained": [ {
+				     "resourceType": "Observation",
+				     "id": "A",
+				     "identifier": [ {
+				       "value": "A"
+				     } ]
+				   }, {
+				     "resourceType": "Observation",
+				     "id": "B",
+				     "identifier": [ {
+				       "value": "B"
+				     } ]
+				   } ],
+				   "entity": [ {
+				     "what": {
+				       "reference": "#B"
+				     }
+				   }, {
+				     "what": {
+				       "reference": "#A"
+				     }
+				   } ]
+				 }""";
 
 			ourLog.info("Input: {}", auditEvent);
 			AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
@@ -1911,8 +1913,9 @@ public class JsonParserR4Test extends BaseTest {
 			observation.setId("123");
 			Specimen specimen = new Specimen();
 			specimen.setId("contained-id");
-			observation.getContained().add(specimen);
 			observation.setSpecimen(new Reference("#contained-id"));
+
+			observation.getContained().add(specimen);
 
 			String text = ourCtx.newJsonParser().encodeResourceToString(observation);
 
@@ -1934,8 +1937,9 @@ public class JsonParserR4Test extends BaseTest {
 
 			Observation observation = new Observation();
 			observation.setId("123");
-			observation.getContained().add(specimen);
 			observation.setSpecimen(new Reference(specimen));
+
+			observation.getContained().add(specimen);
 
 			String text = ourCtx.newJsonParser().encodeResourceToString(observation);
 
@@ -1968,6 +1972,9 @@ public class JsonParserR4Test extends BaseTest {
 			// the terser doesn't add a new contained element to the observation
 			assertThat(observation.getContained()).isEmpty();
 
+			// the terser doesn't mutate the id of the contained resource either
+			assertThat(specimen.getId()).doesNotStartWith("#");
+
 			// However the encoded text contains both a single contained resource, as well as the reference to it.
 			assertThat(text).contains("\"reference\":\""+specimenReferenceId+"\"");
 			assertThat(text).contains("\"id\":\""+specimenReferenceId.substring(1)+"\"");
@@ -1984,8 +1991,9 @@ public class JsonParserR4Test extends BaseTest {
 			Observation observation = new Observation();
 			observation.setId("O1");
 			observation.setStatus(Observation.ObservationStatus.FINAL);
-			observation.getContained().add(specimen);
 			observation.setSpecimen(new Reference(new IdType("#contained-id")));
+
+			observation.getContained().add(specimen);
 
 			String text = ourCtx.newJsonParser().encodeResourceToString(observation);
 
