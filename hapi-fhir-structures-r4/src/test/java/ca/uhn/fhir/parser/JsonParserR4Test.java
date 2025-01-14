@@ -80,6 +80,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -1900,6 +1901,7 @@ public class JsonParserR4Test extends BaseTest {
 			Observation observation = ourCtx.newJsonParser().parseResource(Observation.class, text);
 			assertThat(observation.getSpecimen().getReference()).isEqualTo("#contained-id");
 			//FIXME the parsed resource has an added `#` in the contained resource id.
+			assertSame(observation.getContained().get(0), observation.getSpecimen().getResource());
 			assertThat(observation.getContained().get(0).getId()).isEqualTo("contained-id");
 		}
 
