@@ -1902,7 +1902,7 @@ public class JsonParserR4Test extends BaseTest {
 
 			Observation observation = ourCtx.newJsonParser().parseResource(Observation.class, text);
 			assertThat(observation.getSpecimen().getReference()).isEqualTo("#contained-id");
-			//FIXME the parsed resource has an added `#` in the contained resource id.
+			//TODO the parsed resource has an added `#` in the contained resource id.
 			assertSame(observation.getContained().get(0), observation.getSpecimen().getResource());
 			assertThat(observation.getContained().get(0).getId()).isEqualTo("contained-id");
 		}
@@ -1923,7 +1923,7 @@ public class JsonParserR4Test extends BaseTest {
 			assertThat(text).contains("\"id\":\"contained-id\"");
 
 			assertThat(observation.getContained().size()).isEqualTo(1);
-		/*FIXME despite correctly encoding the contained resource, the original contained resource is mutated and given
+		/*TODO despite correctly encoding the contained resource, the original contained resource is mutated and given
 		   an id prefixed with a hash.
 		*/
 			assertThat(observation.getContained().get(0).getId()).isEqualTo("contained-id");
@@ -1947,7 +1947,7 @@ public class JsonParserR4Test extends BaseTest {
 			assertThat(text).contains("\"id\":\"contained-id\"");
 
 			assertThat(observation.getContained().size()).isEqualTo(1);
-		/*FIXME despite correctly encoding the contained resource, the original contained resource is mutated and given
+		/*TODO despite correctly encoding the contained resource, the original contained resource is mutated and given
 		   an id prefixed with a hash.
 		*/
 			assertThat(observation.getContained().get(0).getId()).isEqualTo("contained-id");
@@ -2001,7 +2001,7 @@ public class JsonParserR4Test extends BaseTest {
 			String specimenReferenceId = observation.getSpecimen().getReference();
 			assertThat(specimenReferenceId).startsWith("#");
 
-			// FIXME why does the terser mutate the contained element of the original resource?
+			// TODO why does the terser mutate the contained element of the original resource?
 			String specimenContainedId = observation.getContained().get(0).getIdElement().getValue();
 			assertThat(specimenContainedId).isEqualTo("contained-id");
 
