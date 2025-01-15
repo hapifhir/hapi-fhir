@@ -196,10 +196,10 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 				Value value = property.getValue();
 				if (value instanceof ToOne) {
 					ToOne toOne = (ToOne) value;
-					filterPropertiesFromToOneRelationship(theClassLoaderService, theMetadata, table, entityPersistentClass.getClassName(), toOne);
+					filterPropertiesFromToOneRelationship(
+							theClassLoaderService, theMetadata, table, entityPersistentClass.getClassName(), toOne);
 				}
 			}
-
 
 			for (UniqueKey uniqueKey : table.getUniqueKeys().values()) {
 				// Adjust UniqueKey constraints, which are uniqueness
@@ -355,7 +355,8 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 		Value value = theForeignKey.getColumn(0).getValue();
 		if (value instanceof ToOne) {
 			ToOne manyToOne = (ToOne) value;
-			Set<String> columnNamesToRemoveFromFks = filterPropertiesFromToOneRelationship(theClassLoaderService, theMetadata, theTable, theEntityTypeName, manyToOne);
+			Set<String> columnNamesToRemoveFromFks = filterPropertiesFromToOneRelationship(
+					theClassLoaderService, theMetadata, theTable, theEntityTypeName, manyToOne);
 			removeColumns(theForeignKey.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
 		} else {
 
@@ -367,7 +368,12 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 	}
 
 	@Nonnull
-	private Set<String> filterPropertiesFromToOneRelationship(ClassLoaderService theClassLoaderService, InFlightMetadataCollector theMetadata, Table theTable, String theEntityTypeName, ToOne manyToOne) {
+	private Set<String> filterPropertiesFromToOneRelationship(
+			ClassLoaderService theClassLoaderService,
+			InFlightMetadataCollector theMetadata,
+			Table theTable,
+			String theEntityTypeName,
+			ToOne manyToOne) {
 		String targetTableName = theMetadata
 				.getEntityBindingMap()
 				.get(manyToOne.getReferencedEntityName())
