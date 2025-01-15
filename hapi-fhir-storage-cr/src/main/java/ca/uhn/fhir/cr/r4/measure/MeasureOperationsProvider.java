@@ -35,8 +35,11 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MeasureOperationsProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(MeasureOperationsProvider.class);
 
 	private final R4MeasureEvaluatorSingleFactory myR4MeasureServiceFactory;
 	private final StringTimePeriodHandler myStringTimePeriodHandler;
@@ -86,6 +89,7 @@ public class MeasureOperationsProvider {
 			@OperationParam(name = "parameters") Parameters theParameters,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
+		// LUKETODO:  Parameters within Parameters
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
 				.evaluate(
@@ -102,5 +106,62 @@ public class MeasureOperationsProvider {
 						theParameters,
 						theProductLine,
 						thePractitioner);
+	}
+
+	@Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE_2, idempotent = true, type = Measure.class)
+	public MeasureReport evaluateMeasure2(EvaluateMeasureSingleParams theParams, RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
+		// LUKETODO:  Parameters within Parameters
+		return myR4MeasureServiceFactory
+				.create(theRequestDetails)
+				.evaluate(
+						// LUKETODO:  1. can we support the concept of Either in hapi-fhir annotations?
+						// LUKETODO:  2. can we modify OperationParam to support the concept of mututally exclusive
+						// params
+						// LUKETODO:  3. code gen from operation definition
+						Eithers.forMiddle3(theParams.getId()),
+						// LUKETODO:  push this into the hapi-fhir REST framework code
+						myStringTimePeriodHandler.getStartZonedDateTime(theParams.getPeriodStart(), theRequestDetails),
+						// LUKETODO:  push this into the hapi-fhir REST framework code
+						myStringTimePeriodHandler.getEndZonedDateTime(theParams.getPeriodEnd(), theRequestDetails),
+						theParams.getReportType(),
+						theParams.getSubject(),
+						theParams.getLastReceivedOn(),
+						null,
+						theParams.getTerminologyEndpoint(),
+						null,
+						theParams.getAdditionalData(),
+						theParams.getParameters(),
+						theParams.getProductLine(),
+						theParams.getPractitioner());
+	}
+
+	//	@Operation(name = "$fooBar", manualResponse = true, idempotent = true)
+	//	OperationOutcome fooBar(FooBarParams theParams) {
+	//		ourLog.info("fooBar params: {}", theParams);
+	//		return new OperationOutcome();
+	//	}
+
+	@Operation(name = "$fooBar", manualResponse = true, idempotent = true)
+	// LUKETODO:  consider defining a new @OperationEmbeddedParam
+	public void fooBar(@OperationParam(name = "params") FooBarParams theParams) {
+		ourLog.info("1234: fooBar params: {}", theParams);
+	}
+	//
+	//	@Operation(name = "$returnsBundle", manualResponse = true, idempotent = true)
+	//	public Bundle returnsBundle(@OperationParam(name = "params") ReturnsBundleParams theParams) {
+	//		final Bundle bundle = new Bundle();
+	//		bundle.setIdentifier(new Identifier().setValue("aValue"));
+	//
+	//		final String bundleString =
+	// FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+	//
+	//		ourLog.info("1234: returnsBundle params: {}, bundle:{}", theParams, bundleString);
+	//
+	//		return bundle;
+	//	}
+
+	void example() {
+		fooBar(new FooBarParams(null, null));
 	}
 }

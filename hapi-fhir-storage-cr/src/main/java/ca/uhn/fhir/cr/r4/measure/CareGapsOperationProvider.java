@@ -31,12 +31,16 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CareGapsOperationProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(MeasureOperationsProvider.class);
+
 	private final ICareGapsServiceFactory myR4CareGapsProcessorFactory;
 	private final StringTimePeriodHandler myStringTimePeriodHandler;
 
@@ -120,4 +124,28 @@ public class CareGapsOperationProvider {
 								.map(BooleanType::getValue)
 								.orElse(false));
 	}
+
+	//	@Operation(name = ProviderConstants.CR_OPERATION_CARE_GAPS_2, idempotent = true, type = Measure.class)
+	//	public Parameters careGapsReport2(
+	//		// LUKETODO:  include RequestDetails in Params object?
+	//		RequestDetails theRequestDetails,
+	//		@OperationParam(name = "params") CareGapsParams theParams) {
+	//
+	//		return myR4CareGapsProcessorFactory
+	//			.create(theRequestDetails)
+	//			.getCareGapsReport(
+	//				// LUKETODO:   how to handle passing this down seamlessly?
+	//				myStringTimePeriodHandler.getStartZonedDateTime(theParams.getPeriodStart(), theRequestDetails),
+	//				myStringTimePeriodHandler.getEndZonedDateTime(theParams.getPeriodEnd(), theRequestDetails),
+	//				theParams.getSubject(),
+	//				theParams.getStatus(),
+	//				theParams.getMeasureId() == null
+	//					? null
+	//					: theParams.getMeasureId().stream().map(IdType::new).collect(Collectors.toList()),
+	//				theParams.getMeasureIdentifier(),
+	//				theParams.getMeasureUrl(),
+	//				Optional.ofNullable(theParams.getNonDocument())
+	//					.map(BooleanType::getValue)
+	//					.orElse(false));
+	//	}
 }
