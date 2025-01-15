@@ -226,6 +226,30 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			IBasePersistedResource theEntity,
 			RestOperationTypeEnum theOperationType,
 			TransactionDetails theTransactionDetails) {
+		return doUpdateForUpdateOrPatch(
+				theRequest,
+				theResourceId,
+				theMatchUrl,
+				thePerformIndexing,
+				theForceUpdateVersion,
+				theResource,
+				theEntity,
+				theOperationType,
+				theTransactionDetails,
+				false);
+	}
+
+	protected DaoMethodOutcome doUpdateForUpdateOrPatch(
+			RequestDetails theRequest,
+			IIdType theResourceId,
+			String theMatchUrl,
+			boolean thePerformIndexing,
+			boolean theForceUpdateVersion,
+			T theResource,
+			IBasePersistedResource theEntity,
+			RestOperationTypeEnum theOperationType,
+			TransactionDetails theTransactionDetails,
+			boolean theShouldForcePopulateOldResourceForProcessing) {
 		if (theResourceId.hasVersionIdPart()
 				&& Long.parseLong(theResourceId.getVersionIdPart()) != theEntity.getVersion()) {
 			throw new ResourceVersionConflictException(
@@ -239,7 +263,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		}
 
 		IBaseResource oldResource;
-		if (getStorageSettings().isMassIngestionMode()) {
+		if (getStorageSettings().isMassIngestionMode() && !theShouldForcePopulateOldResourceForProcessing) {
 			oldResource = null;
 		} else {
 			oldResource = getStorageResourceParser().toResource(theEntity, false);
