@@ -128,6 +128,19 @@ public abstract class BaseMethodBinding {
 		return params;
 	}
 
+	// LUKETODO:  JP deleted this for some reason:  why?
+	protected Object[] createParametersForServerRequest(RequestDetails theRequest) {
+		Object[] params = new Object[getParameters().size()];
+		for (int i = 0; i < getParameters().size(); i++) {
+			IParameter param = getParameters().get(i);
+			if (param == null) {
+				continue;
+			}
+			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
+		}
+		return params;
+	}
+
 	/**
 	 * Subclasses may override to declare that they apply to all resource types
 	 */
@@ -309,7 +322,7 @@ public abstract class BaseMethodBinding {
 										methodParamAtIndex,
 										setterParamType);
 								if (methodParamAtIndex != setterParamType) {
-									throw new RuntimeException("1234: bad params");
+									throw new RuntimeException(Msg.code(12345523) + "1234: bad params");
 								}
 
 								setter.invoke(methodParam);
@@ -320,7 +333,7 @@ public abstract class BaseMethodBinding {
 						} else {
 							// LUKETODO:  else?
 							if (theMethodParams.length != constructorParameters.length) {
-								throw new RuntimeException("1234: bad params");
+								throw new RuntimeException(Msg.code(234198921) + "1234: bad params");
 							}
 
 							for (int index = 0; index < theMethodParams.length; index++) {
@@ -332,7 +345,7 @@ public abstract class BaseMethodBinding {
 										methodParamAtIndex,
 										parameterAtIndex);
 								if (methodParamAtIndex != parameterAtIndex) {
-									throw new RuntimeException("1234: bad params");
+									throw new RuntimeException(Msg.code(236146124) + "1234: bad params");
 								}
 							}
 
