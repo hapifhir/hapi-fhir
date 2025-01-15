@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.R4MeasureEvaluatorSingleFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -32,7 +31,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
@@ -111,32 +109,31 @@ public class MeasureOperationsProvider {
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE_2, idempotent = true, type = Measure.class)
-	public MeasureReport evaluateMeasure2(
-			EvaluateMeasureSingleParams theParams,
-			RequestDetails theRequestDetails)
-		throws InternalErrorException, FHIRException {
+	public MeasureReport evaluateMeasure2(EvaluateMeasureSingleParams theParams, RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
 		// LUKETODO:  Parameters within Parameters
 		return myR4MeasureServiceFactory
-			.create(theRequestDetails)
-			.evaluate(
-				// LUKETODO:  1. can we support the concept of Either in hapi-fhir annotations?
-				// LUKETODO:  2. can we modify OperationParam to support the concept of mututally exclusive params
-				// LUKETODO:  3. code gen from operation definition
-				Eithers.forMiddle3(theParams.getId()),
-				// LUKETODO:  push this into the hapi-fhir REST framework code
-				myStringTimePeriodHandler.getStartZonedDateTime(theParams.getPeriodStart(), theRequestDetails),
-				// LUKETODO:  push this into the hapi-fhir REST framework code
-				myStringTimePeriodHandler.getEndZonedDateTime(theParams.getPeriodEnd(), theRequestDetails),
-				theParams.getReportType(),
-				theParams.getSubject(),
-				theParams.getLastReceivedOn(),
-				null,
-				theParams.getTerminologyEndpoint(),
-				null,
-				theParams.getAdditionalData(),
-				theParams.getParameters(),
-				theParams.getProductLine(),
-				theParams.getPractitioner());
+				.create(theRequestDetails)
+				.evaluate(
+						// LUKETODO:  1. can we support the concept of Either in hapi-fhir annotations?
+						// LUKETODO:  2. can we modify OperationParam to support the concept of mututally exclusive
+						// params
+						// LUKETODO:  3. code gen from operation definition
+						Eithers.forMiddle3(theParams.getId()),
+						// LUKETODO:  push this into the hapi-fhir REST framework code
+						myStringTimePeriodHandler.getStartZonedDateTime(theParams.getPeriodStart(), theRequestDetails),
+						// LUKETODO:  push this into the hapi-fhir REST framework code
+						myStringTimePeriodHandler.getEndZonedDateTime(theParams.getPeriodEnd(), theRequestDetails),
+						theParams.getReportType(),
+						theParams.getSubject(),
+						theParams.getLastReceivedOn(),
+						null,
+						theParams.getTerminologyEndpoint(),
+						null,
+						theParams.getAdditionalData(),
+						theParams.getParameters(),
+						theParams.getProductLine(),
+						theParams.getPractitioner());
 	}
 
 	//	@Operation(name = "$fooBar", manualResponse = true, idempotent = true)
@@ -150,18 +147,19 @@ public class MeasureOperationsProvider {
 	public void fooBar(@OperationParam(name = "params") FooBarParams theParams) {
 		ourLog.info("1234: fooBar params: {}", theParams);
 	}
-//
-//	@Operation(name = "$returnsBundle", manualResponse = true, idempotent = true)
-//	public Bundle returnsBundle(@OperationParam(name = "params") ReturnsBundleParams theParams) {
-//		final Bundle bundle = new Bundle();
-//		bundle.setIdentifier(new Identifier().setValue("aValue"));
-//
-//		final String bundleString = FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
-//
-//		ourLog.info("1234: returnsBundle params: {}, bundle:{}", theParams, bundleString);
-//
-//		return bundle;
-//	}
+	//
+	//	@Operation(name = "$returnsBundle", manualResponse = true, idempotent = true)
+	//	public Bundle returnsBundle(@OperationParam(name = "params") ReturnsBundleParams theParams) {
+	//		final Bundle bundle = new Bundle();
+	//		bundle.setIdentifier(new Identifier().setValue("aValue"));
+	//
+	//		final String bundleString =
+	// FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+	//
+	//		ourLog.info("1234: returnsBundle params: {}, bundle:{}", theParams, bundleString);
+	//
+	//		return bundle;
+	//	}
 
 	void example() {
 		fooBar(new FooBarParams(null, null));

@@ -116,10 +116,10 @@ public class MethodUtil {
 
 		// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		final List<Class<?>> operationEmbeddedTypes = Arrays.stream(parameterTypes)
-			.filter(paramType -> paramType.isAnnotationPresent(OperationEmbeddedType.class))
-			.collect(Collectors.toUnmodifiableList());
+				.filter(paramType -> paramType.isAnnotationPresent(OperationEmbeddedType.class))
+				.collect(Collectors.toUnmodifiableList());
 
-		if (! operationEmbeddedTypes.isEmpty()) {
+		if (!operationEmbeddedTypes.isEmpty()) {
 			ourLog.info("1234: isOperationEmbeddedType!!!!!!! method: {}", theMethod.getName());
 
 			// This is the @Operation parameter on the method itself (ex: evaluateMeasure)
@@ -127,8 +127,9 @@ public class MethodUtil {
 
 			if (operationEmbeddedTypes.size() > 1) {
 				// LUKETODO:  error
-				throw new ConfigurationException(
-					String.format("%sOnly one OperationEmbeddedType is supported for now for method: %s", Msg.code(99999), theMethod.getName()));
+				throw new ConfigurationException(String.format(
+						"%sOnly one OperationEmbeddedType is supported for now for method: %s",
+						Msg.code(99999), theMethod.getName()));
 			}
 
 			// LUKETODO:  handle multiple RequestDetails with an error
@@ -148,12 +149,16 @@ public class MethodUtil {
 						final Annotation[] fieldAnnotations = field.getAnnotations();
 
 						if (fieldAnnotations.length < 1) {
-							throw new ConfigurationException(String.format("%sNo annotations for field: %s for method: %s", Msg.code(99999), fieldName, theMethod.getName()));
+							throw new ConfigurationException(String.format(
+									"%sNo annotations for field: %s for method: %s",
+									Msg.code(99999), fieldName, theMethod.getName()));
 						}
 
 						if (fieldAnnotations.length > 1) {
 							// LUKETODO:  error
-							throw new ConfigurationException(String.format("%sMore than one annotation for field: %s for method: %s", Msg.code(99999), fieldName, theMethod.getName()));
+							throw new ConfigurationException(String.format(
+									"%sMore than one annotation for field: %s for method: %s",
+									Msg.code(99999), fieldName, theMethod.getName()));
 						}
 
 						final Set<String> annotationClassNames = Arrays.stream(fieldAnnotations)
@@ -167,8 +172,8 @@ public class MethodUtil {
 								fieldType.getName(),
 								annotationClassNames);
 
-
-						// This is the parameter on the field in question on the OperationEmbeddedType class:  ex myCount
+						// This is the parameter on the field in question on the OperationEmbeddedType class:  ex
+						// myCount
 						final Annotation fieldAnnotation = fieldAnnotations[0];
 
 						// LUKETODO:  what if this is not a IdParam or an OperationParam?
@@ -193,16 +198,19 @@ public class MethodUtil {
 									description,
 									examples);
 
-							// Not sure what these are, but I think they're for params that are part of a Collection parameter
+							// Not sure what these are, but I think they're for params that are part of a Collection
+							// parameter
 							// and may have soemthing to do with a SearchParameter
 							final Class<? extends java.util.Collection<?>> outerCollectionType = null;
 							final Class<? extends java.util.Collection<?>> innerCollectionType = null;
 
-							operationParameter.initializeTypes(theMethod, outerCollectionType, innerCollectionType, fieldType);
+							operationParameter.initializeTypes(
+									theMethod, outerCollectionType, innerCollectionType, fieldType);
 
 							parameters.add(operationParameter);
 						} else {
-							throw new ConfigurationException(Msg.code(99999) + "Unsupported param fieldType: " + fieldAnnotation);
+							throw new ConfigurationException(
+									Msg.code(99999) + "Unsupported param fieldType: " + fieldAnnotation);
 						}
 					}
 				}

@@ -155,11 +155,13 @@ public class ParameterUtil {
 
 		// LUKETODO: be mindful if we get rid of OperationEmbeddedType
 		final long operationEmbeddedTypesCount = Arrays.stream(parameterTypes)
-			.filter(paramType -> paramType.isAnnotationPresent(OperationEmbeddedType.class))
-			.count();
+				.filter(paramType -> paramType.isAnnotationPresent(OperationEmbeddedType.class))
+				.count();
 
 		if (operationEmbeddedTypesCount > 1) {
-			throw new ConfigurationException(String.format("%sMore than one parameter with OperationEmbeddedType for  method: %s", Msg.code(99999), theMethod.getName()));
+			throw new ConfigurationException(String.format(
+					"%sMore than one parameter with OperationEmbeddedType for  method: %s",
+					Msg.code(99999), theMethod.getName()));
 		}
 
 		if (operationEmbeddedTypesCount == 0) {

@@ -2,7 +2,6 @@ package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
-import ca.uhn.fhir.rest.annotation.OperationParam;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IntegerType;
 

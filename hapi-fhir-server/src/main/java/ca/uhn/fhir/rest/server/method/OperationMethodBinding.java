@@ -67,7 +67,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	public static final String WILDCARD_NAME = "$" + Operation.NAME_MATCH_ALL;
 	private final boolean myIdempotent;
 	private final boolean myDeleteEnabled;
-//	private final Integer myIdParamIndex;
+	//	private final Integer myIdParamIndex;
 	private final OperationIdParamDetails myOperationIdParamDetails;
 	private final String myName;
 	private final RestOperationTypeEnum myOtherOperationType;
@@ -503,12 +503,15 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private static class OperationIdParamDetails {
 		@Nullable
 		private final IIdType myIdType;
+
 		@Nullable
 		private final IdParam myIdParam;
+
 		@Nullable
 		private final Integer myIdParamIndex;
 
-		public OperationIdParamDetails(@Nullable IIdType myIdType, @Nullable IdParam myIdParam, @Nullable Integer myIdParamIndex) {
+		public OperationIdParamDetails(
+				@Nullable IIdType myIdType, @Nullable IdParam myIdParam, @Nullable Integer myIdParamIndex) {
 			this.myIdType = myIdType;
 			this.myIdParam = myIdParam;
 			this.myIdParamIndex = myIdParamIndex;
@@ -519,8 +522,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		public void assignOptionalIfIdParamPresent(Consumer<Boolean> theConsumer) {
-			Optional.ofNullable(myIdParam)
-				.ifPresent(nonNull -> theConsumer.accept(nonNull.optional()));
+			Optional.ofNullable(myIdParam).ifPresent(nonNull -> theConsumer.accept(nonNull.optional()));
 		}
 	}
 }

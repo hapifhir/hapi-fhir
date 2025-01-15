@@ -262,15 +262,18 @@ public abstract class BaseMethodBinding {
 			// LUKETODO:  split this up into private methods
 			final Class<?>[] parameterTypes = method.getParameterTypes();
 
-			ourLog.info("1234: invoking method for: {} and params: {} and parameterTypes: {}", method.getName(), theMethodParams, Arrays.toString(parameterTypes));
+			ourLog.info(
+					"1234: invoking method for: {} and params: {} and parameterTypes: {}",
+					method.getName(),
+					theMethodParams,
+					Arrays.toString(parameterTypes));
 
 			for (Class<?> parameterType : parameterTypes) {
 				ourLog.info("1234: invoking parameterType: {} and method: {}", parameterType, method.getName());
 				final Annotation[] parameterTypeAnnotations = parameterType.getAnnotations();
 
 				final boolean hasOperationEmbeddedTypeAnnotation =
-					Arrays.stream(parameterTypeAnnotations)
-						.anyMatch(OperationEmbeddedType.class::isInstance);
+						Arrays.stream(parameterTypeAnnotations).anyMatch(OperationEmbeddedType.class::isInstance);
 
 				if (hasOperationEmbeddedTypeAnnotation) {
 					final Constructor<?>[] constructors = parameterType.getConstructors();
@@ -279,7 +282,8 @@ public abstract class BaseMethodBinding {
 					// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 					if (constructors.length > 0) {
-						// LUKETODO:  if there are multiple constructors, cycle through them until you find one that matches the params list
+						// LUKETODO:  if there are multiple constructors, cycle through them until you find one that
+						// matches the params list
 						final Constructor<?> constructor = constructors[0];
 
 						final Parameter[] constructorParameters = constructor.getParameters();
@@ -289,8 +293,9 @@ public abstract class BaseMethodBinding {
 							// LUKETODO:  call setters
 							final Object operationEmbeddedType = constructor.newInstance();
 							final List<Method> setters = Arrays.stream(parameterType.getDeclaredMethods())
-								.filter(paramMethod -> paramMethod.getName().startsWith("set")) // LUKETODO:  this is nasty
-								.collect(Collectors.toUnmodifiableList());
+									.filter(paramMethod ->
+											paramMethod.getName().startsWith("set")) // LUKETODO:  this is nasty
+									.collect(Collectors.toUnmodifiableList());
 
 							for (int index = 0; index < theMethodParams.length; index++) {
 								final Object methodParam = theMethodParams[index];
@@ -299,7 +304,10 @@ public abstract class BaseMethodBinding {
 								final Method setter = setters.get(index);
 								final Class<?> setterParamType = setter.getParameterTypes()[0];
 
-								ourLog.info("1234: methodParamAtIndex: {}, setterParamType: {}", methodParamAtIndex, setterParamType);
+								ourLog.info(
+										"1234: methodParamAtIndex: {}, setterParamType: {}",
+										methodParamAtIndex,
+										setterParamType);
 								if (methodParamAtIndex != setterParamType) {
 									throw new RuntimeException("1234: bad params");
 								}
@@ -319,7 +327,10 @@ public abstract class BaseMethodBinding {
 								final Class<?> methodParamAtIndex = theMethodParams[index].getClass();
 								final Class<?> parameterAtIndex = constructorParameters[index].getType();
 
-								ourLog.info("1234: methodParamAtIndex: {}, parameterAtIndex: {}", methodParamAtIndex, parameterAtIndex);
+								ourLog.info(
+										"1234: methodParamAtIndex: {}, parameterAtIndex: {}",
+										methodParamAtIndex,
+										parameterAtIndex);
 								if (methodParamAtIndex != parameterAtIndex) {
 									throw new RuntimeException("1234: bad params");
 								}
@@ -331,7 +342,6 @@ public abstract class BaseMethodBinding {
 							// LUKETODO:  design for future use factory methods
 							return method.invoke(getProvider(), operationEmbeddedType);
 						}
-
 					}
 				}
 			}

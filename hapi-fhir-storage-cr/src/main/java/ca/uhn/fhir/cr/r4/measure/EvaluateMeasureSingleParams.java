@@ -1,8 +1,8 @@
 package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
@@ -14,28 +14,49 @@ import java.util.StringJoiner;
 public class EvaluateMeasureSingleParams {
 	@IdParam
 	private final IdType myId;
+
 	@OperationEmbeddedParam(name = "periodStart")
 	private final String myPeriodStart;
+
 	@OperationEmbeddedParam(name = "periodEnd")
 	private final String myPeriodEnd;
+
 	@OperationEmbeddedParam(name = "reportType")
 	private final String myReportType;
+
 	@OperationEmbeddedParam(name = "subject")
 	private final String mySubject;
+
 	@OperationEmbeddedParam(name = "practitioner")
 	private final String myPractitioner;
+
 	@OperationEmbeddedParam(name = "lastReceivedOn")
 	private final String myLastReceivedOn;
+
 	@OperationEmbeddedParam(name = "productLine")
 	private final String myProductLine;
+
 	@OperationEmbeddedParam(name = "additionalData")
 	private final Bundle myAdditionalData;
+
 	@OperationEmbeddedParam(name = "terminologyEndpoint")
 	private final Endpoint myTerminologyEndpoint;
+
 	@OperationEmbeddedParam(name = "parameters")
 	private final Parameters myParameters;
 
-	public EvaluateMeasureSingleParams(IdType myId, String myPeriodStart, String myPeriodEnd, String myReportType, String mySubject, String myPractitioner, String myLastReceivedOn, String myProductLine, Bundle myAdditionalData, Endpoint myTerminologyEndpoint, Parameters myParameters) {
+	public EvaluateMeasureSingleParams(
+			IdType myId,
+			String myPeriodStart,
+			String myPeriodEnd,
+			String myReportType,
+			String mySubject,
+			String myPractitioner,
+			String myLastReceivedOn,
+			String myProductLine,
+			Bundle myAdditionalData,
+			Endpoint myTerminologyEndpoint,
+			Parameters myParameters) {
 		this.myId = myId;
 		this.myPeriodStart = myPeriodStart;
 		this.myPeriodEnd = myPeriodEnd;
@@ -96,17 +117,17 @@ public class EvaluateMeasureSingleParams {
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", EvaluateMeasureSingleParams.class.getSimpleName() + "[", "]")
-			.add("myId=" + myId)
-			.add("myPeriodStart='" + myPeriodStart + "'")
-			.add("myPeriodEnd='" + myPeriodEnd + "'")
-			.add("myReportType='" + myReportType + "'")
-			.add("mySubject='" + mySubject + "'")
-			.add("myPractitioner='" + myPractitioner + "'")
-			.add("myLastReceivedOn='" + myLastReceivedOn + "'")
-			.add("myProductLine='" + myProductLine + "'")
-			.add("myAdditionalData=" + myAdditionalData)
-			.add("myTerminologyEndpoint=" + myTerminologyEndpoint)
-			.add("myParameters=" + myParameters)
-			.toString();
+				.add("myId=" + myId)
+				.add("myPeriodStart='" + myPeriodStart + "'")
+				.add("myPeriodEnd='" + myPeriodEnd + "'")
+				.add("myReportType='" + myReportType + "'")
+				.add("mySubject='" + mySubject + "'")
+				.add("myPractitioner='" + myPractitioner + "'")
+				.add("myLastReceivedOn='" + myLastReceivedOn + "'")
+				.add("myProductLine='" + myProductLine + "'")
+				.add("myAdditionalData=" + myAdditionalData)
+				.add("myTerminologyEndpoint=" + myTerminologyEndpoint)
+				.add("myParameters=" + myParameters)
+				.toString();
 	}
 }

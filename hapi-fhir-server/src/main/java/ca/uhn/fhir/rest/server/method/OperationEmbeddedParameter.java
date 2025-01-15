@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -46,8 +46,8 @@ import org.hl7.fhir.instance.model.api.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
 import java.util.function.Consumer;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
