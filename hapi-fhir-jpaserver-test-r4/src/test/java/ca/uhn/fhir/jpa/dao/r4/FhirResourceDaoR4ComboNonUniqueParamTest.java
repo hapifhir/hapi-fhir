@@ -216,7 +216,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IIdType id1 = createPatient1(null);
 		assertNotNull(id1);
 
-		assertThat(myCaptureQueriesListener.countSelectQueries()).as(String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(SqlQuery::getThreadName).toList())).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countSelectQueries()).as(String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(SqlQuery::getThreadName).toList())).isZero();
 		assertEquals(12, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -422,7 +422,6 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
 
 		myCaptureQueriesListener.logSelectQueries();
-		String expected;
 		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false)).contains("where (rt1_0.FHIR_ID='my-org')");
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
 		assertThat(sql).contains("SP_VALUE_NORMALIZED LIKE 'FAMILY1%'");
@@ -907,6 +906,38 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 		}
 
+		/**
+		 * This test asserts that a date query string prefixed with 'eq' still qualifies the query for combo indexes
+		 * inspection. This approach is preferred over disqualifying the query as it would be the case with any other
+		 * prefixes (gt, le, lt, etc) since date=2025-01-01 and date=eq2025-01-01 are equivalent searches.
+		 */
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"2025-01-01",
+			"eq2025-01-01"})
+		public void testSearchWithDateQueryString_whenModifierEqualIsPresent_willUseComboSearchIndexes(String theDateQueryParameter){
+			// given
+			IIdType id1 = createObservation("2025-01-01");
+
+			SearchParameterMap params = SearchParameterMap
+				.newSynchronous()
+				.add("note-text", new StringParam("Hello"))
+				.add("date", new DateParam(theDateQueryParameter));
+
+			logAllNonUniqueIndexes();
+			logAllDateIndexes();
+
+			myCaptureQueriesListener.clear();
+
+			// when
+			IBundleProvider results = myObservationDao.search(params, mySrd);
+			// then
+			assertComboIndexUsed();
+
+			List<String> actual = toUnqualifiedVersionlessIdValues(results);
+			assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
+		}
+
 		@ParameterizedTest
 		@ValueSource(booleans = {true, false})
 		public void testStringModifier(boolean theUseExact) {
@@ -982,6 +1013,4 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		}
 
 	}
-
-
 }

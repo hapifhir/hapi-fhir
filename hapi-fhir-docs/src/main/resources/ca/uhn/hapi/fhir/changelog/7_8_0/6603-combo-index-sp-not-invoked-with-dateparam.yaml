@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 6603
+jira: SMILE-8048
+title: "Previously, searches where processing was optimised with a combo index search parameters would skip searching 
+the optimised indexes if a date query string was prefixed with 'eq'. Since date=2025-01-01 and date=eq2025-01-01 are 
+equivalent search queries, we have harmonized the search behavior allowing optimised indexes inspection when the prefix
+is present. This issue is fixed."
