@@ -259,6 +259,11 @@
 				<artifactId>hapi-fhir-validation-resources-r5</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-server-cds-hooks</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 </project>
