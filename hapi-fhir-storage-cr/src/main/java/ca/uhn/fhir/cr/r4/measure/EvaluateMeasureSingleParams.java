@@ -2,7 +2,7 @@ package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
-import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
@@ -14,25 +14,25 @@ import java.util.StringJoiner;
 public class EvaluateMeasureSingleParams {
 	@IdParam
 	private final IdType myId;
-	@OperationParam(name = "periodStart")
+	@OperationEmbeddedParam(name = "periodStart")
 	private final String myPeriodStart;
-	@OperationParam(name = "periodEnd")
+	@OperationEmbeddedParam(name = "periodEnd")
 	private final String myPeriodEnd;
-	@OperationParam(name = "reportType")
+	@OperationEmbeddedParam(name = "reportType")
 	private final String myReportType;
-	@OperationParam(name = "subject")
+	@OperationEmbeddedParam(name = "subject")
 	private final String mySubject;
-	@OperationParam(name = "practitioner")
+	@OperationEmbeddedParam(name = "practitioner")
 	private final String myPractitioner;
-	@OperationParam(name = "lastReceivedOn")
+	@OperationEmbeddedParam(name = "lastReceivedOn")
 	private final String myLastReceivedOn;
-	@OperationParam(name = "productLine")
+	@OperationEmbeddedParam(name = "productLine")
 	private final String myProductLine;
-	@OperationParam(name = "additionalData")
+	@OperationEmbeddedParam(name = "additionalData")
 	private final Bundle myAdditionalData;
-	@OperationParam(name = "terminologyEndpoint")
+	@OperationEmbeddedParam(name = "terminologyEndpoint")
 	private final Endpoint myTerminologyEndpoint;
-	@OperationParam(name = "parameters")
+	@OperationEmbeddedParam(name = "parameters")
 	private final Parameters myParameters;
 
 	public EvaluateMeasureSingleParams(IdType myId, String myPeriodStart, String myPeriodEnd, String myReportType, String mySubject, String myPractitioner, String myLastReceivedOn, String myProductLine, Bundle myAdditionalData, Endpoint myTerminologyEndpoint, Parameters myParameters) {

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
-import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 
@@ -10,21 +10,21 @@ import java.util.StringJoiner;
 
 @OperationEmbeddedType
 public class CareGapsParams {
-	@OperationParam(name = "periodStart")
+	@OperationEmbeddedParam(name = "periodStart")
 	private final String myPeriodStart;
-	@OperationParam(name = "periodEnd")
+	@OperationEmbeddedParam(name = "periodEnd")
 	private final String myPeriodEnd;
-	@OperationParam(name = "subject")
+	@OperationEmbeddedParam(name = "subject")
 	private final String mySubject;
-	@OperationParam(name = "status")
+	@OperationEmbeddedParam(name = "status")
 	private final List<String> myStatus;
-	@OperationParam(name = "measureId")
+	@OperationEmbeddedParam(name = "measureId")
 	private final List<String> myMeasureId;
-	@OperationParam(name = "measureIdentifier")
+	@OperationEmbeddedParam(name = "measureIdentifier")
 	private final List<String> myMeasureIdentifier;
-	@OperationParam(name = "measureUrl")
+	@OperationEmbeddedParam(name = "measureUrl")
 	private final List<CanonicalType> myMeasureUrl;
-	@OperationParam(name = "nonDocument")
+	@OperationEmbeddedParam(name = "nonDocument")
 	private final BooleanType myNonDocument;
 
 	public CareGapsParams(

@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Offset;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -105,6 +106,7 @@ public class MethodUtil {
 	@SuppressWarnings("unchecked")
 	public static List<IParameter> getResourceParameters(
 			final FhirContext theContext, Method theMethod, Object theProvider) {
+		ourLog.info("1234: getResourceParameters: " + theMethod.getName());
 		List<IParameter> parameters = new ArrayList<>();
 
 		// LUKETODO:  why no caregaps here????
@@ -113,89 +115,97 @@ public class MethodUtil {
 		// LUKETODO:  one param per method parameter:  what happens if we expand this?
 
 		// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		if (Arrays.stream(parameterTypes)
-				.anyMatch(paramType -> paramType.isAnnotationPresent(OperationEmbeddedType.class))) {
+		final List<Class<?>> operationEmbeddedTypes = Arrays.stream(parameterTypes)
+			.filter(paramType -> paramType.isAnnotationPresent(OperationEmbeddedType.class))
+			.collect(Collectors.toUnmodifiableList());
+
+		if (! operationEmbeddedTypes.isEmpty()) {
 			ourLog.info("1234: isOperationEmbeddedType!!!!!!! method: {}", theMethod.getName());
 
 			// This is the @Operation parameter on the method itself (ex: evaluateMeasure)
 			final Operation op = theMethod.getAnnotation(Operation.class);
 
-			if (parameterTypes.length > 1) {
+			if (operationEmbeddedTypes.size() > 1) {
 				// LUKETODO:  error
 				throw new ConfigurationException(
-						Msg.code(99999) + "Only one OperationEmbeddedType is supported for now!");
+					String.format("%sOnly one OperationEmbeddedType is supported for now for method: %s", Msg.code(99999), theMethod.getName()));
 			}
 
-			final Class<?> operationEmbeddedType = parameterTypes[0];
+			// LUKETODO:  handle multiple RequestDetails with an error
 
-			final Field[] fields = operationEmbeddedType.getDeclaredFields();
-			ourLog.info("1234: declaredFields: {}", fields.length);
-			for (Field field : fields) {
-				final String fieldName = field.getName();
-				final Class<?> fieldType = field.getType();
-				final Annotation[] fieldAnnotations = field.getAnnotations();
-
-				final Set<String> annotationClassNames = Arrays.stream(fieldAnnotations)
-						.map(Annotation::annotationType)
-						.map(Class::getName)
-						.collect(Collectors.toUnmodifiableSet());
-
-				ourLog.info(
-						"1234: MethodUtil:  OperationEmbeddedType: fieldName: {}, class: {}, fieldAnnotations: {}",
-						fieldName,
-						fieldType.getName(),
-						annotationClassNames);
-
-				if (fieldAnnotations.length > 1) {
-					// LUKETODO:  error
-					throw new ConfigurationException(Msg.code(99999) + "More than one annotation per field!");
-				}
-
-				// This is the parameter on the field in question on the OperationEmbeddedType class:  ex myCount
-				final Annotation fieldAnnotation = fieldAnnotations[0];
-
+			for (Class<?> parameterType : parameterTypes) {
 				final IParameter param;
+				// If either the first or second parameter is a RequestDetails, handle it
+				if (parameterType.equals(RequestDetails.class) || parameterType.equals(ServletRequestDetails.class)) {
+					parameters.add(new RequestDetailsParameter());
+				} else { // LUKETODO:  specific check here?
+					// LUKETODO:  limit to a single Params object
+					final Field[] fields = parameterType.getDeclaredFields();
 
-				// LUKETODO:  what if this is not a IdParam or an OperationParam?
-				if (fieldAnnotation instanceof IdParam) {
-					param = new NullParameter();
-				} else if (fieldAnnotation instanceof OperationParam) {
-					final OperationParam operationParam = (OperationParam) fieldAnnotation;
+					for (Field field : fields) {
+						final String fieldName = field.getName();
+						final Class<?> fieldType = field.getType();
+						final Annotation[] fieldAnnotations = field.getAnnotations();
 
-					final Annotation[] fieldAnnotationArray = new Annotation[] {fieldAnnotation};
-					final String description = ParametersUtil.extractDescription(fieldAnnotationArray);
-					final List<String> examples = ParametersUtil.extractExamples(fieldAnnotationArray);
+						if (fieldAnnotations.length < 1) {
+							throw new ConfigurationException(String.format("%sNo annotations for field: %s for method: %s", Msg.code(99999), fieldName, theMethod.getName()));
+						}
 
-					// LUKETODO:  capabilities statemenet provider
-					// LUKETODO:  consider taking  ALL  hapi-fhir storage-cr INTO the clinical-reasoning repo
-//					final OperationParameter operationParameter = new OperationParameter(
-					final OperationEmbeddedParameter operationParameter = new OperationEmbeddedParameter(
-							theContext,
-							op.name(),
-							operationParam.name(),
-							operationParam.min(),
-							operationParam.max(),
-							description,
-							examples);
+						if (fieldAnnotations.length > 1) {
+							// LUKETODO:  error
+							throw new ConfigurationException(String.format("%sMore than one annotation for field: %s for method: %s", Msg.code(99999), fieldName, theMethod.getName()));
+						}
 
-					// Not sure what these are, but I think they're for params that are part of a Collection parameter
-					// and may have soemthing to do with a SearchParameter
-					final Class<? extends java.util.Collection<?>> outerCollectionType = null;
-					final Class<? extends java.util.Collection<?>> innerCollectionType = null;
+						final Set<String> annotationClassNames = Arrays.stream(fieldAnnotations)
+								.map(Annotation::annotationType)
+								.map(Class::getName)
+								.collect(Collectors.toUnmodifiableSet());
 
-					operationParameter.initializeTypes(theMethod, outerCollectionType, innerCollectionType, fieldType);
+						ourLog.info(
+								"1234: MethodUtil:  OperationEmbeddedType: fieldName: {}, class: {}, fieldAnnotations: {}",
+								fieldName,
+								fieldType.getName(),
+								annotationClassNames);
 
-					param = operationParameter;
-				} else {
-					throw new ConfigurationException(Msg.code(99999) + "Unsupport param fieldType: " + fieldAnnotation);
+
+						// This is the parameter on the field in question on the OperationEmbeddedType class:  ex myCount
+						final Annotation fieldAnnotation = fieldAnnotations[0];
+
+						// LUKETODO:  what if this is not a IdParam or an OperationParam?
+						if (fieldAnnotation instanceof IdParam) {
+							parameters.add(new NullParameter());
+						} else if (fieldAnnotation instanceof OperationEmbeddedParam) {
+							// LUKETODO:  use OperationEmbeddedParam instead
+							final OperationEmbeddedParam operationParam = (OperationEmbeddedParam) fieldAnnotation;
+
+							final Annotation[] fieldAnnotationArray = new Annotation[] {fieldAnnotation};
+							final String description = ParametersUtil.extractDescription(fieldAnnotationArray);
+							final List<String> examples = ParametersUtil.extractExamples(fieldAnnotationArray);
+
+							// LUKETODO:  capabilities statemenet provider
+							// LUKETODO:  consider taking  ALL  hapi-fhir storage-cr INTO the clinical-reasoning repo
+							final OperationEmbeddedParameter operationParameter = new OperationEmbeddedParameter(
+									theContext,
+									op.name(),
+									operationParam.name(),
+									operationParam.min(),
+									operationParam.max(),
+									description,
+									examples);
+
+							// Not sure what these are, but I think they're for params that are part of a Collection parameter
+							// and may have soemthing to do with a SearchParameter
+							final Class<? extends java.util.Collection<?>> outerCollectionType = null;
+							final Class<? extends java.util.Collection<?>> innerCollectionType = null;
+
+							operationParameter.initializeTypes(theMethod, outerCollectionType, innerCollectionType, fieldType);
+
+							parameters.add(operationParameter);
+						} else {
+							throw new ConfigurationException(Msg.code(99999) + "Unsupported param fieldType: " + fieldAnnotation);
+						}
+					}
 				}
-
-				// LUKETODO:  somehow add multiples of parameters in this block
-
-				// LUKETODO:  DO NOT ALLOW an OperationEmbeddedType within an OperationEmbeddedType
-				// LUKETODO:  DO NOT ALLOW an OperationEmbeddedType within an OperationEmbeddedType
-
-				parameters.add(param);
 			}
 
 			// LUKETODO:  short-circuit for now
@@ -214,38 +224,7 @@ public class MethodUtil {
 				// TagList is handled directly within the method bindings
 				param = new NullParameter();
 			} else {
-				// LUKETODO:  add comments about what this does
-				if (parameterType.isAnnotationPresent(OperationEmbeddedType.class)) {
-					//					ourLog.info("1234: isOperationEmbeddedType!!!!!!! method: {}", theMethod.getName());
-					//
-					//					final Field[] fields = parameterType.getDeclaredFields();
-					//					ourLog.info("1234: declaredFields: {}", fields.length);
-					//					ourLog.info("1234: MethodUtil:  nextParameterAnnotations: {}",
-					// Arrays.toString(nextParameterAnnotations));
-					//					for (Field field : fields) {
-					//						final String fieldName = field.getName();
-					//						final Class<?> type = field.getType();
-					//						final Annotation[] annotations = field.getAnnotations();
-					//
-					//						final Set<String> annotationClassNames =
-					// Arrays.stream(annotations).map(Annotation::annotationType).map(Class::getName).collect(Collectors.toUnmodifiableSet());
-					//
-					//						ourLog.info("1234: MethodUtil:  OperationEmbeddedType: fieldName: {}, class: {},
-					// annotations: {}", fieldName, type.getName(), annotationClassNames);
-					//
-					//						// LUKETODO:  somehow add multiples of parameters in this block
-					//
-					//						// LUKETODO:  DO NOT ALLOW an OperationEmbeddedType within an OperationEmbeddedType
-					//						// LUKETODO:  DO NOT ALLOW an OperationEmbeddedType within an OperationEmbeddedType
-					//					}
-					//
-					//					// LUKETODO:  figure out the pattern here and possibly reuse it:
-					//					// LUKETODO:  take the original parameterType and see if it's a Collection
-					//					// LUKETODO:  take the generic parameter type for the Collection, and assign it to
-					// parameterType
-					//					// LUKETODO:  as a sort of guard, if the parametter if null, then get the superclass for the
-					// method, get the superclass method, and then get the generic type for the superclass method???
-				} else if (Collection.class.isAssignableFrom(parameterType)) {
+				if (Collection.class.isAssignableFrom(parameterType)) {
 					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
 					if (parameterType == null && theMethod.getDeclaringClass().isSynthetic()) {

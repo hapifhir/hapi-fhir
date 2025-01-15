@@ -150,18 +150,18 @@ public class MeasureOperationsProvider {
 	public void fooBar(@OperationParam(name = "params") FooBarParams theParams) {
 		ourLog.info("1234: fooBar params: {}", theParams);
 	}
-
-	@Operation(name = "$returnsBundle", manualResponse = true, idempotent = true)
-	public Bundle returnsBundle(@OperationParam(name = "params") ReturnsBundleParams theParams) {
-		final Bundle bundle = new Bundle();
-		bundle.setIdentifier(new Identifier().setValue("aValue"));
-
-		final String bundleString = FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
-
-		ourLog.info("1234: returnsBundle params: {}, bundle:{}", theParams, bundleString);
-
-		return bundle;
-	}
+//
+//	@Operation(name = "$returnsBundle", manualResponse = true, idempotent = true)
+//	public Bundle returnsBundle(@OperationParam(name = "params") ReturnsBundleParams theParams) {
+//		final Bundle bundle = new Bundle();
+//		bundle.setIdentifier(new Identifier().setValue("aValue"));
+//
+//		final String bundleString = FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+//
+//		ourLog.info("1234: returnsBundle params: {}, bundle:{}", theParams, bundleString);
+//
+//		return bundle;
+//	}
 
 	void example() {
 		fooBar(new FooBarParams(null, null));

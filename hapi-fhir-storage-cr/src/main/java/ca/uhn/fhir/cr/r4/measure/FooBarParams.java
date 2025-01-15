@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -36,11 +37,11 @@ import java.util.StringJoiner;
 @OperationEmbeddedType
 public class FooBarParams {
 	// LUKETODO:  use OperationEmbeddedParameter instead
-	@OperationParam(name = "doFoo")
+	@OperationEmbeddedParam(name = "doFoo")
 	// LUKETODO:  do I always need to make it a BooleanType and not a Boolean?
 	private BooleanType myDoFoo;
 
-	@OperationParam(name = "count")
+	@OperationEmbeddedParam(name = "count")
 	private IntegerType myCount;
 
 	public FooBarParams(BooleanType myDoFoo, IntegerType myCount) {
