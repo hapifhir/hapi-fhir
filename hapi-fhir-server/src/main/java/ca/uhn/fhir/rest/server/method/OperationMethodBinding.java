@@ -39,10 +39,12 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -51,6 +53,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -63,7 +67,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	public static final String WILDCARD_NAME = "$" + Operation.NAME_MATCH_ALL;
 	private final boolean myIdempotent;
 	private final boolean myDeleteEnabled;
-	private final Integer myIdParamIndex;
+//	private final Integer myIdParamIndex;
+	private final OperationIdParamDetails myOperationIdParamDetails;
 	private final String myName;
 	private final RestOperationTypeEnum myOtherOperationType;
 	private final ReturnTypeEnum myReturnType;
@@ -172,15 +177,16 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			myReturnType = ReturnTypeEnum.RESOURCE;
 		}
 
-		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
+		myOperationIdParamDetails = findIdParameterDetails(theMethod);
+
 		if (getResourceName() == null) {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-			if (myIdParamIndex != null) {
+			if (myOperationIdParamDetails.myIdParamIndex != null) {
 				myCanOperateAtInstanceLevel = true;
 			} else {
 				myCanOperateAtServerLevel = true;
 			}
-		} else if (myIdParamIndex == null) {
+		} else if (myOperationIdParamDetails.myIdParamIndex == null) {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
 			myCanOperateAtTypeLevel = true;
 		} else {
@@ -188,7 +194,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			myCanOperateAtInstanceLevel = true;
 
 			// LUKETODO: Here, we need to check the operation's parameters class for the Id.
-			for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
+			for (Annotation next : theMethod.getParameterAnnotations()[myOperationIdParamDetails.myIdParamIndex]) {
 				//				ourLog.info("1234: method: {}, param: {}, paramType: {}", theMethod.getName(), myIdParamIndex,
 				// next.annotationType());
 				if (next instanceof IdParam) {
@@ -398,8 +404,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					Msg.code(428) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 		}
 
-		if (myIdParamIndex != null) {
-			theMethodParams[myIdParamIndex] = theRequest.getId();
+		if (myOperationIdParamDetails.myIdParamIndex != null) {
+			theMethodParams[myOperationIdParamDetails.myIdParamIndex] = theRequest.getId();
 		}
 
 		Object response = invokeServerMethod(theRequest, theMethodParams);
@@ -447,6 +453,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return myCanonicalUrl;
 	}
 
+	private OperationIdParamDetails findIdParameterDetails(Method theMethod) {
+		return new OperationIdParamDetails(null, null, ParameterUtil.findIdParameterIndex(theMethod, getContext()));
+	}
+
 	public static class ReturnType {
 		private int myMax;
 		private int myMin;
@@ -486,6 +496,31 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		public void setType(String theType) {
 			myType = theType;
+		}
+	}
+
+	// LUKETODO:  consider making this top-level
+	private static class OperationIdParamDetails {
+		@Nullable
+		private final IIdType myIdType;
+		@Nullable
+		private final IdParam myIdParam;
+		@Nullable
+		private final Integer myIdParamIndex;
+
+		public OperationIdParamDetails(@Nullable IIdType myIdType, @Nullable IdParam myIdParam, @Nullable Integer myIdParamIndex) {
+			this.myIdType = myIdType;
+			this.myIdParam = myIdParam;
+			this.myIdParamIndex = myIdParamIndex;
+		}
+
+		public boolean hasIdParamAnnotationAndIdTypeParamAtSameIndex() {
+			return false;
+		}
+
+		public void assignOptionalIfIdParamPresent(Consumer<Boolean> theConsumer) {
+			Optional.ofNullable(myIdParam)
+				.ifPresent(nonNull -> theConsumer.accept(nonNull.optional()));
 		}
 	}
 }
