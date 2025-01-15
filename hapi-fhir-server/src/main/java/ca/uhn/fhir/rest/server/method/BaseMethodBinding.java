@@ -328,6 +328,7 @@ public abstract class BaseMethodBinding {
 							final Object operationEmbeddedType = constructor.newInstance(theMethodParams);
 
 							ourLog.info("1234: invoking method with operationEmbeddedType: {}", operationEmbeddedType);
+							// LUKETODO:  design for future use factory methods
 							return method.invoke(getProvider(), operationEmbeddedType);
 						}
 

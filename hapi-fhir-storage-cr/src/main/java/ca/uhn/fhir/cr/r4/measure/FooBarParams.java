@@ -35,6 +35,7 @@ import java.util.StringJoiner;
  **/
 @OperationEmbeddedType
 public class FooBarParams {
+	// LUKETODO:  use OperationEmbeddedParameter instead
 	@OperationParam(name = "doFoo")
 	// LUKETODO:  do I always need to make it a BooleanType and not a Boolean?
 	private BooleanType myDoFoo;
@@ -51,17 +52,9 @@ public class FooBarParams {
 		return myDoFoo;
 	}
 
-	public void setDoFoo(BooleanType theDoFoo) {
-		myDoFoo = theDoFoo;
-	}
-
 	// LUKETODO:  do I always need to make it a IntegerType and not an Integer?
 	public IntegerType getCount() {
 		return myCount;
-	}
-
-	public void setCount(IntegerType theCount) {
-		myCount = theCount;
 	}
 
 	@Override

@@ -110,6 +110,35 @@ public class MeasureOperationsProvider {
 						thePractitioner);
 	}
 
+	@Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE_2, idempotent = true, type = Measure.class)
+	public MeasureReport evaluateMeasure2(
+			EvaluateMeasureSingleParams theParams,
+			RequestDetails theRequestDetails)
+		throws InternalErrorException, FHIRException {
+		// LUKETODO:  Parameters within Parameters
+		return myR4MeasureServiceFactory
+			.create(theRequestDetails)
+			.evaluate(
+				// LUKETODO:  1. can we support the concept of Either in hapi-fhir annotations?
+				// LUKETODO:  2. can we modify OperationParam to support the concept of mututally exclusive params
+				// LUKETODO:  3. code gen from operation definition
+				Eithers.forMiddle3(theParams.getId()),
+				// LUKETODO:  push this into the hapi-fhir REST framework code
+				myStringTimePeriodHandler.getStartZonedDateTime(theParams.getPeriodStart(), theRequestDetails),
+				// LUKETODO:  push this into the hapi-fhir REST framework code
+				myStringTimePeriodHandler.getEndZonedDateTime(theParams.getPeriodEnd(), theRequestDetails),
+				theParams.getReportType(),
+				theParams.getSubject(),
+				theParams.getLastReceivedOn(),
+				null,
+				theParams.getTerminologyEndpoint(),
+				null,
+				theParams.getAdditionalData(),
+				theParams.getParameters(),
+				theParams.getProductLine(),
+				theParams.getPractitioner());
+	}
+
 	//	@Operation(name = "$fooBar", manualResponse = true, idempotent = true)
 	//	OperationOutcome fooBar(FooBarParams theParams) {
 	//		ourLog.info("fooBar params: {}", theParams);
