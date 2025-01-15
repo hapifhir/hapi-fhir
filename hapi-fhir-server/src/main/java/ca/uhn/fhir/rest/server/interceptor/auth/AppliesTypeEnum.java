@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-enum AppliesTypeEnum {
+public enum AppliesTypeEnum {
 	ALL_RESOURCES,
 	TYPES,
 	INSTANCES

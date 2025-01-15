@@ -33,7 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class OperationRule extends BaseRule implements IAuthRule {
+public class OperationRule extends BaseRule implements IAuthRule {
 	private String myOperationName;
 	private boolean myAppliesToServer;
 	private HashSet<Class<? extends IBaseResource>> myAppliesToTypes;
@@ -45,7 +45,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private boolean myAllowAllResponses;
 	private boolean myAllowAllResourcesAccess;
 
-	OperationRule(String theRuleName) {
+	protected OperationRule(String theRuleName) {
 		super(theRuleName);
 	}
 
