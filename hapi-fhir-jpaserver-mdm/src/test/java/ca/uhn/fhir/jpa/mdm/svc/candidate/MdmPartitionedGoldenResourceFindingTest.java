@@ -38,7 +38,6 @@ public class MdmPartitionedGoldenResourceFindingTest extends BaseMdmR4Test {
 		assertThat(links).hasSize(1);
 		Long janeOriginalGoldenResourceId = links.get(0).getGoldenResourcePersistenceId().getId();
 
-
 		List<MdmLink> links2 = myMdmLinkDaoSvc.findMdmLinksBySourceResource(jane2);
 		assertThat(links2).hasSize(1);
 		Long jane2GoldenResourceId = links2.get(0).getGoldenResourcePersistenceId().getId();
@@ -61,7 +60,6 @@ public class MdmPartitionedGoldenResourceFindingTest extends BaseMdmR4Test {
 		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(jane);
 		assertThat(links).hasSize(1);
 		Long janeOriginalGoldenResourceId = links.get(0).getGoldenResourcePersistenceId().getId();
-
 
 		List<MdmLink> links2 = myMdmLinkDaoSvc.findMdmLinksBySourceResource(jane2);
 		assertThat(links2).hasSize(1);
