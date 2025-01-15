@@ -233,7 +233,6 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertThat(result.isSuccessful()).as(all.toString()).isFalse();
 		assertThat(result.getMessages().get(0).getMessage()).startsWith("Unknown code 'https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code#foo'");
-
 	}
 
 	@Test
