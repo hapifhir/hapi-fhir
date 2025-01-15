@@ -54,13 +54,15 @@
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
 			<scope>test</scope>
-			<version>10.17.1.0</version>
+			<version>10.16.1.1</version>
+			<!--	Don't bump this, they drop support for JRE 17	-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derbytools</artifactId>
 			<scope>test</scope>
-			<version>10.17.1.0</version>
+			<version>10.16.1.1</version>
+			<!--	Don't bump this, they drop support for JRE 17	-->
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>

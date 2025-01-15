@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6583
+title: "When processing a batch2 job under heavy load, a race condition meant that the final reducer step would occasionally fail if it started immediately following a batch2 maintenance task."

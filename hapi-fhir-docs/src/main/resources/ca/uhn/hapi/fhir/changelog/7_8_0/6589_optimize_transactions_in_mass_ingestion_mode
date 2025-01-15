@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 6589
+title: "When performing data loading into a JPA repository using FHIR transactions with Mass Ingestion Mode enabled, the prefetch routine has been optimized to avoid loading the current resource body/contents, since these are not actually needed in Mass Ingestion mode. This avoids a redundant select statement being issued for each transaction and should improve performance."
