@@ -384,8 +384,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		 * These two constraints were the last two that we had that used
 		 * hibernate-generated names. Yay!
 		 */
-		version.onTable("HFJ_RES_TAG").dropForeignKey("20250102.10", "FKbfcjbaftmiwr3rxkwsy23vneo", "HFJ_TAG_DEF");
-		version.onTable("HFJ_HISTORY_TAG").dropForeignKey("20250102.20", "FKtderym7awj6q8iq5c51xv4ndw", "HFJ_TAG_DEF");
+		version.onTable("HFJ_RES_TAG").dropForeignKey("20250115.10", "FKbfcjbaftmiwr3rxkwsy23vneo", "HFJ_TAG_DEF");
+		version.onTable("HFJ_HISTORY_TAG").dropForeignKey("20250115.20", "FKtderym7awj6q8iq5c51xv4ndw", "HFJ_TAG_DEF");
+
+		version.onTable("HFJ_RES_LINK").dropForeignKey("20250115.30", "FK_RESLINK_TARGET", "HFJ_RESOURCE");
 	}
 
 	protected void init780_afterPartitionChanges() {

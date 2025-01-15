@@ -192,6 +192,15 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 						theClassLoaderService, theMetadata, foreignKey, table, nextEntry.getKey());
 			}
 
+			for (Property property : entityPersistentClass.getProperties()) {
+				Value value = property.getValue();
+				if (value instanceof ToOne) {
+					ToOne toOne = (ToOne) value;
+					filterPropertiesFromToOneRelationship(theClassLoaderService, theMetadata, table, entityPersistentClass.getClassName(), toOne);
+				}
+			}
+
+
 			for (UniqueKey uniqueKey : table.getUniqueKeys().values()) {
 				// Adjust UniqueKey constraints, which are uniqueness
 				// constraints automatically generated to support FKs on
@@ -346,22 +355,8 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 		Value value = theForeignKey.getColumn(0).getValue();
 		if (value instanceof ToOne) {
 			ToOne manyToOne = (ToOne) value;
-
-			String targetTableName = theMetadata
-					.getEntityBindingMap()
-					.get(manyToOne.getReferencedEntityName())
-					.getTable()
-					.getName();
-			Class<?> entityType = getType(theClassLoaderService, theEntityTypeName);
-			String propertyName = manyToOne.getPropertyName();
-			Set<String> columnNamesToRemoveFromFks =
-					determineFilteredColumnNamesInForeignKey(entityType, propertyName, targetTableName);
-
-			removeColumns(manyToOne.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
+			Set<String> columnNamesToRemoveFromFks = filterPropertiesFromToOneRelationship(theClassLoaderService, theMetadata, theTable, theEntityTypeName, manyToOne);
 			removeColumns(theForeignKey.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
-
-			columnNamesToRemoveFromFks.forEach(t -> myQualifiedIdRemovedColumnNames.add(theTable.getName() + "#" + t));
-
 		} else {
 
 			theForeignKey
@@ -369,6 +364,24 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 					.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
 							theForeignKey.getReferencedTable().getName() + "#" + t.getName()));
 		}
+	}
+
+	@Nonnull
+	private Set<String> filterPropertiesFromToOneRelationship(ClassLoaderService theClassLoaderService, InFlightMetadataCollector theMetadata, Table theTable, String theEntityTypeName, ToOne manyToOne) {
+		String targetTableName = theMetadata
+				.getEntityBindingMap()
+				.get(manyToOne.getReferencedEntityName())
+				.getTable()
+				.getName();
+		Class<?> entityType = getType(theClassLoaderService, theEntityTypeName);
+		String propertyName = manyToOne.getPropertyName();
+		Set<String> columnNamesToRemoveFromFks =
+				determineFilteredColumnNamesInForeignKey(entityType, propertyName, targetTableName);
+
+		removeColumns(manyToOne.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
+
+		columnNamesToRemoveFromFks.forEach(t -> myQualifiedIdRemovedColumnNames.add(theTable.getName() + "#" + t));
+		return columnNamesToRemoveFromFks;
 	}
 
 	private void filterPartitionedIdsFromUniqueConstraints(UniqueKey uniqueKey, Table table) {
