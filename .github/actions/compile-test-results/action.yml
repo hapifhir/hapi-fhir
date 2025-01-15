@@ -4,12 +4,10 @@ inputs:
   modules:
     description: A JSON list of modules to process
     required: true
-    type: string
   github_token:
     description: GitHub token for API authentication
     required: true
-    type: string
-    
+
 runs:
   using: composite
   steps:

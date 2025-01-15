@@ -19,18 +19,14 @@ runs:
       with:
         fetch-depth: 1
 
-    - name: Set up Java
+    - name: Set up Java 17
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: '11'
+        java-version: '17'
 
-    - name: Install Docker
-      shell: bash
-      run: |
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sudo sh get-docker.sh
-        docker --version
+    - name: Setup Docker
+      uses: docker/setup-docker@v2
     
     - name: Create and List Maven Cache Directory
       shell: bash
@@ -42,23 +38,7 @@ runs:
         MAVEN_CACHE_FOLDER: $HOME/.m2/repository 
 
     - name: Restore Maven Cache
-      uses: actions/cache@v4
-      with:
-        path: $HOME/.m2/repository
-        enableCrossOsArchive: true  
-        key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-            maven-${{ runner.os }}-
-
-    - name: Verify cache was restored
-      shell: bash
-      run: |
-        if [ -d "$HOME/.m2/repository" ]; then
-          echo "Cache exists"
-          ls -R $HOME/.m2/repository
-        else
-          echo "Cache not found"
-        fi
+      uses: ./.github/actions/caching-handler
 
     - name: Build Maven Module
       shell: bash
@@ -71,21 +51,6 @@ runs:
           -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
           -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false \
           -Dstyle.color=always -Djansi.force=true
-    
-    - name: Copy Test Logs
-      shell: bash
-      if: always()
-      run: |
-        ls -R $GITHUB_WORKSPACE/${{ inputs.module }}
-        mkdir -p $GITHUB_WORKSPACE/reports
-        cp $GITHUB_WORKSPACE/${{ inputs.module }}/target/*-reports/*.txt $GITHUB_WORKSPACE/reports/
-
-    - name: Upload Test Logs as Artifact
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: ${{ inputs.name }}_full_logs_${{ github.run_id }}_${{ github.run_number }}
-        path: $GITHUB_WORKSPACE/reports
 
     - name: Upload Target Artifacts
       uses: actions/upload-artifact@v3

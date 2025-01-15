@@ -7,7 +7,7 @@ inputs:
 outputs:
   modules_list:
     description: 'The generated comma-separated list of Maven modules'
-    value: ${{ steps.list_modules.outputs.modules_list }}
+    value: ${{ steps.list-modules.outputs.modules_list }}
 
 runs:
   using: 'composite'
@@ -15,11 +15,11 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up JDK 11
+    - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         distribution: 'adopt'
-        java-version: '11'
+        java-version: '17'
 
     - name: Debug - Print passed in ignored modules in a newline-separated list
       shell: bash
@@ -28,7 +28,7 @@ runs:
         echo "${{ inputs.ignored_modules }}" | tr ',' '\n'
         
     - name: Find and list Maven modules
-      id: list_modules
+      id: list-modules
       shell: bash
       run: |
         # Specify the directory containing your multi-module Maven project
@@ -88,4 +88,4 @@ runs:
       shell: bash
       run: |
         echo "Modules list generated:"
-        echo "${{ steps.list_modules.outputs.modules_list }}" | tr ',' '\n'
+        echo "${{ steps.list-modules.outputs.modules_list }}" | tr ',' '\n'

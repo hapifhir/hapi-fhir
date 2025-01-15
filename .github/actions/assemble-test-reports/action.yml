@@ -20,13 +20,8 @@ runs:
       with:
         fetch-depth: 1
 
-    - name: Restore Maven cache
-      uses: actions/cache@v4
-      with:
-        path: $HOME/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-
+    - name: Restore Maven Cache
+      uses: ./.github/actions/caching-handler
 
     - name: Compile all previously generated reports
       uses: ./.github/actions/compile-test-results

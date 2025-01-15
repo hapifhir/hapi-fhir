@@ -9,7 +9,7 @@ inputs:
   maven-cache-folder:
     description: 'Folder path for Maven cache'
     required: true
-    default: '${{ runner.os }}/.m2/repository'
+    default: "$HOME/.m2/repository"
   module-name:
     description: 'The Maven module name to build'
     required: true
@@ -23,13 +23,8 @@ runs:
         java-version: ${{ inputs.java-version }}
         distribution: 'temurin'
 
-    - name: Restore Maven cache
-      uses: actions/cache@v4
-      with:
-        path: ${{ inputs.maven-cache-folder }}
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-
+    - name: Restore Maven Cache
+      uses: ./.github/actions/caching-handler
 
     - name: Build Module ${{ inputs.module-name }}
       shell: bash
