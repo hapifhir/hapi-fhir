@@ -175,7 +175,7 @@ public class ResourceTag extends BaseTag {
 			b.append("partition", getPartitionId().getPartitionId());
 		}
 		b.append("resId", getResourceId());
-		b.append("tag", getTag().getId());
+		b.append("tag", getTagId());
 		return b.build();
 	}
 }
