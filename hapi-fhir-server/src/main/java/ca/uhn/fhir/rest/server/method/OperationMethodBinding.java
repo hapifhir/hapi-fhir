@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -48,13 +50,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -150,7 +153,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					+ theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
 					+ " but this annotation has no name defined");
 		}
-		if (theOperationName.startsWith("$") == false) {
+		if (!theOperationName.startsWith("$")) {
 			theOperationName = "$" + theOperationName;
 		}
 		myName = theOperationName;
@@ -158,7 +161,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		try {
 			if (theReturnTypeFromRp != null) {
 				setResourceName(theContext.getResourceType(theReturnTypeFromRp));
-			} else if (theOperationType != null && Modifier.isAbstract(theOperationType.getModifiers()) == false) {
+			} else if (theOperationType != null && !Modifier.isAbstract(theOperationType.getModifiers())) {
 				setResourceName(theContext.getResourceType(theOperationType));
 			} else if (isNotBlank(theOperationTypeName)) {
 				setResourceName(theContext.getResourceType(theOperationTypeName));
@@ -176,7 +179,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			myReturnType = ReturnTypeEnum.RESOURCE;
 		}
 
-		myOperationIdParamDetails = findIdParameterDetails(theMethod);
+		myOperationIdParamDetails = findIdParameterDetails(theMethod, getContext());
 
 		if (getResourceName() == null) {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
@@ -191,15 +194,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		} else {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 			myCanOperateAtInstanceLevel = true;
-
-			// LUKETODO: Here, we need to check the operation's parameters class for the Id.
-			for (Annotation next : theMethod.getParameterAnnotations()[myOperationIdParamDetails.myIdParamIndex]) {
-				//				ourLog.info("1234: method: {}, param: {}, paramType: {}", theMethod.getName(), myIdParamIndex,
-				// next.annotationType());
-				if (next instanceof IdParam) {
-					myCanOperateAtTypeLevel = ((IdParam) next).optional();
-				}
-			}
+			myCanOperateAtServerLevel = myOperationIdParamDetails.setOrReturnPreviousValue(myCanOperateAtServerLevel);
 		}
 
 		myReturnParams = new ArrayList<>();
@@ -314,6 +309,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		boolean requestHasId = theRequest.getId() != null;
 		if (requestHasId) {
+			ourLog.info("1234: method: {} has myCanOperateAtInstanceLevel : {}", myName, myCanOperateAtInstanceLevel);
 			return myCanOperateAtInstanceLevel ? MethodMatchEnum.EXACT : MethodMatchEnum.NONE;
 		}
 		if (isNotBlank(theRequest.getResourceName())) {
@@ -403,7 +399,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					Msg.code(428) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 		}
 
-		final Object response = invokeEitherParamsOrEmbeddedParams(theRequest, theMethodParams);
+		final Object response =
+				invokeEitherParamsOrEmbeddedParams(theRequest, theMethodParams, myOperationIdParamDetails);
 
 		if (myManualResponseMode) {
 			return null;
@@ -412,9 +409,12 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return toResourceList(response);
 	}
 
-	private Object invokeEitherParamsOrEmbeddedParams(RequestDetails theRequest, Object[] theMethodParams) {
-		if (myOperationIdParamDetails.myIdParamIndex != null) {
-			theMethodParams[myOperationIdParamDetails.myIdParamIndex] = theRequest.getId();
+	private Object invokeEitherParamsOrEmbeddedParams(
+			RequestDetails theRequest, Object[] theMethodParams, OperationIdParamDetails theOperationIdParamDetails) {
+		ourLog.info("1234: invoking method: {} with params: {}", theRequest.getOperation(), theMethodParams);
+
+		if (this.myOperationIdParamDetails.myIdParamIndex != null) {
+			theMethodParams[this.myOperationIdParamDetails.myIdParamIndex] = theRequest.getId();
 		}
 
 		return invokeServerMethod(theRequest, theMethodParams);
@@ -456,8 +456,87 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return myCanonicalUrl;
 	}
 
-	private OperationIdParamDetails findIdParameterDetails(Method theMethod) {
-		return new OperationIdParamDetails(null, null, ParameterUtil.findIdParameterIndex(theMethod, getContext()));
+	private OperationIdParamDetails findIdParameterDetails(Method theMethod, FhirContext theContext) {
+		final Class<?>[] parameterTypes = theMethod.getParameterTypes();
+
+		final List<Class<?>> operationEmbeddedTypes = Arrays.stream(parameterTypes)
+				.filter(paramType -> paramType.isAnnotationPresent(OperationEmbeddedType.class))
+				.collect(Collectors.toUnmodifiableList());
+
+		if (!operationEmbeddedTypes.isEmpty()) {
+			return findIdParamIndexForOperationEmbeddedType(theMethod, operationEmbeddedTypes, theContext);
+		}
+
+		return getIdParamAnnotationFromMethodParams(theMethod, theContext);
+	}
+
+	@Nonnull
+	private OperationIdParamDetails getIdParamAnnotationFromMethodParams(Method theMethod, FhirContext theContext) {
+		final Integer paramAnnotationIndex = ParameterUtil.findIdParameterIndex(theMethod, theContext);
+
+		if (paramAnnotationIndex != null) {
+			final Class<?> paramType = theMethod.getParameterTypes()[paramAnnotationIndex];
+			if (IIdType.class.equals(paramType)) {
+				final Annotation[] parameterAnnotation = theMethod.getParameterAnnotations()[paramAnnotationIndex];
+
+				for (Annotation nextParameterAnnotation : parameterAnnotation) {
+					if (nextParameterAnnotation instanceof IdParam) {
+						return new OperationIdParamDetails(
+								null, (IdParam) nextParameterAnnotation, paramAnnotationIndex, theMethod);
+					}
+				}
+				return new OperationIdParamDetails(null, null, paramAnnotationIndex, theMethod);
+			}
+		}
+
+		return new OperationIdParamDetails(null, null, paramAnnotationIndex, theMethod);
+	}
+
+	@Nonnull
+	private OperationIdParamDetails findIdParamIndexForOperationEmbeddedType(
+			Method theMethod, List<Class<?>> theOperationEmbeddedTypes, FhirContext theContext) {
+		for (Class<?> operationEmbeddedTypes : theOperationEmbeddedTypes) {
+			if (operationEmbeddedTypes.equals(RequestDetails.class)
+					|| operationEmbeddedTypes.equals(ServletRequestDetails.class)) {
+				// skip
+			} else {
+				final Field[] fields = operationEmbeddedTypes.getDeclaredFields();
+
+				int paramIndex = 0;
+				for (Field field : fields) {
+					final String fieldName = field.getName();
+					final Annotation[] fieldAnnotations = field.getAnnotations();
+
+					if (fieldAnnotations.length < 1) {
+						// LUKETODO:  which Exception should we throw here?
+						throw new ConfigurationException(String.format(
+								"%sNo annotations for field: %s for method: %s",
+								Msg.code(126362643), fieldName, theMethod.getName()));
+					}
+
+					if (fieldAnnotations.length > 1) {
+						// LUKETODO:  error
+						// LUKETODO:  which Exception should we throw here?
+						throw new ConfigurationException(String.format(
+								"%sMore than one annotation for field: %s for method: %s",
+								Msg.code(195614846), fieldName, theMethod.getName()));
+					}
+
+					final Annotation fieldAnnotation = fieldAnnotations[0];
+
+					if (fieldAnnotation instanceof IdParam) {
+						return new OperationIdParamDetails(null, (IdParam) fieldAnnotation, paramIndex, theMethod);
+					}
+
+					final boolean isRi = theContext.getVersion().getVersion().isRi();
+					// LUKETODO: usesHapiId
+
+					paramIndex++;
+				}
+			}
+		}
+
+		return new OperationIdParamDetails(null, null, null, theMethod);
 	}
 
 	public static class ReturnType {
@@ -510,22 +589,28 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		@Nullable
 		private final IdParam myIdParam;
 
+		// LUKETODO:  can this ever be null?
 		@Nullable
 		private final Integer myIdParamIndex;
 
+		private final Method myMethod;
+
+		// LUKETODO:  add a NOTHING factory method
 		public OperationIdParamDetails(
-				@Nullable IIdType myIdType, @Nullable IdParam myIdParam, @Nullable Integer myIdParamIndex) {
-			this.myIdType = myIdType;
-			this.myIdParam = myIdParam;
-			this.myIdParamIndex = myIdParamIndex;
+				@Nullable IIdType theIdType,
+				@Nullable IdParam theIdParam,
+				@Nullable Integer theIdParamIndex,
+				Method theMethod) {
+			myIdType = theIdType;
+			myIdParam = theIdParam;
+			myIdParamIndex = theIdParamIndex;
+			myMethod = theMethod;
 		}
 
-		public boolean hasIdParamAnnotationAndIdTypeParamAtSameIndex() {
-			return false;
-		}
+		public void assigneMethodParamsIfApplicable() {}
 
-		public void assignOptionalIfIdParamPresent(Consumer<Boolean> theConsumer) {
-			Optional.ofNullable(myIdParam).ifPresent(nonNull -> theConsumer.accept(nonNull.optional()));
+		public boolean setOrReturnPreviousValue(boolean thePreviousValue) {
+			return Optional.ofNullable(myIdParam).map(IdParam::optional).orElse(thePreviousValue);
 		}
 	}
 }
