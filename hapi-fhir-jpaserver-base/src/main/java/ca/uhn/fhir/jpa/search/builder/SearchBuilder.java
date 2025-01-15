@@ -2461,7 +2461,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					ParamPrefixEnum prefix = paramWithPrefix.getPrefix();
 					// A parameter with the 'eq' prefix is the only accepted prefix when combo searching since
 					// birthdate=2025-01-01 and birthdate=eq2025-01-01 are equivalent searches.
-					if (prefix != null && prefix != EQUAL ) {
+					if (prefix != null && prefix != EQUAL) {
 						String message = "Search with params " + theComboParamNames
 								+ " is not a candidate for combo searching - Parameter '" + nextParamName
 								+ "' has prefix: '"
