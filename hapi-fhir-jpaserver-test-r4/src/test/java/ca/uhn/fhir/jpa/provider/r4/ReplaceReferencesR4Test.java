@@ -45,6 +45,10 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
+		// keep the version on Provenance.target fields to verify that Provenance resources were saved
+		// with versioned target references
+		myFhirContext.getParserOptions()
+			.setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		myTestHelper.beforeEach();
@@ -81,6 +85,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		// Check that the linked resources were updated
 
 		myTestHelper.assertAllReferencesUpdated();
+		myTestHelper.assertReplaceReferencesProvenance();
 	}
 
 	private JobInstance awaitJobCompletion(Task task) {
@@ -157,6 +162,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		// Check that the linked resources were updated
 
 		myTestHelper.assertAllReferencesUpdated();
+		myTestHelper.assertReplaceReferencesProvenance();
 	}
 
 	// TODO ED we should add some tests for the invalid request error cases (and assert 4xx status code)
