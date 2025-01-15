@@ -4,9 +4,11 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
@@ -19,6 +21,7 @@ import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -37,6 +40,7 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -197,6 +201,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -221,6 +226,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	@Autowired
 	private ISearchDao mySearchEntityDao;
+
+	@Autowired
+	private IInterceptorService myInterceptorService;
 
 	@Override
 	@AfterEach
@@ -264,7 +272,34 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
 
+	@Test
+	public void testSearchParameterValidation() {
+		// setup
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.getUserData().put(SearchParamValidatingInterceptor.SKIP_VALIDATION, true);
 
+		SearchParameter sp = new SearchParameter();
+		sp.setUrl("http://example.com/name");
+		sp.setId("name");
+		sp.setCode("name");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		sp.addBase("Patient");
+		sp.setExpression("Patient.name");
+
+		// test
+		DaoMethodOutcome outcome = mySearchParameterDao.update(sp, requestDetails);
+
+		myCaptureQueriesListener.clear();
+		sp.setId(outcome.getId());
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.update(sp, requestDetails);
+
+		// verify
+		// TODO - investigate better 'validation' options
+		myCaptureQueriesListener.logAllQueries();
+		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
+	}
 
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
