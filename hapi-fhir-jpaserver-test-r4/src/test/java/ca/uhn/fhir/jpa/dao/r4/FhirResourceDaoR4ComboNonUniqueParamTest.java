@@ -6,11 +6,9 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
-import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -39,7 +37,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -910,61 +907,35 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		}
 
 		/**
-		 * Given:
-		 * - a combo search index parameters combining Patient.gender and Patient.birthdate;
-		 * - two search invocations with query parameters:
-		 *
-		 * Patient?birthdate=2025-01-01&gender=male
-		 * Patient?birthdate=eq2025-01-01&gender=male
-		 *
-		 * The above searches will provide the same result bundle with the execution time of the second one being
-		 * significantly longer when invoked against a large dataset. The difference is in the 'eq' prefix or modifier
-		 * added in the second invocation causing the search layer to skip inspection of combo search indexes.
-		 *
-		 * To retain the optimized searching functionalities provided by combo search index parameters, it is crucial
-		 * that the un-modified aspect of a date query string (i.e. birthdate=2025-01-01) gets preserved when marshalled
-		 * into objects suitable for submission to the search layer.
-		 *
-		 * The purpose of this test is to ensure the necessity described above.  It marshals a date query string into a
-		 * DateRangeParam object, submits the param object to the search layer and asserts that combo search indexes
-		 * are used to generate the result bundle when the date query string is un-modified.
+		 * This test asserts that a date query string prefixed with 'eq' still qualifies the query for combo indexes
+		 * inspection. This approach is preferred over disqualifying the query as it would be the case with any other
+		 * prefixes (gt, le, lt, etc) since date=2025-01-01 and date=eq2025-01-01 are equivalent searches.
 		 */
 		@ParameterizedTest
-		@CsvSource(value = {
-			"2025-01-01, true",
-			"eq2025-01-01, false"
-		})
-		public void testSearchWithDateQueryString_whenModifierEqualIsMissing_willUseComboSearchIndexes(String theDateQueryParameter, boolean theShouldUseComboIndex){
+		@ValueSource(strings = {
+			"2025-01-01",
+			"eq2025-01-01"})
+		public void testSearchWithDateQueryString_whenModifierEqualIsPresent_willUseComboSearchIndexes(String theDateQueryParameter){
 			// given
-			createBirthdateAndGenderSps(false);
-			IIdType patientId = createPatient(withBirthdate("2025-01-01"), withGender("male"));
+			IIdType id1 = createObservation("2025-01-01");
+
+			SearchParameterMap params = SearchParameterMap
+				.newSynchronous()
+				.add("note-text", new StringParam("Hello"))
+				.add("date", new DateParam(theDateQueryParameter));
 
 			logAllNonUniqueIndexes();
 			logAllDateIndexes();
 
-			List<QualifiedParamList> tokens = new ArrayList<>();
-			tokens.add(QualifiedParamList.singleton(null, theDateQueryParameter));
-			DateRangeParam dateRangeParam = new DateRangeParam();
-			dateRangeParam.setValuesAsQueryTokens(myFhirContext, Patient.SP_BIRTHDATE, tokens);
-
 			myCaptureQueriesListener.clear();
-			SearchParameterMap sp = new SearchParameterMap();
-			sp.setLoadSynchronous(true);
-			sp.add(Patient.SP_GENDER, new TokenParam(null, "male"));
-			sp.add(Patient.SP_BIRTHDATE, dateRangeParam);
 
 			// when
-			IBundleProvider results = myPatientDao.search(sp, mySrd);
-
+			IBundleProvider results = myObservationDao.search(params, mySrd);
 			// then
-			if(theShouldUseComboIndex){
-				assertComboIndexUsed();
-			} else {
-				assertComboIndexNotUsed();
-			}
+			assertComboIndexUsed();
 
 			List<String> actual = toUnqualifiedVersionlessIdValues(results);
-			assertThat(actual).contains(patientId.toUnqualifiedVersionless().getValue());
+			assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
 		}
 
 		@ParameterizedTest
