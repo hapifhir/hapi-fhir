@@ -221,7 +221,8 @@ public class OperationEmbeddedParameter implements IParameter {
 						myContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
 				myConverter = new OperationParamConverter();
 			} else {
-				throw new ConfigurationException(Msg.code(361) + "Invalid type for @OperationParam on method "
+				// LUKETODO:  claim new code
+				throw new ConfigurationException(Msg.code(999991) + "Invalid type for @OperationParam on method "
 						+ theMethod + ": " + myParameterType.getName());
 			}
 		}
@@ -239,7 +240,8 @@ public class OperationEmbeddedParameter implements IParameter {
 			FhirVersionEnum elementVersion = FhirVersionEnum.determineVersionForType(theParameterType);
 			if (elementVersion != null) {
 				if (elementVersion != theContext.getVersion().getVersion()) {
-					throw new ConfigurationException(Msg.code(360) + "Incorrect use of type "
+					// LUKETODO:  claim new code
+					throw new ConfigurationException(Msg.code(9999992) + "Incorrect use of type "
 							+ theParameterType.getSimpleName() + " as " + theUseDescription
 							+ " type for method when theContext is for version "
 							+ theContext.getVersion().getVersion().name() + " in method: " + theMethod.toString());
@@ -254,7 +256,8 @@ public class OperationEmbeddedParameter implements IParameter {
 	}
 
 	private void throwWrongParamType(Object nextValue) {
-		throw new InvalidRequestException(Msg.code(362) + "Request has parameter " + myName + " of type "
+		// LUKETODO:  claim new code
+		throw new InvalidRequestException(Msg.code(9999993) + "Request has parameter " + myName + " of type "
 				+ nextValue.getClass().getSimpleName() + " but method expects type " + myParameterType.getSimpleName());
 	}
 
@@ -385,7 +388,8 @@ public class OperationEmbeddedParameter implements IParameter {
 							theRequest.getServer().getFhirContext().getLocalizer();
 					String msg = localizer.getMessage(
 							OperationEmbeddedParameter.class, "urlParamNotPrimitive", myOperationName, myName);
-					throw new MethodNotAllowedException(Msg.code(363) + msg, RequestTypeEnum.POST);
+					// LUKETODO:  claim new code
+					throw new MethodNotAllowedException(Msg.code(99999993) + msg, RequestTypeEnum.POST);
 				}
 			}
 		}
@@ -537,6 +541,7 @@ public class OperationEmbeddedParameter implements IParameter {
 	}
 
 	public static void throwInvalidMode(String paramValues) {
-		throw new InvalidRequestException(Msg.code(364) + "Invalid mode value: \"" + paramValues + "\"");
+		// LUKETODO:  claim new code
+		throw new InvalidRequestException(Msg.code(99999994) + "Invalid mode value: \"" + paramValues + "\"");
 	}
 }

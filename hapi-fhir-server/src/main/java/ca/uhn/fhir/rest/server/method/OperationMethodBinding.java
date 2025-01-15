@@ -67,7 +67,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	public static final String WILDCARD_NAME = "$" + Operation.NAME_MATCH_ALL;
 	private final boolean myIdempotent;
 	private final boolean myDeleteEnabled;
-	//	private final Integer myIdParamIndex;
 	private final OperationIdParamDetails myOperationIdParamDetails;
 	private final String myName;
 	private final RestOperationTypeEnum myOtherOperationType;
@@ -404,17 +403,21 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					Msg.code(428) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 		}
 
-		if (myOperationIdParamDetails.myIdParamIndex != null) {
-			theMethodParams[myOperationIdParamDetails.myIdParamIndex] = theRequest.getId();
-		}
+		final Object response = invokeEitherParamsOrEmbeddedParams(theRequest, theMethodParams);
 
-		Object response = invokeServerMethod(theRequest, theMethodParams);
 		if (myManualResponseMode) {
 			return null;
 		}
 
-		IBundleProvider retVal = toResourceList(response);
-		return retVal;
+		return toResourceList(response);
+	}
+
+	private Object invokeEitherParamsOrEmbeddedParams(RequestDetails theRequest, Object[] theMethodParams) {
+		if (myOperationIdParamDetails.myIdParamIndex != null) {
+			theMethodParams[myOperationIdParamDetails.myIdParamIndex] = theRequest.getId();
+		}
+
+		return invokeServerMethod(theRequest, theMethodParams);
 	}
 
 	public boolean isCanOperateAtInstanceLevel() {

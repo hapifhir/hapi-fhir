@@ -129,7 +129,7 @@ public class MethodUtil {
 				// LUKETODO:  error
 				throw new ConfigurationException(String.format(
 						"%sOnly one OperationEmbeddedType is supported for now for method: %s",
-						Msg.code(99999), theMethod.getName()));
+						Msg.code(9999927), theMethod.getName()));
 			}
 
 			// LUKETODO:  handle multiple RequestDetails with an error
@@ -151,14 +151,14 @@ public class MethodUtil {
 						if (fieldAnnotations.length < 1) {
 							throw new ConfigurationException(String.format(
 									"%sNo annotations for field: %s for method: %s",
-									Msg.code(99999), fieldName, theMethod.getName()));
+									Msg.code(9999926), fieldName, theMethod.getName()));
 						}
 
 						if (fieldAnnotations.length > 1) {
 							// LUKETODO:  error
 							throw new ConfigurationException(String.format(
 									"%sMore than one annotation for field: %s for method: %s",
-									Msg.code(99999), fieldName, theMethod.getName()));
+									Msg.code(999998), fieldName, theMethod.getName()));
 						}
 
 						final Set<String> annotationClassNames = Arrays.stream(fieldAnnotations)
@@ -210,7 +210,7 @@ public class MethodUtil {
 							parameters.add(operationParameter);
 						} else {
 							throw new ConfigurationException(
-									Msg.code(99999) + "Unsupported param fieldType: " + fieldAnnotation);
+									Msg.code(999995) + "Unsupported param fieldType: " + fieldAnnotation);
 						}
 					}
 				}
