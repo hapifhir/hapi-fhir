@@ -135,7 +135,6 @@ public class MethodUtil {
 			// LUKETODO:  handle multiple RequestDetails with an error
 
 			for (Class<?> parameterType : parameterTypes) {
-				final IParameter param;
 				// If either the first or second parameter is a RequestDetails, handle it
 				if (parameterType.equals(RequestDetails.class) || parameterType.equals(ServletRequestDetails.class)) {
 					parameters.add(new RequestDetailsParameter());

@@ -102,33 +102,4 @@ public class MeasureOperationsProvider {
 						theParams.getProductLine(),
 						theParams.getPractitioner());
 	}
-
-	//	@Operation(name = "$fooBar", manualResponse = true, idempotent = true)
-	//	OperationOutcome fooBar(FooBarParams theParams) {
-	//		ourLog.info("fooBar params: {}", theParams);
-	//		return new OperationOutcome();
-	//	}
-
-	@Operation(name = "$fooBar", manualResponse = true, idempotent = true)
-	// LUKETODO:  consider defining a new @OperationEmbeddedParam
-	public void fooBar(@OperationParam(name = "params") FooBarParams theParams) {
-		ourLog.info("1234: fooBar params: {}", theParams);
-	}
-	//
-	//	@Operation(name = "$returnsBundle", manualResponse = true, idempotent = true)
-	//	public Bundle returnsBundle(@OperationParam(name = "params") ReturnsBundleParams theParams) {
-	//		final Bundle bundle = new Bundle();
-	//		bundle.setIdentifier(new Identifier().setValue("aValue"));
-	//
-	//		final String bundleString =
-	// FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
-	//
-	//		ourLog.info("1234: returnsBundle params: {}, bundle:{}", theParams, bundleString);
-	//
-	//		return bundle;
-	//	}
-
-	void example() {
-		fooBar(new FooBarParams(null, null));
-	}
 }

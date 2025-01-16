@@ -636,4 +636,9 @@ public class ParametersUtil {
 		}
 		return retVal;
 	}
+
+	public static boolean isOneOfEligibleTypes(Class<?> theTypeToCheck, Class<?>... theEligibleTypes) {
+		return Arrays.stream(theEligibleTypes)
+			.anyMatch(eligibleType -> eligibleType == theTypeToCheck);
+	}
 }
