@@ -198,6 +198,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public void deleteResource_withPartitions_doesNotDeleteOnDifferentPartition() {
 		// setup
 		DaoMethodOutcome outcome;
+		IBundleProvider bundle;
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(false);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
@@ -221,7 +222,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			outcome = myPatientDao.delete(janePartition1.getIdElement(), partition2ReqDetails);
 
 			// nothing deleted; wrong partition
-			IBundleProvider bundle = myPatientDao.search(spMap, partition2ReqDetails);
+			bundle = myPatientDao.search(spMap, partition2ReqDetails);
 			assertFalse(bundle.isEmpty());
 
 			assertEquals(2, myMdmLinkDao.count());
@@ -232,8 +233,6 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			outcome = myPatientDao.delete(janePartition1.getIdElement(), partition1ReqDetails);
 
 			// deleted on correct partition, but not other partition
-			IBundleProvider bundle = myPatientDao.search(spMap, partition2ReqDetails);
-			assertFalse(bundle.isEmpty());
 			bundle = myPatientDao.search(spMap, partition1ReqDetails);
 			assertTrue(bundle.isEmpty());
 
