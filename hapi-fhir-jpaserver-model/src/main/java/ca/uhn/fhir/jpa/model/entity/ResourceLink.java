@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -69,6 +68,7 @@ public class ResourceLink extends BaseResourceIndex {
 	private static final long serialVersionUID = 1L;
 	public static final String TARGET_RES_PARTITION_ID = "TARGET_RES_PARTITION_ID";
 	public static final String TARGET_RESOURCE_ID = "TARGET_RESOURCE_ID";
+	public static final String FK_RESLINK_TARGET = "FK_RESLINK_TARGET";
 
 	@GenericGenerator(name = "SEQ_RESLINK_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESLINK_ID")
@@ -124,7 +124,13 @@ public class ResourceLink extends BaseResourceIndex {
 						insertable = false,
 						updatable = false),
 			},
-			foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+			/*
+			 * TODO: We need to drop this constraint because it affects performance in pretty
+			 *  terrible ways on a lot of platforms. But a Hibernate bug present in Hibernate 6.6.4
+			 *  makes it impossible.
+			 *  See: https://hibernate.atlassian.net/browse/HHH-19046
+			 */
+			foreignKey = @ForeignKey(name = FK_RESLINK_TARGET))
 	private ResourceTable myTargetResource;
 
 	@Transient
