@@ -998,7 +998,7 @@
 		<apache_karaf_version>4.2.5</apache_karaf_version>
 		<aries_spifly_version>1.2</aries_spifly_version>
 		<caffeine_version>3.1.8</caffeine_version>
-		<checkstyle_version>10.17.0</checkstyle_version>
+		<checkstyle_version>10.21.1</checkstyle_version>
 		<maven_changes_version>2.12.1</maven_changes_version>
 		<commons_codec_version>1.15</commons_codec_version>
 		<commons_compress_version>1.26.0</commons_compress_version>
@@ -1113,7 +1113,7 @@
 		<maven-assembly-plugin-version>3.7.1</maven-assembly-plugin-version>
 		<maven-license-plugin-version>2.5.0</maven-license-plugin-version>
 		<maven-enforcer-plugin-version>3.5.0</maven-enforcer-plugin-version>
-		<maven-checkstyle-version>3.4.0</maven-checkstyle-version>
+		<maven-checkstyle-version>3.6.0</maven-checkstyle-version>
 
 	</properties>
 
