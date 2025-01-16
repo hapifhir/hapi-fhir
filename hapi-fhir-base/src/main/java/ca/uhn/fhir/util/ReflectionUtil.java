@@ -21,10 +21,12 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -36,10 +38,12 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 // LUKETODO:  consider enhancing this class with operation params stuff instead
 public class ReflectionUtil {
@@ -290,5 +294,33 @@ public class ReflectionUtil {
 		} catch (ClassNotFoundException theE) {
 			return false;
 		}
+	}
+
+	// LUKETODO:  see if you can get rid of this:
+	public static boolean hasAnyMethodParamsWithClassesOfAnnotation(Method theMethod, Class<? extends Annotation> theAnnotationClass) {
+		// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		return Arrays.stream(theMethod.getParameterTypes())
+			.anyMatch(paramType -> paramType.isAnnotationPresent(theAnnotationClass));
+	}
+
+	// LUKETODO:  use this whenever possible
+	public static boolean hasAnyMethodParametersContainingFieldsWithAnnotation(Method theMethod, Class<? extends Annotation> theAnnotationClass) {
+		return Arrays.stream(theMethod.getParameterTypes())
+			.map(Class::getFields)
+			.map(Arrays::asList)
+			.flatMap(Collection::stream)
+			.anyMatch(field -> field.isAnnotationPresent(theAnnotationClass));
+	}
+
+	//
+	public static List<Class<?>> getMethodParamsWithClassesWithFieldsWithAnnotation(Method theMethod, Class<? extends Annotation> theAnnotationClass) {
+		return Arrays.stream(theMethod.getParameterTypes())
+			.filter(paramType -> hasFieldsWithAnnotation(paramType, theAnnotationClass))
+			.collect(Collectors.toUnmodifiableList());
+	}
+
+	private static boolean hasFieldsWithAnnotation(Class<?> paramType, Class<? extends Annotation> theAnnotationClass) {
+		return Arrays.stream(paramType.getDeclaredFields())
+			.anyMatch(field -> field.isAnnotationPresent(theAnnotationClass));
 	}
 }

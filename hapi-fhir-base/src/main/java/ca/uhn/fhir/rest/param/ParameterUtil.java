@@ -123,15 +123,19 @@ public class ParameterUtil {
 			if (IIdType.class.equals(paramType)) {
 				return index;
 			}
-			boolean isRi = theContext.getVersion().getVersion().isRi();
-			boolean usesHapiId = IdDt.class.equals(paramType);
-			if (isRi == usesHapiId) {
-				throw new ConfigurationException(Msg.code(1936)
-						+ "Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: "
-						+ theMethod.toString());
-			}
+			validateIdType(theMethod, theContext, paramType);
 		}
 		return index;
+	}
+
+	public static void validateIdType(Method theMethod, FhirContext theContext, Class<?> paramType) {
+		boolean isRi = theContext.getVersion().getVersion().isRi();
+		boolean usesHapiId = IdDt.class.equals(paramType);
+		if (isRi == usesHapiId) {
+			throw new ConfigurationException(Msg.code(1936)
+					+ "Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: "
+					+ theMethod.toString());
+		}
 	}
 
 	@Nullable

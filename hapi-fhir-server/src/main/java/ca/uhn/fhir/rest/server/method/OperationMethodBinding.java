@@ -26,7 +26,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -35,13 +35,13 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.ReflectionUtil;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -54,7 +54,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -398,26 +397,18 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					Msg.code(428) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 		}
 
+		ourLog.info("1234: invoking method: {} with params: {}", theRequest.getOperation(), theMethodParams);
+
 		final Object response =
-				invokeEitherParamsOrEmbeddedParams(theRequest, theMethodParams, myOperationIdParamDetails);
+			invokeServerMethod(
+				theRequest,
+				myOperationIdParamDetails.alterMethodParamsIfNeeded(theRequest, theMethodParams));
 
 		if (myManualResponseMode) {
 			return null;
 		}
 
 		return toResourceList(response);
-	}
-
-	private Object invokeEitherParamsOrEmbeddedParams(
-			RequestDetails theRequest, Object[] theMethodParams, OperationIdParamDetails theOperationIdParamDetails) {
-		ourLog.info("1234: invoking method: {} with params: {}", theRequest.getOperation(), theMethodParams);
-
-		// LUKETODO:  this is gross:  fix this:
-		if (this.myOperationIdParamDetails.myIdParamIndex != null) {
-			theMethodParams[this.myOperationIdParamDetails.myIdParamIndex] = theRequest.getId();
-		}
-
-		return invokeServerMethod(theRequest, theMethodParams);
 	}
 
 	public boolean isCanOperateAtInstanceLevel() {
@@ -457,11 +448,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	private OperationIdParamDetails findIdParameterDetails(Method theMethod, FhirContext theContext) {
-		final Class<?>[] parameterTypes = theMethod.getParameterTypes();
-
-		final List<Class<?>> operationEmbeddedTypes = Arrays.stream(parameterTypes)
-				.filter(paramType -> paramType.isAnnotationPresent(OperationEmbeddedType.class))
-				.collect(Collectors.toUnmodifiableList());
+		final List<Class<?>> operationEmbeddedTypes =
+			ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
+				theMethod,
+				OperationEmbeddedParam.class);
 
 		if (!operationEmbeddedTypes.isEmpty()) {
 			return findIdParamIndexForOperationEmbeddedType(theMethod, operationEmbeddedTypes, theContext);
@@ -485,25 +475,30 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 							(IdParam) nextParameterAnnotation, paramAnnotationIndex);
 					}
 				}
-				return new OperationIdParamDetails(null, paramAnnotationIndex);
 			}
+
+			return new OperationIdParamDetails(null, paramAnnotationIndex);
 		}
 
-		return new OperationIdParamDetails(null, paramAnnotationIndex);
+		return OperationIdParamDetails.EMPTY;
 	}
 
 	@Nonnull
 	private OperationIdParamDetails findIdParamIndexForOperationEmbeddedType(
 			Method theMethod, List<Class<?>> theOperationEmbeddedTypes, FhirContext theContext) {
-		for (Class<?> operationEmbeddedTypes : theOperationEmbeddedTypes) {
-			if (operationEmbeddedTypes.equals(RequestDetails.class)
-					|| operationEmbeddedTypes.equals(ServletRequestDetails.class)) {
+		for (Class<?> operationEmbeddedType : theOperationEmbeddedTypes) {
+			if (ParametersUtil.isOneOfEligibleTypes(
+					operationEmbeddedType,
+					RequestDetails.class,
+					SystemRequestDetails.class)) {
 				// skip
 			} else {
-				final Field[] fields = operationEmbeddedTypes.getDeclaredFields();
+				final Field[] fields = operationEmbeddedType.getDeclaredFields();
 
 				int paramIndex = 0;
 				for (Field field : fields) {
+					ParameterUtil.validateIdType(theMethod, theContext, field.getType());
+
 					final String fieldName = field.getName();
 					final Annotation[] fieldAnnotations = field.getAnnotations();
 
@@ -527,9 +522,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					if (fieldAnnotation instanceof IdParam) {
 						return new OperationIdParamDetails((IdParam) fieldAnnotation, paramIndex);
 					}
-
-					final boolean isRi = theContext.getVersion().getVersion().isRi();
-					// LUKETODO: usesHapiId
 
 					paramIndex++;
 				}

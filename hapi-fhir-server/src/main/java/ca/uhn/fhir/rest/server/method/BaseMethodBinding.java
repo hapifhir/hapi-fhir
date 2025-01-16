@@ -34,7 +34,6 @@ import ca.uhn.fhir.rest.annotation.GraphQL;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -46,7 +45,6 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.BundleProviders;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -58,23 +56,16 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import static java.util.function.Predicate.not;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseMethodBinding {
@@ -119,7 +110,6 @@ public abstract class BaseMethodBinding {
 		return myQueryParameters;
 	}
 
-	// LUKETODO: Alternatively, do the mapping here?
 	protected Object[] createMethodParams(RequestDetails theRequest) {
 		ourLog.info("1234: Creating parameters for method {}, and requestDetails: {}", myMethod.getName(), theRequest);
 		Object[] params = new Object[getParameters().size()];
@@ -276,126 +266,7 @@ public abstract class BaseMethodBinding {
 			// class, bind to the fields, then invoke.
 			final Method method = getMethod();
 
-			// LUKETODO:  split this up into private methods
-			final Class<?>[] parameterTypes = method.getParameterTypes();
-
-			ourLog.info(
-					"1234: invoking method for: {} and params: {} and parameterTypes: {}",
-					method.getName(),
-					theMethodParams,
-					Arrays.toString(parameterTypes));
-
-			if (Arrays.stream(parameterTypes)
-					.map(Class::getAnnotations)
-					.map(Arrays::asList)
-					.flatMap(Collection::stream)
-					.anyMatch(OperationEmbeddedType.class::isInstance)) {
-
-				for (Class<?> parameterType : parameterTypes) {
-					ourLog.info("1234: invoking parameterType: {} and method: {}", parameterType, method.getName());
-					final Annotation[] parameterTypeAnnotations = parameterType.getAnnotations();
-
-					final boolean hasOperationEmbeddedTypeAnnotation =
-							Arrays.stream(parameterTypeAnnotations).anyMatch(OperationEmbeddedType.class::isInstance);
-
-					if (hasOperationEmbeddedTypeAnnotation) {
-						final Constructor<?>[] constructors = parameterType.getConstructors();
-
-						// LUKETODO:  what if there's a noarg constructor and all we have is setters?
-						// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-						if (constructors.length > 0) {
-							// LUKETODO:  if there are multiple constructors, cycle through them until you find one that
-							// matches the params list
-							final Constructor<?> constructor = constructors[0];
-
-							final Parameter[] constructorParameters = constructor.getParameters();
-
-							// LUKETODO:  mandate an immutable class with a constructor to set params
-							if (constructorParameters.length == 0) {
-								throw new InternalErrorException(
-										Msg.code(234198927) + "No constructor that takes parameters!!!");
-							} else {
-								final Object[] methodParamsWithoutRequestDetails =
-										removeRequestDetails(theMethodParams);
-								// LUKETODO:  else?
-								if (methodParamsWithoutRequestDetails.length != constructorParameters.length) {
-									// LUKETODO:  we blow up here because RequestDetails is the EXTRA PARAMETER!
-									throw new InternalErrorException(Msg.code(234198921) + "1234: bad params");
-								}
-
-								final int[] requestDetailsIndexes = IntStream.range(0, theMethodParams.length)
-										.filter(index -> theMethodParams[index] instanceof RequestDetails)
-										.toArray();
-
-								if (requestDetailsIndexes.length > 1) {
-									throw new InternalErrorException(Msg.code(562462)
-											+ "1234: cannot define a request with more than one RequestDetails");
-								}
-
-								final Optional<Integer> optArgPositionRequestDetails = requestDetailsIndexes.length > 0
-										? Optional.of(requestDetailsIndexes[0])
-										: Optional.empty();
-
-								for (int index = 0; index < methodParamsWithoutRequestDetails.length; index++) {
-									final Object methodParamAtIndex = methodParamsWithoutRequestDetails[index];
-									if (methodParamAtIndex == null) {
-										// argument is null, so we can't the type, so skip it:
-										continue;
-									}
-									final Class<?> methodParamClassAtIndex = methodParamAtIndex.getClass();
-									final Class<?> parameterClassAtIndex = constructorParameters[index].getType();
-
-									ourLog.info(
-											"1234: methodParamClassAtIndex: {}, parameterClassAtIndex: {}",
-											methodParamClassAtIndex,
-											parameterClassAtIndex);
-
-									// LUKETODO:  fix this this is gross
-									if (Collection.class.isAssignableFrom(methodParamClassAtIndex)
-											|| Collection.class.isAssignableFrom(parameterClassAtIndex)) {
-										// ex:  List and ArrayList
-										if (methodParamClassAtIndex.isAssignableFrom(parameterClassAtIndex)) {
-											throw new InternalErrorException(String.format(
-													"%s1234: Mismatch between methodParamClassAtIndex: %s and parameterClassAtIndex: %s",
-													Msg.code(236146124),
-													methodParamClassAtIndex,
-													parameterClassAtIndex));
-										}
-									} else if (methodParamClassAtIndex != parameterClassAtIndex) {
-										throw new InternalErrorException(String.format(
-												"%s1234: Mismatch between methodParamClassAtIndex: %s and parameterClassAtIndex: %s",
-												Msg.code(236146125), methodParamClassAtIndex, parameterClassAtIndex));
-									}
-								}
-
-								final Object operationEmbeddedType =
-										constructor.newInstance(methodParamsWithoutRequestDetails);
-
-								ourLog.info(
-										"1234: invoking method with operationEmbeddedType: {}", operationEmbeddedType);
-								// LUKETODO:  design for future use factory methods
-								// LUKETODO:  how do I know where to put the RequestDetails????
-								if (optArgPositionRequestDetails.isPresent()) {
-									final Integer requestDetailsIndex = optArgPositionRequestDetails.get();
-
-									// LUKETODO:  review this:  this is tacky:
-									if (requestDetailsIndex == 0) {
-										return method.invoke(getProvider(), theMethodParams[0], operationEmbeddedType);
-									}
-
-									return method.invoke(
-											getProvider(), operationEmbeddedType, theMethodParams[requestDetailsIndex]);
-								}
-								return method.invoke(getProvider(), operationEmbeddedType);
-							}
-						}
-					}
-				}
-			}
-
-			// LUKETODO:  here we fail with: java.lang.IllegalArgumentException: wrong number of arguments
-			return method.invoke(getProvider(), theMethodParams);
+			return method.invoke(getProvider(), BaseMethodBindingMethodParameterBuilder.buildMethodParams(method, theMethodParams));
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
@@ -409,11 +280,6 @@ public abstract class BaseMethodBinding {
 		}
 	}
 
-	private static Object[] removeRequestDetails(Object[] theMethodParams) {
-		return Arrays.stream(theMethodParams)
-				.filter(not(RequestDetails.class::isInstance).and(not(SystemRequestDetails.class::isInstance)))
-				.toArray();
-	}
 
 	/**
 	 * Does this method have a parameter annotated with {@link ConditionalParamBinder}. Note that many operations don't actually support this paramter, so this will only return true occasionally.
