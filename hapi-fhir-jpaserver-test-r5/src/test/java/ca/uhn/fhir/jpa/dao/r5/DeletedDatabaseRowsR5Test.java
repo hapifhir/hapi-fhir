@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -112,48 +113,60 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test{
 	}
 
 	/**
-	 * There is no FK constraint on {@link ResourceLink#getTargetResource()} so this can be
-	 * nulled out even if a value is present. This is a test to make sure we behave if the
-	 * target row is deleted.
+	 * We don't use a FK constraint on {@link ResourceLink#getTargetResource()} for performance
+	 * reasons so this can be nulled out even if a value is present. This is a test to make sure
+	 * we behave if the target row is deleted.
+	 * We actually do keep this constraint present on H2 in order to make sure that unit tests
+	 * catch any issues which would accidentally try to drop data. So we need to temporarily
+	 * remove that constraint in order for the test to work.
 	 */
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testReferenceWithTargetExpunged(boolean theSynchronous) {
-		// Test
-		Organization org = new Organization();
-		org.setId("Organization/O");
-		JpaPid orgPid = IDao.RESOURCE_PID.get(myOrganizationDao.update(org, mySrd).getResource());
-
-		Patient patient = new Patient();
-		patient.setId("Patient/P");
-		patient.setManagingOrganization(new Reference("Organization/O"));
-		myPatientDao.update(patient, mySrd);
-
-		// Delete the Organization resource
+		// Setup
 		runInTransaction(()->{
-			List<ResourceHistoryTable> historyEntities = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(orgPid.toFk());
-			myResourceHistoryTableDao.deleteAll(historyEntities);
+			myEntityManager.createNativeQuery("alter table HFJ_RES_LINK drop constraint FK_RESLINK_TARGET").executeUpdate();
 		});
+		try {
+			Organization org = new Organization();
+			org.setId("Organization/O");
+			JpaPid orgPid = IDao.RESOURCE_PID.get(myOrganizationDao.update(org, mySrd).getResource());
 
-		logAllResources();
-		logAllResourceVersions();
+			Patient patient = new Patient();
+			patient.setId("Patient/P");
+			patient.setManagingOrganization(new Reference("Organization/O"));
+			myPatientDao.update(patient, mySrd);
 
-		runInTransaction(()->{
-			myResourceTableDao.deleteByPid(orgPid);
-		});
+			// Delete the Organization resource
+			runInTransaction(() -> {
+				List<ResourceHistoryTable> historyEntities = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(orgPid.toFk());
+				myResourceHistoryTableDao.deleteAll(historyEntities);
+			});
+			runInTransaction(() -> {
+				myResourceTableDao.deleteByPid(orgPid);
+			});
 
-		// Make sure that the Org was deleted
-		assertThrows(ResourceNotFoundException.class, ()->myOrganizationDao.read(new IdType("Organization/O"), mySrd));
+			// Make sure that the Org was deleted
+			assertThrows(ResourceNotFoundException.class, () -> myOrganizationDao.read(new IdType("Organization/O"), mySrd));
 
-		// Test
-		SearchParameterMap params = new SearchParameterMap().addInclude(new Include("*"));
-		params.setLoadSynchronous(theSynchronous);
-		IBundleProvider result = myPatientDao.search(params, mySrd);
+			// Test
+			SearchParameterMap params = new SearchParameterMap().addInclude(new Include("*"));
+			params.setLoadSynchronous(theSynchronous);
+			IBundleProvider result = myPatientDao.search(params, mySrd);
 
-		// Verify
-		List<String> values = toUnqualifiedVersionlessIdValues(result);
-		assertThat(values).asList().containsExactly("Patient/P");
-
+			// Verify
+			List<String> values = toUnqualifiedVersionlessIdValues(result);
+			assertThat(values).asList().containsExactly("Patient/P");
+		} finally {
+			runInTransaction(() -> {
+				myResourceHistoryTableDao.deleteAll();
+				myResourceLinkDao.deleteAll();
+				myResourceIndexedSearchParamTokenDao.deleteAll();
+				myResourceTableDao.deleteAll();
+				// Restore the index we dropped at the start of the test
+				myEntityManager.createNativeQuery("alter table if exists HFJ_RES_LINK add constraint FK_RESLINK_TARGET foreign key (TARGET_RESOURCE_ID) references HFJ_RESOURCE").executeUpdate();
+			});
+		}
 	}
 
 }

@@ -113,6 +113,7 @@ public class GenerateDdlMojo extends AbstractMojo {
 		private String targetFileName;
 		private String prependFile;
 		private String appendFile;
+		private List<String> dropStatementsContainingRegex;
 
 		public Dialect() {
 			super();
@@ -122,6 +123,14 @@ public class GenerateDdlMojo extends AbstractMojo {
 			super();
 			setClassName(theClassName);
 			setTargetFileName(theTargetFileName);
+		}
+
+		public List<String> getDropStatementsContainingRegex() {
+			return dropStatementsContainingRegex;
+		}
+
+		public void setDropStatementsContainingRegex(List<String> theDropStatementsContainingRegex) {
+			dropStatementsContainingRegex = theDropStatementsContainingRegex;
 		}
 
 		public String getAppendFile() {
