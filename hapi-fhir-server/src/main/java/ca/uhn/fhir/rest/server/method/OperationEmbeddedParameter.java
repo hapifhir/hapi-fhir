@@ -26,7 +26,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -186,8 +185,6 @@ public class OperationEmbeddedParameter implements IParameter {
 				|| String.class.equals(myParameterType)
 				|| isSearchParam
 				|| ValidationModeEnum.class.equals(myParameterType);
-
-		final boolean isAnnotationPresent = myParameterType.isAnnotationPresent(OperationEmbeddedType.class);
 
 		/*
 		 * The parameter can be of type string for validation methods - This is a bit weird. See ValidateDstu2Test. We

@@ -27,7 +27,6 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -39,7 +38,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -150,39 +148,6 @@ public class ParameterUtil {
 			}
 			paramIndex++;
 		}
-		return null;
-	}
-
-	@Nullable
-	public static Integer findParamAnnotationIndexFromEmbedded(Method theMethod, Class<?> toFind) {
-		final Class<?>[] parameterTypes = theMethod.getParameterTypes();
-
-		// LUKETODO: be mindful if we get rid of OperationEmbeddedType
-		final long operationEmbeddedTypesCount = Arrays.stream(parameterTypes)
-				.filter(paramType -> paramType.isAnnotationPresent(OperationEmbeddedType.class))
-				.count();
-
-		if (operationEmbeddedTypesCount > 1) {
-			throw new ConfigurationException(String.format(
-					"%sMore than one parameter with OperationEmbeddedType for  method: %s",
-					Msg.code(99999), theMethod.getName()));
-		}
-
-		if (operationEmbeddedTypesCount == 0) {
-			return null;
-		}
-
-		int paramIndex = 0;
-		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
-			for (Annotation nextAnnotation : annotations) {
-				Class<? extends Annotation> class1 = nextAnnotation.annotationType();
-				if (toFind.isAssignableFrom(class1)) {
-					return paramIndex;
-				}
-			}
-			paramIndex++;
-		}
-
 		return null;
 	}
 

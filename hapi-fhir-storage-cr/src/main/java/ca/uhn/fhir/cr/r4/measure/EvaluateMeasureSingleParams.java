@@ -2,7 +2,6 @@ package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
@@ -10,7 +9,6 @@ import org.hl7.fhir.r4.model.Parameters;
 
 import java.util.StringJoiner;
 
-@OperationEmbeddedType
 public class EvaluateMeasureSingleParams {
 	@IdParam
 	private final IdType myId;

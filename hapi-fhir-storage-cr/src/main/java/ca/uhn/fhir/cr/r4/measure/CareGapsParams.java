@@ -1,14 +1,12 @@
 package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 
 import java.util.List;
 import java.util.StringJoiner;
 
-@OperationEmbeddedType
 public class CareGapsParams {
 	@OperationEmbeddedParam(name = "periodStart")
 	private final String myPeriodStart;

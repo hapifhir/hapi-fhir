@@ -33,6 +33,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.PARAMETER, ElementType.FIELD})
 // LUKETODO:  javadoc to make this clear that it's associated with an OperationEmbeddedParameter
+// LUKETODO:  get rid of a bunch of cruft like MAX_UNLIMITED
 public @interface OperationEmbeddedParam {
 
 	/**

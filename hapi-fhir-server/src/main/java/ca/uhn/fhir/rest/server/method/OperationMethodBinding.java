@@ -454,7 +454,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				OperationEmbeddedParam.class);
 
 		if (!operationEmbeddedTypes.isEmpty()) {
-			return findIdParamIndexForOperationEmbeddedType(theMethod, operationEmbeddedTypes, theContext);
+			return findIdParamIndexForTypeWithEmbeddedParams(theMethod, operationEmbeddedTypes, theContext);
 		}
 
 		return getIdParamAnnotationFromMethodParams(theMethod, theContext);
@@ -484,16 +484,16 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Nonnull
-	private OperationIdParamDetails findIdParamIndexForOperationEmbeddedType(
-			Method theMethod, List<Class<?>> theOperationEmbeddedTypes, FhirContext theContext) {
-		for (Class<?> operationEmbeddedType : theOperationEmbeddedTypes) {
+	private OperationIdParamDetails findIdParamIndexForTypeWithEmbeddedParams(
+		Method theMethod, List<Class<?>> theTypesWithEmbeddedParams, FhirContext theContext) {
+		for (Class<?> typeWithEmbeddedParams : theTypesWithEmbeddedParams) {
 			if (ParametersUtil.isOneOfEligibleTypes(
-					operationEmbeddedType,
+				typeWithEmbeddedParams,
 					RequestDetails.class,
 					SystemRequestDetails.class)) {
 				// skip
 			} else {
-				final Field[] fields = operationEmbeddedType.getDeclaredFields();
+				final Field[] fields = typeWithEmbeddedParams.getDeclaredFields();
 
 				int paramIndex = 0;
 				for (Field field : fields) {

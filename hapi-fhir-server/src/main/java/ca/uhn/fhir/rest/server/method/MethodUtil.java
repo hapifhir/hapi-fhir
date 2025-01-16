@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Offset;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Patch;
@@ -115,12 +114,13 @@ public class MethodUtil {
 		// LUKETODO:  one param per method parameter:  what happens if we expand this?
 
 		// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		final List<Class<?>> operationEmbeddedTypes = Arrays.stream(parameterTypes)
-				.filter(paramType -> paramType.isAnnotationPresent(OperationEmbeddedType.class))
-				.collect(Collectors.toUnmodifiableList());
+		final List<Class<?>> operationEmbeddedTypes =
+			ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
+				theMethod,
+				OperationEmbeddedParam.class);
 
 		if (!operationEmbeddedTypes.isEmpty()) {
-			ourLog.info("1234: isOperationEmbeddedType!!!!!!! method: {}", theMethod.getName());
+			ourLog.info("1234: has operationEmbeddedTypes  !!!!!!! method: {}", theMethod.getName());
 
 			// This is the @Operation parameter on the method itself (ex: evaluateMeasure)
 			final Operation op = theMethod.getAnnotation(Operation.class);
@@ -128,7 +128,7 @@ public class MethodUtil {
 			if (operationEmbeddedTypes.size() > 1) {
 				// LUKETODO:  error
 				throw new ConfigurationException(String.format(
-						"%sOnly one OperationEmbeddedType is supported for now for method: %s",
+						"%sOnly one type with embedded params is supported for now for method: %s",
 						Msg.code(9999927), theMethod.getName()));
 			}
 
@@ -166,12 +166,12 @@ public class MethodUtil {
 								.collect(Collectors.toUnmodifiableSet());
 
 						ourLog.info(
-								"1234: MethodUtil:  OperationEmbeddedType: fieldName: {}, class: {}, fieldAnnotations: {}",
+								"1234: MethodUtil:  TypeWithEmbeddedParams: fieldName: {}, class: {}, fieldAnnotations: {}",
 								fieldName,
 								fieldType.getName(),
 								annotationClassNames);
 
-						// This is the parameter on the field in question on the OperationEmbeddedType class:  ex
+						// This is the parameter on the field in question on the type with embedded params class:  ex
 						// myCount
 						final Annotation fieldAnnotation = fieldAnnotations[0];
 
@@ -479,6 +479,7 @@ public class MethodUtil {
 						param = new TransactionParameter(theContext);
 					} else if (nextAnnotation instanceof ConditionalUrlParam) {
 						param = new ConditionalParamBinder(((ConditionalUrlParam) nextAnnotation).supportsMultiple());
+						// LUKETODO: OperationEmbeddedParam:  at least for logging for now
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
 						if (op == null) {
@@ -594,7 +595,7 @@ public class MethodUtil {
 								+ "' has no recognized FHIR interface parameter nextParameterAnnotations. Don't know how to handle this parameter");
 			}
 
-			// LUKETODO:  if we call this with an @OperationEmbeddedType, we get an Exceptioon here
+			// LUKETODO:  if we call this with an type with embedded params, we get an Exceptioon here
 			// LUKETODO:  Or do we expand the paramters here, and then foreaach parameters.add() ???
 			//			ourLog.info("1234: param class: {}, method: {}", param.getClass().getCanonicalName(),
 			// theMethod.getName());
