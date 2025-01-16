@@ -51,6 +51,7 @@ public class MeasureOperationsProvider {
 		myStringTimePeriodHandler = theStringTimePeriodHandler;
 	}
 
+	// LUKETODO:  fix javadoc
 	/**
 	 * Implements the <a href=
 	 * "https://www.hl7.org/fhir/operation-measure-evaluate-measure.html">$evaluate-measure</a>
@@ -75,41 +76,7 @@ public class MeasureOperationsProvider {
 	 * @return the calculated MeasureReport
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
-	public MeasureReport evaluateMeasure(
-			@IdParam IdType theId,
-			@OperationParam(name = "periodStart") String thePeriodStart,
-			@OperationParam(name = "periodEnd") String thePeriodEnd,
-			@OperationParam(name = "reportType") String theReportType,
-			@OperationParam(name = "subject") String theSubject,
-			@OperationParam(name = "practitioner") String thePractitioner,
-			@OperationParam(name = "lastReceivedOn") String theLastReceivedOn,
-			@OperationParam(name = "productLine") String theProductLine,
-			@OperationParam(name = "additionalData") Bundle theAdditionalData,
-			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-			@OperationParam(name = "parameters") Parameters theParameters,
-			RequestDetails theRequestDetails)
-			throws InternalErrorException, FHIRException {
-		// LUKETODO:  Parameters within Parameters
-		return myR4MeasureServiceFactory
-				.create(theRequestDetails)
-				.evaluate(
-						Eithers.forMiddle3(theId),
-						myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails),
-						myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails),
-						theReportType,
-						theSubject,
-						theLastReceivedOn,
-						null,
-						theTerminologyEndpoint,
-						null,
-						theAdditionalData,
-						theParameters,
-						theProductLine,
-						thePractitioner);
-	}
-
-	@Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE_2, idempotent = true, type = Measure.class)
-	public MeasureReport evaluateMeasure2(EvaluateMeasureSingleParams theParams, RequestDetails theRequestDetails)
+	public MeasureReport evaluateMeasure(EvaluateMeasureSingleParams theParams, RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		// LUKETODO:  Parameters within Parameters
 		return myR4MeasureServiceFactory

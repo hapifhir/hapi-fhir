@@ -50,6 +50,7 @@ public class CareGapsOperationProvider {
 		myStringTimePeriodHandler = theStringTimePeriodHandler;
 	}
 
+	// LUKETODO: fix javadoc
 	/**
 	 * Implements the <a href=
 	 * "http://build.fhir.org/ig/HL7/davinci-deqm/OperationDefinition-care-gaps.html">$care-gaps</a>
@@ -98,35 +99,6 @@ public class CareGapsOperationProvider {
 					"Implements the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/OperationDefinition-care-gaps.html\">$care-gaps</a> operation found in the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/index.html\">Da Vinci DEQM FHIR Implementation Guide</a> which is an extension of the <a href=\"http://build.fhir.org/operation-measure-care-gaps.html\">$care-gaps</a> operation found in the <a href=\"http://hl7.org/fhir/R4/clinicalreasoning-module.html\">FHIR Clinical Reasoning Module</a>.")
 	@Operation(name = ProviderConstants.CR_OPERATION_CARE_GAPS, idempotent = true, type = Measure.class)
 	public Parameters careGapsReport(
-			RequestDetails theRequestDetails,
-			@OperationParam(name = "periodStart") String thePeriodStart,
-			@OperationParam(name = "periodEnd") String thePeriodEnd,
-			@OperationParam(name = "subject") String theSubject,
-			@OperationParam(name = "status") List<String> theStatus,
-			@OperationParam(name = "measureId") List<String> theMeasureId,
-			@OperationParam(name = "measureIdentifier") List<String> theMeasureIdentifier,
-			@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl,
-			@OperationParam(name = "nonDocument") BooleanType theNonDocument) {
-
-		return myR4CareGapsProcessorFactory
-				.create(theRequestDetails)
-				.getCareGapsReport(
-						myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails),
-						myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails),
-						theSubject,
-						theStatus,
-						theMeasureId == null
-								? null
-								: theMeasureId.stream().map(IdType::new).collect(Collectors.toList()),
-						theMeasureIdentifier,
-						theMeasureUrl,
-						Optional.ofNullable(theNonDocument)
-								.map(BooleanType::getValue)
-								.orElse(false));
-	}
-
-	@Operation(name = ProviderConstants.CR_OPERATION_CARE_GAPS_2, idempotent = true, type = Measure.class)
-	public Parameters careGapsReport2(
 			// LUKETODO:  include RequestDetails in Params object?
 			RequestDetails theRequestDetails, @OperationParam(name = "params") CareGapsParams theParams) {
 
