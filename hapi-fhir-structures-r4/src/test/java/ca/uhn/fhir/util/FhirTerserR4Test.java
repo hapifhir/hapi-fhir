@@ -18,6 +18,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -42,6 +43,7 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -68,6 +70,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
+import static ca.uhn.fhir.test.utilities.UuidUtils.UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -218,12 +221,12 @@ public class FhirTerserR4Test {
 
 		myCtx.newTerser().containResources(medAdmin, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 
-		assertThat(medAdmin.getContained().get(0).getId()).containsPattern(HASH_UUID_PATTERN);
-		assertThat(medAdmin.getContained().get(1).getId()).containsPattern(HASH_UUID_PATTERN);
+		assertThat(medAdmin.getContained().get(0).getId()).containsPattern(UUID_PATTERN);
+		assertThat(medAdmin.getContained().get(1).getId()).containsPattern(UUID_PATTERN);
 		assertEquals(ResourceType.Medication, medAdmin.getContained().get(0).getResourceType());
 		assertEquals(ResourceType.Substance, medAdmin.getContained().get(1).getResourceType());
-		assertEquals(medAdmin.getContained().get(0).getId(), medAdmin.getMedicationReference().getReference());
-		assertEquals(medAdmin.getContained().get(1).getId(), ((Medication) (medAdmin.getContained().get(0))).getIngredientFirstRep().getItemReference().getReference());
+		assertEquals("#" + medAdmin.getContained().get(0).getId(), medAdmin.getMedicationReference().getReference());
+		assertEquals("#" + medAdmin.getContained().get(1).getId(), ((Medication) (medAdmin.getContained().get(0))).getIngredientFirstRep().getItemReference().getReference());
 
 	}
 
