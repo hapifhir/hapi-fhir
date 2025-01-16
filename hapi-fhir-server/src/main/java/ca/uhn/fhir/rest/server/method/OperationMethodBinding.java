@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -183,12 +182,12 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		if (getResourceName() == null) {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-			if (myOperationIdParamDetails.myIdParamIndex != null) {
+			if (myOperationIdParamDetails.isFound()) {
 				myCanOperateAtInstanceLevel = true;
 			} else {
 				myCanOperateAtServerLevel = true;
 			}
-		} else if (myOperationIdParamDetails.myIdParamIndex == null) {
+		} else if (! myOperationIdParamDetails.isFound()) {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
 			myCanOperateAtTypeLevel = true;
 		} else {
@@ -483,14 +482,14 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				for (Annotation nextParameterAnnotation : parameterAnnotation) {
 					if (nextParameterAnnotation instanceof IdParam) {
 						return new OperationIdParamDetails(
-								null, (IdParam) nextParameterAnnotation, paramAnnotationIndex, theMethod);
+							(IdParam) nextParameterAnnotation, paramAnnotationIndex);
 					}
 				}
-				return new OperationIdParamDetails(null, null, paramAnnotationIndex, theMethod);
+				return new OperationIdParamDetails(null, paramAnnotationIndex);
 			}
 		}
 
-		return new OperationIdParamDetails(null, null, paramAnnotationIndex, theMethod);
+		return new OperationIdParamDetails(null, paramAnnotationIndex);
 	}
 
 	@Nonnull
@@ -526,7 +525,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					final Annotation fieldAnnotation = fieldAnnotations[0];
 
 					if (fieldAnnotation instanceof IdParam) {
-						return new OperationIdParamDetails(null, (IdParam) fieldAnnotation, paramIndex, theMethod);
+						return new OperationIdParamDetails((IdParam) fieldAnnotation, paramIndex);
 					}
 
 					final boolean isRi = theContext.getVersion().getVersion().isRi();
@@ -537,7 +536,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		return new OperationIdParamDetails(null, null, null, theMethod);
+		return OperationIdParamDetails.EMPTY;
 	}
 
 	public static class ReturnType {
@@ -579,39 +578,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		public void setType(String theType) {
 			myType = theType;
-		}
-	}
-
-	// LUKETODO:  consider making this top-level
-	private static class OperationIdParamDetails {
-		@Nullable
-		private final IIdType myIdType;
-
-		@Nullable
-		private final IdParam myIdParam;
-
-		// LUKETODO:  can this ever be null?
-		@Nullable
-		private final Integer myIdParamIndex;
-
-		private final Method myMethod;
-
-		// LUKETODO:  add a NOTHING factory method
-		public OperationIdParamDetails(
-				@Nullable IIdType theIdType,
-				@Nullable IdParam theIdParam,
-				@Nullable Integer theIdParamIndex,
-				Method theMethod) {
-			myIdType = theIdType;
-			myIdParam = theIdParam;
-			myIdParamIndex = theIdParamIndex;
-			myMethod = theMethod;
-		}
-
-		public void assigneMethodParamsIfApplicable() {}
-
-		public boolean setOrReturnPreviousValue(boolean thePreviousValue) {
-			return Optional.ofNullable(myIdParam).map(IdParam::optional).orElse(thePreviousValue);
 		}
 	}
 }
