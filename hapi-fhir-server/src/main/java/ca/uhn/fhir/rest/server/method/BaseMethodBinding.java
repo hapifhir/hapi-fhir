@@ -285,88 +285,110 @@ public abstract class BaseMethodBinding {
 					theMethodParams,
 					Arrays.toString(parameterTypes));
 
-			for (Class<?> parameterType : parameterTypes) {
-				ourLog.info("1234: invoking parameterType: {} and method: {}", parameterType, method.getName());
-				final Annotation[] parameterTypeAnnotations = parameterType.getAnnotations();
+			if (Arrays.stream(parameterTypes)
+					.map(Class::getAnnotations)
+					.map(Arrays::asList)
+					.flatMap(Collection::stream)
+					.anyMatch(OperationEmbeddedType.class::isInstance)) {
 
-				final boolean hasOperationEmbeddedTypeAnnotation =
-						Arrays.stream(parameterTypeAnnotations).anyMatch(OperationEmbeddedType.class::isInstance);
+				for (Class<?> parameterType : parameterTypes) {
+					ourLog.info("1234: invoking parameterType: {} and method: {}", parameterType, method.getName());
+					final Annotation[] parameterTypeAnnotations = parameterType.getAnnotations();
 
-				if (hasOperationEmbeddedTypeAnnotation) {
-					final Constructor<?>[] constructors = parameterType.getConstructors();
+					final boolean hasOperationEmbeddedTypeAnnotation =
+							Arrays.stream(parameterTypeAnnotations).anyMatch(OperationEmbeddedType.class::isInstance);
 
-					// LUKETODO:  what if there's a noarg constructor and all we have is setters?
-					// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					if (hasOperationEmbeddedTypeAnnotation) {
+						final Constructor<?>[] constructors = parameterType.getConstructors();
 
-					if (constructors.length > 0) {
-						// LUKETODO:  if there are multiple constructors, cycle through them until you find one that
-						// matches the params list
-						final Constructor<?> constructor = constructors[0];
+						// LUKETODO:  what if there's a noarg constructor and all we have is setters?
+						// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-						final Parameter[] constructorParameters = constructor.getParameters();
+						if (constructors.length > 0) {
+							// LUKETODO:  if there are multiple constructors, cycle through them until you find one that
+							// matches the params list
+							final Constructor<?> constructor = constructors[0];
 
-						// LUKETODO:  mandate an immutable class with a constructor to set params
-						if (constructorParameters.length == 0) {
-							throw new InternalErrorException(
-									Msg.code(234198927) + "No constructor that takes parameters!!!");
-						} else {
-							final Object[] methodParamsWithoutRequestDetails = removeRequestDetails(theMethodParams);
-							// LUKETODO:  else?
-							if (methodParamsWithoutRequestDetails.length != constructorParameters.length) {
-								// LUKETODO:  we blow up here because RequestDetails is the EXTRA PARAMETER!
-								throw new InternalErrorException(Msg.code(234198921) + "1234: bad params");
-							}
+							final Parameter[] constructorParameters = constructor.getParameters();
 
-							final int[] requestDetailsIndexes = IntStream.range(0, theMethodParams.length)
-									.filter(index -> theMethodParams[index] instanceof RequestDetails)
-									.toArray();
-
-							if (requestDetailsIndexes.length > 1) {
-								throw new InternalErrorException(Msg.code(562462)
-										+ "1234: cannot define a request with more than one RequestDetails");
-							}
-
-							final Optional<Integer> optArgPositionRequestDetails = requestDetailsIndexes.length > 0
-									? Optional.of(requestDetailsIndexes[0])
-									: Optional.empty();
-
-							for (int index = 0; index < methodParamsWithoutRequestDetails.length; index++) {
-								final Object methodParamAtIndex = methodParamsWithoutRequestDetails[index];
-								if (methodParamAtIndex == null) {
-									// argument is null, so we can't the type, so skip it:
-									continue;
+							// LUKETODO:  mandate an immutable class with a constructor to set params
+							if (constructorParameters.length == 0) {
+								throw new InternalErrorException(
+										Msg.code(234198927) + "No constructor that takes parameters!!!");
+							} else {
+								final Object[] methodParamsWithoutRequestDetails =
+										removeRequestDetails(theMethodParams);
+								// LUKETODO:  else?
+								if (methodParamsWithoutRequestDetails.length != constructorParameters.length) {
+									// LUKETODO:  we blow up here because RequestDetails is the EXTRA PARAMETER!
+									throw new InternalErrorException(Msg.code(234198921) + "1234: bad params");
 								}
-								final Class<?> methodParamClassAtIndex = methodParamAtIndex.getClass();
-								final Class<?> parameterClassAtIndex = constructorParameters[index].getType();
+
+								final int[] requestDetailsIndexes = IntStream.range(0, theMethodParams.length)
+										.filter(index -> theMethodParams[index] instanceof RequestDetails)
+										.toArray();
+
+								if (requestDetailsIndexes.length > 1) {
+									throw new InternalErrorException(Msg.code(562462)
+											+ "1234: cannot define a request with more than one RequestDetails");
+								}
+
+								final Optional<Integer> optArgPositionRequestDetails = requestDetailsIndexes.length > 0
+										? Optional.of(requestDetailsIndexes[0])
+										: Optional.empty();
+
+								for (int index = 0; index < methodParamsWithoutRequestDetails.length; index++) {
+									final Object methodParamAtIndex = methodParamsWithoutRequestDetails[index];
+									if (methodParamAtIndex == null) {
+										// argument is null, so we can't the type, so skip it:
+										continue;
+									}
+									final Class<?> methodParamClassAtIndex = methodParamAtIndex.getClass();
+									final Class<?> parameterClassAtIndex = constructorParameters[index].getType();
+
+									ourLog.info(
+											"1234: methodParamClassAtIndex: {}, parameterClassAtIndex: {}",
+											methodParamClassAtIndex,
+											parameterClassAtIndex);
+
+									// LUKETODO:  fix this this is gross
+									if (Collection.class.isAssignableFrom(methodParamClassAtIndex)
+											|| Collection.class.isAssignableFrom(parameterClassAtIndex)) {
+										// ex:  List and ArrayList
+										if (methodParamClassAtIndex.isAssignableFrom(parameterClassAtIndex)) {
+											throw new InternalErrorException(String.format(
+													"%s1234: Mismatch between methodParamClassAtIndex: %s and parameterClassAtIndex: %s",
+													Msg.code(236146124),
+													methodParamClassAtIndex,
+													parameterClassAtIndex));
+										}
+									} else if (methodParamClassAtIndex != parameterClassAtIndex) {
+										throw new InternalErrorException(String.format(
+												"%s1234: Mismatch between methodParamClassAtIndex: %s and parameterClassAtIndex: %s",
+												Msg.code(236146125), methodParamClassAtIndex, parameterClassAtIndex));
+									}
+								}
+
+								final Object operationEmbeddedType =
+										constructor.newInstance(methodParamsWithoutRequestDetails);
 
 								ourLog.info(
-										"1234: methodParamClassAtIndex: {}, parameterClassAtIndex: {}",
-										methodParamClassAtIndex,
-										parameterClassAtIndex);
+										"1234: invoking method with operationEmbeddedType: {}", operationEmbeddedType);
+								// LUKETODO:  design for future use factory methods
+								// LUKETODO:  how do I know where to put the RequestDetails????
+								if (optArgPositionRequestDetails.isPresent()) {
+									final Integer requestDetailsIndex = optArgPositionRequestDetails.get();
 
-								if (methodParamClassAtIndex != parameterClassAtIndex) {
-									throw new RuntimeException(Msg.code(236146124) + "1234: bad params");
+									// LUKETODO:  review this:  this is tacky:
+									if (requestDetailsIndex == 0) {
+										return method.invoke(getProvider(), theMethodParams[0], operationEmbeddedType);
+									}
+
+									return method.invoke(
+											getProvider(), operationEmbeddedType, theMethodParams[requestDetailsIndex]);
 								}
+								return method.invoke(getProvider(), operationEmbeddedType);
 							}
-
-							final Object operationEmbeddedType =
-									constructor.newInstance(methodParamsWithoutRequestDetails);
-
-							ourLog.info("1234: invoking method with operationEmbeddedType: {}", operationEmbeddedType);
-							// LUKETODO:  design for future use factory methods
-							// LUKETODO:  how do I know where to put the RequestDetails????
-							if (optArgPositionRequestDetails.isPresent()) {
-								final Integer requestDetailsIndex = optArgPositionRequestDetails.get();
-
-								// LUKETODO:  review this:  this is tacky:
-								if (requestDetailsIndex == 0) {
-									return method.invoke(getProvider(), theMethodParams[0], operationEmbeddedType);
-								}
-
-								return method.invoke(
-										getProvider(), operationEmbeddedType, theMethodParams[requestDetailsIndex]);
-							}
-							return method.invoke(getProvider(), operationEmbeddedType);
 						}
 					}
 				}

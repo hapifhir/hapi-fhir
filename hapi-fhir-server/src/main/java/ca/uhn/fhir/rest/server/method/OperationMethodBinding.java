@@ -413,6 +413,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			RequestDetails theRequest, Object[] theMethodParams, OperationIdParamDetails theOperationIdParamDetails) {
 		ourLog.info("1234: invoking method: {} with params: {}", theRequest.getOperation(), theMethodParams);
 
+		// LUKETODO:  this is gross:  fix this:
 		if (this.myOperationIdParamDetails.myIdParamIndex != null) {
 			theMethodParams[this.myOperationIdParamDetails.myIdParamIndex] = theRequest.getId();
 		}

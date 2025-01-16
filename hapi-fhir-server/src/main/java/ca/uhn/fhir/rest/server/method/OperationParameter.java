@@ -35,7 +35,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedType;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -69,12 +68,7 @@ import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-// LUKETODO:  DO NOT HIJACK THIS
-// LUKETODO:  clone this and use this for Embedded object params
-// LUKETODO:  like EmbeddedOperationParameter
 public class OperationParameter implements IParameter {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationParameter.class);
 
 	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationParam.class.getName() + "_PARSED_RESOURCE";
 
@@ -91,12 +85,12 @@ public class OperationParameter implements IParameter {
 	private Class<? extends Collection> myInnerCollectionType;
 
 	private int myMax;
-	private final int myMin;
+	private int myMin;
 	private Class<?> myParameterType;
 	private String myParamType;
 	private SearchParameter mySearchParameterBinding;
-	private final String myDescription;
-	private final List<String> myExampleValues;
+	private String myDescription;
+	private List<String> myExampleValues;
 
 	OperationParameter(
 			FhirContext theCtx,
@@ -123,7 +117,7 @@ public class OperationParameter implements IParameter {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void addValueToList(List<Object> matchingParamValues, Object values) {
 		if (values != null) {
-			if (BaseAndListParam.class.isAssignableFrom(myParameterType) && !matchingParamValues.isEmpty()) {
+			if (BaseAndListParam.class.isAssignableFrom(myParameterType) && matchingParamValues.size() > 0) {
 				BaseAndListParam existing = (BaseAndListParam<?>) matchingParamValues.get(0);
 				BaseAndListParam<?> newAndList = (BaseAndListParam<?>) values;
 				for (IQueryParameterOr nextAnd : newAndList.getValuesAsQueryTokens()) {
@@ -206,14 +200,11 @@ public class OperationParameter implements IParameter {
 				|| isSearchParam
 				|| ValidationModeEnum.class.equals(myParameterType);
 
-		final boolean isAnnotationPresent = myParameterType.isAnnotationPresent(OperationEmbeddedType.class);
-
 		/*
 		 * The parameter can be of type string for validation methods - This is a bit weird. See ValidateDstu2Test. We
 		 * should probably clean this up..
 		 */
 		if (!myParameterType.equals(IBase.class) && !myParameterType.equals(String.class)) {
-			// LUKETODO:  this is where we get the Exception:  add an else if
 			if (IBaseResource.class.isAssignableFrom(myParameterType) && myParameterType.isInterface()) {
 				myParamType = "Resource";
 			} else if (IBaseReference.class.isAssignableFrom(myParameterType)) {
@@ -267,7 +258,7 @@ public class OperationParameter implements IParameter {
 		}
 	}
 
-	OperationParameter setConverter(IOperationParamConverter theConverter) {
+	public OperationParameter setConverter(IOperationParamConverter theConverter) {
 		myConverter = theConverter;
 		return this;
 	}
@@ -311,7 +302,7 @@ public class OperationParameter implements IParameter {
 			RequestDetails theRequest, List<Object> matchingParamValues) {
 		if (mySearchParameterBinding != null) {
 
-			List<QualifiedParamList> params = new ArrayList<>();
+			List<QualifiedParamList> params = new ArrayList<QualifiedParamList>();
 			String nameWithQualifierColon = myName + ":";
 
 			for (String nextParamName : theRequest.getParameters().keySet()) {
@@ -447,7 +438,7 @@ public class OperationParameter implements IParameter {
 				List<IBase> values = paramChildAccessor.getValues(requestContents);
 				for (IBase nextParameter : values) {
 					List<IBase> nextNames = nameChild.getAccessor().getValues(nextParameter);
-					if (nextNames != null && !nextNames.isEmpty()) {
+					if (nextNames != null && nextNames.size() > 0) {
 						IPrimitiveType<?> nextName = (IPrimitiveType<?>) nextNames.get(0);
 						if (myName.equals(nextName.getValueAsString())) {
 
@@ -458,9 +449,9 @@ public class OperationParameter implements IParameter {
 										valueChild.getAccessor().getValues(nextParameter);
 								List<IBase> paramResources =
 										resourceChild.getAccessor().getValues(nextParameter);
-								if (paramValues != null && !paramValues.isEmpty()) {
+								if (paramValues != null && paramValues.size() > 0) {
 									tryToAddValues(paramValues, matchingParamValues);
-								} else if (paramResources != null && !paramResources.isEmpty()) {
+								} else if (paramResources != null && paramResources.size() > 0) {
 									tryToAddValues(paramResources, matchingParamValues);
 								}
 							}

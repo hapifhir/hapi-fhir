@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+// LUKETODO:  consider enhancing this class with operation params stuff instead
 public class ReflectionUtil {
 
 	public static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];

@@ -198,14 +198,78 @@ public class MethodUtil {
 									description,
 									examples);
 
-							// Not sure what these are, but I think they're for params that are part of a Collection
-							// parameter
-							// and may have soemthing to do with a SearchParameter
-							final Class<? extends java.util.Collection<?>> outerCollectionType = null;
-							final Class<? extends java.util.Collection<?>> innerCollectionType = null;
+							Class<? extends java.util.Collection<?>> outerCollectionType = null;
+							Class<? extends java.util.Collection<?>> innerCollectionType = null;
+
+							parameterType = fieldType;
+
+							if (Collection.class.isAssignableFrom(parameterType)) {
+								innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+								// LUKETODO: come up with another method to do this for field params
+								parameterType = ReflectionUtil.getGenericCollectionTypeOfField(field);
+								if (parameterType == null
+										&& theMethod.getDeclaringClass().isSynthetic()) {
+									try {
+										theMethod = theMethod
+												.getDeclaringClass()
+												.getSuperclass()
+												.getMethod(theMethod.getName(), parameterTypes);
+										parameterType =
+												// LUKETODO:  what to do here if anything?
+												ReflectionUtil.getGenericCollectionTypeOfMethodParameter(
+														theMethod, paramIndex);
+									} catch (NoSuchMethodException e) {
+										throw new ConfigurationException(Msg.code(400) + "A method with name '"
+												+ theMethod.getName() + "' does not exist for super class '"
+												+ theMethod.getDeclaringClass().getSuperclass() + "'");
+									}
+								}
+								// LUKETODO:
+								//								declaredParameterType = parameterType;
+							}
+							// LUKETODO:  now we're processing the generic parameter, so capture the inner and outer
+							// types
+							// Collection<X>
+							// LUKETODO:  could be null?
+							if (Collection.class.isAssignableFrom(parameterType)) {
+								outerCollectionType = innerCollectionType;
+								innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+								// LUKETODO: come up with another method to do this for field params
+								parameterType = ReflectionUtil.getGenericCollectionTypeOfField(field);
+								// LUKETODO:
+								//								declaredParameterType = parameterType;
+							}
+							// LUKETODO:  as a guard:  if this is still a Collection, then throw because something went
+							// wrong
+							// LUKETODO:  could be null?
+							if (Collection.class.isAssignableFrom(parameterType)) {
+								throw new ConfigurationException(
+										Msg.code(401) + "Argument #" + paramIndex + " of Method '" + theMethod.getName()
+												+ "' in type '"
+												+ theMethod.getDeclaringClass().getCanonicalName()
+												+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
+							}
+
+							// LUKETODO:  do I need to worry about this:
+							/*
+
+							Class<?> newParameterType = elementDefinition.getImplementingClass();
+							if (!declaredParameterType.isAssignableFrom(newParameterType)) {
+								throw new ConfigurationException(Msg.code(405) + "Non assignable parameter typeName=\""
+										+ operationParam.typeName() + "\" specified on method " + theMethod);
+							}
+							parameterType = newParameterType;
+							 */
+
+							ourLog.info(
+									"1234: about to initialize types: method: {}, outerCollectionType: {}, innerCollectionType: {}, parameterType: {}",
+									theMethod.getName(),
+									outerCollectionType,
+									innerCollectionType,
+									parameterType);
 
 							operationParameter.initializeTypes(
-									theMethod, outerCollectionType, innerCollectionType, fieldType);
+									theMethod, outerCollectionType, innerCollectionType, parameterType);
 
 							parameters.add(operationParameter);
 						} else {
@@ -535,6 +599,13 @@ public class MethodUtil {
 			// LUKETODO:  Or do we expand the paramters here, and then foreaach parameters.add() ???
 			//			ourLog.info("1234: param class: {}, method: {}", param.getClass().getCanonicalName(),
 			// theMethod.getName());
+
+			ourLog.info(
+					"1234:about to initialize types:  method: {}, outerCollectionType: {}, innerCollectionType: {}, parameterType: {}",
+					theMethod.getName(),
+					outerCollectionType,
+					innerCollectionType,
+					parameterType);
 			param.initializeTypes(theMethod, outerCollectionType, innerCollectionType, parameterType);
 			parameters.add(param);
 
