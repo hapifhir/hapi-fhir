@@ -563,10 +563,14 @@
 						<dialect>
 							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect</className>
 							<targetFileName>oracle.sql</targetFileName>
+							<!-- We may be able to do this in a cleaner way once this is resolved: https://hibernate.atlassian.net/browse/HHH-19046 -->
+							<dropStatementsContainingRegex>add constraint FK_RESLINK_TARGET</dropStatementsContainingRegex>
 						</dialect>
 						<dialect>
 							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect</className>
 							<targetFileName>sqlserver.sql</targetFileName>
+							<!-- We may be able to do this in a cleaner way once this is resolved: https://hibernate.atlassian.net/browse/HHH-19046 -->
+							<dropStatementsContainingRegex>add constraint FK_RESLINK_TARGET</dropStatementsContainingRegex>
 						</dialect>
 						<dialect>
 							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirCockroachDialect</className>
@@ -580,6 +584,8 @@
 							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect</className>
 							<targetFileName>postgres.sql</targetFileName>
 							<appendFile>classpath:ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql</appendFile>
+							<!-- We may be able to do this in a cleaner way once this is resolved: https://hibernate.atlassian.net/browse/HHH-19046 -->
+							<dropStatementsContainingRegex>add constraint FK_RESLINK_TARGET</dropStatementsContainingRegex>
 						</dialect>
 					</dialects>
 				</configuration>
