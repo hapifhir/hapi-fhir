@@ -26,6 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -54,9 +55,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 // LUKETODO:   consider deleting whatever code may be unused
 public class OperationEmbeddedParameter implements IParameter {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationEmbeddedParameter.class);
-
-	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationParam.class.getName() + "_PARSED_RESOURCE";
+	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationEmbeddedParam.class.getName() + "_PARSED_RESOURCE";
 
 	@SuppressWarnings("unchecked")
 	private static final Class<? extends IQueryParameterType>[] COMPOSITE_TYPES = new Class[0];
