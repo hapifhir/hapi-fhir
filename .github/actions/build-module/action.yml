@@ -27,7 +27,7 @@ runs:
 
     - name: Setup Docker
       uses: docker/setup-docker@v2
-    
+
     - name: Create and List Maven Cache Directory
       shell: bash
       run: |
@@ -35,7 +35,7 @@ runs:
         pwd
         ls -al $HOME/.m2/repository
       env:
-        MAVEN_CACHE_FOLDER: $HOME/.m2/repository 
+        MAVEN_CACHE_FOLDER: $HOME/.m2/repository
 
     - name: Restore Maven Cache
       uses: ./.github/actions/caching-handler
@@ -43,7 +43,7 @@ runs:
     - name: Build Maven Module
       shell: bash
       env:
-        MAVEN_CACHE_FOLDER: $HOME/.m2/repository  
+        MAVEN_CACHE_FOLDER: $HOME/.m2/repository
         MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
       run: |
         mvn clean verify jacoco:report -pl ${{ inputs.module }} \
@@ -56,5 +56,5 @@ runs:
       uses: actions/upload-artifact@v3
       if: always()
       with:
-        name: ${{ inputs.name }}_target
-        path: ${{ github.workspace }}/${{ inputs.module }}/target
+        name: ${{ inputs.module }}_build
+        path: './**/target'
