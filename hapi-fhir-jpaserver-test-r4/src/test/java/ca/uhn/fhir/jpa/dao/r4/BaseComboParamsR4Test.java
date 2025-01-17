@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.MockInvoker;
@@ -30,6 +31,7 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 	protected ISearchParamRegistry mySearchParamRegistry;
 	protected List<String> myMessages = new ArrayList<>();
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	protected ComboSearchParameterTestHelper myComboSearchParameterTestHelper;
 
 	@Override
 	@BeforeEach
@@ -62,6 +64,7 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 
 		// allow searches to use cached results
 		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH))).thenReturn(MockInvoker.list(params->true));
+		myComboSearchParameterTestHelper = new ComboSearchParameterTestHelper(mySearchParameterDao, mySearchParamRegistry);
 	}
 
 	@AfterEach
@@ -80,5 +83,9 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 		ourLog.info("Messages:\n  {}", String.join("\n  ", myMessages));
 	}
 
+	protected void createBirthdateAndGenderSps(boolean theUnique) {
+		myComboSearchParameterTestHelper.createBirthdateAndGenderSps(theUnique);
+		myMessages.clear();
+	}
 
 }
