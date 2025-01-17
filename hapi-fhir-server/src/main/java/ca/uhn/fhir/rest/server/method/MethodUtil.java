@@ -106,9 +106,8 @@ public class MethodUtil {
 	@SuppressWarnings("unchecked")
 	public static List<IParameter> getResourceParameters(
 			final FhirContext theContext, final Method theMethod, Object theProvider) {
-		// This variable will be mutated so distinguish it from the argument to getResourceParameters()
+		// We mutate this variable so distinguish this from the argument to getResourceParameters
 		Method methodToUse = theMethod;
-		ourLog.info("1234: getResourceParameters: " + methodToUse.getName());
 		List<IParameter> parameters = new ArrayList<>();
 
 		Class<?>[] parameterTypes = methodToUse.getParameterTypes();
@@ -120,7 +119,7 @@ public class MethodUtil {
 				methodToUse, OperationEmbeddedParam.class);
 
 		if (!operationEmbeddedTypes.isEmpty()
-		/*&& Year.now().equals(Year.of(1900))*/
+		//		&& Year.now().equals(Year.of(1900))
 		) { // disable for now
 			ourLog.info("1234: has operationEmbeddedTypes  !!!!!!! method: {}", methodToUse.getName());
 
@@ -291,6 +290,8 @@ public class MethodUtil {
 
 		for (Annotation[] nextParameterAnnotations : methodToUse.getParameterAnnotations()) {
 			IParameter param = null;
+			// LUKETODO:  final?
+			List<ParamInitializationContext> paramContexts = new ArrayList<>();
 			Class<?> declaredParameterType = parameterTypes[paramIndex];
 			Class<?> parameterType = declaredParameterType;
 
@@ -652,6 +653,11 @@ public class MethodUtil {
 											parameterType);
 
 									// LUKETODO:  how to handle multiple  parameters.add(param); ?????
+									paramContexts.add(new ParamInitializationContext(
+											operationParameter,
+											parameterType,
+											outerCollectionTypeInner,
+											outerCollectionTypeInner));
 								} else {
 									// some kind of Exception for now?
 								}
@@ -661,7 +667,7 @@ public class MethodUtil {
 						OperationParam operationParam = (OperationParam) nextAnnotation;
 						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
 						List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);
-						;
+
 						param = new OperationParameter(
 								theContext,
 								op.name(),
@@ -757,6 +763,12 @@ public class MethodUtil {
 				}
 			}
 
+			// LUKETODO:  do we need this or just add conditional logic?
+			if (paramContexts.isEmpty()) {
+				paramContexts.add(
+						new ParamInitializationContext(param, parameterType, outerCollectionType, innerCollectionType));
+			}
+
 			if (param == null) {
 				throw new ConfigurationException(
 						Msg.code(408) + "Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length)
@@ -765,23 +777,42 @@ public class MethodUtil {
 								+ "' has no recognized FHIR interface parameter nextParameterAnnotations. Don't know how to handle this parameter");
 			}
 
-			// LUKETODO:  if we call this with an type with embedded params, we get an Exceptioon here
-			// LUKETODO:  Or do we expand the paramters here, and then foreaach parameters.add() ???
-			//			ourLog.info("1234: param class: {}, method: {}", param.getClass().getCanonicalName(),
-			// methodToUse.getName());
+			for (ParamInitializationContext paramContext : paramContexts) {
+				ourLog.info(
+						"1234: NEW: about to initialize types:  method: {}, outerCollectionType: {}, innerCollectionType: {}, parameterType: {}",
+						methodToUse.getName(),
+						paramContext.myOuterCollectionType,
+						paramContext.myInnerCollectionType,
+						paramContext.myParameterType);
 
-			ourLog.info(
-					"1234:about to initialize types:  method: {}, outerCollectionType: {}, innerCollectionType: {}, parameterType: {}",
-					methodToUse.getName(),
-					outerCollectionType,
-					innerCollectionType,
-					parameterType);
-
-			param.initializeTypes(theMethod, outerCollectionType, innerCollectionType, parameterType);
-			parameters.add(param);
+				paramContext.initialize(methodToUse);
+				parameters.add(paramContext.myParam);
+			}
 
 			paramIndex++;
 		}
 		return parameters;
+	}
+
+	private static class ParamInitializationContext {
+		private IParameter myParam;
+		private Class<?> myParameterType;
+		private Class<? extends java.util.Collection<?>> myOuterCollectionType = null;
+		private Class<? extends java.util.Collection<?>> myInnerCollectionType = null;
+
+		private ParamInitializationContext(
+				IParameter myParam,
+				Class<?> myParameterType,
+				Class<? extends Collection<?>> myOuterCollectionType,
+				Class<? extends Collection<?>> myInnerCollectionType) {
+			this.myParam = myParam;
+			this.myParameterType = myParameterType;
+			this.myOuterCollectionType = myOuterCollectionType;
+			this.myInnerCollectionType = myInnerCollectionType;
+		}
+
+		void initialize(Method theMethod) {
+			myParam.initializeTypes(theMethod, myOuterCollectionType, myInnerCollectionType, myParameterType);
+		}
 	}
 }
