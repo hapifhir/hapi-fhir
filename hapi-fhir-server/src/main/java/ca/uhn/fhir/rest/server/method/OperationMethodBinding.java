@@ -186,7 +186,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			} else {
 				myCanOperateAtServerLevel = true;
 			}
-		} else if (! myOperationIdParamDetails.isFound()) {
+		} else if (!myOperationIdParamDetails.isFound()) {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
 			myCanOperateAtTypeLevel = true;
 		} else {
@@ -399,10 +399,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		ourLog.info("1234: invoking method: {} with params: {}", theRequest.getOperation(), theMethodParams);
 
-		final Object response =
-			invokeServerMethod(
-				theRequest,
-				myOperationIdParamDetails.alterMethodParamsIfNeeded(theRequest, theMethodParams));
+		final Object response = invokeServerMethod(
+				theRequest, myOperationIdParamDetails.alterMethodParamsIfNeeded(theRequest, theMethodParams));
 
 		if (myManualResponseMode) {
 			return null;
@@ -448,10 +446,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	private OperationIdParamDetails findIdParameterDetails(Method theMethod, FhirContext theContext) {
-		final List<Class<?>> operationEmbeddedTypes =
-			ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
-				theMethod,
-				OperationEmbeddedParam.class);
+		final List<Class<?>> operationEmbeddedTypes = ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
+				theMethod, OperationEmbeddedParam.class);
 
 		if (!operationEmbeddedTypes.isEmpty()) {
 			return findIdParamIndexForTypeWithEmbeddedParams(theMethod, operationEmbeddedTypes, theContext);
@@ -471,8 +467,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 				for (Annotation nextParameterAnnotation : parameterAnnotation) {
 					if (nextParameterAnnotation instanceof IdParam) {
-						return new OperationIdParamDetails(
-							(IdParam) nextParameterAnnotation, paramAnnotationIndex);
+						return new OperationIdParamDetails((IdParam) nextParameterAnnotation, paramAnnotationIndex);
 					}
 				}
 			}
@@ -485,12 +480,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Nonnull
 	private OperationIdParamDetails findIdParamIndexForTypeWithEmbeddedParams(
-		Method theMethod, List<Class<?>> theTypesWithEmbeddedParams, FhirContext theContext) {
+			Method theMethod, List<Class<?>> theTypesWithEmbeddedParams, FhirContext theContext) {
 		for (Class<?> typeWithEmbeddedParams : theTypesWithEmbeddedParams) {
 			if (ParametersUtil.isOneOfEligibleTypes(
-				typeWithEmbeddedParams,
-					RequestDetails.class,
-					SystemRequestDetails.class)) {
+					typeWithEmbeddedParams, RequestDetails.class, SystemRequestDetails.class)) {
 				// skip
 			} else {
 				final Field[] fields = typeWithEmbeddedParams.getDeclaredFields();

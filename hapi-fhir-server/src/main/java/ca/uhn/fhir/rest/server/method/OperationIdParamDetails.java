@@ -18,9 +18,7 @@ class OperationIdParamDetails {
 
 	public static OperationIdParamDetails EMPTY = new OperationIdParamDetails(null, null);
 
-	public OperationIdParamDetails(
-		@Nullable IdParam theIdParam,
-		@Nullable Integer theIdParamIndex) {
+	public OperationIdParamDetails(@Nullable IdParam theIdParam, @Nullable Integer theIdParamIndex) {
 		myIdParam = theIdParam;
 		myIdParamIndex = theIdParamIndex;
 	}
@@ -30,9 +28,7 @@ class OperationIdParamDetails {
 	}
 
 	public boolean setOrReturnPreviousValue(boolean thePreviousValue) {
-		return Optional.ofNullable(myIdParam)
-			.map(IdParam::optional)
-			.orElse(thePreviousValue);
+		return Optional.ofNullable(myIdParam).map(IdParam::optional).orElse(thePreviousValue);
 	}
 
 	public Object[] alterMethodParamsIfNeeded(RequestDetails theRequest, Object[] theMethodParams) {

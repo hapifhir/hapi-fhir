@@ -71,6 +71,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -108,18 +109,17 @@ public class MethodUtil {
 		ourLog.info("1234: getResourceParameters: " + theMethod.getName());
 		List<IParameter> parameters = new ArrayList<>();
 
-		// LUKETODO:  why no caregaps here????
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		int paramIndex = 0;
 		// LUKETODO:  one param per method parameter:  what happens if we expand this?
 
 		// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		final List<Class<?>> operationEmbeddedTypes =
-			ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
-				theMethod,
-				OperationEmbeddedParam.class);
+		final List<Class<?>> operationEmbeddedTypes = ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
+				theMethod, OperationEmbeddedParam.class);
 
-		if (!operationEmbeddedTypes.isEmpty()) {
+		if (!operationEmbeddedTypes.isEmpty()
+		/*&& Year.now().equals(Year.of(1900))*/
+		) { // disable for now
 			ourLog.info("1234: has operationEmbeddedTypes  !!!!!!! method: {}", theMethod.getName());
 
 			// This is the @Operation parameter on the method itself (ex: evaluateMeasure)
@@ -179,7 +179,6 @@ public class MethodUtil {
 						if (fieldAnnotation instanceof IdParam) {
 							parameters.add(new NullParameter());
 						} else if (fieldAnnotation instanceof OperationEmbeddedParam) {
-							// LUKETODO:  use OperationEmbeddedParam instead
 							final OperationEmbeddedParam operationParam = (OperationEmbeddedParam) fieldAnnotation;
 
 							final Annotation[] fieldAnnotationArray = new Annotation[] {fieldAnnotation};
@@ -284,8 +283,8 @@ public class MethodUtil {
 		}
 
 		for (Annotation[] nextParameterAnnotations : theMethod.getParameterAnnotations()) {
-
-			IParameter param = null;
+			// These can be multiples if we're dealing with a OperationEmbeddedParam
+			final List<IParameter> params = new ArrayList<>();
 			Class<?> declaredParameterType = parameterTypes[paramIndex];
 			Class<?> parameterType = declaredParameterType;
 
@@ -293,7 +292,7 @@ public class MethodUtil {
 			Class<? extends java.util.Collection<?>> innerCollectionType = null;
 			if (TagList.class.isAssignableFrom(parameterType)) {
 				// TagList is handled directly within the method bindings
-				param = new NullParameter();
+				params.add(new NullParameter());
 			} else {
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
@@ -354,24 +353,24 @@ public class MethodUtil {
 			}
 
 			if (ServletRequest.class.isAssignableFrom(parameterType)) {
-				param = new ServletRequestParameter();
+				params.add(new ServletRequestParameter());
 			} else if (ServletResponse.class.isAssignableFrom(parameterType)) {
-				param = new ServletResponseParameter();
+				params.add(new ServletResponseParameter());
 			} else if (parameterType.equals(RequestDetails.class)
 					|| parameterType.equals(ServletRequestDetails.class)) {
-				param = new RequestDetailsParameter();
+				params.add(new RequestDetailsParameter());
 			} else if (parameterType.equals(IInterceptorBroadcaster.class)) {
-				param = new InterceptorBroadcasterParameter();
+				params.add(new InterceptorBroadcasterParameter());
 			} else if (parameterType.equals(SummaryEnum.class)) {
-				param = new SummaryEnumParameter();
+				params.add(new SummaryEnumParameter());
 			} else if (parameterType.equals(PatchTypeEnum.class)) {
-				param = new PatchTypeParameter();
+				params.add(new PatchTypeParameter());
 			} else if (parameterType.equals(SearchContainedModeEnum.class)) {
-				param = new SearchContainedModeParameter();
+				params.add(new SearchContainedModeParameter());
 			} else if (parameterType.equals(SearchTotalModeEnum.class)) {
-				param = new SearchTotalModeParameter();
+				params.add(new SearchTotalModeParameter());
 			} else {
-				for (int i = 0; i < nextParameterAnnotations.length && param == null; i++) {
+				for (int i = 0; i < nextParameterAnnotations.length && params.isEmpty(); i++) {
 					Annotation nextAnnotation = nextParameterAnnotations[i];
 
 					if (nextAnnotation instanceof RequiredParam) {
@@ -385,7 +384,7 @@ public class MethodUtil {
 								((RequiredParam) nextAnnotation).chainBlacklist());
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 						MethodUtil.extractDescription(parameter, nextParameterAnnotations);
-						param = parameter;
+						params.add(parameter);
 					} else if (nextAnnotation instanceof OptionalParam) {
 						SearchParameter parameter = new SearchParameter();
 						parameter.setName(((OptionalParam) nextAnnotation).name());
@@ -397,9 +396,9 @@ public class MethodUtil {
 								((OptionalParam) nextAnnotation).chainBlacklist());
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 						MethodUtil.extractDescription(parameter, nextParameterAnnotations);
-						param = parameter;
+						params.add(parameter);
 					} else if (nextAnnotation instanceof RawParam) {
-						param = new RawParamsParameter(parameters);
+						params.add(new RawParamsParameter(parameters));
 					} else if (nextAnnotation instanceof IncludeParam) {
 						Class<? extends Collection<Include>> instantiableCollectionType;
 						Class<?> specType;
@@ -420,8 +419,8 @@ public class MethodUtil {
 							specType = parameterType;
 						}
 
-						param = new IncludeParameter(
-								(IncludeParam) nextAnnotation, instantiableCollectionType, specType);
+						params.add(new IncludeParameter(
+								(IncludeParam) nextAnnotation, instantiableCollectionType, specType));
 					} else if (nextAnnotation instanceof ResourceParam) {
 						Mode mode;
 						if (IBaseResource.class.isAssignableFrom(parameterType)) {
@@ -445,41 +444,41 @@ public class MethodUtil {
 						}
 						boolean methodIsOperation = theMethod.getAnnotation(Operation.class) != null;
 						boolean methodIsPatch = theMethod.getAnnotation(Patch.class) != null;
-						param = new ResourceParameter(
+						params.add(new ResourceParameter(
 								(Class<? extends IBaseResource>) parameterType,
 								theProvider,
 								mode,
 								methodIsOperation,
-								methodIsPatch);
+								methodIsPatch));
 					} else if (nextAnnotation instanceof IdParam) {
-						param = new NullParameter();
+						params.add(new NullParameter());
 					} else if (nextAnnotation instanceof ServerBase) {
-						param = new ServerBaseParamBinder();
+						params.add(new ServerBaseParamBinder());
 					} else if (nextAnnotation instanceof Elements) {
-						param = new ElementsParameter();
+						params.add(new ElementsParameter());
 					} else if (nextAnnotation instanceof Since) {
-						param = new SinceParameter();
-						((SinceParameter) param)
-								.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
+						final SinceParameter sinceParameter = new SinceParameter();
+						sinceParameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
+						params.add(sinceParameter);
 					} else if (nextAnnotation instanceof At) {
-						param = new AtParameter();
-						((AtParameter) param)
-								.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
+						final AtParameter atParameter = new AtParameter();
+						atParameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
+						params.add(atParameter);
 					} else if (nextAnnotation instanceof Count) {
-						param = new CountParameter();
+						params.add(new CountParameter());
 					} else if (nextAnnotation instanceof Offset) {
-						param = new OffsetParameter();
+						params.add(new OffsetParameter());
 					} else if (nextAnnotation instanceof GraphQLQueryUrl) {
-						param = new GraphQLQueryUrlParameter();
+						params.add(new GraphQLQueryUrlParameter());
 					} else if (nextAnnotation instanceof GraphQLQueryBody) {
-						param = new GraphQLQueryBodyParameter();
+						params.add(new GraphQLQueryBodyParameter());
 					} else if (nextAnnotation instanceof Sort) {
-						param = new SortParameter(theContext);
+						params.add(new SortParameter(theContext));
 					} else if (nextAnnotation instanceof TransactionParam) {
-						param = new TransactionParameter(theContext);
+						params.add(new TransactionParameter(theContext));
 					} else if (nextAnnotation instanceof ConditionalUrlParam) {
-						param = new ConditionalParamBinder(((ConditionalUrlParam) nextAnnotation).supportsMultiple());
-						// LUKETODO: OperationEmbeddedParam:  at least for logging for now
+						params.add(
+								new ConditionalParamBinder(((ConditionalUrlParam) nextAnnotation).supportsMultiple()));
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
 						if (op == null) {
@@ -488,18 +487,182 @@ public class MethodUtil {
 									+ theMethod.toGenericString());
 						}
 
+						// LUKETODO:  try to combine into validateAndGet methods
+						final List<Class<?>> operationEmbeddedTypesInner =
+								ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
+										theMethod, OperationEmbeddedParam.class);
+
+						if (operationEmbeddedTypesInner.size() > 1) {
+							// LUKETODO:  error
+							throw new ConfigurationException(String.format(
+									"%sOnly one type with embedded params is supported for now for method: %s",
+									Msg.code(9999927), theMethod.getName()));
+						}
+
+						if (!operationEmbeddedTypes.isEmpty() && Year.now().equals(Year.of(1900))) {
+							// LUKETODO:  TRY TO DO AS MUCH OF THIS AS POSSIBLE WITHIN A SEPARATE
+							// METHOD!!!!!!!!!!!!!!!!!!!!
+							ourLog.info("1234: has operationEmbeddedTypes  !!!!!!! method: {}", theMethod.getName());
+
+							final Class<?> operationEmbeddedType = operationEmbeddedTypesInner.get(0);
+
+							final Field[] fields = operationEmbeddedType.getDeclaredFields();
+
+							for (Field field : fields) {
+								final String fieldName = field.getName();
+								final Class<?> fieldType = field.getType();
+								final Annotation[] fieldAnnotations = field.getAnnotations();
+
+								if (fieldAnnotations.length < 1) {
+									throw new ConfigurationException(String.format(
+											"%sNo annotations for field: %s for method: %s",
+											Msg.code(9999926), fieldName, theMethod.getName()));
+								}
+
+								if (fieldAnnotations.length > 1) {
+									// LUKETODO:  error
+									throw new ConfigurationException(String.format(
+											"%sMore than one annotation for field: %s for method: %s",
+											Msg.code(999998), fieldName, theMethod.getName()));
+								}
+
+								final Set<String> annotationClassNames = Arrays.stream(fieldAnnotations)
+										.map(Annotation::annotationType)
+										.map(Class::getName)
+										.collect(Collectors.toUnmodifiableSet());
+
+								ourLog.info(
+										"1234: MethodUtil:  TypeWithEmbeddedParams: fieldName: {}, class: {}, fieldAnnotations: {}",
+										fieldName,
+										fieldType.getName(),
+										annotationClassNames);
+
+								// This is the parameter on the field in question on the type with embedded params
+								// class:  ex
+								// myCount
+								final Annotation fieldAnnotation = fieldAnnotations[0];
+
+								if (fieldAnnotation instanceof IdParam) {
+									// skip
+								} else if (fieldAnnotation instanceof OperationEmbeddedParam) {
+									final OperationEmbeddedParam operationParam =
+											(OperationEmbeddedParam) fieldAnnotation;
+
+									final Annotation[] fieldAnnotationArray = new Annotation[] {fieldAnnotation};
+									final String description = ParametersUtil.extractDescription(fieldAnnotationArray);
+									final List<String> examples = ParametersUtil.extractExamples(fieldAnnotationArray);
+
+									// LUKETODO:  capabilities statemenet provider
+									// LUKETODO:  consider taking  ALL  hapi-fhir storage-cr INTO the clinical-reasoning
+									// repo
+									final OperationEmbeddedParameter operationParameter =
+											new OperationEmbeddedParameter(
+													theContext,
+													op.name(),
+													operationParam.name(),
+													operationParam.min(),
+													operationParam.max(),
+													description,
+													examples);
+
+									Class<? extends java.util.Collection<?>> outerCollectionTypeInner = null;
+									Class<? extends java.util.Collection<?>> innerCollectionTypeInner = null;
+
+									parameterType = fieldType;
+
+									if (Collection.class.isAssignableFrom(parameterType)) {
+										innerCollectionTypeInner =
+												(Class<? extends java.util.Collection<?>>) parameterType;
+										// LUKETODO: come up with another method to do this for field params
+										parameterType = ReflectionUtil.getGenericCollectionTypeOfField(field);
+										if (parameterType == null
+												&& theMethod.getDeclaringClass().isSynthetic()) {
+											try {
+												theMethod = theMethod
+														.getDeclaringClass()
+														.getSuperclass()
+														.getMethod(theMethod.getName(), parameterTypes);
+												parameterType =
+														// LUKETODO:  what to do here if anything?
+														ReflectionUtil.getGenericCollectionTypeOfMethodParameter(
+																theMethod, paramIndex);
+											} catch (NoSuchMethodException e) {
+												throw new ConfigurationException(Msg.code(400) + "A method with name '"
+														+ theMethod.getName() + "' does not exist for super class '"
+														+ theMethod
+																.getDeclaringClass()
+																.getSuperclass() + "'");
+											}
+										}
+										// LUKETODO:
+										//								declaredParameterType = parameterType;
+									}
+									// LUKETODO:  now we're processing the generic parameter, so capture the inner and
+									// outer
+									// types
+									// Collection<X>
+									// LUKETODO:  could be null?
+									if (Collection.class.isAssignableFrom(parameterType)) {
+										outerCollectionTypeInner = innerCollectionTypeInner;
+										innerCollectionTypeInner =
+												(Class<? extends java.util.Collection<?>>) parameterType;
+										// LUKETODO: come up with another method to do this for field params
+										parameterType = ReflectionUtil.getGenericCollectionTypeOfField(field);
+										// LUKETODO:
+										//								declaredParameterType = parameterType;
+									}
+									// LUKETODO:  as a guard:  if this is still a Collection, then throw because
+									// something went
+									// wrong
+									// LUKETODO:  could be null?
+									if (Collection.class.isAssignableFrom(parameterType)) {
+										throw new ConfigurationException(
+												Msg.code(401) + "Argument #" + paramIndex + " of Method '"
+														+ theMethod.getName()
+														+ "' in type '"
+														+ theMethod
+																.getDeclaringClass()
+																.getCanonicalName()
+														+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
+									}
+
+									// LUKETODO:  do I need to worry about this:
+									/*
+
+									Class<?> newParameterType = elementDefinition.getImplementingClass();
+									if (!declaredParameterType.isAssignableFrom(newParameterType)) {
+										throw new ConfigurationException(Msg.code(405) + "Non assignable parameter typeName=\""
+												+ operationParam.typeName() + "\" specified on method " + theMethod);
+									}
+									parameterType = newParameterType;
+									 */
+
+									ourLog.info(
+											"1234: about to initialize types: method: {}, outerCollectionType: {}, innerCollectionType: {}, parameterType: {}",
+											theMethod.getName(),
+											outerCollectionType,
+											innerCollectionType,
+											parameterType);
+
+									// LUKETODO:  how to handle multiple  parameters.add(param); ?????
+								} else {
+									// some kind of Exception for now?
+								}
+							}
+						}
+
 						OperationParam operationParam = (OperationParam) nextAnnotation;
 						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
 						List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);
 
-						param = new OperationParameter(
+						params.add(new OperationParameter(
 								theContext,
 								op.name(),
 								operationParam.name(),
 								operationParam.min(),
 								operationParam.max(),
 								description,
-								examples);
+								examples));
 						if (isNotBlank(operationParam.typeName())) {
 							BaseRuntimeElementDefinition<?> elementDefinition =
 									theContext.getElementDefinition(operationParam.typeName());
@@ -526,7 +689,7 @@ public class MethodUtil {
 						}
 						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
 						List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);
-						param = new OperationParameter(
+						params.add(new OperationParameter(
 										theContext,
 										Constants.EXTOP_VALIDATE,
 										Constants.EXTOP_VALIDATE_MODE,
@@ -553,7 +716,7 @@ public class MethodUtil {
 										return ParametersUtil.createString(
 												theContext, ((ValidationModeEnum) theObject).getCode());
 									}
-								});
+								}));
 					} else if (nextAnnotation instanceof Validate.Profile) {
 						if (!parameterType.equals(String.class)) {
 							throw new ConfigurationException(Msg.code(407) + "Parameter annotated with @"
@@ -562,7 +725,7 @@ public class MethodUtil {
 						}
 						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
 						List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);
-						param = new OperationParameter(
+						params.add(new OperationParameter(
 										theContext,
 										Constants.EXTOP_VALIDATE,
 										Constants.EXTOP_VALIDATE_PROFILE,
@@ -580,14 +743,14 @@ public class MethodUtil {
 									public Object outgoingClient(Object theObject) {
 										return ParametersUtil.createString(theContext, theObject.toString());
 									}
-								});
+								}));
 					} else {
 						continue;
 					}
 				}
 			}
 
-			if (param == null) {
+			if (params.isEmpty()) {
 				throw new ConfigurationException(
 						Msg.code(408) + "Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length)
 								+ " of method '" + theMethod.getName() + "' on type '"
@@ -606,9 +769,16 @@ public class MethodUtil {
 					outerCollectionType,
 					innerCollectionType,
 					parameterType);
-			param.initializeTypes(theMethod, outerCollectionType, innerCollectionType, parameterType);
-			parameters.add(param);
 
+			for (IParameter param : params) {
+				// LUKETODO:  this may not work because of the multitude of values for each of the 3 last params for
+				// OperationEmbeddedParam
+				param.initializeTypes(theMethod, outerCollectionType, innerCollectionType, parameterType);
+			}
+
+			parameters.addAll(params);
+
+			// LUKETODO: what to do about this?
 			paramIndex++;
 		}
 		return parameters;

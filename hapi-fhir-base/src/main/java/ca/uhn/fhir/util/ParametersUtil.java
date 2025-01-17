@@ -638,7 +638,6 @@ public class ParametersUtil {
 	}
 
 	public static boolean isOneOfEligibleTypes(Class<?> theTypeToCheck, Class<?>... theEligibleTypes) {
-		return Arrays.stream(theEligibleTypes)
-			.anyMatch(eligibleType -> eligibleType == theTypeToCheck);
+		return Arrays.stream(theEligibleTypes).anyMatch(eligibleType -> eligibleType == theTypeToCheck);
 	}
 }

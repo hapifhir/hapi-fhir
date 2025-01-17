@@ -266,7 +266,8 @@ public abstract class BaseMethodBinding {
 			// class, bind to the fields, then invoke.
 			final Method method = getMethod();
 
-			return method.invoke(getProvider(), BaseMethodBindingMethodParameterBuilder.buildMethodParams(method, theMethodParams));
+			return method.invoke(
+					getProvider(), BaseMethodBindingMethodParameterBuilder.buildMethodParams(method, theMethodParams));
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
@@ -279,7 +280,6 @@ public abstract class BaseMethodBinding {
 			throw new InternalErrorException(Msg.code(390) + "Failed to call access method: " + e.getCause(), e);
 		}
 	}
-
 
 	/**
 	 * Does this method have a parameter annotated with {@link ConditionalParamBinder}. Note that many operations don't actually support this paramter, so this will only return true occasionally.
