@@ -81,7 +81,8 @@ public class GenerateDdlMojo extends AbstractMojo {
 		}
 
 		for (Dialect nextDialect : dialects) {
-			IHapiFhirDialect instance = ReflectionUtil.newInstance(nextDialect.getClassName(), IHapiFhirDialect.class, new Class[0], new Object[0]);
+			IHapiFhirDialect instance = ReflectionUtil.newInstance(
+					nextDialect.getClassName(), IHapiFhirDialect.class, new Class[0], new Object[0]);
 			switch (instance.getDriverType()) {
 				case H2_EMBEDDED:
 				case DERBY_EMBEDDED:
