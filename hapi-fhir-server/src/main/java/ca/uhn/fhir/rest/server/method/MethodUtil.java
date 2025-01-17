@@ -206,6 +206,7 @@ public class MethodUtil {
 
 							parameterType = fieldType;
 
+							// LUKETODO:  this is broken:  we are LOSING the generic type for some reason
 							if (Collection.class.isAssignableFrom(parameterType)) {
 								innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
 								// LUKETODO: come up with another method to do this for field params
@@ -229,12 +230,7 @@ public class MethodUtil {
 														.getSuperclass() + "'");
 									}
 								}
-								// LUKETODO:
-								//								declaredParameterType = parameterType;
 							}
-							// LUKETODO:  now we're processing the generic parameter, so capture the inner and outer
-							// types
-							// Collection<X>
 							// LUKETODO:  could be null?
 							if (Collection.class.isAssignableFrom(parameterType)) {
 								outerCollectionType = innerCollectionType;
@@ -369,6 +365,7 @@ public class MethodUtil {
 				param = new ServletResponseParameter();
 			} else if (parameterType.equals(RequestDetails.class)
 					|| parameterType.equals(ServletRequestDetails.class)) {
+				// LUKETODO:  this is where I got nailed
 				param = new RequestDetailsParameter();
 			} else if (parameterType.equals(IInterceptorBroadcaster.class)) {
 				param = new InterceptorBroadcasterParameter();
@@ -781,7 +778,8 @@ public class MethodUtil {
 			}
 
 			// LUKETODO:  do we need this or just add conditional logic?
-			if (paramContexts.isEmpty()) {
+			if (paramContexts.isEmpty()
+				|| ! (param instanceof OperationEmbeddedParameter)) { // LUKETODO:  another nasty hack:  we need to add RequestDetails
 				paramContexts.add(
 						new ParamInitializationContext(param, parameterType, outerCollectionType, innerCollectionType));
 			}

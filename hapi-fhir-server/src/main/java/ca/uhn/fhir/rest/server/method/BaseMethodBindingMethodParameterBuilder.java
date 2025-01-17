@@ -84,6 +84,17 @@ class BaseMethodBindingMethodParameterBuilder {
 
 		validMethodParamTypes(methodParamsWithoutRequestDetails, validateAndGetConstructorParameters(constructor));
 
+		ourLog.info("constructor args: \n{}\nand non-request details parameter args: \n{}\n and orig method params:\n{}",
+			Arrays.toString(constructor.getParameterTypes()),
+			Arrays.toString(methodParamsWithoutRequestDetails),
+			Arrays.toString(theMethodParams));
+
+		if (methodParamsWithoutRequestDetails.length != constructor.getParameterCount()) {
+			throw new InternalErrorException(String.format("1234: mismatch between constructor args: %s and non-request details parameter args: %s",
+				Arrays.toString(constructor.getParameterTypes()),
+				Arrays.toString(methodParamsWithoutRequestDetails)));
+		}
+
 		return constructor.newInstance(methodParamsWithoutRequestDetails);
 	}
 
