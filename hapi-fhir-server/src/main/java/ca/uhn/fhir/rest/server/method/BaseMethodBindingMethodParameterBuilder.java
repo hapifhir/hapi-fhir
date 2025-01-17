@@ -118,36 +118,38 @@ class BaseMethodBindingMethodParameterBuilder {
 
 	// LUKETODO:  design for future use factory methods
 
+	// RequestDetails must be dealt with separately because there is no such concept in clinical-reasoning and the
+	// operation params classes must be defined in that project
 	@Nonnull
-	private static Object[] buildMethodParamsInCorrectPositions(
-			Object[] theMethodParams, Object operationEmbeddedType) {
+	private static Object[] buildMethodParamsInCorrectPositions(Object[] theMethodParams, Object operationEmbeddedType) {
 
-		// LUKETODO: this is DUMB:  extract the Request Details, then pass an enum of either FIRST OR LAST
-		final List<Integer> requestDetailsIndexes = IntStream.range(0, theMethodParams.length)
-				.filter(index -> theMethodParams[index] instanceof RequestDetails)
-				.boxed()
-				.collect(Collectors.toUnmodifiableList());
-		;
+		final List<RequestDetails> requestDetailsMultiple = Arrays.stream(theMethodParams)
+			.filter(RequestDetails.class::isInstance)
+			.map(RequestDetails.class::cast)
+			.collect(Collectors.toUnmodifiableList());
 
-		if (requestDetailsIndexes.size() > 1) {
+		if (requestDetailsMultiple.size() > 1) {
 			throw new InternalErrorException(
-					Msg.code(562462) + "1234: cannot define a request with more than one RequestDetails");
+				Msg.code(562462) + "1234: cannot define a request with more than one RequestDetails");
 		}
 
-		if (!requestDetailsIndexes.isEmpty()) {
-			final int requestDetailsIndex = requestDetailsIndexes.get(0);
-
-			if (requestDetailsIndex == 0) {
-				// RequestDetails goes first
-				return new Object[] {theMethodParams[0], operationEmbeddedType};
-			}
-
-			// RequestDetails goes last
-			return new Object[] {operationEmbeddedType, theMethodParams[requestDetailsIndex]};
+		if (requestDetailsMultiple.isEmpty()) {
+			// No RequestDetails at all
+			return new Object[] {operationEmbeddedType};
 		}
 
-		// No RequestDetails at all
-		return new Object[] {operationEmbeddedType};
+		final RequestDetails requestDetails = requestDetailsMultiple.get(0);
+
+		final int indexOfRequestDetails = Arrays.asList(theMethodParams)
+			.indexOf(requestDetails);
+
+		if (indexOfRequestDetails == 0) {
+			// RequestDetails goes first
+			return new Object[] {requestDetails, operationEmbeddedType};
+		}
+
+		// RequestDetails goes last
+		return new Object[] {operationEmbeddedType, requestDetails};
 	}
 
 	private static void validMethodParamTypes(
