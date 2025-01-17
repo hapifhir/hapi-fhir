@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 6618
+jira: SMILE-9602
+title: "Previously, deleting the final MDM managed resource on a partition
+        would not result in the linked Golden Resource being deleted as well.
+        This has now been resolved.
+"
