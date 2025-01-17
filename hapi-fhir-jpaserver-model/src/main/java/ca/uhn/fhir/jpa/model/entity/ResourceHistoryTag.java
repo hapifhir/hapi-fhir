@@ -154,12 +154,12 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("id", getId());
-		if (getPartitionId() != null) {
+		if (getPartitionId().getPartitionId() != null) {
 			b.append("partId", getPartitionId().getPartitionId());
 		}
 		b.append("versionId", myResourceHistoryPid);
 		b.append("resId", getResourceId());
-		b.append("tag", getTag().getId());
+		b.append("tag", getTagId());
 		return b.build();
 	}
 }
