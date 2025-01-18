@@ -25,6 +25,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.lenient;
 
+// LUKETODO: ask #team-hdp about adding FHIR structures R4 to the test pom
+// LUKETODO: test FHIR primitive types, like IntegerType, BooleanType, and IPrimitiveType
+// LUKETODO: test IdParam/IIdType/etc
+// LUKETODO: test with RequestDetails either at the beginning or the end
+// LUKETODO: try to test for every case in embedded params where there's a throws
 @ExtendWith(MockitoExtension.class)
 class MethodUtilTest {
 

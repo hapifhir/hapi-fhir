@@ -29,7 +29,16 @@ class BaseMethodBindingMethodParameterBuilder {
 
 	private BaseMethodBindingMethodParameterBuilder() {}
 
-	static Object[] buildMethodParams(Method theMethod, Object[] theMethodParams)
+	static Object[] buildMethodParams(Method theMethod, Object[] theMethodParams) {
+		try {
+			return tryBuildMethodParams(theMethod, theMethodParams);
+		} catch (InvocationTargetException | IllegalAccessException | InstantiationException exception) {
+			throw new InternalErrorException(String.format("%s1234:  Error building method params: %s",
+				Msg.code(234198928), exception.getMessage()), exception);
+		}
+	}
+
+	static Object[] tryBuildMethodParams(Method theMethod, Object[] theMethodParams)
 			throws InvocationTargetException, IllegalAccessException, InstantiationException {
 
 		if (theMethod == null || theMethodParams == null) {

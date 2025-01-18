@@ -19,6 +19,7 @@ import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.*;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+// LUKETODO:  try to cover more InternalErrorException cases
 class BaseMethodBindingMethodParameterBuilderTest {
 
 	// LUKETODO:  assert Exception messages
