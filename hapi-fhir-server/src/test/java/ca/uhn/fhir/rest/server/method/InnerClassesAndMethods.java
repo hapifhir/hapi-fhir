@@ -1,0 +1,241 @@
+package ca.uhn.fhir.rest.server.method;
+
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
+// Methods and embedded param classes to be used for testing regression code in hapi-fhir-server method classes
+class InnerClassesAndMethods {
+
+	// LUKETODO:  figure out how to test FHIR version specific resources and primitive types.
+
+	static final String SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS = "sampleMethodEmbeddedTypeMultipleRequestDetails";
+	static final String SUPER_SIMPLE = "superSimple";
+	static final String INVALID_METHOD_OPERATION_PARAMS_NO_OPERATION = "invalidMethodOperationParamsNoOperationInvalid";
+	static final String SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE = "sampleMethodEmbeddedTypeRequestDetailsFirstWithIdType";
+	static final String SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST = "sampleMethodEmbeddedTypeRequestDetailsLast";
+	static final String SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST = "sampleMethodEmbeddedTypeRequestDetailsFirst";
+	static final String SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS = "sampleMethodEmbeddedTypeNoRequestDetails";
+	static final String SAMPLE_METHOD_OPERATION_PARAMS = "sampleMethodOperationParams";
+	static final String SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE = "sampleMethodParamNoEmbeddedType";
+
+	Method getDeclaredMethod(String theMethodName, Class<?>... theParamClasses) {
+		try {
+			return this.getClass().getDeclaredMethod(theMethodName, theParamClasses);
+		} catch (Exception exceptional) {
+			fail(String.format("Could not find method: %s with params: %s", theMethodName, Arrays.toString(theParamClasses)));
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T unsafeCast(Object theObject) {
+		return (T)theObject;
+	}
+
+	// Below are the methods and classed to test reflection code
+
+	void superSimple() {
+	}
+
+	void invalidMethodOperationParamsNoOperationInvalid(
+		@OperationParam(name = "param1") String theParam1) {
+
+	}
+
+	@Operation(name="sampleMethodOperationParams")
+	void sampleMethodOperationParams(
+		@IdParam IIdType theIdType,
+		@OperationParam(name = "param1") String theParam1,
+		@OperationParam(name = "param2") List<String> theParam2) {
+		// Sample method for testing
+	}
+
+	static class ParamsWithoutAnnotations {
+		private final String myParam1;
+		private final List<String> myParam2;
+
+		public ParamsWithoutAnnotations(String myParam1, List<String> myParam2) {
+			this.myParam1 = myParam1;
+			this.myParam2 = myParam2;
+		}
+
+		public String getParam1() {
+			return myParam1;
+		}
+
+		public List<String> getParam2() {
+			return myParam2;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			ParamsWithoutAnnotations that = (ParamsWithoutAnnotations) o;
+			return Objects.equals(myParam1, that.myParam1) && Objects.equals(myParam2, that.myParam2);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myParam1, myParam2);
+		}
+
+		@Override
+		public String toString() {
+			return new StringJoiner(", ", ParamsWithoutAnnotations.class.getSimpleName() + "[", "]")
+				.add("myParam1='" + myParam1 + "'")
+				.add("myParam2=" + myParam2)
+				.toString();
+		}
+	}
+
+	// Ignore warnings that these classes can be records.  Converting them to records will make the tests fail
+	static class SampleParams {
+		@OperationEmbeddedParam(name = "param1")
+		private final String myParam1;
+
+		@OperationEmbeddedParam(name = "param2")
+		private final List<String> myParam2;
+
+		public SampleParams(String myParam1, List<String> myParam2) {
+			this.myParam1 = myParam1;
+			this.myParam2 = myParam2;
+		}
+
+		public String getParam1() {
+			return myParam1;
+		}
+
+		public List<String> getParam2() {
+			return myParam2;
+		}
+
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == null || getClass() != o.getClass()) return false;
+			SampleParams that = (SampleParams) o;
+			return Objects.equals(myParam1, that.myParam1) && Objects.equals(myParam2, that.myParam2);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myParam1, myParam2);
+		}
+
+		@Override
+		public String toString() {
+			return new StringJoiner(", ", SampleParams.class.getSimpleName() + "[", "]")
+				.add("myParam1='" + myParam1 + "'")
+				.add("myParam2=" + myParam2)
+				.toString();
+		}
+	}
+
+	// Ignore warnings that these classes can be records.  Converting them to records will make the tests fail
+	static class SampleParamsWithIdParam {
+		@IdParam
+		private final IIdType myId;
+
+		@OperationEmbeddedParam(name = "param1")
+		private final String myParam1;
+
+		@OperationEmbeddedParam(name = "param2")
+		private final List<String> myParam2;
+
+		public SampleParamsWithIdParam(IIdType myId, String myParam1, List<String> myParam2) {
+			this.myId = myId;
+			this.myParam1 = myParam1;
+			this.myParam2 = myParam2;
+		}
+
+		public IIdType getId() {
+			return myId;
+		}
+
+		public String getParam1() {
+			return myParam1;
+		}
+
+		public List<String> getParam2() {
+			return myParam2;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			SampleParamsWithIdParam that = (SampleParamsWithIdParam) o;
+			return Objects.equals(myId, that.myId) && Objects.equals(myParam1, that.myParam1) && Objects.equals(myParam2, that.myParam2);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myId, myParam1, myParam2);
+		}
+
+		@Override
+		public String toString() {
+			return new StringJoiner(", ", SampleParamsWithIdParam.class.getSimpleName() + "[", "]")
+				.add("myId=" + myId)
+				.add("myParam1='" + myParam1 + "'")
+				.add("myParam2=" + myParam2)
+				.toString();
+		}
+	}
+
+	String sampleMethodEmbeddedTypeRequestDetailsFirst(RequestDetails theRequestDetails, SampleParams theParams) {
+		// return something arbitrary
+		return theRequestDetails.getId().getValue() + theParams.getParam1();
+	}
+
+	String sampleMethodEmbeddedTypeRequestDetailsLast(SampleParams theParams, RequestDetails theRequestDetails) {
+		// return something arbitrary
+		return theRequestDetails.getId().getValue() + theParams.getParam1();
+	}
+
+	@Operation(name="sampleMethodEmbeddedTypeNoRequestDetails")
+	String sampleMethodEmbeddedTypeNoRequestDetails(SampleParams theParams) {
+		// return something arbitrary
+		return theParams.getParam1();
+	}
+
+	String sampleMethodParamNoEmbeddedType(ParamsWithoutAnnotations theParams) {
+		// return something arbitrary
+		return theParams.getParam1();
+	}
+
+	String sampleMethodEmbeddedTypeMultipleRequestDetails(RequestDetails theRequestDetails1, SampleParams theParams, RequestDetails theRequestDetails2) {
+		// return something arbitrary
+		return theRequestDetails1.getId().getValue() + theParams.getParam1();
+	}
+
+	String sampleMethodEmbeddedTypeRequestDetailsFirstWithIdType(RequestDetails theRequestDetails, SampleParamsWithIdParam theParams) {
+		// return something arbitrary
+		return theRequestDetails.getId().getValue() + theParams.getParam1();
+	}
+
+	String sampleMethodEmbeddedTypeRequestDetailsLastWithIdType(SampleParamsWithIdParam theParams, RequestDetails theRequestDetails) {
+		// return something arbitrary
+		return theRequestDetails.getId().getValue() + theParams.getParam1();
+	}
+
+	String sampleMethodEmbeddedTypeNoRequestDetailsWithIdType(SampleParams theParams) {
+		// return something arbitrary
+		return theParams.getParam1();
+	}
+}
