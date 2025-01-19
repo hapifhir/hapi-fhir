@@ -1,5 +1,7 @@
 package ca.uhn.fhir.tinder.ddl;
 
+import ca.uhn.fhir.jpa.model.dialect.IHapiFhirDialect;
+import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -12,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -78,6 +81,36 @@ public class GenerateDdlMojo extends AbstractMojo {
 		}
 
 		for (Dialect nextDialect : dialects) {
+			IHapiFhirDialect instance = ReflectionUtil.newInstance(
+					nextDialect.getClassName(), IHapiFhirDialect.class, new Class[0], new Object[0]);
+			switch (instance.getDriverType()) {
+				case H2_EMBEDDED:
+				case DERBY_EMBEDDED:
+				case MARIADB_10_1:
+				case MYSQL_5_7:
+				case COCKROACHDB_21_1:
+					break;
+				case POSTGRES_9_4:
+				case MSSQL_2012:
+				case ORACLE_12C:
+					/*
+					 * This is a hardcoded fix to remove the FK constraint from FK_RES_LINK to the
+					 * target resource. This constraint hurts performance so we drop it on several
+					 * platforms, but we want to leave it in for H2 so that unit tests can catch
+					 * issues.
+					 *
+					 * In the future it may be possible to do this in a cleaner way, but for now
+					 * we have to leave the constraint as-is in the entity classes because of this
+					 * bug:
+					 * https://hibernate.atlassian.net/browse/HHH-19046
+					 */
+					if (nextDialect.getDropStatementsContainingRegex() == null) {
+						nextDialect.setDropStatementsContainingRegex(new ArrayList<>());
+					}
+					nextDialect.dropStatementsContainingRegex.add("add constraint FK_RESLINK_TARGET");
+					break;
+			}
+
 			generator.addDialect(nextDialect);
 		}
 
@@ -113,6 +146,7 @@ public class GenerateDdlMojo extends AbstractMojo {
 		private String targetFileName;
 		private String prependFile;
 		private String appendFile;
+		private List<String> dropStatementsContainingRegex;
 
 		public Dialect() {
 			super();
@@ -122,6 +156,14 @@ public class GenerateDdlMojo extends AbstractMojo {
 			super();
 			setClassName(theClassName);
 			setTargetFileName(theTargetFileName);
+		}
+
+		public List<String> getDropStatementsContainingRegex() {
+			return dropStatementsContainingRegex;
+		}
+
+		public void setDropStatementsContainingRegex(List<String> theDropStatementsContainingRegex) {
+			dropStatementsContainingRegex = theDropStatementsContainingRegex;
 		}
 
 		public String getAppendFile() {

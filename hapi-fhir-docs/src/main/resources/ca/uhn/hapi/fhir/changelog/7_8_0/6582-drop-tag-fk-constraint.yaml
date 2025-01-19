@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 6582
+title: "Under heavy load, a foreign key constraint in the Tag Definition table (used for Tags, Security Labels, and Profile Definitions) can cause serious slowdowns when writing large numbers of resources (particularly if many resources contain the same tags/labels, or if the resources are being written individually or in smaller batches). This has been corrected. Also, a foreign key constraint on the Resource Link table has been dropped. This will significantly improve performance when writing resource collections with many links to resources not also in the same Bundle."

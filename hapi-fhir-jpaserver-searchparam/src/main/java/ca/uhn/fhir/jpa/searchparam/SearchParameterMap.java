@@ -567,8 +567,8 @@ public class SearchParameterMap implements Serializable {
 	private boolean isNotEqualsComparator(DateParam theLowerBound, DateParam theUpperBound) {
 		return theLowerBound != null
 				&& theUpperBound != null
-				&& theLowerBound.getPrefix().equals(NOT_EQUAL)
-				&& theUpperBound.getPrefix().equals(NOT_EQUAL);
+				&& NOT_EQUAL.equals(theLowerBound.getPrefix())
+				&& NOT_EQUAL.equals(theUpperBound.getPrefix());
 	}
 
 	/**

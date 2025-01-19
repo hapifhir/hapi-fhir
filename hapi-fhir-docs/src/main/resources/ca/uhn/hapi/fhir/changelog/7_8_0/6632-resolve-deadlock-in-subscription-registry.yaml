@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6632
+title: "A race condition in the SubscriptionRegistry could cause an occasional deadlock
+  during shutdown."
