@@ -5,7 +5,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SampleParams;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	// LUKETODO:  RequestDetails in signature but not passed
 
 	@Test
-	void happyPathOperationParamsEmptyParams() throws InvocationTargetException, IllegalAccessException, InstantiationException {
+	void happyPathOperationParamsEmptyParams() {
 		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SUPER_SIMPLE);
 		final Object[] inputParams = new Object[]{};
 
@@ -47,8 +48,8 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	}
 
 	@Test
-	void happyPathOperationParamsNonEmptyParams() throws InvocationTargetException, IllegalAccessException, InstantiationException {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_OPERATION_PARAMS, IIdType.class, String.class, List.class);
+	void happyPathOperationParamsNonEmptyParams() {
+		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_OPERATION_PARAMS, IdType.class, String.class, List.class, BooleanType.class);
 		final Object[] inputParams = new Object[]{new IdDt(), "param1", List.of("param2")};
 
 		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);
@@ -57,7 +58,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	}
 
 	@Test
-	void happyPathOperationEmbeddedTypesNoRequestDetails() throws InvocationTargetException, IllegalAccessException, InstantiationException {
+	void happyPathOperationEmbeddedTypesNoRequestDetails() {
 		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
 		final Object[] inputParams = new Object[]{"param1", List.of("param2")};
 		final Object[] expectedOutputParams = new Object[]{new SampleParams("param1", List.of("param2"))};
@@ -68,7 +69,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	}
 
 	@Test
-	void happyPathOperationEmbeddedTypesRequestDetailsFirst() throws InvocationTargetException, IllegalAccessException, InstantiationException {
+	void happyPathOperationEmbeddedTypesRequestDetailsFirst() {
 		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST, RequestDetails.class, SampleParams.class);
 		final Object[] inputParams = new Object[]{REQUEST_DETAILS, "param1", List.of("param2")};
 		final Object[] expectedOutputParams = new Object[]{REQUEST_DETAILS, new SampleParams("param1", List.of("param2"))};
@@ -79,7 +80,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	}
 
 	@Test
-	void happyPathOperationEmbeddedTypesRequestDetailsLast() throws InvocationTargetException, IllegalAccessException, InstantiationException {
+	void happyPathOperationEmbeddedTypesRequestDetailsLast() {
 		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST, SampleParams.class, RequestDetails.class);
 		final Object[] inputParams = new Object[]{"param1", List.of("param3"), REQUEST_DETAILS};
 		final Object[] expectedOutputParams = new Object[]{new SampleParams("param1", List.of("param3")), REQUEST_DETAILS};
@@ -91,16 +92,19 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	@Disabled
-	// LUKETODO:  Figure out what we're doing with FHIR structures in this test module before testing anything with IdTypes...
-	void happyPathOperationEmbeddedTypesWithIdType() throws InvocationTargetException, IllegalAccessException, InstantiationException {
-//		final IIdType id = new IIdType();
-//		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE, RequestDetails.class, SampleParamsWithIdParam.class);
-//		final Object[] inputParams = new Object[]{REQUEST_DETAILS, id, "param1", List.of("param2")};
-//		final Object[] expectedOutputParams = new Object[]{REQUEST_DETAILS, new SampleParamsWithIdParam(id, "param1", List.of("param2")),};
-//
-//		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);
-//
-//		assertArrayEquals(expectedOutputParams, actualOutputParams);
+	void happyPathOperationEmbeddedTypesWithIdType() {
+		final IdType id = new IdType();
+		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE, RequestDetails.class, SampleParamsWithIdParam.class);
+		final Object[] inputParams = new Object[]{REQUEST_DETAILS, id, "param1", List.of("param2"), new BooleanType(false)};
+		final Object[] expectedOutputParams = new Object[]{REQUEST_DETAILS, new SampleParamsWithIdParam(id, "param1", List.of("param2"), new BooleanType(false))};
+
+		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);
+
+//		assertParamsEqual(expectedOutputParams, actualOutputParams);
+		assertArrayEquals(expectedOutputParams, actualOutputParams);
+	}
+
+	private void assertParamsEqual(Object[] expectedOutputParams, Object[] actualOutputParams) {
 	}
 
 	@Test

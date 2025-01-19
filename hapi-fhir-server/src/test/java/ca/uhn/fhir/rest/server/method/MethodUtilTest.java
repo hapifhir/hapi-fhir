@@ -2,11 +2,9 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SampleParams;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.BeforeEach;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,28 +28,16 @@ import static org.mockito.Mockito.lenient;
 // LUKETODO: test IdParam/IIdType/etc
 // LUKETODO: test with RequestDetails either at the beginning or the end
 // LUKETODO: try to test for every case in embedded params where there's a throws
-@ExtendWith(MockitoExtension.class)
 class MethodUtilTest {
 
 	private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(MethodUtilTest.class);
 
-	// Need FHIR structures in test pom to use this, which is only needed for a tiny number of test cases
-	@Mock
-    private FhirContext myFhirContext;
-
-	@Mock
-	private IFhirVersion myFhirVersion;
+	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 
 	private final InnerClassesAndMethods myInnerClassesAndMethods = new InnerClassesAndMethods();
 
     @Mock
     private Object myProvider;
-
-	@BeforeEach
-	void beforeEach() {
-		lenient().when(myFhirVersion.getVersion()).thenReturn(FhirVersionEnum.R4);
-		lenient().when(myFhirContext.getVersion()).thenReturn(myFhirVersion);
-	}
 
 	@Test
 	void simpleMethodNoParams() {
@@ -71,17 +57,39 @@ class MethodUtilTest {
 
 	@Test
 	void sampleMethodOperationParams() {
-		final List<IParameter> resourceParameters = getMethodAndExecute(SAMPLE_METHOD_OPERATION_PARAMS, IIdType.class, String.class, List.class);
+		final List<IParameter> resourceParameters = getMethodAndExecute(SAMPLE_METHOD_OPERATION_PARAMS, IdType.class, String.class, List.class, BooleanType.class);
 
 		assertThat(resourceParameters).isNotNull();
 		assertThat(resourceParameters).isNotEmpty();
-		assertThat(resourceParameters).hasExactlyElementsOfTypes(NullParameter.class, OperationParameter.class, OperationParameter.class);
+		assertThat(resourceParameters).hasExactlyElementsOfTypes(NullParameter.class, OperationParameter.class, OperationParameter.class, OperationParameter.class);
+
+		// LUKETODO:  assert the actual OperationParameter values
+	}
+
+	@Test
+	void sampleMethodOperationParamsWithFhirTypes() {
+		final List<IParameter> resourceParameters = getMethodAndExecute(SAMPLE_METHOD_OPERATION_PARAMS, IdType.class, String.class, List.class, BooleanType.class);
+
+		assertThat(resourceParameters).isNotNull();
+		assertThat(resourceParameters).isNotEmpty();
+		assertThat(resourceParameters).hasExactlyElementsOfTypes(NullParameter.class, OperationParameter.class, OperationParameter.class, OperationParameter.class);
 
 		// LUKETODO:  assert the actual OperationParameter values
 	}
 
 	@Test
 	void sampleMethodEmbeddedParams() {
+		final List<IParameter> resourceParameters = getMethodAndExecute(SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
+
+		assertThat(resourceParameters).isNotNull();
+		assertThat(resourceParameters).isNotEmpty();
+		assertThat(resourceParameters).hasExactlyElementsOfTypes(OperationEmbeddedParameter.class, OperationEmbeddedParameter.class);
+
+		// LUKETODO:  assert the actual OperationEmbeddedParameter values
+	}
+
+	@Test
+	void sampleMethodEmbeddedParamsWithFhirTypes() {
 		final List<IParameter> resourceParameters = getMethodAndExecute(SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
 
 		assertThat(resourceParameters).isNotNull();
@@ -241,12 +249,12 @@ class MethodUtilTest {
 
 	private List<IParameter> getMethodAndExecute(String theMethodName, Class<?>... theParamClasses) {
 		return MethodUtil.getResourceParameters(
-			myFhirContext,
+			ourFhirContext,
 			myInnerClassesAndMethods.getDeclaredMethod(theMethodName, theParamClasses),
 			myProvider);
 	}
 
 	private List<IParameter> getResourceParameters(Method theMethod) {
-		return MethodUtil.getResourceParameters(myFhirContext, theMethod, myProvider);
+		return MethodUtil.getResourceParameters(ourFhirContext, theMethod, myProvider);
 	}
 }

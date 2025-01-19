@@ -5,7 +5,8 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.IdType;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -56,9 +57,10 @@ class InnerClassesAndMethods {
 
 	@Operation(name="sampleMethodOperationParams")
 	void sampleMethodOperationParams(
-		@IdParam IIdType theIdType,
+		@IdParam IdType theIdType,
 		@OperationParam(name = "param1") String theParam1,
-		@OperationParam(name = "param2") List<String> theParam2) {
+		@OperationParam(name = "param2") List<String> theParam2,
+		@OperationParam(name="param3") BooleanType theParam3) {
 		// Sample method for testing
 	}
 
@@ -148,7 +150,7 @@ class InnerClassesAndMethods {
 	// Ignore warnings that these classes can be records.  Converting them to records will make the tests fail
 	static class SampleParamsWithIdParam {
 		@IdParam
-		private final IIdType myId;
+		private final IdType myId;
 
 		@OperationEmbeddedParam(name = "param1")
 		private final String myParam1;
@@ -156,13 +158,17 @@ class InnerClassesAndMethods {
 		@OperationEmbeddedParam(name = "param2")
 		private final List<String> myParam2;
 
-		public SampleParamsWithIdParam(IIdType myId, String myParam1, List<String> myParam2) {
-			this.myId = myId;
-			this.myParam1 = myParam1;
-			this.myParam2 = myParam2;
+		@OperationEmbeddedParam(name = "param3")
+		private final BooleanType myParam3;
+
+		public SampleParamsWithIdParam(IdType theId, String theParam1, List<String> theParam2, BooleanType theParam3) {
+			myId = theId;
+			myParam1 = theParam1;
+			myParam2 = theParam2;
+			myParam3 = theParam3;
 		}
 
-		public IIdType getId() {
+		public IdType getId() {
 			return myId;
 		}
 
@@ -174,18 +180,23 @@ class InnerClassesAndMethods {
 			return myParam2;
 		}
 
+		public BooleanType getMyParam3() {
+			return myParam3;
+		}
+
 		@Override
 		public boolean equals(Object o) {
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
+			if (o == null || getClass() != o.getClass()) return false;
 			SampleParamsWithIdParam that = (SampleParamsWithIdParam) o;
-			return Objects.equals(myId, that.myId) && Objects.equals(myParam1, that.myParam1) && Objects.equals(myParam2, that.myParam2);
+			return Objects.equals(myId, that.myId) &&
+				Objects.equals(myParam1, that.myParam1) &&
+				Objects.equals(myParam2, that.myParam2) &&
+				Objects.equals(myParam3.booleanValue(), that.myParam3.booleanValue());
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(myId, myParam1, myParam2);
+			return Objects.hash(myId, myParam1, myParam2, myParam3.booleanValue());
 		}
 
 		@Override
@@ -194,6 +205,7 @@ class InnerClassesAndMethods {
 				.add("myId=" + myId)
 				.add("myParam1='" + myParam1 + "'")
 				.add("myParam2=" + myParam2)
+				.add("myParam3=" + myParam3.booleanValue())
 				.toString();
 		}
 	}
