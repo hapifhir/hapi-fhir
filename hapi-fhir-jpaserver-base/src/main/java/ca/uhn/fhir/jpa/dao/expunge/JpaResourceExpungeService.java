@@ -144,7 +144,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	@Override
 	@Transactional
 	public List<ResourceHistoryTablePk> findHistoricalVersionsOfNonDeletedResources(
-			String theResourceName, JpaPid theJpaPid, int theRemainingCount, String theDumbBuildBreakingApiChange) {
+			String theResourceName, JpaPid theJpaPid, int theRemainingCount) {
 		ourLog.info("Look at this change!");
 		if (isEmptyQuery(theRemainingCount)) {
 			return Collections.emptyList();
@@ -197,11 +197,6 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			}
 		}
 		return ids.getContent();
-	}
-
-	@Override
-	public List<ResourceHistoryTablePk> findHistoricalVersionsOfNonDeletedResources(String theResourceName, JpaPid theResourceId, int theI) {
-		return List.of();
 	}
 
 	@Override
