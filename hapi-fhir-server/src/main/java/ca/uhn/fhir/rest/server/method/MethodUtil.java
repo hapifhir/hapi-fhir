@@ -210,7 +210,7 @@ public class MethodUtil {
 
 					if (op == null) {
 						throw new ConfigurationException(Msg.code(404)
-							+ "@OperationParam detected on method that is not annotated with @Operation: "
+							+ "@OperationParam or OperationEmbeddedParam detected on method that is not annotated with @Operation: "
 							+ methodToUse.toGenericString());
 					}
 

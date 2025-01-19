@@ -28,6 +28,7 @@ class InnerClassesAndMethods {
 	static final String SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST = "sampleMethodEmbeddedTypeRequestDetailsLast";
 	static final String SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST = "sampleMethodEmbeddedTypeRequestDetailsFirst";
 	static final String SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS = "sampleMethodEmbeddedTypeNoRequestDetails";
+	static final String SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE = "sampleMethodEmbeddedTypeNoRequestDetailsWithIdType";
 	static final String SAMPLE_METHOD_OPERATION_PARAMS = "sampleMethodOperationParams";
 	static final String SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE = "sampleMethodParamNoEmbeddedType";
 
@@ -246,7 +247,8 @@ class InnerClassesAndMethods {
 		return theRequestDetails.getId().getValue() + theParams.getParam1();
 	}
 
-	String sampleMethodEmbeddedTypeNoRequestDetailsWithIdType(SampleParams theParams) {
+	@Operation(name="sampleMethodEmbeddedTypeNoRequestDetailsWithIdType")
+	String sampleMethodEmbeddedTypeNoRequestDetailsWithIdType(SampleParamsWithIdParam theParams) {
 		// return something arbitrary
 		return theParams.getParam1();
 	}
