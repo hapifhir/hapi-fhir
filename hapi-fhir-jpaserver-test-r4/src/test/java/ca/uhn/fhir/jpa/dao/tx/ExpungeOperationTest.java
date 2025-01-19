@@ -47,7 +47,7 @@ public class ExpungeOperationTest {
 	@Test
 	public void testExpunge_onSpecificTenant_willPerformExpungeOnSpecificTenant(){
 		// given
-		when(myIResourceExpungeService.findHistoricalVersionsOfDeletedResources(any(), any(), anyInt())).thenReturn(List.of(JpaPid.fromId(1l)));
+		when(myIResourceExpungeService.findHistoricalVersionsOfDeletedResources(any(), any(), anyInt(),any())).thenReturn(List.of(JpaPid.fromId(1l)));
 		when(myIResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(any(), any(), anyInt())).thenReturn(List.of(JpaPid.fromId(1l)));
 		myStorageSettings.setExpungeBatchSize(5);
 
