@@ -200,6 +200,11 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	}
 
 	@Override
+	public List<ResourceHistoryTablePk> findHistoricalVersionsOfNonDeletedResources(String theResourceName, JpaPid theResourceId, int theI) {
+		return List.of();
+	}
+
+	@Override
 	@Transactional
 	public void expungeCurrentVersionOfResources(
 			RequestDetails theRequestDetails, List<JpaPid> theResourceIds, AtomicInteger theRemainingCount) {
