@@ -11,7 +11,11 @@ class MethodUtilMutableLoopStateHolder {
 	private final Class<? extends Collection<?>> myOuterCollectionType;
 	private final Class<? extends Collection<?>> myInnerCollectionType;
 
-	public MethodUtilMutableLoopStateHolder(Class<?> theParameterType, Method theMethodToUse, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType) {
+	public MethodUtilMutableLoopStateHolder(
+			Class<?> theParameterType,
+			Method theMethodToUse,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType) {
 		myParameterType = theParameterType;
 		myMethodToUse = theMethodToUse;
 		myOuterCollectionType = theOuterCollectionType;
@@ -37,10 +41,10 @@ class MethodUtilMutableLoopStateHolder {
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", MethodUtilMutableLoopStateHolder.class.getSimpleName() + "[", "]")
-			.add("myParameterType=" + myParameterType)
-			.add("myMethodToUse=" + myMethodToUse)
-			.add("myOuterCollectionType=" + myOuterCollectionType)
-			.add("myInnerCollectionType=" + myInnerCollectionType)
-			.toString();
+				.add("myParameterType=" + myParameterType)
+				.add("myMethodToUse=" + myMethodToUse)
+				.add("myOuterCollectionType=" + myOuterCollectionType)
+				.add("myInnerCollectionType=" + myInnerCollectionType)
+				.toString();
 	}
 }

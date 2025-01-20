@@ -49,17 +49,6 @@ class BaseMethodBindingMethodParameterBuilder {
 					Msg.code(234198927), theMethod, Arrays.toString(theMethodParams)));
 		}
 
-		final Class<?>[] methodParameterTypes = theMethod.getParameterTypes();
-
-		if (Arrays.stream(methodParameterTypes)
-						.filter(RequestDetails.class::isAssignableFrom)
-						.count()
-				> 1) {
-			throw new InternalErrorException(String.format(
-					"%s1234:  Invalid operation with embedded parameters.  Cannot have more than one RequestDetails: %s",
-					Msg.code(924469635), theMethod.getName()));
-		}
-
 		final List<Class<?>> parameterTypesWithOperationEmbeddedParam =
 				ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
 						theMethod, OperationEmbeddedParam.class);
@@ -72,6 +61,17 @@ class BaseMethodBindingMethodParameterBuilder {
 
 		if (parameterTypesWithOperationEmbeddedParam.isEmpty()) {
 			return theMethodParams;
+		}
+
+		final Class<?>[] methodParameterTypes = theMethod.getParameterTypes();
+
+		if (Arrays.stream(methodParameterTypes)
+						.filter(RequestDetails.class::isAssignableFrom)
+						.count()
+				> 1) {
+			throw new InternalErrorException(String.format(
+					"%s1234:  Invalid operation with embedded parameters.  Cannot have more than one RequestDetails: %s",
+					Msg.code(924469635), theMethod.getName()));
 		}
 
 		final long numRequestDetails = Arrays.stream(methodParameterTypes)

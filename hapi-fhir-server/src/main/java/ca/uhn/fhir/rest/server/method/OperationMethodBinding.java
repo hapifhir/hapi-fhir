@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -480,9 +479,9 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private Optional<IdParam> findIdParam(Method theMethod, int theParamIndex) {
 		// LUKETODO:  do we need to validate there's only one?
 		return Arrays.stream(theMethod.getParameterAnnotations()[theParamIndex])
-			.filter(IdParam.class::isInstance)
-			.map(IdParam.class::cast)
-			.findFirst();
+				.filter(IdParam.class::isInstance)
+				.map(IdParam.class::cast)
+				.findFirst();
 	}
 
 	@Nonnull

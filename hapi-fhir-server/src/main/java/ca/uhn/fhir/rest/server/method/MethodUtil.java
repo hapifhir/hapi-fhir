@@ -282,64 +282,8 @@ public class MethodUtil {
 
 								parameterType = fieldType;
 
-								Class<?> parameterTypeInner = parameterType;
-								Class<? extends java.util.Collection<?>> outerCollectionTypeInner = null;
-								Class<? extends java.util.Collection<?>> innerCollectionTypeInner = null;
-
-								if (Collection.class.isAssignableFrom(parameterType)) {
-									innerCollectionTypeInner = (Class<? extends java.util.Collection<?>>) parameterType;
-									parameterTypeInner = ReflectionUtil.getGenericCollectionTypeOfField(field);
-									if (parameterTypeInner == null
-											&& methodToUse.getDeclaringClass().isSynthetic()) {
-										try {
-											methodToUse = methodToUse
-													.getDeclaringClass()
-													.getSuperclass()
-													.getMethod(methodToUse.getName(), parameterTypes);
-											parameterTypeInner =
-													// LUKETODO:  what to do here if anything?
-													ReflectionUtil.getGenericCollectionTypeOfMethodParameter(
-															methodToUse, paramIndex);
-										} catch (NoSuchMethodException e) {
-											throw new ConfigurationException(Msg.code(400) + "A method with name '"
-													+ methodToUse.getName() + "' does not exist for super class '"
-													+ methodToUse
-															.getDeclaringClass()
-															.getSuperclass() + "'");
-										}
-									}
-									// LUKETODO:
-									//								declaredParameterType = parameterType;
-								}
-								// LUKETODO:  now we're processing the generic parameter, so capture the inner and
-								// outer
-								// types
-								// Collection<X>
-								// LUKETODO:  could be null?
-								if (Collection.class.isAssignableFrom(parameterTypeInner)) {
-									outerCollectionTypeInner = innerCollectionTypeInner;
-									innerCollectionTypeInner = (Class<? extends java.util.Collection<?>>) parameterType;
-									// LUKETODO: come up with another method to do this for field params
-									parameterTypeInner = ReflectionUtil.getGenericCollectionTypeOfField(field);
-									// LUKETODO:
-									//								declaredParameterType = parameterType;
-								}
-								// LUKETODO:  as a guard:  if this is still a Collection, then throw because
-								// something went
-								// wrong
-								// LUKETODO:  could be null?
-								if (Collection.class.isAssignableFrom(parameterTypeInner)) {
-									throw new ConfigurationException(
-											Msg.code(401) + "Argument #" + paramIndex + " of Method '"
-													+ methodToUse.getName()
-													+ "' in type '"
-													+ methodToUse
-															.getDeclaringClass()
-															.getCanonicalName()
-													+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
-								}
-
-								final MethodUtilMutableLoopStateHolder stateHolder = doStuff(methodToUse, parameterTypes, parameterType, paramIndex, field);
+								final MethodUtilMutableLoopStateHolder stateHolder =
+										doStuff(methodToUse, parameterTypes, parameterType, paramIndex, field);
 
 								parameterType = stateHolder.getParameterType();
 								methodToUse = stateHolder.getMethodToUse();
@@ -579,8 +523,8 @@ public class MethodUtil {
 					|| !(param
 							instanceof OperationEmbeddedParameter)) { // LUKETODO:  another nasty hack:  we need to add
 				// RequestDetails if it's last
-				paramContexts.add(
-						new MethodUtilParamInitializationContext(param, parameterType, outerCollectionType, innerCollectionType));
+				paramContexts.add(new MethodUtilParamInitializationContext(
+						param, parameterType, outerCollectionType, innerCollectionType));
 			}
 
 			if (param == null) {
@@ -601,7 +545,8 @@ public class MethodUtil {
 		return parameters;
 	}
 
-	private static MethodUtilMutableLoopStateHolder doStuff(Method theMethod, Class<?>[] theParameterTypes, Class<?> theParameterType, int paramIndex, Field theField) {
+	private static MethodUtilMutableLoopStateHolder doStuff(
+			Method theMethod, Class<?>[] theParameterTypes, Class<?> theParameterType, int paramIndex, Field theField) {
 		Class<?> parameterType = theParameterType;
 		Method methodToUse = theMethod;
 		Class<? extends java.util.Collection<?>> outerCollectionType = null;
@@ -610,23 +555,19 @@ public class MethodUtil {
 		if (Collection.class.isAssignableFrom(parameterType)) {
 			innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
 			parameterType = ReflectionUtil.getGenericCollectionTypeOfField(theField);
-			if (parameterType == null
-				&& methodToUse.getDeclaringClass().isSynthetic()) {
+			if (parameterType == null && methodToUse.getDeclaringClass().isSynthetic()) {
 				try {
 					methodToUse = methodToUse
-						.getDeclaringClass()
-						.getSuperclass()
-						.getMethod(methodToUse.getName(), theParameterTypes);
+							.getDeclaringClass()
+							.getSuperclass()
+							.getMethod(methodToUse.getName(), theParameterTypes);
 					parameterType =
-						// LUKETODO:  what to do here if anything?
-						ReflectionUtil.getGenericCollectionTypeOfMethodParameter(
-							methodToUse, paramIndex);
+							// LUKETODO:  what to do here if anything?
+							ReflectionUtil.getGenericCollectionTypeOfMethodParameter(methodToUse, paramIndex);
 				} catch (NoSuchMethodException e) {
 					throw new ConfigurationException(Msg.code(400) + "A method with name '"
-						+ methodToUse.getName() + "' does not exist for super class '"
-						+ methodToUse
-						.getDeclaringClass()
-						.getSuperclass() + "'");
+							+ methodToUse.getName() + "' does not exist for super class '"
+							+ methodToUse.getDeclaringClass().getSuperclass() + "'");
 				}
 			}
 			// LUKETODO:
@@ -650,26 +591,23 @@ public class MethodUtil {
 		// wrong
 		// LUKETODO:  could be null?
 		if (Collection.class.isAssignableFrom(parameterType)) {
-			throw new ConfigurationException(
-				Msg.code(401) + "Argument #" + paramIndex + " of Method '"
+			throw new ConfigurationException(Msg.code(401) + "Argument #" + paramIndex + " of Method '"
 					+ methodToUse.getName()
 					+ "' in type '"
-					+ methodToUse
-					.getDeclaringClass()
-					.getCanonicalName()
+					+ methodToUse.getDeclaringClass().getCanonicalName()
 					+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
 		}
 
 		// LUKETODO:  do I need to worry about this:
-								/*
+		/*
 
-								Class<?> newParameterType = elementDefinition.getImplementingClass();
-								if (!declaredParameterType.isAssignableFrom(newParameterType)) {
-									throw new ConfigurationException(Msg.code(405) + "Non assignable parameter typeName=\""
-											+ operationParam.typeName() + "\" specified on method " + methodToUse);
-								}
-								parameterType = newParameterType;
-								 */
+		Class<?> newParameterType = elementDefinition.getImplementingClass();
+		if (!declaredParameterType.isAssignableFrom(newParameterType)) {
+			throw new ConfigurationException(Msg.code(405) + "Non assignable parameter typeName=\""
+					+ operationParam.typeName() + "\" specified on method " + methodToUse);
+		}
+		parameterType = newParameterType;
+		 */
 
 		//									ourLog.info(
 		//											"1234: about to initialize types: method: {}, outerCollectionType: {},
@@ -679,7 +617,8 @@ public class MethodUtil {
 		//											innerCollectionType,
 		//											parameterType);
 
-		return new MethodUtilMutableLoopStateHolder(parameterType, methodToUse, outerCollectionType, innerCollectionType);
+		return new MethodUtilMutableLoopStateHolder(
+				parameterType, methodToUse, outerCollectionType, innerCollectionType);
 	}
 
 	@Nonnull
