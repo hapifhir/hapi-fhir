@@ -5,11 +5,14 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Patient;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -27,6 +30,7 @@ class InnerClassesAndMethods {
 
 	static final String SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS = "sampleMethodEmbeddedTypeMultipleRequestDetails";
 	static final String SUPER_SIMPLE = "superSimple";
+	static final String SIMPLE_OPERATION = "simpleOperation";
 	static final String INVALID_METHOD_OPERATION_PARAMS_NO_OPERATION = "invalidMethodOperationParamsNoOperationInvalid";
 	static final String SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE = "sampleMethodEmbeddedTypeRequestDetailsFirstWithIdType";
 	static final String SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST = "sampleMethodEmbeddedTypeRequestDetailsLast";
@@ -35,6 +39,7 @@ class InnerClassesAndMethods {
 	static final String SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE = "sampleMethodEmbeddedTypeNoRequestDetailsWithIdType";
 	static final String SAMPLE_METHOD_OPERATION_PARAMS = "sampleMethodOperationParams";
 	static final String SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE = "sampleMethodParamNoEmbeddedType";
+	static final String EXPAND = "expand";
 
 	Method getDeclaredMethod(String theMethodName, Class<?>... theParamClasses) {
 		try {
@@ -271,5 +276,14 @@ class InnerClassesAndMethods {
 	MeasureReport sampleMethodEmbeddedTypeNoRequestDetailsWithIdType(SampleParamsWithIdParam theParams) {
 		// return something arbitrary
 		return new MeasureReport(null, null, null, null);
+	}
+
+	@Operation(name = "$expand", idempotent = true, typeName = "ValueSet")
+	public IBaseResource expand(
+			 HttpServletRequest theServletRequest,
+			 @IdParam(optional = true) IIdType theId,
+			 @OperationParam(name = "valueSet", min = 0, max = 1) IBaseResource theValueSet,
+			 RequestDetails theRequestDetails) {
+		return new Patient();
 	}
 }

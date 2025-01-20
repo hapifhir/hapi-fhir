@@ -192,7 +192,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		} else {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 			myCanOperateAtInstanceLevel = true;
-			myCanOperateAtServerLevel = myOperationIdParamDetails.setOrReturnPreviousValue(myCanOperateAtServerLevel);
+			myCanOperateAtTypeLevel = myOperationIdParamDetails.setOrReturnPreviousValue(myCanOperateAtTypeLevel);
 		}
 
 		myReturnParams = new ArrayList<>();
