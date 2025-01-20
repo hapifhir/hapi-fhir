@@ -1676,7 +1676,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					.newTerser()
 					.containResources(
 							theResource,
-							FhirTerser.OptionsEnum. MODIFY_RESOURCE,
+							FhirTerser.OptionsEnum.MODIFY_RESOURCE,
 							FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 		}
 	}

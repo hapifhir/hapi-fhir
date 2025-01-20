@@ -88,9 +88,6 @@ public class FhirTerser {
 	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED =
 			FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
 
-	private static final String USER_DATA_KEY_CONTAINED_RESOURCE_ID_GENERATED_BY_TERSER =
-		FhirTerser.class.getName() + "_CONTAINED_RESOURCE_ID_GENERATED_BY_TERSER";
-
 	private final FhirContext myContext;
 
 	/**
@@ -1432,6 +1429,25 @@ public class FhirTerser {
 		});
 	}
 
+	private boolean isInternalFragment(IBaseReference theReference) {
+		if (!theReference.getReferenceElement().isEmpty()) {
+			return theReference.getReferenceElement().isLocal();
+		}
+		if( theReference.getResource() == null) {
+			return false;
+		}
+		if (theReference.getResource().getIdElement() == null) {
+			return false;
+		}
+		if (theReference.getResource().getIdElement().isAbsolute()) {
+			return false;
+		}
+		if (theReference.getResource().getIdElement().hasResourceType()) {
+			return false;
+		}
+		return true;
+	}
+
 	private void containResourcesForEncoding(
 			ContainedResources theContained, IBaseResource theResource, boolean theModifyResource) {
 		List<IBaseReference> allReferences = getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
@@ -1444,7 +1460,7 @@ public class FhirTerser {
 
 		for (IBaseReference next : allReferences) {
 			IBaseResource resource = next.getResource();
-			if (resource == null && next.getReferenceElement().isLocal()) {
+			if (resource == null && isInternalFragment(next)) {
 				if (theContained.hasExistingIdToContainedResource()) {
 					IBaseResource potentialTarget = theContained
 							.getExistingIdToContainedResource()
@@ -1460,7 +1476,7 @@ public class FhirTerser {
 		for (IBaseReference next : allReferences) {
 			IBaseResource resource = next.getResource();
 			if (resource != null) {
-				if (resource.getIdElement().isEmpty() || theContained.hasTerserGeneratedContainedId(resource)) {
+				if (resource.getIdElement().isEmpty() || isInternalFragment(next)) {
 
 					IIdType id = theContained.addContained(resource);
 					if (id == null) {
@@ -1470,7 +1486,8 @@ public class FhirTerser {
 						getContainedResourceList(theResource).add(resource);
 						next.setReference(id.getValue());
 					}
-					if (theContained.hasTerserGeneratedContainedId(resource) && theContained.hasExistingIdToContainedResource()) {
+					if (isInternalFragment(next)
+							&& theContained.hasExistingIdToContainedResource()) {
 						theContained
 								.getExistingIdToContainedResource()
 								.remove(resource.getIdElement().getValue());
@@ -1511,7 +1528,9 @@ public class FhirTerser {
 		ContainedResources contained = new ContainedResources();
 
 		List<? extends IBaseResource> containedResources = getContainedResourceList(theResource);
-		containedResources.forEach(contained::addContained);
+		for (IBaseResource next : containedResources) {
+			contained.addContained(next);
+		}
 
 		if (myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
 			containResourcesForEncoding(contained, theResource, modifyResource);
@@ -1809,18 +1828,12 @@ public class FhirTerser {
 			if (isBlank(newId.getValue())) {
 				UUID randomUUID = UUID.randomUUID();
 				theResource.getIdElement().setValue(randomUUID.toString());
-				theResource.setUserData(USER_DATA_KEY_CONTAINED_RESOURCE_ID_GENERATED_BY_TERSER, Boolean.TRUE);
+				//theResource.setUserData(USER_DATA_KEY_CONTAINED_RESOURCE_ID_GENERATED_BY_TERSER, Boolean.TRUE);
 				newId.setValue("#" + randomUUID);
 			}
-
 			getResourceToIdMap().put(theResource, newId);
 			getOrCreateResourceList().add(theResource);
 			return newId;
-		}
-
-		public boolean hasTerserGeneratedContainedId(IBaseResource theResource) {
-			Object userData = theResource.getUserData(USER_DATA_KEY_CONTAINED_RESOURCE_ID_GENERATED_BY_TERSER);
-			return userData != null ? (Boolean) userData : false;
 		}
 
 		public void addContained(IIdType theId, IBaseResource theResource) {
