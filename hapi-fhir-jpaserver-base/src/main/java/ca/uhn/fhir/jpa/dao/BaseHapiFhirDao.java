@@ -671,17 +671,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		allResourceTagsNewAndOldFromTheEntity.forEach(tag -> {
 
-			// Don't keep duplicate tags
-			if (!allTagDefinitionsPresent.add(tag.getTag())) {
+			// Don't keep duplicate tags or tags with a missing definition
+			TagDefinition tagDefinition = tag.getTag();
+			if (tagDefinition == null || !allTagDefinitionsPresent.add(tagDefinition)) {
 				theEntity.getTags().remove(tag);
 			}
 
 			// Drop any tags that have been removed
-			if (!allResourceTagsFromTheResource.contains(tag)) {
+			if (tagDefinition != null && !allResourceTagsFromTheResource.contains(tag)) {
 				if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
 					theEntity.getTags().remove(tag);
-				} else if (HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY.equals(
-						tag.getTag().getSystem())) {
+				} else if (HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY.equals(tagDefinition.getSystem())) {
 					theEntity.getTags().remove(tag);
 				}
 			}
@@ -766,6 +766,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * @return Returns <code>true</code> if the tag should be removed
 	 */
 	protected boolean shouldDroppedTagBeRemovedOnUpdate(RequestDetails theRequest, ResourceTag theTag) {
+		if (theTag.getTag() == null) {
+			return true;
+		}
 
 		Set<TagTypeEnum> metaSnapshotModeTokens = null;
 

@@ -183,10 +183,12 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		IIdType id = createObservation(withSubject("Patient/A"));
 
 		runInTransaction(() -> {
-			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set TARGET_RESOURCE_ID = null").executeUpdate());
+			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set (TARGET_RESOURCE_ID,TARGET_RES_PARTITION_ID) = (null, null)").executeUpdate());
 			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set TARGET_RESOURCE_URL = 'http://foo'").executeUpdate());
 			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set TARGET_RESOURCE_VERSION = 1").executeUpdate());
 		});
+
+		myEntityManager.clear();
 
 		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
