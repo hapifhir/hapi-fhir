@@ -29,6 +29,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 // LUKETODO: test IdParam/IIdType/etc
 // LUKETODO: test with RequestDetails either at the beginning or the end
 // LUKETODO: try to test for every case in embedded params where there's a throws
+
+// LUKETODO:  comment why this class lives in this module
 @ExtendWith(MockitoExtension.class)
 class MethodUtilTest {
 

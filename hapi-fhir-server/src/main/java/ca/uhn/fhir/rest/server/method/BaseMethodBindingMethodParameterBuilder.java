@@ -33,8 +33,10 @@ class BaseMethodBindingMethodParameterBuilder {
 		try {
 			return tryBuildMethodParams(theMethod, theMethodParams);
 		} catch (InvocationTargetException | IllegalAccessException | InstantiationException exception) {
-			throw new InternalErrorException(String.format("%s1234:  Error building method params: %s",
-				Msg.code(234198928), exception.getMessage()), exception);
+			throw new InternalErrorException(
+					String.format(
+							"%s1234:  Error building method params: %s", Msg.code(234198928), exception.getMessage()),
+					exception);
 		}
 	}
 
@@ -42,17 +44,20 @@ class BaseMethodBindingMethodParameterBuilder {
 			throws InvocationTargetException, IllegalAccessException, InstantiationException {
 
 		if (theMethod == null || theMethodParams == null) {
-			throw new InternalErrorException(String.format("%s Either theMethod: %s or theMethodParams: %s is null",
+			throw new InternalErrorException(String.format(
+					"%s Either theMethod: %s or theMethodParams: %s is null",
 					Msg.code(234198927), theMethod, Arrays.toString(theMethodParams)));
 		}
 
 		final Class<?>[] methodParameterTypes = theMethod.getParameterTypes();
 
 		if (Arrays.stream(methodParameterTypes)
-			.filter(RequestDetails.class::isAssignableFrom).count() > 1) {
+						.filter(RequestDetails.class::isAssignableFrom)
+						.count()
+				> 1) {
 			throw new InternalErrorException(String.format(
-				"%s1234:  Invalid operation with embedded parameters.  Cannot have more than one RequestDetails: %s",
-				Msg.code(924469635), theMethod.getName()));
+					"%s1234:  Invalid operation with embedded parameters.  Cannot have more than one RequestDetails: %s",
+					Msg.code(924469635), theMethod.getName()));
 		}
 
 		final List<Class<?>> parameterTypesWithOperationEmbeddedParam =
@@ -70,19 +75,19 @@ class BaseMethodBindingMethodParameterBuilder {
 		}
 
 		final long numRequestDetails = Arrays.stream(methodParameterTypes)
-			.filter(RequestDetails.class::isAssignableFrom)
-			.count();
+				.filter(RequestDetails.class::isAssignableFrom)
+				.count();
 
 		if (numRequestDetails == 0 && methodParameterTypes.length > 1) {
 			throw new InternalErrorException(String.format(
-				"%s1234:  Invalid operation with embedded parameters.  Cannot have more than 1 params and no RequestDetails: %s",
-				Msg.code(924469634), theMethod.getName()));
+					"%s1234:  Invalid operation with embedded parameters.  Cannot have more than 1 params and no RequestDetails: %s",
+					Msg.code(924469634), theMethod.getName()));
 		}
 
 		if (numRequestDetails > 0 && methodParameterTypes.length > 2) {
 			throw new InternalErrorException(String.format(
-				"%s1234:  Invalid operation with embedded parameters.  Cannot have more than 2 params and a RequestDetails: %s",
-				Msg.code(924469634), theMethod.getName()));
+					"%s1234:  Invalid operation with embedded parameters.  Cannot have more than 2 params and a RequestDetails: %s",
+					Msg.code(924469634), theMethod.getName()));
 		}
 
 		final Class<?> parameterTypeWithOperationEmbeddedParam = parameterTypesWithOperationEmbeddedParam.get(0);
@@ -122,9 +127,10 @@ class BaseMethodBindingMethodParameterBuilder {
 		validMethodParamTypes(methodParamsWithoutRequestDetails, validateAndGetConstructorParameters(constructor));
 
 		if (methodParamsWithoutRequestDetails.length != constructor.getParameterCount()) {
-			throw new InternalErrorException(String.format("1234: mismatch between constructor args: %s and non-request details parameter args: %s",
-				Arrays.toString(constructor.getParameterTypes()),
-				Arrays.toString(methodParamsWithoutRequestDetails)));
+			throw new InternalErrorException(String.format(
+					"1234: mismatch between constructor args: %s and non-request details parameter args: %s",
+					Arrays.toString(constructor.getParameterTypes()),
+					Arrays.toString(methodParamsWithoutRequestDetails)));
 		}
 
 		return constructor.newInstance(methodParamsWithoutRequestDetails);
@@ -164,16 +170,17 @@ class BaseMethodBindingMethodParameterBuilder {
 	// RequestDetails must be dealt with separately because there is no such concept in clinical-reasoning and the
 	// operation params classes must be defined in that project
 	@Nonnull
-	private static Object[] buildMethodParamsInCorrectPositions(Object[] theMethodParams, Object operationEmbeddedType) {
+	private static Object[] buildMethodParamsInCorrectPositions(
+			Object[] theMethodParams, Object operationEmbeddedType) {
 
 		final List<RequestDetails> requestDetailsMultiple = Arrays.stream(theMethodParams)
-			.filter(RequestDetails.class::isInstance)
-			.map(RequestDetails.class::cast)
-			.collect(Collectors.toUnmodifiableList());
+				.filter(RequestDetails.class::isInstance)
+				.map(RequestDetails.class::cast)
+				.collect(Collectors.toUnmodifiableList());
 
 		if (requestDetailsMultiple.size() > 1) {
 			throw new InternalErrorException(
-				Msg.code(562462) + "1234: cannot define a request with more than one RequestDetails");
+					Msg.code(562462) + "1234: cannot define a request with more than one RequestDetails");
 		}
 
 		if (requestDetailsMultiple.isEmpty()) {
@@ -183,8 +190,7 @@ class BaseMethodBindingMethodParameterBuilder {
 
 		final RequestDetails requestDetails = requestDetailsMultiple.get(0);
 
-		final int indexOfRequestDetails = Arrays.asList(theMethodParams)
-			.indexOf(requestDetails);
+		final int indexOfRequestDetails = Arrays.asList(theMethodParams).indexOf(requestDetails);
 
 		if (indexOfRequestDetails == 0) {
 			// RequestDetails goes first
@@ -224,8 +230,8 @@ class BaseMethodBindingMethodParameterBuilder {
 						"%s1234: Mismatch between methodParamClassAtIndex: %s and parameterClassAtIndex: %s",
 						Msg.code(236146124), methodParamClassAtIndex, parameterClassAtIndex));
 			}
-		// Ex:  Field is declared as an IIdType, but argument is an IdDt
-		} else if (! parameterClassAtIndex.isAssignableFrom(methodParamClassAtIndex)) {
+			// Ex:  Field is declared as an IIdType, but argument is an IdDt
+		} else if (!parameterClassAtIndex.isAssignableFrom(methodParamClassAtIndex)) {
 			throw new InternalErrorException(String.format(
 					"%s1234: Mismatch between methodParamClassAtIndex: %s and parameterClassAtIndex: %s",
 					Msg.code(236146125), methodParamClassAtIndex, parameterClassAtIndex));

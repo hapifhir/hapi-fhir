@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -20,6 +19,7 @@ import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.*;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+// LUKETODO:  comment why this class lives in this module
 // LUKETODO:  try to cover more InternalErrorException cases
 class BaseMethodBindingMethodParameterBuilderTest {
 
@@ -39,7 +39,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationParamsEmptyParams() {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SUPER_SIMPLE);
+		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SUPER_SIMPLE);
 		final Object[] inputParams = new Object[]{};
 
 		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);
@@ -49,7 +49,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationParamsNonEmptyParams() {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_OPERATION_PARAMS, IdType.class, String.class, List.class, BooleanType.class);
+		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS, IdType.class, String.class, List.class, BooleanType.class);
 		final Object[] inputParams = new Object[]{new IdDt(), "param1", List.of("param2")};
 
 		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);
@@ -59,7 +59,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationEmbeddedTypesNoRequestDetails() {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
+		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
 		final Object[] inputParams = new Object[]{"param1", List.of("param2")};
 		final Object[] expectedOutputParams = new Object[]{new SampleParams("param1", List.of("param2"))};
 
@@ -70,7 +70,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationEmbeddedTypesRequestDetailsFirst() {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST, RequestDetails.class, SampleParams.class);
+		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST, RequestDetails.class, SampleParams.class);
 		final Object[] inputParams = new Object[]{REQUEST_DETAILS, "param1", List.of("param2")};
 		final Object[] expectedOutputParams = new Object[]{REQUEST_DETAILS, new SampleParams("param1", List.of("param2"))};
 
@@ -81,7 +81,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationEmbeddedTypesRequestDetailsLast() {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST, SampleParams.class, RequestDetails.class);
+		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST, SampleParams.class, RequestDetails.class);
 		final Object[] inputParams = new Object[]{"param1", List.of("param3"), REQUEST_DETAILS};
 		final Object[] expectedOutputParams = new Object[]{new SampleParams("param1", List.of("param3")), REQUEST_DETAILS};
 
@@ -94,17 +94,13 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	@Disabled
 	void happyPathOperationEmbeddedTypesWithIdType() {
 		final IdType id = new IdType();
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE, RequestDetails.class, SampleParamsWithIdParam.class);
+		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE, RequestDetails.class, SampleParamsWithIdParam.class);
 		final Object[] inputParams = new Object[]{REQUEST_DETAILS, id, "param1", List.of("param2"), new BooleanType(false)};
 		final Object[] expectedOutputParams = new Object[]{REQUEST_DETAILS, new SampleParamsWithIdParam(id, "param1", List.of("param2"), new BooleanType(false))};
 
 		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);
 
-//		assertParamsEqual(expectedOutputParams, actualOutputParams);
 		assertArrayEquals(expectedOutputParams, actualOutputParams);
-	}
-
-	private void assertParamsEqual(Object[] expectedOutputParams, Object[] actualOutputParams) {
 	}
 
 	@Test
@@ -116,7 +112,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void buildMethodParams_withNullParams_shouldThrowInternalErrorException() throws NoSuchMethodException {
-		final Method sampleMethod = InnerClassesAndMethods.class.getDeclaredMethod(SUPER_SIMPLE);
+		final Method sampleMethod = InnerClassesAndMethods.class.getDeclaredMethod(InnerClassesAndMethods.SUPER_SIMPLE);
 
 		assertThrows(InternalErrorException.class, () -> {
 			buildMethodParams(sampleMethod, null);
@@ -130,7 +126,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void buildMethodParams_multipleRequestDetails_shouldThrowInternalErrorException() {
-		final Method method = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS,
+		final Method method = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS,
 				RequestDetails.class, SampleParams.class, RequestDetails.class);
 		final Object[] inputParams = new Object[]{REQUEST_DETAILS, new IdDt(), "param1", List.of("param2", REQUEST_DETAILS)};
 		assertThrows(InternalErrorException.class, () -> {
@@ -142,7 +138,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	@Test
 	@Disabled
 	void buildMethodParams_withClassMiissingParameterAnnotations_shouldThrowInternalErrorException() {
-		final Method method = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE, ParamsWithoutAnnotations.class);
+		final Method method = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE, ParamsWithoutAnnotations.class);
 
 		final Object[] inputParams = new Object[]{new IdDt(), "param1", 2, List.of("param3")};
 

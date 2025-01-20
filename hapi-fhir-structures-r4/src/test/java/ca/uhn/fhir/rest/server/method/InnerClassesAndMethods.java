@@ -16,6 +16,7 @@ import java.util.StringJoiner;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+// LUKETODO:  comment why this class lives in this module
 // Methods and embedded param classes to be used for testing regression code in hapi-fhir-server method classes
 class InnerClassesAndMethods {
 

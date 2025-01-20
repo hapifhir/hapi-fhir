@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server.method;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -17,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
 
+// LUKETODO:  consider whether this test needs to live here or in r4 structures
 @ExtendWith(MockitoExtension.class)
 class OperationMethodBindingTest {
 
@@ -32,13 +32,17 @@ class OperationMethodBindingTest {
 
 	}
 
+	@Operation(name = "$simpleOperation")
+	void simpleOperation() {
+
+	}
+
 	@Test
 	void constructor_withInvalidOperationName_shouldThrowConfigurationException() throws NoSuchMethodException {
 		myMethod = getClass().getDeclaredMethod("invalidOperation");
-
 		final Operation operation = myMethod.getAnnotation(Operation.class);
 
-		ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
+		final ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
 			new OperationMethodBinding(
 				IBaseResource.class, null, myMethod, ourFhirContext, provider, operation);
 		});
@@ -47,47 +51,52 @@ class OperationMethodBindingTest {
 	}
 
 	@Test
-	void incomingServerRequestMatchesMethod_withMismatchedOperation_shouldReturnNone() {
+	void incomingServerRequestMatchesMethod_withMismatchedOperation_shouldReturnNone() throws NoSuchMethodException {
+		myMethod = getClass().getDeclaredMethod("simpleOperation");
+		final Operation operation = myMethod.getAnnotation(Operation.class);
+
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setOperation("differentOperation");
 		requestDetails.setRequestType(RequestTypeEnum.GET);
 
-		OperationMethodBinding binding = new OperationMethodBinding(
-			IBaseResource.class, null, myMethod, ourFhirContext, provider, mock(Operation.class));
+		final OperationMethodBinding binding = new OperationMethodBinding(
+			IBaseResource.class, null, myMethod, ourFhirContext, provider, operation);
 
 		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(requestDetails));
 	}
 
 	@Test
-	void incomingServerRequestMatchesMethod_withMatchingOperation_shouldReturnExact() {
+	void incomingServerRequestMatchesMethod_withMatchingOperation_shouldReturnExact() throws NoSuchMethodException {
+		myMethod = getClass().getDeclaredMethod("simpleOperation");
+		final Operation operation = myMethod.getAnnotation(Operation.class);
+
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setOperation("$operationName");
+		requestDetails.setOperation("$simpleOperation");
 		requestDetails.setRequestType(RequestTypeEnum.GET);
 
-		Operation operation = mock(Operation.class);
-		when(operation.name()).thenReturn("$operationName");
-
-		OperationMethodBinding binding = new OperationMethodBinding(
+		final OperationMethodBinding binding = new OperationMethodBinding(
 			IBaseResource.class, null, myMethod, ourFhirContext, provider, operation);
 
 		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(requestDetails));
 	}
 
 	@Test
-	void invokeServer_withUnsupportedRequestType_shouldThrowMethodNotAllowedException() {
+	void invokeServer_withUnsupportedRequestType_shouldThrowMethodNotAllowedException() throws NoSuchMethodException {
+		myMethod = getClass().getDeclaredMethod("simpleOperation");
+		final Operation operation = myMethod.getAnnotation(Operation.class);
+
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRequestType(RequestTypeEnum.PUT);
 
-		Operation operation = mock(Operation.class);
-		when(operation.name()).thenReturn("$operationName");
-
-		OperationMethodBinding binding = new OperationMethodBinding(
+		final OperationMethodBinding binding = new OperationMethodBinding(
 			IBaseResource.class, null, myMethod, ourFhirContext, provider, operation);
 
-		MethodNotAllowedException exception = assertThrows(MethodNotAllowedException.class, () -> {
+		final MethodNotAllowedException exception = assertThrows(MethodNotAllowedException.class, () -> {
 			binding.invokeServer(null, requestDetails, new Object[]{});
 		});
 
-		assertTrue(exception.getMessage().contains("methodNotSupported"));
+		assertTrue(exception.getMessage().contains("HTTP Method PUT is not allowed for this operation."));
 	}
+
+	// LUKETODO:  add tests for new functionality
 }
