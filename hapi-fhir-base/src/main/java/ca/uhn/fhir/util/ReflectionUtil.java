@@ -318,7 +318,7 @@ public class ReflectionUtil {
 			Method theMethod, Class<? extends Annotation> theAnnotationClass) {
 		return Arrays.stream(theMethod.getParameterTypes())
 				.filter(paramType -> hasFieldsWithAnnotation(paramType, theAnnotationClass))
-				.collect(Collectors.toUnmodifiableList());
+				.collect(Collectors.toList());
 	}
 
 	private static boolean hasFieldsWithAnnotation(Class<?> paramType, Class<? extends Annotation> theAnnotationClass) {

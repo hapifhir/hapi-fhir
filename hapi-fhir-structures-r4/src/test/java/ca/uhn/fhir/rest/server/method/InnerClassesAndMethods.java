@@ -7,6 +7,8 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.MeasureReport;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -52,18 +54,34 @@ class InnerClassesAndMethods {
 	void superSimple() {
 	}
 
+	@Operation(name = "")
+	void invalidOperation() {
+
+	}
+
+	@Operation(name = "$simpleOperation")
+	void simpleOperation() {
+
+	}
+
+	@Operation(name = "$withEmbeddedParams")
+	void withEmbeddedParams() {
+
+	}
+
 	void invalidMethodOperationParamsNoOperationInvalid(
 		@OperationParam(name = "param1") String theParam1) {
 
 	}
 
-	@Operation(name="sampleMethodOperationParams")
-	void sampleMethodOperationParams(
+	@Operation(name="sampleMethodOperationParams", type = Measure.class)
+	public MeasureReport sampleMethodOperationParams(
 		@IdParam IdType theIdType,
 		@OperationParam(name = "param1") String theParam1,
 		@OperationParam(name = "param2") List<String> theParam2,
 		@OperationParam(name="param3") BooleanType theParam3) {
 		// Sample method for testing
+		return new MeasureReport(null, null, null, null);
 	}
 
 	static class ParamsWithoutAnnotations {
