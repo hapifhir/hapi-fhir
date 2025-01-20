@@ -482,6 +482,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private OperationIdParamDetails findIdParamIndexForTypeWithEmbeddedParams(
 			Method theMethod, List<Class<?>> theTypesWithEmbeddedParams, FhirContext theContext) {
 		for (Class<?> typeWithEmbeddedParams : theTypesWithEmbeddedParams) {
+			// LUKETODO:  skip anything else?
 			if (ParametersUtil.isOneOfEligibleTypes(
 					typeWithEmbeddedParams, RequestDetails.class, SystemRequestDetails.class)) {
 				// skip

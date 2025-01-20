@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
@@ -76,7 +77,7 @@ class InnerClassesAndMethods {
 
 	@Operation(name="sampleMethodOperationParams", type = Measure.class)
 	public MeasureReport sampleMethodOperationParams(
-		@IdParam IdType theIdType,
+		@IdParam IIdType theIdType,
 		@OperationParam(name = "param1") String theParam1,
 		@OperationParam(name = "param2") List<String> theParam2,
 		@OperationParam(name="param3") BooleanType theParam3) {
@@ -266,9 +267,9 @@ class InnerClassesAndMethods {
 		return theRequestDetails.getId().getValue() + theParams.getParam1();
 	}
 
-	@Operation(name="sampleMethodEmbeddedTypeNoRequestDetailsWithIdType")
-	String sampleMethodEmbeddedTypeNoRequestDetailsWithIdType(SampleParamsWithIdParam theParams) {
+	@Operation(name="sampleMethodEmbeddedTypeNoRequestDetailsWithIdType", type = Measure.class)
+	MeasureReport sampleMethodEmbeddedTypeNoRequestDetailsWithIdType(SampleParamsWithIdParam theParams) {
 		// return something arbitrary
-		return theParams.getParam1();
+		return new MeasureReport(null, null, null, null);
 	}
 }

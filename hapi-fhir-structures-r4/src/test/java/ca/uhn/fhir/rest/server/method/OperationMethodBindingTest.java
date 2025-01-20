@@ -8,7 +8,9 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SampleParamsWithIdParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -92,13 +94,30 @@ class OperationMethodBindingTest {
 	}
 
 	@Test
-	void simpleMethodOperationParams() throws NoSuchMethodException {
-		init("sampleMethodOperationParams", IdType.class, String.class, List.class, BooleanType.class);
+	void simpleMethodOperationParams() {
+		init(InnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS, IIdType.class, String.class, List.class, BooleanType.class);
 
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setRequestType(RequestTypeEnum.PUT);
+		requestDetails.setRequestType(RequestTypeEnum.GET);
 		requestDetails.setOperation("$sampleMethodOperationParams");
-		requestDetails.setResourceName(ResourceType.MeasureReport.name());
+		requestDetails.setResourceName(ResourceType.Measure.name());
+		requestDetails.setId(new IdType(ResourceType.Measure.name(), "Measure/123"));
+
+		final OperationMethodBinding binding = new OperationMethodBinding(
+			 IBaseResource.class, null, myMethod, ourFhirContext, provider, myOperation);
+
+		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(requestDetails));
+	}
+
+	@Test
+	void simpleMethodEmbeddedParams() {
+		init(InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE, SampleParamsWithIdParam.class);
+
+		final SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestType(RequestTypeEnum.GET);
+		requestDetails.setOperation("$sampleMethodEmbeddedTypeNoRequestDetailsWithIdType");
+		requestDetails.setResourceName(ResourceType.Measure.name());
+		requestDetails.setId(new IdType(ResourceType.Measure.name(), "Measure/123"));
 
 		final OperationMethodBinding binding = new OperationMethodBinding(
 			 IBaseResource.class, null, myMethod, ourFhirContext, provider, myOperation);
@@ -110,6 +129,4 @@ class OperationMethodBindingTest {
 		myMethod = myInnerClassesAndMethods.getDeclaredMethod(theMethodName, theParamClasses);
 		myOperation = myMethod.getAnnotation(Operation.class);
 	}
-
-	// LUKETODO:  add tests for new functionality
 }

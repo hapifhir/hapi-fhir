@@ -26,7 +26,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -49,13 +48,16 @@ import java.lang.reflect.Modifier;
 import java.util.function.Consumer;
 import java.util.*;
 
+import static ca.uhn.fhir.rest.server.method.OperationParameter.REQUEST_CONTENTS_USERDATA_KEY;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 // LUKETODO:  use this for Embedded object params
 // LUKETODO:   consider deleting whatever code may be unused
 public class OperationEmbeddedParameter implements IParameter {
 
-	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationEmbeddedParam.class.getName() + "_PARSED_RESOURCE";
+	// LUKETODO: do we need this to be separate or just reuse the one from OperationParameter?
+	// LUKETODO:  if so, add conditional logic everywhere to use it
+//	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationEmbeddedParam.class.getName() + "_PARSED_RESOURCE";
 
 	@SuppressWarnings("unchecked")
 	private static final Class<? extends IQueryParameterType>[] COMPOSITE_TYPES = new Class[0];
