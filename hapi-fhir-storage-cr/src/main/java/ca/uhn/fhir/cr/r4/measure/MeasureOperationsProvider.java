@@ -72,7 +72,6 @@ public class MeasureOperationsProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
 	public MeasureReport evaluateMeasure(EvaluateMeasureSingleParams theParams, RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		// LUKETODO:  Parameters within Parameters
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
 				.evaluate(

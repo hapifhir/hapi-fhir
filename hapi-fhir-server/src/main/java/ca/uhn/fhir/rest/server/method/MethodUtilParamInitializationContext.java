@@ -4,13 +4,13 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 // LUKETODO:  javadoc
-class ParamInitializationContext {
+class MethodUtilParamInitializationContext {
 	private final IParameter myParam;
 	private final Class<?> myParameterType;
 	private final Class<? extends java.util.Collection<?>> myOuterCollectionType;
 	private final Class<? extends java.util.Collection<?>> myInnerCollectionType;
 
-	ParamInitializationContext(
+	MethodUtilParamInitializationContext(
 			IParameter theParam,
 			Class<?> theParameterType,
 			Class<? extends Collection<?>> theOuterCollectionType,

@@ -5,6 +5,8 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -12,12 +14,15 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -25,8 +30,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 // LUKETODO:  comment why this class lives in this module
 // Methods and embedded param classes to be used for testing regression code in hapi-fhir-server method classes
 class InnerClassesAndMethods {
-
-	// LUKETODO:  figure out how to test FHIR version specific resources and primitive types.
 
 	static final String SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS = "sampleMethodEmbeddedTypeMultipleRequestDetails";
 	static final String SUPER_SIMPLE = "superSimple";
@@ -39,11 +42,25 @@ class InnerClassesAndMethods {
 	static final String SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE = "sampleMethodEmbeddedTypeNoRequestDetailsWithIdType";
 	static final String SAMPLE_METHOD_OPERATION_PARAMS = "sampleMethodOperationParams";
 	static final String SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE = "sampleMethodParamNoEmbeddedType";
+
 	static final String EXPAND = "expand";
+	static final String OP_INSTANCE_OR_TYPE = "opInstanceOrType";
+
 
 	Method getDeclaredMethod(String theMethodName, Class<?>... theParamClasses) {
+		return getDeclaredMethod(this.getClass(), theMethodName, theParamClasses);
+	}
+
+	Method getDeclaredMethod(@Nullable Object provider, String theMethodName, Class<?>... theParamClasses) {
+		return getDeclaredMethod(
+			 provider != null ? provider.getClass() : this.getClass(),
+			 theMethodName,
+			 theParamClasses);
+	}
+
+	Method getDeclaredMethod(Class<?> theContainingClass, String theMethodName, Class<?>... theParamClasses) {
 		try {
-			return this.getClass().getDeclaredMethod(theMethodName, theParamClasses);
+			return theContainingClass.getDeclaredMethod(theMethodName, theParamClasses);
 		} catch (Exception exceptional) {
 			fail(String.format("Could not find method: %s with params: %s", theMethodName, Arrays.toString(theParamClasses)));
 		}
@@ -236,11 +253,13 @@ class InnerClassesAndMethods {
 		}
 	}
 
+	@Operation(name="sampleMethodEmbeddedTypeRequestDetailsFirst")
 	String sampleMethodEmbeddedTypeRequestDetailsFirst(RequestDetails theRequestDetails, SampleParams theParams) {
 		// return something arbitrary
 		return theRequestDetails.getId().getValue() + theParams.getParam1();
 	}
 
+	@Operation(name="sampleMethodEmbeddedTypeRequestDetailsLast")
 	String sampleMethodEmbeddedTypeRequestDetailsLast(SampleParams theParams, RequestDetails theRequestDetails) {
 		// return something arbitrary
 		return theRequestDetails.getId().getValue() + theParams.getParam1();
@@ -259,7 +278,7 @@ class InnerClassesAndMethods {
 
 	String sampleMethodEmbeddedTypeMultipleRequestDetails(RequestDetails theRequestDetails1, SampleParams theParams, RequestDetails theRequestDetails2) {
 		// return something arbitrary
-		return theRequestDetails1.getId().getValue() + theParams.getParam1();
+		return theRequestDetails1.getId().getValue() + theParams.getParam1() + theRequestDetails2.getId().getValue();
 	}
 
 	String sampleMethodEmbeddedTypeRequestDetailsFirstWithIdType(RequestDetails theRequestDetails, SampleParamsWithIdParam theParams) {
@@ -279,11 +298,28 @@ class InnerClassesAndMethods {
 	}
 
 	@Operation(name = "$expand", idempotent = true, typeName = "ValueSet")
-	public IBaseResource expand(
+	IBaseResource expand(
 			 HttpServletRequest theServletRequest,
 			 @IdParam(optional = true) IIdType theId,
 			 @OperationParam(name = "valueSet", min = 0, max = 1) IBaseResource theValueSet,
 			 RequestDetails theRequestDetails) {
 		return new Patient();
+	}
+
+	// More realistic scenario where method binding actually checks the provider resource type
+	static class PatientProvider implements IResourceProvider {
+
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+
+		@Operation(name = "$OP_INSTANCE_OR_TYPE")
+		Parameters opInstanceOrType(
+			 @IdParam(optional = true) IdType theId,
+			 @OperationParam(name = "PARAM1" ) StringType theParam1,
+			 @OperationParam(name = "PARAM2" ) Patient theParam2) {
+			return new Parameters();
+		}
 	}
 }

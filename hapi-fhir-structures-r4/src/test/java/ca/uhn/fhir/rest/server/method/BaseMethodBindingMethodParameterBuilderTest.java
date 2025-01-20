@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SampleParams;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Disabled;
@@ -49,7 +50,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationParamsNonEmptyParams() {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS, IdType.class, String.class, List.class, BooleanType.class);
+		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS, IIdType.class, String.class, List.class, BooleanType.class);
 		final Object[] inputParams = new Object[]{new IdDt(), "param1", List.of("param2")};
 
 		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);

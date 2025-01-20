@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -54,8 +55,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -458,24 +461,28 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Nonnull
 	private OperationIdParamDetails getIdParamAnnotationFromMethodParams(Method theMethod, FhirContext theContext) {
-		final Integer paramAnnotationIndex = ParameterUtil.findIdParameterIndex(theMethod, theContext);
-
+		final Integer paramAnnotationIndex = ParameterUtil.findParamAnnotationIndex(theMethod, IdParam.class);
 		if (paramAnnotationIndex != null) {
+			final Optional<IdParam> optIdParam = findIdParam(theMethod, paramAnnotationIndex);
 			final Class<?> paramType = theMethod.getParameterTypes()[paramAnnotationIndex];
 			if (IIdType.class.equals(paramType)) {
-				final Annotation[] parameterAnnotation = theMethod.getParameterAnnotations()[paramAnnotationIndex];
-
-				for (Annotation nextParameterAnnotation : parameterAnnotation) {
-					if (nextParameterAnnotation instanceof IdParam) {
-						return new OperationIdParamDetails((IdParam) nextParameterAnnotation, paramAnnotationIndex);
-					}
-				}
+				return new OperationIdParamDetails(optIdParam.orElse(null), paramAnnotationIndex);
 			}
 
-			return new OperationIdParamDetails(null, paramAnnotationIndex);
+			ParameterUtil.validateIdType(theMethod, theContext, paramType);
+
+			return new OperationIdParamDetails(optIdParam.orElse(null), paramAnnotationIndex);
 		}
 
 		return OperationIdParamDetails.EMPTY;
+	}
+
+	private Optional<IdParam> findIdParam(Method theMethod, int theParamIndex) {
+		// LUKETODO:  do we need to validate there's only one?
+		return Arrays.stream(theMethod.getParameterAnnotations()[theParamIndex])
+			.filter(IdParam.class::isInstance)
+			.map(IdParam.class::cast)
+			.findFirst();
 	}
 
 	@Nonnull
@@ -497,15 +504,12 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					final Annotation[] fieldAnnotations = field.getAnnotations();
 
 					if (fieldAnnotations.length < 1) {
-						// LUKETODO:  which Exception should we throw here?
 						throw new ConfigurationException(String.format(
 								"%sNo annotations for field: %s for method: %s",
 								Msg.code(126362643), fieldName, theMethod.getName()));
 					}
 
 					if (fieldAnnotations.length > 1) {
-						// LUKETODO:  error
-						// LUKETODO:  which Exception should we throw here?
 						throw new ConfigurationException(String.format(
 								"%sMore than one annotation for field: %s for method: %s",
 								Msg.code(195614846), fieldName, theMethod.getName()));

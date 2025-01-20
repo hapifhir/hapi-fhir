@@ -116,7 +116,7 @@ public class MethodUtil {
 		for (Annotation[] nextParameterAnnotations : methodToUse.getParameterAnnotations()) {
 			// LUKETODO:  wrapper object for all of these
 			IParameter param = null;
-			final List<ParamInitializationContext> paramContexts = new ArrayList<>();
+			final List<MethodUtilParamInitializationContext> paramContexts = new ArrayList<>();
 			Class<?> declaredParameterType = parameterTypes[paramIndex];
 			Class<?> parameterType = declaredParameterType;
 
@@ -339,31 +339,18 @@ public class MethodUtil {
 													+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
 								}
 
-								// LUKETODO:  do I need to worry about this:
-								/*
+								final MethodUtilMutableLoopStateHolder stateHolder = doStuff(methodToUse, parameterTypes, parameterType, paramIndex, field);
 
-								Class<?> newParameterType = elementDefinition.getImplementingClass();
-								if (!declaredParameterType.isAssignableFrom(newParameterType)) {
-									throw new ConfigurationException(Msg.code(405) + "Non assignable parameter typeName=\""
-											+ operationParam.typeName() + "\" specified on method " + methodToUse);
-								}
-								parameterType = newParameterType;
-								 */
-
-								//									ourLog.info(
-								//											"1234: about to initialize types: method: {}, outerCollectionType: {},
-								// innerCollectionType: {}, parameterType: {}",
-								//											methodToUse.getName(),
-								//											outerCollectionType,
-								//											innerCollectionType,
-								//											parameterType);
+								parameterType = stateHolder.getParameterType();
+								methodToUse = stateHolder.getMethodToUse();
 
 								// LUKETODO:  how to handle multiple  parameters.add(param); ?????
-								paramContexts.add(new ParamInitializationContext(
+								paramContexts.add(new MethodUtilParamInitializationContext(
 										operationEmbeddedParameter,
-										parameterTypeInner,
-										outerCollectionTypeInner,
-										innerCollectionTypeInner));
+										stateHolder.getParameterType(),
+										stateHolder.getOuterCollectionType(),
+										stateHolder.getInnerCollectionType()));
+
 								// LUKETODO:  nasty hack to skip the null check
 								param = operationEmbeddedParameter;
 							} else {
@@ -593,7 +580,7 @@ public class MethodUtil {
 							instanceof OperationEmbeddedParameter)) { // LUKETODO:  another nasty hack:  we need to add
 				// RequestDetails if it's last
 				paramContexts.add(
-						new ParamInitializationContext(param, parameterType, outerCollectionType, innerCollectionType));
+						new MethodUtilParamInitializationContext(param, parameterType, outerCollectionType, innerCollectionType));
 			}
 
 			if (param == null) {
@@ -604,7 +591,7 @@ public class MethodUtil {
 								+ "' has no recognized FHIR interface parameter nextParameterAnnotations. Don't know how to handle this parameter");
 			}
 
-			for (ParamInitializationContext paramContext : paramContexts) {
+			for (MethodUtilParamInitializationContext paramContext : paramContexts) {
 				paramContext.initialize(methodToUse);
 				parameters.add(paramContext.getParam());
 			}
@@ -612,6 +599,87 @@ public class MethodUtil {
 			paramIndex++;
 		}
 		return parameters;
+	}
+
+	private static MethodUtilMutableLoopStateHolder doStuff(Method theMethod, Class<?>[] theParameterTypes, Class<?> theParameterType, int paramIndex, Field theField) {
+		Class<?> parameterType = theParameterType;
+		Method methodToUse = theMethod;
+		Class<? extends java.util.Collection<?>> outerCollectionType = null;
+		Class<? extends java.util.Collection<?>> innerCollectionType = null;
+
+		if (Collection.class.isAssignableFrom(parameterType)) {
+			innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+			parameterType = ReflectionUtil.getGenericCollectionTypeOfField(theField);
+			if (parameterType == null
+				&& methodToUse.getDeclaringClass().isSynthetic()) {
+				try {
+					methodToUse = methodToUse
+						.getDeclaringClass()
+						.getSuperclass()
+						.getMethod(methodToUse.getName(), theParameterTypes);
+					parameterType =
+						// LUKETODO:  what to do here if anything?
+						ReflectionUtil.getGenericCollectionTypeOfMethodParameter(
+							methodToUse, paramIndex);
+				} catch (NoSuchMethodException e) {
+					throw new ConfigurationException(Msg.code(400) + "A method with name '"
+						+ methodToUse.getName() + "' does not exist for super class '"
+						+ methodToUse
+						.getDeclaringClass()
+						.getSuperclass() + "'");
+				}
+			}
+			// LUKETODO:
+			//								declaredParameterType = parameterType;
+		}
+		// LUKETODO:  now we're processing the generic parameter, so capture the inner and
+		// outer
+		// types
+		// Collection<X>
+		// LUKETODO:  could be null?
+		if (Collection.class.isAssignableFrom(parameterType)) {
+			outerCollectionType = innerCollectionType;
+			innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+			// LUKETODO: come up with another method to do this for field params
+			parameterType = ReflectionUtil.getGenericCollectionTypeOfField(theField);
+			// LUKETODO:
+			//								declaredParameterType = parameterType;
+		}
+		// LUKETODO:  as a guard:  if this is still a Collection, then throw because
+		// something went
+		// wrong
+		// LUKETODO:  could be null?
+		if (Collection.class.isAssignableFrom(parameterType)) {
+			throw new ConfigurationException(
+				Msg.code(401) + "Argument #" + paramIndex + " of Method '"
+					+ methodToUse.getName()
+					+ "' in type '"
+					+ methodToUse
+					.getDeclaringClass()
+					.getCanonicalName()
+					+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
+		}
+
+		// LUKETODO:  do I need to worry about this:
+								/*
+
+								Class<?> newParameterType = elementDefinition.getImplementingClass();
+								if (!declaredParameterType.isAssignableFrom(newParameterType)) {
+									throw new ConfigurationException(Msg.code(405) + "Non assignable parameter typeName=\""
+											+ operationParam.typeName() + "\" specified on method " + methodToUse);
+								}
+								parameterType = newParameterType;
+								 */
+
+		//									ourLog.info(
+		//											"1234: about to initialize types: method: {}, outerCollectionType: {},
+		// innerCollectionType: {}, parameterType: {}",
+		//											methodToUse.getName(),
+		//											outerCollectionType,
+		//											innerCollectionType,
+		//											parameterType);
+
+		return new MethodUtilMutableLoopStateHolder(parameterType, methodToUse, outerCollectionType, innerCollectionType);
 	}
 
 	@Nonnull

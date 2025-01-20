@@ -2,10 +2,11 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SampleParams;
 import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SampleParamsWithIdParam;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,14 +20,13 @@ import java.util.List;
 import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.INVALID_METHOD_OPERATION_PARAMS_NO_OPERATION;
 import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS;
 import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE;
+import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST;
+import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST;
 import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS;
 import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SUPER_SIMPLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-// LUKETODO: ask #team-hdp about adding FHIR structures R4 to the test pom
-// LUKETODO: test FHIR primitive types, like IntegerType, BooleanType, and IPrimitiveType
-// LUKETODO: test IdParam/IIdType/etc
 // LUKETODO: test with RequestDetails either at the beginning or the end
 // LUKETODO: try to test for every case in embedded params where there's a throws
 
@@ -61,7 +61,7 @@ class MethodUtilTest {
 
 	@Test
 	void sampleMethodOperationParams() {
-		final List<IParameter> resourceParameters = getMethodAndExecute(SAMPLE_METHOD_OPERATION_PARAMS, IdType.class, String.class, List.class, BooleanType.class);
+		final List<IParameter> resourceParameters = getMethodAndExecute(SAMPLE_METHOD_OPERATION_PARAMS, IIdType.class, String.class, List.class, BooleanType.class);
 
 		assertThat(resourceParameters).isNotNull();
 		assertThat(resourceParameters).isNotEmpty();
@@ -72,7 +72,7 @@ class MethodUtilTest {
 
 	@Test
 	void sampleMethodOperationParamsWithFhirTypes() {
-		final List<IParameter> resourceParameters = getMethodAndExecute(SAMPLE_METHOD_OPERATION_PARAMS, IdType.class, String.class, List.class, BooleanType.class);
+		final List<IParameter> resourceParameters = getMethodAndExecute(SAMPLE_METHOD_OPERATION_PARAMS, IIdType.class, String.class, List.class, BooleanType.class);
 
 		assertThat(resourceParameters).isNotNull();
 		assertThat(resourceParameters).isNotEmpty();
@@ -88,6 +88,28 @@ class MethodUtilTest {
 		assertThat(resourceParameters).isNotNull();
 		assertThat(resourceParameters).isNotEmpty();
 		assertThat(resourceParameters).hasExactlyElementsOfTypes(OperationEmbeddedParameter.class, OperationEmbeddedParameter.class);
+
+		// LUKETODO:  assert the actual OperationEmbeddedParameter values
+	}
+
+	@Test
+	void sampleMethodEmbeddedParamsRequestDetailsFirst() {
+		final List<IParameter> resourceParameters = getMethodAndExecute(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST, RequestDetails.class, SampleParams.class);
+
+		assertThat(resourceParameters).isNotNull();
+		assertThat(resourceParameters).isNotEmpty();
+		assertThat(resourceParameters).hasExactlyElementsOfTypes(RequestDetailsParameter.class, OperationEmbeddedParameter.class, OperationEmbeddedParameter.class);
+
+		// LUKETODO:  assert the actual OperationEmbeddedParameter values
+	}
+
+	@Test
+	void sampleMethodEmbeddedParamsRequestDetailsLast() {
+		final List<IParameter> resourceParameters = getMethodAndExecute(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST, SampleParams.class, RequestDetails.class);
+
+		assertThat(resourceParameters).isNotNull();
+		assertThat(resourceParameters).isNotEmpty();
+		assertThat(resourceParameters).hasExactlyElementsOfTypes(OperationEmbeddedParameter.class, OperationEmbeddedParameter.class, RequestDetailsParameter.class);
 
 		// LUKETODO:  assert the actual OperationEmbeddedParameter values
 	}

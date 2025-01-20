@@ -13,8 +13,7 @@ class OperationIdParamDetails {
 	private final IdParam myIdParam;
 
 	@Nullable
-	// LUKETODO: private
-	public final Integer myIdParamIndex;
+	private final Integer myIdParamIndex;
 
 	public static final OperationIdParamDetails EMPTY = new OperationIdParamDetails(null, null);
 

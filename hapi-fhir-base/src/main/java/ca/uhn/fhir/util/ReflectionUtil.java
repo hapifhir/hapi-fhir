@@ -295,25 +295,6 @@ public class ReflectionUtil {
 		}
 	}
 
-	// LUKETODO:  see if you can get rid of this:
-	public static boolean hasAnyMethodParamsWithClassesOfAnnotation(
-			Method theMethod, Class<? extends Annotation> theAnnotationClass) {
-		// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		return Arrays.stream(theMethod.getParameterTypes())
-				.anyMatch(paramType -> paramType.isAnnotationPresent(theAnnotationClass));
-	}
-
-	// LUKETODO:  use this whenever possible
-	public static boolean hasAnyMethodParametersContainingFieldsWithAnnotation(
-			Method theMethod, Class<? extends Annotation> theAnnotationClass) {
-		return Arrays.stream(theMethod.getParameterTypes())
-				.map(Class::getFields)
-				.map(Arrays::asList)
-				.flatMap(Collection::stream)
-				.anyMatch(field -> field.isAnnotationPresent(theAnnotationClass));
-	}
-
-	//
 	public static List<Class<?>> getMethodParamsWithClassesWithFieldsWithAnnotation(
 			Method theMethod, Class<? extends Annotation> theAnnotationClass) {
 		return Arrays.stream(theMethod.getParameterTypes())

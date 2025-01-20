@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.method;
 
 import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.EXPAND;
+import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.OP_INSTANCE_OR_TYPE;
 import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE;
 import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS;
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,23 +13,21 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.PatientProvider;
 import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SampleParamsWithIdParam;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
 import java.util.List;
 
-// LUKETODO:  consider whether this test needs to live here or in r4 structures
-@ExtendWith(MockitoExtension.class)
 class OperationMethodBindingTest {
 
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
@@ -38,8 +37,7 @@ class OperationMethodBindingTest {
 	private Method myMethod;
 	private Operation myOperation;
 
-	@Mock
-	private Object provider;
+	private Object myProvider = null;
 
 	@Test
 	void constructor_withInvalidOperationName_shouldThrowConfigurationException() {
@@ -47,7 +45,7 @@ class OperationMethodBindingTest {
 
 		final ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
 			new OperationMethodBinding(
-				IBaseResource.class, null, myMethod, ourFhirContext, provider, myOperation);
+				IBaseResource.class, null, myMethod, ourFhirContext, myProvider, myOperation);
 		});
 
 		assertTrue(exception.getMessage().contains("is annotated with @Operation but this annotation has no name defined"));
@@ -62,7 +60,7 @@ class OperationMethodBindingTest {
 		requestDetails.setRequestType(RequestTypeEnum.GET);
 
 		final OperationMethodBinding binding = new OperationMethodBinding(
-			IBaseResource.class, null, myMethod, ourFhirContext, provider, myOperation);
+			IBaseResource.class, null, myMethod, ourFhirContext, myProvider, myOperation);
 
 		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(requestDetails));
 	}
@@ -76,7 +74,7 @@ class OperationMethodBindingTest {
 		requestDetails.setRequestType(RequestTypeEnum.GET);
 
 		final OperationMethodBinding binding = new OperationMethodBinding(
-			IBaseResource.class, null, myMethod, ourFhirContext, provider, myOperation);
+			IBaseResource.class, null, myMethod, ourFhirContext, myProvider, myOperation);
 
 		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(requestDetails));
 	}
@@ -89,7 +87,7 @@ class OperationMethodBindingTest {
 		requestDetails.setRequestType(RequestTypeEnum.PUT);
 
 		final OperationMethodBinding binding = new OperationMethodBinding(
-			IBaseResource.class, null, myMethod, ourFhirContext, provider, myOperation);
+			IBaseResource.class, null, myMethod, ourFhirContext, myProvider, myOperation);
 
 		final MethodNotAllowedException exception = assertThrows(MethodNotAllowedException.class, () -> {
 			binding.invokeServer(null, requestDetails, new Object[]{});
@@ -109,7 +107,7 @@ class OperationMethodBindingTest {
 		requestDetails.setId(new IdType(ResourceType.Measure.name(), "Measure/123"));
 
 		final OperationMethodBinding binding = new OperationMethodBinding(
-			 IBaseResource.class, null, myMethod, ourFhirContext, provider, myOperation);
+			 IBaseResource.class, null, myMethod, ourFhirContext, myProvider, myOperation);
 
 		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(requestDetails));
 	}
@@ -125,7 +123,7 @@ class OperationMethodBindingTest {
 		requestDetails.setId(new IdType(ResourceType.Measure.name(), "Measure/123"));
 
 		final OperationMethodBinding binding = new OperationMethodBinding(
-			 IBaseResource.class, null, myMethod, ourFhirContext, provider, myOperation);
+			 IBaseResource.class, null, myMethod, ourFhirContext, myProvider, myOperation);
 
 		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(requestDetails));
 	}
@@ -140,13 +138,29 @@ class OperationMethodBindingTest {
 		requestDetails.setResourceName(ResourceType.ValueSet.name());
 
 		final OperationMethodBinding binding = new OperationMethodBinding(
-			 IBaseResource.class, null, myMethod, ourFhirContext, provider, myOperation);
+			 IBaseResource.class, null, myMethod, ourFhirContext, myProvider, myOperation);
+
+		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(requestDetails));
+	}
+
+	@Test
+	void methodWithIdParamButNoIIdType() {
+		myProvider = new PatientProvider();
+		init(OP_INSTANCE_OR_TYPE, IdType.class, StringType.class, Patient.class);
+
+		final SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestType(RequestTypeEnum.POST);
+		requestDetails.setOperation("$OP_INSTANCE_OR_TYPE");
+		requestDetails.setResourceName(ResourceType.Patient.name());
+
+		final OperationMethodBinding binding = new OperationMethodBinding(
+			 Patient.class, Patient.class, myMethod, ourFhirContext, myProvider, myOperation);
 
 		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(requestDetails));
 	}
 
 	private void init(String theMethodName, Class<?>... theParamClasses) {
-		myMethod = myInnerClassesAndMethods.getDeclaredMethod(theMethodName, theParamClasses);
+		myMethod = myInnerClassesAndMethods.getDeclaredMethod(myProvider, theMethodName, theParamClasses);
 		myOperation = myMethod.getAnnotation(Operation.class);
 	}
 }
