@@ -1433,7 +1433,7 @@ public class FhirTerser {
 		if (!theReference.getReferenceElement().isEmpty()) {
 			return theReference.getReferenceElement().isLocal();
 		}
-		if( theReference.getResource() == null) {
+		if (theReference.getResource() == null) {
 			return false;
 		}
 		if (theReference.getResource().getIdElement() == null) {
@@ -1486,8 +1486,7 @@ public class FhirTerser {
 						getContainedResourceList(theResource).add(resource);
 						next.setReference(id.getValue());
 					}
-					if (isInternalFragment(next)
-							&& theContained.hasExistingIdToContainedResource()) {
+					if (isInternalFragment(next) && theContained.hasExistingIdToContainedResource()) {
 						theContained
 								.getExistingIdToContainedResource()
 								.remove(resource.getIdElement().getValue());
@@ -1828,7 +1827,6 @@ public class FhirTerser {
 			if (isBlank(newId.getValue())) {
 				UUID randomUUID = UUID.randomUUID();
 				theResource.getIdElement().setValue(randomUUID.toString());
-				//theResource.setUserData(USER_DATA_KEY_CONTAINED_RESOURCE_ID_GENERATED_BY_TERSER, Boolean.TRUE);
 				newId.setValue("#" + randomUUID);
 			}
 			getResourceToIdMap().put(theResource, newId);
