@@ -3081,6 +3081,74 @@ public enum Pointcut implements IPointcut {
 			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.rest.api.server.RequestDetails"),
 
 	/**
+	 * <b>CDS Hooks Prefetch Hook:</b>
+	 * Invoked before a CDS Hooks prefetch request is made.
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 *     <li> "ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson" - The CDS Hooks request that the prefetch is being made for</li>
+	 *     <li> "java.lang.String" - The prefetch template for the prefetch request</li>
+	 *     <li> "java.lang.String" - The actual prefetch query, generated based on the prefetch template using
+	 *     the prefetch context</li>
+	 *  </ul>
+	 *
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	CDS_HOOK_PREFETCH_REQUEST(
+			void.class,
+			"ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson",
+			"java.lang.String",
+			"java.lang.String"),
+
+	/**
+	 * <b>CDS Hooks Prefetch Hook:</b>
+	 * Invoked after CDS Hooks prefetch request is completed successfully.
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 *     <li> "ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson" - The CDS Hooks request that the prefetch is being made for</li>
+	 *     <li> "java.lang.String" - The prefetch template for the prefetch request</li>
+	 *     <li> "java.lang.String" - The actual prefetch query, generated based on the prefetch template using
+	 *     the prefetch context</li>
+	 *     <li> "org.hl7.fhir.instance.model.api.IBaseResource" - The resource that is returned by the prefetch
+	 *     request</li>
+	 *  </ul>
+	 *
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	CDS_HOOK_PREFETCH_RESPONSE(
+			void.class,
+			"ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson",
+			"java.lang.String",
+			"java.lang.String",
+			"org.hl7.fhir.instance.model.api.IBaseResource"),
+
+	/**
+	 * <b>CDS Hooks Prefetch Hook:</b>
+	 * Invoked after a failed CDS Hooks prefetch request.
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 *     <li> "ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson" - The CDS Hooks request that the prefetch is being made for</li>
+	 *     <li> "java.lang.String" - The prefetch template for the prefetch request</li>
+	 *     <li> "java.lang.String" - The actual prefetch query, generated based on the prefetch template using
+	 *     the prefetch context</li>
+	 *     <li> "java.lang.Exception" - The exception that caused the failure of the prefetch request</li>
+	 *  </ul>
+	 *
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	CDS_HOOK_PREFETCH_FAILED(
+			void.class,
+			"ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson",
+			"java.lang.String",
+			"java.lang.String",
+			"java.lang.Exception"),
+
+	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
 	 */
