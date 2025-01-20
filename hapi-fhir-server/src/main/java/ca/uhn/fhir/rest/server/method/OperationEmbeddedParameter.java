@@ -57,7 +57,7 @@ public class OperationEmbeddedParameter implements IParameter {
 
 	// LUKETODO: do we need this to be separate or just reuse the one from OperationParameter?
 	// LUKETODO:  if so, add conditional logic everywhere to use it
-//	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationEmbeddedParam.class.getName() + "_PARSED_RESOURCE";
+	//	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationEmbeddedParam.class.getName() + "_PARSED_RESOURCE";
 
 	@SuppressWarnings("unchecked")
 	private static final Class<? extends IQueryParameterType>[] COMPOSITE_TYPES = new Class[0];
