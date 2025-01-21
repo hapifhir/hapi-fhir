@@ -197,12 +197,12 @@ public class FhirTerserR4Test {
 
 		FhirTerser.ContainedResources contained = myCtx.newTerser().containResources(mr, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 
-		assertThat(mr.getContained().get(0).getId()).containsPattern(HASH_UUID_PATTERN);
-		assertThat(mr.getContained().get(1).getId()).containsPattern(HASH_UUID_PATTERN);
+		assertThat(mr.getContained().get(0).getId()).containsPattern(UUID_PATTERN);
+		assertThat(mr.getContained().get(1).getId()).containsPattern(UUID_PATTERN);
 		assertEquals(ResourceType.Medication, mr.getContained().get(0).getResourceType());
 		assertEquals(ResourceType.Practitioner, mr.getContained().get(1).getResourceType());
-		assertEquals(mr.getContained().get(0).getId(), mr.getMedicationReference().getReference());
-		assertEquals(mr.getContained().get(1).getId(), mr.getRequester().getReference());
+		assertEquals("#" + mr.getContained().get(0).getId(), mr.getMedicationReference().getReference());
+		assertEquals("#" + mr.getContained().get(1).getId(), mr.getRequester().getReference());
 
 		FhirTerser.ContainedResources secondPass = myCtx.newTerser().containResources(mr, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 		assertThat(secondPass).isSameAs(contained);

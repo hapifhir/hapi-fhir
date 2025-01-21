@@ -1025,7 +1025,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			Patient p = new Patient();
 			p.setId("pat");
 			p.addName().setFamily("Smith").addGiven("John");
-			p.getManagingOrganization().setReference(org.getId());
+			p.getManagingOrganization().setReference("#" + org.getId());
 
 			Observation obs = new Observation();
 			obs.getContained().add(p);
@@ -1036,7 +1036,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			Device d = new Device();
 			d.setId("dev");
-			d.getOwner().setReference(org.getId());
+			d.getOwner().setReference("#" + org.getId());
 
 			Observation obs2 = new Observation();
 			obs2.getContained().add(d);
