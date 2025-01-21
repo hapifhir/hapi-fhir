@@ -275,28 +275,23 @@ public class MethodUtil {
 							if (fieldAnnotation instanceof IdParam) {
 								parameters.add(new NullParameter());
 							} else if (fieldAnnotation instanceof OperationEmbeddedParam) {
-								final OperationEmbeddedParameter operationEmbeddedParameter =
-										getOperationEmbeddedParameter(
-												theContext, fieldAnnotation, op, (OperationEmbeddedParam)
-														fieldAnnotation);
-
-								parameterType = fieldType;
 
 								final MethodUtilMutableLoopStateHolder stateHolder =
-										doStuff(methodToUse, parameterTypes, parameterType, paramIndex, field);
+										doStuff(methodToUse, parameterTypes, fieldType, paramIndex, field, theContext, fieldAnnotation, op);
 
-								parameterType = stateHolder.getParameterType();
-								methodToUse = stateHolder.getMethodToUse();
+//								parameterType = stateHolder.getParameterType();
 
 								// LUKETODO:  how to handle multiple  parameters.add(param); ?????
-								paramContexts.add(new MethodUtilParamInitializationContext(
-										operationEmbeddedParameter,
-										stateHolder.getParameterType(),
-										stateHolder.getOuterCollectionType(),
-										stateHolder.getInnerCollectionType()));
+								final MethodUtilParamInitializationContext paramContext = new MethodUtilParamInitializationContext(
+									stateHolder.getOperationEmbeddedParameter(),
+									stateHolder.getParameterType(),
+									stateHolder.getOuterCollectionType(),
+									stateHolder.getInnerCollectionType());
+
+								paramContexts.add(paramContext);
 
 								// LUKETODO:  nasty hack to skip the null check
-								param = operationEmbeddedParameter;
+								param = stateHolder.getOperationEmbeddedParameter();
 							} else {
 								// some kind of Exception for now?
 							}
@@ -546,8 +541,13 @@ public class MethodUtil {
 	}
 
 	private static MethodUtilMutableLoopStateHolder doStuff(
-			Method theMethod, Class<?>[] theParameterTypes, Class<?> theParameterType, int paramIndex, Field theField) {
-		Class<?> parameterType = theParameterType;
+		Method theMethod, Class<?>[] theParameterTypes, Class<?> theFieldType, int theParamIndex, Field theField, FhirContext theContext, Annotation theFieldAnnotation, Operation theOp) {
+		final OperationEmbeddedParameter operationEmbeddedParameter =
+			getOperationEmbeddedParameter(
+				theContext, theFieldAnnotation, theOp, (OperationEmbeddedParam)
+					theFieldAnnotation);
+
+		Class<?> parameterType = theFieldType;
 		Method methodToUse = theMethod;
 		Class<? extends java.util.Collection<?>> outerCollectionType = null;
 		Class<? extends java.util.Collection<?>> innerCollectionType = null;
@@ -563,7 +563,7 @@ public class MethodUtil {
 							.getMethod(methodToUse.getName(), theParameterTypes);
 					parameterType =
 							// LUKETODO:  what to do here if anything?
-							ReflectionUtil.getGenericCollectionTypeOfMethodParameter(methodToUse, paramIndex);
+							ReflectionUtil.getGenericCollectionTypeOfMethodParameter(methodToUse, theParamIndex);
 				} catch (NoSuchMethodException e) {
 					throw new ConfigurationException(Msg.code(400) + "A method with name '"
 							+ methodToUse.getName() + "' does not exist for super class '"
@@ -591,7 +591,7 @@ public class MethodUtil {
 		// wrong
 		// LUKETODO:  could be null?
 		if (Collection.class.isAssignableFrom(parameterType)) {
-			throw new ConfigurationException(Msg.code(401) + "Argument #" + paramIndex + " of Method '"
+			throw new ConfigurationException(Msg.code(401) + "Argument #" + theParamIndex + " of Method '"
 					+ methodToUse.getName()
 					+ "' in type '"
 					+ methodToUse.getDeclaringClass().getCanonicalName()
@@ -618,7 +618,7 @@ public class MethodUtil {
 		//											parameterType);
 
 		return new MethodUtilMutableLoopStateHolder(
-				parameterType, methodToUse, outerCollectionType, innerCollectionType);
+				parameterType, outerCollectionType, innerCollectionType, operationEmbeddedParameter);
 	}
 
 	@Nonnull
