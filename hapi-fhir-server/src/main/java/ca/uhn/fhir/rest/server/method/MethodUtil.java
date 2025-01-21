@@ -63,15 +63,12 @@ import ca.uhn.fhir.rest.server.method.ResourceParameter.Mode;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -198,11 +195,8 @@ public class MethodUtil {
 			} else if (parameterType.equals(SearchTotalModeEnum.class)) {
 				param = new SearchTotalModeParameter();
 			} else {
-				// LUKETODO:  introduce new state objects
 				final Operation op = methodToUse.getAnnotation(Operation.class);
-				// LUKETODO:  this relies on new new embedded params explicitly leave OUT @OperationParam on parameters
 				if (nextParameterAnnotations.length == 0) {
-					// LUKETODO:  UNIT TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 					final List<Class<?>> operationEmbeddedTypes =
 							ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
 									methodToUse, OperationEmbeddedParam.class);
@@ -214,42 +208,40 @@ public class MethodUtil {
 					}
 
 					if (operationEmbeddedTypes.size() > 1) {
-						// LUKETODO:  error
 						throw new ConfigurationException(String.format(
 								"%sOnly one type with embedded params is supported for now for method: %s",
 								Msg.code(9999927), methodToUse.getName()));
 					}
 
 					// LUKETODO:  else????
-					if (!operationEmbeddedTypes
-							.isEmpty()) { // ensure this is the opposite so we can flip between the two
-						// LUKETODO:  TRY TO DO AS MUCH OF THIS AS POSSIBLE WITHIN A SEPARATE
-						// METHOD!!!!!!!!!!!!!!!!!!!!
-						ourLog.info("1234: has operationEmbeddedTypes  !!!!!!! method: {}", methodToUse.getName());
+					if (!operationEmbeddedTypes.isEmpty()) {
+						final MethodUtilForEmbeddedParameters paramsStuff =
+							new MethodUtilForEmbeddedParameters(
+								theContext,
+								theMethod,
+								op,
+								parameterTypes,
+								operationEmbeddedTypes.get(0),
+								paramIndex);
 
-						final Class<?> operationEmbeddedType = operationEmbeddedTypes.get(0);
+						final List<OuterContext> outerContexts = paramsStuff.doStuffOuterOuter();
 
-						final Field[] fields = operationEmbeddedType.getDeclaredFields();
-
-						for (Field field : fields) {
-							final OuterContext outerContext =
-									doStuffOuter(theContext, methodToUse, op, parameterTypes, field, paramIndex);
-
-							if (outerContext.myParamter != null) {
-								parameters.add(outerContext.myParamter);
+						for (OuterContext outerContext : outerContexts) {
+							if (outerContext.getParamter() != null) {
+								parameters.add(outerContext.getParamter());
 							}
 
-							if (outerContext.myStateHolder != null) {
-								paramContexts.add(outerContext.myStateHolder.getParamContext());
+							if (outerContext.getStateHolder() != null) {
+								paramContexts.add(outerContext.getStateHolder().getParamContext());
 
-								//								// LUKETODO:  nasty hack to skip the null check
+								// LUKETODO:  nasty hack to skip the null check
 								param = outerContext
-										.myStateHolder
+										.getStateHolder()
 										.getParamContext()
 										.getParam();
 							}
 						}
-					}
+					} // else these are regular
 				}
 
 				for (int i = 0; i < nextParameterAnnotations.length && param == null; i++) {
@@ -491,176 +483,5 @@ public class MethodUtil {
 			paramIndex++;
 		}
 		return parameters;
-	}
-
-	private static class OuterContext {
-		@Nullable
-		private final IParameter myParamter;
-
-		@Nullable
-		private final MethodUtilMutableLoopStateHolder myStateHolder;
-
-		public OuterContext(IParameter myParamter, @Nullable MethodUtilMutableLoopStateHolder myStateHolder) {
-			this.myParamter = myParamter;
-			this.myStateHolder = myStateHolder;
-		}
-	}
-
-	private static OuterContext doStuffOuter(
-			FhirContext theContext,
-			Method theMethodToUse,
-			Operation theOp,
-			Class<?>[] theParameterTypes,
-			Field theField,
-			int theParamIndex) {
-		final String fieldName = theField.getName();
-		final Class<?> fieldType = theField.getType();
-		final Annotation[] fieldAnnotations = theField.getAnnotations();
-
-		if (fieldAnnotations.length < 1) {
-			throw new ConfigurationException(String.format(
-					"%sNo annotations for field: %s for method: %s",
-					Msg.code(9999926), fieldName, theMethodToUse.getName()));
-		}
-
-		if (fieldAnnotations.length > 1) {
-			// LUKETODO:  error
-			throw new ConfigurationException(String.format(
-					"%sMore than one annotation for field: %s for method: %s",
-					Msg.code(999998), fieldName, theMethodToUse.getName()));
-		}
-
-		// This is the parameter on the field in question on the type with embedded params
-		// class:  ex
-		// myCount
-		final Annotation fieldAnnotation = fieldAnnotations[0];
-
-		if (fieldAnnotation instanceof IdParam) {
-			return new OuterContext(new NullParameter(), null);
-		} else if (fieldAnnotation instanceof OperationEmbeddedParam) {
-
-			final MethodUtilMutableLoopStateHolder stateHolder = doStuff(
-					theMethodToUse,
-					theParameterTypes,
-					fieldType,
-					theParamIndex,
-					theField,
-					theContext,
-					fieldAnnotation,
-					theOp);
-
-			return new OuterContext(null, stateHolder);
-
-		} else {
-			// some kind of Exception for now?
-			return new OuterContext(null, null);
-		}
-	}
-
-	private static MethodUtilMutableLoopStateHolder doStuff(
-			Method theMethod,
-			Class<?>[] theParameterTypes,
-			Class<?> theFieldType,
-			int theParamIndex,
-			Field theField,
-			FhirContext theContext,
-			Annotation theFieldAnnotation,
-			Operation theOp) {
-		final OperationEmbeddedParameter operationEmbeddedParameter = getOperationEmbeddedParameter(
-				theContext, theFieldAnnotation, theOp, (OperationEmbeddedParam) theFieldAnnotation);
-
-		Class<?> parameterType = theFieldType;
-		Method methodToUse = theMethod;
-		Class<? extends java.util.Collection<?>> outerCollectionType = null;
-		Class<? extends java.util.Collection<?>> innerCollectionType = null;
-
-		if (Collection.class.isAssignableFrom(parameterType)) {
-			innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
-			parameterType = ReflectionUtil.getGenericCollectionTypeOfField(theField);
-			if (parameterType == null && methodToUse.getDeclaringClass().isSynthetic()) {
-				try {
-					methodToUse = methodToUse
-							.getDeclaringClass()
-							.getSuperclass()
-							.getMethod(methodToUse.getName(), theParameterTypes);
-					parameterType =
-							// LUKETODO:  what to do here if anything?
-							ReflectionUtil.getGenericCollectionTypeOfMethodParameter(methodToUse, theParamIndex);
-				} catch (NoSuchMethodException e) {
-					throw new ConfigurationException(Msg.code(400) + "A method with name '"
-							+ methodToUse.getName() + "' does not exist for super class '"
-							+ methodToUse.getDeclaringClass().getSuperclass() + "'");
-				}
-			}
-			// LUKETODO:
-			//								declaredParameterType = parameterType;
-		}
-		// LUKETODO:  now we're processing the generic parameter, so capture the inner and
-		// outer
-		// types
-		// Collection<X>
-		// LUKETODO:  could be null?
-		if (Collection.class.isAssignableFrom(parameterType)) {
-			outerCollectionType = innerCollectionType;
-			innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
-			// LUKETODO: come up with another method to do this for field params
-			parameterType = ReflectionUtil.getGenericCollectionTypeOfField(theField);
-			// LUKETODO:
-			//								declaredParameterType = parameterType;
-		}
-		// LUKETODO:  as a guard:  if this is still a Collection, then throw because
-		// something went
-		// wrong
-		// LUKETODO:  could be null?
-		if (Collection.class.isAssignableFrom(parameterType)) {
-			throw new ConfigurationException(Msg.code(401) + "Argument #" + theParamIndex + " of Method '"
-					+ methodToUse.getName()
-					+ "' in type '"
-					+ methodToUse.getDeclaringClass().getCanonicalName()
-					+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
-		}
-
-		// LUKETODO:  do I need to worry about this:
-		/*
-
-		Class<?> newParameterType = elementDefinition.getImplementingClass();
-		if (!declaredParameterType.isAssignableFrom(newParameterType)) {
-			throw new ConfigurationException(Msg.code(405) + "Non assignable parameter typeName=\""
-					+ operationParam.typeName() + "\" specified on method " + methodToUse);
-		}
-		parameterType = newParameterType;
-		 */
-
-		//									ourLog.info(
-		//											"1234: about to initialize types: method: {}, outerCollectionType: {},
-		// innerCollectionType: {}, parameterType: {}",
-		//											methodToUse.getName(),
-		//											outerCollectionType,
-		//											innerCollectionType,
-		//											parameterType);
-		final MethodUtilParamInitializationContext paramContext = new MethodUtilParamInitializationContext(
-				operationEmbeddedParameter, parameterType, outerCollectionType, innerCollectionType);
-
-		return new MethodUtilMutableLoopStateHolder(paramContext);
-	}
-
-	@Nonnull
-	private static OperationEmbeddedParameter getOperationEmbeddedParameter(
-			FhirContext theContext, Annotation fieldAnnotation, Operation op, OperationEmbeddedParam operationParam) {
-		final Annotation[] fieldAnnotationArray = new Annotation[] {fieldAnnotation};
-		final String description = ParametersUtil.extractDescription(fieldAnnotationArray);
-		final List<String> examples = ParametersUtil.extractExamples(fieldAnnotationArray);
-
-		// LUKETODO:  capabilities statemenet provider
-		// LUKETODO:  consider taking  ALL  hapi-fhir storage-cr INTO the clinical-reasoning
-		// repo
-		return new OperationEmbeddedParameter(
-				theContext,
-				op.name(),
-				operationParam.name(),
-				operationParam.min(),
-				operationParam.max(),
-				description,
-				examples);
 	}
 }
