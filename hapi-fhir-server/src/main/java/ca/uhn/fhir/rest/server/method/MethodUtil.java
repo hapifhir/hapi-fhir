@@ -109,9 +109,8 @@ public class MethodUtil {
 		int paramIndex = 0;
 
 		for (Annotation[] nextParameterAnnotations : methodToUse.getParameterAnnotations()) {
-			// LUKETODO:  wrapper object for all of these
 			IParameter param = null;
-			final List<MethodUtilParamInitializationContext> paramContexts = new ArrayList<>();
+			final List<ParamInitializationContext> paramContexts = new ArrayList<>();
 			Class<?> declaredParameterType = parameterTypes[paramIndex];
 			Class<?> parameterType = declaredParameterType;
 
@@ -196,13 +195,15 @@ public class MethodUtil {
 				param = new SearchTotalModeParameter();
 			} else {
 				final Operation op = methodToUse.getAnnotation(Operation.class);
+				// There are no annotations on this parameter, so we check to see if the parameter class has fields
+				// annotated OperationEmbeddedParam
 				if (nextParameterAnnotations.length == 0) {
 					final List<Class<?>> operationEmbeddedTypes =
 							ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
 									methodToUse, OperationEmbeddedParam.class);
 
 					if (op == null) {
-						throw new ConfigurationException(Msg.code(404)
+						throw new ConfigurationException(Msg.code(846192641)
 								+ "@OperationParam or OperationEmbeddedParam detected on method that is not annotated with @Operation: "
 								+ methodToUse.toGenericString());
 					}
@@ -213,30 +214,34 @@ public class MethodUtil {
 								Msg.code(9999927), methodToUse.getName()));
 					}
 
-					// LUKETODO:  else????
 					if (!operationEmbeddedTypes.isEmpty()) {
-						final MethodUtilForEmbeddedParameters paramsStuff = new MethodUtilForEmbeddedParameters(
-								theContext, theMethod, op, parameterTypes, operationEmbeddedTypes.get(0), paramIndex);
+						final EmbeddedParameterConverter embeddedParameterConverter = new EmbeddedParameterConverter(
+								theContext, theMethod, op, parameterTypes, operationEmbeddedTypes.get(0));
 
-						final List<OuterContext> outerContexts = paramsStuff.doStuffOuterOuter();
+						final List<EmbeddedParameterConverterContext> outerContexts =
+								embeddedParameterConverter.convert();
 
-						for (OuterContext outerContext : outerContexts) {
-							if (outerContext.getParamter() != null) {
-								parameters.add(outerContext.getParamter());
+						for (EmbeddedParameterConverterContext outerContext : outerContexts) {
+							if (outerContext.getParameter() != null) {
+								parameters.add(outerContext.getParameter());
 							}
+							final ParamInitializationContext paramContext = outerContext.getParamContext();
 
-							if (outerContext.getStateHolder() != null) {
-								paramContexts.add(outerContext.getStateHolder().getParamContext());
+							if (paramContext != null) {
+								paramContexts.add(paramContext);
 
-								// LUKETODO:  nasty hack to skip the null check
-								param = outerContext
-										.getStateHolder()
-										.getParamContext()
-										.getParam();
+								// N.B. This a hack used only to pass the null check below, which is crucial to the
+								// non-embedded params logic
+								param = paramContext.getParam();
 							}
 						}
-					} // else these are regular
-				}
+					} else {
+						// More than likely this will result in the param == null Exception below
+						ourLog.warn(
+								"Method '{}' has no parameters with annotations. Don't know how to handle this parameter",
+								methodToUse.getName());
+					}
+				} // else there are no embedded params and let execution fall to the for loop below
 
 				for (int i = 0; i < nextParameterAnnotations.length && param == null; i++) {
 					Annotation nextAnnotation = nextParameterAnnotations[i];
@@ -452,13 +457,12 @@ public class MethodUtil {
 				}
 			}
 
-			// LUKETODO:  do we need this or just add conditional logic?
 			if (paramContexts.isEmpty()
 					|| !(param
 							instanceof OperationEmbeddedParameter)) { // LUKETODO:  another nasty hack:  we need to add
 				// RequestDetails if it's last
-				paramContexts.add(new MethodUtilParamInitializationContext(
-						param, parameterType, outerCollectionType, innerCollectionType));
+				paramContexts.add(
+						new ParamInitializationContext(param, parameterType, outerCollectionType, innerCollectionType));
 			}
 
 			if (param == null) {
@@ -469,7 +473,7 @@ public class MethodUtil {
 								+ "' has no recognized FHIR interface parameter nextParameterAnnotations. Don't know how to handle this parameter");
 			}
 
-			for (MethodUtilParamInitializationContext paramContext : paramContexts) {
+			for (ParamInitializationContext paramContext : paramContexts) {
 				paramContext.initialize(methodToUse);
 				parameters.add(paramContext.getParam());
 			}

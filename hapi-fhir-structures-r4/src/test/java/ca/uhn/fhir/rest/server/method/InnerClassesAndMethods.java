@@ -22,12 +22,12 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.StringJoiner;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-// LUKETODO:  comment why this class lives in this module
+// This class lives in hapi-fhir-structures-r4 because if we introduce it in hapi-fhir-server, there will be a
+// circular dependency
 // Methods and embedded param classes to be used for testing regression code in hapi-fhir-server method classes
 class InnerClassesAndMethods {
 

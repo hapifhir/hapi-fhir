@@ -20,8 +20,9 @@ import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.*;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-// LUKETODO:  comment why this class lives in this module
 // LUKETODO:  try to cover more InternalErrorException cases
+// This test lives in hapi-fhir-structures-r4 because if we introduce it in hapi-fhir-server, there will be a
+// circular dependency
 class BaseMethodBindingMethodParameterBuilderTest {
 
 	// LUKETODO:  assert Exception messages

@@ -28,6 +28,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 import java.util.List;
 
+// This test lives in hapi-fhir-structures-r4 because if we introduce it in hapi-fhir-server, there will be a
+// circular dependency
 class OperationMethodBindingTest {
 
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();

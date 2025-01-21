@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ReflectionUtilTest {
 
-	// LUKETODO:  add tests for
+	// LUKETODO:  add tests for new methods
 
 	@Test
 	public void testNewInstance() {

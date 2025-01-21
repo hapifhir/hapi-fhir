@@ -27,10 +27,11 @@ import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SUPER_SIMPLE
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-// LUKETODO: test with RequestDetails either at the beginning or the end
 // LUKETODO: try to test for every case in embedded params where there's a throws
 
-// LUKETODO:  comment why this class lives in this module
+// This test lives in hapi-fhir-structures-r4 because if we introduce it in hapi-fhir-server, there will be a
+// circular dependency
+// LUKETODO: do we need mocks at all?
 @ExtendWith(MockitoExtension.class)
 class MethodUtilTest {
 

@@ -6,7 +6,9 @@ import jakarta.annotation.Nullable;
 
 import java.util.Optional;
 
-// LUKETODO:  javadoc
+/**
+ * This class is used to capture the details of an operation's ID parameter to be used by {@link OperationMethodBinding}
+ */
 class OperationIdParamDetails {
 
 	@Nullable

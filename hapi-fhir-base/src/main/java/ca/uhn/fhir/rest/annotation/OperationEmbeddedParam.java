@@ -29,12 +29,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Used by any method parameter within an class passed to an {@link Operation} method to be converted into an
+ * OperationEmbeddedParameter.
+ * <p/>
+ * The class itself doesn't have an annotation, only its fields.
+ * <p/>
+ * The method parameter in the operation also is explicitly not annotated
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.PARAMETER, ElementType.FIELD})
-// LUKETODO:  javadoc to make this clear that it's associated with an OperationEmbeddedParameter
-// LUKETODO:  get rid of a bunch of cruft like MAX_UNLIMITED
 public @interface OperationEmbeddedParam {
+	// LUKETODO:  after writing the conformance code get rid of a bunch of cruft like MAX_UNLIMITED
 
 	/**
 	 * Value for {@link OperationEmbeddedParam#max()} indicating no maximum
