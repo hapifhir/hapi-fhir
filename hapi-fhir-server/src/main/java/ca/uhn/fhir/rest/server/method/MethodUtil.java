@@ -215,14 +215,8 @@ public class MethodUtil {
 
 					// LUKETODO:  else????
 					if (!operationEmbeddedTypes.isEmpty()) {
-						final MethodUtilForEmbeddedParameters paramsStuff =
-							new MethodUtilForEmbeddedParameters(
-								theContext,
-								theMethod,
-								op,
-								parameterTypes,
-								operationEmbeddedTypes.get(0),
-								paramIndex);
+						final MethodUtilForEmbeddedParameters paramsStuff = new MethodUtilForEmbeddedParameters(
+								theContext, theMethod, op, parameterTypes, operationEmbeddedTypes.get(0), paramIndex);
 
 						final List<OuterContext> outerContexts = paramsStuff.doStuffOuterOuter();
 

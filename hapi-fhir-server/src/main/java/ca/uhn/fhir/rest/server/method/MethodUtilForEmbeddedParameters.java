@@ -52,16 +52,14 @@ public class MethodUtilForEmbeddedParameters {
 		return outerContexts;
 	}
 
-	private OuterContext doStuffOuter(
-			Field theField) {
+	private OuterContext doStuffOuter(Field theField) {
 		final String fieldName = theField.getName();
 		final Class<?> fieldType = theField.getType();
 		final Annotation[] fieldAnnotations = theField.getAnnotations();
 
 		if (fieldAnnotations.length < 1) {
 			throw new ConfigurationException(String.format(
-					"%sNo annotations for field: %s for method: %s",
-					Msg.code(9999926), fieldName, myMethod.getName()));
+					"%sNo annotations for field: %s for method: %s", Msg.code(9999926), fieldName, myMethod.getName()));
 		}
 
 		if (fieldAnnotations.length > 1) {
@@ -80,10 +78,8 @@ public class MethodUtilForEmbeddedParameters {
 			return new OuterContext(new NullParameter(), null);
 		} else if (fieldAnnotation instanceof OperationEmbeddedParam) {
 
-			final MethodUtilMutableLoopStateHolder stateHolder = doStuff(
-					fieldType,
-					theField,
-				(OperationEmbeddedParam) fieldAnnotation);
+			final MethodUtilMutableLoopStateHolder stateHolder =
+					doStuff(fieldType, theField, (OperationEmbeddedParam) fieldAnnotation);
 
 			return new OuterContext(null, stateHolder);
 
@@ -94,12 +90,10 @@ public class MethodUtilForEmbeddedParameters {
 	}
 
 	private MethodUtilMutableLoopStateHolder doStuff(
-			Class<?> theFieldType,
-			Field theField,
-			OperationEmbeddedParam theOperationEmbeddedParam) {
+			Class<?> theFieldType, Field theField, OperationEmbeddedParam theOperationEmbeddedParam) {
 
 		final OperationEmbeddedParameter operationEmbeddedParameter =
-			getOperationEmbeddedParameter(theOperationEmbeddedParam);
+				getOperationEmbeddedParameter(theOperationEmbeddedParam);
 
 		Class<?> parameterType = theFieldType;
 		Method methodToUse = myMethod;
