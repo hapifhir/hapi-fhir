@@ -64,6 +64,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -73,12 +74,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -215,12 +213,7 @@ public class MethodUtil {
 								+ methodToUse.toGenericString());
 					}
 
-					// LUKETODO:  try to combine into validateAndGet methods
-					final List<Class<?>> operationEmbeddedTypesInner =
-							ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
-									methodToUse, OperationEmbeddedParam.class);
-
-					if (operationEmbeddedTypesInner.size() > 1) {
+					if (operationEmbeddedTypes.size() > 1) {
 						// LUKETODO:  error
 						throw new ConfigurationException(String.format(
 								"%sOnly one type with embedded params is supported for now for method: %s",
@@ -234,66 +227,26 @@ public class MethodUtil {
 						// METHOD!!!!!!!!!!!!!!!!!!!!
 						ourLog.info("1234: has operationEmbeddedTypes  !!!!!!! method: {}", methodToUse.getName());
 
-						final Class<?> operationEmbeddedType = operationEmbeddedTypesInner.get(0);
+						final Class<?> operationEmbeddedType = operationEmbeddedTypes.get(0);
 
 						final Field[] fields = operationEmbeddedType.getDeclaredFields();
 
 						for (Field field : fields) {
-							final String fieldName = field.getName();
-							final Class<?> fieldType = field.getType();
-							final Annotation[] fieldAnnotations = field.getAnnotations();
+							final OuterContext outerContext =
+									doStuffOuter(theContext, methodToUse, op, parameterTypes, field, paramIndex);
 
-							if (fieldAnnotations.length < 1) {
-								throw new ConfigurationException(String.format(
-										"%sNo annotations for field: %s for method: %s",
-										Msg.code(9999926), fieldName, methodToUse.getName()));
+							if (outerContext.myParamter != null) {
+								parameters.add(outerContext.myParamter);
 							}
 
-							if (fieldAnnotations.length > 1) {
-								// LUKETODO:  error
-								throw new ConfigurationException(String.format(
-										"%sMore than one annotation for field: %s for method: %s",
-										Msg.code(999998), fieldName, methodToUse.getName()));
-							}
+							if (outerContext.myStateHolder != null) {
+								paramContexts.add(outerContext.myStateHolder.getParamContext());
 
-							final Set<String> annotationClassNames = Arrays.stream(fieldAnnotations)
-									.map(Annotation::annotationType)
-									.map(Class::getName)
-									.collect(Collectors.toUnmodifiableSet());
-
-							ourLog.info(
-									"1234: MethodUtil:  TypeWithEmbeddedParams: fieldName: {}, class: {}, fieldAnnotations: {}",
-									fieldName,
-									fieldType.getName(),
-									annotationClassNames);
-
-							// This is the parameter on the field in question on the type with embedded params
-							// class:  ex
-							// myCount
-							final Annotation fieldAnnotation = fieldAnnotations[0];
-
-							if (fieldAnnotation instanceof IdParam) {
-								parameters.add(new NullParameter());
-							} else if (fieldAnnotation instanceof OperationEmbeddedParam) {
-
-								final MethodUtilMutableLoopStateHolder stateHolder =
-										doStuff(methodToUse, parameterTypes, fieldType, paramIndex, field, theContext, fieldAnnotation, op);
-
-//								parameterType = stateHolder.getParameterType();
-
-								// LUKETODO:  how to handle multiple  parameters.add(param); ?????
-								final MethodUtilParamInitializationContext paramContext = new MethodUtilParamInitializationContext(
-									stateHolder.getOperationEmbeddedParameter(),
-									stateHolder.getParameterType(),
-									stateHolder.getOuterCollectionType(),
-									stateHolder.getInnerCollectionType());
-
-								paramContexts.add(paramContext);
-
-								// LUKETODO:  nasty hack to skip the null check
-								param = stateHolder.getOperationEmbeddedParameter();
-							} else {
-								// some kind of Exception for now?
+								//								// LUKETODO:  nasty hack to skip the null check
+								param = outerContext
+										.myStateHolder
+										.getParamContext()
+										.getParam();
 							}
 						}
 					}
@@ -540,12 +493,81 @@ public class MethodUtil {
 		return parameters;
 	}
 
+	private static class OuterContext {
+		@Nullable
+		private final IParameter myParamter;
+
+		@Nullable
+		private final MethodUtilMutableLoopStateHolder myStateHolder;
+
+		public OuterContext(IParameter myParamter, @Nullable MethodUtilMutableLoopStateHolder myStateHolder) {
+			this.myParamter = myParamter;
+			this.myStateHolder = myStateHolder;
+		}
+	}
+
+	private static OuterContext doStuffOuter(
+			FhirContext theContext,
+			Method theMethodToUse,
+			Operation theOp,
+			Class<?>[] theParameterTypes,
+			Field theField,
+			int theParamIndex) {
+		final String fieldName = theField.getName();
+		final Class<?> fieldType = theField.getType();
+		final Annotation[] fieldAnnotations = theField.getAnnotations();
+
+		if (fieldAnnotations.length < 1) {
+			throw new ConfigurationException(String.format(
+					"%sNo annotations for field: %s for method: %s",
+					Msg.code(9999926), fieldName, theMethodToUse.getName()));
+		}
+
+		if (fieldAnnotations.length > 1) {
+			// LUKETODO:  error
+			throw new ConfigurationException(String.format(
+					"%sMore than one annotation for field: %s for method: %s",
+					Msg.code(999998), fieldName, theMethodToUse.getName()));
+		}
+
+		// This is the parameter on the field in question on the type with embedded params
+		// class:  ex
+		// myCount
+		final Annotation fieldAnnotation = fieldAnnotations[0];
+
+		if (fieldAnnotation instanceof IdParam) {
+			return new OuterContext(new NullParameter(), null);
+		} else if (fieldAnnotation instanceof OperationEmbeddedParam) {
+
+			final MethodUtilMutableLoopStateHolder stateHolder = doStuff(
+					theMethodToUse,
+					theParameterTypes,
+					fieldType,
+					theParamIndex,
+					theField,
+					theContext,
+					fieldAnnotation,
+					theOp);
+
+			return new OuterContext(null, stateHolder);
+
+		} else {
+			// some kind of Exception for now?
+			return new OuterContext(null, null);
+		}
+	}
+
 	private static MethodUtilMutableLoopStateHolder doStuff(
-		Method theMethod, Class<?>[] theParameterTypes, Class<?> theFieldType, int theParamIndex, Field theField, FhirContext theContext, Annotation theFieldAnnotation, Operation theOp) {
-		final OperationEmbeddedParameter operationEmbeddedParameter =
-			getOperationEmbeddedParameter(
-				theContext, theFieldAnnotation, theOp, (OperationEmbeddedParam)
-					theFieldAnnotation);
+			Method theMethod,
+			Class<?>[] theParameterTypes,
+			Class<?> theFieldType,
+			int theParamIndex,
+			Field theField,
+			FhirContext theContext,
+			Annotation theFieldAnnotation,
+			Operation theOp) {
+		final OperationEmbeddedParameter operationEmbeddedParameter = getOperationEmbeddedParameter(
+				theContext, theFieldAnnotation, theOp, (OperationEmbeddedParam) theFieldAnnotation);
 
 		Class<?> parameterType = theFieldType;
 		Method methodToUse = theMethod;
@@ -616,9 +638,10 @@ public class MethodUtil {
 		//											outerCollectionType,
 		//											innerCollectionType,
 		//											parameterType);
+		final MethodUtilParamInitializationContext paramContext = new MethodUtilParamInitializationContext(
+				operationEmbeddedParameter, parameterType, outerCollectionType, innerCollectionType);
 
-		return new MethodUtilMutableLoopStateHolder(
-				parameterType, outerCollectionType, innerCollectionType, operationEmbeddedParameter);
+		return new MethodUtilMutableLoopStateHolder(paramContext);
 	}
 
 	@Nonnull
