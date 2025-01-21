@@ -1430,19 +1430,13 @@ public class FhirTerser {
 	}
 
 	private boolean isInternalFragment(IBaseReference theReference) {
-		if (!theReference.getReferenceElement().isEmpty()) {
-			return theReference.getReferenceElement().isLocal();
+		assert theReference.getResource() != null;
+		if (theReference.getResource().getIdElement().isEmpty()) {
+			return true;
 		}
-		if (theReference.getResource() == null) {
-			return false;
-		}
-		if (theReference.getResource().getIdElement() == null) {
-			return false;
-		}
-		if (theReference.getResource().getIdElement().isAbsolute()) {
-			return false;
-		}
-		if (theReference.getResource().getIdElement().hasResourceType()) {
+		if (theReference.getResource().getIdElement().isAbsolute()
+			|| theReference.getResource().getIdElement().getValueAsString().startsWith("urn:")
+		) {
 			return false;
 		}
 		return true;
@@ -1460,7 +1454,7 @@ public class FhirTerser {
 
 		for (IBaseReference next : allReferences) {
 			IBaseResource resource = next.getResource();
-			if (resource == null && isInternalFragment(next)) {
+			if (resource == null && next.getReferenceElement().isLocal()) {
 				if (theContained.hasExistingIdToContainedResource()) {
 					IBaseResource potentialTarget = theContained
 							.getExistingIdToContainedResource()

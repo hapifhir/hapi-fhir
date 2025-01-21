@@ -1685,11 +1685,11 @@ public class JsonParserR4Test extends BaseTest {
 			MedicationDispense md = new MedicationDispense();
 
 			MedicationRequest mr = new MedicationRequest();
-			mr.setId("#MR");
+			mr.setId("MR");
 			md.addAuthorizingPrescription().setResource(mr);
 
 			Medication med = new Medication();
-			med.setId("#MED");
+			med.setId("MED");
 			md.setMedication(new Reference(med));
 			mr.setMedication(new Reference(med));
 
