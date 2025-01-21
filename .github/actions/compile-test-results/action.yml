@@ -24,25 +24,31 @@ runs:
           run: |
               echo "Restoring artifacts to original locations..."
               
+              # List all artifacts for debugging
+              echo "Contents of ./artifacts directory:"
+              ls -l ./artifacts
+              
               # Process each artifact in the downloaded directory
               for artifact_path in ./artifacts/*; do
-                artifact=$(basename "$artifact_path")
-                echo "Processing artifact: $artifact"
+                if [ -d "$artifact_path" ]; then
+                  artifact=$(basename "$artifact_path")
+                  echo "Processing artifact: $artifact"
               
-                # Replace underscores with slashes to get the original module path
-                original_name=$(echo "$artifact" | sed 's|_|/|g')
-                echo "Restoring original name: $original_name"
+                  # Convert artifact name back to original path
+                  original_name=$(echo "$artifact" | sed 's|_|/|g')
+                  # target_dir="${GITHUB_WORKSPACE}/${original_name}/target"
+                  target_dir="${GITHUB_WORKSPACE}/${original_name}"
               
-                # Target directory for the restored artifact
-                target_dir="${original_name}"
+                  echo "Restoring to target directory: $target_dir"
               
-                # Ensure the target directory exists
-                mkdir -p "$(dirname "$target_dir")"
+                  # Ensure the target directory exists
+                  mkdir -p "$target_dir"
+                  mv "$artifact_path/${original_name}"/* "$target_dir/" || echo "Failed to move contents for $artifact"
               
-                # Move the artifact to the target directory
-                mv "$artifact_path"/* "$target_dir"
-              
-                echo "Restored artifact for: $original_name"
+                  echo "Restored artifact for: $original_name"
+                else
+                  echo "Artifact path $artifact_path is not a directory. Skipping."
+                fi
               done
               
               echo "All artifacts have been restored to their original locations."
