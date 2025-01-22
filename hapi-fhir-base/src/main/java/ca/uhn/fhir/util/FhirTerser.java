@@ -1478,7 +1478,7 @@ public class FhirTerser {
 					}
 					if (theModifyResource) {
 						getContainedResourceList(theResource).add(resource);
-						next.setReference(id.getValue());
+						next.setReference("#" + id.getValue());
 					}
 					if (isInternalFragment(next) && theContained.hasExistingIdToContainedResource()) {
 						theContained
