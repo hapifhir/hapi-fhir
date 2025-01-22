@@ -146,7 +146,6 @@ public class MethodUtil {
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(methodToUse, paramIndex);
 					declaredParameterType = parameterType;
 				}
-				// LUKETODO:  as a guard:  if this is still a Collection, then throw because something went wrong
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					throw new ConfigurationException(
 							Msg.code(401) + "Argument #" + paramIndex + " of Method '" + methodToUse.getName()

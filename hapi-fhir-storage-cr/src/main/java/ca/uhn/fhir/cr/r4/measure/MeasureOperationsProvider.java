@@ -45,7 +45,6 @@ public class MeasureOperationsProvider {
 		myStringTimePeriodHandler = theStringTimePeriodHandler;
 	}
 
-	// LUKETODO:  fix javadoc
 	/**
 	 * Implements the <a href=
 	 * "https://www.hl7.org/fhir/operation-measure-evaluate-measure.html">$evaluate-measure</a>
@@ -54,17 +53,7 @@ public class MeasureOperationsProvider {
 	 * Reasoning Module</a>. This implementation aims to be compatible with the CQF
 	 * IG.
 	 *
-	 * @param theId             the id of the Measure to evaluate
-	 * @param thePeriodStart    The start of the reporting period
-	 * @param thePeriodEnd      The end of the reporting period
-	 * @param theReportType     The type of MeasureReport to generate
-	 * @param theSubject        the subject to use for the evaluation
-	 * @param thePractitioner   the practitioner to use for the evaluation
-	 * @param theLastReceivedOn the date the results of this measure were last
-	 *                          received.
-	 * @param theProductLine    the productLine (e.g. Medicare, Medicaid, etc) to use
-	 *                          for the evaluation. This is a non-standard parameter.
-	 * @param theAdditionalData the data bundle containing additional data
+	 * @param theParams          Please refer to the javadoc for {@link EvaluateMeasureSingleParams} for more information on the parameters.
 	 * @param theRequestDetails The details (such as tenant) of this request. Usually
 	 *                          autopopulated HAPI.
 	 * @return the calculated MeasureReport
@@ -79,6 +68,10 @@ public class MeasureOperationsProvider {
 						// LUKETODO:  2. can we modify OperationParam to support the concept of mututally exclusive
 						// params
 						// LUKETODO:  3. code gen from operation definition
+						// LUKETODO:  4. is there such as thing as a MUTUALLY EXCLUSIVE ANNotation?. is there such as
+						// thing as a MUTUALLY EXCLUSIVE ANNotation?4. is there such as thing as a MUTUALLY EXCLUSIVE
+						// ANNotation?4. is there such as thing as a MUTUALLY EXCLUSIVE ANNotation?
+						// so 3 different params :  try annotations
 						Eithers.forMiddle3(theParams.getId()),
 						// LUKETODO:  push this into the hapi-fhir REST framework code
 						myStringTimePeriodHandler.getStartZonedDateTime(theParams.getPeriodStart(), theRequestDetails),

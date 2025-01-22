@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 
@@ -141,11 +142,21 @@ public class OperationEmbeddedParameter implements IParameter {
 		return myParamType;
 	}
 
+	@VisibleForTesting
+	public Class<? extends Collection> getInnerCollectionType() {
+		return myInnerCollectionType;
+	}
+
 	public String getSearchParamType() {
 		if (mySearchParameterBinding != null) {
 			return mySearchParameterBinding.getParamType().getCode();
 		}
 		return null;
+	}
+
+	@VisibleForTesting
+	public String getOperationName() {
+		return myOperationName;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -197,7 +208,6 @@ public class OperationEmbeddedParameter implements IParameter {
 		 * should probably clean this up..
 		 */
 		if (!myParameterType.equals(IBase.class) && !myParameterType.equals(String.class)) {
-			// LUKETODO:  this is where we get the Exception:  add an else if
 			if (IBaseResource.class.isAssignableFrom(myParameterType) && myParameterType.isInterface()) {
 				myParamType = "Resource";
 			} else if (IBaseReference.class.isAssignableFrom(myParameterType)) {

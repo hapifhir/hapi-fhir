@@ -14,7 +14,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.INVALID_METHOD_OPERATION_PARAMS_NO_OPERATION;
@@ -26,13 +27,12 @@ import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHO
 import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SUPER_SIMPLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 
 // LUKETODO: try to test for every case in embedded params where there's a throws
 
 // This test lives in hapi-fhir-structures-r4 because if we introduce it in hapi-fhir-server, there will be a
 // circular dependency
-// LUKETODO: do we need mocks at all?
-@ExtendWith(MockitoExtension.class)
 class MethodUtilTest {
 
 	private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(MethodUtilTest.class);
@@ -41,8 +41,7 @@ class MethodUtilTest {
 
 	private final InnerClassesAndMethods myInnerClassesAndMethods = new InnerClassesAndMethods();
 
-    @Mock
-    private Object myProvider;
+    private final Object myProvider = new Object();
 
 	@Test
 	void simpleMethodNoParams() {
@@ -68,7 +67,16 @@ class MethodUtilTest {
 		assertThat(resourceParameters).isNotEmpty();
 		assertThat(resourceParameters).hasExactlyElementsOfTypes(NullParameter.class, OperationParameter.class, OperationParameter.class, OperationParameter.class);
 
-		// LUKETODO:  assert the actual OperationParameter values
+		final List<IParameterToAssert> expectedParameters = List.of(
+			 new NullParameterToAssert(),
+			 new OperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, null),
+			 new OperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class, null),
+		new OperationParameterToAssert(ourFhirContext, "param3", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, "boolean")
+		);
+
+		assertThat(resourceParameters)
+			 .matches(theActualParameters -> assertParametersEqual(expectedParameters, theActualParameters),
+				  "Expected parameters do not match actual parameters");
 	}
 
 	@Test
@@ -79,7 +87,16 @@ class MethodUtilTest {
 		assertThat(resourceParameters).isNotEmpty();
 		assertThat(resourceParameters).hasExactlyElementsOfTypes(NullParameter.class, OperationParameter.class, OperationParameter.class, OperationParameter.class);
 
-		// LUKETODO:  assert the actual OperationParameter values
+		final List<IParameterToAssert> expectedParameters = List.of(
+			 new NullParameterToAssert(),
+			 new OperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, null),
+			 new OperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class,null),
+		new OperationParameterToAssert(ourFhirContext, "param3", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, "boolean")
+		);
+
+		assertThat(resourceParameters)
+			 .matches(theActualParameters -> assertParametersEqual(expectedParameters, theActualParameters),
+				  "Expected parameters do not match actual parameters");
 	}
 
 	@Test
@@ -90,7 +107,14 @@ class MethodUtilTest {
 		assertThat(resourceParameters).isNotEmpty();
 		assertThat(resourceParameters).hasExactlyElementsOfTypes(OperationEmbeddedParameter.class, OperationEmbeddedParameter.class);
 
-		// LUKETODO:  assert the actual OperationEmbeddedParameter values
+		final List<IParameterToAssert> expectedParameters = List.of(
+			 new OperationEmbeddedParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, null),
+			 new OperationEmbeddedParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class, null)
+		);
+
+		assertThat(resourceParameters)
+			 .matches(theActualParameters -> assertParametersEqual(expectedParameters, theActualParameters),
+				  "Expected parameters do not match actual parameters");
 	}
 
 	@Test
@@ -101,7 +125,15 @@ class MethodUtilTest {
 		assertThat(resourceParameters).isNotEmpty();
 		assertThat(resourceParameters).hasExactlyElementsOfTypes(RequestDetailsParameter.class, OperationEmbeddedParameter.class, OperationEmbeddedParameter.class);
 
-		// LUKETODO:  assert the actual OperationEmbeddedParameter values
+		final List<IParameterToAssert> expectedParameters = List.of(
+			 new RequestDetailsParameterToAssert(),
+			 new OperationEmbeddedParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,null, String.class, null),
+			 new OperationEmbeddedParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,ArrayList.class, String.class, null)
+		);
+
+		assertThat(resourceParameters)
+			 .matches(theActualParameters -> assertParametersEqual(expectedParameters, theActualParameters),
+				  "Expected parameters do not match actual parameters");
 	}
 
 	@Test
@@ -112,7 +144,15 @@ class MethodUtilTest {
 		assertThat(resourceParameters).isNotEmpty();
 		assertThat(resourceParameters).hasExactlyElementsOfTypes(OperationEmbeddedParameter.class, OperationEmbeddedParameter.class, RequestDetailsParameter.class);
 
-		// LUKETODO:  assert the actual OperationEmbeddedParameter values
+		final List<IParameterToAssert> expectedParameters = List.of(
+			 new OperationEmbeddedParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,null, String.class, null),
+			 new OperationEmbeddedParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class, null),
+			 new RequestDetailsParameterToAssert()
+		);
+
+		assertThat(resourceParameters)
+			 .matches(theActualParameters -> assertParametersEqual(expectedParameters, theActualParameters),
+				  "Expected parameters do not match actual parameters");
 	}
 
 	@Test
@@ -123,7 +163,16 @@ class MethodUtilTest {
 		assertThat(resourceParameters).isNotEmpty();
 		assertThat(resourceParameters).hasExactlyElementsOfTypes(NullParameter.class, OperationEmbeddedParameter.class, OperationEmbeddedParameter.class, OperationEmbeddedParameter.class);
 
-		// LUKETODO:  assert the actual OperationEmbeddedParameter values
+		final List<IParameterToAssert> expectedParameters = List.of(
+			 new NullParameterToAssert(),
+			 new OperationEmbeddedParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,null, String.class, null),
+			 new OperationEmbeddedParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class, null),
+		new OperationEmbeddedParameterToAssert(ourFhirContext, "param3", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,null, String.class, "boolean")
+		);
+
+		assertThat(resourceParameters)
+			 .matches(theActualParameters -> assertParametersEqual(expectedParameters, theActualParameters),
+				  "Expected parameters do not match actual parameters");
 	}
 
 	@Test
@@ -281,7 +330,79 @@ class MethodUtilTest {
 			myProvider);
 	}
 
-	private List<IParameter> getResourceParameters(Method theMethod) {
-		return MethodUtil.getResourceParameters(ourFhirContext, theMethod, myProvider);
+	private boolean assertParametersEqual(List<? extends IParameterToAssert> theExpectedParameters, List<? extends IParameter> theActualParameters) {
+		if (theActualParameters.size() != theExpectedParameters.size()) {
+			fail("Expected parameters size does not match actual parameters size");
+			return false;
+		}
+
+		for (int i = 0; i < theActualParameters.size(); i++) {
+			final IParameterToAssert expectedParameter = theExpectedParameters.get(i);
+			final IParameter actualParameter = theActualParameters.get(i);
+
+			if (! assertParametersEqual(expectedParameter, actualParameter)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private boolean assertParametersEqual(IParameterToAssert theExpectedParameter, IParameter theActualParameter) {
+		if (theExpectedParameter instanceof NullParameterToAssert && theActualParameter instanceof NullParameter) {
+			return true;
+		}
+
+		if (theExpectedParameter instanceof RequestDetailsParameterToAssert && theActualParameter instanceof RequestDetailsParameter) {
+			return true;
+		}
+
+		if (theExpectedParameter instanceof OperationParameterToAssert expectedOperationParameter && theActualParameter instanceof OperationParameter actualOperationParameter) {
+			assertThat(actualOperationParameter.getContext().getVersion().getVersion()).isEqualTo(expectedOperationParameter.myContext().getVersion().getVersion());
+			assertThat(actualOperationParameter.getName()).isEqualTo(expectedOperationParameter.myName());
+			assertThat(actualOperationParameter.getParamType()).isEqualTo(expectedOperationParameter.myParamType());
+			assertThat(actualOperationParameter.getInnerCollectionType()).isEqualTo(expectedOperationParameter.myInnerCollectionType());
+
+			return true;
+		}
+
+		if (theExpectedParameter instanceof OperationEmbeddedParameterToAssert expectedOperationEmbeddedParameter && theActualParameter instanceof OperationEmbeddedParameter actualOperationEmbeddedParameter) {
+			assertThat(actualOperationEmbeddedParameter.getContext().getVersion().getVersion()).isEqualTo(expectedOperationEmbeddedParameter.myContext().getVersion().getVersion());
+			assertThat(actualOperationEmbeddedParameter.getName()).isEqualTo(expectedOperationEmbeddedParameter.myName());
+			assertThat(actualOperationEmbeddedParameter.getParamType()).isEqualTo(expectedOperationEmbeddedParameter.myParamType());
+			assertThat(actualOperationEmbeddedParameter.getInnerCollectionType()).isEqualTo(expectedOperationEmbeddedParameter.myInnerCollectionType());
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private interface IParameterToAssert {}
+
+	private record NullParameterToAssert() implements IParameterToAssert {
+	}
+
+	private record RequestDetailsParameterToAssert() implements IParameterToAssert {
+	}
+
+	private record OperationParameterToAssert(
+		 FhirContext myContext,
+		 String myName,
+		 String myOperationName,
+		 @SuppressWarnings("rawtypes")
+		 Class<? extends Collection> myInnerCollectionType,
+		 Class<?> myParameterType,
+		 String myParamType) implements IParameterToAssert {
+	}
+
+	private record OperationEmbeddedParameterToAssert(
+		 FhirContext myContext,
+		 String myName,
+		 String myOperationName,
+		 @SuppressWarnings("rawtypes")
+		 Class<? extends Collection> myInnerCollectionType,
+		 Class<?> myParameterType,
+		 String myParamType) implements IParameterToAssert {
 	}
 }

@@ -47,7 +47,6 @@ public class CareGapsOperationProvider {
 		myStringTimePeriodHandler = theStringTimePeriodHandler;
 	}
 
-	// LUKETODO: fix javadoc
 	/**
 	 * Implements the <a href=
 	 * "http://build.fhir.org/ig/HL7/davinci-deqm/OperationDefinition-care-gaps.html">$care-gaps</a>
@@ -74,19 +73,7 @@ public class CareGapsOperationProvider {
 	 *
 	 * @param theRequestDetails generally auto-populated by the HAPI server
 	 *                          framework.
-	 * @param thePeriodStart       the start of the gaps through period
-	 * @param thePeriodEnd         the end of the gaps through period
-	 * @param theSubject           a reference to either a Patient or Group for which
-	 *                          the gaps in care report(s) will be generated
-	 * @param theStatus            the status code of gaps in care reports that will be
-	 *                          included in the result
-	 * @param theMeasureId         the id of Measure(s) for which the gaps in care
-	 *                          report(s) will be calculated
-	 * @param theMeasureIdentifier the identifier of Measure(s) for which the gaps in
-	 *                          care report(s) will be calculated
-	 * @param theMeasureUrl        the canonical URL of Measure(s) for which the gaps
-	 *                          in care report(s) will be calculated
-	 * @param theNonDocument    defaults to 'false' which returns standard 'document' bundle for `$care-gaps`.
+	 * @param theParams          Please refer to the javadoc for {@link CareGapsParams} for more information on the parameters.
 	 *   If 'true', this will return summarized subject bundle with only detectedIssue resource.
 	 * @return Parameters of bundles of Care Gap Measure Reports
 	 */
