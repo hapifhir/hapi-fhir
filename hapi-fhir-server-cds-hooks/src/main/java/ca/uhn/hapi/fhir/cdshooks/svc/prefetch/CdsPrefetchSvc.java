@@ -30,7 +30,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchContext;
+import ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchPointcutContextJson;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -117,11 +117,12 @@ public class CdsPrefetchSvc {
 			ourLog.info("missing: {}.  Fetching with {}", theMissingPrefetch, url);
 			IBaseResource resource;
 
-			CdsHookPrefetchContext cdsHookPrefetchContext = new CdsHookPrefetchContext();
+			CdsHookPrefetchPointcutContextJson cdsHookPrefetchContext = new CdsHookPrefetchPointcutContextJson();
 			cdsHookPrefetchContext.setTemplate(template);
 			cdsHookPrefetchContext.setQuery(url);
+			cdsHookPrefetchContext.setCdsResolutionStrategy(source);
 
-			callCdsPrefetchRequestHooks(cdsHookPrefetchContext, theCdsServiceRequestJson, source);
+			callCdsPrefetchRequestHooks(cdsHookPrefetchContext, theCdsServiceRequestJson);
 
 			try {
 				if (source == CdsResolutionStrategyEnum.FHIR_CLIENT) {
@@ -133,11 +134,11 @@ public class CdsPrefetchSvc {
 					throw new IllegalStateException(Msg.code(2388) + "Unexpected strategy " + theStrategies);
 				}
 			} catch (Exception e) {
-				callCdsPrefetchFailedHooks(cdsHookPrefetchContext, theCdsServiceRequestJson, source, e);
+				callCdsPrefetchFailedHooks(cdsHookPrefetchContext, theCdsServiceRequestJson, e);
 				throw e;
 			}
 
-			callCdsPrefetchResponseHooks(cdsHookPrefetchContext, theCdsServiceRequestJson, source, resource);
+			callCdsPrefetchResponseHooks(cdsHookPrefetchContext, theCdsServiceRequestJson, resource);
 
 			theCdsServiceRequestJson.addPrefetch(key, resource);
 		}
@@ -160,27 +161,23 @@ public class CdsPrefetchSvc {
 	}
 
 	private void callCdsPrefetchRequestHooks(
-		CdsHookPrefetchContext theCdsHookPrefetchContext, CdsServiceRequestJson theCdsServiceRequestJson,
-		CdsResolutionStrategyEnum theSource) {
+		CdsHookPrefetchPointcutContextJson theCdsHookPrefetchContext, CdsServiceRequestJson theCdsServiceRequestJson) {
 		if (myInterceptorBroadcaster != null && myInterceptorBroadcaster.hasHooks(Pointcut.CDS_HOOK_PREFETCH_REQUEST)) {
 			HookParams params = new HookParams();
-			params.add(CdsHookPrefetchContext.class, theCdsHookPrefetchContext);
+			params.add(CdsHookPrefetchPointcutContextJson.class, theCdsHookPrefetchContext);
 			params.add(CdsServiceRequestJson.class, theCdsServiceRequestJson);
-			params.add(CdsResolutionStrategyEnum.class, theSource);
 			myInterceptorBroadcaster.callHooks(Pointcut.CDS_HOOK_PREFETCH_REQUEST, params);
 		}
 	}
 
 	private void callCdsPrefetchResponseHooks(
-		CdsHookPrefetchContext theCdsHookPrefetchContext, CdsServiceRequestJson theCdsServiceRequestJson,
-		CdsResolutionStrategyEnum theSource,
+		CdsHookPrefetchPointcutContextJson theCdsHookPrefetchContext, CdsServiceRequestJson theCdsServiceRequestJson,
 		IBaseResource theResource) {
 		if (myInterceptorBroadcaster != null
 				&& myInterceptorBroadcaster.hasHooks(Pointcut.CDS_HOOK_PREFETCH_RESPONSE)) {
 			HookParams params = new HookParams();
-			params.add(CdsHookPrefetchContext.class, theCdsHookPrefetchContext);
+			params.add(CdsHookPrefetchPointcutContextJson.class, theCdsHookPrefetchContext);
 			params.add(CdsServiceRequestJson.class, theCdsServiceRequestJson);
-			params.add(CdsResolutionStrategyEnum.class, theSource);
 			params.add(IBaseResource.class, theResource);
 
 			myInterceptorBroadcaster.callHooks(Pointcut.CDS_HOOK_PREFETCH_RESPONSE, params);
@@ -188,14 +185,12 @@ public class CdsPrefetchSvc {
 	}
 
 	private void callCdsPrefetchFailedHooks(
-		CdsHookPrefetchContext theCdsHookPrefetchContext, CdsServiceRequestJson theCdsServiceRequestJson,
-		CdsResolutionStrategyEnum theSource,
+		CdsHookPrefetchPointcutContextJson theCdsHookPrefetchContext, CdsServiceRequestJson theCdsServiceRequestJson,
 		Exception theException) {
 		if (myInterceptorBroadcaster != null && myInterceptorBroadcaster.hasHooks(Pointcut.CDS_HOOK_PREFETCH_FAILED)) {
 			HookParams params = new HookParams();
-			params.add(CdsHookPrefetchContext.class, theCdsHookPrefetchContext);
+			params.add(CdsHookPrefetchPointcutContextJson.class, theCdsHookPrefetchContext);
 			params.add(CdsServiceRequestJson.class, theCdsServiceRequestJson);
-			params.add(CdsResolutionStrategyEnum.class, theSource);
 			params.add(Exception.class, theException);
 
 			myInterceptorBroadcaster.callHooks(Pointcut.CDS_HOOK_PREFETCH_FAILED, params);

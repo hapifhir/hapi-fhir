@@ -1,21 +1,22 @@
 package ca.uhn.hapi.fhir.cdshooks.api.json.prefetch;
 
-import ca.uhn.fhir.rest.api.server.cdshooks.BaseCdsServiceJson;
+import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Contains the context of a CDS Hooks Prefetch Request
+ * Contains the pointcut context of a CDS Hooks Prefetch Request
  *
  * @see <a href="https://cds-hooks.hl7.org/ballots/2020Sep/">Version 1.1 of the CDS Hooks Specification</a>
  */
-public class CdsHookPrefetchContext extends BaseCdsServiceJson {
+public class CdsHookPrefetchPointcutContextJson implements IModelJson {
 
 	public static final String TEMPLATE = "template";
 	public static final String QUERY = "query";
+	public static final String RESOLUTION_STRATEGY = "resolutionStrategy";
 	public static final String USER_DATA = "userData";
 
 	/**
@@ -23,6 +24,12 @@ public class CdsHookPrefetchContext extends BaseCdsServiceJson {
 	 */
 	@JsonProperty(value = TEMPLATE, required = true)
 	String myTemplate;
+
+	/**
+	 * How the prefetch query will be executed (valid values include FHIR_CLIENT and DAO)
+	 */
+	@JsonProperty(value = RESOLUTION_STRATEGY, required = true)
+	private CdsResolutionStrategyEnum myCdsResolutionStrategy;
 
 	/**
 	 * The actual prefetch query, generated based on the prefetch template using the prefetch context
@@ -44,6 +51,14 @@ public class CdsHookPrefetchContext extends BaseCdsServiceJson {
 		myTemplate = theTemplate;
 	}
 
+	public CdsResolutionStrategyEnum getCdsResolutionStrategy() {
+		return myCdsResolutionStrategy;
+	}
+
+	public void setCdsResolutionStrategy(CdsResolutionStrategyEnum theCdsResolutionStrategy) {
+		myCdsResolutionStrategy = theCdsResolutionStrategy;
+	}
+
 	public String getQuery() {
 		return myQuery;
 	}
@@ -59,10 +74,10 @@ public class CdsHookPrefetchContext extends BaseCdsServiceJson {
 		myUserData.put(theKey, theValue);
 	}
 
-	public Map<String, Object> getUserData() {
+	public Object getUserData(String theKey) {
 		if (myUserData == null) {
 			myUserData = new LinkedHashMap<>();
 		}
-		return Collections.unmodifiableMap(myUserData);
+		return myUserData.get(theKey);
 	}
 }
