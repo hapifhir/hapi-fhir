@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
+import ca.uhn.fhir.rest.server.method.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.ICollectDataServiceFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;

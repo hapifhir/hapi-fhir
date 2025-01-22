@@ -80,6 +80,10 @@ public @interface OperationEmbeddedParam {
 	 */
 	Class<? extends IBase> type() default IBase.class;
 
+	// LUKETODO:  javadoc
+	// LUKETODO:  Void to mean don't convert?
+	Class<?> typeToConvertFrom() default Void.class;
+
 	/**
 	 * Optionally specifies the type of the parameter as a string, such as <code>Coding</code> or
 	 * <code>base64Binary</code>. This can be useful if you want to use a generic interface type

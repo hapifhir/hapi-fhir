@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -30,15 +31,15 @@ import java.util.StringJoiner;
  *                         for the evaluation. This is a non-standard parameter.
  * myAdditionalData  the data bundle containing additional data
  */
-public class EvaluateMeasureSingleParams {
+public class EvaluateMeasureSingleParams2 {
 	@IdParam
 	private final IdType myId;
 
-	@OperationEmbeddedParam(name = "periodStart")
-	private final String myPeriodStart;
+	@OperationEmbeddedParam(name = "periodStart", typeToConvertFrom = String.class)
+	private final ZonedDateTime myPeriodStart;
 
-	@OperationEmbeddedParam(name = "periodEnd")
-	private final String myPeriodEnd;
+	@OperationEmbeddedParam(name = "periodEnd", typeToConvertFrom = String.class)
+	private final ZonedDateTime myPeriodEnd;
 
 	@OperationEmbeddedParam(name = "reportType")
 	private final String myReportType;
@@ -64,10 +65,10 @@ public class EvaluateMeasureSingleParams {
 	@OperationEmbeddedParam(name = "parameters")
 	private final Parameters myParameters;
 
-	public EvaluateMeasureSingleParams(
+	public EvaluateMeasureSingleParams2(
 			IdType theId,
-			String thePeriodStart,
-			String thePeriodEnd,
+			ZonedDateTime thePeriodStart,
+			ZonedDateTime thePeriodEnd,
 			String theReportType,
 			String theSubject,
 			String thePractitioner,
@@ -89,7 +90,7 @@ public class EvaluateMeasureSingleParams {
 		myParameters = theParameters;
 	}
 
-	private EvaluateMeasureSingleParams(Builder builder) {
+	private EvaluateMeasureSingleParams2(Builder builder) {
 		this.myId = builder.myId;
 		this.myPeriodStart = builder.myPeriodStart;
 		this.myPeriodEnd = builder.myPeriodEnd;
@@ -107,11 +108,11 @@ public class EvaluateMeasureSingleParams {
 		return myId;
 	}
 
-	public String getPeriodStart() {
+	public ZonedDateTime getPeriodStart() {
 		return myPeriodStart;
 	}
 
-	public String getPeriodEnd() {
+	public ZonedDateTime getPeriodEnd() {
 		return myPeriodEnd;
 	}
 
@@ -152,7 +153,7 @@ public class EvaluateMeasureSingleParams {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		EvaluateMeasureSingleParams that = (EvaluateMeasureSingleParams) o;
+		EvaluateMeasureSingleParams2 that = (EvaluateMeasureSingleParams2) o;
 		return Objects.equals(myId, that.myId)
 				&& Objects.equals(myPeriodStart, that.myPeriodStart)
 				&& Objects.equals(myPeriodEnd, that.myPeriodEnd)
@@ -184,7 +185,7 @@ public class EvaluateMeasureSingleParams {
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", EvaluateMeasureSingleParams.class.getSimpleName() + "[", "]")
+		return new StringJoiner(", ", EvaluateMeasureSingleParams2.class.getSimpleName() + "[", "]")
 				.add("myId=" + myId)
 				.add("myPeriodStart='" + myPeriodStart + "'")
 				.add("myPeriodEnd='" + myPeriodEnd + "'")
@@ -205,8 +206,8 @@ public class EvaluateMeasureSingleParams {
 
 	public static class Builder {
 		private IdType myId;
-		private String myPeriodStart;
-		private String myPeriodEnd;
+		private ZonedDateTime myPeriodStart;
+		private ZonedDateTime myPeriodEnd;
 		private String myReportType;
 		private String mySubject;
 		private String myPractitioner;
@@ -221,12 +222,12 @@ public class EvaluateMeasureSingleParams {
 			return this;
 		}
 
-		public Builder setPeriodStart(String myPeriodStart) {
+		public Builder setPeriodStart(ZonedDateTime myPeriodStart) {
 			this.myPeriodStart = myPeriodStart;
 			return this;
 		}
 
-		public Builder setPeriodEnd(String myPeriodEnd) {
+		public Builder setPeriodEnd(ZonedDateTime myPeriodEnd) {
 			this.myPeriodEnd = myPeriodEnd;
 			return this;
 		}
@@ -271,8 +272,8 @@ public class EvaluateMeasureSingleParams {
 			return this;
 		}
 
-		public EvaluateMeasureSingleParams build() {
-			return new EvaluateMeasureSingleParams(this);
+		public EvaluateMeasureSingleParams2 build() {
+			return new EvaluateMeasureSingleParams2(this);
 		}
 	}
 }

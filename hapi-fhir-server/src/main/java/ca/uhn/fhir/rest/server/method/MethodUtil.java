@@ -215,7 +215,7 @@ public class MethodUtil {
 
 					if (!operationEmbeddedTypes.isEmpty()) {
 						final EmbeddedParameterConverter embeddedParameterConverter = new EmbeddedParameterConverter(
-								theContext, theMethod, op, parameterTypes, operationEmbeddedTypes.get(0));
+								theContext, theMethod, op, operationEmbeddedTypes.get(0));
 
 						final List<EmbeddedParameterConverterContext> outerContexts =
 								embeddedParameterConverter.convert();
@@ -466,7 +466,7 @@ public class MethodUtil {
 
 			if (param == null) {
 				throw new ConfigurationException(
-						Msg.code(408) + "Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length)
+						Msg.code(408) + "Parameter #" + (paramIndex + 1) + "/" + (parameterTypes.length)
 								+ " of method '" + methodToUse.getName() + "' on type '"
 								+ methodToUse.getDeclaringClass().getCanonicalName()
 								+ "' has no recognized FHIR interface parameter nextParameterAnnotations. Don't know how to handle this parameter");

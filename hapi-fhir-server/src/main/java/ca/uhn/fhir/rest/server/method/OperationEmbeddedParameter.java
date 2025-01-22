@@ -84,6 +84,7 @@ public class OperationEmbeddedParameter implements IParameter {
 	private SearchParameter mySearchParameterBinding;
 	private final String myDescription;
 	private final List<String> myExampleValues;
+	private final Class<?> myTypeToConvertFrom;
 
 	OperationEmbeddedParameter(
 			FhirContext theCtx,
@@ -92,13 +93,15 @@ public class OperationEmbeddedParameter implements IParameter {
 			int theMin,
 			int theMax,
 			String theDescription,
-			List<String> theExampleValues) {
+			List<String> theExampleValues,
+			Class<?> theTypeToConvertFrom) {
 		myOperationName = theOperationName;
 		myName = theParameterName;
 		myMin = theMin;
 		myMax = theMax;
 		myContext = theCtx;
 		myDescription = theDescription;
+		myTypeToConvertFrom = theTypeToConvertFrom;
 
 		List<String> exampleValues = new ArrayList<>();
 		if (theExampleValues != null) {

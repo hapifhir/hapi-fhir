@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.common.RepositoryFactoryForRepositoryInterface;
-import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
+import ca.uhn.fhir.rest.server.method.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.config.CrBaseConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;

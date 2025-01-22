@@ -308,8 +308,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		boolean requestHasId = theRequest.getId() != null;
+		ourLog.trace("method: {} has myCanOperateAtInstanceLevel : {}, requestHasId: {}", myName, myCanOperateAtInstanceLevel, requestHasId);
 		if (requestHasId) {
-			ourLog.info("1234: method: {} has myCanOperateAtInstanceLevel : {}", myName, myCanOperateAtInstanceLevel);
 			return myCanOperateAtInstanceLevel ? MethodMatchEnum.EXACT : MethodMatchEnum.NONE;
 		}
 		if (isNotBlank(theRequest.getResourceName())) {
@@ -399,7 +399,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					Msg.code(428) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 		}
 
-		ourLog.info("1234: invoking method: {} with params: {}", theRequest.getOperation(), theMethodParams);
+		ourLog.trace("invoking method: {} with params: {}", theRequest.getOperation(), theMethodParams);
 
 		final Object response = invokeServerMethod(
 				theRequest, myOperationIdParamDetails.alterMethodParamsIfNeeded(theRequest, theMethodParams));

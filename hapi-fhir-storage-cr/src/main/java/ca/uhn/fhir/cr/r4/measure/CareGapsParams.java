@@ -75,22 +75,22 @@ public class CareGapsParams {
 	private final BooleanType myNonDocument;
 
 	public CareGapsParams(
-			String myPeriodStart,
-			String myPeriodEnd,
-			String mySubject,
-			List<String> myStatus,
-			List<String> myMeasureId,
-			List<String> myMeasureIdentifier,
-			List<CanonicalType> myMeasureUrl,
-			BooleanType myNonDocument) {
-		this.myPeriodStart = myPeriodStart;
-		this.myPeriodEnd = myPeriodEnd;
-		this.mySubject = mySubject;
-		this.myStatus = myStatus;
-		this.myMeasureId = myMeasureId;
-		this.myMeasureIdentifier = myMeasureIdentifier;
-		this.myMeasureUrl = myMeasureUrl;
-		this.myNonDocument = myNonDocument;
+			String thePeriodStart,
+			String thePeriodEnd,
+			String theSubject,
+			List<String> theStatus,
+			List<String> theMeasureId,
+			List<String> theMeasureIdentifier,
+			List<CanonicalType> theMeasureUrl,
+			BooleanType theNonDocument) {
+		myPeriodStart = thePeriodStart;
+		myPeriodEnd = thePeriodEnd;
+		mySubject = theSubject;
+		myStatus = theStatus;
+		myMeasureId = theMeasureId;
+		myMeasureIdentifier = theMeasureIdentifier;
+		myMeasureUrl = theMeasureUrl;
+		myNonDocument = theNonDocument;
 	}
 
 	private CareGapsParams(Builder builder) {

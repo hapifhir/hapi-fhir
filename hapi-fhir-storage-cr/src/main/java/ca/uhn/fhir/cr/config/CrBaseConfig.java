@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.cr.config;
 
-import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
+import ca.uhn.fhir.rest.server.method.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

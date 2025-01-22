@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
+import ca.uhn.fhir.rest.server.method.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CareGapsOperationProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(MeasureOperationsProvider.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
 
 	private final ICareGapsServiceFactory myR4CareGapsProcessorFactory;
 	private final StringTimePeriodHandler myStringTimePeriodHandler;
@@ -83,7 +83,6 @@ public class CareGapsOperationProvider {
 					"Implements the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/OperationDefinition-care-gaps.html\">$care-gaps</a> operation found in the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/index.html\">Da Vinci DEQM FHIR Implementation Guide</a> which is an extension of the <a href=\"http://build.fhir.org/operation-measure-care-gaps.html\">$care-gaps</a> operation found in the <a href=\"http://hl7.org/fhir/R4/clinicalreasoning-module.html\">FHIR Clinical Reasoning Module</a>.")
 	@Operation(name = ProviderConstants.CR_OPERATION_CARE_GAPS, idempotent = true, type = Measure.class)
 	public Parameters careGapsReport(
-			// LUKETODO:  do NOT use @OperationParam  if this is for embedded params and document this
 			RequestDetails theRequestDetails, CareGapsParams theParams) {
 
 		return myR4CareGapsProcessorFactory

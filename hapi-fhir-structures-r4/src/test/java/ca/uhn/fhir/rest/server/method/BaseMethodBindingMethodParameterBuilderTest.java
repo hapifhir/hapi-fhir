@@ -44,7 +44,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SUPER_SIMPLE);
 		final Object[] inputParams = new Object[]{};
 
-		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);
+		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams, REQUEST_DETAILS);
 
 		assertArrayEquals(inputParams, actualOutputParams);
 	}
@@ -54,7 +54,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS, IIdType.class, String.class, List.class, BooleanType.class);
 		final Object[] inputParams = new Object[]{new IdDt(), "param1", List.of("param2")};
 
-		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);
+		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams, REQUEST_DETAILS);
 
 		assertArrayEquals(inputParams, actualOutputParams);
 	}
@@ -65,7 +65,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 		final Object[] inputParams = new Object[]{"param1", List.of("param2")};
 		final Object[] expectedOutputParams = new Object[]{new SampleParams("param1", List.of("param2"))};
 
-		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);
+		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams, REQUEST_DETAILS);
 
 		assertArrayEquals(expectedOutputParams, actualOutputParams);
 	}
@@ -76,7 +76,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 		final Object[] inputParams = new Object[]{REQUEST_DETAILS, "param1", List.of("param2")};
 		final Object[] expectedOutputParams = new Object[]{REQUEST_DETAILS, new SampleParams("param1", List.of("param2"))};
 
-		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);
+		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams, REQUEST_DETAILS);
 
 		assertArrayEquals(expectedOutputParams, actualOutputParams);
 	}
@@ -87,7 +87,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 		final Object[] inputParams = new Object[]{"param1", List.of("param3"), REQUEST_DETAILS};
 		final Object[] expectedOutputParams = new Object[]{new SampleParams("param1", List.of("param3")), REQUEST_DETAILS};
 
-		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);
+		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams, REQUEST_DETAILS);
 
 		assertArrayEquals(expectedOutputParams, actualOutputParams);
 	}
@@ -100,7 +100,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 		final Object[] inputParams = new Object[]{REQUEST_DETAILS, id, "param1", List.of("param2"), new BooleanType(false)};
 		final Object[] expectedOutputParams = new Object[]{REQUEST_DETAILS, new SampleParamsWithIdParam(id, "param1", List.of("param2"), new BooleanType(false))};
 
-		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams);
+		final Object[] actualOutputParams = buildMethodParams(sampleMethod, inputParams, REQUEST_DETAILS);
 
 		assertArrayEquals(expectedOutputParams, actualOutputParams);
 	}
@@ -108,7 +108,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	@Test
 	void buildMethodParams_withNullMethod_shouldThrowInternalErrorException() {
 		assertThrows(InternalErrorException.class, () -> {
-			buildMethodParams(null, new Object[]{});
+			buildMethodParams(null, new Object[]{}, REQUEST_DETAILS);
 		});
 	}
 
@@ -117,13 +117,13 @@ class BaseMethodBindingMethodParameterBuilderTest {
 		final Method sampleMethod = InnerClassesAndMethods.class.getDeclaredMethod(InnerClassesAndMethods.SUPER_SIMPLE);
 
 		assertThrows(InternalErrorException.class, () -> {
-			buildMethodParams(sampleMethod, null);
+			buildMethodParams(sampleMethod, null, REQUEST_DETAILS);
 		});
 	}
 
 	@Test
 	void buildMethodParams_withNullMethodAndParams_shouldThrowInternalErrorException() {
-		assertThrows(InternalErrorException.class, () -> buildMethodParams(null, null));
+		assertThrows(InternalErrorException.class, () -> buildMethodParams(null, null, null));
 	}
 
 	@Test
@@ -132,7 +132,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 				RequestDetails.class, SampleParams.class, RequestDetails.class);
 		final Object[] inputParams = new Object[]{REQUEST_DETAILS, new IdDt(), "param1", List.of("param2", REQUEST_DETAILS)};
 		assertThrows(InternalErrorException.class, () -> {
-			buildMethodParams(method, inputParams);
+			buildMethodParams(method, inputParams, REQUEST_DETAILS);
 		});
 	}
 
@@ -145,7 +145,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 		final Object[] inputParams = new Object[]{new IdDt(), "param1", 2, List.of("param3")};
 
 		assertThrows(InternalErrorException.class, () -> {
-			buildMethodParams(method, inputParams);
+			buildMethodParams(method, inputParams, REQUEST_DETAILS);
 		});
 	}
 }

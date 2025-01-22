@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.common;
+package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
 import jakarta.annotation.Nullable;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -215,7 +215,7 @@ public class StringTimePeriodHandler {
 	private ZoneId getClientTimezoneOrInvalidRequest(RequestDetails theRequestDetails) {
 		final String clientTimezoneString = theRequestDetails.getHeader(Constants.HEADER_CLIENT_TIMEZONE);
 
-		if (Strings.isNotBlank(clientTimezoneString)) {
+		if (StringUtils.isNotBlank(clientTimezoneString)) {
 			try {
 				return ZoneId.of(clientTimezoneString);
 			} catch (Exception exception) {

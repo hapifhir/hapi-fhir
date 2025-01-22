@@ -8,7 +8,9 @@
     * The parameters class must not have any top-level annotations
     * The parameters class must be immutable:  setters will not be respected by the reflection code
     * The parameters class must contain one and only one public constructor for all fields
+    * The arguments to the constructor must be in the same order as both the arguments passed to the REST call and the fields in the class
     * The parameters class may contain a Builder class for developer convenience
+    * In order to future-proof, the setters in the builder class must be in the same order as the fields in the class
     * The parameters class must contain at least one field annotated with @OperationEmbeddedParam
     * The parameters class must contain 0 to 1 @IdParam fields, with the same rules as @IdParam variables
     * The parameters class may not contain fields with any annotations other than @IdParam or @OperationEmbeddedParam

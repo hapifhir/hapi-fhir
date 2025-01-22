@@ -252,7 +252,11 @@ public abstract class BaseMethodBinding {
 			final Method method = getMethod();
 
 			return method.invoke(
-					getProvider(), BaseMethodBindingMethodParameterBuilder.buildMethodParams(method, theMethodParams));
+					getProvider(),
+				BaseMethodBindingMethodParameterBuilder.buildMethodParams(
+					method,
+					theMethodParams,
+					theRequest));
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();

@@ -30,27 +30,29 @@ public class EmbeddedParameterConverter {
 	private final FhirContext myContext;
 	private final Method myMethod;
 	private final Operation myOperation;
-	// LUKETODO:  warning?
-	private final Class<?>[] myParameterTypes;
 	private final Class<?> myOperationEmbeddedType;
 
 	public EmbeddedParameterConverter(
 			FhirContext theContext,
 			Method theMethod,
 			Operation theOperation,
-			Class<?>[] theParameterTypes,
 			Class<?> theOperationEmbeddedType) {
 		myContext = theContext;
 		myMethod = theMethod;
 		myOperation = theOperation;
-		myParameterTypes = theParameterTypes;
 		myOperationEmbeddedType = theOperationEmbeddedType;
 	}
 
 	List<EmbeddedParameterConverterContext> convert() {
-		return Arrays.stream(myOperationEmbeddedType.getDeclaredFields())
+		return Arrays.stream(validateConstructorArgsAndReturnFields())
 				.map(this::convertField)
 				.collect(Collectors.toUnmodifiableList());
+	}
+
+	private Field[] validateConstructorArgsAndReturnFields() {
+		EmbeddedOperationUtils.validateAndGetConstructor(myOperationEmbeddedType);
+
+		return myOperationEmbeddedType.getDeclaredFields();
 	}
 
 	private EmbeddedParameterConverterContext convertField(Field theField) {
@@ -147,7 +149,8 @@ public class EmbeddedParameterConverter {
 				operationParam.min(),
 				operationParam.max(),
 				ParametersUtil.extractDescription(fieldAnnotationArray),
-				ParametersUtil.extractExamples(fieldAnnotationArray));
+				ParametersUtil.extractExamples(fieldAnnotationArray),
+				operationParam.typeToConvertFrom());
 	}
 
 	@SuppressWarnings("unchecked")
