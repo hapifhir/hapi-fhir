@@ -26,10 +26,14 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
+import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -110,6 +114,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -442,6 +447,31 @@ public class OpenApiInterceptor {
 		return page;
 	}
 
+	/**
+	 * When implementing your own HAPI server, you can create a class extending this one and override
+	 * this method if you have something in the operations that you want to customize in the
+	 * generated OpenAPI Spec.
+	 *
+	 * @param openApi - The OpenAPI Spec object that is in the process of being generated.
+	 * @param operation - The Operation that is in the process of being generated.
+	 * @param baseMethodBinding - Object containing metadata about the method that processes this operation.
+	 */
+	protected void customizeOperation(OpenAPI openApi, Operation operation, BaseMethodBinding baseMethodBinding) {
+		// Here just to be overridden by extending classes.
+	}
+
+	/**
+	 * When implementing your own HAPI server, you can create a class extending this one and override
+	 * this method if you have something in the operations that you want to customize in the
+	 * generated OpenAPI Spec.
+	 *
+	 * @param openApi - The OpenAPI Spec object that is in the process of being generated.
+	 * @param requestDetails - Details about the request being processed.
+	 */
+	protected void customizeOpenApi(OpenAPI openApi, ServletRequestDetails requestDetails) {
+		// Here just to be overridden by extending classes.
+	}
+
 	protected OpenAPI generateOpenApi(ServletRequestDetails theRequestDetails) {
 		String page = extractPageName(theRequestDetails, null);
 
@@ -453,6 +483,9 @@ public class OpenApiInterceptor {
 		if (restfulServer.getServerConformanceProvider() instanceof IServerConformanceProvider) {
 			capabilitiesProvider = (IServerConformanceProvider<?>) restfulServer.getServerConformanceProvider();
 		}
+
+		final HashMap<String, HashMap<RestOperationTypeEnum, BaseMethodBinding>> operationLookup =
+				buildOperationLookup(restfulServer);
 
 		OpenAPI openApi = new OpenAPI();
 
@@ -473,6 +506,10 @@ public class OpenApiInterceptor {
 
 		Paths paths = new Paths();
 		openApi.setPaths(paths);
+
+		ensureComponentsSchemasPopulated(openApi);
+
+		customizeOpenApi(openApi, theRequestDetails);
 
 		if (page == null || page.equals(PAGE_SYSTEM) || page.equals(PAGE_ALL)) {
 			Tag serverTag = new Tag();
@@ -495,7 +532,7 @@ public class OpenApiInterceptor {
 				Operation transaction = getPathItem(paths, "/", PathItem.HttpMethod.POST);
 				transaction.addTagsItem(PAGE_SYSTEM);
 				transaction.setSummary("server-transaction: Execute a FHIR Transaction (or FHIR Batch) Bundle");
-				addFhirResourceResponse(ctx, openApi, transaction, null);
+				addFhirResourceResponse(ctx, openApi, transaction, "Bundle");
 				addFhirResourceRequestBody(openApi, transaction, ctx, null);
 			}
 
@@ -505,13 +542,14 @@ public class OpenApiInterceptor {
 				systemHistory.addTagsItem(PAGE_SYSTEM);
 				systemHistory.setSummary(
 						"server-history: Fetch the resource change history across all resource types on the server");
-				addFhirResourceResponse(ctx, openApi, systemHistory, null);
+				addFhirResourceResponse(ctx, openApi, systemHistory, "Bundle");
 			}
 
 			// System-level Operations
 			for (CapabilityStatement.CapabilityStatementRestResourceOperationComponent nextOperation :
 					cs.getRestFirstRep().getOperation()) {
 				addFhirOperation(ctx, openApi, theRequestDetails, capabilitiesProvider, paths, null, nextOperation);
+				// TODO: customize operations
 			}
 		}
 
@@ -536,10 +574,17 @@ public class OpenApiInterceptor {
 			// Instance Read
 			if (typeRestfulInteractions.contains(CapabilityStatement.TypeRestfulInteraction.READ)) {
 				Operation operation = getPathItem(paths, "/" + resourceType + "/{id}", PathItem.HttpMethod.GET);
+
+				final BaseMethodBinding baseMethodBinding =
+						operationLookup.get(resourceType).get(RestOperationTypeEnum.READ);
+
 				operation.addTagsItem(resourceType);
 				operation.setSummary("read-instance: Read " + resourceType + " instance");
 				addResourceIdParameter(operation);
-				addFhirResourceResponse(ctx, openApi, operation, null);
+
+				addFhirResourceResponse(ctx, openApi, operation, resourceType);
+
+				customizeOperation(openApi, operation, baseMethodBinding);
 			}
 
 			// Instance VRead
@@ -550,7 +595,11 @@ public class OpenApiInterceptor {
 				operation.setSummary("vread-instance: Read " + resourceType + " instance with specific version");
 				addResourceIdParameter(operation);
 				addResourceVersionIdParameter(operation);
-				addFhirResourceResponse(ctx, openApi, operation, null);
+				addFhirResourceResponse(ctx, openApi, operation, resourceType);
+
+				final BaseMethodBinding baseMethodBinding =
+						operationLookup.get(resourceType).get(RestOperationTypeEnum.VREAD);
+				customizeOperation(openApi, operation, baseMethodBinding);
 			}
 
 			// Type Create
@@ -560,6 +609,10 @@ public class OpenApiInterceptor {
 				operation.setSummary("create-type: Create a new " + resourceType + " instance");
 				addFhirResourceRequestBody(openApi, operation, ctx, genericExampleSupplier(ctx, resourceType));
 				addFhirResourceResponse(ctx, openApi, operation, null);
+
+				final BaseMethodBinding baseMethodBinding =
+						operationLookup.get(resourceType).get(RestOperationTypeEnum.CREATE);
+				customizeOperation(openApi, operation, baseMethodBinding);
 			}
 
 			// Instance Update
@@ -571,6 +624,10 @@ public class OpenApiInterceptor {
 				addResourceIdParameter(operation);
 				addFhirResourceRequestBody(openApi, operation, ctx, genericExampleSupplier(ctx, resourceType));
 				addFhirResourceResponse(ctx, openApi, operation, null);
+
+				final BaseMethodBinding baseMethodBinding =
+						operationLookup.get(resourceType).get(RestOperationTypeEnum.UPDATE);
+				customizeOperation(openApi, operation, baseMethodBinding);
 			}
 
 			// Type history
@@ -579,18 +636,26 @@ public class OpenApiInterceptor {
 				operation.addTagsItem(resourceType);
 				operation.setSummary(
 						"type-history: Fetch the resource change history for all resources of type " + resourceType);
-				addFhirResourceResponse(ctx, openApi, operation, null);
+				addFhirResourceResponse(ctx, openApi, operation, "Bundle");
+
+				final BaseMethodBinding baseMethodBinding =
+						operationLookup.get(resourceType).get(RestOperationTypeEnum.HISTORY_TYPE);
+				customizeOperation(openApi, operation, baseMethodBinding);
 			}
 
 			// Instance history
-			if (typeRestfulInteractions.contains(CapabilityStatement.TypeRestfulInteraction.HISTORYTYPE)) {
+			if (typeRestfulInteractions.contains(CapabilityStatement.TypeRestfulInteraction.HISTORYINSTANCE)) {
 				Operation operation =
 						getPathItem(paths, "/" + resourceType + "/{id}/_history", PathItem.HttpMethod.GET);
 				operation.addTagsItem(resourceType);
 				operation.setSummary("instance-history: Fetch the resource change history for all resources of type "
 						+ resourceType);
 				addResourceIdParameter(operation);
-				addFhirResourceResponse(ctx, openApi, operation, null);
+				addFhirResourceResponse(ctx, openApi, operation, "Bundle");
+
+				final BaseMethodBinding baseMethodBinding =
+						operationLookup.get(resourceType).get(RestOperationTypeEnum.HISTORY_INSTANCE);
+				customizeOperation(openApi, operation, baseMethodBinding);
 			}
 
 			// Instance Patch
@@ -601,6 +666,10 @@ public class OpenApiInterceptor {
 				addResourceIdParameter(operation);
 				addFhirResourceRequestBody(openApi, operation, FHIR_CONTEXT_CANONICAL, patchExampleSupplier());
 				addFhirResourceResponse(ctx, openApi, operation, null);
+
+				final BaseMethodBinding baseMethodBinding =
+						operationLookup.get(resourceType).get(RestOperationTypeEnum.PATCH);
+				customizeOperation(openApi, operation, baseMethodBinding);
 			}
 
 			// Instance Delete
@@ -610,22 +679,32 @@ public class OpenApiInterceptor {
 				operation.setSummary("instance-delete: Perform a logical delete on a resource instance");
 				addResourceIdParameter(operation);
 				addFhirResourceResponse(ctx, openApi, operation, null);
+
+				final BaseMethodBinding baseMethodBinding =
+						operationLookup.get(resourceType).get(RestOperationTypeEnum.DELETE);
+				customizeOperation(openApi, operation, baseMethodBinding);
 			}
 
 			// Search
 			if (typeRestfulInteractions.contains(CapabilityStatement.TypeRestfulInteraction.SEARCHTYPE)) {
+
+				final BaseMethodBinding baseMethodBinding =
+						operationLookup.get(resourceType).get(RestOperationTypeEnum.SEARCH_TYPE);
+
 				addSearchOperation(
 						openApi,
 						getPathItem(paths, "/" + resourceType, PathItem.HttpMethod.GET),
 						ctx,
 						resourceType,
-						nextResource);
+						nextResource,
+						baseMethodBinding);
 				addSearchOperation(
 						openApi,
 						getPathItem(paths, "/" + resourceType + "/_search", PathItem.HttpMethod.GET),
 						ctx,
 						resourceType,
-						nextResource);
+						nextResource,
+						baseMethodBinding);
 			}
 
 			// Resource-level Operations
@@ -633,10 +712,40 @@ public class OpenApiInterceptor {
 					nextResource.getOperation()) {
 				addFhirOperation(
 						ctx, openApi, theRequestDetails, capabilitiesProvider, paths, resourceType, nextOperation);
+
+				// TODO: customize operations
 			}
 		}
 
 		return openApi;
+	}
+
+	private HashMap<String, HashMap<RestOperationTypeEnum, BaseMethodBinding>> buildOperationLookup(
+			RestfulServer restfulServer) {
+		final HashMap<String, HashMap<RestOperationTypeEnum, BaseMethodBinding>> map = new HashMap<>();
+		final Collection<ResourceBinding> resourceBindings = restfulServer.getResourceBindings();
+		for (ResourceBinding resourceBinding : resourceBindings) {
+			if (!map.containsKey(resourceBinding.getResourceName())) {
+				map.put(resourceBinding.getResourceName(), new HashMap<>());
+			}
+
+			final Map<RestOperationTypeEnum, BaseMethodBinding> resourceMap =
+					map.get(resourceBinding.getResourceName());
+
+			final List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+			for (BaseMethodBinding methodBinding : methodBindings) {
+				final RestOperationTypeEnum restOperationType = methodBinding.getRestOperationType();
+				resourceMap.put(restOperationType, methodBinding);
+
+				if (RestOperationTypeEnum.VREAD.equals(restOperationType)) {
+					resourceMap.put(RestOperationTypeEnum.READ, methodBinding);
+				} else if (RestOperationTypeEnum.READ.equals(restOperationType)
+						&& ((ReadMethodBinding) methodBinding).isVread()) {
+					resourceMap.put(RestOperationTypeEnum.VREAD, methodBinding);
+				}
+			}
+		}
+		return map;
 	}
 
 	@Nonnull
@@ -674,7 +783,8 @@ public class OpenApiInterceptor {
 			final Operation operation,
 			final FhirContext ctx,
 			final String resourceType,
-			final CapabilityStatement.CapabilityStatementRestResourceComponent nextResource) {
+			final CapabilityStatement.CapabilityStatementRestResourceComponent nextResource,
+			final BaseMethodBinding baseMethodBinding) {
 		operation.addTagsItem(resourceType);
 		operation.setDescription("This is a search type");
 		operation.setSummary("search-type: Search for " + resourceType + " instances");
@@ -691,6 +801,8 @@ public class OpenApiInterceptor {
 			parametersItem.setDescription(nextSearchParam.getDocumentation());
 			parametersItem.setSchema(toSchema(nextSearchParam.getType()));
 		}
+
+		customizeOperation(openApi, operation, baseMethodBinding);
 	}
 
 	private Supplier<IBaseResource> patchExampleSupplier() {
