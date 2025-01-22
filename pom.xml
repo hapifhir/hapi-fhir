@@ -49,7 +49,7 @@
 
 	<repositories>
 		<repository>
-			<id>oss-snapshot</id>
+			<id>oss-snapshots</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 			<snapshots>
 				<enabled>true</enabled>
