@@ -155,12 +155,12 @@ public class CdsPrefetchSvc {
 	}
 
 	private void callCdsPrefetchRequestHooks(
-			CdsServiceRequestJson theCdsServiceRequestJson, String prefetchTemplate, String prefetchQuery) {
+			CdsServiceRequestJson theCdsServiceRequestJson, String thePrefetchTemplate, String thePrefetchQuery) {
 		if (myInterceptorBroadcaster != null && myInterceptorBroadcaster.hasHooks(Pointcut.CDS_HOOK_PREFETCH_REQUEST)) {
 			HookParams params = new HookParams();
 			params.add(CdsServiceRequestJson.class, theCdsServiceRequestJson);
-			params.add(String.class, prefetchTemplate);
-			params.add(String.class, prefetchQuery);
+			params.add(String.class, thePrefetchTemplate);
+			params.add(String.class, thePrefetchQuery);
 			myInterceptorBroadcaster.callHooks(Pointcut.CDS_HOOK_PREFETCH_REQUEST, params);
 		}
 	}
@@ -169,14 +169,14 @@ public class CdsPrefetchSvc {
 			CdsServiceRequestJson theCdsServiceRequestJson,
 			String thePrefetchTemplate,
 			String thePrefetchQuery,
-			IBaseResource resource) {
+			IBaseResource theResource) {
 		if (myInterceptorBroadcaster != null
 				&& myInterceptorBroadcaster.hasHooks(Pointcut.CDS_HOOK_PREFETCH_RESPONSE)) {
 			HookParams params = new HookParams();
 			params.add(CdsServiceRequestJson.class, theCdsServiceRequestJson);
 			params.add(String.class, thePrefetchTemplate);
 			params.add(String.class, thePrefetchQuery);
-			params.add(IBaseResource.class, resource);
+			params.add(IBaseResource.class, theResource);
 
 			myInterceptorBroadcaster.callHooks(Pointcut.CDS_HOOK_PREFETCH_RESPONSE, params);
 		}
