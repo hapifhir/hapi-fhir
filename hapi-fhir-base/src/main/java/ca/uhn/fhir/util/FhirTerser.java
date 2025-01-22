@@ -1817,7 +1817,7 @@ public class FhirTerser {
 				return existing;
 			}
 
-			IIdType newId = new IdDt(theResource.getIdElement());
+			final IIdType newId = new IdDt(theResource.getIdElement());
 			if (isBlank(newId.getValue())) {
 				UUID randomUUID = UUID.randomUUID();
 				theResource.getIdElement().setValue(randomUUID.toString());
@@ -1825,7 +1825,7 @@ public class FhirTerser {
 			}
 			getResourceToIdMap().put(theResource, newId);
 			getOrCreateResourceList().add(theResource);
-			return newId;
+			return theResource.getIdElement();
 		}
 
 		public void addContained(IIdType theId, IBaseResource theResource) {
