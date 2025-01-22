@@ -3085,10 +3085,11 @@ public enum Pointcut implements IPointcut {
 	 * Invoked before a CDS Hooks prefetch request is made.
 	 * Hooks may accept the following parameters:
 	 * <ul>
+	 *     <li> "ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchContext" - The prefetch query and template used for the request.
+	 *     		This parameter also contains a user data map <code>(String, Object)</code>, that allows data to be store between pointcut
+	 *     		invocations of a prefetch request/response.</li>
 	 *     <li> "ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson" - The CDS Hooks request that the prefetch is being made for</li>
 	 *     <li> "ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum" - could be FHIR_CLIENT or DAO</li>
-	 *     <li> "java.lang.String" - The prefetch template for the prefetch request</li>
-	 *     <li> "java.lang.String" - The actual prefetch query, generated based on the prefetch template using
 	 *     the prefetch context</li>
 	 *  </ul>
 	 *
@@ -3098,21 +3099,20 @@ public enum Pointcut implements IPointcut {
 	 */
 	CDS_HOOK_PREFETCH_REQUEST(
 			void.class,
+			"ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchContext",
 			"ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson",
-			"ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum",
-			"java.lang.String",
-			"java.lang.String"),
+			"ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum"),
 
 	/**
 	 * <b>CDS Hooks Prefetch Hook:</b>
 	 * Invoked after CDS Hooks prefetch request is completed successfully.
 	 * Hooks may accept the following parameters:
 	 * <ul>
+	 *     <li> "ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchContext" - The prefetch query and template used for the request.
+	 * 	 	This parameter also contains a user data map <code>(String, Object)</code>, that allows data to be store between pointcut
+	 * 	 	invocations of a prefetch request/response.</li>
 	 *     <li> "ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson" - The CDS Hooks request that the prefetch is being made for</li>
-	 *     <li> "java.lang.String" - The prefetch template for the prefetch request</li>
 	 *     <li> "ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum" - could be FHIR_CLIENT or DAO</li>
-	 *     <li> "java.lang.String" - The actual prefetch query, generated based on the prefetch template using
-	 *     the prefetch context</li>
 	 *     <li> "org.hl7.fhir.instance.model.api.IBaseResource" - The resource that is returned by the prefetch
 	 *     request</li>
 	 *  </ul>
@@ -3123,10 +3123,9 @@ public enum Pointcut implements IPointcut {
 	 */
 	CDS_HOOK_PREFETCH_RESPONSE(
 			void.class,
+			"ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchContext",
 			"ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson",
 			"ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum",
-			"java.lang.String",
-			"java.lang.String",
 			"org.hl7.fhir.instance.model.api.IBaseResource"),
 
 	/**
@@ -3134,10 +3133,11 @@ public enum Pointcut implements IPointcut {
 	 * Invoked after a failed CDS Hooks prefetch request.
 	 * Hooks may accept the following parameters:
 	 * <ul>
+	 *     <li> "ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchContext" - The prefetch query and template used for the request.
+	 * 	 		This parameter also contains a user data map <code>(String, Object)</code>, that allows data to be store between pointcut
+	 * 	 		invocations of a prefetch request/response.</li>
 	 *     <li> "ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson" - The CDS Hooks request that the prefetch is being made for</li>
 	 *     <li> "ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum" - could be FHIR_CLIENT or DAO</li>
-	 *     <li> "java.lang.String" - The prefetch template for the prefetch request</li>
-	 *     <li> "java.lang.String" - The actual prefetch query, generated based on the prefetch template using
 	 *     the prefetch context</li>
 	 *     <li> "java.lang.Exception" - The exception that caused the failure of the prefetch request</li>
 	 *  </ul>
@@ -3148,10 +3148,9 @@ public enum Pointcut implements IPointcut {
 	 */
 	CDS_HOOK_PREFETCH_FAILED(
 			void.class,
+			"ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchContext",
 			"ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson",
 			"ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum",
-			"java.lang.String",
-			"java.lang.String",
 			"java.lang.Exception"),
 
 	/**
