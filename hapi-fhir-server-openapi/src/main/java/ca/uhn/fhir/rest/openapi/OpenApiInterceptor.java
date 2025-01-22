@@ -788,7 +788,7 @@ public class OpenApiInterceptor {
 		operation.addTagsItem(resourceType);
 		operation.setDescription("This is a search type");
 		operation.setSummary("search-type: Search for " + resourceType + " instances");
-		addFhirResourceResponse(ctx, openApi, operation, null);
+		addFhirResourceResponse(ctx, openApi, operation, "Bundle");
 
 		for (final CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent nextSearchParam :
 				nextResource.getSearchParam()) {

@@ -44,7 +44,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r5.model.ActorDefinition;
 import org.htmlunit.html.DomElement;
 import org.htmlunit.html.HtmlDivision;
@@ -246,8 +245,15 @@ public class OpenApiInterceptorTest {
 			assertThat(lastNPath.getGet().getParameters()).hasSize(4);
 			assertEquals("Subject description", lastNPath.getGet().getParameters().get(0).getDescription());
 
-			final MediaType schema = parsed.getPaths().get("/Observation/{id}").getGet().getResponses().get("200").getContent().get(Constants.CT_FHIR_JSON_NEW);
-			assertNotNull(schema);
+			final MediaType readObservationMediaType = parsed.getPaths().get("/Observation/{id}").getGet().getResponses().get("200").getContent().get(Constants.CT_FHIR_JSON_NEW);
+			assertNotNull(readObservationMediaType);
+			assertThat(readObservationMediaType.getExample()).isInstanceOf(String.class);
+			assertThat((String) readObservationMediaType.getExample()).contains("\"resourceType\": \"Observation\"");
+
+			final MediaType searchObservationMediaType = parsed.getPaths().get("/Observation").getGet().getResponses().get("200").getContent().get(Constants.CT_FHIR_JSON_NEW);
+			assertNotNull(searchObservationMediaType);
+			assertThat(searchObservationMediaType.getExample()).isInstanceOf(String.class);
+			assertThat((String) searchObservationMediaType.getExample()).contains("\"resourceType\": \"Bundle\"");
 		}
 
 		@Test
