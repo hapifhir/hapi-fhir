@@ -35,10 +35,10 @@ public class EvaluateMeasureSingleParams2 {
 	@IdParam
 	private final IdType myId;
 
-	@OperationEmbeddedParam(name = "periodStart", typeToConvertFrom = String.class)
+	@OperationEmbeddedParam(name = "periodStart", sourceType = String.class)
 	private final ZonedDateTime myPeriodStart;
 
-	@OperationEmbeddedParam(name = "periodEnd", typeToConvertFrom = String.class)
+	@OperationEmbeddedParam(name = "periodEnd", sourceType = String.class)
 	private final ZonedDateTime myPeriodEnd;
 
 	@OperationEmbeddedParam(name = "reportType")

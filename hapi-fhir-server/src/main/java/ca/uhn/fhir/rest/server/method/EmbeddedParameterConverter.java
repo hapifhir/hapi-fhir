@@ -33,10 +33,7 @@ public class EmbeddedParameterConverter {
 	private final Class<?> myOperationEmbeddedType;
 
 	public EmbeddedParameterConverter(
-			FhirContext theContext,
-			Method theMethod,
-			Operation theOperation,
-			Class<?> theOperationEmbeddedType) {
+			FhirContext theContext, Method theMethod, Operation theOperation, Class<?> theOperationEmbeddedType) {
 		myContext = theContext;
 		myMethod = theMethod;
 		myOperation = theOperation;
@@ -150,7 +147,8 @@ public class EmbeddedParameterConverter {
 				operationParam.max(),
 				ParametersUtil.extractDescription(fieldAnnotationArray),
 				ParametersUtil.extractExamples(fieldAnnotationArray),
-				operationParam.typeToConvertFrom());
+				operationParam.sourceType(),
+				operationParam.rangeType());
 	}
 
 	@SuppressWarnings("unchecked")

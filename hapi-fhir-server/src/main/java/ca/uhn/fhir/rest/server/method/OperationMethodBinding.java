@@ -308,7 +308,11 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		boolean requestHasId = theRequest.getId() != null;
-		ourLog.trace("method: {} has myCanOperateAtInstanceLevel : {}, requestHasId: {}", myName, myCanOperateAtInstanceLevel, requestHasId);
+		ourLog.trace(
+				"method: {} has myCanOperateAtInstanceLevel : {}, requestHasId: {}",
+				myName,
+				myCanOperateAtInstanceLevel,
+				requestHasId);
 		if (requestHasId) {
 			return myCanOperateAtInstanceLevel ? MethodMatchEnum.EXACT : MethodMatchEnum.NONE;
 		}

@@ -26,6 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -45,6 +46,8 @@ import ca.uhn.fhir.util.ReflectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -60,6 +63,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * {@link Operation}.
  */
 public class OperationEmbeddedParameter implements IParameter {
+	private static final Logger ourLog = LoggerFactory.getLogger(OperationEmbeddedParameter.class);
 
 	// LUKETODO: do we need this to be separate or just reuse the one from OperationParameter?
 	// LUKETODO:  if so, add conditional logic everywhere to use it
@@ -84,7 +88,9 @@ public class OperationEmbeddedParameter implements IParameter {
 	private SearchParameter mySearchParameterBinding;
 	private final String myDescription;
 	private final List<String> myExampleValues;
-	private final Class<?> myTypeToConvertFrom;
+	private final Class<?> mySourceType;
+	// LUKETODO:  just pass the whole thing?
+	private final EmbeddedParameterRangeType myRengeType;
 
 	OperationEmbeddedParameter(
 			FhirContext theCtx,
@@ -94,14 +100,21 @@ public class OperationEmbeddedParameter implements IParameter {
 			int theMax,
 			String theDescription,
 			List<String> theExampleValues,
-			Class<?> theTypeToConvertFrom) {
+			Class<?> theSourceType,
+			EmbeddedParameterRangeType theRengeType) {
 		myOperationName = theOperationName;
 		myName = theParameterName;
 		myMin = theMin;
 		myMax = theMax;
 		myContext = theCtx;
 		myDescription = theDescription;
-		myTypeToConvertFrom = theTypeToConvertFrom;
+		// LUKETODO:  is this wise?
+		if (theSourceType == Void.class) {
+			mySourceType = myParameterType;
+		} else {
+			mySourceType = theSourceType;
+		}
+		myRengeType = theRengeType;
 
 		List<String> exampleValues = new ArrayList<>();
 		if (theExampleValues != null) {
@@ -145,11 +158,6 @@ public class OperationEmbeddedParameter implements IParameter {
 		return myParamType;
 	}
 
-	@VisibleForTesting
-	public Class<? extends Collection> getInnerCollectionType() {
-		return myInnerCollectionType;
-	}
-
 	public String getSearchParamType() {
 		if (mySearchParameterBinding != null) {
 			return mySearchParameterBinding.getParamType().getCode();
@@ -158,8 +166,18 @@ public class OperationEmbeddedParameter implements IParameter {
 	}
 
 	@VisibleForTesting
+	public Class<? extends Collection> getInnerCollectionType() {
+		return myInnerCollectionType;
+	}
+
+	@VisibleForTesting
 	public String getOperationName() {
 		return myOperationName;
+	}
+
+	@VisibleForTesting
+	public Class<?> getSourceType() {
+		return mySourceType;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -203,6 +221,7 @@ public class OperationEmbeddedParameter implements IParameter {
 
 		myAllowGet = IPrimitiveType.class.isAssignableFrom(myParameterType)
 				|| String.class.equals(myParameterType)
+				|| String.class.equals(mySourceType)
 				|| isSearchParam
 				|| ValidationModeEnum.class.equals(myParameterType);
 
@@ -210,7 +229,9 @@ public class OperationEmbeddedParameter implements IParameter {
 		 * The parameter can be of type string for validation methods - This is a bit weird. See ValidateDstu2Test. We
 		 * should probably clean this up..
 		 */
-		if (!myParameterType.equals(IBase.class) && !myParameterType.equals(String.class)) {
+		if (!myParameterType.equals(IBase.class)
+				&& !myParameterType.equals(String.class)
+				&& !EmbeddedOperationUtils.isValidSourceTypeConversion(mySourceType, myParameterType, myRengeType)) {
 			if (IBaseResource.class.isAssignableFrom(myParameterType) && myParameterType.isInterface()) {
 				myParamType = "Resource";
 			} else if (IBaseReference.class.isAssignableFrom(myParameterType)) {
@@ -238,8 +259,11 @@ public class OperationEmbeddedParameter implements IParameter {
 				myConverter = new OperationParamConverter();
 			} else {
 				// LUKETODO:  claim new code
-				throw new ConfigurationException(Msg.code(999991) + "Invalid type for @OperationParam on method "
-						+ theMethod + ": " + myParameterType.getName());
+				// LUKETODO:  test the rangeType NOT_APPLICABLE scenario
+				final String error = String.format(
+						"%sInvalid type for @OperationEmbeddedParam on method: %s with sourceType: %s, parameterType: %s, and rangeType: %s",
+						Msg.code(999991), theMethod.getName(), mySourceType, myParameterType, myRengeType);
+				throw new ConfigurationException(error);
 			}
 		}
 	}
@@ -340,6 +364,12 @@ public class OperationEmbeddedParameter implements IParameter {
 
 		} else {
 			String[] paramValues = theRequest.getParameters().get(myName);
+			ourLog.info(
+					"1234: operation: {} paramName: {}, paramValues: {}",
+					theRequest.getOperation(),
+					myName,
+					Arrays.toString(paramValues));
+
 			if (paramValues != null && paramValues.length > 0) {
 				if (myAllowGet) {
 
@@ -374,7 +404,9 @@ public class OperationEmbeddedParameter implements IParameter {
 							matchingParamValues.add(param);
 						});
 
-					} else if (String.class.isAssignableFrom(myParameterType)) {
+						// LUKETODO: comment to explain
+						// LUKETODO: call EmbeddedOperationUtils.isValidSourceTypeConversion ????
+					} else if (String.class.isAssignableFrom(myParameterType) || String.class.equals(mySourceType)) {
 
 						matchingParamValues.addAll(Arrays.asList(paramValues));
 
@@ -430,6 +462,8 @@ public class OperationEmbeddedParameter implements IParameter {
 
 	private void translateQueryParametersIntoServerArgumentForPost(
 			RequestDetails theRequest, List<Object> matchingParamValues) {
+		//		ourLog.info("1234: translateQueryParametersIntoServerArgumentForPost: operation: {}, matchingParamValues:
+		// {}", theRequest.getOperation(), matchingParamValues);
 		IBaseResource requestContents = (IBaseResource) theRequest.getUserData().get(REQUEST_CONTENTS_USERDATA_KEY);
 		if (requestContents != null) {
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(requestContents);
@@ -459,9 +493,28 @@ public class OperationEmbeddedParameter implements IParameter {
 										valueChild.getAccessor().getValues(nextParameter);
 								List<IBase> paramResources =
 										resourceChild.getAccessor().getValues(nextParameter);
+								ourLog.info(
+										"1234: try to add values: operation: {}, myName: {}, nextParameter: {}, paramValues: {} matchingParamValues: {}",
+										theRequest.getOperation(),
+										myName,
+										nextParameter,
+										paramResources,
+										matchingParamValues);
+								//  try to add values: operation: $evaluate-measures, myName: periodStart,
+								// nextParameter:
+								// org.hl7.fhir.r4.model.Parameters$ParametersParameterComponent@7682050a, paramValues:
+								// [] matchingParamValues: []
+								// LUKETODO:  some part of this code reacts badly to ZonedDateTime
+								//								HAPI-1716: Resource class[java.time.ZonedDateTime] does not contain any valid
+								// HAPI-FHIR annotations
 								if (paramValues != null && !paramValues.isEmpty()) {
+									// paramValues non-empty:  adding paramvalues: [DateType[2023-01-01]]
+									ourLog.info("1234: paramValues non-empty:  adding paramvalues: {}", paramValues);
 									tryToAddValues(paramValues, matchingParamValues);
 								} else if (paramResources != null && !paramResources.isEmpty()) {
+									ourLog.info(
+											"1234: peramResources non-empty:  adding peramResources: {}",
+											paramResources);
 									tryToAddValues(paramResources, matchingParamValues);
 								}
 							}
@@ -480,6 +533,7 @@ public class OperationEmbeddedParameter implements IParameter {
 
 	@SuppressWarnings("unchecked")
 	private void tryToAddValues(List<IBase> theParamValues, List<Object> theMatchingParamValues) {
+		ourLog.info("1234:tryToAddValues: {}, {}", theParamValues, theMatchingParamValues);
 		for (Object nextValue : theParamValues) {
 			if (nextValue == null) {
 				continue;
@@ -487,7 +541,9 @@ public class OperationEmbeddedParameter implements IParameter {
 			if (myConverter != null) {
 				nextValue = myConverter.incomingServer(nextValue);
 			}
-			if (myParameterType.equals(String.class)) {
+			// LUKETODO:  test this
+			if (myParameterType.equals(String.class)
+					|| EmbeddedOperationUtils.isValidSourceTypeConversion(mySourceType, myParameterType, myRengeType)) {
 				if (nextValue instanceof IPrimitiveType<?>) {
 					IPrimitiveType<?> source = (IPrimitiveType<?>) nextValue;
 					theMatchingParamValues.add(source.getValueAsString());

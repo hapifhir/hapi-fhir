@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
@@ -19,6 +20,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 
 import java.lang.reflect.Method;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +44,8 @@ class InnerClassesAndMethods {
 	static final String SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE = "sampleMethodEmbeddedTypeNoRequestDetailsWithIdType";
 	static final String SAMPLE_METHOD_OPERATION_PARAMS = "sampleMethodOperationParams";
 	static final String SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE = "sampleMethodParamNoEmbeddedType";
+	static final String SIMPLE_METHOD_WITH_PARAMS_CONVERSION = "simpleMethodWithParamsConversion";
+
 
 	static final String EXPAND = "expand";
 	static final String OP_INSTANCE_OR_TYPE = "opInstanceOrType";
@@ -190,6 +194,48 @@ class InnerClassesAndMethods {
 		}
 	}
 
+	static class ParamsWithTypeConversion {
+		@OperationEmbeddedParam(name = "periodStart", sourceType = String.class, rangeType = EmbeddedParameterRangeType.START)
+		private final ZonedDateTime myPeriodStart;
+
+		@OperationEmbeddedParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)
+		private final ZonedDateTime myPeriodEnd;
+
+		public ParamsWithTypeConversion(ZonedDateTime myPeriodStart, ZonedDateTime myPeriodEnd) {
+			this.myPeriodStart = myPeriodStart;
+			this.myPeriodEnd = myPeriodEnd;
+		}
+
+		public ZonedDateTime getPeriodStart() {
+			return myPeriodStart;
+		}
+
+		public ZonedDateTime getPeriodEnd() {
+			return myPeriodEnd;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == null || getClass() != o.getClass()) return false;
+			ParamsWithTypeConversion that = (ParamsWithTypeConversion) o;
+			return Objects.equals(myPeriodStart, that.myPeriodStart)
+				 && Objects.equals(myPeriodEnd, that.myPeriodEnd);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myPeriodStart, myPeriodEnd);
+		}
+
+		@Override
+		public String toString() {
+			return new StringJoiner(", ", ParamsWithTypeConversion.class.getSimpleName() + "[", "]")
+				 .add("myPeriodStart=" + myPeriodStart)
+				 .add("myPeriodEnd=" + myPeriodEnd)
+				 .toString();
+		}
+	}
+
 	// Ignore warnings that these classes can be records.  Converting them to records will make the tests fail
 	static class SampleParamsWithIdParam {
 		@IdParam
@@ -269,6 +315,12 @@ class InnerClassesAndMethods {
 	String sampleMethodEmbeddedTypeNoRequestDetails(SampleParams theParams) {
 		// return something arbitrary
 		return theParams.getParam1();
+	}
+
+	@Operation(name="simpleMethodWithParamsConversion")
+	String simpleMethodWithParamsConversion(ParamsWithTypeConversion theParams) {
+		// return something arbitrary
+		return theParams.getPeriodStart().toString();
 	}
 
 	String sampleMethodParamNoEmbeddedType(ParamsWithoutAnnotations theParams) {

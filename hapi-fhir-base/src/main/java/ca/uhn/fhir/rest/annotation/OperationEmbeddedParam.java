@@ -82,7 +82,10 @@ public @interface OperationEmbeddedParam {
 
 	// LUKETODO:  javadoc
 	// LUKETODO:  Void to mean don't convert?
-	Class<?> typeToConvertFrom() default Void.class;
+	Class<?> sourceType() default Void.class;
+
+	// LUKETODO:  javadoc
+	EmbeddedParameterRangeType rangeType() default EmbeddedParameterRangeType.NOT_APPLICABLE;
 
 	/**
 	 * Optionally specifies the type of the parameter as a string, such as <code>Coding</code> or

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import org.hl7.fhir.r4.model.Bundle;
@@ -7,6 +8,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -34,11 +36,14 @@ public class EvaluateMeasureSingleParams {
 	@IdParam
 	private final IdType myId;
 
-	@OperationEmbeddedParam(name = "periodStart")
-	private final String myPeriodStart;
+	@OperationEmbeddedParam(
+			name = "periodStart",
+			sourceType = String.class,
+			rangeType = EmbeddedParameterRangeType.START)
+	private final ZonedDateTime myPeriodStart;
 
-	@OperationEmbeddedParam(name = "periodEnd")
-	private final String myPeriodEnd;
+	@OperationEmbeddedParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)
+	private final ZonedDateTime myPeriodEnd;
 
 	@OperationEmbeddedParam(name = "reportType")
 	private final String myReportType;
@@ -66,8 +71,8 @@ public class EvaluateMeasureSingleParams {
 
 	public EvaluateMeasureSingleParams(
 			IdType theId,
-			String thePeriodStart,
-			String thePeriodEnd,
+			ZonedDateTime thePeriodStart,
+			ZonedDateTime thePeriodEnd,
 			String theReportType,
 			String theSubject,
 			String thePractitioner,
@@ -107,11 +112,11 @@ public class EvaluateMeasureSingleParams {
 		return myId;
 	}
 
-	public String getPeriodStart() {
+	public ZonedDateTime getPeriodStart() {
 		return myPeriodStart;
 	}
 
-	public String getPeriodEnd() {
+	public ZonedDateTime getPeriodEnd() {
 		return myPeriodEnd;
 	}
 
@@ -205,8 +210,8 @@ public class EvaluateMeasureSingleParams {
 
 	public static class Builder {
 		private IdType myId;
-		private String myPeriodStart;
-		private String myPeriodEnd;
+		private ZonedDateTime myPeriodStart;
+		private ZonedDateTime myPeriodEnd;
 		private String myReportType;
 		private String mySubject;
 		private String myPractitioner;
@@ -221,12 +226,12 @@ public class EvaluateMeasureSingleParams {
 			return this;
 		}
 
-		public Builder setPeriodStart(String myPeriodStart) {
+		public Builder setPeriodStart(ZonedDateTime myPeriodStart) {
 			this.myPeriodStart = myPeriodStart;
 			return this;
 		}
 
-		public Builder setPeriodEnd(String myPeriodEnd) {
+		public Builder setPeriodEnd(ZonedDateTime myPeriodEnd) {
 			this.myPeriodEnd = myPeriodEnd;
 			return this;
 		}

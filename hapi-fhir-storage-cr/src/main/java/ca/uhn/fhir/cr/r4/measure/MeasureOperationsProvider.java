@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.rest.server.method.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.R4MeasureEvaluatorSingleFactory;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.method.StringTimePeriodHandler;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Measure;
@@ -73,10 +73,8 @@ public class MeasureOperationsProvider {
 						// ANNotation?4. is there such as thing as a MUTUALLY EXCLUSIVE ANNotation?
 						// so 3 different params :  try annotations
 						Eithers.forMiddle3(theParams.getId()),
-						// LUKETODO:  push this into the hapi-fhir REST framework code
-						myStringTimePeriodHandler.getStartZonedDateTime(theParams.getPeriodStart(), theRequestDetails),
-						// LUKETODO:  push this into the hapi-fhir REST framework code
-						myStringTimePeriodHandler.getEndZonedDateTime(theParams.getPeriodEnd(), theRequestDetails),
+						theParams.getPeriodStart(),
+						theParams.getPeriodEnd(),
 						theParams.getReportType(),
 						theParams.getSubject(),
 						theParams.getLastReceivedOn(),
