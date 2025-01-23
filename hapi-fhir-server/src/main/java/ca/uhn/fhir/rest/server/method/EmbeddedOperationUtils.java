@@ -138,7 +138,9 @@ public class EmbeddedOperationUtils {
 	 * @return true if the type conversion is supported
 	 */
 	static boolean isValidSourceTypeConversion(
-			Class<?> theSourceType, Class<?> theTargetType, OperationParameterRangeType theOperationParameterRangeType) {
+			Class<?> theSourceType,
+			Class<?> theTargetType,
+			OperationParameterRangeType theOperationParameterRangeType) {
 		return String.class == theSourceType
 				&& ZonedDateTime.class == theTargetType
 				&& OperationParameterRangeType.NOT_APPLICABLE != theOperationParameterRangeType;

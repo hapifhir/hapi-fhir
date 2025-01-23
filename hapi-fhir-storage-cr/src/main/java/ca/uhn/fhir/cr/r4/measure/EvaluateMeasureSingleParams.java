@@ -21,8 +21,8 @@ package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
-import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;

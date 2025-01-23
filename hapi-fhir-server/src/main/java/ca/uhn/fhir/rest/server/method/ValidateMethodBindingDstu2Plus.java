@@ -71,15 +71,15 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 						String description = ParametersUtil.extractDescription(parameterAnnotations);
 						List<String> examples = ParametersUtil.extractExamples(parameterAnnotations);
 						OperationParameter parameter = new OperationParameter(
-							theContext,
-							Constants.EXTOP_VALIDATE,
-							Constants.EXTOP_VALIDATE_RESOURCE,
-							0,
-							1,
-							description,
-							examples,
-							Void.class,
-							OperationParameterRangeType.NOT_APPLICABLE);
+								theContext,
+								Constants.EXTOP_VALIDATE,
+								Constants.EXTOP_VALIDATE_RESOURCE,
+								0,
+								1,
+								description,
+								examples,
+								Void.class,
+								OperationParameterRangeType.NOT_APPLICABLE);
 						parameter.initializeTypes(theMethod, null, null, parameterType);
 						newParams.add(parameter);
 					}
