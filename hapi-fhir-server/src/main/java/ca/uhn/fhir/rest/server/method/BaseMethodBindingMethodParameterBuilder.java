@@ -22,7 +22,7 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
-import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
+import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -246,7 +246,7 @@ class BaseMethodBindingMethodParameterBuilder {
 
 		final EmbeddedOperationParam embeddedParamAtIndex = (EmbeddedOperationParam) annotation;
 		final Class<?> paramClassAtIndex = paramAtIndex.getClass();
-		final EmbeddedParameterRangeType rangeType = embeddedParamAtIndex.rangeType();
+		final OperationParameterRangeType rangeType = embeddedParamAtIndex.rangeType();
 		final Parameter constructorParameter = theConstructorParameters[theIndex];
 		final Class<?> constructorParameterType = constructorParameter.getType();
 

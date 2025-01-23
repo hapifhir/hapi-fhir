@@ -23,7 +23,7 @@ package ca.uhn.fhir.rest.annotation;
  * Used to indicate whether an {@link EmbeddedOperationParam} should be considered as part of a range of values, and if
  * so whether it's the start or end of the range.
  */
-public enum EmbeddedParameterRangeType {
+public enum OperationParameterRangeType {
 	START,
 	END,
 	NOT_APPLICABLE

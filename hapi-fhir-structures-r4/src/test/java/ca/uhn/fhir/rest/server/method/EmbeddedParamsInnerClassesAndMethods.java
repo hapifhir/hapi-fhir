@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
-import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
+import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
@@ -200,10 +200,10 @@ class EmbeddedParamsInnerClassesAndMethods {
 
 	@EmbeddableOperationParams
 	static class ParamsWithTypeConversion {
-		@EmbeddedOperationParam(name = "periodStart", sourceType = String.class, rangeType = EmbeddedParameterRangeType.START)
+		@EmbeddedOperationParam(name = "periodStart", sourceType = String.class, rangeType = OperationParameterRangeType.START)
 		private final ZonedDateTime myPeriodStart;
 
-		@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)
+		@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
 		private final ZonedDateTime myPeriodEnd;
 
 		public ParamsWithTypeConversion(ZonedDateTime myPeriodStart, ZonedDateTime myPeriodEnd) {

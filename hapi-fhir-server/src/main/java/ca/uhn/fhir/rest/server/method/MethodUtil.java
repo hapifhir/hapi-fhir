@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Offset;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.RawParam;
@@ -200,54 +201,6 @@ public class MethodUtil {
 				param = new SearchTotalModeParameter();
 			} else {
 				final Operation op = methodToUse.getAnnotation(Operation.class);
-				// LUKETODO:  delete this after all existing providers have migrated.
-				// There are no annotations on this parameter, so we check to see if the parameter class has fields
-				// annotated OperationEmbeddedParam
-				if (nextParameterAnnotations.length == 0) {
-					final List<Class<?>> operationEmbeddedTypes =
-							ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
-									methodToUse, EmbeddedOperationParam.class);
-
-					if (op == null) {
-						throw new ConfigurationException(Msg.code(846192641)
-								+ "@OperationParam or OperationEmbeddedParam detected on method that is not annotated with @Operation: "
-								+ methodToUse.toGenericString());
-					}
-
-					if (operationEmbeddedTypes.size() > 1) {
-						throw new ConfigurationException(String.format(
-								"%sOnly one type with embedded params is supported for now for method: %s",
-								Msg.code(9999927), methodToUse.getName()));
-					}
-
-					if (!operationEmbeddedTypes.isEmpty()) {
-						final EmbeddedParameterConverter embeddedParameterConverter = new EmbeddedParameterConverter(
-								theContext, theMethod, op, operationEmbeddedTypes.get(0));
-
-						final List<EmbeddedParameterConverterContext> outerContexts =
-								embeddedParameterConverter.convert();
-
-						for (EmbeddedParameterConverterContext outerContext : outerContexts) {
-							if (outerContext.getParameter() != null) {
-								parameters.add(outerContext.getParameter());
-							}
-							final ParamInitializationContext paramContext = outerContext.getParamContext();
-
-							if (paramContext != null) {
-								paramContexts.add(paramContext);
-
-								// N.B. This a hack used only to pass the null check below, which is crucial to the
-								// non-embedded params logic
-								param = paramContext.getParam();
-							}
-						}
-					} else {
-						// More than likely this will result in the param == null Exception below
-						ourLog.warn(
-								"Method '{}' has no parameters with annotations. Don't know how to handle this parameter",
-								methodToUse.getName());
-					}
-				} // else there are no embedded params and let execution fall to the for loop below
 
 				for (int i = 0; i < nextParameterAnnotations.length && param == null; i++) {
 					Annotation nextAnnotation = nextParameterAnnotations[i];
@@ -375,7 +328,9 @@ public class MethodUtil {
 								operationParam.min(),
 								operationParam.max(),
 								description,
-								examples);
+								examples,
+								operationParam.sourceType(),
+								operationParam.rangeType());
 						if (isNotBlank(operationParam.typeName())) {
 							BaseRuntimeElementDefinition<?> elementDefinition =
 									theContext.getElementDefinition(operationParam.typeName());
@@ -455,7 +410,9 @@ public class MethodUtil {
 										0,
 										1,
 										description,
-										examples)
+										examples,
+							Void.class,
+							OperationParameterRangeType.NOT_APPLICABLE)
 								.setConverter(new IOperationParamConverter() {
 									@Override
 									public Object incomingServer(Object theObject) {
@@ -492,7 +449,9 @@ public class MethodUtil {
 											0,
 											1,
 											description,
-											examples)
+											examples,
+										Void.class,
+									OperationParameterRangeType.NOT_APPLICABLE)
 									.setConverter(new IOperationParamConverter() {
 										@Override
 										public Object incomingServer(Object theObject) {

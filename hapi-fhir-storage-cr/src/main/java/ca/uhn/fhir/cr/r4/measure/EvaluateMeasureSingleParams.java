@@ -21,7 +21,7 @@ package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
-import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
+import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -63,10 +63,10 @@ public class EvaluateMeasureSingleParams {
 	@EmbeddedOperationParam(
 			name = "periodStart",
 			sourceType = String.class,
-			rangeType = EmbeddedParameterRangeType.START)
+			rangeType = OperationParameterRangeType.START)
 	private final ZonedDateTime myPeriodStart;
 
-	@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)
+	@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
 	private final ZonedDateTime myPeriodEnd;
 
 	@EmbeddedOperationParam(name = "reportType")

@@ -22,7 +22,7 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
-import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
+import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.util.ReflectionUtil;
 import jakarta.annotation.Nonnull;
 
@@ -118,9 +118,9 @@ public class EmbeddedOperationUtils {
 
 		if (annotation instanceof EmbeddedOperationParam) {
 			final EmbeddedOperationParam embeddedOperationParam = (EmbeddedOperationParam) annotation;
-			final EmbeddedParameterRangeType embeddedParameterRangeType = embeddedOperationParam.rangeType();
+			final OperationParameterRangeType operationParameterRangeType = embeddedOperationParam.rangeType();
 
-			if (isValidSourceTypeConversion(methodParamClass, constructorParamType, embeddedParameterRangeType)) {
+			if (isValidSourceTypeConversion(methodParamClass, constructorParamType, operationParameterRangeType)) {
 				return true;
 			}
 		}
@@ -134,14 +134,14 @@ public class EmbeddedOperationUtils {
 	 *
 	 * @param theSourceType The source type for the class, which can be different from the declared type
 	 * @param theTargetType The target type for the class, which can be different from the source type
-	 * @param theEmbeddedParameterRangeType Whether the embedded parameter is a range and if so, start or end
+	 * @param theOperationParameterRangeType Whether the embedded parameter is a range and if so, start or end
 	 * @return true if the type conversion is supported
 	 */
 	static boolean isValidSourceTypeConversion(
-			Class<?> theSourceType, Class<?> theTargetType, EmbeddedParameterRangeType theEmbeddedParameterRangeType) {
+			Class<?> theSourceType, Class<?> theTargetType, OperationParameterRangeType theOperationParameterRangeType) {
 		return String.class == theSourceType
 				&& ZonedDateTime.class == theTargetType
-				&& EmbeddedParameterRangeType.NOT_APPLICABLE != theEmbeddedParameterRangeType;
+				&& OperationParameterRangeType.NOT_APPLICABLE != theOperationParameterRangeType;
 	}
 
 	private static void validateConstructorArgs(Constructor<?> theConstructor, Field[] theDeclaredFields) {

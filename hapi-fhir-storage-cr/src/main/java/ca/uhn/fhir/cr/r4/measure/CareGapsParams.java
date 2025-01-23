@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
-import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
+import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 
@@ -70,14 +71,15 @@ import java.util.StringJoiner;
  * myNonDocument    defaults to 'false' which returns standard 'document' bundle for `$care-gaps`.
  *                  If 'true', this will return summarized subject bundle with only detectedIssue resource.
  */
+@EmbeddableOperationParams
 public class CareGapsParams {
 	@EmbeddedOperationParam(
 			name = "periodStart",
 			sourceType = String.class,
-			rangeType = EmbeddedParameterRangeType.START)
+			rangeType = OperationParameterRangeType.START)
 	private final ZonedDateTime myPeriodStart;
 
-	@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)
+	@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
 	private final ZonedDateTime myPeriodEnd;
 
 	@EmbeddedOperationParam(name = "subject")

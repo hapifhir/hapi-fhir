@@ -92,7 +92,7 @@ public @interface EmbeddedOperationParam {
 	 * @return The range type associated with any type conversion.  For instance, if we expect a start and end date.
 	 * NOT_APPLICABLE is the default and indicates range conversion is not applicable.
 	 */
-	EmbeddedParameterRangeType rangeType() default EmbeddedParameterRangeType.NOT_APPLICABLE;
+	OperationParameterRangeType rangeType() default OperationParameterRangeType.NOT_APPLICABLE;
 
 	/**
 	 * Optionally specifies the type of the parameter as a string, such as <code>Coding</code> or

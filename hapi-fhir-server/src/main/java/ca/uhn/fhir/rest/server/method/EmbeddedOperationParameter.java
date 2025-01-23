@@ -27,7 +27,7 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
-import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
+import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
@@ -54,7 +54,6 @@ import java.lang.reflect.Modifier;
 import java.util.function.Consumer;
 import java.util.*;
 
-import static ca.uhn.fhir.rest.server.method.OperationParameter.REQUEST_CONTENTS_USERDATA_KEY;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 // LUKETODO:   consider deleting whatever code may be unused
@@ -90,7 +89,7 @@ public class EmbeddedOperationParameter implements IParameter {
 	private final List<String> myExampleValues;
 	private final Class<?> mySourceType;
 	// LUKETODO:  just pass the whole thing?
-	private final EmbeddedParameterRangeType myRengeType;
+	private final OperationParameterRangeType myRengeType;
 
 	EmbeddedOperationParameter(
 			FhirContext theCtx,
@@ -101,7 +100,7 @@ public class EmbeddedOperationParameter implements IParameter {
 			String theDescription,
 			List<String> theExampleValues,
 			Class<?> theSourceType,
-			EmbeddedParameterRangeType theRengeType) {
+			OperationParameterRangeType theRangeType) {
 		myOperationName = theOperationName;
 		myName = theParameterName;
 		myMin = theMin;
@@ -114,7 +113,7 @@ public class EmbeddedOperationParameter implements IParameter {
 		} else {
 			mySourceType = theSourceType;
 		}
-		myRengeType = theRengeType;
+		myRengeType = theRangeType;
 
 		List<String> exampleValues = new ArrayList<>();
 		if (theExampleValues != null) {
@@ -178,6 +177,11 @@ public class EmbeddedOperationParameter implements IParameter {
 	@VisibleForTesting
 	public Class<?> getSourceType() {
 		return mySourceType;
+	}
+
+	@VisibleForTesting
+	public OperationParameterRangeType getRangeType() {
+		return myRengeType;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -262,7 +266,7 @@ public class EmbeddedOperationParameter implements IParameter {
 				// LUKETODO:  test the rangeType NOT_APPLICABLE scenario
 				final String error = String.format(
 						"%sInvalid type for @OperationEmbeddedParam on method: %s with sourceType: %s, parameterType: %s, and rangeType: %s",
-						Msg.code(999991), theMethod.getName(), mySourceType, myParameterType, myRengeType);
+						Msg.code(999991), theMethod.getName(), mySourceType, myParameterType.getName(), myRengeType);
 				throw new ConfigurationException(error);
 			}
 		}

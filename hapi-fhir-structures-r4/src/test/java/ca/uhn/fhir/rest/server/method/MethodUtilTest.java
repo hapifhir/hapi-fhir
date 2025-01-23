@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.ParamsWithTypeConversion;
 import ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SampleParams;
@@ -69,9 +70,9 @@ class MethodUtilTest {
 
 		final List<IParameterToAssert> expectedParameters = List.of(
 			 new NullParameterToAssert(),
-			 new OperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, null),
-			 new OperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class, null),
-		new OperationParameterToAssert(ourFhirContext, "param3", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, "boolean")
+			 new OperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE),
+			 new OperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE),
+		new OperationParameterToAssert(ourFhirContext, "param3", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, "boolean", Void.class, OperationParameterRangeType.NOT_APPLICABLE)
 		);
 
 		assertThat(resourceParameters)
@@ -89,9 +90,9 @@ class MethodUtilTest {
 
 		final List<IParameterToAssert> expectedParameters = List.of(
 			 new NullParameterToAssert(),
-			 new OperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, null),
-			 new OperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class,null),
-		new OperationParameterToAssert(ourFhirContext, "param3", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, "boolean")
+			 new OperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE),
+			 new OperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class,null, Void.class, OperationParameterRangeType.NOT_APPLICABLE),
+		new OperationParameterToAssert(ourFhirContext, "param3", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, "boolean", Void.class, OperationParameterRangeType.NOT_APPLICABLE)
 		);
 
 		assertThat(resourceParameters)
@@ -108,8 +109,8 @@ class MethodUtilTest {
 		assertThat(resourceParameters).hasExactlyElementsOfTypes(EmbeddedOperationParameter.class, EmbeddedOperationParameter.class);
 
 		final List<IParameterToAssert> expectedParameters = List.of(
-			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, null, Void.class),
-			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class, null, Void.class)
+			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, null, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE),
+			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE)
 		);
 
 		assertThat(resourceParameters)
@@ -127,8 +128,8 @@ class MethodUtilTest {
 
 		final List<IParameterToAssert> expectedParameters = List.of(
 			 new RequestDetailsParameterToAssert(),
-			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,null, String.class, null, Void.class),
-			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,ArrayList.class, String.class, null, Void.class)
+			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,null, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE),
+			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,ArrayList.class, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE)
 		);
 
 		assertThat(resourceParameters)
@@ -145,8 +146,8 @@ class MethodUtilTest {
 		assertThat(resourceParameters).hasExactlyElementsOfTypes(EmbeddedOperationParameter.class, EmbeddedOperationParameter.class, RequestDetailsParameter.class);
 
 		final List<IParameterToAssert> expectedParameters = List.of(
-			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,null, String.class, null, Void.class),
-			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class, null, Void.class),
+			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,null, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE),
+			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE),
 			 new RequestDetailsParameterToAssert()
 		);
 
@@ -165,9 +166,9 @@ class MethodUtilTest {
 
 		final List<IParameterToAssert> expectedParameters = List.of(
 			 new NullParameterToAssert(),
-			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,null, String.class, null, Void.class),
-			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class, null, Void.class),
-		new EmbeddedOperationParameterToAssert(ourFhirContext, "param3", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,null, String.class, "boolean", Void.class)
+			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,null, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE),
+			 new EmbeddedOperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, ArrayList.class, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE),
+		new EmbeddedOperationParameterToAssert(ourFhirContext, "param3", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS,null, String.class, "boolean", Void.class, OperationParameterRangeType.NOT_APPLICABLE)
 		);
 
 		assertThat(resourceParameters)
@@ -184,8 +185,8 @@ class MethodUtilTest {
 		assertThat(resourceParameters).hasExactlyElementsOfTypes(EmbeddedOperationParameter.class, EmbeddedOperationParameter.class);
 
 		final List<IParameterToAssert> expectedParameters = List.of(
-			 new EmbeddedOperationParameterToAssert(ourFhirContext, "periodStart", SIMPLE_METHOD_WITH_PARAMS_CONVERSION,null, ZonedDateTime.class, null, String.class),
-			 new EmbeddedOperationParameterToAssert(ourFhirContext, "periodEnd", SIMPLE_METHOD_WITH_PARAMS_CONVERSION, null, ZonedDateTime.class, null, String.class)
+			 new EmbeddedOperationParameterToAssert(ourFhirContext, "periodStart", SIMPLE_METHOD_WITH_PARAMS_CONVERSION,null, ZonedDateTime.class, null, String.class, OperationParameterRangeType.START),
+			 new EmbeddedOperationParameterToAssert(ourFhirContext, "periodEnd", SIMPLE_METHOD_WITH_PARAMS_CONVERSION, null, ZonedDateTime.class, null, String.class, OperationParameterRangeType.END)
 		);
 
 		assertThat(resourceParameters)
@@ -380,6 +381,8 @@ class MethodUtilTest {
 			assertThat(actualOperationParameter.getName()).isEqualTo(expectedOperationParameter.myName());
 			assertThat(actualOperationParameter.getParamType()).isEqualTo(expectedOperationParameter.myParamType());
 			assertThat(actualOperationParameter.getInnerCollectionType()).isEqualTo(expectedOperationParameter.myInnerCollectionType());
+			assertThat(actualOperationParameter.getSourceType()).isEqualTo(expectedOperationParameter.myTypeToConvertFrom());
+			assertThat(actualOperationParameter.getRangeType()).isEqualTo(expectedOperationParameter.myRangeType());
 
 			return true;
 		}
@@ -390,6 +393,7 @@ class MethodUtilTest {
 			assertThat(actualEmbeddedOperationParameter.getParamType()).isEqualTo(expectedEmbeddedOperationParameter.myParamType());
 			assertThat(actualEmbeddedOperationParameter.getInnerCollectionType()).isEqualTo(expectedEmbeddedOperationParameter.myInnerCollectionType());
 			assertThat(actualEmbeddedOperationParameter.getSourceType()).isEqualTo(expectedEmbeddedOperationParameter.myTypeToConvertFrom());
+			assertThat(actualEmbeddedOperationParameter.getRangeType()).isEqualTo(expectedEmbeddedOperationParameter.myRangeType());
 
 			return true;
 		}
@@ -412,7 +416,9 @@ class MethodUtilTest {
 		 @SuppressWarnings("rawtypes")
 		 Class<? extends Collection> myInnerCollectionType,
 		 Class<?> myParameterType,
-		 String myParamType) implements IParameterToAssert {
+		 String myParamType,
+		 Class<?> myTypeToConvertFrom,
+		 OperationParameterRangeType myRangeType) implements IParameterToAssert {
 	}
 
 	private record EmbeddedOperationParameterToAssert(
@@ -423,6 +429,7 @@ class MethodUtilTest {
 		 Class<? extends Collection> myInnerCollectionType,
 		 Class<?> myParameterType,
 		 String myParamType,
-		 Class<?> myTypeToConvertFrom) implements IParameterToAssert {
+		 Class<?> myTypeToConvertFrom,
+		 OperationParameterRangeType myRangeType) implements IParameterToAssert {
 	}
 }
