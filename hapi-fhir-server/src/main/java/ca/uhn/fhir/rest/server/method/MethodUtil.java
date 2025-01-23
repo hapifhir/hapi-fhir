@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Elements;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -199,6 +200,7 @@ public class MethodUtil {
 				param = new SearchTotalModeParameter();
 			} else {
 				final Operation op = methodToUse.getAnnotation(Operation.class);
+				// LUKETODO:  delete this after all existing providers have migrated.
 				// There are no annotations on this parameter, so we check to see if the parameter class has fields
 				// annotated OperationEmbeddedParam
 				if (nextParameterAnnotations.length == 0) {
@@ -392,6 +394,52 @@ public class MethodUtil {
 							}
 							parameterType = newParameterType;
 						}
+					} else if (nextAnnotation instanceof EmbeddedOperationParams) {
+						final List<Class<?>> operationEmbeddedTypes =
+								ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
+										methodToUse, EmbeddedOperationParam.class);
+
+						if (op == null) {
+							throw new ConfigurationException(Msg.code(846192641)
+									+ "@OperationParam or OperationEmbeddedParam detected on method that is not annotated with @Operation: "
+									+ methodToUse.toGenericString());
+						}
+
+						if (operationEmbeddedTypes.size() > 1) {
+							throw new ConfigurationException(String.format(
+									"%sOnly one type with embedded params is supported for now for method: %s",
+									Msg.code(9999927), methodToUse.getName()));
+						}
+
+						if (!operationEmbeddedTypes.isEmpty()) {
+							final EmbeddedParameterConverter embeddedParameterConverter =
+									new EmbeddedParameterConverter(
+											theContext, theMethod, op, operationEmbeddedTypes.get(0));
+
+							final List<EmbeddedParameterConverterContext> outerContexts =
+									embeddedParameterConverter.convert();
+
+							for (EmbeddedParameterConverterContext outerContext : outerContexts) {
+								if (outerContext.getParameter() != null) {
+									parameters.add(outerContext.getParameter());
+								}
+								final ParamInitializationContext paramContext = outerContext.getParamContext();
+
+								if (paramContext != null) {
+									paramContexts.add(paramContext);
+
+									// N.B. This a hack used only to pass the null check below, which is crucial to the
+									// non-embedded params logic
+									param = paramContext.getParam();
+								}
+							}
+						} else {
+							// More than likely this will result in the param == null Exception below
+							ourLog.warn(
+									"Method '{}' has no parameters with annotations. Don't know how to handle this parameter",
+									methodToUse.getName());
+						}
+						ourLog.info("1234:  NEW CODE PATH!!!!!");
 					} else if (nextAnnotation instanceof Validate.Mode) {
 						if (!parameterType.equals(ValidationModeEnum.class)) {
 							throw new ConfigurationException(Msg.code(406) + "Parameter annotated with @"

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.cr.r4.R4MeasureEvaluatorSingleFactory;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -54,7 +55,8 @@ public class MeasureOperationsProvider {
 	 * @return the calculated MeasureReport
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
-	public MeasureReport evaluateMeasure(EvaluateMeasureSingleParams theParams, RequestDetails theRequestDetails)
+	public MeasureReport evaluateMeasure(
+			@EmbeddedOperationParams EvaluateMeasureSingleParams theParams, RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)

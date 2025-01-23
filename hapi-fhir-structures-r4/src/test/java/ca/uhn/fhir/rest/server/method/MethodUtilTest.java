@@ -3,9 +3,9 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.ParamsWithTypeConversion;
-import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SampleParams;
-import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SampleParamsWithIdParam;
+import ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.ParamsWithTypeConversion;
+import ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SampleParams;
+import ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SampleParamsWithIdParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.junit.jupiter.api.Disabled;
@@ -17,14 +17,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.INVALID_METHOD_OPERATION_PARAMS_NO_OPERATION;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SIMPLE_METHOD_WITH_PARAMS_CONVERSION;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SUPER_SIMPLE;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.INVALID_METHOD_OPERATION_PARAMS_NO_OPERATION;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SIMPLE_METHOD_WITH_PARAMS_CONVERSION;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SUPER_SIMPLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
@@ -39,7 +39,7 @@ class MethodUtilTest {
 
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 
-	private final InnerClassesAndMethods myInnerClassesAndMethods = new InnerClassesAndMethods();
+	private final EmbeddedParamsInnerClassesAndMethods myEmbeddedParamsInnerClassesAndMethods = new EmbeddedParamsInnerClassesAndMethods();
 
     private final Object myProvider = new Object();
 
@@ -344,7 +344,7 @@ class MethodUtilTest {
 	private List<IParameter> getMethodAndExecute(String theMethodName, Class<?>... theParamClasses) {
 		return MethodUtil.getResourceParameters(
 			ourFhirContext,
-			myInnerClassesAndMethods.getDeclaredMethod(theMethodName, theParamClasses),
+			myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(theMethodName, theParamClasses),
 			myProvider);
 	}
 

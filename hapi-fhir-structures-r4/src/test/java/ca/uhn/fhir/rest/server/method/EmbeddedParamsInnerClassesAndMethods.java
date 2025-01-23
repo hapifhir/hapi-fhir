@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -31,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 // This class lives in hapi-fhir-structures-r4 because if we introduce it in hapi-fhir-server, there will be a
 // circular dependency
 // Methods and embedded param classes to be used for testing regression code in hapi-fhir-server method classes
-class InnerClassesAndMethods {
+class EmbeddedParamsInnerClassesAndMethods {
 
 	static final String SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS = "sampleMethodEmbeddedTypeMultipleRequestDetails";
 	static final String SUPER_SIMPLE = "superSimple";
@@ -111,6 +113,7 @@ class InnerClassesAndMethods {
 		return new MeasureReport(null, null, null, null);
 	}
 
+	@EmbeddableOperationParams
 	static class ParamsWithoutAnnotations {
 		private final String myParam1;
 		private final List<String> myParam2;
@@ -152,6 +155,7 @@ class InnerClassesAndMethods {
 	}
 
 	// Ignore warnings that these classes can be records.  Converting them to records will make the tests fail
+	@EmbeddableOperationParams
 	static class SampleParams {
 		@EmbeddedOperationParam(name = "param1")
 		private final String myParam1;
@@ -194,6 +198,7 @@ class InnerClassesAndMethods {
 		}
 	}
 
+	@EmbeddableOperationParams
 	static class ParamsWithTypeConversion {
 		@EmbeddedOperationParam(name = "periodStart", sourceType = String.class, rangeType = EmbeddedParameterRangeType.START)
 		private final ZonedDateTime myPeriodStart;
@@ -237,6 +242,7 @@ class InnerClassesAndMethods {
 	}
 
 	// Ignore warnings that these classes can be records.  Converting them to records will make the tests fail
+	@EmbeddableOperationParams
 	static class SampleParamsWithIdParam {
 		@IdParam
 		private final IdType myId;
@@ -300,51 +306,51 @@ class InnerClassesAndMethods {
 	}
 
 	@Operation(name="sampleMethodEmbeddedTypeRequestDetailsFirst")
-	String sampleMethodEmbeddedTypeRequestDetailsFirst(RequestDetails theRequestDetails, SampleParams theParams) {
+	String sampleMethodEmbeddedTypeRequestDetailsFirst(RequestDetails theRequestDetails, @EmbeddedOperationParams SampleParams theParams) {
 		// return something arbitrary
 		return theRequestDetails.getId().getValue() + theParams.getParam1();
 	}
 
 	@Operation(name="sampleMethodEmbeddedTypeRequestDetailsLast")
-	String sampleMethodEmbeddedTypeRequestDetailsLast(SampleParams theParams, RequestDetails theRequestDetails) {
+	String sampleMethodEmbeddedTypeRequestDetailsLast(@EmbeddedOperationParams SampleParams theParams, RequestDetails theRequestDetails) {
 		// return something arbitrary
 		return theRequestDetails.getId().getValue() + theParams.getParam1();
 	}
 
 	@Operation(name="sampleMethodEmbeddedTypeNoRequestDetails")
-	String sampleMethodEmbeddedTypeNoRequestDetails(SampleParams theParams) {
+	String sampleMethodEmbeddedTypeNoRequestDetails(@EmbeddedOperationParams SampleParams theParams) {
 		// return something arbitrary
 		return theParams.getParam1();
 	}
 
 	@Operation(name="simpleMethodWithParamsConversion")
-	String simpleMethodWithParamsConversion(ParamsWithTypeConversion theParams) {
+	String simpleMethodWithParamsConversion(@EmbeddedOperationParams ParamsWithTypeConversion theParams) {
 		// return something arbitrary
 		return theParams.getPeriodStart().toString();
 	}
 
-	String sampleMethodParamNoEmbeddedType(ParamsWithoutAnnotations theParams) {
+	String sampleMethodParamNoEmbeddedType(@EmbeddedOperationParams ParamsWithoutAnnotations theParams) {
 		// return something arbitrary
 		return theParams.getParam1();
 	}
 
-	String sampleMethodEmbeddedTypeMultipleRequestDetails(RequestDetails theRequestDetails1, SampleParams theParams, RequestDetails theRequestDetails2) {
+	String sampleMethodEmbeddedTypeMultipleRequestDetails(RequestDetails theRequestDetails1, @EmbeddedOperationParams SampleParams theParams, RequestDetails theRequestDetails2) {
 		// return something arbitrary
 		return theRequestDetails1.getId().getValue() + theParams.getParam1() + theRequestDetails2.getId().getValue();
 	}
 
-	String sampleMethodEmbeddedTypeRequestDetailsFirstWithIdType(RequestDetails theRequestDetails, SampleParamsWithIdParam theParams) {
+	String sampleMethodEmbeddedTypeRequestDetailsFirstWithIdType(RequestDetails theRequestDetails, @EmbeddedOperationParams SampleParamsWithIdParam theParams) {
 		// return something arbitrary
 		return theRequestDetails.getId().getValue() + theParams.getParam1();
 	}
 
-	String sampleMethodEmbeddedTypeRequestDetailsLastWithIdType(SampleParamsWithIdParam theParams, RequestDetails theRequestDetails) {
+	String sampleMethodEmbeddedTypeRequestDetailsLastWithIdType(@EmbeddedOperationParams SampleParamsWithIdParam theParams, RequestDetails theRequestDetails) {
 		// return something arbitrary
 		return theRequestDetails.getId().getValue() + theParams.getParam1();
 	}
 
 	@Operation(name="sampleMethodEmbeddedTypeNoRequestDetailsWithIdType", type = Measure.class)
-	MeasureReport sampleMethodEmbeddedTypeNoRequestDetailsWithIdType(SampleParamsWithIdParam theParams) {
+	MeasureReport sampleMethodEmbeddedTypeNoRequestDetailsWithIdType(@EmbeddedOperationParams SampleParamsWithIdParam theParams) {
 		// return something arbitrary
 		return new MeasureReport(null, null, null, null);
 	}

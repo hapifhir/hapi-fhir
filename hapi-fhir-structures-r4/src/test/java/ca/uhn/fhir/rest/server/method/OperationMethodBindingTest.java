@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.server.method;
 
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.EXPAND;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.OP_INSTANCE_OR_TYPE;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.EXPAND;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.OP_INSTANCE_OR_TYPE;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -13,8 +13,8 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.PatientProvider;
-import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SampleParamsWithIdParam;
+import ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.PatientProvider;
+import ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SampleParamsWithIdParam;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -34,7 +34,7 @@ class OperationMethodBindingTest {
 
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 
-	private final InnerClassesAndMethods myInnerClassesAndMethods = new InnerClassesAndMethods();
+	private final EmbeddedParamsInnerClassesAndMethods myEmbeddedParamsInnerClassesAndMethods = new EmbeddedParamsInnerClassesAndMethods();
 
 	private Method myMethod;
 	private Operation myOperation;
@@ -83,7 +83,7 @@ class OperationMethodBindingTest {
 
 	@Test
 	void invokeServer_withUnsupportedRequestType_shouldThrowMethodNotAllowedException() {
-		init(InnerClassesAndMethods.SIMPLE_OPERATION);
+		init(EmbeddedParamsInnerClassesAndMethods.SIMPLE_OPERATION);
 
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRequestType(RequestTypeEnum.PUT);
@@ -162,7 +162,7 @@ class OperationMethodBindingTest {
 	}
 
 	private void init(String theMethodName, Class<?>... theParamClasses) {
-		myMethod = myInnerClassesAndMethods.getDeclaredMethod(myProvider, theMethodName, theParamClasses);
+		myMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(myProvider, theMethodName, theParamClasses);
 		myOperation = myMethod.getAnnotation(Operation.class);
 	}
 }

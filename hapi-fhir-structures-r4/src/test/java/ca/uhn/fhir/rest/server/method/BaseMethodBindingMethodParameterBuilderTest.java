@@ -4,7 +4,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SampleParams;
+import ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SampleParams;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
@@ -18,14 +18,14 @@ import java.time.Month;
 import java.time.ZoneOffset;
 import java.util.List;
 
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.ParamsWithTypeConversion;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.ParamsWithoutAnnotations;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SIMPLE_METHOD_WITH_PARAMS_CONVERSION;
-import static ca.uhn.fhir.rest.server.method.InnerClassesAndMethods.SampleParamsWithIdParam;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.ParamsWithTypeConversion;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.ParamsWithoutAnnotations;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SIMPLE_METHOD_WITH_PARAMS_CONVERSION;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SampleParamsWithIdParam;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -41,7 +41,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	private static final RequestDetails REQUEST_DETAILS = new SystemRequestDetails();
 
-	private final InnerClassesAndMethods myInnerClassesAndMethods = new InnerClassesAndMethods();
+	private final EmbeddedParamsInnerClassesAndMethods myEmbeddedParamsInnerClassesAndMethods = new EmbeddedParamsInnerClassesAndMethods();
 
 	// LUKETODO:  wrong params
 	// LUKETODO:  wrong param order
@@ -50,7 +50,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationParamsEmptyParams() {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SUPER_SIMPLE);
+		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(EmbeddedParamsInnerClassesAndMethods.SUPER_SIMPLE);
 		final Object[] inputParams = new Object[]{};
 
 		final Object[] actualOutputParams = buildMethodParams(sampleMethod, REQUEST_DETAILS, inputParams);
@@ -60,7 +60,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationParamsNonEmptyParams() {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS, IIdType.class, String.class, List.class, BooleanType.class);
+		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_OPERATION_PARAMS, IIdType.class, String.class, List.class, BooleanType.class);
 		final Object[] inputParams = new Object[]{new IdDt(), "param1", List.of("param2")};
 
 		final Object[] actualOutputParams = buildMethodParams(sampleMethod, REQUEST_DETAILS, inputParams);
@@ -70,7 +70,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationEmbeddedTypesNoRequestDetails() {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
+		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
 		final Object[] inputParams = new Object[]{"param1", List.of("param2")};
 		final Object[] expectedOutputParams = new Object[]{new SampleParams("param1", List.of("param2"))};
 
@@ -81,7 +81,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationEmbeddedTypesNoRequestDetailsNullArguments() {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
+		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
 		final Object[] inputParams = new Object[]{null, null};
 		final Object[] expectedOutputParams = new Object[]{new SampleParams(null, null)};
 
@@ -92,7 +92,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationEmbeddedTypesRequestDetailsFirst() {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST, RequestDetails.class, SampleParams.class);
+		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST, RequestDetails.class, SampleParams.class);
 		final Object[] inputParams = new Object[]{REQUEST_DETAILS, "param1", List.of("param2")};
 		final Object[] expectedOutputParams = new Object[]{REQUEST_DETAILS, new SampleParams("param1", List.of("param2"))};
 
@@ -103,7 +103,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationEmbeddedTypesRequestDetailsLast() {
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST, SampleParams.class, RequestDetails.class);
+		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST, SampleParams.class, RequestDetails.class);
 		final Object[] inputParams = new Object[]{"param1", List.of("param3"), REQUEST_DETAILS};
 		final Object[] expectedOutputParams = new Object[]{new SampleParams("param1", List.of("param3")), REQUEST_DETAILS};
 
@@ -116,7 +116,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	@Disabled
 	void happyPathOperationEmbeddedTypesWithIdType() {
 		final IdType id = new IdType();
-		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE, RequestDetails.class, SampleParamsWithIdParam.class);
+		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE, RequestDetails.class, SampleParamsWithIdParam.class);
 		final Object[] inputParams = new Object[]{REQUEST_DETAILS, id, "param1", List.of("param2"), new BooleanType(false)};
 		final Object[] expectedOutputParams = new Object[]{REQUEST_DETAILS, new SampleParamsWithIdParam(id, "param1", List.of("param2"), new BooleanType(false))};
 
@@ -134,7 +134,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void buildMethodParams_withNullParams_shouldThrowInternalErrorException() throws NoSuchMethodException {
-		final Method sampleMethod = InnerClassesAndMethods.class.getDeclaredMethod(InnerClassesAndMethods.SUPER_SIMPLE);
+		final Method sampleMethod = EmbeddedParamsInnerClassesAndMethods.class.getDeclaredMethod(EmbeddedParamsInnerClassesAndMethods.SUPER_SIMPLE);
 
 		assertThrows(InternalErrorException.class, () -> {
 			buildMethodParams(sampleMethod, REQUEST_DETAILS, null);
@@ -148,7 +148,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void buildMethodParams_multipleRequestDetails_shouldThrowInternalErrorException() {
-		final Method method = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS,
+		final Method method = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS,
 				RequestDetails.class, SampleParams.class, RequestDetails.class);
 		final Object[] inputParams = new Object[]{REQUEST_DETAILS, new IdDt(), "param1", List.of("param2", REQUEST_DETAILS)};
 		assertThrows(InternalErrorException.class, () -> {
@@ -160,7 +160,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	@Test
 	@Disabled
 	void buildMethodParams_withClassMiissingParameterAnnotations_shouldThrowInternalErrorException() {
-		final Method method = myInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE, ParamsWithoutAnnotations.class);
+		final Method method = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE, ParamsWithoutAnnotations.class);
 
 		final Object[] inputParams = new Object[]{new IdDt(), "param1", 2, List.of("param3")};
 
@@ -171,7 +171,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void paramsConversionZonedDateTime() {
-		final Method method = myInnerClassesAndMethods.getDeclaredMethod(SIMPLE_METHOD_WITH_PARAMS_CONVERSION, ParamsWithTypeConversion.class);
+		final Method method = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(SIMPLE_METHOD_WITH_PARAMS_CONVERSION, ParamsWithTypeConversion.class);
 
 		final Object[] inputParams = new Object[]{"2024-01-01", "2025-01-01"};
 		final Object[] expectedOutputParams = new Object[]{

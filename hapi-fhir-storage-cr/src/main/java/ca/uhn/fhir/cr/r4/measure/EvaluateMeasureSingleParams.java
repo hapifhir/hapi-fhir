@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -52,10 +53,13 @@ import java.util.StringJoiner;
  * myAdditionalData  the data bundle containing additional data
  */
 // LUKETODO:  start to integrate this with a clinical reasoning branch
+// LUKETODO:  make code use or at least validate this annotation
+@EmbeddableOperationParams
 public class EvaluateMeasureSingleParams {
 	@IdParam
 	private final IdType myId;
 
+	// LUKETODO: OperationParam
 	@EmbeddedOperationParam(
 			name = "periodStart",
 			sourceType = String.class,
@@ -89,6 +93,8 @@ public class EvaluateMeasureSingleParams {
 	@EmbeddedOperationParam(name = "parameters")
 	private final Parameters myParameters;
 
+	// LUKETODO:  embedded factory constructor annoation
+	// LUKETODO:  annotations on constructor parameters instead
 	public EvaluateMeasureSingleParams(
 			IdType theId,
 			ZonedDateTime thePeriodStart,
@@ -115,17 +121,18 @@ public class EvaluateMeasureSingleParams {
 	}
 
 	private EvaluateMeasureSingleParams(Builder builder) {
-		this.myId = builder.myId;
-		this.myPeriodStart = builder.myPeriodStart;
-		this.myPeriodEnd = builder.myPeriodEnd;
-		this.myReportType = builder.myReportType;
-		this.mySubject = builder.mySubject;
-		this.myPractitioner = builder.myPractitioner;
-		this.myLastReceivedOn = builder.myLastReceivedOn;
-		this.myProductLine = builder.myProductLine;
-		this.myAdditionalData = builder.myAdditionalData;
-		this.myTerminologyEndpoint = builder.myTerminologyEndpoint;
-		this.myParameters = builder.myParameters;
+		this(
+				builder.myId,
+				builder.myPeriodStart,
+				builder.myPeriodEnd,
+				builder.myReportType,
+				builder.mySubject,
+				builder.myPractitioner,
+				builder.myLastReceivedOn,
+				builder.myProductLine,
+				builder.myAdditionalData,
+				builder.myTerminologyEndpoint,
+				builder.myParameters);
 	}
 
 	public IdType getId() {
