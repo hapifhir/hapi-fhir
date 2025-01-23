@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6656
+title: "Previously, the FHIR Patch `replace` operation would fail when replacing an element of a high cardinality 
+resource element using the FHIR patch syntax. This has now been fixed."
+

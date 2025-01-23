@@ -456,6 +456,87 @@ public class FhirPatchApplyR4Test {
 		assertEquals("third-system", patient.getIdentifier().get(0).getSystem());
 		assertEquals("third-value", patient.getIdentifier().get(0).getValue());
 	}
+
+
+	@Test
+	public void testReplaceAnElementInHighCardinalityFieldByIndex() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("first-system").setValue("first-value");
+		patient.addIdentifier().setSystem("second-system").setValue("second-value");
+
+		//Given: We create a patch to replace the second identifier
+		Identifier theValue = new Identifier().setSystem("third-system").setValue("third-value");
+		Parameters patch = new Parameters();
+		patch.addParameter(createPatchReplaceOperation("Patient.identifier[1]",  theValue));
+
+		//When: We apply the patch
+		svc.apply(patient, patch);
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		//Then: it replaces the identifier correctly.
+		assertThat(patient.getIdentifier()).hasSize(2);
+		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("first-system");
+		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("first-value");
+		assertThat(patient.getIdentifier().get(1).getSystem()).isEqualTo("third-system");
+		assertThat(patient.getIdentifier().get(1).getValue()).isEqualTo("third-value");
+	}
+
+	@Test
+	public void testReplaceAnElementInHighCardinalityFieldByFilter_SingleMatch() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("first-system").setValue("first-value");
+		patient.addIdentifier().setSystem("second-system").setValue("second-value");
+
+		//Given: We create a patch to replace the second identifier
+		Identifier theValue = new Identifier().setSystem("third-system").setValue("third-value");
+		Parameters patch = new Parameters();
+		patch.addParameter(createPatchReplaceOperation("Patient.identifier.where(system='second-system')",
+			theValue));
+
+		//When: We apply the patch
+		svc.apply(patient, patch);
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		//Then: it replaces the identifier correctly.
+		assertThat(patient.getIdentifier()).hasSize(2);
+		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("first-system");
+		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("first-value");
+		assertThat(patient.getIdentifier().get(1).getSystem()).isEqualTo("third-system");
+		assertThat(patient.getIdentifier().get(1).getValue()).isEqualTo("third-value");
+	}
+
+	@Test
+	public void testReplaceElementsInHighCardinalityFieldByFilter_MultipleMatches() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("existing-system1").setValue("first-value");
+		patient.addIdentifier().setSystem("to-be-replaced-system").setValue("second-value");
+		patient.addIdentifier().setSystem("existing-system2").setValue("third-value");
+		patient.addIdentifier().setSystem("to-be-replaced-system").setValue("fourth-value");
+		//Given: We create a patch to replace the second identifier
+		Identifier theValue = new Identifier().setSystem("new-system").setValue("new-value");
+		Parameters patch = new Parameters();
+		patch.addParameter(createPatchReplaceOperation("Patient.identifier.where(system='to-be-replaced-system')",
+			theValue));
+
+		//When: We apply the patch
+		svc.apply(patient, patch);
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		//Then: it replaces  identifiers correctly.
+		assertThat(patient.getIdentifier()).hasSize(4);
+		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("existing-system1");
+		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("first-value");
+		assertThat(patient.getIdentifier().get(1).getSystem()).isEqualTo("new-system");
+		assertThat(patient.getIdentifier().get(1).getValue()).isEqualTo("new-value");
+		assertThat(patient.getIdentifier().get(2).getSystem()).isEqualTo("existing-system2");
+		assertThat(patient.getIdentifier().get(2).getValue()).isEqualTo("third-value");
+		assertThat(patient.getIdentifier().get(3).getSystem()).isEqualTo("new-system");
+		assertThat(patient.getIdentifier().get(3).getValue()).isEqualTo("new-value");
+	}
+
 	@Test
 	public void testReplaceToHighCardinalityFieldRemovesAllAndSetsValue() {
 		FhirPatch svc = new FhirPatch(ourCtx);

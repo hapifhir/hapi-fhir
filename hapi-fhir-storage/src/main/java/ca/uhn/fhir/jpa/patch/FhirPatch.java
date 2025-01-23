@@ -167,16 +167,14 @@ public class FhirPatch {
 		}
 	}
 
-	private void handleDeleteOperation(IBaseResource theResource, IBase theParameters) {
-
-		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
-		path = defaultString(path);
-
+	private ParsedPath parsePath(String path) {
 		String containingPath;
 		String elementName;
+		boolean isList = false;
 
 		if (path.endsWith(")")) {
 			// This is probably a filter, so we're probably dealing with a list
+			isList = true;
 			int filterArgsIndex = path.lastIndexOf('('); // Let's hope there aren't nested parentheses
 			int lastDotIndex = path.lastIndexOf(
 					'.', filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
@@ -185,21 +183,39 @@ public class FhirPatch {
 			elementName = path.substring(secondLastDotIndex + 1, lastDotIndex);
 		} else if (path.endsWith("]")) {
 			// This is almost definitely a list
+			isList = true;
 			int openBracketIndex = path.lastIndexOf('[');
 			int lastDotIndex = path.lastIndexOf('.', openBracketIndex);
 			containingPath = path.substring(0, lastDotIndex);
 			elementName = path.substring(lastDotIndex + 1, openBracketIndex);
 		} else {
-			containingPath = path;
-			elementName = null;
+			// assume not a list
+			int lastDot = path.lastIndexOf(".");
+			containingPath = path.substring(0, lastDot);
+			elementName = path.substring(lastDot + 1);
 		}
 
-		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		return new ParsedPath(elementName, containingPath, isList);
+	}
+
+	private void handleDeleteOperation(IBaseResource theResource, IBase theParameters) {
+
+		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
+		path = defaultString(path);
+
+		ParsedPath parsedPath = parsePath(path);
+		List<IBase> containingElements = myContext
+				.newFhirPath()
+				.evaluate(
+						theResource,
+						parsedPath.getIsElementAList() ? parsedPath.getContainingPath() : path,
+						IBase.class);
+
 		for (IBase nextElement : containingElements) {
-			if (elementName == null) {
-				deleteSingleElement(nextElement);
+			if (parsedPath.getIsElementAList()) {
+				deleteFromList(theResource, nextElement, parsedPath.getElementName(), path);
 			} else {
-				deleteFromList(theResource, nextElement, elementName, path);
+				deleteSingleElement(nextElement);
 			}
 		}
 	}
@@ -227,18 +243,44 @@ public class FhirPatch {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
-		int lastDot = path.lastIndexOf(".");
-		String containingPath = path.substring(0, lastDot);
-		String elementName = path.substring(lastDot + 1);
+		ParsedPath parsedPath = parsePath(path);
 
-		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
-		for (IBase nextElement : containingElements) {
+		List<IBase> containingElements =
+				myContext.newFhirPath().evaluate(theResource, parsedPath.getContainingPath(), IBase.class);
+		for (IBase containingElement : containingElements) {
 
-			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
+			ChildDefinition childDefinition = findChildDefinition(containingElement, parsedPath.getElementName());
+			IBase newValue = getNewValue(theParameters, containingElement, childDefinition);
+			if (parsedPath.getIsElementAList()) {
+				replaceInList(newValue, theResource, containingElement, childDefinition, path);
+			} else {
+				childDefinition.getChildDef().getMutator().setValue(containingElement, newValue);
+			}
+		}
+	}
 
-			IBase newValue = getNewValue(theParameters, nextElement, childDefinition);
+	private void replaceInList(
+			IBase theNewValue,
+			IBaseResource theResource,
+			IBase theContainingElement,
+			ChildDefinition theChildDefinitionForTheList,
+			String theFullReplacePath) {
 
-			childDefinition.getChildDef().getMutator().setValue(nextElement, newValue);
+		List<IBase> existingValues = new ArrayList<>(
+				theChildDefinitionForTheList.getChildDef().getAccessor().getValues(theContainingElement));
+		List<IBase> valuesToReplace = myContext.newFhirPath().evaluate(theResource, theFullReplacePath, IBase.class);
+
+		BaseRuntimeChildDefinition.IMutator listMutator =
+				theChildDefinitionForTheList.getChildDef().getMutator();
+		// clear the whole list first, then reconstruct it in the loop below replacing the values that need to be
+		// replaced
+		listMutator.setValue(theContainingElement, null);
+		for (IBase existingValue : existingValues) {
+			if (valuesToReplace.contains(existingValue)) {
+				listMutator.addValue(theContainingElement, theNewValue);
+			} else {
+				listMutator.addValue(theContainingElement, existingValue);
+			}
 		}
 	}
 
@@ -665,6 +707,30 @@ public class FhirPatch {
 
 		public BaseRuntimeElementDefinition<?> getChildElement() {
 			return myChildElement;
+		}
+	}
+
+	private static class ParsedPath {
+		private final String myElementName;
+		private final String myContainingPath;
+		private final boolean myIsElementAList;
+
+		public ParsedPath(String theElementName, String theContainingPath, boolean theIsList) {
+			myElementName = theElementName;
+			myContainingPath = theContainingPath;
+			myIsElementAList = theIsList;
+		}
+
+		public String getElementName() {
+			return myElementName;
+		}
+
+		public String getContainingPath() {
+			return myContainingPath;
+		}
+
+		public boolean getIsElementAList() {
+			return myIsElementAList;
 		}
 	}
 }
