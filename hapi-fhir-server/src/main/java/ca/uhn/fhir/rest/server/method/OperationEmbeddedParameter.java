@@ -109,7 +109,7 @@ public class OperationEmbeddedParameter implements IParameter {
 		myContext = theCtx;
 		myDescription = theDescription;
 		// LUKETODO:  is this wise?
-		if (theSourceType == Void.class) {
+		if (theSourceType == Void.class && myParameterType != null) {
 			mySourceType = myParameterType;
 		} else {
 			mySourceType = theSourceType;

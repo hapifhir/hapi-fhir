@@ -87,9 +87,8 @@ public class CareGapsOperationProvider {
 		return myR4CareGapsProcessorFactory
 				.create(theRequestDetails)
 				.getCareGapsReport(
-						// LUKETODO:   how to handle passing this down seamlessly?
-						myStringTimePeriodHandler.getStartZonedDateTime(theParams.getPeriodStart(), theRequestDetails),
-						myStringTimePeriodHandler.getEndZonedDateTime(theParams.getPeriodEnd(), theRequestDetails),
+						theParams.getPeriodStart(),
+						theParams.getPeriodEnd(),
 						theParams.getSubject(),
 						theParams.getStatus(),
 						theParams.getMeasureId() == null

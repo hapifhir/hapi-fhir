@@ -80,11 +80,18 @@ public @interface OperationEmbeddedParam {
 	 */
 	Class<? extends IBase> type() default IBase.class;
 
-	// LUKETODO:  javadoc
-	// LUKETODO:  Void to mean don't convert?
+	/**
+	 * The source type of the parameters if we're expecting to do a type conversion, such as String to ZonedDateTime.
+	 * Void indicates that we don't want to do a type conversion.
+	 *
+	 * @return the source type of the parameter
+	 */
 	Class<?> sourceType() default Void.class;
 
-	// LUKETODO:  javadoc
+	/**
+	 * @return The range type associated with any type conversion.  For instance, if we expect a start and end date.
+	 * NOT_APPLICABLE is the default and indicates range conversion is not applicable.
+	 */
 	EmbeddedParameterRangeType rangeType() default EmbeddedParameterRangeType.NOT_APPLICABLE;
 
 	/**

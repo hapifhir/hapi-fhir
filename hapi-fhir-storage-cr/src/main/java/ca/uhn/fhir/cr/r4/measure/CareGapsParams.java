@@ -1,9 +1,30 @@
+/*-
+ * #%L
+ * HAPI FHIR - Clinical Reasoning
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
 import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -50,11 +71,11 @@ import java.util.StringJoiner;
  *                  If 'true', this will return summarized subject bundle with only detectedIssue resource.
  */
 public class CareGapsParams {
-	@OperationEmbeddedParam(name = "periodStart")
-	private final String myPeriodStart;
+	@OperationEmbeddedParam(name = "periodStart", sourceType = String.class, rangeType = EmbeddedParameterRangeType.START)
+	private final ZonedDateTime myPeriodStart;
 
-	@OperationEmbeddedParam(name = "periodEnd")
-	private final String myPeriodEnd;
+	@OperationEmbeddedParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)
+	private final ZonedDateTime myPeriodEnd;
 
 	@OperationEmbeddedParam(name = "subject")
 	private final String mySubject;
@@ -75,8 +96,8 @@ public class CareGapsParams {
 	private final BooleanType myNonDocument;
 
 	public CareGapsParams(
-			String thePeriodStart,
-			String thePeriodEnd,
+			ZonedDateTime thePeriodStart,
+			ZonedDateTime thePeriodEnd,
 			String theSubject,
 			List<String> theStatus,
 			List<String> theMeasureId,
@@ -94,21 +115,21 @@ public class CareGapsParams {
 	}
 
 	private CareGapsParams(Builder builder) {
-		this.myPeriodStart = builder.myPeriodStart;
-		this.myPeriodEnd = builder.myPeriodEnd;
-		this.mySubject = builder.mySubject;
-		this.myStatus = builder.myStatus;
-		this.myMeasureId = builder.myMeasureId;
-		this.myMeasureIdentifier = builder.myMeasureIdentifier;
-		this.myMeasureUrl = builder.myMeasureUrl;
-		this.myNonDocument = builder.myNonDocument;
+		myPeriodStart = builder.myPeriodStart;
+		myPeriodEnd = builder.myPeriodEnd;
+		mySubject = builder.mySubject;
+		myStatus = builder.myStatus;
+		myMeasureId = builder.myMeasureId;
+		myMeasureIdentifier = builder.myMeasureIdentifier;
+		myMeasureUrl = builder.myMeasureUrl;
+		myNonDocument = builder.myNonDocument;
 	}
 
-	public String getPeriodStart() {
+	public ZonedDateTime getPeriodStart() {
 		return myPeriodStart;
 	}
 
-	public String getPeriodEnd() {
+	public ZonedDateTime getPeriodEnd() {
 		return myPeriodEnd;
 	}
 
@@ -182,8 +203,8 @@ public class CareGapsParams {
 	}
 
 	public static class Builder {
-		private String myPeriodStart;
-		private String myPeriodEnd;
+		private ZonedDateTime myPeriodStart;
+		private ZonedDateTime myPeriodEnd;
 		private String mySubject;
 		private List<String> myStatus;
 		private List<String> myMeasureId;
@@ -191,43 +212,43 @@ public class CareGapsParams {
 		private List<CanonicalType> myMeasureUrl;
 		private BooleanType myNonDocument;
 
-		public Builder setPeriodStart(String myPeriodStart) {
-			this.myPeriodStart = myPeriodStart;
+		public Builder setPeriodStart(ZonedDateTime thePeriodStart) {
+			myPeriodStart = thePeriodStart;
 			return this;
 		}
 
-		public Builder setPeriodEnd(String myPeriodEnd) {
-			this.myPeriodEnd = myPeriodEnd;
+		public Builder setPeriodEnd(ZonedDateTime thePeriodEnd) {
+			myPeriodEnd = thePeriodEnd;
 			return this;
 		}
 
-		public Builder setSubject(String mySubject) {
-			this.mySubject = mySubject;
+		public Builder setSubject(String theSubject) {
+			mySubject = theSubject;
 			return this;
 		}
 
-		public Builder setStatus(List<String> myStatus) {
-			this.myStatus = myStatus;
+		public Builder setStatus(List<String> theStatus) {
+			myStatus = theStatus;
 			return this;
 		}
 
-		public Builder setMeasureId(List<String> myMeasureId) {
-			this.myMeasureId = myMeasureId;
+		public Builder setMeasureId(List<String> theMeasureId) {
+			myMeasureId = theMeasureId;
 			return this;
 		}
 
-		public Builder setMeasureIdentifier(List<String> myMeasureIdentifier) {
-			this.myMeasureIdentifier = myMeasureIdentifier;
+		public Builder setMeasureIdentifier(List<String> theMeasureIdentifier) {
+			myMeasureIdentifier = theMeasureIdentifier;
 			return this;
 		}
 
-		public Builder setMeasureUrl(List<CanonicalType> myMeasureUrl) {
-			this.myMeasureUrl = myMeasureUrl;
+		public Builder setMeasureUrl(List<CanonicalType> theMeasureUrl) {
+			myMeasureUrl = theMeasureUrl;
 			return this;
 		}
 
-		public Builder setNonDocument(BooleanType myNonDocument) {
-			this.myNonDocument = myNonDocument;
+		public Builder setNonDocument(BooleanType theNonDocument) {
+			myNonDocument = theNonDocument;
 			return this;
 		}
 

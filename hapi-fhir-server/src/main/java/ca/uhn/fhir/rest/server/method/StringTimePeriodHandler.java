@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Clinical Reasoning
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%

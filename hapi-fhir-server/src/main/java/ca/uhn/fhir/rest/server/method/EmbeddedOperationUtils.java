@@ -1,8 +1,28 @@
+/*-
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
+import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -12,14 +32,23 @@ import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 
-// LUKETODO:  javadoc
-// LUKETODO:  merge with ReflectionUtil or ParameterUtil?
-// LUKETODO:  think about Exceptions
+/**
+ * Common operations for any functionality that work with {@link OperationEmbeddedParam}
+ */
 public class EmbeddedOperationUtils {
 
 	private EmbeddedOperationUtils() {}
 
-	// LUKETODO:  javadoc
+	/**
+	 * Validate that a constructor for a class with fields that are {@link OperationEmbeddedParam} declares its
+	 * parameters in the same order as the fields are declared in the class.  It also validates that the fields are
+	 * final.  It also takes into account Collections and generic types, as well as whether there is a source to
+	 * target type conversion, such as String to ZonedDateTime.
+	 *
+	 * @param theParameterTypeWithOperationEmbeddedParam the class that has fields that are
+		 * annotated with {@link OperationEmbeddedParam}
+	 * @return the constructor for the class
+	 */
 	static Constructor<?> validateAndGetConstructor(Class<?> theParameterTypeWithOperationEmbeddedParam) {
 		final Constructor<?>[] constructors = theParameterTypeWithOperationEmbeddedParam.getConstructors();
 
@@ -43,8 +72,15 @@ public class EmbeddedOperationUtils {
 		return soleConstructor;
 	}
 
-	// LUKETODO:  javadoc
-	// We currently only support converting from a String to a ZonedDateTime
+	/**
+	 * Indicate whether or not this is currently a supported type conversion
+	 * We currently only support converting from a String to a ZonedDateTime
+	 *
+	 * @param theSourceType The source type for the class, which can be different from the declared type
+	 * @param theTargetType The target type for the class, which can be different from the source type
+	 * @param theEmbeddedParameterRangeType Whether the embedded parameter is a range and if so, start or end
+	 * @return true if the type conversion is supported
+	 */
 	static boolean isValidSourceTypeConversion(
 			Class<?> theSourceType, Class<?> theTargetType, EmbeddedParameterRangeType theEmbeddedParameterRangeType) {
 		return String.class == theSourceType

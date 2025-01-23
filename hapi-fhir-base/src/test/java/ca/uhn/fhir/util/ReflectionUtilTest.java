@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +18,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ReflectionUtilTest {
-
-	// LUKETODO:  add tests for new methods
 
 	@Test
 	public void testNewInstance() {
@@ -67,4 +67,39 @@ public class ReflectionUtilTest {
 		assertEquals("startsWith returns(boolean) params(java.lang.String, int)", description);
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TestAnnotation {}
+
+	static class TestClass1 {
+		@TestAnnotation
+		private String field1;
+	}
+
+	static class TestClass2 {
+		private String field2;
+	}
+
+	static class TestClass3 {
+		@TestAnnotation
+		private String field3;
+	}
+
+	static class TestClass4 {
+		private TestClass1 param1;
+		private TestClass2 param2;
+		private TestClass3 param3;
+
+		void setParams(TestClass1 param1, TestClass2 param2, TestClass3 param3) {
+		}
+	}
+
+	@Test
+	public void testGetMethodParamsWithClassesWithFieldsWithAnnotation() throws NoSuchMethodException {
+		Method method = TestClass4.class.getDeclaredMethod("setParams", TestClass1.class, TestClass2.class, TestClass3.class);
+		List<Class<?>> result = ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(method, TestAnnotation.class);
+
+		assertEquals(2, result.size());
+		assertTrue(result.contains(TestClass1.class));
+		assertTrue(result.contains(TestClass3.class));
+	}
 }

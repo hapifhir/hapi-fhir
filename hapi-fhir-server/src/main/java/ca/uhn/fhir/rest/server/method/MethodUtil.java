@@ -74,6 +74,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -140,13 +141,13 @@ public class MethodUtil {
 					declaredParameterType = parameterType;
 				}
 
-				if (Collection.class.isAssignableFrom(parameterType)) {
+				if (parameterType != null && Collection.class.isAssignableFrom(parameterType)) {
 					outerCollectionType = innerCollectionType;
 					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(methodToUse, paramIndex);
 					declaredParameterType = parameterType;
 				}
-				if (Collection.class.isAssignableFrom(parameterType)) {
+				if (parameterType == null || Collection.class.isAssignableFrom(parameterType)) {
 					throw new ConfigurationException(
 							Msg.code(401) + "Argument #" + paramIndex + " of Method '" + methodToUse.getName()
 									+ "' in type '"
@@ -167,10 +168,14 @@ public class MethodUtil {
 							ReflectionUtil.getGenericCollectionTypeOfMethodParameter(methodToUse, paramIndex);
 					if (Date.class.equals(genericType)) {
 						BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("dateTime");
-						parameterType = dateTimeDef.getImplementingClass();
+						parameterType = Optional.ofNullable(dateTimeDef)
+							.map(BaseRuntimeElementDefinition::getImplementingClass)
+							.orElse(null);
 					} else if (String.class.equals(genericType) || genericType == null) {
 						BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("string");
-						parameterType = dateTimeDef.getImplementingClass();
+						parameterType = Optional.ofNullable(dateTimeDef)
+							.map(BaseRuntimeElementDefinition::getImplementingClass)
+							.orElse(null);
 					}
 				}
 			}
@@ -456,9 +461,7 @@ public class MethodUtil {
 				}
 			}
 
-			if (paramContexts.isEmpty()
-					|| !(param
-							instanceof OperationEmbeddedParameter)) { // LUKETODO:  another nasty hack:  we need to add
+			if (paramContexts.isEmpty() || !(param instanceof OperationEmbeddedParameter)) {
 				// RequestDetails if it's last
 				paramContexts.add(
 						new ParamInitializationContext(param, parameterType, outerCollectionType, innerCollectionType));
