@@ -35,10 +35,12 @@ public class DeleteConflictFinderService {
 	protected EntityManager myEntityManager;
 
 	List<ResourceLink> findConflicts(ResourceTable theEntity, int maxResults) {
-		TypedQuery<ResourceLink> query = myEntityManager.createQuery(
-				"SELECT l FROM ResourceLink l WHERE l.myTargetResource.myPid = :target_pid", ResourceLink.class);
+		String queryStr = "SELECT l FROM ResourceLink l WHERE l.myTargetResource.myPid = :target_pid AND (l.myTargetResourceVersion IS NULL)";
+		TypedQuery<ResourceLink> query = myEntityManager.createQuery(queryStr, ResourceLink.class);
 		query.setParameter("target_pid", theEntity.getId());
 		query.setMaxResults(maxResults);
-		return query.getResultList();
+		List<ResourceLink> resourceLinks = query.getResultList();
+
+		return resourceLinks;
 	}
 }
