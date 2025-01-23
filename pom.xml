@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.7.17-SNAPSHOT</version>
+	<version>7.7.18-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -49,7 +49,7 @@
 
 	<repositories>
 		<repository>
-			<id>oss-snapshot</id>
+			<id>oss-snapshots</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 			<snapshots>
 				<enabled>true</enabled>
@@ -998,7 +998,7 @@
 		<apache_karaf_version>4.2.5</apache_karaf_version>
 		<aries_spifly_version>1.2</aries_spifly_version>
 		<caffeine_version>3.1.8</caffeine_version>
-		<checkstyle_version>10.17.0</checkstyle_version>
+		<checkstyle_version>10.21.1</checkstyle_version>
 		<maven_changes_version>2.12.1</maven_changes_version>
 		<commons_codec_version>1.15</commons_codec_version>
 		<commons_compress_version>1.26.0</commons_compress_version>
@@ -1087,12 +1087,7 @@
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- Clinical Reasoning & CQL Support -->
-		<clinical-reasoning.version>3.15.0</clinical-reasoning.version>
-		<!-- TODO: LD: this a TEMPORARY HACK to get around the fact that CR 3.15.0 is missing a pom file -->
-		<!-- This needs to be removed next time we do a CR bump -->
-		<!-- See: https://github.com/hapifhir/hapi-fhir/issues/6567 -->
-		<!-- Direct CQL dependencies -->
-		<cql.version>3.19.1</cql.version>
+		<clinical-reasoning.version>3.17.0</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1113,7 +1108,7 @@
 		<maven-assembly-plugin-version>3.7.1</maven-assembly-plugin-version>
 		<maven-license-plugin-version>2.5.0</maven-license-plugin-version>
 		<maven-enforcer-plugin-version>3.5.0</maven-enforcer-plugin-version>
-		<maven-checkstyle-version>3.4.0</maven-checkstyle-version>
+		<maven-checkstyle-version>3.6.0</maven-checkstyle-version>
 
 	</properties>
 
@@ -2397,21 +2392,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
-			<!-- TODO: LD: this a TEMPORARY HACK to get around the fact that CR 3.15.0 is missing a pom file -->
-			<!-- This needs to be removed next time we do a CR bump -->
-			<!-- See: https://github.com/hapifhir/hapi-fhir/issues/6567 -->
-			<!-- Direct CQL dependencies -->
-			<dependency>
-				<groupId>info.cqframework</groupId>
-				<artifactId>cql-to-elm</artifactId>
-				<version>${cql.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>info.cqframework</groupId>
-				<artifactId>cqf-fhir</artifactId>
-				<version>${cql.version}</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -2527,6 +2507,11 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>3.8.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>3.1.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.sonatype.plugins</groupId>
@@ -3010,60 +2995,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-changes-plugin</artifactId>
-				<version>${maven_changes_version}</version>
-				<inherited>false</inherited>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>changes-report</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-				<configuration>
-					<feedType>atom_1.0</feedType>
-					<issueLinkTemplatePerSystem>
-						<default>https://github.com/hapifhir/hapi-fhir/issues/%ISSUE%</default>
-					</issueLinkTemplatePerSystem>
-					<escapeHTML>false</escapeHTML>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>${surefire_version}</version>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>failsafe-report-only</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-				<configuration>
-					<reportsDirectories>
-						<reportDirectory>${project.basedir}/hapi-fhir-base/target/surefire-reports/</reportDirectory>
-						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu/target/surefire-reports/
-						</reportDirectory>
-						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu2/target/surefire-reports/
-						</reportDirectory>
-						<reportDirectory>${project.basedir}/hapi-fhir-jpaserver-base/target/surefire-reports/
-						</reportDirectory>
-					</reportsDirectories>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.0.0</version>
-				<inherited>false</inherited>
-			</plugin>
-		</plugins>
-	</reporting>
 
 	<profiles>
 		<profile>

@@ -826,10 +826,7 @@ public class SearchQueryBuilder {
 			DateParam lb = theDateRange.getLowerBound();
 			DateParam ub = theDateRange.getUpperBound();
 
-			return lb != null
-					&& ub != null
-					&& lb.getPrefix().equals(NOT_EQUAL)
-					&& ub.getPrefix().equals(NOT_EQUAL);
+			return lb != null && ub != null && NOT_EQUAL.equals(lb.getPrefix()) && NOT_EQUAL.equals(ub.getPrefix());
 		}
 		return false;
 	}
