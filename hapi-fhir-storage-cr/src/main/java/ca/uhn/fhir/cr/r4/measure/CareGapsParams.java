@@ -71,7 +71,10 @@ import java.util.StringJoiner;
  *                  If 'true', this will return summarized subject bundle with only detectedIssue resource.
  */
 public class CareGapsParams {
-	@OperationEmbeddedParam(name = "periodStart", sourceType = String.class, rangeType = EmbeddedParameterRangeType.START)
+	@OperationEmbeddedParam(
+			name = "periodStart",
+			sourceType = String.class,
+			rangeType = EmbeddedParameterRangeType.START)
 	private final ZonedDateTime myPeriodStart;
 
 	@OperationEmbeddedParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)

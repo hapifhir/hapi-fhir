@@ -169,13 +169,13 @@ public class MethodUtil {
 					if (Date.class.equals(genericType)) {
 						BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("dateTime");
 						parameterType = Optional.ofNullable(dateTimeDef)
-							.map(BaseRuntimeElementDefinition::getImplementingClass)
-							.orElse(null);
+								.map(BaseRuntimeElementDefinition::getImplementingClass)
+								.orElse(null);
 					} else if (String.class.equals(genericType) || genericType == null) {
 						BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("string");
 						parameterType = Optional.ofNullable(dateTimeDef)
-							.map(BaseRuntimeElementDefinition::getImplementingClass)
-							.orElse(null);
+								.map(BaseRuntimeElementDefinition::getImplementingClass)
+								.orElse(null);
 					}
 				}
 			}
