@@ -296,11 +296,18 @@ public class ReflectionUtil {
 	public static List<Class<?>> getMethodParamsWithClassesWithFieldsWithAnnotation(
 			Method theMethod, Class<? extends Annotation> theAnnotationClass) {
 		return Arrays.stream(theMethod.getParameterTypes())
-				.filter(paramType -> hasFieldsWithAnnotation(paramType, theAnnotationClass))
+				.filter(paramType -> hasAnyFieldsWithAnnotation(paramType, theAnnotationClass))
 				.collect(Collectors.toList());
 	}
 
-	private static boolean hasFieldsWithAnnotation(Class<?> paramType, Class<? extends Annotation> theAnnotationClass) {
+	public static boolean hasAnyMethodParamsWithClassesWithFieldsWithAnnotation(
+			Method theMethod, Class<? extends Annotation> theAnnotationClass) {
+		return Arrays.stream(theMethod.getParameterTypes())
+				.anyMatch(paramType -> hasAnyFieldsWithAnnotation(paramType, theAnnotationClass));
+	}
+
+	private static boolean hasAnyFieldsWithAnnotation(
+			Class<?> paramType, Class<? extends Annotation> theAnnotationClass) {
 		return Arrays.stream(paramType.getDeclaredFields())
 				.anyMatch(field -> field.isAnnotationPresent(theAnnotationClass));
 	}

@@ -22,9 +22,9 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import jakarta.annotation.Nonnull;
@@ -40,8 +40,8 @@ import java.util.stream.Collectors;
 import static org.slf4j.LoggerFactory.*;
 
 /**
- * Leveraged by {@link MethodUtil} exclusively to convert {@link OperationEmbeddedParam} parameters for a method to
- * either a {@link NullParameter} or an {@link OperationEmbeddedParam}.
+ * Leveraged by {@link MethodUtil} exclusively to convert {@link EmbeddedOperationParam} parameters for a method to
+ * either a {@link NullParameter} or an {@link EmbeddedOperationParam}.
  */
 public class EmbeddedParameterConverter {
 	private static final org.slf4j.Logger ourLog = getLogger(EmbeddedParameterConverter.class);
@@ -91,9 +91,9 @@ public class EmbeddedParameterConverter {
 
 		if (fieldAnnotation instanceof IdParam) {
 			return EmbeddedParameterConverterContext.forParameter(new NullParameter());
-		} else if (fieldAnnotation instanceof OperationEmbeddedParam) {
+		} else if (fieldAnnotation instanceof EmbeddedOperationParam) {
 			final ParamInitializationContext paramContext =
-					buildParamContext(fieldType, theField, (OperationEmbeddedParam) fieldAnnotation);
+					buildParamContext(fieldType, theField, (EmbeddedOperationParam) fieldAnnotation);
 
 			return EmbeddedParameterConverterContext.forEmbeddedContext(paramContext);
 		} else {
@@ -106,10 +106,10 @@ public class EmbeddedParameterConverter {
 	}
 
 	private ParamInitializationContext buildParamContext(
-			Class<?> theFieldType, Field theField, OperationEmbeddedParam theOperationEmbeddedParam) {
+			Class<?> theFieldType, Field theField, EmbeddedOperationParam theEmbeddedOperationParam) {
 
-		final OperationEmbeddedParameter operationEmbeddedParameter =
-				getOperationEmbeddedParameter(theOperationEmbeddedParam);
+		final EmbeddedOperationParameter embeddedOperationParameter =
+				getOperationEmbeddedParameter(theEmbeddedOperationParam);
 
 		Class<?> parameterType = theFieldType;
 		Class<? extends java.util.Collection<?>> outerCollectionType = null;
@@ -151,14 +151,14 @@ public class EmbeddedParameterConverter {
 		// TODO: LD:  Don't worry about the OperationEmbeddedParam.type() for now until we chose to implement it later
 
 		return new ParamInitializationContext(
-				operationEmbeddedParameter, parameterType, outerCollectionType, innerCollectionType);
+				embeddedOperationParameter, parameterType, outerCollectionType, innerCollectionType);
 	}
 
 	@Nonnull
-	private OperationEmbeddedParameter getOperationEmbeddedParameter(OperationEmbeddedParam operationParam) {
+	private EmbeddedOperationParameter getOperationEmbeddedParameter(EmbeddedOperationParam operationParam) {
 		final Annotation[] fieldAnnotationArray = new Annotation[] {operationParam};
 
-		return new OperationEmbeddedParameter(
+		return new EmbeddedOperationParameter(
 				myContext,
 				myOperation.name(),
 				operationParam.name(),

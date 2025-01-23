@@ -21,8 +21,8 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -39,7 +39,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -49,10 +48,9 @@ import java.util.stream.IntStream;
 
 import static java.util.function.Predicate.not;
 
-// LUKETODO:  should this be responsible for invoking the method as well?
 /**
  * Responsible for either passing to objects params straight through to the method call or converting them to
- * fit within a class that has fields annotated with {@link OperationEmbeddedParam} and to also handle placement
+ * fit within a class that has fields annotated with {@link EmbeddedOperationParam} and to also handle placement
  * of {@link RequestDetails} in those params
  */
 class BaseMethodBindingMethodParameterBuilder {
@@ -103,7 +101,7 @@ class BaseMethodBindingMethodParameterBuilder {
 
 		final List<Class<?>> parameterTypesWithOperationEmbeddedParam =
 				ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
-						myMethod, OperationEmbeddedParam.class);
+						myMethod, EmbeddedOperationParam.class);
 
 		if (parameterTypesWithOperationEmbeddedParam.size() > 1) {
 			throw new InternalErrorException(String.format(
@@ -216,16 +214,9 @@ class BaseMethodBindingMethodParameterBuilder {
 			Object[] theMethodParamsWithoutRequestDetails,
 			Parameter[] theConstructorParameters,
 			Annotation[] theAnnotations) {
-		// LUKETODO:  rangetype check?
-		// LUKETODO: warnings?
-		if (Arrays.stream(theMethodParamsWithoutRequestDetails).noneMatch(String.class::isInstance)
-				&& Arrays.stream(theAnnotations)
-						.filter(OperationEmbeddedParam.class::isInstance)
-						.map(OperationEmbeddedParam.class::cast)
-						.map(OperationEmbeddedParam::sourceType)
-						.noneMatch(ZonedDateTime.class::isInstance)) {
 
-			// Nothing to do:
+		if (!EmbeddedOperationUtils.hasAnyValidSourceTypeConversions(
+				theMethodParamsWithoutRequestDetails, theConstructorParameters, theAnnotations)) {
 			return theMethodParamsWithoutRequestDetails;
 		}
 
@@ -249,11 +240,11 @@ class BaseMethodBindingMethodParameterBuilder {
 			return paramAtIndex;
 		}
 
-		if (!(annotation instanceof OperationEmbeddedParam)) {
+		if (!(annotation instanceof EmbeddedOperationParam)) {
 			return paramAtIndex;
 		}
 
-		final OperationEmbeddedParam embeddedParamAtIndex = (OperationEmbeddedParam) annotation;
+		final EmbeddedOperationParam embeddedParamAtIndex = (EmbeddedOperationParam) annotation;
 		final Class<?> paramClassAtIndex = paramAtIndex.getClass();
 		final EmbeddedParameterRangeType rangeType = embeddedParamAtIndex.rangeType();
 		final Parameter constructorParameter = theConstructorParameters[theIndex];
@@ -355,12 +346,9 @@ class BaseMethodBindingMethodParameterBuilder {
 
 		final Class<?> methodParamClass = theMethodParam.getClass();
 
-		//		LUKETODO:  HAPI-4313421: Mismatch between methodParamClass: class org.hl7.fhir.r4.model.IdType and
-		// OperationEmbeddedParam source type: class java.lang.String for method: evaluateMeasure
-
-		final Optional<OperationEmbeddedParam> optOperationEmbeddedParam =
-				theAnnotation instanceof OperationEmbeddedParam
-						? Optional.of((OperationEmbeddedParam) theAnnotation)
+		final Optional<EmbeddedOperationParam> optOperationEmbeddedParam =
+				theAnnotation instanceof EmbeddedOperationParam
+						? Optional.of((EmbeddedOperationParam) theAnnotation)
 						: Optional.empty();
 
 		optOperationEmbeddedParam.ifPresent(embeddedParam -> {

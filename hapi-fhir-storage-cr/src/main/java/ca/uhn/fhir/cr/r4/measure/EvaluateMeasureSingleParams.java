@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
@@ -51,41 +51,42 @@ import java.util.StringJoiner;
  *                         for the evaluation. This is a non-standard parameter.
  * myAdditionalData  the data bundle containing additional data
  */
+// LUKETODO:  start to integrate this with a clinical reasoning branch
 public class EvaluateMeasureSingleParams {
 	@IdParam
 	private final IdType myId;
 
-	@OperationEmbeddedParam(
+	@EmbeddedOperationParam(
 			name = "periodStart",
 			sourceType = String.class,
 			rangeType = EmbeddedParameterRangeType.START)
 	private final ZonedDateTime myPeriodStart;
 
-	@OperationEmbeddedParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)
+	@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)
 	private final ZonedDateTime myPeriodEnd;
 
-	@OperationEmbeddedParam(name = "reportType")
+	@EmbeddedOperationParam(name = "reportType")
 	private final String myReportType;
 
-	@OperationEmbeddedParam(name = "subject")
+	@EmbeddedOperationParam(name = "subject")
 	private final String mySubject;
 
-	@OperationEmbeddedParam(name = "practitioner")
+	@EmbeddedOperationParam(name = "practitioner")
 	private final String myPractitioner;
 
-	@OperationEmbeddedParam(name = "lastReceivedOn")
+	@EmbeddedOperationParam(name = "lastReceivedOn")
 	private final String myLastReceivedOn;
 
-	@OperationEmbeddedParam(name = "productLine")
+	@EmbeddedOperationParam(name = "productLine")
 	private final String myProductLine;
 
-	@OperationEmbeddedParam(name = "additionalData")
+	@EmbeddedOperationParam(name = "additionalData")
 	private final Bundle myAdditionalData;
 
-	@OperationEmbeddedParam(name = "terminologyEndpoint")
+	@EmbeddedOperationParam(name = "terminologyEndpoint")
 	private final Endpoint myTerminologyEndpoint;
 
-	@OperationEmbeddedParam(name = "parameters")
+	@EmbeddedOperationParam(name = "parameters")
 	private final Parameters myParameters;
 
 	public EvaluateMeasureSingleParams(

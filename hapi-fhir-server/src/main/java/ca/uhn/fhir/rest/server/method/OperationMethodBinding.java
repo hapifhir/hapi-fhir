@@ -24,9 +24,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -362,7 +363,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			throws BaseServerResponseException, IOException {
 		if (theRequest.getRequestType() == RequestTypeEnum.POST && !myManualRequestMode) {
 			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, this, null);
-			theRequest.getUserData().put(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY, requestContents);
+			theRequest.getUserData().put(determineUserDataKey(getMethod()), requestContents);
 		}
 		return super.invokeServer(theServer, theRequest);
 	}
@@ -438,8 +439,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	protected void populateRequestDetailsForInterceptor(RequestDetails theRequestDetails, Object[] theMethodParams) {
 		super.populateRequestDetailsForInterceptor(theRequestDetails, theMethodParams);
-		IBaseResource resource =
-				(IBaseResource) theRequestDetails.getUserData().get(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY);
+		IBaseResource resource = getBaseResource(theRequestDetails);
 		theRequestDetails.setResource(resource);
 	}
 
@@ -453,7 +453,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private OperationIdParamDetails findIdParameterDetails(Method theMethod, FhirContext theContext) {
 		final List<Class<?>> operationEmbeddedTypes = ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
-				theMethod, OperationEmbeddedParam.class);
+				theMethod, EmbeddedOperationParam.class);
 
 		if (!operationEmbeddedTypes.isEmpty()) {
 			return findIdParamIndexForTypeWithEmbeddedParams(theMethod, operationEmbeddedTypes, theContext);
@@ -530,6 +530,26 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		return OperationIdParamDetails.EMPTY;
+	}
+
+	private IBaseResource getBaseResource(RequestDetails theRequestDetails) {
+		final Map<Object, Object> userData = theRequestDetails.getUserData();
+
+		if (userData.containsKey(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY)) {
+			return (IBaseResource) userData.get(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY);
+		}
+
+		if (userData.containsKey(EmbeddedOperationParameter.REQUEST_CONTENTS_USERDATA_KEY)) {
+			return (IBaseResource) userData.get(EmbeddedOperationParameter.REQUEST_CONTENTS_USERDATA_KEY);
+		}
+
+		return null;
+	}
+
+	private static String determineUserDataKey(Method theMethod) {
+		return EmbeddedOperationUtils.hasAnyMethodParamsWithClassesWithFieldsWithEmbeddedOperationParams(theMethod)
+				? EmbeddedOperationParameter.REQUEST_CONTENTS_USERDATA_KEY
+				: OperationParameter.REQUEST_CONTENTS_USERDATA_KEY;
 	}
 
 	public static class ReturnType {

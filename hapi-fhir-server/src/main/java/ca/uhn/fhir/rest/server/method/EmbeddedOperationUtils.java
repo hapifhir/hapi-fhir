@@ -21,32 +21,38 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
+import ca.uhn.fhir.util.ReflectionUtil;
+import jakarta.annotation.Nonnull;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.stream.IntStream;
 
 /**
- * Common operations for any functionality that work with {@link OperationEmbeddedParam}
+ * Common operations for any functionality that work with {@link EmbeddedOperationParam}
  */
 public class EmbeddedOperationUtils {
 
 	private EmbeddedOperationUtils() {}
 
 	/**
-	 * Validate that a constructor for a class with fields that are {@link OperationEmbeddedParam} declares its
+	 * Validate that a constructor for a class with fields that are {@link EmbeddedOperationParam} declares its
 	 * parameters in the same order as the fields are declared in the class.  It also validates that the fields are
 	 * final.  It also takes into account Collections and generic types, as well as whether there is a source to
 	 * target type conversion, such as String to ZonedDateTime.
 	 *
 	 * @param theParameterTypeWithOperationEmbeddedParam the class that has fields that are
-	 * annotated with {@link OperationEmbeddedParam}
+	 * annotated with {@link EmbeddedOperationParam}
 	 * @return the constructor for the class
 	 */
 	static Constructor<?> validateAndGetConstructor(Class<?> theParameterTypeWithOperationEmbeddedParam) {
@@ -70,6 +76,56 @@ public class EmbeddedOperationUtils {
 		validateConstructorArgs(soleConstructor, theParameterTypeWithOperationEmbeddedParam.getDeclaredFields());
 
 		return soleConstructor;
+	}
+
+	static boolean hasAnyMethodParamsWithClassesWithFieldsWithEmbeddedOperationParams(Method theMethod) {
+		return ReflectionUtil.hasAnyMethodParamsWithClassesWithFieldsWithAnnotation(
+				theMethod, EmbeddedOperationParam.class);
+	}
+
+	// LUKETODO:  javadoc
+	static boolean hasAnyValidSourceTypeConversions(
+			Object[] theMethodParamsWithoutRequestDetails,
+			Parameter[] theConstructorParameters,
+			Annotation[] theAnnotations) {
+		if (theMethodParamsWithoutRequestDetails.length != theAnnotations.length
+				|| theMethodParamsWithoutRequestDetails.length != theConstructorParameters.length) {
+			// This is probably an error but not this method's responsibility to check
+			return false;
+		}
+
+		return IntStream.range(0, theMethodParamsWithoutRequestDetails.length)
+				.mapToObj(index -> isValidSourceTypeConversion(
+						theMethodParamsWithoutRequestDetails, theConstructorParameters, theAnnotations, index))
+				.anyMatch(Boolean::booleanValue);
+	}
+
+	@Nonnull
+	private static Boolean isValidSourceTypeConversion(
+			Object[] theMethodParamsWithoutRequestDetails,
+			Parameter[] theConstructorParameters,
+			Annotation[] theAnnotations,
+			int theIndex) {
+		final Object methodParam = theMethodParamsWithoutRequestDetails[theIndex];
+
+		if (methodParam == null) {
+			return false;
+		}
+
+		final Class<?> methodParamClass = methodParam.getClass();
+		final Class<?> constructorParamType = theConstructorParameters[theIndex].getType();
+		final Annotation annotation = theAnnotations[theIndex];
+
+		if (annotation instanceof EmbeddedOperationParam) {
+			final EmbeddedOperationParam embeddedOperationParam = (EmbeddedOperationParam) annotation;
+			final EmbeddedParameterRangeType embeddedParameterRangeType = embeddedOperationParam.rangeType();
+
+			if (isValidSourceTypeConversion(methodParamClass, constructorParamType, embeddedParameterRangeType)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

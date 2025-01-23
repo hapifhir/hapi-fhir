@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 
@@ -71,31 +71,31 @@ import java.util.StringJoiner;
  *                  If 'true', this will return summarized subject bundle with only detectedIssue resource.
  */
 public class CareGapsParams {
-	@OperationEmbeddedParam(
+	@EmbeddedOperationParam(
 			name = "periodStart",
 			sourceType = String.class,
 			rangeType = EmbeddedParameterRangeType.START)
 	private final ZonedDateTime myPeriodStart;
 
-	@OperationEmbeddedParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)
+	@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)
 	private final ZonedDateTime myPeriodEnd;
 
-	@OperationEmbeddedParam(name = "subject")
+	@EmbeddedOperationParam(name = "subject")
 	private final String mySubject;
 
-	@OperationEmbeddedParam(name = "status")
+	@EmbeddedOperationParam(name = "status")
 	private final List<String> myStatus;
 
-	@OperationEmbeddedParam(name = "measureId")
+	@EmbeddedOperationParam(name = "measureId")
 	private final List<String> myMeasureId;
 
-	@OperationEmbeddedParam(name = "measureIdentifier")
+	@EmbeddedOperationParam(name = "measureIdentifier")
 	private final List<String> myMeasureIdentifier;
 
-	@OperationEmbeddedParam(name = "measureUrl")
+	@EmbeddedOperationParam(name = "measureUrl")
 	private final List<CanonicalType> myMeasureUrl;
 
-	@OperationEmbeddedParam(name = "nonDocument")
+	@EmbeddedOperationParam(name = "nonDocument")
 	private final BooleanType myNonDocument;
 
 	public CareGapsParams(

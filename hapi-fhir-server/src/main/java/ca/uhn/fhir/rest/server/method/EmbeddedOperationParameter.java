@@ -26,9 +26,9 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -59,15 +59,15 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 // LUKETODO:   consider deleting whatever code may be unused
 /**
- * Associated with a field annotated with {@link OperationEmbeddedParam} within a class passed to a method annotated with
+ * Associated with a field annotated with {@link EmbeddedOperationParam} within a class passed to a method annotated with
  * {@link Operation}.
  */
-public class OperationEmbeddedParameter implements IParameter {
-	private static final Logger ourLog = LoggerFactory.getLogger(OperationEmbeddedParameter.class);
+public class EmbeddedOperationParameter implements IParameter {
+	private static final Logger ourLog = LoggerFactory.getLogger(EmbeddedOperationParameter.class);
 
 	// LUKETODO: do we need this to be separate or just reuse the one from OperationParameter?
 	// LUKETODO:  if so, add conditional logic everywhere to use it
-	//	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationEmbeddedParam.class.getName() + "_PARSED_RESOURCE";
+	static final String REQUEST_CONTENTS_USERDATA_KEY = EmbeddedOperationParameter.class.getName() + "_PARSED_RESOURCE";
 
 	@SuppressWarnings("unchecked")
 	private static final Class<? extends IQueryParameterType>[] COMPOSITE_TYPES = new Class[0];
@@ -92,7 +92,7 @@ public class OperationEmbeddedParameter implements IParameter {
 	// LUKETODO:  just pass the whole thing?
 	private final EmbeddedParameterRangeType myRengeType;
 
-	OperationEmbeddedParameter(
+	EmbeddedOperationParameter(
 			FhirContext theCtx,
 			String theOperationName,
 			String theParameterName,
@@ -290,7 +290,7 @@ public class OperationEmbeddedParameter implements IParameter {
 		}
 	}
 
-	OperationEmbeddedParameter setConverter(IOperationParamConverter theConverter) {
+	EmbeddedOperationParameter setConverter(IOperationParamConverter theConverter) {
 		myConverter = theConverter;
 		return this;
 	}
@@ -435,7 +435,7 @@ public class OperationEmbeddedParameter implements IParameter {
 					HapiLocalizer localizer =
 							theRequest.getServer().getFhirContext().getLocalizer();
 					String msg = localizer.getMessage(
-							OperationEmbeddedParameter.class, "urlParamNotPrimitive", myOperationName, myName);
+							EmbeddedOperationParameter.class, "urlParamNotPrimitive", myOperationName, myName);
 					// LUKETODO:  claim new code
 					throw new MethodNotAllowedException(Msg.code(99999993) + msg, RequestTypeEnum.POST);
 				}

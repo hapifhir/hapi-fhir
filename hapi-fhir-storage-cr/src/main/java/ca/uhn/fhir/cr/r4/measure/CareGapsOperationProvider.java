@@ -23,7 +23,6 @@ import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.method.StringTimePeriodHandler;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
@@ -39,12 +38,9 @@ public class CareGapsOperationProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
 
 	private final ICareGapsServiceFactory myR4CareGapsProcessorFactory;
-	private final StringTimePeriodHandler myStringTimePeriodHandler;
 
-	public CareGapsOperationProvider(
-			ICareGapsServiceFactory theR4CareGapsProcessorFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+	public CareGapsOperationProvider(ICareGapsServiceFactory theR4CareGapsProcessorFactory) {
 		myR4CareGapsProcessorFactory = theR4CareGapsProcessorFactory;
-		myStringTimePeriodHandler = theStringTimePeriodHandler;
 	}
 
 	/**
@@ -91,6 +87,7 @@ public class CareGapsOperationProvider {
 						theParams.getPeriodEnd(),
 						theParams.getSubject(),
 						theParams.getStatus(),
+						// LUKETODO:  why can't we have a List<IdType> @OperationParam?
 						theParams.getMeasureId() == null
 								? null
 								: theParams.getMeasureId().stream()

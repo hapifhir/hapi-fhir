@@ -31,13 +31,13 @@ import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Elements;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Offset;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Patch;
@@ -204,7 +204,7 @@ public class MethodUtil {
 				if (nextParameterAnnotations.length == 0) {
 					final List<Class<?>> operationEmbeddedTypes =
 							ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
-									methodToUse, OperationEmbeddedParam.class);
+									methodToUse, EmbeddedOperationParam.class);
 
 					if (op == null) {
 						throw new ConfigurationException(Msg.code(846192641)
@@ -461,7 +461,7 @@ public class MethodUtil {
 				}
 			}
 
-			if (paramContexts.isEmpty() || !(param instanceof OperationEmbeddedParameter)) {
+			if (paramContexts.isEmpty() || !(param instanceof EmbeddedOperationParameter)) {
 				// RequestDetails if it's last
 				paramContexts.add(
 						new ParamInitializationContext(param, parameterType, outerCollectionType, innerCollectionType));

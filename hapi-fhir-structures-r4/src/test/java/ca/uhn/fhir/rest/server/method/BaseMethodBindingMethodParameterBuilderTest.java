@@ -80,6 +80,17 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	}
 
 	@Test
+	void happyPathOperationEmbeddedTypesNoRequestDetailsNullArguments() {
+		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
+		final Object[] inputParams = new Object[]{null, null};
+		final Object[] expectedOutputParams = new Object[]{new SampleParams(null, null)};
+
+		final Object[] actualOutputParams = buildMethodParams(sampleMethod, REQUEST_DETAILS, inputParams);
+
+		assertArrayEquals(expectedOutputParams, actualOutputParams);
+	}
+
+	@Test
 	void happyPathOperationEmbeddedTypesRequestDetailsFirst() {
 		final Method sampleMethod = myInnerClassesAndMethods.getDeclaredMethod(InnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST, RequestDetails.class, SampleParams.class);
 		final Object[] inputParams = new Object[]{REQUEST_DETAILS, "param1", List.of("param2")};

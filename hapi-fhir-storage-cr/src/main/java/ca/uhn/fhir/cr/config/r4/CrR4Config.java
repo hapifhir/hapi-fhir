@@ -144,9 +144,8 @@ public class CrR4Config {
 	}
 
 	@Bean
-	CareGapsOperationProvider r4CareGapsOperationProvider(
-			ICareGapsServiceFactory theR4CareGapsProcessorFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
-		return new CareGapsOperationProvider(theR4CareGapsProcessorFactory, theStringTimePeriodHandler);
+	CareGapsOperationProvider r4CareGapsOperationProvider(ICareGapsServiceFactory theR4CareGapsProcessorFactory) {
+		return new CareGapsOperationProvider(theR4CareGapsProcessorFactory);
 	}
 
 	@Bean
@@ -155,10 +154,8 @@ public class CrR4Config {
 	}
 
 	@Bean
-	MeasureOperationsProvider r4MeasureOperationsProvider(
-			R4MeasureEvaluatorSingleFactory theR4MeasureServiceFactory,
-			StringTimePeriodHandler theStringTimePeriodHandler) {
-		return new MeasureOperationsProvider(theR4MeasureServiceFactory, theStringTimePeriodHandler);
+	MeasureOperationsProvider r4MeasureOperationsProvider(R4MeasureEvaluatorSingleFactory theR4MeasureServiceFactory) {
+		return new MeasureOperationsProvider(theR4MeasureServiceFactory);
 	}
 
 	@Bean

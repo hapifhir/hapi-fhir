@@ -3,7 +3,7 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.rest.annotation.EmbeddedParameterRangeType;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationEmbeddedParam;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -153,10 +153,10 @@ class InnerClassesAndMethods {
 
 	// Ignore warnings that these classes can be records.  Converting them to records will make the tests fail
 	static class SampleParams {
-		@OperationEmbeddedParam(name = "param1")
+		@EmbeddedOperationParam(name = "param1")
 		private final String myParam1;
 
-		@OperationEmbeddedParam(name = "param2")
+		@EmbeddedOperationParam(name = "param2")
 		private final List<String> myParam2;
 
 		public SampleParams(String myParam1, List<String> myParam2) {
@@ -195,10 +195,10 @@ class InnerClassesAndMethods {
 	}
 
 	static class ParamsWithTypeConversion {
-		@OperationEmbeddedParam(name = "periodStart", sourceType = String.class, rangeType = EmbeddedParameterRangeType.START)
+		@EmbeddedOperationParam(name = "periodStart", sourceType = String.class, rangeType = EmbeddedParameterRangeType.START)
 		private final ZonedDateTime myPeriodStart;
 
-		@OperationEmbeddedParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)
+		@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = EmbeddedParameterRangeType.END)
 		private final ZonedDateTime myPeriodEnd;
 
 		public ParamsWithTypeConversion(ZonedDateTime myPeriodStart, ZonedDateTime myPeriodEnd) {
@@ -241,13 +241,13 @@ class InnerClassesAndMethods {
 		@IdParam
 		private final IdType myId;
 
-		@OperationEmbeddedParam(name = "param1")
+		@EmbeddedOperationParam(name = "param1")
 		private final String myParam1;
 
-		@OperationEmbeddedParam(name = "param2")
+		@EmbeddedOperationParam(name = "param2")
 		private final List<String> myParam2;
 
-		@OperationEmbeddedParam(name = "param3")
+		@EmbeddedOperationParam(name = "param3")
 		private final BooleanType myParam3;
 
 		public SampleParamsWithIdParam(IdType theId, String theParam1, List<String> theParam2, BooleanType theParam3) {

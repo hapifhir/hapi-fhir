@@ -38,16 +38,16 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.PARAMETER, ElementType.FIELD})
-public @interface OperationEmbeddedParam {
+public @interface EmbeddedOperationParam {
 	// LUKETODO:  after writing the conformance code get rid of a bunch of cruft like MAX_UNLIMITED
 
 	/**
-	 * Value for {@link OperationEmbeddedParam#max()} indicating no maximum
+	 * Value for {@link EmbeddedOperationParam#max()} indicating no maximum
 	 */
 	int MAX_UNLIMITED = -1;
 
 	/**
-	 * Value for {@link OperationEmbeddedParam#max()} indicating that the maximum will be inferred
+	 * Value for {@link EmbeddedOperationParam#max()} indicating that the maximum will be inferred
 	 * from the type. If the type is a single parameter type (e.g. <code>StringDt</code>,
 	 * <code>TokenParam</code>, <code>IBaseResource</code>) the maximum will be
 	 * <code>1</code>.

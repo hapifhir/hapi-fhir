@@ -23,7 +23,6 @@ import ca.uhn.fhir.cr.r4.R4MeasureEvaluatorSingleFactory;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.method.StringTimePeriodHandler;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Measure;
@@ -36,13 +35,9 @@ public class MeasureOperationsProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(MeasureOperationsProvider.class);
 
 	private final R4MeasureEvaluatorSingleFactory myR4MeasureServiceFactory;
-	private final StringTimePeriodHandler myStringTimePeriodHandler;
 
-	public MeasureOperationsProvider(
-			R4MeasureEvaluatorSingleFactory theR4MeasureServiceFactory,
-			StringTimePeriodHandler theStringTimePeriodHandler) {
+	public MeasureOperationsProvider(R4MeasureEvaluatorSingleFactory theR4MeasureServiceFactory) {
 		myR4MeasureServiceFactory = theR4MeasureServiceFactory;
-		myStringTimePeriodHandler = theStringTimePeriodHandler;
 	}
 
 	/**
