@@ -715,8 +715,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getCode().addCoding().setCode("obs2").setSystem("Some System").setDisplay("Body weight as measured by me");
 			obs.setStatus(Observation.ObservationStatus.FINAL);
 			obs.setValue(new Quantity(81));
-			obs.setSubject(new Reference(p.getId()));
-			obs.setEncounter(new Reference(encounter.getId()));
+			obs.setSubject(new Reference("#" +p.getId()));
+			obs.setEncounter(new Reference("#" + encounter.getId()));
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
