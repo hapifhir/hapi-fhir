@@ -131,7 +131,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init780() {
-		Builder version = forVersion(VersionEnum.V8_0_0);
+		Builder version = forVersion(VersionEnum.V7_8_0);
 
 		version.addTask(new VerifyDatabasePartitioningModeMigrationTask(
 				version.getRelease(), "20241008.1", getFlags().contains(FlagEnum.DB_PARTITION_MODE)));
