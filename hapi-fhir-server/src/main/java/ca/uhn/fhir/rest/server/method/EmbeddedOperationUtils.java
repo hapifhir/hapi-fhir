@@ -152,8 +152,8 @@ public class EmbeddedOperationUtils {
 
 	public static List<Class<?>> getMethodParamsAnnotatedWithEmbeddedOperationParams(Method theMethod) {
 		return Arrays.stream(theMethod.getParameterTypes())
-			.filter(EmbeddedOperationUtils::hasEmbeddedOperationParamsAnnotation)
-			.collect(Collectors.toUnmodifiableList());
+				.filter(EmbeddedOperationUtils::hasEmbeddedOperationParamsAnnotation)
+				.collect(Collectors.toUnmodifiableList());
 	}
 
 	private static boolean hasEmbeddedOperationParamsAnnotation(Class<?> theMethodParameterType) {

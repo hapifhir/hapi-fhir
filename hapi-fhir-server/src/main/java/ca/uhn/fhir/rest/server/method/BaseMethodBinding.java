@@ -254,7 +254,14 @@ public abstract class BaseMethodBinding {
 			final BaseMethodBindingMethodParameterBuilder baseMethodBindingMethodParameterBuilder =
 					new BaseMethodBindingMethodParameterBuilder(method, theRequest, theMethodParams);
 
-			return method.invoke(getProvider(), baseMethodBindingMethodParameterBuilder.build());
+			final Object[] outputParams = baseMethodBindingMethodParameterBuilder.build();
+
+			// LUKETODO:  cleanup later
+			ourLog.info(
+					"1234:  \nmethod: {}, \ninputParams: {}, \noutputParams: {}",
+					myMethod.getName(), theMethodParams, outputParams);
+
+			return method.invoke(getProvider(), outputParams);
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();

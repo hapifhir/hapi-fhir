@@ -104,24 +104,18 @@ public class CareGapsParams {
 
 	public CareGapsParams(
 			@OperationParam(
-				name = "periodStart",
-				sourceType = String.class,
-				rangeType = OperationParameterRangeType.START)
-			ZonedDateTime thePeriodStart,
+							name = "periodStart",
+							sourceType = String.class,
+							rangeType = OperationParameterRangeType.START)
+					ZonedDateTime thePeriodStart,
 			@OperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
-			ZonedDateTime thePeriodEnd,
-			@OperationParam(name = "subject")
-			String theSubject,
-			@OperationParam(name = "status")
-			List<String> theStatus,
-			@OperationParam(name = "measureId")
-			List<String> theMeasureId,
-			@OperationParam(name = "measureIdentifier")
-			List<String> theMeasureIdentifier,
-			@OperationParam(name = "measureUrl")
-			List<CanonicalType> theMeasureUrl,
-			@OperationParam(name = "nonDocument")
-			BooleanType theNonDocument) {
+					ZonedDateTime thePeriodEnd,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "status") List<String> theStatus,
+			@OperationParam(name = "measureId") List<String> theMeasureId,
+			@OperationParam(name = "measureIdentifier") List<String> theMeasureIdentifier,
+			@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl,
+			@OperationParam(name = "nonDocument") BooleanType theNonDocument) {
 		myPeriodStart = thePeriodStart;
 		myPeriodEnd = thePeriodEnd;
 		mySubject = theSubject;

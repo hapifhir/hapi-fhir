@@ -97,31 +97,22 @@ public class EvaluateMeasureSingleParams {
 	// LUKETODO:  embedded factory constructor annoation
 	// LUKETODO:  annotations on constructor parameters instead
 	public EvaluateMeasureSingleParams(
-			@IdParam
-			IdType theId,
+			@IdParam IdType theId,
 			@OperationParam(
-				name = "periodStart",
-				sourceType = String.class,
-				rangeType = OperationParameterRangeType.START)
-			ZonedDateTime thePeriodStart,
+							name = "periodStart",
+							sourceType = String.class,
+							rangeType = OperationParameterRangeType.START)
+					ZonedDateTime thePeriodStart,
 			@OperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
-			ZonedDateTime thePeriodEnd,
-			@OperationParam(name = "reportType")
-			String theReportType,
-			@OperationParam(name = "subject")
-			String theSubject,
-			@OperationParam(name = "practitioner")
-			String thePractitioner,
-			@OperationParam(name = "lastReceivedOn")
-			String theLastReceivedOn,
-			@OperationParam(name = "productLine")
-			String theProductLine,
-			@OperationParam(name = "additionalData")
-			Bundle theAdditionalData,
-			@OperationParam(name = "terminologyEndpoint")
-			Endpoint theTerminologyEndpoint,
-			@OperationParam(name = "parameters")
-			Parameters theParameters) {
+					ZonedDateTime thePeriodEnd,
+			@OperationParam(name = "reportType") String theReportType,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "practitioner") String thePractitioner,
+			@OperationParam(name = "lastReceivedOn") String theLastReceivedOn,
+			@OperationParam(name = "productLine") String theProductLine,
+			@OperationParam(name = "additionalData") Bundle theAdditionalData,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			@OperationParam(name = "parameters") Parameters theParameters) {
 		myId = theId;
 		myPeriodStart = thePeriodStart;
 		myPeriodEnd = thePeriodEnd;

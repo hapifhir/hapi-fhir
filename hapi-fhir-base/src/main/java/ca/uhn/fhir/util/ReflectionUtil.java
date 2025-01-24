@@ -168,7 +168,8 @@ public class ReflectionUtil {
 		return getGenericCollectionTypeOf(collectionType.getActualTypeArguments()[0]);
 	}
 
-	public static Class<?> getGenericCollectionTypeOfConstructorParameter(Constructor<?> theConstructor, Parameter theConstructorParameter) {
+	public static Class<?> getGenericCollectionTypeOfConstructorParameter(
+			Constructor<?> theConstructor, Parameter theConstructorParameter) {
 		final int theParamIndex = getIndexOfElement(theConstructor.getParameters(), theConstructorParameter);
 		final Type genericParameterType = theConstructor.getGenericParameterTypes()[theParamIndex];
 
