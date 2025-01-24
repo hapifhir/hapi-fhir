@@ -47,7 +47,7 @@ class EmbeddedParamsInnerClassesAndMethods {
 	static final String SAMPLE_METHOD_OPERATION_PARAMS = "sampleMethodOperationParams";
 	static final String SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE = "sampleMethodParamNoEmbeddedType";
 	static final String SIMPLE_METHOD_WITH_PARAMS_CONVERSION = "simpleMethodWithParamsConversion";
-
+	static final String SAMPLE_METHOD_EMBEDDED_TYPE_ID_TYPE_AND_TYPE_CONVERSION = "sampleMethodEmbeddedTypeIdTypeAndTypeConversion";
 
 	static final String EXPAND = "expand";
 	static final String OP_INSTANCE_OR_TYPE = "opInstanceOrType";
@@ -163,7 +163,11 @@ class EmbeddedParamsInnerClassesAndMethods {
 		@EmbeddedOperationParam(name = "param2")
 		private final List<String> myParam2;
 
-		public SampleParams(String myParam1, List<String> myParam2) {
+		public SampleParams(
+			 @OperationParam(name = "param1")
+			 String myParam1,
+			 @OperationParam(name = "param2")
+			 List<String> myParam2) {
 			this.myParam1 = myParam1;
 			this.myParam2 = myParam2;
 		}
@@ -206,9 +210,13 @@ class EmbeddedParamsInnerClassesAndMethods {
 		@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
 		private final ZonedDateTime myPeriodEnd;
 
-		public ParamsWithTypeConversion(ZonedDateTime myPeriodStart, ZonedDateTime myPeriodEnd) {
-			this.myPeriodStart = myPeriodStart;
-			this.myPeriodEnd = myPeriodEnd;
+		public ParamsWithTypeConversion(
+				 @OperationParam(name = "periodStart", sourceType = String.class, rangeType = OperationParameterRangeType.START)
+				 ZonedDateTime thePeriodStart,
+				 @OperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
+				 ZonedDateTime thePeriodEnd) {
+			myPeriodStart = thePeriodStart;
+			myPeriodEnd = thePeriodEnd;
 		}
 
 		public ZonedDateTime getPeriodStart() {
@@ -256,7 +264,15 @@ class EmbeddedParamsInnerClassesAndMethods {
 		@EmbeddedOperationParam(name = "param3")
 		private final BooleanType myParam3;
 
-		public SampleParamsWithIdParam(IdType theId, String theParam1, List<String> theParam2, BooleanType theParam3) {
+		public SampleParamsWithIdParam(
+				 @IdParam
+				 IdType theId,
+				 @OperationParam(name = "param1")
+				 String theParam1,
+				 @OperationParam(name = "param2")
+				 List<String> theParam2,
+				 @OperationParam(name = "param3")
+				 BooleanType theParam3) {
 			myId = theId;
 			myParam1 = theParam1;
 			myParam2 = theParam2;
@@ -305,6 +321,65 @@ class EmbeddedParamsInnerClassesAndMethods {
 		}
 	}
 
+	@EmbeddableOperationParams
+	static class ParamsWithIdParamAndTypeConversion {
+		@IdParam
+		private final IdType myId;
+
+		@EmbeddedOperationParam(name = "periodStart", sourceType = String.class, rangeType = OperationParameterRangeType.START)
+		private final ZonedDateTime myPeriodStart;
+
+		@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
+		private final ZonedDateTime myPeriodEnd;
+
+		public ParamsWithIdParamAndTypeConversion(
+			 @IdParam
+			 IdType theId,
+			 @OperationParam(name = "periodStart", sourceType = String.class, rangeType = OperationParameterRangeType.START)
+			 ZonedDateTime thePeriodStart,
+			 @OperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
+			 ZonedDateTime thePeriodEnd) {
+			myId = theId;
+			myPeriodStart = thePeriodStart;
+			myPeriodEnd = thePeriodEnd;
+		}
+
+		public IdType getId() {
+			return myId;
+		}
+
+		public ZonedDateTime getPeriodStart() {
+			return myPeriodStart;
+		}
+
+		public ZonedDateTime getPeriodEnd() {
+			return myPeriodEnd;
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (theO == null || getClass() != theO.getClass()) {
+				return false;
+			}
+			ParamsWithIdParamAndTypeConversion that = (ParamsWithIdParamAndTypeConversion) theO;
+			return Objects.equals(myId, that.myId) && Objects.equals(myPeriodStart, that.myPeriodStart) && Objects.equals(myPeriodEnd, that.myPeriodEnd);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myId, myPeriodStart, myPeriodEnd);
+		}
+
+		@Override
+		public String toString() {
+			return new StringJoiner(", ", ParamsWithIdParamAndTypeConversion.class.getSimpleName() + "[", "]")
+				 .add("myId=" + myId)
+				 .add("myPeriodStart=" + myPeriodStart)
+				 .add("myPeriodEnd=" + myPeriodEnd)
+				 .toString();
+		}
+	}
+
 	@Operation(name="sampleMethodEmbeddedTypeRequestDetailsFirst")
 	String sampleMethodEmbeddedTypeRequestDetailsFirst(RequestDetails theRequestDetails, @EmbeddedOperationParams SampleParams theParams) {
 		// return something arbitrary
@@ -342,6 +417,12 @@ class EmbeddedParamsInnerClassesAndMethods {
 	String sampleMethodEmbeddedTypeRequestDetailsFirstWithIdType(RequestDetails theRequestDetails, @EmbeddedOperationParams SampleParamsWithIdParam theParams) {
 		// return something arbitrary
 		return theRequestDetails.getId().getValue() + theParams.getParam1();
+	}
+
+	@Operation(name="sampleMethodEmbeddedTypeIdTypeAndTypeConversion")
+	String sampleMethodEmbeddedTypeIdTypeAndTypeConversion(@EmbeddedOperationParams ParamsWithIdParamAndTypeConversion theParams) {
+		// return something arbitrary
+		return theParams.getId().getValue();
 	}
 
 	String sampleMethodEmbeddedTypeRequestDetailsLastWithIdType(@EmbeddedOperationParams SampleParamsWithIdParam theParams, RequestDetails theRequestDetails) {

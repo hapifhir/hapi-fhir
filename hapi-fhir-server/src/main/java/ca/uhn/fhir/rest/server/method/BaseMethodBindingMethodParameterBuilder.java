@@ -26,7 +26,6 @@ import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.ReflectionUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
@@ -99,17 +98,27 @@ class BaseMethodBindingMethodParameterBuilder {
 					Msg.code(234198927), myMethod, Arrays.toString(myInputMethodParams)));
 		}
 
-		final List<Class<?>> parameterTypesWithOperationEmbeddedParam =
-				ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
-						myMethod, EmbeddedOperationParam.class);
+		ourLog.info(
+				"1234: START building for method: {}, requestDetails: {}, inputMethodParams: {}",
+				myMethod.getName(),
+				myRequestDetails,
+				Arrays.toString(myInputMethodParams));
 
-		if (parameterTypesWithOperationEmbeddedParam.size() > 1) {
+		final List<Class<?>> parameterTypesWithOperationEmbeddedParams =
+				EmbeddedOperationUtils.getMethodParamsAnnotatedWithEmbeddableOperationParams(myMethod);
+
+		//		final List<Class<?>> parameterTypesWithOperationEmbeddedParam =
+		//				ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
+		//						myMethod, EmbeddedOperationParams.class);
+
+		//		if (parameterTypesWithOperationEmbeddedParam.size() > 1) {
+		if (parameterTypesWithOperationEmbeddedParams.size() > 1) {
 			throw new InternalErrorException(String.format(
 					"%sInvalid operation embedded parameters.  More than a single such class is part of method definition: %s",
 					Msg.code(924469634), myMethod.getName()));
 		}
 
-		if (parameterTypesWithOperationEmbeddedParam.isEmpty()) {
+		if (parameterTypesWithOperationEmbeddedParams.isEmpty()) {
 			return myInputMethodParams;
 		}
 
@@ -141,39 +150,50 @@ class BaseMethodBindingMethodParameterBuilder {
 					Msg.code(924469634), methodName));
 		}
 
-		final Class<?> parameterTypeWithOperationEmbeddedParam = parameterTypesWithOperationEmbeddedParam.get(0);
+		final Class<?> parameterTypeWithOperationEmbeddedParams = parameterTypesWithOperationEmbeddedParams.get(0);
 
-		return determineMethodParamsForOperationEmbeddedParams(parameterTypeWithOperationEmbeddedParam);
+		return determineMethodParamsForOperationEmbeddedParams(parameterTypeWithOperationEmbeddedParams);
 	}
 
 	private Object[] determineMethodParamsForOperationEmbeddedParams(
-			Class<?> theParameterTypeWithOperationEmbeddedParam)
+			Class<?> theParameterTypeWithOperationEmbeddedParams)
 			throws InvocationTargetException, IllegalAccessException, InstantiationException {
 
 		final String methodName = myMethod.getName();
 
 		ourLog.info(
-				"1234: invoking parameterTypeWithOperationEmbeddedParam: {} and theMethod: {}",
-				theParameterTypeWithOperationEmbeddedParam,
+				"1234: invoking parameterTypeWithOperationEmbeddedParams: {} and theMethod: {}",
+				theParameterTypeWithOperationEmbeddedParams,
 				methodName);
 
-		final Object operationEmbeddedType = buildOperationEmbeddedObject(
-				methodName, theParameterTypeWithOperationEmbeddedParam, myInputMethodParams);
+		final Object operationEmbeddedType =
+				buildOperationEmbeddedObject(theParameterTypeWithOperationEmbeddedParams, myInputMethodParams);
 
 		ourLog.info(
 				"1234: build method params with embedded object and requestDetails (if applicable) for: {}",
 				operationEmbeddedType);
 
-		return buildMethodParamsInCorrectPositions(operationEmbeddedType);
+		final Object[] params = buildMethodParamsInCorrectPositions(operationEmbeddedType);
+
+		ourLog.info(
+				"1234: END: method: {}, requestDetails: {}, inputMethodParams: {}, outputMethodParams: {}",
+				myMethod.getName(),
+				myRequestDetails,
+				Arrays.toString(myInputMethodParams),
+				Arrays.toString(params));
+
+		return params;
 	}
 
 	@Nonnull
 	private Object buildOperationEmbeddedObject(
-			String theMethodName, Class<?> theParameterTypeWithOperationEmbeddedParam, Object[] theMethodParams)
+			Class<?> theParameterTypeWithOperationEmbeddedParam, Object[] theMethodParams)
 			throws InstantiationException, IllegalAccessException, InvocationTargetException {
 		final Constructor<?> constructor =
 				EmbeddedOperationUtils.validateAndGetConstructor(theParameterTypeWithOperationEmbeddedParam);
 
+		// LUKETODO: redo this method in the new constructor param world
+		// LUKETODO: off by one error
 		final Object[] methodParamsWithoutRequestDetails = cloneWithRemovedRequestDetails(theMethodParams);
 
 		final Annotation[] annotations = Arrays.stream(theParameterTypeWithOperationEmbeddedParam.getDeclaredFields())

@@ -21,8 +21,8 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
-import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.util.ReflectionUtil;
 import jakarta.annotation.Nonnull;
@@ -150,13 +150,13 @@ public class EmbeddedOperationUtils {
 				&& OperationParameterRangeType.NOT_APPLICABLE != theOperationParameterRangeType;
 	}
 
-	public static List<Class<?>> getMethodParamsAnnotatedWithEmbeddedOperationParams(Method theMethod) {
+	public static List<Class<?>> getMethodParamsAnnotatedWithEmbeddableOperationParams(Method theMethod) {
 		return Arrays.stream(theMethod.getParameterTypes())
-				.filter(EmbeddedOperationUtils::hasEmbeddedOperationParamsAnnotation)
+				.filter(EmbeddedOperationUtils::hasEmbeddableOperationParamsAnnotation)
 				.collect(Collectors.toUnmodifiableList());
 	}
 
-	private static boolean hasEmbeddedOperationParamsAnnotation(Class<?> theMethodParameterType) {
+	private static boolean hasEmbeddableOperationParamsAnnotation(Class<?> theMethodParameterType) {
 		final Annotation[] annotations = theMethodParameterType.getAnnotations();
 
 		if (annotations.length == 0) {
@@ -169,7 +169,7 @@ public class EmbeddedOperationUtils {
 					Msg.code(9132164), theMethodParameterType));
 		}
 
-		return EmbeddedOperationParams.class == annotations[0].annotationType();
+		return EmbeddableOperationParams.class == annotations[0].annotationType();
 	}
 
 	private static void validateConstructorArgs(Constructor<?> theConstructor, Field[] theDeclaredFields) {

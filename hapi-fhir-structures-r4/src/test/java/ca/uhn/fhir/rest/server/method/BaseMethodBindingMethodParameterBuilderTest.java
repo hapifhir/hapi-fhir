@@ -21,6 +21,7 @@ import java.util.List;
 import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.ParamsWithTypeConversion;
 import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.ParamsWithoutAnnotations;
 import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS;
 import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE;
 import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST;
 import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE;
@@ -70,7 +71,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationEmbeddedTypesNoRequestDetails() {
-		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
+		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
 		final Object[] inputParams = new Object[]{"param1", List.of("param2")};
 		final Object[] expectedOutputParams = new Object[]{new SampleParams("param1", List.of("param2"))};
 
@@ -81,7 +82,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationEmbeddedTypesNoRequestDetailsNullArguments() {
-		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
+		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS, SampleParams.class);
 		final Object[] inputParams = new Object[]{null, null};
 		final Object[] expectedOutputParams = new Object[]{new SampleParams(null, null)};
 

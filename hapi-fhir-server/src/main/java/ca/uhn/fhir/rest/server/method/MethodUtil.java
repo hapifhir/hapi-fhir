@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Elements;
-import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
+import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
@@ -71,12 +71,16 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -350,9 +354,117 @@ public class MethodUtil {
 							parameterType = newParameterType;
 						}
 					} else if (nextAnnotation instanceof EmbeddedOperationParams) {
-						final List<Class<?>> operationEmbeddedTypes =
-								ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
-										methodToUse, EmbeddedOperationParam.class);
+						// LUKETODO:  cleanup
+						// NEW
+						if (op == null) {
+							throw new ConfigurationException(Msg.code(846192641)
+									+ "@OperationParam or OperationEmbeddedParam detected on method that is not annotated with @Operation: "
+									+ methodToUse.toGenericString());
+						}
+
+						final List<Class<?>> embeddedParamsClasses = Arrays.stream(methodToUse.getParameterTypes())
+								.filter(paramType -> paramType.isAnnotationPresent(EmbeddableOperationParams.class))
+								.collect(Collectors.toUnmodifiableList());
+
+						// LUKETODO;  better error?
+						if (embeddedParamsClasses.isEmpty()) {
+							throw new ConfigurationException(String.format(
+									"%sThere is no param with @EmbeddableOperationParams is supported for now for method: %s",
+									Msg.code(9999924), methodToUse.getName()));
+						}
+
+						// LUKETODO;  better error?
+						if (embeddedParamsClasses.size() > 1) {
+							throw new ConfigurationException(String.format(
+									"%sMore than one param with with @EmbeddableOperationParams  for method: %s",
+									Msg.code(9999927), methodToUse.getName()));
+						}
+
+						final Class<?> soleEmbeddedParamClass = embeddedParamsClasses.get(0);
+
+						final Constructor<?>[] constructorsForEmbeddableOperationParams =
+								soleEmbeddedParamClass.getConstructors();
+
+						// LUKETODO;  better error?
+						if (constructorsForEmbeddableOperationParams.length == 0) {
+							throw new ConfigurationException(String.format(
+									"%sThere is no constructor with @EmbeddableOperationParams is supported for now for method: %s",
+									Msg.code(9999924), methodToUse.getName()));
+						}
+
+						// LUKETODO;  better error?
+						if (constructorsForEmbeddableOperationParams.length > 1) {
+							throw new ConfigurationException(String.format(
+									"%sOnly one constructor with @EmbeddableOperationParams is supported but there is mulitple for method: %s",
+									Msg.code(9999927), methodToUse.getName()));
+						}
+
+						final Constructor<?> constructor = constructorsForEmbeddableOperationParams[0];
+
+						final Parameter[] constructorParams = constructor.getParameters();
+
+						for (Parameter constructorParam : constructorParams) {
+							final Annotation[] annotations = constructorParam.getAnnotations();
+
+							// LUKETODO: test
+							if (annotations.length == 0) {
+								throw new ConfigurationException(String.format(
+										"%s Constructor params have no annotation for embedded params class: %s and method: %s",
+										Msg.code(9999937),
+										constructor.getDeclaringClass().getName(),
+										methodToUse.getName()));
+							}
+
+							// LUKETODO: test
+							if (annotations.length > 1) {
+								throw new ConfigurationException(String.format(
+										"%s Constructor params have more than one annotation for embedded params: %s and method: %s",
+										Msg.code(9999947),
+										constructor.getDeclaringClass().getName(),
+										methodToUse.getName()));
+							}
+
+							final Annotation soleAnnotation = annotations[0];
+
+							IParameter innerParam = null;
+							if (soleAnnotation instanceof IdParam) {
+								// LUKETODO:  we're missing this parameter when we build the method binding
+								innerParam = new NullParameter();
+								// Need to add this explicitly
+								parameters.add(innerParam);
+							} else if (soleAnnotation instanceof OperationParam) {
+								final OperationParam operationParam = (OperationParam) soleAnnotation;
+								final String description = ParametersUtil.extractDescription(annotations);
+								final List<String> examples = ParametersUtil.extractExamples(annotations);
+								final OperationParameter operationParameter = new OperationParameter(
+										theContext,
+										op.name(),
+										operationParam.name(),
+										operationParam.min(),
+										operationParam.max(),
+										description,
+										examples,
+										operationParam.sourceType(),
+										operationParam.rangeType());
+
+								final ParamInitializationContext paramContext =
+										buildParamContext(constructor, constructorParam, operationParameter);
+
+								innerParam = operationParameter;
+								paramContexts.add(paramContext);
+							}
+
+							param = innerParam;
+						}
+
+						// LUKETODO:  need to disable the below code
+
+						// OLD
+						//						final List<Class<?>> operationEmbeddedTypes =
+						//								ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
+						//										methodToUse, EmbeddedOperationParam.class);
+
+						final List<Class<?>> operationEmbeddedTypes = List.of();
 
 						if (op == null) {
 							throw new ConfigurationException(Msg.code(846192641)
@@ -468,18 +580,27 @@ public class MethodUtil {
 				}
 			}
 
-			if (paramContexts.isEmpty() || !(param instanceof EmbeddedOperationParameter)) {
-				// RequestDetails if it's last
-				paramContexts.add(
-						new ParamInitializationContext(param, parameterType, outerCollectionType, innerCollectionType));
-			}
-
 			if (param == null) {
 				throw new ConfigurationException(
 						Msg.code(408) + "Parameter #" + (paramIndex + 1) + "/" + (parameterTypes.length)
 								+ " of method '" + methodToUse.getName() + "' on type '"
 								+ methodToUse.getDeclaringClass().getCanonicalName()
 								+ "' has no recognized FHIR interface parameter nextParameterAnnotations. Don't know how to handle this parameter");
+			}
+
+			// LUKETODO:  refactor into some sort of static method
+			// LUKETODO:  comment that this is a guard against adding the entire embeddable parameter as an
+			// OperationParameter
+			// LUKETODO:  find a better guard for this?
+
+			// LUKETODO:  this doesn't work because the contexts are not empty
+
+			if (paramContexts.isEmpty()
+					|| Arrays.stream(parameterType.getAnnotations())
+							.noneMatch(annotation -> annotation instanceof EmbeddableOperationParams)) {
+				// RequestDetails if it's last
+				paramContexts.add(
+						new ParamInitializationContext(param, parameterType, outerCollectionType, innerCollectionType));
 			}
 
 			for (ParamInitializationContext paramContext : paramContexts) {
@@ -490,5 +611,58 @@ public class MethodUtil {
 			paramIndex++;
 		}
 		return parameters;
+	}
+
+	private static ParamInitializationContext buildParamContext(
+			Constructor<?> theConstructor, Parameter theConstructorParameter, OperationParameter theOperationParam) {
+
+		final Class<?> genericParameter =
+				ReflectionUtil.getGenericCollectionTypeOfConstructorParameter(theConstructor, theConstructorParameter);
+
+		Class<?> parameterType = theConstructorParameter.getType();
+		Class<? extends java.util.Collection<?>> outerCollectionType = null;
+		Class<? extends java.util.Collection<?>> innerCollectionType = null;
+
+		// Flat collection
+		if (Collection.class.isAssignableFrom(parameterType)) {
+			innerCollectionType = unsafeCast(parameterType);
+			parameterType = genericParameter;
+			if (parameterType == null) {
+				final String error = String.format(
+						"%s Cannot find generic type for field: %s in class: %s for constructor: %s",
+						Msg.code(724612469),
+						theConstructorParameter.getName(),
+						theConstructorParameter.getClass().getCanonicalName(),
+						theConstructor.getName());
+				throw new ConfigurationException(error);
+			}
+
+			// Collection of a Collection: Permitted
+			if (Collection.class.isAssignableFrom(parameterType)) {
+				outerCollectionType = innerCollectionType;
+				innerCollectionType = unsafeCast(parameterType);
+			}
+
+			// Collection of a Collection of a Collection:  Prohibited
+			if (Collection.class.isAssignableFrom(parameterType)) {
+				final String error = String.format(
+						"%sInvalid generic type (a collection of a collection of a collection) for field: %s in class: %s for constructor: %s",
+						Msg.code(724612469),
+						theConstructorParameter.getName(),
+						theConstructorParameter.getClass().getCanonicalName(),
+						theConstructor.getName());
+				throw new ConfigurationException(error);
+			}
+		}
+
+		// TODO: LD:  Don't worry about the OperationEmbeddedParam.type() for now until we chose to implement it later
+
+		return new ParamInitializationContext(
+				theOperationParam, parameterType, outerCollectionType, innerCollectionType);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T unsafeCast(Object theObject) {
+		return (T) theObject;
 	}
 }
