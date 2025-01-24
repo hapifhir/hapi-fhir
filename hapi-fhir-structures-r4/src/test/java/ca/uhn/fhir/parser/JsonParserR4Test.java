@@ -1775,7 +1775,7 @@ public class JsonParserR4Test extends BaseTest {
 			obs.getSubject().setResource(pt);
 
 			Encounter enc = new Encounter();
-			enc.setId("#1");
+			enc.setId("1");
 			enc.setStatus(Encounter.EncounterStatus.ARRIVED);
 			obs.getEncounter().setReference("#1");
 			obs.getContained().add(enc);
