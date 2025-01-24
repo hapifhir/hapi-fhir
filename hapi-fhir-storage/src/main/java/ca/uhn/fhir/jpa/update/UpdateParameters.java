@@ -7,17 +7,17 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-public class UpdateParameters <T extends IBaseResource> {
+public class UpdateParameters<T extends IBaseResource> {
 
 	private RequestDetails myRequestDetails;
-    private IIdType myResourceIdToUpdate;
-    private String myMatchUrl;
-    private boolean myShouldPerformIndexing;
-    private boolean myShouldForceUpdateVersion;
-    private T myExistingResource;
-    private IBasePersistedResource myExistingEntity;
-    private RestOperationTypeEnum myOperationType;
-    private TransactionDetails myTransactionDetails;
+	private IIdType myResourceIdToUpdate;
+	private String myMatchUrl;
+	private boolean myShouldPerformIndexing;
+	private boolean myShouldForceUpdateVersion;
+	private T myExistingResource;
+	private IBasePersistedResource myExistingEntity;
+	private RestOperationTypeEnum myOperationType;
+	private TransactionDetails myTransactionDetails;
 
 	/**
 	 * In the update methods, we have a local variable to keep track of the old resource before performing the update
@@ -26,94 +26,95 @@ public class UpdateParameters <T extends IBaseResource> {
 	 *
 	 * If this is set to true, the old resource will be forcefully populated.
 	 */
-    private boolean myShouldForcePopulateOldResourceForProcessing;
+	private boolean myShouldForcePopulateOldResourceForProcessing;
 
-    public RequestDetails getRequest() {
-        return myRequestDetails;
-    }
+	public RequestDetails getRequest() {
+		return myRequestDetails;
+	}
 
 	public UpdateParameters<T> setRequestDetails(RequestDetails theRequest) {
 		this.myRequestDetails = theRequest;
 		return this;
 	}
 
-    public IIdType getResourceIdToUpdate() {
-        return myResourceIdToUpdate;
-    }
+	public IIdType getResourceIdToUpdate() {
+		return myResourceIdToUpdate;
+	}
 
 	public UpdateParameters<T> setResourceIdToUpdate(IIdType theResourceId) {
 		this.myResourceIdToUpdate = theResourceId;
 		return this;
 	}
 
-    public String getMatchUrl() {
-        return myMatchUrl;
-    }
+	public String getMatchUrl() {
+		return myMatchUrl;
+	}
 
 	public UpdateParameters<T> setMatchUrl(String theMatchUrl) {
 		this.myMatchUrl = theMatchUrl;
 		return this;
 	}
 
-    public boolean shouldPerformIndexing() {
-        return myShouldPerformIndexing;
-    }
+	public boolean shouldPerformIndexing() {
+		return myShouldPerformIndexing;
+	}
 
 	public UpdateParameters<T> setShouldPerformIndexing(boolean thePerformIndexing) {
 		this.myShouldPerformIndexing = thePerformIndexing;
 		return this;
 	}
 
-    public boolean shouldForceUpdateVersion() {
-        return myShouldForceUpdateVersion;
-    }
+	public boolean shouldForceUpdateVersion() {
+		return myShouldForceUpdateVersion;
+	}
 
 	public UpdateParameters<T> setShouldForceUpdateVersion(boolean theForceUpdateVersion) {
 		this.myShouldForceUpdateVersion = theForceUpdateVersion;
 		return this;
 	}
 
-    public T getResource() {
-        return myExistingResource;
-    }
+	public T getResource() {
+		return myExistingResource;
+	}
 
 	public UpdateParameters<T> setResource(T theResource) {
 		this.myExistingResource = theResource;
 		return this;
 	}
 
-    public IBasePersistedResource getEntity() {
-        return myExistingEntity;
-    }
+	public IBasePersistedResource getEntity() {
+		return myExistingEntity;
+	}
 
 	public UpdateParameters<T> setEntity(IBasePersistedResource theEntity) {
 		this.myExistingEntity = theEntity;
 		return this;
 	}
 
-    public RestOperationTypeEnum getOperationType() {
-        return myOperationType;
-    }
+	public RestOperationTypeEnum getOperationType() {
+		return myOperationType;
+	}
 
 	public UpdateParameters<T> setOperationType(RestOperationTypeEnum myOperationType) {
 		this.myOperationType = myOperationType;
 		return this;
 	}
 
-    public TransactionDetails getTransactionDetails() {
-        return myTransactionDetails;
-    }
+	public TransactionDetails getTransactionDetails() {
+		return myTransactionDetails;
+	}
 
 	public UpdateParameters<T> setTransactionDetails(TransactionDetails myTransactionDetails) {
 		this.myTransactionDetails = myTransactionDetails;
 		return this;
 	}
 
-    public boolean shouldForcePopulateOldResourceForProcessing() {
-        return myShouldForcePopulateOldResourceForProcessing;
-    }
+	public boolean shouldForcePopulateOldResourceForProcessing() {
+		return myShouldForcePopulateOldResourceForProcessing;
+	}
 
-	public UpdateParameters<T> setShouldForcePopulateOldResourceForProcessing(boolean myShouldForcePopulateOldResourceForProcessing) {
+	public UpdateParameters<T> setShouldForcePopulateOldResourceForProcessing(
+			boolean myShouldForcePopulateOldResourceForProcessing) {
 		this.myShouldForcePopulateOldResourceForProcessing = myShouldForcePopulateOldResourceForProcessing;
 		return this;
 	}

@@ -2496,16 +2496,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Start
 		if (outcome == null) {
 			UpdateParameters updateParameters = new UpdateParameters<>()
-				.setRequestDetails(theRequest)
-				.setResourceIdToUpdate(resourceId)
-				.setMatchUrl(theMatchUrl)
-				.setShouldPerformIndexing(thePerformIndexing)
-				.setShouldForceUpdateVersion(theForceUpdateVersion)
-				.setResource(theResource)
-				.setEntity(entity)
-				.setOperationType(update)
-				.setTransactionDetails(theTransactionDetails)
-				.setShouldForcePopulateOldResourceForProcessing(false);
+					.setRequestDetails(theRequest)
+					.setResourceIdToUpdate(resourceId)
+					.setMatchUrl(theMatchUrl)
+					.setShouldPerformIndexing(thePerformIndexing)
+					.setShouldForceUpdateVersion(theForceUpdateVersion)
+					.setResource(theResource)
+					.setEntity(entity)
+					.setOperationType(update)
+					.setTransactionDetails(theTransactionDetails)
+					.setShouldForcePopulateOldResourceForProcessing(false);
 
 			outcome = doUpdateForUpdateOrPatch(updateParameters);
 		}
