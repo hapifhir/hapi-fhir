@@ -39,136 +39,138 @@ import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.*;
 
+// LUKETODO:  redo javadoc
+// LUKETODO:  convert to new design
 /**
  * Leveraged by {@link MethodUtil} exclusively to convert {@link EmbeddedOperationParam} parameters for a method to
  * either a {@link NullParameter} or an {@link EmbeddedOperationParam}.
  */
 public class EmbeddedParameterConverter {
 	private static final org.slf4j.Logger ourLog = getLogger(EmbeddedParameterConverter.class);
-
-	private final FhirContext myContext;
-	private final Method myMethod;
-	private final Operation myOperation;
-	private final Class<?> myOperationEmbeddedType;
-
-	public EmbeddedParameterConverter(
-			FhirContext theContext, Method theMethod, Operation theOperation, Class<?> theOperationEmbeddedType) {
-		myContext = theContext;
-		myMethod = theMethod;
-		myOperation = theOperation;
-		myOperationEmbeddedType = theOperationEmbeddedType;
-	}
-
-	List<EmbeddedParameterConverterContext> convert() {
-		return Arrays.stream(validateConstructorArgsAndReturnFields())
-				.map(this::convertField)
-				.collect(Collectors.toUnmodifiableList());
-	}
-
-	private Field[] validateConstructorArgsAndReturnFields() {
-		EmbeddedOperationUtils.validateAndGetConstructor(myOperationEmbeddedType);
-
-		return myOperationEmbeddedType.getDeclaredFields();
-	}
-
-	private EmbeddedParameterConverterContext convertField(Field theField) {
-		final String fieldName = theField.getName();
-		final Class<?> fieldType = theField.getType();
-		final Annotation[] fieldAnnotations = theField.getAnnotations();
-
-		if (fieldAnnotations.length < 1) {
-			throw new ConfigurationException(String.format(
-					"%sNo annotations for field: %s for method: %s", Msg.code(9999926), fieldName, myMethod.getName()));
-		}
-
-		if (fieldAnnotations.length > 1) {
-			throw new ConfigurationException(String.format(
-					"%sMore than one annotation for field: %s for method: %s",
-					Msg.code(999998), fieldName, myMethod.getName()));
-		}
-
-		final Annotation fieldAnnotation = fieldAnnotations[0];
-
-		if (fieldAnnotation instanceof IdParam) {
-			return EmbeddedParameterConverterContext.forParameter(new NullParameter());
-		} else if (fieldAnnotation instanceof EmbeddedOperationParam) {
-			final ParamInitializationContext paramContext =
-					buildParamContext(fieldType, theField, (EmbeddedOperationParam) fieldAnnotation);
-
-			return EmbeddedParameterConverterContext.forEmbeddedContext(paramContext);
-		} else {
-			final String error = String.format(
-					"%sUnsupported annotation type: %s for a class: %s with OperationEmbeddedParams which is part of method: %s: ",
-					Msg.code(912732197), myOperationEmbeddedType, fieldAnnotation.annotationType(), myMethod.getName());
-
-			throw new ConfigurationException(error);
-		}
-	}
-
-	private ParamInitializationContext buildParamContext(
-			Class<?> theFieldType, Field theField, EmbeddedOperationParam theEmbeddedOperationParam) {
-
-		final EmbeddedOperationParameter embeddedOperationParameter =
-				getOperationEmbeddedParameter(theEmbeddedOperationParam);
-
-		Class<?> parameterType = theFieldType;
-		Class<? extends java.util.Collection<?>> outerCollectionType = null;
-		Class<? extends java.util.Collection<?>> innerCollectionType = null;
-
-		// Flat collection
-		if (Collection.class.isAssignableFrom(parameterType)) {
-			innerCollectionType = unsafeCast(parameterType);
-			parameterType = ReflectionUtil.getGenericCollectionTypeOfField(theField);
-			if (parameterType == null) {
-				final String error = String.format(
-						"%s Cannot find generic type for field: %s in class: %s for method: %s",
-						Msg.code(724612469),
-						theField.getName(),
-						theField.getDeclaringClass().getCanonicalName(),
-						myMethod.getName());
-				throw new ConfigurationException(error);
-			}
-
-			// Collection of a Collection: Permitted
-			if (Collection.class.isAssignableFrom(parameterType)) {
-				outerCollectionType = innerCollectionType;
-				innerCollectionType = unsafeCast(parameterType);
-				parameterType = ReflectionUtil.getGenericCollectionTypeOfField(theField);
-			}
-
-			// Collection of a Collection of a Collection:  Prohibited
-			if (parameterType != null && Collection.class.isAssignableFrom(parameterType)) {
-				final String error = String.format(
-						"%sInvalid generic type (a collection of a collection of a collection) for field: %s in class: %s for method: %s",
-						Msg.code(724612469),
-						theField.getName(),
-						theField.getDeclaringClass().getCanonicalName(),
-						myMethod.getName());
-				throw new ConfigurationException(error);
-			}
-		}
-
-		// TODO: LD:  Don't worry about the OperationEmbeddedParam.type() for now until we chose to implement it later
-
-		return new ParamInitializationContext(
-				embeddedOperationParameter, parameterType, outerCollectionType, innerCollectionType);
-	}
-
-	@Nonnull
-	private EmbeddedOperationParameter getOperationEmbeddedParameter(EmbeddedOperationParam operationParam) {
-		final Annotation[] fieldAnnotationArray = new Annotation[] {operationParam};
-
-		return new EmbeddedOperationParameter(
-				myContext,
-				myOperation.name(),
-				operationParam.name(),
-				operationParam.min(),
-				operationParam.max(),
-				ParametersUtil.extractDescription(fieldAnnotationArray),
-				ParametersUtil.extractExamples(fieldAnnotationArray),
-				operationParam.sourceType(),
-				operationParam.rangeType());
-	}
+//
+//	private final FhirContext myContext;
+//	private final Method myMethod;
+//	private final Operation myOperation;
+//	private final Class<?> myOperationEmbeddedType;
+//
+//	public EmbeddedParameterConverter(
+//			FhirContext theContext, Method theMethod, Operation theOperation, Class<?> theOperationEmbeddedType) {
+//		myContext = theContext;
+//		myMethod = theMethod;
+//		myOperation = theOperation;
+//		myOperationEmbeddedType = theOperationEmbeddedType;
+//	}
+//
+//	List<EmbeddedParameterConverterContext> convert() {
+//		return Arrays.stream(validateConstructorArgsAndReturnFields())
+//				.map(this::convertField)
+//				.collect(Collectors.toUnmodifiableList());
+//	}
+//
+//	private Field[] validateConstructorArgsAndReturnFields() {
+//		EmbeddedOperationUtils.validateAndGetConstructor(myOperationEmbeddedType);
+//
+//		return myOperationEmbeddedType.getDeclaredFields();
+//	}
+//
+//	private EmbeddedParameterConverterContext convertField(Field theField) {
+//		final String fieldName = theField.getName();
+//		final Class<?> fieldType = theField.getType();
+//		final Annotation[] fieldAnnotations = theField.getAnnotations();
+//
+//		if (fieldAnnotations.length < 1) {
+//			throw new ConfigurationException(String.format(
+//					"%sNo annotations for field: %s for method: %s", Msg.code(9999926), fieldName, myMethod.getName()));
+//		}
+//
+//		if (fieldAnnotations.length > 1) {
+//			throw new ConfigurationException(String.format(
+//					"%sMore than one annotation for field: %s for method: %s",
+//					Msg.code(999998), fieldName, myMethod.getName()));
+//		}
+//
+//		final Annotation fieldAnnotation = fieldAnnotations[0];
+//
+//		if (fieldAnnotation instanceof IdParam) {
+//			return EmbeddedParameterConverterContext.forParameter(new NullParameter());
+//		} else if (fieldAnnotation instanceof EmbeddedOperationParam) {
+//			final ParamInitializationContext paramContext =
+//					buildParamContext(fieldType, theField, (EmbeddedOperationParam) fieldAnnotation);
+//
+//			return EmbeddedParameterConverterContext.forEmbeddedContext(paramContext);
+//		} else {
+//			final String error = String.format(
+//					"%sUnsupported annotation type: %s for a class: %s with OperationEmbeddedParams which is part of method: %s: ",
+//					Msg.code(912732197), myOperationEmbeddedType, fieldAnnotation.annotationType(), myMethod.getName());
+//
+//			throw new ConfigurationException(error);
+//		}
+//	}
+//
+//	private ParamInitializationContext buildParamContext(
+//			Class<?> theFieldType, Field theField, EmbeddedOperationParam theEmbeddedOperationParam) {
+//
+//		final EmbeddedOperationParameter embeddedOperationParameter =
+//				getOperationEmbeddedParameter(theEmbeddedOperationParam);
+//
+//		Class<?> parameterType = theFieldType;
+//		Class<? extends java.util.Collection<?>> outerCollectionType = null;
+//		Class<? extends java.util.Collection<?>> innerCollectionType = null;
+//
+//		// Flat collection
+//		if (Collection.class.isAssignableFrom(parameterType)) {
+//			innerCollectionType = unsafeCast(parameterType);
+//			parameterType = ReflectionUtil.getGenericCollectionTypeOfField(theField);
+//			if (parameterType == null) {
+//				final String error = String.format(
+//						"%s Cannot find generic type for field: %s in class: %s for method: %s",
+//						Msg.code(724612469),
+//						theField.getName(),
+//						theField.getDeclaringClass().getCanonicalName(),
+//						myMethod.getName());
+//				throw new ConfigurationException(error);
+//			}
+//
+//			// Collection of a Collection: Permitted
+//			if (Collection.class.isAssignableFrom(parameterType)) {
+//				outerCollectionType = innerCollectionType;
+//				innerCollectionType = unsafeCast(parameterType);
+//				parameterType = ReflectionUtil.getGenericCollectionTypeOfField(theField);
+//			}
+//
+//			// Collection of a Collection of a Collection:  Prohibited
+//			if (parameterType != null && Collection.class.isAssignableFrom(parameterType)) {
+//				final String error = String.format(
+//						"%sInvalid generic type (a collection of a collection of a collection) for field: %s in class: %s for method: %s",
+//						Msg.code(724612469),
+//						theField.getName(),
+//						theField.getDeclaringClass().getCanonicalName(),
+//						myMethod.getName());
+//				throw new ConfigurationException(error);
+//			}
+//		}
+//
+//		// TODO: LD:  Don't worry about the OperationEmbeddedParam.type() for now until we chose to implement it later
+//
+//		return new ParamInitializationContext(
+//				embeddedOperationParameter, parameterType, outerCollectionType, innerCollectionType);
+//	}
+//
+//	@Nonnull
+//	private EmbeddedOperationParameter getOperationEmbeddedParameter(EmbeddedOperationParam operationParam) {
+//		final Annotation[] fieldAnnotationArray = new Annotation[] {operationParam};
+//
+//		return new EmbeddedOperationParameter(
+//				myContext,
+//				myOperation.name(),
+//				operationParam.name(),
+//				operationParam.min(),
+//				operationParam.max(),
+//				ParametersUtil.extractDescription(fieldAnnotationArray),
+//				ParametersUtil.extractExamples(fieldAnnotationArray),
+//				operationParam.sourceType(),
+//				operationParam.rangeType());
+//	}
 
 	@SuppressWarnings("unchecked")
 	private static <T> T unsafeCast(Object theObject) {

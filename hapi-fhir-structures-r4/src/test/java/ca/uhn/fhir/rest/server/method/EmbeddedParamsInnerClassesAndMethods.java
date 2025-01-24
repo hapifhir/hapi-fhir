@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -157,10 +156,8 @@ class EmbeddedParamsInnerClassesAndMethods {
 	// Ignore warnings that these classes can be records.  Converting them to records will make the tests fail
 	@EmbeddableOperationParams
 	static class SampleParams {
-		@EmbeddedOperationParam(name = "param1")
 		private final String myParam1;
 
-		@EmbeddedOperationParam(name = "param2")
 		private final List<String> myParam2;
 
 		public SampleParams(
@@ -204,10 +201,8 @@ class EmbeddedParamsInnerClassesAndMethods {
 
 	@EmbeddableOperationParams
 	static class ParamsWithTypeConversion {
-		@EmbeddedOperationParam(name = "periodStart", sourceType = String.class, rangeType = OperationParameterRangeType.START)
 		private final ZonedDateTime myPeriodStart;
 
-		@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
 		private final ZonedDateTime myPeriodEnd;
 
 		public ParamsWithTypeConversion(
@@ -252,16 +247,12 @@ class EmbeddedParamsInnerClassesAndMethods {
 	// Ignore warnings that these classes can be records.  Converting them to records will make the tests fail
 	@EmbeddableOperationParams
 	static class SampleParamsWithIdParam {
-		@IdParam
 		private final IdType myId;
 
-		@EmbeddedOperationParam(name = "param1")
 		private final String myParam1;
 
-		@EmbeddedOperationParam(name = "param2")
 		private final List<String> myParam2;
 
-		@EmbeddedOperationParam(name = "param3")
 		private final BooleanType myParam3;
 
 		public SampleParamsWithIdParam(
@@ -326,10 +317,8 @@ class EmbeddedParamsInnerClassesAndMethods {
 		@IdParam
 		private final IdType myId;
 
-		@EmbeddedOperationParam(name = "periodStart", sourceType = String.class, rangeType = OperationParameterRangeType.START)
 		private final ZonedDateTime myPeriodStart;
 
-		@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
 		private final ZonedDateTime myPeriodEnd;
 
 		public ParamsWithIdParamAndTypeConversion(

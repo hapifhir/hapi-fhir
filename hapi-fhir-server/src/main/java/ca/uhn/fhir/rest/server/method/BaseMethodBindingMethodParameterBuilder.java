@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -32,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -47,6 +47,7 @@ import java.util.stream.IntStream;
 
 import static java.util.function.Predicate.not;
 
+// LUKETODO:  redo javadoc
 /**
  * Responsible for either passing to objects params straight through to the method call or converting them to
  * fit within a class that has fields annotated with {@link EmbeddedOperationParam} and to also handle placement
@@ -107,11 +108,6 @@ class BaseMethodBindingMethodParameterBuilder {
 		final List<Class<?>> parameterTypesWithOperationEmbeddedParams =
 				EmbeddedOperationUtils.getMethodParamsAnnotatedWithEmbeddableOperationParams(myMethod);
 
-		//		final List<Class<?>> parameterTypesWithOperationEmbeddedParam =
-		//				ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
-		//						myMethod, EmbeddedOperationParams.class);
-
-		//		if (parameterTypesWithOperationEmbeddedParam.size() > 1) {
 		if (parameterTypesWithOperationEmbeddedParams.size() > 1) {
 			throw new InternalErrorException(String.format(
 					"%sInvalid operation embedded parameters.  More than a single such class is part of method definition: %s",
@@ -196,36 +192,14 @@ class BaseMethodBindingMethodParameterBuilder {
 		// LUKETODO: off by one error
 		final Object[] methodParamsWithoutRequestDetails = cloneWithRemovedRequestDetails(theMethodParams);
 
-		final Annotation[] annotations = Arrays.stream(theParameterTypeWithOperationEmbeddedParam.getDeclaredFields())
-				.map(AccessibleObject::getAnnotations)
-				.filter(array -> array.length == 1)
-				.flatMap(Arrays::stream)
-				.toArray(Annotation[]::new);
-
-		if (methodParamsWithoutRequestDetails.length != constructor.getParameterCount()) {
-			final String error = String.format(
-					"%smismatch between constructor args: %s and non-request details parameter args: %s",
-					Msg.code(475326592),
-					Arrays.toString(constructor.getParameterTypes()),
-					Arrays.toString(methodParamsWithoutRequestDetails));
-			throw new InternalErrorException(error);
-		}
-
-		if (methodParamsWithoutRequestDetails.length != annotations.length) {
-			final String error = String.format(
-					"%smismatch between non-request details parameter args: %s and number of annotations: %s",
-					Msg.code(475326593),
-					Arrays.toString(methodParamsWithoutRequestDetails),
-					Arrays.toString(annotations));
-			throw new InternalErrorException(error);
-		}
+		final Annotation[] constructorAnnotations = constructor.getAnnotations();
 
 		final Parameter[] constructorParameters = validateAndGetConstructorParameters(constructor);
 
-		validMethodParamTypes(methodParamsWithoutRequestDetails, constructorParameters, annotations);
+		validMethodParamTypes(methodParamsWithoutRequestDetails, constructorParameters);
 
 		final Object[] convertedParams =
-				convertParamsIfNeeded(methodParamsWithoutRequestDetails, constructorParameters, annotations);
+				convertParamsIfNeeded(methodParamsWithoutRequestDetails, constructorParameters, constructorAnnotations);
 
 		return constructor.newInstance(convertedParams);
 	}
@@ -235,8 +209,10 @@ class BaseMethodBindingMethodParameterBuilder {
 			Parameter[] theConstructorParameters,
 			Annotation[] theAnnotations) {
 
+		final Annotation[] annotations = Arrays.stream(theConstructorParameters).map(Parameter::getAnnotations).filter(array -> array.length == 1).map(array -> array[0]).toArray(Annotation[]::new);
+
 		if (!EmbeddedOperationUtils.hasAnyValidSourceTypeConversions(
-				theMethodParamsWithoutRequestDetails, theConstructorParameters, theAnnotations)) {
+				theMethodParamsWithoutRequestDetails, theConstructorParameters, annotations)) {
 			return theMethodParamsWithoutRequestDetails;
 		}
 
@@ -254,19 +230,20 @@ class BaseMethodBindingMethodParameterBuilder {
 			int theIndex) {
 
 		final Object paramAtIndex = theMethodParamsWithoutRequestDetails[theIndex];
-		final Annotation annotation = theAnnotations[theIndex];
+		final Annotation annotation = theConstructorParameters[theIndex].getAnnotations()[0];
+//		final Annotation annotation = theAnnotations[theIndex];
 
 		if (paramAtIndex == null) {
 			return paramAtIndex;
 		}
 
-		if (!(annotation instanceof EmbeddedOperationParam)) {
+		if (!(annotation instanceof OperationParam)) {
 			return paramAtIndex;
 		}
 
-		final EmbeddedOperationParam embeddedParamAtIndex = (EmbeddedOperationParam) annotation;
+		final OperationParam operationParamAtIndex = (OperationParam) annotation;
 		final Class<?> paramClassAtIndex = paramAtIndex.getClass();
-		final OperationParameterRangeType rangeType = embeddedParamAtIndex.rangeType();
+		final OperationParameterRangeType rangeType = operationParamAtIndex.rangeType();
 		final Parameter constructorParameter = theConstructorParameters[theIndex];
 		final Class<?> constructorParameterType = constructorParameter.getType();
 
@@ -336,8 +313,7 @@ class BaseMethodBindingMethodParameterBuilder {
 
 	private void validMethodParamTypes(
 			Object[] theMethodParamsWithoutRequestDetails,
-			Parameter[] theConstructorParameters,
-			Annotation[] theAnnotations) {
+			Parameter[] theConstructorParameters) {
 
 		if (theMethodParamsWithoutRequestDetails.length != theConstructorParameters.length) {
 			final String error = String.format(
@@ -353,7 +329,8 @@ class BaseMethodBindingMethodParameterBuilder {
 			validateMethodParamType(
 					theMethodParamsWithoutRequestDetails[index],
 					theConstructorParameters[index].getType(),
-					theAnnotations[index]);
+					// LUKETODO:  fix by not passing this directly
+					theConstructorParameters[index].getAnnotations()[0]);
 		}
 	}
 
@@ -366,9 +343,9 @@ class BaseMethodBindingMethodParameterBuilder {
 
 		final Class<?> methodParamClass = theMethodParam.getClass();
 
-		final Optional<EmbeddedOperationParam> optOperationEmbeddedParam =
-				theAnnotation instanceof EmbeddedOperationParam
-						? Optional.of((EmbeddedOperationParam) theAnnotation)
+		final Optional<OperationParam> optOperationEmbeddedParam =
+				theAnnotation instanceof OperationParam
+						? Optional.of((OperationParam) theAnnotation)
 						: Optional.empty();
 
 		optOperationEmbeddedParam.ifPresent(embeddedParam -> {

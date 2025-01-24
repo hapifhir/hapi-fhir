@@ -457,56 +457,30 @@ public class MethodUtil {
 							param = innerParam;
 						}
 
-						// LUKETODO:  need to disable the below code
-
-						// OLD
-						//						final List<Class<?>> operationEmbeddedTypes =
-						//								ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
-						//										methodToUse, EmbeddedOperationParam.class);
-
-						final List<Class<?>> operationEmbeddedTypes = List.of();
-
-						if (op == null) {
-							throw new ConfigurationException(Msg.code(846192641)
-									+ "@OperationParam or OperationEmbeddedParam detected on method that is not annotated with @Operation: "
-									+ methodToUse.toGenericString());
-						}
-
-						if (operationEmbeddedTypes.size() > 1) {
-							throw new ConfigurationException(String.format(
-									"%sOnly one type with embedded params is supported for now for method: %s",
-									Msg.code(9999927), methodToUse.getName()));
-						}
-
-						if (!operationEmbeddedTypes.isEmpty()) {
-							final EmbeddedParameterConverter embeddedParameterConverter =
-									new EmbeddedParameterConverter(
-											theContext, theMethod, op, operationEmbeddedTypes.get(0));
-
-							final List<EmbeddedParameterConverterContext> outerContexts =
-									embeddedParameterConverter.convert();
-
-							for (EmbeddedParameterConverterContext outerContext : outerContexts) {
-								if (outerContext.getParameter() != null) {
-									parameters.add(outerContext.getParameter());
-								}
-								final ParamInitializationContext paramContext = outerContext.getParamContext();
-
-								if (paramContext != null) {
-									paramContexts.add(paramContext);
-
-									// N.B. This a hack used only to pass the null check below, which is crucial to the
-									// non-embedded params logic
-									param = paramContext.getParam();
-								}
-							}
-						} else {
-							// More than likely this will result in the param == null Exception below
-							ourLog.warn(
-									"Method '{}' has no parameters with annotations. Don't know how to handle this parameter",
-									methodToUse.getName());
-						}
-						ourLog.info("1234:  NEW CODE PATH!!!!!");
+						// LUKETODO:  extract the pattent from the code below then delete:
+//						if (!operationEmbeddedTypes.isEmpty()) {
+//							final EmbeddedParameterConverter embeddedParameterConverter =
+//									new EmbeddedParameterConverter(
+//											theContext, theMethod, op, operationEmbeddedTypes.get(0));
+//
+//							final List<EmbeddedParameterConverterContext> outerContexts =
+//									embeddedParameterConverter.convert();
+//
+//							for (EmbeddedParameterConverterContext outerContext : outerContexts) {
+//								if (outerContext.getParameter() != null) {
+//									parameters.add(outerContext.getParameter());
+//								}
+//								final ParamInitializationContext paramContext = outerContext.getParamContext();
+//
+//								if (paramContext != null) {
+//									paramContexts.add(paramContext);
+//
+//									// N.B. This a hack used only to pass the null check below, which is crucial to the
+//									// non-embedded params logic
+//									param = paramContext.getParam();
+//								}
+//							}
+//						}
 					} else if (nextAnnotation instanceof Validate.Mode) {
 						if (!parameterType.equals(ValidationModeEnum.class)) {
 							throw new ConfigurationException(Msg.code(406) + "Parameter annotated with @"

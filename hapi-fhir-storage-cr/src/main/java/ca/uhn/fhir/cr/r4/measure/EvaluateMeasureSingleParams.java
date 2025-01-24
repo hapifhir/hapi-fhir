@@ -57,41 +57,26 @@ import java.util.StringJoiner;
 // LUKETODO:  make code use or at least validate this annotation
 @EmbeddableOperationParams
 public class EvaluateMeasureSingleParams {
-	@IdParam
 	private final IdType myId;
 
-	// LUKETODO: OperationParam
-	@EmbeddedOperationParam(
-			name = "periodStart",
-			sourceType = String.class,
-			rangeType = OperationParameterRangeType.START)
 	private final ZonedDateTime myPeriodStart;
 
-	@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
 	private final ZonedDateTime myPeriodEnd;
 
-	@EmbeddedOperationParam(name = "reportType")
 	private final String myReportType;
 
-	@EmbeddedOperationParam(name = "subject")
 	private final String mySubject;
 
-	@EmbeddedOperationParam(name = "practitioner")
 	private final String myPractitioner;
 
-	@EmbeddedOperationParam(name = "lastReceivedOn")
 	private final String myLastReceivedOn;
 
-	@EmbeddedOperationParam(name = "productLine")
 	private final String myProductLine;
 
-	@EmbeddedOperationParam(name = "additionalData")
 	private final Bundle myAdditionalData;
 
-	@EmbeddedOperationParam(name = "terminologyEndpoint")
 	private final Endpoint myTerminologyEndpoint;
 
-	@EmbeddedOperationParam(name = "parameters")
 	private final Parameters myParameters;
 
 	// LUKETODO:  embedded factory constructor annoation

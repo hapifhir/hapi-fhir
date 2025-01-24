@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -40,7 +39,6 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.ParametersUtil;
-import ca.uhn.fhir.util.ReflectionUtil;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -50,9 +48,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -452,8 +451,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	private OperationIdParamDetails findIdParameterDetails(Method theMethod, FhirContext theContext) {
-		final List<Class<?>> operationEmbeddedTypes = ReflectionUtil.getMethodParamsWithClassesWithFieldsWithAnnotation(
-				theMethod, EmbeddedOperationParam.class);
+		final List<Class<?>> operationEmbeddedTypes = EmbeddedOperationUtils.getMethodParamsAnnotatedWithEmbeddableOperationParams(theMethod);
 
 		if (!operationEmbeddedTypes.isEmpty()) {
 			return findIdParamIndexForTypeWithEmbeddedParams(theMethod, operationEmbeddedTypes, theContext);
@@ -497,25 +495,28 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					typeWithEmbeddedParams, RequestDetails.class, SystemRequestDetails.class)) {
 				// skip
 			} else {
-				final Field[] fields = typeWithEmbeddedParams.getDeclaredFields();
+				// LUKETODO:  fix
+				final Constructor<?> constructor = EmbeddedOperationUtils.validateAndGetConstructor(typeWithEmbeddedParams);
+
+				final Parameter[] constructorParams = constructor.getParameters();
 
 				int paramIndex = 0;
-				for (Field field : fields) {
-					ParameterUtil.validateIdType(theMethod, theContext, field.getType());
+				for (Parameter constructorParam : constructorParams) {
+					ParameterUtil.validateIdType(theMethod, theContext, constructorParam.getType());
 
-					final String fieldName = field.getName();
-					final Annotation[] fieldAnnotations = field.getAnnotations();
+					final String constructorParamName = constructorParam.getName();
+					final Annotation[] fieldAnnotations = constructorParam.getAnnotations();
 
 					if (fieldAnnotations.length < 1) {
 						throw new ConfigurationException(String.format(
-								"%sNo annotations for field: %s for method: %s",
-								Msg.code(126362643), fieldName, theMethod.getName()));
+								"%sNo annotations for constructor param: %s for method: %s",
+								Msg.code(126362643), constructorParamName, theMethod.getName()));
 					}
 
 					if (fieldAnnotations.length > 1) {
 						throw new ConfigurationException(String.format(
-								"%sMore than one annotation for field: %s for method: %s",
-								Msg.code(195614846), fieldName, theMethod.getName()));
+								"%sMore than one annotation for constructor param: %s for method: %s",
+								Msg.code(195614846), constructorParamName, theMethod.getName()));
 					}
 
 					final Annotation fieldAnnotation = fieldAnnotations[0];

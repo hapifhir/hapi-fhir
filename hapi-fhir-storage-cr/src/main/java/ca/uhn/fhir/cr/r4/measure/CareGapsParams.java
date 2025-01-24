@@ -74,32 +74,20 @@ import java.util.StringJoiner;
  */
 @EmbeddableOperationParams
 public class CareGapsParams {
-	// LUKETODO: when ready, cut the umbilical cord
-	@EmbeddedOperationParam(
-			name = "periodStart",
-			sourceType = String.class,
-			rangeType = OperationParameterRangeType.START)
 	private final ZonedDateTime myPeriodStart;
 
-	@EmbeddedOperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
 	private final ZonedDateTime myPeriodEnd;
 
-	@EmbeddedOperationParam(name = "subject")
 	private final String mySubject;
 
-	@EmbeddedOperationParam(name = "status")
 	private final List<String> myStatus;
 
-	@EmbeddedOperationParam(name = "measureId")
 	private final List<String> myMeasureId;
 
-	@EmbeddedOperationParam(name = "measureIdentifier")
 	private final List<String> myMeasureIdentifier;
 
-	@EmbeddedOperationParam(name = "measureUrl")
 	private final List<CanonicalType> myMeasureUrl;
 
-	@EmbeddedOperationParam(name = "nonDocument")
 	private final BooleanType myNonDocument;
 
 	public CareGapsParams(

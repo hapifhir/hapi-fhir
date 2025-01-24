@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.util.ReflectionUtil;
 import jakarta.annotation.Nonnull;
@@ -49,6 +50,7 @@ public class EmbeddedOperationUtils {
 
 	private EmbeddedOperationUtils() {}
 
+	// LUKETODO: redo for OperationParam
 	/**
 	 * Validate that a constructor for a class with fields that are {@link EmbeddedOperationParam} declares its
 	 * parameters in the same order as the fields are declared in the class.  It also validates that the fields are
@@ -120,8 +122,8 @@ public class EmbeddedOperationUtils {
 		final Class<?> constructorParamType = theConstructorParameters[theIndex].getType();
 		final Annotation annotation = theAnnotations[theIndex];
 
-		if (annotation instanceof EmbeddedOperationParam) {
-			final EmbeddedOperationParam embeddedOperationParam = (EmbeddedOperationParam) annotation;
+		if (annotation instanceof OperationParam) {
+			final OperationParam embeddedOperationParam = (OperationParam) annotation;
 			final OperationParameterRangeType operationParameterRangeType = embeddedOperationParam.rangeType();
 
 			if (isValidSourceTypeConversion(methodParamClass, constructorParamType, operationParameterRangeType)) {
