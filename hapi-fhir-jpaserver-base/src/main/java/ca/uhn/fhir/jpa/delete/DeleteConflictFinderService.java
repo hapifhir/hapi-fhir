@@ -40,8 +40,7 @@ public class DeleteConflictFinderService {
 		TypedQuery<ResourceLink> query = myEntityManager.createQuery(queryStr, ResourceLink.class);
 		query.setParameter("target_pid", theEntity.getId());
 		query.setMaxResults(maxResults);
-		List<ResourceLink> resourceLinks = query.getResultList();
 
-		return resourceLinks;
+		return query.getResultList();
 	}
 }
