@@ -21,6 +21,7 @@ package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -73,6 +74,7 @@ import java.util.StringJoiner;
  */
 @EmbeddableOperationParams
 public class CareGapsParams {
+	// LUKETODO: when ready, cut the umbilical cord
 	@EmbeddedOperationParam(
 			name = "periodStart",
 			sourceType = String.class,
@@ -101,13 +103,24 @@ public class CareGapsParams {
 	private final BooleanType myNonDocument;
 
 	public CareGapsParams(
+			@OperationParam(
+				name = "periodStart",
+				sourceType = String.class,
+				rangeType = OperationParameterRangeType.START)
 			ZonedDateTime thePeriodStart,
+			@OperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
 			ZonedDateTime thePeriodEnd,
+			@OperationParam(name = "subject")
 			String theSubject,
+			@OperationParam(name = "status")
 			List<String> theStatus,
+			@OperationParam(name = "measureId")
 			List<String> theMeasureId,
+			@OperationParam(name = "measureIdentifier")
 			List<String> theMeasureIdentifier,
+			@OperationParam(name = "measureUrl")
 			List<CanonicalType> theMeasureUrl,
+			@OperationParam(name = "nonDocument")
 			BooleanType theNonDocument) {
 		myPeriodStart = thePeriodStart;
 		myPeriodEnd = thePeriodEnd;

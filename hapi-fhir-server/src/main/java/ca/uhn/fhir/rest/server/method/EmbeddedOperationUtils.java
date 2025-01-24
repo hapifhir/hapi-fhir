@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.util.ReflectionUtil;
 import jakarta.annotation.Nonnull;
@@ -35,7 +36,10 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -144,6 +148,28 @@ public class EmbeddedOperationUtils {
 		return String.class == theSourceType
 				&& ZonedDateTime.class == theTargetType
 				&& OperationParameterRangeType.NOT_APPLICABLE != theOperationParameterRangeType;
+	}
+
+	public static List<Class<?>> getMethodParamsAnnotatedWithEmbeddedOperationParams(Method theMethod) {
+		return Arrays.stream(theMethod.getParameterTypes())
+			.filter(EmbeddedOperationUtils::hasEmbeddedOperationParamsAnnotation)
+			.collect(Collectors.toUnmodifiableList());
+	}
+
+	private static boolean hasEmbeddedOperationParamsAnnotation(Class<?> theMethodParameterType) {
+		final Annotation[] annotations = theMethodParameterType.getAnnotations();
+
+		if (annotations.length == 0) {
+			return false;
+		}
+
+		if (annotations.length > 1) {
+			throw new ConfigurationException(String.format(
+					"%sInvalid operation embedded parameters.  Class has more than one annotation: %s",
+					Msg.code(9132164), theMethodParameterType));
+		}
+
+		return EmbeddedOperationParams.class == annotations[0].annotationType();
 	}
 
 	private static void validateConstructorArgs(Constructor<?> theConstructor, Field[] theDeclaredFields) {

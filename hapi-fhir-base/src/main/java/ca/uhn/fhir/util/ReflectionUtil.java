@@ -31,6 +31,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -165,6 +166,27 @@ public class ReflectionUtil {
 		}
 		ParameterizedType collectionType = (ParameterizedType) genericParameterType;
 		return getGenericCollectionTypeOf(collectionType.getActualTypeArguments()[0]);
+	}
+
+	public static Class<?> getGenericCollectionTypeOfConstructorParameter(Constructor<?> theConstructor, Parameter theConstructorParameter) {
+		final int theParamIndex = getIndexOfElement(theConstructor.getParameters(), theConstructorParameter);
+		final Type genericParameterType = theConstructor.getGenericParameterTypes()[theParamIndex];
+
+		if (Class.class.equals(genericParameterType) || Class.class.equals(genericParameterType.getClass())) {
+			return null;
+		}
+
+		final ParameterizedType collectionType = (ParameterizedType) genericParameterType;
+		return getGenericCollectionTypeOf(collectionType.getActualTypeArguments()[0]);
+	}
+
+	private static <T> int getIndexOfElement(T[] array, T element) {
+		for (int i = 0; i < array.length; i++) {
+			if (array[i].equals(element)) {
+				return i;
+			}
+		}
+		return -1; // Return -1 if the element is not found
 	}
 
 	public static Class<?> getGenericCollectionTypeOfMethodReturnType(Method theMethod) {

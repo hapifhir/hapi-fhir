@@ -22,6 +22,7 @@ package ca.uhn.fhir.cr.r4.measure;
 import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -96,16 +97,30 @@ public class EvaluateMeasureSingleParams {
 	// LUKETODO:  embedded factory constructor annoation
 	// LUKETODO:  annotations on constructor parameters instead
 	public EvaluateMeasureSingleParams(
+			@IdParam
 			IdType theId,
+			@OperationParam(
+				name = "periodStart",
+				sourceType = String.class,
+				rangeType = OperationParameterRangeType.START)
 			ZonedDateTime thePeriodStart,
+			@OperationParam(name = "periodEnd", sourceType = String.class, rangeType = OperationParameterRangeType.END)
 			ZonedDateTime thePeriodEnd,
+			@OperationParam(name = "reportType")
 			String theReportType,
+			@OperationParam(name = "subject")
 			String theSubject,
+			@OperationParam(name = "practitioner")
 			String thePractitioner,
+			@OperationParam(name = "lastReceivedOn")
 			String theLastReceivedOn,
+			@OperationParam(name = "productLine")
 			String theProductLine,
+			@OperationParam(name = "additionalData")
 			Bundle theAdditionalData,
+			@OperationParam(name = "terminologyEndpoint")
 			Endpoint theTerminologyEndpoint,
+			@OperationParam(name = "parameters")
 			Parameters theParameters) {
 		myId = theId;
 		myPeriodStart = thePeriodStart;

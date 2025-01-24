@@ -270,7 +270,7 @@ public class OperationParameter implements IParameter {
 				// LUKETODO:  claim new code
 				// LUKETODO:  test the rangeType NOT_APPLICABLE scenario
 				final String error = String.format(
-						"%sInvalid type for @OperationEmbeddedParam on method: %s with sourceType: %s, parameterType: %s, and rangeType: %s",
+						"%sInvalid type for @OperationParam on method: %s with sourceType: %s, parameterType: %s, and rangeType: %s",
 						Msg.code(361), theMethod.getName(), mySourceType, myParameterType.getName(), myRangeType);
 				throw new ConfigurationException(error);
 			}
