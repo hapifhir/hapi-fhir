@@ -609,7 +609,8 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			myOrganizationDao.update(p2, mySrd);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).contains(Msg.code(996) + "Incorrect resource type");
+			assertThat(e.getMessage()).contains(Msg.code(2616));
+			assertThat(e.getMessage()).contains("this is not the correct resource type for this resource");
 		}
 	}
 

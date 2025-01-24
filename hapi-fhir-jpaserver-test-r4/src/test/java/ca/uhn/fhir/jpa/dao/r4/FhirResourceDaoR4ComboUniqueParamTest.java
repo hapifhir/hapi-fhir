@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
-import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -45,7 +44,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
@@ -72,21 +70,10 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
-	private ComboSearchParameterTestHelper myComboSearchParameterTestHelper;
-
-	@BeforeEach
-	public void beforeEach() {
-		myComboSearchParameterTestHelper = new ComboSearchParameterTestHelper(mySearchParameterDao, mySearchParamRegistry);
-	}
 
 	@AfterEach
 	public void purgeUniqueIndexes() {
 		myResourceIndexedComboStringUniqueDao.deleteAll();
-	}
-
-	private void createUniqueBirthdateAndGenderSps() {
-		myComboSearchParameterTestHelper.createBirthdateAndGenderSps(true);
-		myMessages.clear();
 	}
 
 	private void createUniqueGenderFamilyComboSp() {
@@ -896,7 +883,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	public void testDuplicateUniqueValuesAreRejectedWithChecking_TestingDisabled() {
 		myStorageSettings.setUniqueIndexesCheckedBeforeSave(false);
 
-		createUniqueBirthdateAndGenderSps();
+		createBirthdateAndGenderSps(true);
 
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
@@ -913,7 +900,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testDuplicateUniqueValuesAreRejectedWithChecking_TestingEnabled() {
-		createUniqueBirthdateAndGenderSps();
+		createBirthdateAndGenderSps(true);
 
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
@@ -1167,7 +1154,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testNonTransaction() {
-		createUniqueBirthdateAndGenderSps();
+		createBirthdateAndGenderSps(true);
 
 		Patient p = new Patient();
 		p.setGender(Enumerations.AdministrativeGender.MALE);
@@ -1358,7 +1345,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testUniqueValuesAreIndexed_DateAndToken() {
-		createUniqueBirthdateAndGenderSps();
+		createBirthdateAndGenderSps(true);
 
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
@@ -1604,7 +1591,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testUniqueValuesAreNotIndexedIfNotAllParamsAreFound_DateAndToken() {
-		createUniqueBirthdateAndGenderSps();
+		createBirthdateAndGenderSps(true);
 
 		Patient pt;
 
@@ -1716,7 +1703,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testDetectUniqueSearchParams() {
-		createUniqueBirthdateAndGenderSps();
+		createBirthdateAndGenderSps(true);
 		List<RuntimeSearchParam> params = mySearchParamRegistry.getActiveComboSearchParams("Patient", null);
 
 		assertThat(params).hasSize(1);
@@ -1731,7 +1718,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testDuplicateUniqueValuesWithDateAreRejected() {
-		createUniqueBirthdateAndGenderSps();
+		createBirthdateAndGenderSps(true);
 
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
@@ -1782,7 +1769,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testUniqueComboSearchWithDateNotUsingUniqueIndex() {
-		createUniqueBirthdateAndGenderSps();
+		createBirthdateAndGenderSps(true);
 
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);

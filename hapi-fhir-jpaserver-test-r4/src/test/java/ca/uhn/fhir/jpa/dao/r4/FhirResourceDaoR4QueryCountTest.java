@@ -4017,8 +4017,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(((OperationOutcome)outcome.getOperationOutcome()).getIssueFirstRep().getDiagnostics()).contains("No issues detected");
 		myCaptureQueriesListener.logSelectQueries();
 		if (theStoredInRepository) {
-			assertEquals(7, myCaptureQueriesListener.countGetConnections());
-			assertEquals(8, myCaptureQueriesListener.countSelectQueries());
+			assertEquals(5, myCaptureQueriesListener.countGetConnections());
+			assertEquals(6, myCaptureQueriesListener.countSelectQueries());
 		} else {
 			assertEquals(6, myCaptureQueriesListener.countGetConnections());
 			assertEquals(6, myCaptureQueriesListener.countSelectQueries());

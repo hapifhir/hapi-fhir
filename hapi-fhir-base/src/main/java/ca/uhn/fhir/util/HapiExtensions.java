@@ -195,6 +195,18 @@ public class HapiExtensions {
 			"http://hl7.org/fhir/tools/CustomTargetResource";
 
 	/**
+	 * When a resource is replacing another resource, this extension can be added
+	 * to include a reference to the resource that is being replaced.
+	 */
+	public static final String EXTENSION_REPLACES = "http://hapifhir.io/fhir/StructureDefinition/replaces";
+
+	/**
+	 * When a resource is replaced by another resource, this extension can be added
+	 * to include a reference to the resource that is replacing it.
+	 */
+	public static final String EXTENSION_REPLACED_BY = "http://hapifhir.io/fhir/StructureDefinition/replaced-by";
+
+	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {}

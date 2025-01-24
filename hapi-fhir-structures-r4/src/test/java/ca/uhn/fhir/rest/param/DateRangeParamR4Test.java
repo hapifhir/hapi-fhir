@@ -103,7 +103,7 @@ public class DateRangeParamR4Test {
 	}
 
 	@Test
-	public void testSearchForOneUnqualifiedDate() throws Exception {
+	public void testSearchWithUnqualifiedDate_shouldRemainUnqualified() throws Exception {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=2012-01-01");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		consumeResponse(status);
@@ -114,8 +114,13 @@ public class DateRangeParamR4Test {
 
 		assertEquals(parseLowerForDatePrecision("2012-01-01 00:00:00.0000"), ourLastDateRange.getLowerBoundAsInstant());
 		assertEquals(parseUpperForDatePrecision("2012-01-03 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
-		assertEquals(ParamPrefixEnum.EQUAL, ourLastDateRange.getLowerBound().getPrefix());
-		assertEquals(ParamPrefixEnum.EQUAL, ourLastDateRange.getUpperBound().getPrefix());
+
+		// In order for combo search indexes to be searched, it is required that date query parameters not include a date
+		// modifier (eq, gt,le, etc). Subsequently, parsing a date query parameter should result in Lower/upper bound prefixes
+		// having values only if specifically provided as part of the date query string (birthdate=eq2012-01-01) and not be given the default
+		// value of 'EQUAL'.
+		assertNull(ourLastDateRange.getLowerBound().getPrefix());
+		assertNull(ourLastDateRange.getUpperBound().getPrefix());
 	}
 
 	@Test
@@ -467,7 +472,7 @@ public class DateRangeParamR4Test {
 	}
 
 	@AfterAll
-	public static void afterClassClearContext() throws Exception {
+	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
