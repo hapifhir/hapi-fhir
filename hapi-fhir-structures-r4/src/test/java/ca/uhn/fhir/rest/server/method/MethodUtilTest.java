@@ -408,17 +408,6 @@ class MethodUtilTest {
 			return true;
 		}
 
-		if (theExpectedParameter instanceof EmbeddedOperationParameterToAssert expectedEmbeddedOperationParameter && theActualParameter instanceof EmbeddedOperationParameter actualEmbeddedOperationParameter) {
-			assertThat(actualEmbeddedOperationParameter.getContext().getVersion().getVersion()).isEqualTo(expectedEmbeddedOperationParameter.myContext().getVersion().getVersion());
-			assertThat(actualEmbeddedOperationParameter.getName()).isEqualTo(expectedEmbeddedOperationParameter.myName());
-			assertThat(actualEmbeddedOperationParameter.getParamType()).isEqualTo(expectedEmbeddedOperationParameter.myParamType());
-			assertThat(actualEmbeddedOperationParameter.getInnerCollectionType()).isEqualTo(expectedEmbeddedOperationParameter.myInnerCollectionType());
-			assertThat(actualEmbeddedOperationParameter.getSourceType()).isEqualTo(expectedEmbeddedOperationParameter.myTypeToConvertFrom());
-			assertThat(actualEmbeddedOperationParameter.getRangeType()).isEqualTo(expectedEmbeddedOperationParameter.myRangeType());
-
-			return true;
-		}
-
 		return false;
 	}
 
@@ -431,18 +420,6 @@ class MethodUtilTest {
 	}
 
 	private record OperationParameterToAssert(
-		 FhirContext myContext,
-		 String myName,
-		 String myOperationName,
-		 @SuppressWarnings("rawtypes")
-		 Class<? extends Collection> myInnerCollectionType,
-		 Class<?> myParameterType,
-		 String myParamType,
-		 Class<?> myTypeToConvertFrom,
-		 OperationParameterRangeType myRangeType) implements IParameterToAssert {
-	}
-
-	private record EmbeddedOperationParameterToAssert(
 		 FhirContext myContext,
 		 String myName,
 		 String myOperationName,

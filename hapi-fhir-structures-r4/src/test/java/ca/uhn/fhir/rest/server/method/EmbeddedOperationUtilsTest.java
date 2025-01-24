@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
@@ -12,11 +14,16 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class EmbeddedOperationUtilsTest {
+	@EmbeddableOperationParams
 	private static class SimpleFieldsAndConstructorInOrder {
 		private final String myParam1;
 		private final int myParam2;
 
-		public SimpleFieldsAndConstructorInOrder(String theParam1, int theParam2) {
+		public SimpleFieldsAndConstructorInOrder(
+			 @OperationParam(name = "param1")
+			 String theParam1,
+			 @OperationParam(name = "param2")
+			 int theParam2) {
 			myParam1 = theParam1;
 			myParam2 = theParam2;
 		}
@@ -99,13 +106,22 @@ class EmbeddedOperationUtilsTest {
 		}
 	}
 
+	@EmbeddableOperationParams
 	private static class WithGenericFieldsAndConstructorInOrder {
 		private final String myParam1;
 		private final int myParam2;
 		private final List<String> myParam3;
 		private final List<Integer> myParam4;
 
-		public WithGenericFieldsAndConstructorInOrder(String theParam1, int theParam2, List<String> theParam3, List<Integer> theParam4) {
+		public WithGenericFieldsAndConstructorInOrder(
+				 @OperationParam(name = "param1")
+				 String theParam1,
+				 @OperationParam(name = "param2")
+				 int theParam2,
+				 @OperationParam(name = "param3")
+				 List<String> theParam3,
+				 @OperationParam(name = "param4")
+				 List<Integer> theParam4) {
 			myParam1 = theParam1;
 			myParam2 = theParam2;
 			myParam3 = theParam3;

@@ -20,7 +20,6 @@
 package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
-import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;

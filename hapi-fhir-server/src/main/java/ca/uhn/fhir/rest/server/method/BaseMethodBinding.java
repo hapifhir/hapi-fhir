@@ -259,7 +259,9 @@ public abstract class BaseMethodBinding {
 			// LUKETODO:  cleanup later
 			ourLog.info(
 					"1234:  \nmethod: {}, \ninputParams: {}, \noutputParams: {}",
-					myMethod.getName(), theMethodParams, outputParams);
+					myMethod.getName(),
+					theMethodParams,
+					outputParams);
 
 			return method.invoke(getProvider(), outputParams);
 		} catch (InvocationTargetException e) {

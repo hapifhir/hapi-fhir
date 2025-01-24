@@ -451,7 +451,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	private OperationIdParamDetails findIdParameterDetails(Method theMethod, FhirContext theContext) {
-		final List<Class<?>> operationEmbeddedTypes = EmbeddedOperationUtils.getMethodParamsAnnotatedWithEmbeddableOperationParams(theMethod);
+		final List<Class<?>> operationEmbeddedTypes =
+				EmbeddedOperationUtils.getMethodParamsAnnotatedWithEmbeddableOperationParams(theMethod);
 
 		if (!operationEmbeddedTypes.isEmpty()) {
 			return findIdParamIndexForTypeWithEmbeddedParams(theMethod, operationEmbeddedTypes, theContext);
@@ -496,7 +497,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				// skip
 			} else {
 				// LUKETODO:  fix
-				final Constructor<?> constructor = EmbeddedOperationUtils.validateAndGetConstructor(typeWithEmbeddedParams);
+				final Constructor<?> constructor =
+						EmbeddedOperationUtils.validateAndGetConstructor(typeWithEmbeddedParams);
 
 				final Parameter[] constructorParams = constructor.getParameters();
 

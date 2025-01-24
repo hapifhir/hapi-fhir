@@ -22,10 +22,9 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
-import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
-import ca.uhn.fhir.util.ReflectionUtil;
 import jakarta.annotation.Nonnull;
 
 import java.lang.annotation.Annotation;
@@ -44,21 +43,20 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * Common operations for any functionality that work with {@link EmbeddedOperationParam}
+ * Common operations for any functionality that work with {@link EmbeddedOperationParams}
  */
 public class EmbeddedOperationUtils {
 
 	private EmbeddedOperationUtils() {}
 
-	// LUKETODO: redo for OperationParam
 	/**
-	 * Validate that a constructor for a class with fields that are {@link EmbeddedOperationParam} declares its
-	 * parameters in the same order as the fields are declared in the class.  It also validates that the fields are
+	 * Validate that for a class that has a {@link EmbeddableOperationParams} its constructor hass parameters that are
+	 * {@link OperationParam}.  It also validates that the fields are
 	 * final.  It also takes into account Collections and generic types, as well as whether there is a source to
 	 * target type conversion, such as String to ZonedDateTime.
 	 *
-	 * @param theParameterTypeWithOperationEmbeddedParam the class that has fields that are
-	 * annotated with {@link EmbeddedOperationParam}
+	 * @param theParameterTypeWithOperationEmbeddedParam the class that constructor params that are
+	 * annotated with {@link OperationParam}
 	 * @return the constructor for the class
 	 */
 	static Constructor<?> validateAndGetConstructor(Class<?> theParameterTypeWithOperationEmbeddedParam) {
@@ -82,11 +80,6 @@ public class EmbeddedOperationUtils {
 		validateConstructorArgs(soleConstructor, theParameterTypeWithOperationEmbeddedParam.getDeclaredFields());
 
 		return soleConstructor;
-	}
-
-	static boolean hasAnyMethodParamsWithClassesWithFieldsWithEmbeddedOperationParams(Method theMethod) {
-		return ReflectionUtil.hasAnyMethodParamsWithClassesWithFieldsWithAnnotation(
-				theMethod, EmbeddedOperationParam.class);
 	}
 
 	// LUKETODO:  javadoc
@@ -123,8 +116,8 @@ public class EmbeddedOperationUtils {
 		final Annotation annotation = theAnnotations[theIndex];
 
 		if (annotation instanceof OperationParam) {
-			final OperationParam embeddedOperationParam = (OperationParam) annotation;
-			final OperationParameterRangeType operationParameterRangeType = embeddedOperationParam.rangeType();
+			final OperationParam operationParam = (OperationParam) annotation;
+			final OperationParameterRangeType operationParameterRangeType = operationParam.rangeType();
 
 			if (isValidSourceTypeConversion(methodParamClass, constructorParamType, operationParameterRangeType)) {
 				return true;
@@ -175,6 +168,7 @@ public class EmbeddedOperationUtils {
 	}
 
 	private static void validateConstructorArgs(Constructor<?> theConstructor, Field[] theDeclaredFields) {
+		final Parameter[] constructorParameters = theConstructor.getParameters();
 		final Class<?>[] constructorParameterTypes = theConstructor.getParameterTypes();
 
 		if (constructorParameterTypes.length != theDeclaredFields.length) {
@@ -186,8 +180,24 @@ public class EmbeddedOperationUtils {
 
 		final Type[] constructorGenericParameterTypes = theConstructor.getGenericParameterTypes();
 
-		for (int index = 0; index < constructorParameterTypes.length; index++) {
+		for (int index = 0; index < constructorParameters.length; index++) {
+			final Parameter constructorParameterAtIndex = constructorParameters[index];
 			final Class<?> constructorParameterTypeAtIndex = constructorParameterTypes[index];
+
+			final Annotation[] constructorParamAnnotations = constructorParameterAtIndex.getAnnotations();
+
+			if (constructorParamAnnotations.length < 1) {
+				throw new ConfigurationException(String.format(
+						"%sNo annotations for constructor class: %s param: %s",
+						Msg.code(9999926), theConstructor.getDeclaringClass(), constructorParameterAtIndex));
+			}
+
+			if (constructorParamAnnotations.length > 1) {
+				throw new ConfigurationException(String.format(
+						"%sMore than one annotation for constructor: %s param: %s ",
+						Msg.code(999998), theConstructor, constructorParameterTypeAtIndex));
+			}
+
 			final Field declaredFieldAtIndex = theDeclaredFields[index];
 			final Class<?> fieldTypeAtIndex = declaredFieldAtIndex.getType();
 

@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.annotation.EmbeddedOperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -50,7 +49,7 @@ import static java.util.function.Predicate.not;
 // LUKETODO:  redo javadoc
 /**
  * Responsible for either passing to objects params straight through to the method call or converting them to
- * fit within a class that has fields annotated with {@link EmbeddedOperationParam} and to also handle placement
+ * fit within a class that has cosntructor parameters annotated with {@link OperationParam} and to also handle placement
  * of {@link RequestDetails} in those params
  */
 class BaseMethodBindingMethodParameterBuilder {
@@ -209,7 +208,11 @@ class BaseMethodBindingMethodParameterBuilder {
 			Parameter[] theConstructorParameters,
 			Annotation[] theAnnotations) {
 
-		final Annotation[] annotations = Arrays.stream(theConstructorParameters).map(Parameter::getAnnotations).filter(array -> array.length == 1).map(array -> array[0]).toArray(Annotation[]::new);
+		final Annotation[] annotations = Arrays.stream(theConstructorParameters)
+				.map(Parameter::getAnnotations)
+				.filter(array -> array.length == 1)
+				.map(array -> array[0])
+				.toArray(Annotation[]::new);
 
 		if (!EmbeddedOperationUtils.hasAnyValidSourceTypeConversions(
 				theMethodParamsWithoutRequestDetails, theConstructorParameters, annotations)) {
@@ -231,7 +234,7 @@ class BaseMethodBindingMethodParameterBuilder {
 
 		final Object paramAtIndex = theMethodParamsWithoutRequestDetails[theIndex];
 		final Annotation annotation = theConstructorParameters[theIndex].getAnnotations()[0];
-//		final Annotation annotation = theAnnotations[theIndex];
+		//		final Annotation annotation = theAnnotations[theIndex];
 
 		if (paramAtIndex == null) {
 			return paramAtIndex;
@@ -312,8 +315,7 @@ class BaseMethodBindingMethodParameterBuilder {
 	}
 
 	private void validMethodParamTypes(
-			Object[] theMethodParamsWithoutRequestDetails,
-			Parameter[] theConstructorParameters) {
+			Object[] theMethodParamsWithoutRequestDetails, Parameter[] theConstructorParameters) {
 
 		if (theMethodParamsWithoutRequestDetails.length != theConstructorParameters.length) {
 			final String error = String.format(
@@ -343,10 +345,9 @@ class BaseMethodBindingMethodParameterBuilder {
 
 		final Class<?> methodParamClass = theMethodParam.getClass();
 
-		final Optional<OperationParam> optOperationEmbeddedParam =
-				theAnnotation instanceof OperationParam
-						? Optional.of((OperationParam) theAnnotation)
-						: Optional.empty();
+		final Optional<OperationParam> optOperationEmbeddedParam = theAnnotation instanceof OperationParam
+				? Optional.of((OperationParam) theAnnotation)
+				: Optional.empty();
 
 		optOperationEmbeddedParam.ifPresent(embeddedParam -> {
 			// LUKETODO: is this wise?

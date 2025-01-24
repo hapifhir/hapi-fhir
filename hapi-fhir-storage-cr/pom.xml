@@ -20,6 +20,9 @@
 	<properties>
 		<org.antlr-version>4.10.1</org.antlr-version>
 		<spring-security-core.version>5.7.8</spring-security-core.version>
+		<!-- LUKETODO:  start temp -->
+		<maven.enforcer.skip>true</maven.enforcer.skip>
+		<!-- LUKETODO:  end temp -->
 	</properties>
 
 

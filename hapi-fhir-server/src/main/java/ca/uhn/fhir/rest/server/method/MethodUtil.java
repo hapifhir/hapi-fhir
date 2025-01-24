@@ -380,6 +380,12 @@ public class MethodUtil {
 									Msg.code(9999927), methodToUse.getName()));
 						}
 
+						final EmbeddedParameterConverter embeddedParameterConverter =
+								new EmbeddedParameterConverter(theContext, theMethod, op, embeddedParamsClasses.get(0));
+
+						final List<EmbeddedParameterConverterContext> outerContexts =
+								embeddedParameterConverter.convert();
+
 						final Class<?> soleEmbeddedParamClass = embeddedParamsClasses.get(0);
 
 						final Constructor<?>[] constructorsForEmbeddableOperationParams =
@@ -458,29 +464,29 @@ public class MethodUtil {
 						}
 
 						// LUKETODO:  extract the pattent from the code below then delete:
-//						if (!operationEmbeddedTypes.isEmpty()) {
-//							final EmbeddedParameterConverter embeddedParameterConverter =
-//									new EmbeddedParameterConverter(
-//											theContext, theMethod, op, operationEmbeddedTypes.get(0));
-//
-//							final List<EmbeddedParameterConverterContext> outerContexts =
-//									embeddedParameterConverter.convert();
-//
-//							for (EmbeddedParameterConverterContext outerContext : outerContexts) {
-//								if (outerContext.getParameter() != null) {
-//									parameters.add(outerContext.getParameter());
-//								}
-//								final ParamInitializationContext paramContext = outerContext.getParamContext();
-//
-//								if (paramContext != null) {
-//									paramContexts.add(paramContext);
-//
-//									// N.B. This a hack used only to pass the null check below, which is crucial to the
-//									// non-embedded params logic
-//									param = paramContext.getParam();
-//								}
-//							}
-//						}
+						//						if (!operationEmbeddedTypes.isEmpty()) {
+						//							final EmbeddedParameterConverter embeddedParameterConverter =
+						//									new EmbeddedParameterConverter(
+						//											theContext, theMethod, op, operationEmbeddedTypes.get(0));
+						//
+						//							final List<EmbeddedParameterConverterContext> outerContexts =
+						//									embeddedParameterConverter.convert();
+						//
+						//							for (EmbeddedParameterConverterContext outerContext : outerContexts) {
+						//								if (outerContext.getParameter() != null) {
+						//									parameters.add(outerContext.getParameter());
+						//								}
+						//								final ParamInitializationContext paramContext = outerContext.getParamContext();
+						//
+						//								if (paramContext != null) {
+						//									paramContexts.add(paramContext);
+						//
+						//									// N.B. This a hack used only to pass the null check below, which is crucial to the
+						//									// non-embedded params logic
+						//									param = paramContext.getParam();
+						//								}
+						//							}
+						//						}
 					} else if (nextAnnotation instanceof Validate.Mode) {
 						if (!parameterType.equals(ValidationModeEnum.class)) {
 							throw new ConfigurationException(Msg.code(406) + "Parameter annotated with @"
