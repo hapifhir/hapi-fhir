@@ -173,10 +173,9 @@ public class MethodUtil {
 						final Operation op = theMethod.getAnnotation(Operation.class);
 
 						if (op == null) {
-							final String error = String.format("%s@OperationParam or @EmbeddedOperationParams detected on method: [%s] that is not annotated with @Operation: %s",
-								Msg.code(404),
-								theMethod.getName(),
-								theMethod.toGenericString());
+							final String error = String.format(
+									"%s@OperationParam or @EmbeddedOperationParams detected on method: [%s] that is not annotated with @Operation: %s",
+									Msg.code(404), theMethod.getName(), theMethod.toGenericString());
 							throw new ConfigurationException(error);
 						}
 
