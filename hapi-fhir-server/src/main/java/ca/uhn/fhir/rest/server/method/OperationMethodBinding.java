@@ -480,7 +480,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	private Optional<IdParam> findIdParam(Method theMethod, int theParamIndex) {
-		// LUKETODO:  do we need to validate there's only one?
 		return Arrays.stream(theMethod.getParameterAnnotations()[theParamIndex])
 				.filter(IdParam.class::isInstance)
 				.map(IdParam.class::cast)
@@ -496,7 +495,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					typeWithEmbeddedParams, RequestDetails.class, SystemRequestDetails.class)) {
 				// skip
 			} else {
-				// LUKETODO:  fix
 				final Constructor<?> constructor =
 						EmbeddedOperationUtils.validateAndGetConstructor(typeWithEmbeddedParams);
 

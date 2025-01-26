@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.Sampl
 import ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SampleParamsWithIdParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +30,6 @@ import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethod
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
-
-// LUKETODO: try to test for every case in embedded params where there's a throws
 
 // This test lives in hapi-fhir-structures-r4 because if we introduce it in hapi-fhir-server, there will be a
 // circular dependency
@@ -216,152 +213,39 @@ class MethodUtilTest {
 	}
 
 	@Test
-	@Disabled
-    void getResourceParameters_withOptionalParam_shouldReturnSearchParameter() throws NoSuchMethodException {
-//        final Method sampleMethod = this.getClass().getDeclaredMethod("sampleMethod", String.class);
-//        when(method.getParameterAnnotations()).thenReturn(new Annotation[][]{{new OptionalParam() {
-//            @Override
-//            public Class<? extends Annotation> annotationType() {
-//                return OptionalParam.class;
-//            }
-//
-//			@Override
-//			public String[] chainBlacklist() {
-//				return new String[0];
-//			}
-//
-//			@Override
-//			public String[] chainWhitelist() {
-//				return new String[0];
-//			}
-//
-//			@Override
-//			public Class<? extends IQueryParameterType>[] compositeTypes() {
-//				return new Class[0];
-//			}
-//
-//			@Override
-//            public String name() {
-//                return "param";
-//            }
-//
-//			@Override
-//			public Class<? extends IBaseResource>[] targetTypes() {
-//				return new Class[0];
-//			}
-//		}}});
-//        when(method.getParameterTypes()).thenReturn(sampleMethod.getParameterTypes());
-//
-//        List<IParameter> parameters = MethodUtil.getResourceParameters(myFhirContext, method, provider);
-//
-//        assertEquals(1, parameters.size());
-//		assertInstanceOf(SearchParameter.class, parameters.get(0));
-//        SearchParameter searchParameter = (SearchParameter) parameters.get(0);
-//        assertEquals("param", searchParameter.getName());
-//        assertFalse(searchParameter.isRequired());
-    }
+	void invalidMethodWithNoAnnotations() {
+		assertThatThrownBy(() -> getMethodAndExecute("methodWithNoAnnotations", String.class))
+			 .isInstanceOf(ConfigurationException.class)
+			 .hasMessageContaining("has no recognized FHIR interface parameter nextParameterAnnotations");
+	}
 
-    @Test
-	@Disabled
-    void getResourceParameters_withInvalidAnnotation_shouldThrowConfigurationException() throws NoSuchMethodException {
-//        Method sampleMethod = this.getClass().getDeclaredMethod("sampleMethod", String.class);
-//        when(method.getParameterAnnotations()).thenReturn(new Annotation[][]{{new Annotation() {
-//            @Override
-//            public Class<? extends Annotation> annotationType() {
-//                return Annotation.class;
-//            }
-//        }}});
-//        when(method.getParameterTypes()).thenReturn(sampleMethod.getParameterTypes());
-//
-//        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
-//            MethodUtil.getResourceParameters(myFhirContext, method, provider);
-//        });
-//
-//        assertTrue(exception.getMessage().contains("has no recognized FHIR interface parameter nextParameterAnnotations"));
-    }
+	@Test
+	void invalidMethodWithInvalidGenericType() {
+		assertThatThrownBy(() -> getMethodAndExecute("methodWithInvalidGenericType", List.class))
+			 .isInstanceOf(ConfigurationException.class)
+			 .hasMessageContaining("is of an invalid generic type");
+	}
 
-    @Test
-	@Disabled
-    void getResourceParameters_withMultipleAnnotations_shouldReturnCorrectParameters() throws NoSuchMethodException {
-//        Method sampleMethod = this.getClass().getDeclaredMethod("sampleMethod", String.class);
-//        when(method.getParameterAnnotations()).thenReturn(new Annotation[][]{
-//            {new RequiredParam() {
-//                @Override
-//                public Class<? extends Annotation> annotationType() {
-//                    return RequiredParam.class;
-//                }
-//
-//				@Override
-//				public String[] chainBlacklist() {
-//					return new String[0];
-//				}
-//
-//				@Override
-//				public String[] chainWhitelist() {
-//					return new String[0];
-//				}
-//
-//				@Override
-//				public Class<? extends IQueryParameterType>[] compositeTypes() {
-//					return new Class[0];
-//				}
-//
-//				@Override
-//                public String name() {
-//                    return "param1";
-//                }
-//
-//				@Override
-//				public Class<? extends IBaseResource>[] targetTypes() {
-//					return new Class[0];
-//				}
-//			}},
-//            {new OptionalParam() {
-//                @Override
-//                public Class<? extends Annotation> annotationType() {
-//                    return OptionalParam.class;
-//                }
-//
-//				@Override
-//				public String[] chainBlacklist() {
-//					return new String[0];
-//				}
-//
-//				@Override
-//				public String[] chainWhitelist() {
-//					return new String[0];
-//				}
-//
-//				@Override
-//				public Class<? extends IQueryParameterType>[] compositeTypes() {
-//					return new Class[0];
-//				}
-//
-//				@Override
-//                public String name() {
-//                    return "param2";
-//                }
-//
-//				@Override
-//				public Class<? extends IBaseResource>[] targetTypes() {
-//					return new Class[0];
-//				}
-//			}}
-//        });
-//        when(method.getParameterTypes()).thenReturn(new Class[]{String.class, String.class});
-//
-//        List<IParameter> parameters = MethodUtil.getResourceParameters(myFhirContext, method, provider);
-//
-//        assertEquals(2, parameters.size());
-//        assertTrue(parameters.get(0) instanceof SearchParameter);
-//        assertTrue(parameters.get(1) instanceof SearchParameter);
-//        SearchParameter searchParameter1 = (SearchParameter) parameters.get(0);
-//        SearchParameter searchParameter2 = (SearchParameter) parameters.get(1);
-//        assertEquals("param1", searchParameter1.getName());
-//        assertTrue(searchParameter1.isRequired());
-//        assertEquals("param2", searchParameter2.getName());
-//        assertFalse(searchParameter2.isRequired());
-    }
+	@Test
+	void invalidMethodWithUnknownTypeName() {
+		assertThatThrownBy(() -> getMethodAndExecute("methodWithUnknownTypeName", String.class))
+			 .isInstanceOf(ConfigurationException.class)
+			 .hasMessageContaining("has no recognized FHIR interface parameter nextParameterAnnotations. Don't know how to handle this parameter");
+	}
+
+	@Test
+	void invalidMethodWithNonAssignableTypeName() {
+		assertThatThrownBy(() -> getMethodAndExecute("methodWithNonAssignableTypeName", String.class))
+			 .isInstanceOf(ConfigurationException.class)
+			 .hasMessageContaining(" has no recognized FHIR interface parameter nextParameterAnnotations. Don't know how to handle this parameter");
+	}
+
+	@Test
+	void invalidMethodWithInvalidAnnotation() {
+		assertThatThrownBy(() -> getMethodAndExecute("methodWithInvalidAnnotation", String.class))
+			 .isInstanceOf(ConfigurationException.class)
+			 .hasMessageContaining("has no recognized FHIR interface parameter nextParameterAnnotations");
+	}
 
 	private List<IParameter> getMethodAndExecute(String theMethodName, Class<?>... theParamClasses) {
 		return MethodUtil.getResourceParameters(

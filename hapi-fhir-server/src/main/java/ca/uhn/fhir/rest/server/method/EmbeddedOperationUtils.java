@@ -82,7 +82,15 @@ public class EmbeddedOperationUtils {
 		return soleConstructor;
 	}
 
-	// LUKETODO:  javadoc
+	/**
+	 * Checks to see if the constructor in question has any parameters that should be subject to a parameter conversion
+	 * from a source type to a target type.  This is currently only supported for String to ZonedDateTime.
+	 *
+	 * @param theMethodParamsWithoutRequestDetails method parameters without the request details
+	 * @param theConstructorParameters constructor parameters for the embedded params class
+	 * @param theAnnotations the annotations on the constructor params
+	 * @return true if this is an expected source type conversion
+	 */
 	static boolean hasAnyValidSourceTypeConversions(
 			Object[] theMethodParamsWithoutRequestDetails,
 			Parameter[] theConstructorParameters,
@@ -97,34 +105,6 @@ public class EmbeddedOperationUtils {
 				.mapToObj(index -> isValidSourceTypeConversion(
 						theMethodParamsWithoutRequestDetails, theConstructorParameters, theAnnotations, index))
 				.anyMatch(Boolean::booleanValue);
-	}
-
-	@Nonnull
-	private static Boolean isValidSourceTypeConversion(
-			Object[] theMethodParamsWithoutRequestDetails,
-			Parameter[] theConstructorParameters,
-			Annotation[] theAnnotations,
-			int theIndex) {
-		final Object methodParam = theMethodParamsWithoutRequestDetails[theIndex];
-
-		if (methodParam == null) {
-			return false;
-		}
-
-		final Class<?> methodParamClass = methodParam.getClass();
-		final Class<?> constructorParamType = theConstructorParameters[theIndex].getType();
-		final Annotation annotation = theAnnotations[theIndex];
-
-		if (annotation instanceof OperationParam) {
-			final OperationParam operationParam = (OperationParam) annotation;
-			final OperationParameterRangeType operationParameterRangeType = operationParam.rangeType();
-
-			if (isValidSourceTypeConversion(methodParamClass, constructorParamType, operationParameterRangeType)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
@@ -145,14 +125,18 @@ public class EmbeddedOperationUtils {
 				&& OperationParameterRangeType.NOT_APPLICABLE != theOperationParameterRangeType;
 	}
 
-	public static List<Class<?>> getMethodParamsAnnotatedWithEmbeddableOperationParams(Method theMethod) {
+	static List<Class<?>> getMethodParamsAnnotatedWithEmbeddableOperationParams(Method theMethod) {
 		return Arrays.stream(theMethod.getParameterTypes())
 				.filter(EmbeddedOperationUtils::hasEmbeddableOperationParamsAnnotation)
 				.collect(Collectors.toUnmodifiableList());
 	}
 
-	private static boolean hasEmbeddableOperationParamsAnnotation(Class<?> theMethodParameterType) {
-		final Annotation[] annotations = theMethodParameterType.getAnnotations();
+	static boolean typeHasNoEmbeddableOperationParamsAnnotation(Class<?> theType) {
+		return ! hasEmbeddableOperationParamsAnnotation(theType);
+	}
+
+	private static boolean hasEmbeddableOperationParamsAnnotation(Class<?> theType) {
+		final Annotation[] annotations = theType.getAnnotations();
 
 		if (annotations.length == 0) {
 			return false;
@@ -161,10 +145,38 @@ public class EmbeddedOperationUtils {
 		if (annotations.length > 1) {
 			throw new ConfigurationException(String.format(
 					"%sInvalid operation embedded parameters.  Class has more than one annotation: %s",
-					Msg.code(9132164), theMethodParameterType));
+					Msg.code(9132164), theType));
 		}
 
 		return EmbeddableOperationParams.class == annotations[0].annotationType();
+	}
+
+	@Nonnull
+	private static Boolean isValidSourceTypeConversion(
+		Object[] theMethodParamsWithoutRequestDetails,
+		Parameter[] theConstructorParameters,
+		Annotation[] theAnnotations,
+		int theIndex) {
+		final Object methodParam = theMethodParamsWithoutRequestDetails[theIndex];
+
+		if (methodParam == null) {
+			return false;
+		}
+
+		final Class<?> methodParamClass = methodParam.getClass();
+		final Class<?> constructorParamType = theConstructorParameters[theIndex].getType();
+		final Annotation annotation = theAnnotations[theIndex];
+
+		if (annotation instanceof OperationParam) {
+			final OperationParam operationParam = (OperationParam) annotation;
+			final OperationParameterRangeType operationParameterRangeType = operationParam.rangeType();
+
+			if (isValidSourceTypeConversion(methodParamClass, constructorParamType, operationParameterRangeType)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private static void validateConstructorArgs(Constructor<?> theConstructor, Field[] theDeclaredFields) {

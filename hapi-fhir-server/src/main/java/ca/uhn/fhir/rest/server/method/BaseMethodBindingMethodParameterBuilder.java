@@ -46,17 +46,15 @@ import java.util.stream.IntStream;
 
 import static java.util.function.Predicate.not;
 
-// LUKETODO:  redo javadoc
 /**
  * Responsible for either passing to objects params straight through to the method call or converting them to
- * fit within a class that has cosntructor parameters annotated with {@link OperationParam} and to also handle placement
+ * fit within a class that has constructor parameters annotated with {@link OperationParam} and to also handle placement
  * of {@link RequestDetails} in those params
  */
 class BaseMethodBindingMethodParameterBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseMethodBindingMethodParameterBuilder.class);
 
-	// LUKETODO: constructor param or something?
 	private final StringTimePeriodHandler myStringTimePeriodHandler = new StringTimePeriodHandler(ZoneOffset.UTC);
 
 	private final Method myMethod;
@@ -187,8 +185,6 @@ class BaseMethodBindingMethodParameterBuilder {
 		final Constructor<?> constructor =
 				EmbeddedOperationUtils.validateAndGetConstructor(theParameterTypeWithOperationEmbeddedParam);
 
-		// LUKETODO: redo this method in the new constructor param world
-		// LUKETODO: off by one error
 		final Object[] methodParamsWithoutRequestDetails = cloneWithRemovedRequestDetails(theMethodParams);
 
 		final Annotation[] constructorAnnotations = constructor.getAnnotations();
@@ -221,7 +217,7 @@ class BaseMethodBindingMethodParameterBuilder {
 
 		return IntStream.range(0, theMethodParamsWithoutRequestDetails.length)
 				.mapToObj(index -> convertParamIfNeeded(
-						theMethodParamsWithoutRequestDetails, theConstructorParameters, theAnnotations, index))
+						theMethodParamsWithoutRequestDetails, theConstructorParameters, index))
 				.toArray(Object[]::new);
 	}
 
@@ -229,16 +225,17 @@ class BaseMethodBindingMethodParameterBuilder {
 	private Object convertParamIfNeeded(
 			Object[] theMethodParamsWithoutRequestDetails,
 			Parameter[] theConstructorParameters,
-			Annotation[] theAnnotations,
 			int theIndex) {
 
 		final Object paramAtIndex = theMethodParamsWithoutRequestDetails[theIndex];
-		final Annotation annotation = theConstructorParameters[theIndex].getAnnotations()[0];
-		//		final Annotation annotation = theAnnotations[theIndex];
 
 		if (paramAtIndex == null) {
 			return paramAtIndex;
 		}
+
+		final Parameter constructorParameter = theConstructorParameters[theIndex];
+		// Ne already validated that there is at least one annotation earlier
+		final Annotation annotation = constructorParameter.getAnnotations()[0];
 
 		if (!(annotation instanceof OperationParam)) {
 			return paramAtIndex;
@@ -247,7 +244,6 @@ class BaseMethodBindingMethodParameterBuilder {
 		final OperationParam operationParamAtIndex = (OperationParam) annotation;
 		final Class<?> paramClassAtIndex = paramAtIndex.getClass();
 		final OperationParameterRangeType rangeType = operationParamAtIndex.rangeType();
-		final Parameter constructorParameter = theConstructorParameters[theIndex];
 		final Class<?> constructorParameterType = constructorParameter.getType();
 
 		if (EmbeddedOperationUtils.isValidSourceTypeConversion(
@@ -259,8 +255,8 @@ class BaseMethodBindingMethodParameterBuilder {
 				case END:
 					return myStringTimePeriodHandler.getEndZonedDateTime(paramAtIndexAsString, myRequestDetails);
 				default:
-					// LUKETODO:  message, code, etc
-					throw new IllegalArgumentException();
+					// This should never happen
+					throw new IllegalArgumentException(Msg.code(217312) + "Invalid range type: " + rangeType);
 			}
 		} else {
 			return paramAtIndex;
@@ -330,13 +326,11 @@ class BaseMethodBindingMethodParameterBuilder {
 		for (int index = 0; index < theMethodParamsWithoutRequestDetails.length; index++) {
 			validateMethodParamType(
 					theMethodParamsWithoutRequestDetails[index],
-					theConstructorParameters[index].getType(),
-					// LUKETODO:  fix by not passing this directly
-					theConstructorParameters[index].getAnnotations()[0]);
+					theConstructorParameters[index]);
 		}
 	}
 
-	private void validateMethodParamType(Object theMethodParam, Class<?> theParameterClass, Annotation theAnnotation) {
+	private void validateMethodParamType(Object theMethodParam, Parameter theConstructorParameter) {
 
 		if (theMethodParam == null) {
 			// argument is null, so we can't the type, so skip it:
@@ -345,12 +339,10 @@ class BaseMethodBindingMethodParameterBuilder {
 
 		final Class<?> methodParamClass = theMethodParam.getClass();
 
-		final Optional<OperationParam> optOperationEmbeddedParam = theAnnotation instanceof OperationParam
-				? Optional.of((OperationParam) theAnnotation)
-				: Optional.empty();
+		final Optional<OperationParam> optOperationEmbeddedParam =
+			Optional.ofNullable(theConstructorParameter.getAnnotation(OperationParam.class));
 
 		optOperationEmbeddedParam.ifPresent(embeddedParam -> {
-			// LUKETODO: is this wise?
 			if (embeddedParam.sourceType() != Void.class && methodParamClass != embeddedParam.sourceType()) {
 				final String error = String.format(
 						"%sMismatch between methodParamClass: %s and OperationEmbeddedParam source type: %s for method: %s",
@@ -359,26 +351,28 @@ class BaseMethodBindingMethodParameterBuilder {
 			}
 		});
 
+		final Class<?> parameterType = theConstructorParameter.getType();
+
 		if (Collection.class.isAssignableFrom(methodParamClass)
-				|| Collection.class.isAssignableFrom(theParameterClass)) {
+				|| Collection.class.isAssignableFrom(parameterType)) {
 			// ex:  List and ArrayList
-			if (methodParamClass.isAssignableFrom(theParameterClass)) {
+			if (methodParamClass.isAssignableFrom(parameterType)) {
 				final String error = String.format(
 						"%sMismatch between methodParamClass: %s and parameterClassAtIndex: %s for method: %s",
-						Msg.code(236146124), methodParamClass, theParameterClass, myMethod.getName());
+						Msg.code(236146124), methodParamClass, parameterType, myMethod.getName());
 
 				throw new InternalErrorException(error);
 			}
 			// Ex:  Field is declared as an IIdType, but argument is an IdDt
 			// or supported type conversion: String to ZonedDateTime
-		} else if (!theParameterClass.isAssignableFrom(methodParamClass)
+		} else if (!parameterType.isAssignableFrom(methodParamClass)
 				&& !optOperationEmbeddedParam
 						.map(embeddedParam -> EmbeddedOperationUtils.isValidSourceTypeConversion(
-								methodParamClass, theParameterClass, embeddedParam.rangeType()))
+								methodParamClass, parameterType, embeddedParam.rangeType()))
 						.orElse(false)) {
 			final String error = String.format(
 					"%sMismatch between methodParamClass: %s and parameterClassAtIndex: %s for method: %s",
-					Msg.code(236146125), methodParamClass, theParameterClass, myMethod.getName());
+					Msg.code(236146125), methodParamClass, parameterType, myMethod.getName());
 			throw new InternalErrorException(error);
 		}
 	}

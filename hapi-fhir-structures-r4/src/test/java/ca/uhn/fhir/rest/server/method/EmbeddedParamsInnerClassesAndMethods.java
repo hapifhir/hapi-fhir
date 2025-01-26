@@ -78,6 +78,25 @@ class EmbeddedParamsInnerClassesAndMethods {
 	}
 
 	// Below are the methods and classed to test reflection code
+	public void methodWithNoAnnotations(String param) {
+		// Method implementation
+	}
+
+	public void methodWithInvalidGenericType(List<List<String>> param) {
+		// Method implementation
+	}
+
+	public void methodWithUnknownTypeName(String param) {
+		// Method implementation
+	}
+
+	public void methodWithNonAssignableTypeName(String param) {
+		// Method implementation
+	}
+
+	public void methodWithInvalidAnnotation(String param) {
+		// Method implementation
+	}
 
 	void superSimple() {
 	}

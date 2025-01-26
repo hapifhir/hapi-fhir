@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Elements;
-import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
@@ -71,16 +70,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -453,17 +448,10 @@ public class MethodUtil {
 								+ "' has no recognized FHIR interface parameter nextParameterAnnotations. Don't know how to handle this parameter");
 			}
 
-			// LUKETODO:  refactor into some sort of static method
-			// LUKETODO:  comment that this is a guard against adding the entire embeddable parameter as an
-			// OperationParameter
-			// LUKETODO:  find a better guard for this?
-
-			// LUKETODO:  this doesn't work because the contexts are not empty
-
 			if (paramContexts.isEmpty()
-					|| Arrays.stream(parameterType.getAnnotations())
-							.noneMatch(annotation -> annotation instanceof EmbeddableOperationParams)) {
-				// RequestDetails if it's last
+					// Ensure that if we've processed embedded operations parameters and last parameter is a
+					// RequestDetails, we don't miss it
+					|| EmbeddedOperationUtils.typeHasNoEmbeddableOperationParamsAnnotation(parameterType)) {
 				paramContexts.add(
 						new ParamInitializationContext(param, parameterType, outerCollectionType, innerCollectionType));
 			}

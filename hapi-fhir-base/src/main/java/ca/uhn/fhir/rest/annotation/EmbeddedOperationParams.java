@@ -24,7 +24,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-// LUKETODO:  javadoc
+/**
+ * Indicates that a method parameter is for a class annotated with {@link EmbeddableOperationParams} which will in turn
+ * contain a constructor whose parameters will be annotated with {@link OperationParam} and similar annotations.
+ * a
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.PARAMETER})
 public @interface EmbeddedOperationParams {}

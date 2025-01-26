@@ -53,7 +53,6 @@ import java.util.StringJoiner;
  * myAdditionalData  the data bundle containing additional data
  */
 // LUKETODO:  start to integrate this with a clinical reasoning branch
-// LUKETODO:  make code use or at least validate this annotation
 @EmbeddableOperationParams
 public class EvaluateMeasureSingleParams {
 	private final IdType myId;

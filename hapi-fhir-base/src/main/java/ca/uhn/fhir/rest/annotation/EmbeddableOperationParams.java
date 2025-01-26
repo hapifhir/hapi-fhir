@@ -24,7 +24,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-// LUKETODO:  javadoc
+
+/**
+ * Indicates a class will contain {@link OperationParam} parameters and similar annotations that will be processed
+ * in place of separate method parameters so annotated in an operation provider.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.TYPE})
 public @interface EmbeddableOperationParams {}

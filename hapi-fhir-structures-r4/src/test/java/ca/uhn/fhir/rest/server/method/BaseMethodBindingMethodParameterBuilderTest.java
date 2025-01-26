@@ -22,6 +22,7 @@ import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethod
 import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.ParamsWithoutAnnotations;
 import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS;
 import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS;
+import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST;
 import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE;
 import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_LAST;
 import static ca.uhn.fhir.rest.server.method.EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE;
@@ -35,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 // circular dependency
 class BaseMethodBindingMethodParameterBuilderTest {
 
-	// LUKETODO:  test ZonedDateTime + IdParam
 	// LUKETODO:  assert Exception messages
 
 	private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(BaseMethodBindingMethodParameterBuilderTest.class);
@@ -93,7 +93,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 
 	@Test
 	void happyPathOperationEmbeddedTypesRequestDetailsFirst() {
-		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(EmbeddedParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST, RequestDetails.class, SampleParams.class);
+		final Method sampleMethod = myEmbeddedParamsInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST, RequestDetails.class, SampleParams.class);
 		final Object[] inputParams = new Object[]{REQUEST_DETAILS, "param1", List.of("param2")};
 		final Object[] expectedOutputParams = new Object[]{REQUEST_DETAILS, new SampleParams("param1", List.of("param2"))};
 
