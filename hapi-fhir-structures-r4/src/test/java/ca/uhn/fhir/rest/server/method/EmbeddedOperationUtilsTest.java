@@ -13,6 +13,7 @@ import java.util.Objects;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+// LUKETODO:  test for non-embedded case where we have multiple annotations
 class EmbeddedOperationUtilsTest {
 	@EmbeddableOperationParams
 	private static class SimpleFieldsAndConstructorInOrder {

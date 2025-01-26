@@ -142,13 +142,22 @@ public class EmbeddedOperationUtils {
 			return false;
 		}
 
+		final List<EmbeddableOperationParams> embeddableOperationParams = Arrays.stream(annotations)
+			.filter(EmbeddableOperationParams.class::isInstance)
+			.map(EmbeddableOperationParams.class::cast)
+			.collect(Collectors.toUnmodifiableList());
+
+		if (embeddableOperationParams.isEmpty()) {
+			return false;
+		}
+
 		if (annotations.length > 1) {
 			throw new ConfigurationException(String.format(
 					"%sInvalid operation embedded parameters.  Class has more than one annotation: %s",
 					Msg.code(9132164), theType));
 		}
 
-		return EmbeddableOperationParams.class == annotations[0].annotationType();
+		return true;
 	}
 
 	@Nonnull
