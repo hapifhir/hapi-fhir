@@ -46,6 +46,10 @@ class ParamInitializationContext {
 		return myParam;
 	}
 
+	public Class<?> getParameterType() {
+		return myParameterType;
+	}
+
 	void initialize(Method theMethod) {
 		myParam.initializeTypes(theMethod, myOuterCollectionType, myInnerCollectionType, myParameterType);
 	}

@@ -151,96 +151,69 @@ public class MethodUtil {
 			} else if (parameterType.equals(SearchTotalModeEnum.class)) {
 				param = new SearchTotalModeParameter();
 			} else {
-				final Operation op = theMethod.getAnnotation(Operation.class);
-
 				for (int i = 0; i < nextParameterAnnotations.length && param == null; i++) {
-					Annotation nextAnnotation = nextParameterAnnotations[i];
+					final Annotation nextParameterAnnotation = nextParameterAnnotations[i];
 
-					if (nextAnnotation instanceof RequiredParam) {
-						param = createRequiredParam(
-								theContext,
-								nextParameterAnnotations,
-								(RequiredParam) nextAnnotation,
-								parameterType,
-								innerCollectionType,
-								outerCollectionType);
-					} else if (nextAnnotation instanceof OptionalParam) {
-						param = createOptionalParam(
-								theContext,
-								nextParameterAnnotations,
-								(OptionalParam) nextAnnotation,
-								parameterType,
-								innerCollectionType,
-								outerCollectionType);
-					} else if (nextAnnotation instanceof RawParam) {
-						param = new RawParamsParameter(parameters);
-					} else if (nextAnnotation instanceof IncludeParam) {
-						param = createIncludeParam(
-								theMethod, parameterType, innerCollectionType, outerCollectionType, (IncludeParam)
-										nextAnnotation);
-					} else if (nextAnnotation instanceof ResourceParam) {
-						param = createResourceParam(theMethod, theProvider, parameterType);
-					} else if (nextAnnotation instanceof IdParam) {
-						param = new NullParameter();
-					} else if (nextAnnotation instanceof ServerBase) {
-						param = new ServerBaseParamBinder();
-					} else if (nextAnnotation instanceof Elements) {
-						param = new ElementsParameter();
-					} else if (nextAnnotation instanceof Since) {
-						param = createSinceParameter(
-								theContext, parameterType, innerCollectionType, outerCollectionType);
-					} else if (nextAnnotation instanceof At) {
-						param = createAtParameter(theContext, parameterType, innerCollectionType, outerCollectionType);
-					} else if (nextAnnotation instanceof Count) {
-						param = new CountParameter();
-					} else if (nextAnnotation instanceof Offset) {
-						param = new OffsetParameter();
-					} else if (nextAnnotation instanceof GraphQLQueryUrl) {
-						param = new GraphQLQueryUrlParameter();
-					} else if (nextAnnotation instanceof GraphQLQueryBody) {
-						param = new GraphQLQueryBodyParameter();
-					} else if (nextAnnotation instanceof Sort) {
-						param = new SortParameter(theContext);
-					} else if (nextAnnotation instanceof TransactionParam) {
-						param = new TransactionParameter(theContext);
-					} else if (nextAnnotation instanceof ConditionalUrlParam) {
-						param = new ConditionalParamBinder(((ConditionalUrlParam) nextAnnotation).supportsMultiple());
-					} else if (nextAnnotation instanceof OperationParam) {
-						final ParameterContext paramContext = createOperationParameterContext(
-								theContext,
-								theMethod,
-								nextParameterAnnotations,
-								nextAnnotation,
-								parameterType,
-								declaredParameterType);
+					final IParameter paramForNonOperationNonEmbeddedAnnotation =
+							getParamForNonOperationNonEmbeddedAnnotation(
+									theContext,
+									theProvider,
+									theMethod,
+									nextParameterAnnotations,
+									nextParameterAnnotation,
+									parameterType,
+									outerCollectionType,
+									innerCollectionType,
+									parameters);
 
-						param = paramContext.getParam();
-						parameterType = paramContext.getParameterType();
-					} else if (nextAnnotation instanceof EmbeddedOperationParams) {
-						final EmbeddedParameterConverter embeddedParameterConverter =
-								new EmbeddedParameterConverter(theContext, theMethod, op);
+					if (paramForNonOperationNonEmbeddedAnnotation != null) {
+						param = paramForNonOperationNonEmbeddedAnnotation;
+					} else if ((nextParameterAnnotation instanceof OperationParam)
+							|| (nextParameterAnnotation instanceof EmbeddedOperationParams)) {
+						final Operation op = theMethod.getAnnotation(Operation.class);
 
-						for (EmbeddedParameterConverterContext outerContext : embeddedParameterConverter.convert()) {
-							if (outerContext.getParameter() != null) {
-								parameters.add(outerContext.getParameter());
-							}
-
-							final ParamInitializationContext paramContext = outerContext.getParamContext();
-
-							if (paramContext != null) {
-								paramContexts.add(paramContext);
-
-								// N.B. This a hack used only to pass the null check below, which is crucial to the
-								// non-embedded params logic
-								param = paramContext.getParam();
-							}
+						if (op == null) {
+							throw new ConfigurationException(Msg.code(404)
+									+ "@OperationParam or @EmbeddedOperationParams detected on method that is not annotated with @Operation: "
+									+ theMethod.toGenericString());
 						}
-					} else if (nextAnnotation instanceof Validate.Mode) {
-						param = createValidateNode(theContext, nextParameterAnnotations, parameterType);
-					} else {
-						if (nextAnnotation instanceof Validate.Profile) {
-							param = createValidateProfile(theContext, nextParameterAnnotations, parameterType);
+
+						if (nextParameterAnnotation instanceof OperationParam) {
+							final ParamInitializationContext operationParamContext = createOperationParamContext(
+									theContext,
+									theMethod,
+									nextParameterAnnotations,
+									nextParameterAnnotation,
+									parameterType,
+									declaredParameterType,
+									outerCollectionType,
+									innerCollectionType);
+
+							param = operationParamContext.getParam();
+							parameterType = operationParamContext.getParameterType();
 						}
+
+						if (nextParameterAnnotation instanceof EmbeddedOperationParams) {
+							final EmbeddedParameterConverter embeddedParameterConverter =
+									new EmbeddedParameterConverter(theContext, theMethod, op);
+
+							for (EmbeddedParameterConverterContext outerContext :
+									embeddedParameterConverter.convert()) {
+								if (outerContext.getParameter() != null) {
+									parameters.add(outerContext.getParameter());
+								}
+
+								final ParamInitializationContext paramContext = outerContext.getParamContext();
+
+								if (paramContext != null) {
+									paramContexts.add(paramContext);
+
+									// N.B. This a hack used only to pass the null check below, which is crucial to the
+									// non-embedded params logic
+									param = paramContext.getParam();
+								}
+							}
+						} // else param is null, and we throw, assuming nothing next in the loop doesn't this variable
 					}
 				}
 			}
@@ -269,6 +242,73 @@ public class MethodUtil {
 			paramIndex++;
 		}
 		return parameters;
+	}
+
+	@Nullable
+	private static IParameter getParamForNonOperationNonEmbeddedAnnotation(
+			FhirContext theContext,
+			Object theProvider,
+			Method theMethod,
+			Annotation[] theNextParameterAnnotations,
+			Annotation theNextAnnotation,
+			Class<?> theParameterType,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			List<IParameter> theParameters) {
+		if (theNextAnnotation instanceof RequiredParam) {
+			return createRequiredParam(
+					theContext,
+					theNextParameterAnnotations,
+					(RequiredParam) theNextAnnotation,
+					theParameterType,
+					theInnerCollectionType,
+					theOuterCollectionType);
+		} else if (theNextAnnotation instanceof OptionalParam) {
+			return createOptionalParam(
+					theContext,
+					theNextParameterAnnotations,
+					(OptionalParam) theNextAnnotation,
+					theParameterType,
+					theInnerCollectionType,
+					theOuterCollectionType);
+		} else if (theNextAnnotation instanceof RawParam) {
+			return new RawParamsParameter(theParameters);
+		} else if (theNextAnnotation instanceof IncludeParam) {
+			return createIncludeParam(
+					theMethod, theParameterType, theInnerCollectionType, theOuterCollectionType, (IncludeParam)
+							theNextAnnotation);
+		} else if (theNextAnnotation instanceof ResourceParam) {
+			return createResourceParam(theMethod, theProvider, theParameterType);
+		} else if (theNextAnnotation instanceof IdParam) {
+			return new NullParameter();
+		} else if (theNextAnnotation instanceof ServerBase) {
+			return new ServerBaseParamBinder();
+		} else if (theNextAnnotation instanceof Elements) {
+			return new ElementsParameter();
+		} else if (theNextAnnotation instanceof Since) {
+			return createSinceParameter(theContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
+		} else if (theNextAnnotation instanceof At) {
+			return createAtParameter(theContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
+		} else if (theNextAnnotation instanceof Count) {
+			return new CountParameter();
+		} else if (theNextAnnotation instanceof Offset) {
+			return new OffsetParameter();
+		} else if (theNextAnnotation instanceof GraphQLQueryUrl) {
+			return new GraphQLQueryUrlParameter();
+		} else if (theNextAnnotation instanceof GraphQLQueryBody) {
+			return new GraphQLQueryBodyParameter();
+		} else if (theNextAnnotation instanceof Sort) {
+			return new SortParameter(theContext);
+		} else if (theNextAnnotation instanceof TransactionParam) {
+			return new TransactionParameter(theContext);
+		} else if (theNextAnnotation instanceof ConditionalUrlParam) {
+			return new ConditionalParamBinder(((ConditionalUrlParam) theNextAnnotation).supportsMultiple());
+		} else if (theNextAnnotation instanceof Validate.Mode) {
+			return createValidateNode(theContext, theNextParameterAnnotations, theParameterType);
+		} else if (theNextAnnotation instanceof Validate.Profile) {
+			return createValidateProfile(theContext, theNextParameterAnnotations, theParameterType);
+		}
+		return null;
 	}
 
 	@Nonnull
@@ -469,13 +509,15 @@ public class MethodUtil {
 	}
 
 	@Nonnull
-	private static ParameterContext createOperationParameterContext(
+	private static ParamInitializationContext createOperationParamContext(
 			FhirContext theContext,
 			Method theMethod,
 			Annotation[] theNextParameterAnnotations,
 			Annotation theNextAnnotation,
 			Class<?> theParameterType,
-			Class<?> theDeclaredParameterType) {
+			Class<?> theDeclaredParameterType,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType) {
 		final Operation op = theMethod.getAnnotation(Operation.class);
 		if (op == null) {
 			throw new ConfigurationException(Msg.code(404)
@@ -518,7 +560,8 @@ public class MethodUtil {
 			parameterTypeInner = newParameterType;
 		}
 
-		return new ParameterContext(parameterTypeInner, param);
+		return new ParamInitializationContext(
+				param, parameterTypeInner, theOuterCollectionType, theInnerCollectionType);
 	}
 
 	private static GenericsContext getGenericsContext(
