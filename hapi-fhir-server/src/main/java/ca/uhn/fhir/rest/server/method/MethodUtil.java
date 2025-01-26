@@ -102,7 +102,6 @@ public class MethodUtil {
 		}
 	}
 
-
 	// LUKETODO:  extract annotations method and make sure it works with embedded params
 	public static List<IParameter> getResourceParameters(
 			final FhirContext theContext, final Method theMethod, Object theProvider) {

@@ -143,9 +143,9 @@ public class EmbeddedOperationUtils {
 		}
 
 		final List<EmbeddableOperationParams> embeddableOperationParams = Arrays.stream(annotations)
-			.filter(EmbeddableOperationParams.class::isInstance)
-			.map(EmbeddableOperationParams.class::cast)
-			.collect(Collectors.toUnmodifiableList());
+				.filter(EmbeddableOperationParams.class::isInstance)
+				.map(EmbeddableOperationParams.class::cast)
+				.collect(Collectors.toUnmodifiableList());
 
 		if (embeddableOperationParams.isEmpty()) {
 			return false;
