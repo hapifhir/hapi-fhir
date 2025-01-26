@@ -62,6 +62,8 @@ import ca.uhn.fhir.rest.server.method.ResourceParameter.Mode;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -113,58 +115,13 @@ public class MethodUtil {
 				// TagList is handled directly within the method bindings
 				param = new NullParameter();
 			} else {
-				if (Collection.class.isAssignableFrom(parameterType)) {
-					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
-					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
-					if (parameterType == null && theMethod.getDeclaringClass().isSynthetic()) {
-						try {
-							theMethod = theMethod
-									.getDeclaringClass()
-									.getSuperclass()
-									.getMethod(theMethod.getName(), parameterTypes);
-							parameterType =
-									ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
-						} catch (NoSuchMethodException e) {
-							throw new ConfigurationException(Msg.code(400) + "A method with name '"
-									+ theMethod.getName() + "' does not exist for super class '"
-									+ theMethod.getDeclaringClass().getSuperclass() + "'");
-						}
-					}
-					declaredParameterType = parameterType;
-				}
-				if (Collection.class.isAssignableFrom(parameterType)) {
-					outerCollectionType = innerCollectionType;
-					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
-					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
-					declaredParameterType = parameterType;
-				}
-				if (Collection.class.isAssignableFrom(parameterType)) {
-					throw new ConfigurationException(
-							Msg.code(401) + "Argument #" + paramIndex + " of Method '" + theMethod.getName()
-									+ "' in type '"
-									+ theMethod.getDeclaringClass().getCanonicalName()
-									+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
-				}
+				final GenericsContext genericsContext =
+						getGenericsContext(theContext, theMethod, parameterTypes, paramIndex);
 
-				/*
-				 * If the user is trying to bind IPrimitiveType they are probably
-				 * trying to write code that is compatible across versions of FHIR.
-				 * We'll try and come up with an appropriate subtype to give
-				 * them.
-				 *
-				 * This gets tested in HistoryR4Test
-				 */
-				if (IPrimitiveType.class.equals(parameterType)) {
-					Class<?> genericType =
-							ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
-					if (Date.class.equals(genericType)) {
-						BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("dateTime");
-						parameterType = dateTimeDef.getImplementingClass();
-					} else if (String.class.equals(genericType) || genericType == null) {
-						BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("string");
-						parameterType = dateTimeDef.getImplementingClass();
-					}
-				}
+				parameterType = genericsContext.getParameterType();
+				declaredParameterType = genericsContext.getDeclaredParameterType();
+				outerCollectionType = genericsContext.getOuterCollectionType();
+				innerCollectionType = genericsContext.getInnerCollectionType();
 			}
 
 			if (ServletRequest.class.isAssignableFrom(parameterType)) {
@@ -186,217 +143,20 @@ public class MethodUtil {
 				param = new SearchTotalModeParameter();
 			} else {
 				for (int i = 0; i < nextParameterAnnotations.length && param == null; i++) {
-					Annotation nextAnnotation = nextParameterAnnotations[i];
+					final ParameterContext parameterContext = handleAnnotation(
+							theContext,
+							theProvider,
+							theMethod,
+							nextParameterAnnotations,
+							nextParameterAnnotations[i],
+							parameterType,
+							declaredParameterType,
+							outerCollectionType,
+							innerCollectionType,
+							parameters);
 
-					if (nextAnnotation instanceof RequiredParam) {
-						SearchParameter parameter = new SearchParameter();
-						parameter.setName(((RequiredParam) nextAnnotation).name());
-						parameter.setRequired(true);
-						parameter.setDeclaredTypes(((RequiredParam) nextAnnotation).targetTypes());
-						parameter.setCompositeTypes(((RequiredParam) nextAnnotation).compositeTypes());
-						parameter.setChainLists(
-								((RequiredParam) nextAnnotation).chainWhitelist(),
-								((RequiredParam) nextAnnotation).chainBlacklist());
-						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
-						MethodUtil.extractDescription(parameter, nextParameterAnnotations);
-						param = parameter;
-					} else if (nextAnnotation instanceof OptionalParam) {
-						SearchParameter parameter = new SearchParameter();
-						parameter.setName(((OptionalParam) nextAnnotation).name());
-						parameter.setRequired(false);
-						parameter.setDeclaredTypes(((OptionalParam) nextAnnotation).targetTypes());
-						parameter.setCompositeTypes(((OptionalParam) nextAnnotation).compositeTypes());
-						parameter.setChainLists(
-								((OptionalParam) nextAnnotation).chainWhitelist(),
-								((OptionalParam) nextAnnotation).chainBlacklist());
-						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
-						MethodUtil.extractDescription(parameter, nextParameterAnnotations);
-						param = parameter;
-					} else if (nextAnnotation instanceof RawParam) {
-						param = new RawParamsParameter(parameters);
-					} else if (nextAnnotation instanceof IncludeParam) {
-						Class<? extends Collection<Include>> instantiableCollectionType;
-						Class<?> specType;
-
-						if (parameterType == String.class) {
-							instantiableCollectionType = null;
-							specType = String.class;
-						} else if ((parameterType != Include.class)
-								|| innerCollectionType == null
-								|| outerCollectionType != null) {
-							throw new ConfigurationException(Msg.code(402) + "Method '" + theMethod.getName()
-									+ "' is annotated with @" + IncludeParam.class.getSimpleName()
-									+ " but has a type other than Collection<" + Include.class.getSimpleName() + ">");
-						} else {
-							instantiableCollectionType = (Class<? extends Collection<Include>>)
-									CollectionBinder.getInstantiableCollectionType(
-											innerCollectionType, "Method '" + theMethod.getName() + "'");
-							specType = parameterType;
-						}
-
-						param = new IncludeParameter(
-								(IncludeParam) nextAnnotation, instantiableCollectionType, specType);
-					} else if (nextAnnotation instanceof ResourceParam) {
-						Mode mode;
-						if (IBaseResource.class.isAssignableFrom(parameterType)) {
-							mode = Mode.RESOURCE;
-						} else if (String.class.equals(parameterType)) {
-							mode = ResourceParameter.Mode.BODY;
-						} else if (byte[].class.equals(parameterType)) {
-							mode = ResourceParameter.Mode.BODY_BYTE_ARRAY;
-						} else if (EncodingEnum.class.equals(parameterType)) {
-							mode = Mode.ENCODING;
-						} else {
-							StringBuilder b = new StringBuilder();
-							b.append("Method '");
-							b.append(theMethod.getName());
-							b.append("' is annotated with @");
-							b.append(ResourceParam.class.getSimpleName());
-							b.append(" but has a type that is not an implementation of ");
-							b.append(IBaseResource.class.getCanonicalName());
-							b.append(" or String or byte[]");
-							throw new ConfigurationException(Msg.code(403) + b.toString());
-						}
-						boolean methodIsOperation = theMethod.getAnnotation(Operation.class) != null;
-						boolean methodIsPatch = theMethod.getAnnotation(Patch.class) != null;
-						param = new ResourceParameter(
-								(Class<? extends IBaseResource>) parameterType,
-								theProvider,
-								mode,
-								methodIsOperation,
-								methodIsPatch);
-					} else if (nextAnnotation instanceof IdParam) {
-						param = new NullParameter();
-					} else if (nextAnnotation instanceof ServerBase) {
-						param = new ServerBaseParamBinder();
-					} else if (nextAnnotation instanceof Elements) {
-						param = new ElementsParameter();
-					} else if (nextAnnotation instanceof Since) {
-						param = new SinceParameter();
-						((SinceParameter) param)
-								.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
-					} else if (nextAnnotation instanceof At) {
-						param = new AtParameter();
-						((AtParameter) param)
-								.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
-					} else if (nextAnnotation instanceof Count) {
-						param = new CountParameter();
-					} else if (nextAnnotation instanceof Offset) {
-						param = new OffsetParameter();
-					} else if (nextAnnotation instanceof GraphQLQueryUrl) {
-						param = new GraphQLQueryUrlParameter();
-					} else if (nextAnnotation instanceof GraphQLQueryBody) {
-						param = new GraphQLQueryBodyParameter();
-					} else if (nextAnnotation instanceof Sort) {
-						param = new SortParameter(theContext);
-					} else if (nextAnnotation instanceof TransactionParam) {
-						param = new TransactionParameter(theContext);
-					} else if (nextAnnotation instanceof ConditionalUrlParam) {
-						param = new ConditionalParamBinder(((ConditionalUrlParam) nextAnnotation).supportsMultiple());
-					} else if (nextAnnotation instanceof OperationParam) {
-						Operation op = theMethod.getAnnotation(Operation.class);
-						if (op == null) {
-							throw new ConfigurationException(Msg.code(404)
-									+ "@OperationParam detected on method that is not annotated with @Operation: "
-									+ theMethod.toGenericString());
-						}
-
-						OperationParam operationParam = (OperationParam) nextAnnotation;
-						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
-						List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);
-						;
-						param = new OperationParameter(
-								theContext,
-								op.name(),
-								operationParam.name(),
-								operationParam.min(),
-								operationParam.max(),
-								description,
-								examples);
-						if (isNotBlank(operationParam.typeName())) {
-							BaseRuntimeElementDefinition<?> elementDefinition =
-									theContext.getElementDefinition(operationParam.typeName());
-							if (elementDefinition == null) {
-								elementDefinition = theContext.getResourceDefinition(operationParam.typeName());
-							}
-							org.apache.commons.lang3.Validate.notNull(
-									elementDefinition,
-									"Unknown type name in @OperationParam: typeName=\"%s\"",
-									operationParam.typeName());
-
-							Class<?> newParameterType = elementDefinition.getImplementingClass();
-							if (!declaredParameterType.isAssignableFrom(newParameterType)) {
-								throw new ConfigurationException(Msg.code(405) + "Non assignable parameter typeName=\""
-										+ operationParam.typeName() + "\" specified on method " + theMethod);
-							}
-							parameterType = newParameterType;
-						}
-					} else if (nextAnnotation instanceof Validate.Mode) {
-						if (parameterType.equals(ValidationModeEnum.class) == false) {
-							throw new ConfigurationException(Msg.code(406) + "Parameter annotated with @"
-									+ Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName()
-									+ " must be of type " + ValidationModeEnum.class.getName());
-						}
-						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
-						List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);
-						param = new OperationParameter(
-										theContext,
-										Constants.EXTOP_VALIDATE,
-										Constants.EXTOP_VALIDATE_MODE,
-										0,
-										1,
-										description,
-										examples)
-								.setConverter(new IOperationParamConverter() {
-									@Override
-									public Object incomingServer(Object theObject) {
-										if (isNotBlank(theObject.toString())) {
-											ValidationModeEnum retVal =
-													ValidationModeEnum.forCode(theObject.toString());
-											if (retVal == null) {
-												OperationParameter.throwInvalidMode(theObject.toString());
-											}
-											return retVal;
-										}
-										return null;
-									}
-
-									@Override
-									public Object outgoingClient(Object theObject) {
-										return ParametersUtil.createString(
-												theContext, ((ValidationModeEnum) theObject).getCode());
-									}
-								});
-					} else if (nextAnnotation instanceof Validate.Profile) {
-						if (parameterType.equals(String.class) == false) {
-							throw new ConfigurationException(Msg.code(407) + "Parameter annotated with @"
-									+ Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName()
-									+ " must be of type " + String.class.getName());
-						}
-						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
-						List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);
-						param = new OperationParameter(
-										theContext,
-										Constants.EXTOP_VALIDATE,
-										Constants.EXTOP_VALIDATE_PROFILE,
-										0,
-										1,
-										description,
-										examples)
-								.setConverter(new IOperationParamConverter() {
-									@Override
-									public Object incomingServer(Object theObject) {
-										return theObject.toString();
-									}
-
-									@Override
-									public Object outgoingClient(Object theObject) {
-										return ParametersUtil.createString(theContext, theObject.toString());
-									}
-								});
-					} else {
-						continue;
-					}
+					param = parameterContext.getParam();
+					parameterType = parameterContext.getParameterType();
 				}
 			}
 
@@ -414,5 +174,462 @@ public class MethodUtil {
 			paramIndex++;
 		}
 		return parameters;
+	}
+
+	@Nonnull
+	private static ParameterContext handleAnnotation(
+			FhirContext theContext,
+			Object theProvider,
+			Method theMethod,
+			Annotation[] theNextParameterAnnotations,
+			Annotation theNextAnnotation,
+			Class<?> theParameterType,
+			Class<?> theDeclaredParameterType,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			List<IParameter> parameters) {
+		if (theNextAnnotation instanceof RequiredParam) {
+			return new ParameterContext(
+					theParameterType,
+					createRequiredParam(
+							theContext,
+							theNextParameterAnnotations,
+							(RequiredParam) theNextAnnotation,
+							theParameterType,
+							theInnerCollectionType,
+							theOuterCollectionType));
+		} else if (theNextAnnotation instanceof OptionalParam) {
+			return new ParameterContext(
+					theParameterType,
+					createOptionalParam(
+							theContext,
+							theNextParameterAnnotations,
+							(OptionalParam) theNextAnnotation,
+							theParameterType,
+							theInnerCollectionType,
+							theOuterCollectionType));
+		} else if (theNextAnnotation instanceof RawParam) {
+			return new ParameterContext(theParameterType, new RawParamsParameter(parameters));
+		} else if (theNextAnnotation instanceof IncludeParam) {
+			return new ParameterContext(
+					theParameterType,
+					createIncludeParam(
+							theMethod, theParameterType, theInnerCollectionType, theOuterCollectionType, (IncludeParam)
+									theNextAnnotation));
+		} else if (theNextAnnotation instanceof ResourceParam) {
+			return new ParameterContext(
+					theParameterType, createResourceParam(theMethod, theProvider, theParameterType));
+		} else if (theNextAnnotation instanceof IdParam) {
+			return new ParameterContext(theParameterType, new NullParameter());
+		} else if (theNextAnnotation instanceof ServerBase) {
+			return new ParameterContext(theParameterType, new ServerBaseParamBinder());
+		} else if (theNextAnnotation instanceof Elements) {
+			return new ParameterContext(theParameterType, new ElementsParameter());
+		} else if (theNextAnnotation instanceof Since) {
+			return new ParameterContext(
+					theParameterType,
+					createSinceParameter(theContext, theParameterType, theInnerCollectionType, theOuterCollectionType));
+		} else if (theNextAnnotation instanceof At) {
+			return new ParameterContext(
+					theParameterType,
+					createAtParameter(theContext, theParameterType, theInnerCollectionType, theOuterCollectionType));
+		} else if (theNextAnnotation instanceof Count) {
+			return new ParameterContext(theParameterType, new CountParameter());
+		} else if (theNextAnnotation instanceof Offset) {
+			return new ParameterContext(theParameterType, new OffsetParameter());
+		} else if (theNextAnnotation instanceof GraphQLQueryUrl) {
+			return new ParameterContext(theParameterType, new GraphQLQueryUrlParameter());
+		} else if (theNextAnnotation instanceof GraphQLQueryBody) {
+			return new ParameterContext(theParameterType, new GraphQLQueryBodyParameter());
+		} else if (theNextAnnotation instanceof Sort) {
+			return new ParameterContext(theParameterType, new SortParameter(theContext));
+		} else if (theNextAnnotation instanceof TransactionParam) {
+			return new ParameterContext(theParameterType, new TransactionParameter(theContext));
+		} else if (theNextAnnotation instanceof ConditionalUrlParam) {
+			return new ParameterContext(
+					theParameterType,
+					new ConditionalParamBinder(((ConditionalUrlParam) theNextAnnotation).supportsMultiple()));
+		} else if (theNextAnnotation instanceof OperationParam) {
+			return createOperationParameterContext(
+					theContext,
+					theMethod,
+					theNextParameterAnnotations,
+					theNextAnnotation,
+					theParameterType,
+					theDeclaredParameterType);
+		} else if (theNextAnnotation instanceof Validate.Mode) {
+			return new ParameterContext(
+					theParameterType, createValidateNode(theContext, theNextParameterAnnotations, theParameterType));
+		} else if (theNextAnnotation instanceof Validate.Profile) {
+			return new ParameterContext(
+					theParameterType, createValidateProfile(theContext, theNextParameterAnnotations, theParameterType));
+		}
+
+		return new ParameterContext(theParameterType, null);
+	}
+
+	@Nonnull
+	private static ParameterContext createOperationParameterContext(
+			FhirContext theContext,
+			Method theMethod,
+			Annotation[] theNextParameterAnnotations,
+			Annotation theNextAnnotation,
+			Class<?> theParameterType,
+			Class<?> theDeclaredParameterType) {
+		Operation op = theMethod.getAnnotation(Operation.class);
+		if (op == null) {
+			throw new ConfigurationException(Msg.code(404)
+					+ "@OperationParam detected on method that is not annotated with @Operation: "
+					+ theMethod.toGenericString());
+		}
+
+		OperationParam operationParam = (OperationParam) theNextAnnotation;
+		String description = ParametersUtil.extractDescription(theNextParameterAnnotations);
+		List<String> examples = ParametersUtil.extractExamples(theNextParameterAnnotations);
+		Class<?> parameterTypeInner = theParameterType;
+
+		OperationParameter param = new OperationParameter(
+				theContext,
+				op.name(),
+				operationParam.name(),
+				operationParam.min(),
+				operationParam.max(),
+				description,
+				examples);
+		if (isNotBlank(operationParam.typeName())) {
+			BaseRuntimeElementDefinition<?> elementDefinition =
+					theContext.getElementDefinition(operationParam.typeName());
+			if (elementDefinition == null) {
+				elementDefinition = theContext.getResourceDefinition(operationParam.typeName());
+			}
+			org.apache.commons.lang3.Validate.notNull(
+					elementDefinition,
+					"Unknown type name in @OperationParam: typeName=\"%s\"",
+					operationParam.typeName());
+
+			Class<?> newParameterType = elementDefinition.getImplementingClass();
+			if (!theDeclaredParameterType.isAssignableFrom(newParameterType)) {
+				throw new ConfigurationException(Msg.code(405) + "Non assignable parameter typeName=\""
+						+ operationParam.typeName() + "\" specified on method " + theMethod);
+			}
+			parameterTypeInner = newParameterType;
+		}
+
+		return new ParameterContext(parameterTypeInner, param);
+	}
+
+	@Nonnull
+	private static IParameter createAtParameter(
+			FhirContext theContext,
+			Class<?> theParameterType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<? extends Collection<?>> theOuterCollectionType) {
+		IParameter param;
+		param = new AtParameter();
+		((AtParameter) param).setType(theContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
+		return param;
+	}
+
+	@Nonnull
+	private static IParameter createSinceParameter(
+			FhirContext theTheContext,
+			Class<?> theParameterType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<? extends Collection<?>> theOuterCollectionType) {
+		IParameter param;
+		param = new SinceParameter();
+		((SinceParameter) param)
+				.setType(theTheContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
+		return param;
+	}
+
+	@Nonnull
+	private static IParameter createRequiredParam(
+			FhirContext theContext,
+			Annotation[] theNextParameterAnnotations,
+			RequiredParam theNextAnnotation,
+			Class<?> theParameterType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<? extends Collection<?>> theOuterCollectionType) {
+		IParameter param;
+		SearchParameter parameter = new SearchParameter();
+		parameter.setName(theNextAnnotation.name());
+		parameter.setRequired(true);
+		parameter.setDeclaredTypes(theNextAnnotation.targetTypes());
+		parameter.setCompositeTypes(theNextAnnotation.compositeTypes());
+		parameter.setChainLists(theNextAnnotation.chainWhitelist(), theNextAnnotation.chainBlacklist());
+		parameter.setType(theContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
+		MethodUtil.extractDescription(parameter, theNextParameterAnnotations);
+		param = parameter;
+		return param;
+	}
+
+	@Nonnull
+	private static IParameter createOptionalParam(
+			FhirContext theContext,
+			Annotation[] theNextParameterAnnotations,
+			OptionalParam theNextAnnotation,
+			Class<?> theParameterType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<? extends Collection<?>> theOuterCollectionType) {
+		IParameter param;
+		SearchParameter parameter = new SearchParameter();
+		parameter.setName(theNextAnnotation.name());
+		parameter.setRequired(false);
+		parameter.setDeclaredTypes(theNextAnnotation.targetTypes());
+		parameter.setCompositeTypes(theNextAnnotation.compositeTypes());
+		parameter.setChainLists(theNextAnnotation.chainWhitelist(), theNextAnnotation.chainBlacklist());
+		parameter.setType(theContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
+		MethodUtil.extractDescription(parameter, theNextParameterAnnotations);
+		param = parameter;
+		return param;
+	}
+
+	@Nonnull
+	private static IParameter createIncludeParam(
+			Method theMethod,
+			Class<?> theParameterType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			IncludeParam theNextAnnotation) {
+		IParameter param;
+		Class<? extends Collection<Include>> instantiableCollectionType;
+		Class<?> specType;
+
+		if (theParameterType == String.class) {
+			instantiableCollectionType = null;
+			specType = String.class;
+		} else if ((theParameterType != Include.class)
+				|| theInnerCollectionType == null
+				|| theOuterCollectionType != null) {
+			throw new ConfigurationException(Msg.code(402) + "Method '" + theMethod.getName()
+					+ "' is annotated with @" + IncludeParam.class.getSimpleName()
+					+ " but has a type other than Collection<" + Include.class.getSimpleName() + ">");
+		} else {
+			instantiableCollectionType =
+					(Class<? extends Collection<Include>>) CollectionBinder.getInstantiableCollectionType(
+							theInnerCollectionType, "Method '" + theMethod.getName() + "'");
+			specType = theParameterType;
+		}
+
+		param = new IncludeParameter(theNextAnnotation, instantiableCollectionType, specType);
+		return param;
+	}
+
+	@Nonnull
+	private static IParameter createResourceParam(Method theMethod, Object theProvider, Class<?> theParameterType) {
+		IParameter param;
+		Mode mode;
+		if (IBaseResource.class.isAssignableFrom(theParameterType)) {
+			mode = Mode.RESOURCE;
+		} else if (String.class.equals(theParameterType)) {
+			mode = Mode.BODY;
+		} else if (byte[].class.equals(theParameterType)) {
+			mode = Mode.BODY_BYTE_ARRAY;
+		} else if (EncodingEnum.class.equals(theParameterType)) {
+			mode = Mode.ENCODING;
+		} else {
+			StringBuilder b = new StringBuilder();
+			b.append("Method '");
+			b.append(theMethod.getName());
+			b.append("' is annotated with @");
+			b.append(ResourceParam.class.getSimpleName());
+			b.append(" but has a type that is not an implementation of ");
+			b.append(IBaseResource.class.getCanonicalName());
+			b.append(" or String or byte[]");
+			throw new ConfigurationException(Msg.code(403) + b.toString());
+		}
+		boolean methodIsOperation = theMethod.getAnnotation(Operation.class) != null;
+		boolean methodIsPatch = theMethod.getAnnotation(Patch.class) != null;
+		param = new ResourceParameter(
+				(Class<? extends IBaseResource>) theParameterType, theProvider, mode, methodIsOperation, methodIsPatch);
+		return param;
+	}
+
+	private static IParameter createValidateNode(
+			FhirContext theContext, Annotation[] theNextParameterAnnotations, Class<?> theParameterType) {
+		IParameter param;
+		if (!theParameterType.equals(ValidationModeEnum.class)) {
+			throw new ConfigurationException(Msg.code(406) + "Parameter annotated with @"
+					+ Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName()
+					+ " must be of type " + ValidationModeEnum.class.getName());
+		}
+		String description = ParametersUtil.extractDescription(theNextParameterAnnotations);
+		List<String> examples = ParametersUtil.extractExamples(theNextParameterAnnotations);
+		param = new OperationParameter(
+						theContext,
+						Constants.EXTOP_VALIDATE,
+						Constants.EXTOP_VALIDATE_MODE,
+						0,
+						1,
+						description,
+						examples)
+				.setConverter(new IOperationParamConverter() {
+					@Override
+					public Object incomingServer(Object theObject) {
+						if (isNotBlank(theObject.toString())) {
+							ValidationModeEnum retVal = ValidationModeEnum.forCode(theObject.toString());
+							if (retVal == null) {
+								OperationParameter.throwInvalidMode(theObject.toString());
+							}
+							return retVal;
+						}
+						return null;
+					}
+
+					@Override
+					public Object outgoingClient(Object theObject) {
+						return ParametersUtil.createString(theContext, ((ValidationModeEnum) theObject).getCode());
+					}
+				});
+		return param;
+	}
+
+	private static IParameter createValidateProfile(
+			FhirContext theContext, Annotation[] theNextParameterAnnotations, Class<?> theParameterType) {
+		IParameter param;
+		if (!theParameterType.equals(String.class)) {
+			throw new ConfigurationException(Msg.code(407) + "Parameter annotated with @"
+					+ Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName()
+					+ " must be of type " + String.class.getName());
+		}
+		String description = ParametersUtil.extractDescription(theNextParameterAnnotations);
+		List<String> examples = ParametersUtil.extractExamples(theNextParameterAnnotations);
+		param = new OperationParameter(
+						theContext,
+						Constants.EXTOP_VALIDATE,
+						Constants.EXTOP_VALIDATE_PROFILE,
+						0,
+						1,
+						description,
+						examples)
+				.setConverter(new IOperationParamConverter() {
+					@Override
+					public Object incomingServer(Object theObject) {
+						return theObject.toString();
+					}
+
+					@Override
+					public Object outgoingClient(Object theObject) {
+						return ParametersUtil.createString(theContext, theObject.toString());
+					}
+				});
+		return param;
+	}
+
+	private static GenericsContext getGenericsContext(
+			FhirContext theContext, Method theMethod, Class<?>[] theParameterTypes, int theParamIndex) {
+
+		Class<?> declaredParameterType = theParameterTypes[theParamIndex];
+		Class<?> parameterType = declaredParameterType;
+		Class<? extends java.util.Collection<?>> outerCollectionType = null;
+		Class<? extends java.util.Collection<?>> innerCollectionType = null;
+
+		if (Collection.class.isAssignableFrom(parameterType)) {
+			innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+			parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, theParamIndex);
+			if (parameterType == null && theMethod.getDeclaringClass().isSynthetic()) {
+				try {
+					theMethod = theMethod
+							.getDeclaringClass()
+							.getSuperclass()
+							.getMethod(theMethod.getName(), theParameterTypes);
+					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, theParamIndex);
+				} catch (NoSuchMethodException e) {
+					throw new ConfigurationException(Msg.code(400) + "A method with name '"
+							+ theMethod.getName() + "' does not exist for super class '"
+							+ theMethod.getDeclaringClass().getSuperclass() + "'");
+				}
+			}
+			declaredParameterType = parameterType;
+		}
+		if (Collection.class.isAssignableFrom(parameterType)) {
+			outerCollectionType = innerCollectionType;
+			innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+			parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, theParamIndex);
+			declaredParameterType = parameterType;
+		}
+		if (Collection.class.isAssignableFrom(parameterType)) {
+			throw new ConfigurationException(
+					Msg.code(401) + "Argument #" + theParamIndex + " of Method '" + theMethod.getName()
+							+ "' in type '"
+							+ theMethod.getDeclaringClass().getCanonicalName()
+							+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
+		}
+
+		/*
+		 * If the user is trying to bind IPrimitiveType they are probably
+		 * trying to write code that is compatible across versions of FHIR.
+		 * We'll try and come up with an appropriate subtype to give
+		 * them.
+		 *
+		 * This gets tested in HistoryR4Test
+		 */
+		if (IPrimitiveType.class.equals(parameterType)) {
+			Class<?> genericType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, theParamIndex);
+			if (Date.class.equals(genericType)) {
+				BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("dateTime");
+				parameterType = dateTimeDef.getImplementingClass();
+			} else if (String.class.equals(genericType) || genericType == null) {
+				BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("string");
+				parameterType = dateTimeDef.getImplementingClass();
+			}
+		}
+
+		return new GenericsContext(parameterType, declaredParameterType, outerCollectionType, innerCollectionType);
+	}
+
+	private static class GenericsContext {
+		private final Class<?> parameterType;
+		private final Class<?> declaredParameterType;
+		private final Class<? extends java.util.Collection<?>> outerCollectionType;
+		private final Class<? extends java.util.Collection<?>> innerCollectionType;
+
+		public GenericsContext(
+				Class<?> theParameterType,
+				Class<?> theDeclaredParameterType,
+				Class<? extends Collection<?>> theOuterCollectionType,
+				Class<? extends Collection<?>> theInnerCollectionType) {
+			parameterType = theParameterType;
+			declaredParameterType = theDeclaredParameterType;
+			outerCollectionType = theOuterCollectionType;
+			innerCollectionType = theInnerCollectionType;
+		}
+
+		public Class<?> getParameterType() {
+			return parameterType;
+		}
+
+		public Class<?> getDeclaredParameterType() {
+			return declaredParameterType;
+		}
+
+		public Class<? extends Collection<?>> getOuterCollectionType() {
+			return outerCollectionType;
+		}
+
+		public Class<? extends Collection<?>> getInnerCollectionType() {
+			return innerCollectionType;
+		}
+	}
+
+	private static class ParameterContext {
+		private final Class<?> myParameterType;
+
+		@Nullable
+		private final IParameter myParameter;
+
+		public ParameterContext(Class<?> theParameterType, @Nullable IParameter theParameter) {
+			myParameter = theParameter;
+			myParameterType = theParameterType;
+		}
+
+		public IParameter getParam() {
+			return myParameter;
+		}
+
+		public Class<?> getParameterType() {
+			return myParameterType;
+		}
 	}
 }
