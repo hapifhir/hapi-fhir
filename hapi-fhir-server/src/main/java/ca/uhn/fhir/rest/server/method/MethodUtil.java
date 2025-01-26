@@ -75,6 +75,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -97,7 +98,6 @@ public class MethodUtil {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public static List<IParameter> getResourceParameters(
 			final FhirContext theContext, Method theMethod, Object theProvider) {
 		List<IParameter> parameters = new ArrayList<>();
@@ -324,9 +324,8 @@ public class MethodUtil {
 			Class<?> theParameterType,
 			Class<? extends Collection<?>> theInnerCollectionType,
 			Class<? extends Collection<?>> theOuterCollectionType) {
-		IParameter param;
-		param = new AtParameter();
-		((AtParameter) param).setType(theContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
+		final AtParameter param = new AtParameter();
+		param.setType(theContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
 		return param;
 	}
 
@@ -336,10 +335,8 @@ public class MethodUtil {
 			Class<?> theParameterType,
 			Class<? extends Collection<?>> theInnerCollectionType,
 			Class<? extends Collection<?>> theOuterCollectionType) {
-		IParameter param;
-		param = new SinceParameter();
-		((SinceParameter) param)
-				.setType(theTheContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
+		final SinceParameter param = new SinceParameter();
+		param.setType(theTheContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
 		return param;
 	}
 
@@ -406,9 +403,8 @@ public class MethodUtil {
 					+ "' is annotated with @" + IncludeParam.class.getSimpleName()
 					+ " but has a type other than Collection<" + Include.class.getSimpleName() + ">");
 		} else {
-			instantiableCollectionType =
-					(Class<? extends Collection<Include>>) CollectionBinder.getInstantiableCollectionType(
-							theInnerCollectionType, "Method '" + theMethod.getName() + "'");
+			instantiableCollectionType = unsafeCast(CollectionBinder.getInstantiableCollectionType(
+					theInnerCollectionType, "Method '" + theMethod.getName() + "'"));
 			specType = theParameterType;
 		}
 
@@ -429,20 +425,18 @@ public class MethodUtil {
 		} else if (EncodingEnum.class.equals(theParameterType)) {
 			mode = Mode.ENCODING;
 		} else {
-			StringBuilder b = new StringBuilder();
-			b.append("Method '");
-			b.append(theMethod.getName());
-			b.append("' is annotated with @");
-			b.append(ResourceParam.class.getSimpleName());
-			b.append(" but has a type that is not an implementation of ");
-			b.append(IBaseResource.class.getCanonicalName());
-			b.append(" or String or byte[]");
-			throw new ConfigurationException(Msg.code(403) + b.toString());
+			final String error = String.format(
+					"%sMethod: '%s' is annotated with @%s but has a type that is not an implementation of %s or String or byte[]",
+					Msg.code(403),
+					theMethod.getName(),
+					ResourceParam.class.getSimpleName(),
+					IBaseResource.class.getCanonicalName());
+			throw new ConfigurationException(error);
 		}
 		boolean methodIsOperation = theMethod.getAnnotation(Operation.class) != null;
 		boolean methodIsPatch = theMethod.getAnnotation(Patch.class) != null;
 		param = new ResourceParameter(
-				(Class<? extends IBaseResource>) theParameterType, theProvider, mode, methodIsOperation, methodIsPatch);
+				unsafeCast(theParameterType), theProvider, mode, methodIsOperation, methodIsPatch);
 		return param;
 	}
 
@@ -526,7 +520,7 @@ public class MethodUtil {
 		Class<? extends java.util.Collection<?>> innerCollectionType = null;
 
 		if (Collection.class.isAssignableFrom(parameterType)) {
-			innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+			innerCollectionType = unsafeCast(parameterType);
 			parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, theParamIndex);
 			if (parameterType == null && theMethod.getDeclaringClass().isSynthetic()) {
 				try {
@@ -543,13 +537,13 @@ public class MethodUtil {
 			}
 			declaredParameterType = parameterType;
 		}
-		if (Collection.class.isAssignableFrom(parameterType)) {
+		if (parameterType != null && Collection.class.isAssignableFrom(parameterType)) {
 			outerCollectionType = innerCollectionType;
-			innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
+			innerCollectionType = unsafeCast(parameterType);
 			parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, theParamIndex);
 			declaredParameterType = parameterType;
 		}
-		if (Collection.class.isAssignableFrom(parameterType)) {
+		if (parameterType != null && Collection.class.isAssignableFrom(parameterType)) {
 			throw new ConfigurationException(
 					Msg.code(401) + "Argument #" + theParamIndex + " of Method '" + theMethod.getName()
 							+ "' in type '"
@@ -569,14 +563,23 @@ public class MethodUtil {
 			Class<?> genericType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, theParamIndex);
 			if (Date.class.equals(genericType)) {
 				BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("dateTime");
-				parameterType = dateTimeDef.getImplementingClass();
+				parameterType = Optional.ofNullable(dateTimeDef)
+						.map(BaseRuntimeElementDefinition::getImplementingClass)
+						.orElse(null);
 			} else if (String.class.equals(genericType) || genericType == null) {
 				BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("string");
-				parameterType = dateTimeDef.getImplementingClass();
+				parameterType = Optional.ofNullable(dateTimeDef)
+						.map(BaseRuntimeElementDefinition::getImplementingClass)
+						.orElse(null);
 			}
 		}
 
 		return new GenericsContext(parameterType, declaredParameterType, outerCollectionType, innerCollectionType);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T unsafeCast(Object theObject) {
+		return (T) theObject;
 	}
 
 	private static class GenericsContext {
