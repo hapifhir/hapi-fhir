@@ -24,7 +24,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * Indicates a class will contain {@link OperationParam} parameters and similar annotations that will be processed
  * in place of separate method parameters so annotated in an operation provider.

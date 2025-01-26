@@ -132,7 +132,7 @@ public class EmbeddedOperationUtils {
 	}
 
 	static boolean typeHasNoEmbeddableOperationParamsAnnotation(Class<?> theType) {
-		return ! hasEmbeddableOperationParamsAnnotation(theType);
+		return !hasEmbeddableOperationParamsAnnotation(theType);
 	}
 
 	private static boolean hasEmbeddableOperationParamsAnnotation(Class<?> theType) {
@@ -153,10 +153,10 @@ public class EmbeddedOperationUtils {
 
 	@Nonnull
 	private static Boolean isValidSourceTypeConversion(
-		Object[] theMethodParamsWithoutRequestDetails,
-		Parameter[] theConstructorParameters,
-		Annotation[] theAnnotations,
-		int theIndex) {
+			Object[] theMethodParamsWithoutRequestDetails,
+			Parameter[] theConstructorParameters,
+			Annotation[] theAnnotations,
+			int theIndex) {
 		final Object methodParam = theMethodParamsWithoutRequestDetails[theIndex];
 
 		if (methodParam == null) {

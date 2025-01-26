@@ -54,31 +54,30 @@ public class EmbeddedParameterConverter {
 	private final Class<?> myOperationEmbeddedType;
 	private final Constructor<?> myConstructor;
 
-	public EmbeddedParameterConverter(
-			FhirContext theContext, Method theMethod, Operation theOperation) {
+	public EmbeddedParameterConverter(FhirContext theContext, Method theMethod, Operation theOperation) {
 
 		if (theOperation == null) {
 			throw new ConfigurationException(Msg.code(846192641)
-				+ "@OperationParam or OperationEmbeddedParam detected on method that is not annotated with @Operation: "
-				+ theMethod.toGenericString());
+					+ "@OperationParam or OperationEmbeddedParam detected on method that is not annotated with @Operation: "
+					+ theMethod.toGenericString());
 		}
 
 		final List<Class<?>> embeddedParamsClasses = Arrays.stream(theMethod.getParameterTypes())
-			.filter(paramType -> paramType.isAnnotationPresent(EmbeddableOperationParams.class))
-			.collect(Collectors.toUnmodifiableList());
+				.filter(paramType -> paramType.isAnnotationPresent(EmbeddableOperationParams.class))
+				.collect(Collectors.toUnmodifiableList());
 
 		// LUKETODO;  better error?
 		if (embeddedParamsClasses.isEmpty()) {
 			throw new ConfigurationException(String.format(
-				"%sThere is no param with @EmbeddableOperationParams is supported for now for method: %s",
-				Msg.code(9999924), theMethod.getName()));
+					"%sThere is no param with @EmbeddableOperationParams is supported for now for method: %s",
+					Msg.code(9999924), theMethod.getName()));
 		}
 
 		// LUKETODO;  better error?
 		if (embeddedParamsClasses.size() > 1) {
 			throw new ConfigurationException(String.format(
-				"%sMore than one param with with @EmbeddableOperationParams  for method: %s",
-				Msg.code(9999927), theMethod.getName()));
+					"%sMore than one param with with @EmbeddableOperationParams  for method: %s",
+					Msg.code(9999927), theMethod.getName()));
 		}
 
 		myContext = theContext;

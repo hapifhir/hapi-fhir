@@ -216,16 +216,14 @@ class BaseMethodBindingMethodParameterBuilder {
 		}
 
 		return IntStream.range(0, theMethodParamsWithoutRequestDetails.length)
-				.mapToObj(index -> convertParamIfNeeded(
-						theMethodParamsWithoutRequestDetails, theConstructorParameters, index))
+				.mapToObj(index ->
+						convertParamIfNeeded(theMethodParamsWithoutRequestDetails, theConstructorParameters, index))
 				.toArray(Object[]::new);
 	}
 
 	@Nullable
 	private Object convertParamIfNeeded(
-			Object[] theMethodParamsWithoutRequestDetails,
-			Parameter[] theConstructorParameters,
-			int theIndex) {
+			Object[] theMethodParamsWithoutRequestDetails, Parameter[] theConstructorParameters, int theIndex) {
 
 		final Object paramAtIndex = theMethodParamsWithoutRequestDetails[theIndex];
 
@@ -324,9 +322,7 @@ class BaseMethodBindingMethodParameterBuilder {
 		}
 
 		for (int index = 0; index < theMethodParamsWithoutRequestDetails.length; index++) {
-			validateMethodParamType(
-					theMethodParamsWithoutRequestDetails[index],
-					theConstructorParameters[index]);
+			validateMethodParamType(theMethodParamsWithoutRequestDetails[index], theConstructorParameters[index]);
 		}
 	}
 
@@ -340,7 +336,7 @@ class BaseMethodBindingMethodParameterBuilder {
 		final Class<?> methodParamClass = theMethodParam.getClass();
 
 		final Optional<OperationParam> optOperationEmbeddedParam =
-			Optional.ofNullable(theConstructorParameter.getAnnotation(OperationParam.class));
+				Optional.ofNullable(theConstructorParameter.getAnnotation(OperationParam.class));
 
 		optOperationEmbeddedParam.ifPresent(embeddedParam -> {
 			if (embeddedParam.sourceType() != Void.class && methodParamClass != embeddedParam.sourceType()) {
@@ -353,8 +349,7 @@ class BaseMethodBindingMethodParameterBuilder {
 
 		final Class<?> parameterType = theConstructorParameter.getType();
 
-		if (Collection.class.isAssignableFrom(methodParamClass)
-				|| Collection.class.isAssignableFrom(parameterType)) {
+		if (Collection.class.isAssignableFrom(methodParamClass) || Collection.class.isAssignableFrom(parameterType)) {
 			// ex:  List and ArrayList
 			if (methodParamClass.isAssignableFrom(parameterType)) {
 				final String error = String.format(
