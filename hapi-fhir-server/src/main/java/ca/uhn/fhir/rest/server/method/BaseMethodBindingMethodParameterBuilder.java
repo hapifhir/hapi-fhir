@@ -28,8 +28,6 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -52,8 +50,6 @@ import static java.util.function.Predicate.not;
  * of {@link RequestDetails} in those params
  */
 class BaseMethodBindingMethodParameterBuilder {
-
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseMethodBindingMethodParameterBuilder.class);
 
 	private final StringTimePeriodHandler myStringTimePeriodHandler = new StringTimePeriodHandler(ZoneOffset.UTC);
 
@@ -95,12 +91,6 @@ class BaseMethodBindingMethodParameterBuilder {
 					"%s Either theMethod: %s or theMethodParams: %s is null",
 					Msg.code(234198927), myMethod, Arrays.toString(myInputMethodParams)));
 		}
-
-		ourLog.info(
-				"1234: START building for method: {}, requestDetails: {}, inputMethodParams: {}",
-				myMethod.getName(),
-				myRequestDetails,
-				Arrays.toString(myInputMethodParams));
 
 		final List<Class<?>> parameterTypesWithOperationEmbeddedParams =
 				EmbeddedOperationUtils.getMethodParamsAnnotatedWithEmbeddableOperationParams(myMethod);
@@ -152,30 +142,10 @@ class BaseMethodBindingMethodParameterBuilder {
 			Class<?> theParameterTypeWithOperationEmbeddedParams)
 			throws InvocationTargetException, IllegalAccessException, InstantiationException {
 
-		final String methodName = myMethod.getName();
-
-		ourLog.info(
-				"1234: invoking parameterTypeWithOperationEmbeddedParams: {} and theMethod: {}",
-				theParameterTypeWithOperationEmbeddedParams,
-				methodName);
-
 		final Object operationEmbeddedType =
 				buildOperationEmbeddedObject(theParameterTypeWithOperationEmbeddedParams, myInputMethodParams);
 
-		ourLog.info(
-				"1234: build method params with embedded object and requestDetails (if applicable) for: {}",
-				operationEmbeddedType);
-
-		final Object[] params = buildMethodParamsInCorrectPositions(operationEmbeddedType);
-
-		ourLog.info(
-				"1234: END: method: {}, requestDetails: {}, inputMethodParams: {}, outputMethodParams: {}",
-				myMethod.getName(),
-				myRequestDetails,
-				Arrays.toString(myInputMethodParams),
-				Arrays.toString(params));
-
-		return params;
+		return buildMethodParamsInCorrectPositions(operationEmbeddedType);
 	}
 
 	@Nonnull
