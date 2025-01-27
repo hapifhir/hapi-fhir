@@ -66,6 +66,8 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
@@ -174,6 +176,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -229,6 +232,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Autowired
 	private IInterceptorService myInterceptorService;
+
+	@RegisterExtension
+	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
 
 	@Override
 	@AfterEach
@@ -299,6 +305,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// TODO - investigate better 'validation' options
 		myCaptureQueriesListener.logAllQueries();
 		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Skipping validation of submitted SearchParameter because " + SearchParamValidatingInterceptor.SKIP_VALIDATION + " flag is true");
 	}
 
 	@Test

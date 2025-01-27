@@ -38,8 +38,11 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
@@ -54,6 +57,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Interceptor
 public class SearchParamValidatingInterceptor {
 
+	private static final Logger logger = LoggerFactory.getLogger(SearchParamValidatingInterceptor.class);
 	public static final String SEARCH_PARAM = "SearchParameter";
 	public static final String SKIP_VALIDATION = SearchParamValidatingInterceptor.class.getName() + ".SKIP_VALIDATION";
 
@@ -142,6 +146,16 @@ public class SearchParamValidatingInterceptor {
 		if (isNotSearchParameterResource(theResource)) {
 			return;
 		}
+
+		// avoid a loop when loading our hard-coded core FhirContext SearchParameters
+		//to address https://gitlab.com/simpatico.ai/cdr/-/issues/6986 so that we can skip Search Param validation if been set in the request
+		boolean isStartup = theRequestDetails != null
+			&& Boolean.TRUE == theRequestDetails.getUserData().get(SKIP_VALIDATION);
+		if (isStartup) {
+			logger.warn("Skipping validation of submitted SearchParameter because {} flag is {}",SKIP_VALIDATION, Boolean.TRUE);
+			return;
+		}
+
 		RuntimeSearchParam runtimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theResource);
 		if (runtimeSearchParam == null) {
 			return;
