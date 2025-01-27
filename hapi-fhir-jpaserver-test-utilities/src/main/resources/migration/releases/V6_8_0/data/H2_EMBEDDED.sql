@@ -21,7 +21,7 @@ INSERT INTO HFJ_RES_VER (
    1,
    '2024-04-05 15:54:05.296',
    'R4',
-   0,
+   false,
    '2023-05-01 15:54:05.296',
    '2023-05-01 15:54:05.296',
    'JSON',
@@ -62,7 +62,7 @@ INSERT INTO BT2_JOB_INSTANCE (
    WARNING_MSG
 ) VALUES (
    '2eb2c28c-fa20-48df-9652-00669dcaea2c',
-   0,
+   false,
    0,
    0,
    '2023-08-06 14:24:10.845',
@@ -80,10 +80,10 @@ INSERT INTO BT2_JOB_INSTANCE (
    'Error message',
    83006,
    '{"jobId":"ec0df47d-8741-41cb-ab77-ca7c00c4799d","batchSize":100}',
-   1,
+   true,
    72995,
    'report',
-   0,
+   false,
    '2023-08-06 14:24:10.875',
    'Failed to reindex resource because unique search parameter unique-code could not be enforced.'
 );
@@ -183,7 +183,7 @@ INSERT INTO HFJ_SEARCH (
    1906,
    'Patient',
    5146583,
-   7368816,
+   convert_to_binary(80008816),
    8479927,
    1212873581,
    '?_lastUpdated=le2021-05-31',
