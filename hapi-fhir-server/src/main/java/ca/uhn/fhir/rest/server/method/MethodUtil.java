@@ -102,7 +102,6 @@ public class MethodUtil {
 		}
 	}
 
-	// LUKETODO:  extract annotations method and make sure it works with embedded params
 	public static List<IParameter> getResourceParameters(
 			final FhirContext theContext, final Method theMethod, Object theProvider) {
 		// We mutate this variable so distinguish this from the argument to getResourceParameters
@@ -124,7 +123,7 @@ public class MethodUtil {
 				// TagList is handled directly within the method bindings
 				param = new NullParameter();
 			} else {
-				final GenericsContext genericsContext =
+				final MethodUtilGenericsContext genericsContext =
 						getGenericsContext(theContext, theMethod, parameterTypes, paramIndex);
 
 				parameterType = genericsContext.getParameterType();
@@ -565,7 +564,7 @@ public class MethodUtil {
 				param, parameterTypeInner, theOuterCollectionType, theInnerCollectionType);
 	}
 
-	private static GenericsContext getGenericsContext(
+	private static MethodUtilGenericsContext getGenericsContext(
 			FhirContext theContext, Method theMethod, Class<?>[] theParameterTypes, int theParamIndex) {
 
 		Class<?> declaredParameterType = theParameterTypes[theParamIndex];
@@ -628,67 +627,12 @@ public class MethodUtil {
 			}
 		}
 
-		return new GenericsContext(parameterType, declaredParameterType, outerCollectionType, innerCollectionType);
+		return new MethodUtilGenericsContext(
+				parameterType, declaredParameterType, outerCollectionType, innerCollectionType);
 	}
 
 	@SuppressWarnings("unchecked")
 	private static <T> T unsafeCast(Object theObject) {
 		return (T) theObject;
-	}
-
-	// LUKETODO:  top level?
-	private static class GenericsContext {
-		private final Class<?> parameterType;
-		private final Class<?> declaredParameterType;
-		private final Class<? extends java.util.Collection<?>> outerCollectionType;
-		private final Class<? extends java.util.Collection<?>> innerCollectionType;
-
-		public GenericsContext(
-				Class<?> theParameterType,
-				Class<?> theDeclaredParameterType,
-				Class<? extends Collection<?>> theOuterCollectionType,
-				Class<? extends Collection<?>> theInnerCollectionType) {
-			parameterType = theParameterType;
-			declaredParameterType = theDeclaredParameterType;
-			outerCollectionType = theOuterCollectionType;
-			innerCollectionType = theInnerCollectionType;
-		}
-
-		public Class<?> getParameterType() {
-			return parameterType;
-		}
-
-		public Class<?> getDeclaredParameterType() {
-			return declaredParameterType;
-		}
-
-		public Class<? extends Collection<?>> getOuterCollectionType() {
-			return outerCollectionType;
-		}
-
-		public Class<? extends Collection<?>> getInnerCollectionType() {
-			return innerCollectionType;
-		}
-	}
-
-	// LUKETODO:  refactor to use only one of the Context classes
-	private static class ParameterContext {
-		private final Class<?> myParameterType;
-
-		@Nullable
-		private final IParameter myParameter;
-
-		public ParameterContext(Class<?> theParameterType, @Nullable IParameter theParameter) {
-			myParameter = theParameter;
-			myParameterType = theParameterType;
-		}
-
-		public IParameter getParam() {
-			return myParameter;
-		}
-
-		public Class<?> getParameterType() {
-			return myParameterType;
-		}
 	}
 }
