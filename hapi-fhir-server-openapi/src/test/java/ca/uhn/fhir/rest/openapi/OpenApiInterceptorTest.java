@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.util.ExtensionConstants;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.MediaType;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
@@ -389,6 +391,31 @@ public class OpenApiInterceptorTest {
 			}
 		}
 
+		@Test
+		public void testInterceptorSubclass() throws IOException {
+			myServer.getRestfulServer().registerInterceptor(new CustomOpenApiInterceptor());
+
+			String resp;
+			HttpGet get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/metadata?_pretty=true");
+			try (CloseableHttpResponse response = myClient.execute(get)) {
+				resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+				ourLog.info("CapabilityStatement: {}", resp);
+			}
+
+			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/api-docs");
+			try (CloseableHttpResponse response = myClient.execute(get)) {
+				resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+				ourLog.info("Response: {}", response.getStatusLine());
+				ourLog.debug("Response: {}", resp);
+			}
+
+			OpenAPI parsed = Yaml.mapper().readValue(resp, OpenAPI.class);
+			assertThat(parsed).isNotNull().isInstanceOf(OpenAPI.class);
+			assertThat(parsed.getInfo()).isNotNull().isInstanceOf(Info.class);
+			assertThat(parsed.getInfo().getDescription()).isEqualTo("This is my custom description for my application!");
+			assertThat(parsed.getPaths()).hasEntrySatisfying("/Patient", item -> assertThat(item.getGet().getDeprecated()).isTrue());
+		}
+
 		protected String fetchSwaggerUi(String url) throws IOException {
 			String resp;
 			HttpGet get = new HttpGet(url);
@@ -516,6 +543,18 @@ public class OpenApiInterceptorTest {
 			return null;
 		}
 
+	}
+
+	static class CustomOpenApiInterceptor extends OpenApiInterceptor {
+		@Override
+		protected void customizeOperation(OpenAPI openApi, io.swagger.v3.oas.models.Operation operation, BaseMethodBinding baseMethodBinding) {
+			operation.setDeprecated(true);
+		}
+		@Override
+		protected void customizeOpenApi(OpenAPI openApi, ServletRequestDetails requestDetails) {
+			final Info info = openApi.getInfo();
+			info.setDescription("This is my custom description for my application!");
+		}
 	}
 
 }

@@ -69,6 +69,8 @@ import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.apache.commons.collections4.map.MultiKeyMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
@@ -484,8 +486,7 @@ public class OpenApiInterceptor {
 			capabilitiesProvider = (IServerConformanceProvider<?>) restfulServer.getServerConformanceProvider();
 		}
 
-		final HashMap<String, HashMap<RestOperationTypeEnum, BaseMethodBinding>> operationLookup =
-				buildOperationLookup(restfulServer);
+		final MultiKeyMap<String, BaseMethodBinding> operationLookup = buildOperationLookup(restfulServer);
 
 		OpenAPI openApi = new OpenAPI();
 
@@ -575,16 +576,13 @@ public class OpenApiInterceptor {
 			if (typeRestfulInteractions.contains(CapabilityStatement.TypeRestfulInteraction.READ)) {
 				Operation operation = getPathItem(paths, "/" + resourceType + "/{id}", PathItem.HttpMethod.GET);
 
-				final BaseMethodBinding baseMethodBinding =
-						operationLookup.get(resourceType).get(RestOperationTypeEnum.READ);
-
 				operation.addTagsItem(resourceType);
 				operation.setSummary("read-instance: Read " + resourceType + " instance");
 				addResourceIdParameter(operation);
 
 				addFhirResourceResponse(ctx, openApi, operation, resourceType);
 
-				customizeOperation(openApi, operation, baseMethodBinding);
+				customizeOperation(openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.READ));
 			}
 
 			// Instance VRead
@@ -597,9 +595,7 @@ public class OpenApiInterceptor {
 				addResourceVersionIdParameter(operation);
 				addFhirResourceResponse(ctx, openApi, operation, resourceType);
 
-				final BaseMethodBinding baseMethodBinding =
-						operationLookup.get(resourceType).get(RestOperationTypeEnum.VREAD);
-				customizeOperation(openApi, operation, baseMethodBinding);
+				customizeOperation(openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.VREAD));
 			}
 
 			// Type Create
@@ -610,9 +606,7 @@ public class OpenApiInterceptor {
 				addFhirResourceRequestBody(openApi, operation, ctx, genericExampleSupplier(ctx, resourceType));
 				addFhirResourceResponse(ctx, openApi, operation, null);
 
-				final BaseMethodBinding baseMethodBinding =
-						operationLookup.get(resourceType).get(RestOperationTypeEnum.CREATE);
-				customizeOperation(openApi, operation, baseMethodBinding);
+				customizeOperation(openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.CREATE));
 			}
 
 			// Instance Update
@@ -625,9 +619,7 @@ public class OpenApiInterceptor {
 				addFhirResourceRequestBody(openApi, operation, ctx, genericExampleSupplier(ctx, resourceType));
 				addFhirResourceResponse(ctx, openApi, operation, null);
 
-				final BaseMethodBinding baseMethodBinding =
-						operationLookup.get(resourceType).get(RestOperationTypeEnum.UPDATE);
-				customizeOperation(openApi, operation, baseMethodBinding);
+				customizeOperation(openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.UPDATE));
 			}
 
 			// Type history
@@ -638,9 +630,8 @@ public class OpenApiInterceptor {
 						"type-history: Fetch the resource change history for all resources of type " + resourceType);
 				addFhirResourceResponse(ctx, openApi, operation, "Bundle");
 
-				final BaseMethodBinding baseMethodBinding =
-						operationLookup.get(resourceType).get(RestOperationTypeEnum.HISTORY_TYPE);
-				customizeOperation(openApi, operation, baseMethodBinding);
+				customizeOperation(
+						openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.HISTORY_TYPE));
 			}
 
 			// Instance history
@@ -653,9 +644,8 @@ public class OpenApiInterceptor {
 				addResourceIdParameter(operation);
 				addFhirResourceResponse(ctx, openApi, operation, "Bundle");
 
-				final BaseMethodBinding baseMethodBinding =
-						operationLookup.get(resourceType).get(RestOperationTypeEnum.HISTORY_INSTANCE);
-				customizeOperation(openApi, operation, baseMethodBinding);
+				customizeOperation(
+						openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.HISTORY_INSTANCE));
 			}
 
 			// Instance Patch
@@ -667,9 +657,7 @@ public class OpenApiInterceptor {
 				addFhirResourceRequestBody(openApi, operation, FHIR_CONTEXT_CANONICAL, patchExampleSupplier());
 				addFhirResourceResponse(ctx, openApi, operation, null);
 
-				final BaseMethodBinding baseMethodBinding =
-						operationLookup.get(resourceType).get(RestOperationTypeEnum.PATCH);
-				customizeOperation(openApi, operation, baseMethodBinding);
+				customizeOperation(openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.PATCH));
 			}
 
 			// Instance Delete
@@ -680,16 +668,14 @@ public class OpenApiInterceptor {
 				addResourceIdParameter(operation);
 				addFhirResourceResponse(ctx, openApi, operation, null);
 
-				final BaseMethodBinding baseMethodBinding =
-						operationLookup.get(resourceType).get(RestOperationTypeEnum.DELETE);
-				customizeOperation(openApi, operation, baseMethodBinding);
+				customizeOperation(openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.DELETE));
 			}
 
 			// Search
 			if (typeRestfulInteractions.contains(CapabilityStatement.TypeRestfulInteraction.SEARCHTYPE)) {
 
 				final BaseMethodBinding baseMethodBinding =
-						operationLookup.get(resourceType).get(RestOperationTypeEnum.SEARCH_TYPE);
+						operationLookup.get(resourceType, RestOperationTypeEnum.SEARCH_TYPE);
 
 				addSearchOperation(
 						openApi,
@@ -720,28 +706,29 @@ public class OpenApiInterceptor {
 		return openApi;
 	}
 
-	private HashMap<String, HashMap<RestOperationTypeEnum, BaseMethodBinding>> buildOperationLookup(
-			RestfulServer restfulServer) {
-		final HashMap<String, HashMap<RestOperationTypeEnum, BaseMethodBinding>> map = new HashMap<>();
+	/**
+	 * Iterate through the resource bindings on the server to build a lookup of resource + operation name
+	 * to the method binding that will process that operation.
+	 */
+	private MultiKeyMap<String, BaseMethodBinding> buildOperationLookup(RestfulServer restfulServer) {
+
+		final MultiKeyMap<String, BaseMethodBinding> map = new MultiKeyMap<>();
+		;
 		final Collection<ResourceBinding> resourceBindings = restfulServer.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
-			if (!map.containsKey(resourceBinding.getResourceName())) {
-				map.put(resourceBinding.getResourceName(), new HashMap<>());
-			}
+			final String resourceName = resourceBinding.getResourceName();
 
-			final Map<RestOperationTypeEnum, BaseMethodBinding> resourceMap =
-					map.get(resourceBinding.getResourceName());
-
-			final List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
-			for (BaseMethodBinding methodBinding : methodBindings) {
+			for (BaseMethodBinding methodBinding : resourceBinding.getMethodBindings()) {
 				final RestOperationTypeEnum restOperationType = methodBinding.getRestOperationType();
-				resourceMap.put(restOperationType, methodBinding);
+				final MultiKey<String> key = new MultiKey<>(resourceName, restOperationType.name());
+
+				map.put(key, methodBinding);
 
 				if (RestOperationTypeEnum.VREAD.equals(restOperationType)) {
-					resourceMap.put(RestOperationTypeEnum.READ, methodBinding);
+					map.put(resourceName, RestOperationTypeEnum.READ.name(), methodBinding);
 				} else if (RestOperationTypeEnum.READ.equals(restOperationType)
 						&& ((ReadMethodBinding) methodBinding).isVread()) {
-					resourceMap.put(RestOperationTypeEnum.VREAD, methodBinding);
+					map.put(resourceName, RestOperationTypeEnum.VREAD.name(), methodBinding);
 				}
 			}
 		}
