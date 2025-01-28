@@ -1,10 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -33,6 +28,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Attachment;
@@ -74,7 +70,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -87,9 +82,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
@@ -254,19 +252,31 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	@Test
-	public void testBatchCreateWithBadRead() {
+	public void testBatchCreateWithBadReadAndBadUpdate() {
 		Bundle request = new Bundle();
 		request.setType(BundleType.BATCH);
 
-		Patient p;
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue("FOO");
+		Patient p0;
+		p0 = new Patient();
+		p0.addIdentifier().setSystem("urn:system").setValue("FOO");
+
+		Patient p1;
+		p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("BAR");
+
 		request
 			.addEntry()
-			.setResource(p)
+			.setResource(p0)
 			.getRequest()
 			.setMethod(HTTPVerb.POST)
 			.setUrl("Patient");
+
+		request
+			.addEntry()
+			.setResource(p1)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation/123");
 
 		request
 			.addEntry()
@@ -274,14 +284,19 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			.setMethod(HTTPVerb.GET)
 			.setUrl("Patient/BABABABA");
 
+		ourLog.info("Request:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(request));
+
 		Bundle response = mySystemDao.transaction(mySrd, request);
-		assertThat(response.getEntry()).hasSize(2);
+		assertThat(response.getEntry()).hasSize(3);
+
+		ourLog.info("Response:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
 		assertThat(response.getEntry().get(0).getResponse().getLocation()).matches(".*Patient/[0-9]+.*");
-		assertEquals("404 Not Found", response.getEntry().get(1).getResponse().getStatus());
+		assertEquals("400 Bad Request", response.getEntry().get(1).getResponse().getStatus());
+		assertEquals("404 Not Found", response.getEntry().get(2).getResponse().getStatus());
 
-		OperationOutcome oo = (OperationOutcome) response.getEntry().get(1).getResponse().getOutcome();
+		OperationOutcome oo = (OperationOutcome) response.getEntry().get(2).getResponse().getOutcome();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals(IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(Msg.code(2001) + "Resource Patient/BABABABA is not known", oo.getIssue().get(0).getDiagnostics());
@@ -516,6 +531,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			.setMethod(HTTPVerb.PUT)
 			.setUrl("Patient/A");
 		resp = mySystemDao.transaction(mySrd, bundle);
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 		assertThat(resp.getEntry().get(0).getResponse().getLocation()).endsWith("Patient/A/_history/1");
 
 		myPatientDao.read(new IdType("Patient/A"));
@@ -1115,7 +1131,9 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/" + methodName);
 
-		mySystemDao.transaction(mySrd, request);
+		Bundle response = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		assertEquals(2, response.getEntry().size());
 
 		myObservationDao.read(new IdType("Observation/a" + methodName), mySrd);
 		myPatientDao.read(new IdType("Patient/" + methodName), mySrd);

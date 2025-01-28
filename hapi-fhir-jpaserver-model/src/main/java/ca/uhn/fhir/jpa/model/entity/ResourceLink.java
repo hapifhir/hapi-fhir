@@ -124,6 +124,12 @@ public class ResourceLink extends BaseResourceIndex {
 						insertable = false,
 						updatable = false),
 			},
+			/*
+			 * TODO: We need to drop this constraint because it affects performance in pretty
+			 *  terrible ways on a lot of platforms. But a Hibernate bug present in Hibernate 6.6.4
+			 *  makes it impossible.
+			 *  See: https://hibernate.atlassian.net/browse/HHH-19046
+			 */
 			foreignKey = @ForeignKey(name = FK_RESLINK_TARGET))
 	private ResourceTable myTargetResource;
 

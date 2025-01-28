@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder.ddl;
 
+import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.util.IoUtil;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.HapiHibernateDialectSettingsService;
@@ -7,6 +8,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
@@ -35,6 +37,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -47,8 +50,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -145,6 +150,44 @@ public class DdlGeneratorHibernate61 {
 			schemaExport.execute(targetTypes, action, metadata, standardRegistry);
 
 			writeContentsToFile(nextDialect.getAppendFile(), classLoader, outputFile);
+
+			if (nextDialect.getDropStatementsContainingRegex() != null
+					&& !nextDialect.getDropStatementsContainingRegex().isEmpty()) {
+				ourLog.info(
+						"Dropping statements containing regex(s): {}", nextDialect.getDropStatementsContainingRegex());
+				try {
+					String fullFile;
+					try (FileReader fr = new FileReader(outputFileName, StandardCharsets.UTF_8)) {
+						fullFile = IOUtils.toString(fr);
+					}
+
+					int count = 0;
+					List<String> statements = SqlUtil.splitSqlFileIntoStatements(fullFile);
+					for (Iterator<String> statementIter = statements.iterator(); statementIter.hasNext(); ) {
+						String statement = statementIter.next();
+						if (nextDialect.getDropStatementsContainingRegex().stream()
+								.anyMatch(regex -> Pattern.compile(regex)
+										.matcher(statement)
+										.find())) {
+							statementIter.remove();
+							count++;
+						}
+					}
+
+					ourLog.info(
+							"Filtered {} statement(s) from file for dialect: {}", count, nextDialect.getClassName());
+
+					try (FileWriter fw = new FileWriter(outputFileName, StandardCharsets.UTF_8)) {
+						for (String statement : statements) {
+							fw.append(statement);
+							fw.append(";\n\n");
+						}
+					}
+
+				} catch (IOException theE) {
+					throw new RuntimeException(theE);
+				}
+			}
 		}
 
 		IoUtil.closeQuietly(connectionProvider);
