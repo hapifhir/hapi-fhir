@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
@@ -54,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 // Methods and embedded param classes to be used for testing regression code in hapi-fhir-server method classes
 class MethodAndOperationParamsInnerClassesAndMethods {
 
+	static final String METHOD_WITH_DESCRIPTION = "methodWithDescription";
 	static final String METHOD_WITH_INVALID_GENERIC_TYPE = "methodWithInvalidGenericType";
 	static final String METHOD_WITH_UNKNOWN_TYPE_NAME = "methodWithUnknownTypeName";
 	static final String METHOD_WITH_NON_ASSIGNABLE_TYPE_NAME = "methodWithNonAssignableTypeName";
@@ -166,6 +168,14 @@ class MethodAndOperationParamsInnerClassesAndMethods {
 			 @OperationParam(name = "PARAM2" ) Patient theParam2) {
 			return new Parameters();
 		}
+	}
+
+	@Description(
+		 shortDefinition="network identifier",
+		 example="An identifier for the network access point of the user device for the audit event"
+	)
+	public void methodWithDescription() {
+		//		No Implementation
 	}
 
 	// Basic Search Parameters

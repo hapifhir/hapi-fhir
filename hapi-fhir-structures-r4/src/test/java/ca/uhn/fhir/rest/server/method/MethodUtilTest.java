@@ -24,9 +24,9 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -34,6 +34,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.EXPAND;
 import static ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.INVALID_METHOD_OPERATION_PARAMS_NO_OPERATION;
+import static ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.METHOD_WITH_DESCRIPTION;
 import static ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.METHOD_WITH_INVALID_ANNOTATION;
 import static ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.METHOD_WITH_INVALID_GENERIC_TYPE;
 import static ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.METHOD_WITH_NON_ASSIGNABLE_TYPE_NAME;
@@ -176,14 +177,19 @@ class MethodUtilTest {
 	// -------------------------------------------------------------------------
 	@Test
 	void testExtractDescription_withDescriptionAnnotation() {
-		SearchParameter parameter = new SearchParameter();
-		Description descriptionAnnotation = Mockito.mock(Description.class);
-		Mockito.when(descriptionAnnotation.shortDefinition()).thenReturn("Test description");
+		final Method method = getMethod(METHOD_WITH_DESCRIPTION);
+		final Annotation[] annotations = method.getAnnotations();
 
-		Annotation[] annotations = new Annotation[]{ descriptionAnnotation };
-		MethodUtil.extractDescription(parameter, annotations);
+		assertThat(annotations.length).isEqualTo(1);
 
-		assertEquals("Test description", parameter.getDescription());
+		final Annotation annotation = annotations[0];
+
+		assertThat(annotation).isInstanceOf(Description.class);
+
+		final Description descriptionAnnotation = (Description) annotation;
+
+		assertThat(descriptionAnnotation.shortDefinition()).isEqualTo("network identifier");
+		assertThat(descriptionAnnotation.example()).isEqualTo(new String[]{"An identifier for the network access point of the user device for the audit event"});
 	}
 
 	@Test
@@ -531,8 +537,12 @@ class MethodUtilTest {
 	private List<IParameter> getMethodAndExecute(String theMethodName, Class<?>... theParamClasses) {
 		return MethodUtil.getResourceParameters(
 			ourFhirContext,
-			myMethodAndOperationParamsInnerClassesAndMethods.getDeclaredMethod(myProvider, theMethodName, theParamClasses),
+			 getMethod(theMethodName, theParamClasses),
 			myProvider);
+	}
+
+	private Method getMethod(String theTheMethodName, Class<?>... theTheParamClasses) {
+		return myMethodAndOperationParamsInnerClassesAndMethods.getDeclaredMethod(myProvider, theTheMethodName, theTheParamClasses);
 	}
 
 	private boolean assertParametersEqual(List<? extends IParameterToAssert> theExpectedParameters, List<? extends IParameter> theActualParameters) {
