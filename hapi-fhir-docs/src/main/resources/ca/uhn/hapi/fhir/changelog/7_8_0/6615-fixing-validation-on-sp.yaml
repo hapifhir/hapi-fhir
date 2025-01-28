@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6615
+title: "added login to skip the SearchParam Validation during update and uses of LogbackTestExtension to validate that it really skipped the validation logic."
