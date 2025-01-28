@@ -148,7 +148,7 @@ public class SearchParamValidatingInterceptor {
 		}
 
 		// avoid a loop when loading our hard-coded core FhirContext SearchParameters
-		//to address https://gitlab.com/simpatico.ai/cdr/-/issues/6986 so that we can skip Search Param validation if been set in the request
+		//skip Search Param validation if been set in the request
 		boolean isStartup = theRequestDetails != null
 			&& Boolean.TRUE == theRequestDetails.getUserData().get(SKIP_VALIDATION);
 		if (isStartup) {
