@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nullable;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -148,11 +147,14 @@ public class SearchParamValidatingInterceptor {
 		}
 
 		// avoid a loop when loading our hard-coded core FhirContext SearchParameters
-		//skip Search Param validation if been set in the request
+		// skip Search Param validation if been set in the request
 		boolean isStartup = theRequestDetails != null
-			&& Boolean.TRUE == theRequestDetails.getUserData().get(SKIP_VALIDATION);
+				&& Boolean.TRUE == theRequestDetails.getUserData().get(SKIP_VALIDATION);
 		if (isStartup) {
-			logger.warn("Skipping validation of submitted SearchParameter because {} flag is {}",SKIP_VALIDATION, Boolean.TRUE);
+			logger.warn(
+					"Skipping validation of submitted SearchParameter because {} flag is {}",
+					SKIP_VALIDATION,
+					Boolean.TRUE);
 			return;
 		}
 
