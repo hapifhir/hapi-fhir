@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -21,8 +22,10 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -63,7 +66,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProviderR4Test.class);
-
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 	private byte[] createSctZip() throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);
@@ -354,6 +358,36 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			"MICRO seq=0",
 			" C&S seq=0"
 		);
+	}
+
+	@Test
+	public void testApplyDeltaAdd_UsingCodeSystemWithElasticSearch() {
+		//Given: Advance HSearch indexing is enabled
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		myStorageSettings.setStoreResourceInHSearchIndex(true);
+		//Given: We have an existing NOT_PRESENT code system
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://example.com/cs");
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myClient.create().resource(codeSystem).execute();
+		CodeSystem.ConceptDefinitionComponent chem = codeSystem.addConcept().setCode("CHEM").setDisplay("Chemistry");
+		chem.addConcept().setCode("HB").setDisplay("Hemoglobin");
+		chem.addConcept().setCode("NEUT").setDisplay("Neutrophils");
+		CodeSystem.ConceptDefinitionComponent micro = codeSystem.addConcept().setCode("MICRO").setDisplay("Microbiology");
+		micro.addConcept().setCode("C&S").setDisplay("Culture And Sensitivity");
+		//Execute
+		Parameters outcome = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://example.com/cs"))
+			.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
+			.prettyPrint()
+			.execute();
+		//Validate
+		IntegerType conceptCount = (IntegerType) outcome.getParameter("conceptCount").getValue();
+		assertThat(conceptCount.getValue()).isEqualTo(5);
 	}
 
 	@Test
