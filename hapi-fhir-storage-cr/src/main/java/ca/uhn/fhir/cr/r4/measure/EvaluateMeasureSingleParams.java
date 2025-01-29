@@ -24,9 +24,13 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -55,7 +59,7 @@ import java.util.StringJoiner;
 // LUKETODO:  start to integrate this with a clinical reasoning branch
 @EmbeddableOperationParams
 public class EvaluateMeasureSingleParams {
-	private final IdType myId;
+	private final Either3<CanonicalType, IdType, Measure> myMeasure;
 
 	private final ZonedDateTime myPeriodStart;
 
@@ -96,7 +100,7 @@ public class EvaluateMeasureSingleParams {
 			@OperationParam(name = "additionalData") Bundle theAdditionalData,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			@OperationParam(name = "parameters") Parameters theParameters) {
-		myId = theId;
+		myMeasure = Eithers.forMiddle3(theId);
 		myPeriodStart = thePeriodStart;
 		myPeriodEnd = thePeriodEnd;
 		myReportType = theReportType;
@@ -124,8 +128,8 @@ public class EvaluateMeasureSingleParams {
 				builder.myParameters);
 	}
 
-	public IdType getId() {
-		return myId;
+	public Either3<CanonicalType, IdType, Measure> getMeasure() {
+		return myMeasure;
 	}
 
 	public ZonedDateTime getPeriodStart() {
@@ -169,12 +173,12 @@ public class EvaluateMeasureSingleParams {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (o == null || getClass() != o.getClass()) {
+	public boolean equals(Object theO) {
+		if (theO == null || getClass() != theO.getClass()) {
 			return false;
 		}
-		EvaluateMeasureSingleParams that = (EvaluateMeasureSingleParams) o;
-		return Objects.equals(myId, that.myId)
+		EvaluateMeasureSingleParams that = (EvaluateMeasureSingleParams) theO;
+		return Objects.equals(myMeasure, that.myMeasure)
 				&& Objects.equals(myPeriodStart, that.myPeriodStart)
 				&& Objects.equals(myPeriodEnd, that.myPeriodEnd)
 				&& Objects.equals(myReportType, that.myReportType)
@@ -190,7 +194,7 @@ public class EvaluateMeasureSingleParams {
 	@Override
 	public int hashCode() {
 		return Objects.hash(
-				myId,
+				myMeasure,
 				myPeriodStart,
 				myPeriodEnd,
 				myReportType,
@@ -206,9 +210,9 @@ public class EvaluateMeasureSingleParams {
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", EvaluateMeasureSingleParams.class.getSimpleName() + "[", "]")
-				.add("myId=" + myId)
-				.add("myPeriodStart='" + myPeriodStart + "'")
-				.add("myPeriodEnd='" + myPeriodEnd + "'")
+				.add("myMeasure=" + myMeasure)
+				.add("myPeriodStart=" + myPeriodStart)
+				.add("myPeriodEnd=" + myPeriodEnd)
 				.add("myReportType='" + myReportType + "'")
 				.add("mySubject='" + mySubject + "'")
 				.add("myPractitioner='" + myPractitioner + "'")

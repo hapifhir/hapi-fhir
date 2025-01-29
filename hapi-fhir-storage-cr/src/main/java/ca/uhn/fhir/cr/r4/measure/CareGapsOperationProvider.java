@@ -26,14 +26,12 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class CareGapsOperationProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
@@ -90,11 +88,7 @@ public class CareGapsOperationProvider {
 						theParams.getSubject(),
 						theParams.getStatus(),
 						// LUKETODO:  why can't we have a List<IdType> @OperationParam?
-						theParams.getMeasureId() == null
-								? null
-								: theParams.getMeasureId().stream()
-										.map(IdType::new)
-										.collect(Collectors.toList()),
+						theParams.getMeasureId(),
 						theParams.getMeasureIdentifier(),
 						theParams.getMeasureUrl(),
 						Optional.ofNullable(theParams.getNonDocument())

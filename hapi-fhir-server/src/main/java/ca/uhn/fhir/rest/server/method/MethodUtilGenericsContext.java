@@ -65,7 +65,10 @@ class MethodUtilGenericsContext {
 			return false;
 		}
 		MethodUtilGenericsContext that = (MethodUtilGenericsContext) theO;
-		return Objects.equals(parameterType, that.parameterType) && Objects.equals(declaredParameterType, that.declaredParameterType) && Objects.equals(outerCollectionType, that.outerCollectionType) && Objects.equals(innerCollectionType, that.innerCollectionType);
+		return Objects.equals(parameterType, that.parameterType)
+				&& Objects.equals(declaredParameterType, that.declaredParameterType)
+				&& Objects.equals(outerCollectionType, that.outerCollectionType)
+				&& Objects.equals(innerCollectionType, that.innerCollectionType);
 	}
 
 	@Override
@@ -76,10 +79,10 @@ class MethodUtilGenericsContext {
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", MethodUtilGenericsContext.class.getSimpleName() + "[", "]")
-			.add("parameterType=" + parameterType)
-			.add("declaredParameterType=" + declaredParameterType)
-			.add("outerCollectionType=" + outerCollectionType)
-			.add("innerCollectionType=" + innerCollectionType)
-			.toString();
+				.add("parameterType=" + parameterType)
+				.add("declaredParameterType=" + declaredParameterType)
+				.add("outerCollectionType=" + outerCollectionType)
+				.add("innerCollectionType=" + innerCollectionType)
+				.toString();
 	}
 }

@@ -26,6 +26,8 @@ import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import jakarta.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -46,6 +48,7 @@ import java.util.stream.IntStream;
  * Common operations for any functionality that work with {@link EmbeddedOperationParams}
  */
 public class EmbeddedOperationUtils {
+	private static final Logger ourLog = LoggerFactory.getLogger(EmbeddedOperationUtils.class);
 
 	private EmbeddedOperationUtils() {}
 
@@ -230,10 +233,12 @@ public class EmbeddedOperationUtils {
 			}
 
 			if (constructorParameterTypeAtIndex != fieldTypeAtIndex) {
-				final String error = String.format(
-						"%sInvalid operation embedded parameters.  Constructor parameter type does not match field type: %s",
-						Msg.code(87421741), theConstructor.getDeclaringClass());
-				throw new ConfigurationException(error);
+				// LUKETODO:  debug
+				ourLog.info(
+						"constructor: {} parameter type: {} is transformed to field type: {}",
+						theConstructor.getDeclaringClass(),
+						constructorParameterTypeAtIndex,
+						fieldTypeAtIndex);
 			}
 
 			if (Collection.class.isAssignableFrom(constructorParameterTypeAtIndex)

@@ -24,11 +24,13 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.IdType;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 /**
  * Non-RequestDetails parameters for the <a href=
@@ -81,7 +83,7 @@ public class CareGapsParams {
 
 	private final List<String> myStatus;
 
-	private final List<String> myMeasureId;
+	private final List<IdType> myMeasureId;
 
 	private final List<String> myMeasureIdentifier;
 
@@ -107,21 +109,22 @@ public class CareGapsParams {
 		myPeriodEnd = thePeriodEnd;
 		mySubject = theSubject;
 		myStatus = theStatus;
-		myMeasureId = theMeasureId;
+		myMeasureId = convertMeasureId(theMeasureId);
 		myMeasureIdentifier = theMeasureIdentifier;
 		myMeasureUrl = theMeasureUrl;
 		myNonDocument = theNonDocument;
 	}
 
-	private CareGapsParams(Builder builder) {
-		myPeriodStart = builder.myPeriodStart;
-		myPeriodEnd = builder.myPeriodEnd;
-		mySubject = builder.mySubject;
-		myStatus = builder.myStatus;
-		myMeasureId = builder.myMeasureId;
-		myMeasureIdentifier = builder.myMeasureIdentifier;
-		myMeasureUrl = builder.myMeasureUrl;
-		myNonDocument = builder.myNonDocument;
+	public CareGapsParams(CareGapsParams.Builder builder) {
+		this(
+				builder.myPeriodStart,
+				builder.myPeriodEnd,
+				builder.mySubject,
+				builder.myStatus,
+				builder.myMeasureId,
+				builder.myMeasureIdentifier,
+				builder.myMeasureUrl,
+				builder.myNonDocument);
 	}
 
 	public ZonedDateTime getPeriodStart() {
@@ -140,7 +143,7 @@ public class CareGapsParams {
 		return myStatus;
 	}
 
-	public List<String> getMeasureId() {
+	public List<IdType> getMeasureId() {
 		return myMeasureId;
 	}
 
@@ -195,6 +198,12 @@ public class CareGapsParams {
 				.add("myMeasureUrl=" + myMeasureUrl)
 				.add("myNonDocument=" + myNonDocument)
 				.toString();
+	}
+
+	private List<IdType> convertMeasureId(List<String> theMeasureId) {
+		return theMeasureId == null
+				? null
+				: theMeasureId.stream().map(IdType::new).collect(Collectors.toList());
 	}
 
 	public static Builder builder() {
