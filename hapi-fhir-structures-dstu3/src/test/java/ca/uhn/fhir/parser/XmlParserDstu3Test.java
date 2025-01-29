@@ -107,6 +107,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -585,7 +586,7 @@ public class XmlParserDstu3Test {
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#" + organizationUuid, org.getIdElement().getValue());
+		assertEquals(organizationUuid, org.getIdElement().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 
 		// And re-encode a second time
@@ -3402,7 +3403,7 @@ public class XmlParserDstu3Test {
 	 */
 	@Test
 	public void testParseWovenContainedResources() throws IOException {
-		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_woven_obs.xml"), StandardCharsets.UTF_8);
+		String string = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream("/bundle_with_woven_obs.xml")), StandardCharsets.UTF_8);
 
 		IParser parser = ourCtx.newXmlParser();
 		parser.setParserErrorHandler(new StrictErrorHandler());
@@ -3410,10 +3411,10 @@ public class XmlParserDstu3Test {
 
 		DiagnosticReport resource = (DiagnosticReport) bundle.getEntry().get(0).getResource();
 		Observation obs = (Observation) resource.getResult().get(1).getResource();
-		assertEquals("#2", obs.getId());
+		assertEquals("2", obs.getId());
 		Reference performerFirstRep = obs.getPerformerFirstRep();
 		Practitioner performer = (Practitioner) performerFirstRep.getResource();
-		assertEquals("#3", performer.getId());
+		assertEquals("3", performer.getId());
 	}
 
 	/**
