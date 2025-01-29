@@ -582,7 +582,8 @@ public class OpenApiInterceptor {
 
 				addFhirResourceResponse(ctx, openApi, operation, resourceType);
 
-				customizeOperation(openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.READ));
+				customizeOperation(
+						openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.READ.name()));
 			}
 
 			// Instance VRead
@@ -595,7 +596,8 @@ public class OpenApiInterceptor {
 				addResourceVersionIdParameter(operation);
 				addFhirResourceResponse(ctx, openApi, operation, resourceType);
 
-				customizeOperation(openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.VREAD));
+				customizeOperation(
+						openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.VREAD.name()));
 			}
 
 			// Type Create
@@ -606,7 +608,8 @@ public class OpenApiInterceptor {
 				addFhirResourceRequestBody(openApi, operation, ctx, genericExampleSupplier(ctx, resourceType));
 				addFhirResourceResponse(ctx, openApi, operation, null);
 
-				customizeOperation(openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.CREATE));
+				customizeOperation(
+						openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.CREATE.name()));
 			}
 
 			// Instance Update
@@ -619,7 +622,8 @@ public class OpenApiInterceptor {
 				addFhirResourceRequestBody(openApi, operation, ctx, genericExampleSupplier(ctx, resourceType));
 				addFhirResourceResponse(ctx, openApi, operation, null);
 
-				customizeOperation(openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.UPDATE));
+				customizeOperation(
+						openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.UPDATE.name()));
 			}
 
 			// Type history
@@ -631,7 +635,9 @@ public class OpenApiInterceptor {
 				addFhirResourceResponse(ctx, openApi, operation, "Bundle");
 
 				customizeOperation(
-						openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.HISTORY_TYPE));
+						openApi,
+						operation,
+						operationLookup.get(resourceType, RestOperationTypeEnum.HISTORY_TYPE.name()));
 			}
 
 			// Instance history
@@ -645,7 +651,9 @@ public class OpenApiInterceptor {
 				addFhirResourceResponse(ctx, openApi, operation, "Bundle");
 
 				customizeOperation(
-						openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.HISTORY_INSTANCE));
+						openApi,
+						operation,
+						operationLookup.get(resourceType, RestOperationTypeEnum.HISTORY_INSTANCE.name()));
 			}
 
 			// Instance Patch
@@ -657,7 +665,8 @@ public class OpenApiInterceptor {
 				addFhirResourceRequestBody(openApi, operation, FHIR_CONTEXT_CANONICAL, patchExampleSupplier());
 				addFhirResourceResponse(ctx, openApi, operation, null);
 
-				customizeOperation(openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.PATCH));
+				customizeOperation(
+						openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.PATCH.name()));
 			}
 
 			// Instance Delete
@@ -668,14 +677,15 @@ public class OpenApiInterceptor {
 				addResourceIdParameter(operation);
 				addFhirResourceResponse(ctx, openApi, operation, null);
 
-				customizeOperation(openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.DELETE));
+				customizeOperation(
+						openApi, operation, operationLookup.get(resourceType, RestOperationTypeEnum.DELETE.name()));
 			}
 
 			// Search
 			if (typeRestfulInteractions.contains(CapabilityStatement.TypeRestfulInteraction.SEARCHTYPE)) {
 
 				final BaseMethodBinding baseMethodBinding =
-						operationLookup.get(resourceType, RestOperationTypeEnum.SEARCH_TYPE);
+						operationLookup.get(resourceType, RestOperationTypeEnum.SEARCH_TYPE.name());
 
 				addSearchOperation(
 						openApi,
@@ -713,7 +723,6 @@ public class OpenApiInterceptor {
 	private MultiKeyMap<String, BaseMethodBinding> buildOperationLookup(RestfulServer restfulServer) {
 
 		final MultiKeyMap<String, BaseMethodBinding> map = new MultiKeyMap<>();
-		;
 		final Collection<ResourceBinding> resourceBindings = restfulServer.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			final String resourceName = resourceBinding.getResourceName();

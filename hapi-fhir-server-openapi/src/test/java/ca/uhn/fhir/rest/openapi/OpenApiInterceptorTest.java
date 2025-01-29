@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
@@ -413,7 +414,28 @@ public class OpenApiInterceptorTest {
 			assertThat(parsed).isNotNull().isInstanceOf(OpenAPI.class);
 			assertThat(parsed.getInfo()).isNotNull().isInstanceOf(Info.class);
 			assertThat(parsed.getInfo().getDescription()).isEqualTo("This is my custom description for my application!");
-			assertThat(parsed.getPaths()).hasEntrySatisfying("/Patient", item -> assertThat(item.getGet().getDeprecated()).isTrue());
+			assertThat(parsed.getPaths()).hasEntrySatisfying("/Patient", item -> {
+				assertThat(item.getGet().getDeprecated()).isTrue();
+				assertThat(item.getGet().getDescription()).isEqualTo("Custom description for resource Patient interaction SEARCH_TYPE");
+				assertThat(item.getPost().getDeprecated()).isTrue();
+				assertThat(item.getPost().getDescription()).isEqualTo("Custom description for resource Patient interaction CREATE");
+			});
+			assertThat(parsed.getPaths()).hasEntrySatisfying("/Patient/{id}", item -> {
+				assertThat(item.getGet().getDeprecated()).isTrue();
+				assertThat(item.getGet().getDescription()).isEqualTo("Custom description for resource Patient interaction READ");
+				assertThat(item.getPatch().getDeprecated()).isTrue();
+				assertThat(item.getPatch().getDescription()).isEqualTo("Custom description for resource Patient interaction PATCH");
+				assertThat(item.getPut().getDeprecated()).isTrue();
+				assertThat(item.getPut().getDescription()).isEqualTo("Custom description for resource Patient interaction UPDATE");
+			});
+			assertThat(parsed.getPaths()).hasEntrySatisfying("/Patient/{id}/_history", item -> {
+				assertThat(item.getGet().getDeprecated()).isTrue();
+				assertThat(item.getGet().getDescription()).isEqualTo("Custom description for resource Patient interaction HISTORY_INSTANCE");
+			});
+			assertThat(parsed.getPaths()).hasEntrySatisfying("/Patient/{id}/_history/{version_id}", item -> {
+				assertThat(item.getGet().getDeprecated()).isTrue();
+				assertThat(item.getGet().getDescription()).isEqualTo("Custom description for resource Patient interaction VREAD");
+			});
 		}
 
 		protected String fetchSwaggerUi(String url) throws IOException {
@@ -549,11 +571,19 @@ public class OpenApiInterceptorTest {
 		@Override
 		protected void customizeOperation(OpenAPI openApi, io.swagger.v3.oas.models.Operation operation, BaseMethodBinding baseMethodBinding) {
 			operation.setDeprecated(true);
+			RestOperationTypeEnum type = baseMethodBinding.getRestOperationType();
+			if (RestOperationTypeEnum.VREAD.equals(type) &&
+					operation.getParameters().stream().noneMatch(param -> "version_id".equals(param.getName()))) {
+				type = RestOperationTypeEnum.READ;
+			}
+			operation.setDescription("Custom description for resource " + baseMethodBinding.getResourceName() + " interaction " + type);
 		}
 		@Override
 		protected void customizeOpenApi(OpenAPI openApi, ServletRequestDetails requestDetails) {
-			final Info info = openApi.getInfo();
-			info.setDescription("This is my custom description for my application!");
+			if (openApi.getInfo() == null) {
+				openApi.setInfo(new Info());
+			}
+			openApi.getInfo().setDescription("This is my custom description for my application!");
 		}
 	}
 
