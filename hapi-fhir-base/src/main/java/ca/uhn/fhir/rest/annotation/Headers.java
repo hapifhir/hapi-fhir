@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.annotation;
 
+import com.google.common.collect.Multimap;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-
-import com.google.common.collect.Multimap;
 
 /**
  * This annotation may be placed on a operation provider method parameter or embedded parameter class to indicate that
