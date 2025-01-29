@@ -235,6 +235,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			myAllStructures = retVal;
 
 			try {
+				retVal = new ArrayList<>();
 				for (IBaseResource next : allStructureDefinitions) {
 					Resource converted = convertToCanonicalVersionAndGenerateSnapshot(next, false);
 					retVal.add((StructureDefinition) converted);
