@@ -646,7 +646,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		final FhirContext fhirContext = getFhirContext();
 		Optional<String> resultValue = getNamedParameterValueAsString(fhirContext, theOutput, "result");
 
-		if (resultValue.isEmpty()) {
+		if (!resultValue.isPresent()) {
 			throw new IllegalArgumentException(
 					Msg.code(2560) + "Parameter `result` is missing from the $validate-code response.");
 		}
