@@ -69,7 +69,7 @@ public class MeasureOperationsProvider {
 						// thing as a MUTUALLY EXCLUSIVE ANNotation?4. is there such as thing as a MUTUALLY EXCLUSIVE
 						// ANNotation?4. is there such as thing as a MUTUALLY EXCLUSIVE ANNotation?
 						// so 3 different params :  try annotations
-						Eithers.forMiddle3(theParams.getId()),
+						theParams.getMeasure(),
 						theParams.getPeriodStart(),
 						theParams.getPeriodEnd(),
 						theParams.getReportType(),

@@ -115,7 +115,7 @@ public class CareGapsParams {
 		myNonDocument = theNonDocument;
 	}
 
-	public CareGapsParams(CareGapsParams.Builder builder) {
+	private CareGapsParams(CareGapsParams.Builder builder) {
 		this(
 				builder.myPeriodStart,
 				builder.myPeriodEnd,
