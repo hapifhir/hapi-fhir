@@ -68,6 +68,7 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
+import ch.qos.logback.classic.Level;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
@@ -234,7 +235,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	private IInterceptorService myInterceptorService;
 
 	@RegisterExtension
-	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
+	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(SearchParamValidatingInterceptor.class, Level.WARN);
 
 	@Override
 	@AfterEach
