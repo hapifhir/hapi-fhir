@@ -24,14 +24,18 @@ public class HeaderParameter implements IParameter {
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(
-			RequestDetails theRequest,
-			BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
+			throws InternalErrorException, InvalidRequestException {
 
 		return theRequest.getHeader(myHeaderName);
 	}
 
 	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+	public void initializeTypes(
+			Method theMethod,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<?> theParameterType) {
 		// LUKETODO:  anything to do here?
 	}
 }

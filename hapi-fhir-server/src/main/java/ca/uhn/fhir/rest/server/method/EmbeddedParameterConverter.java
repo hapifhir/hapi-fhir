@@ -110,7 +110,7 @@ public class EmbeddedParameterConverter {
 			return EmbeddedParameterConverterContext.forParameter(new NullParameter());
 		} else if (constructorParamAnnotation instanceof Header) {
 			return EmbeddedParameterConverterContext.forParameter(
-				new HeaderParameter(((Header) constructorParamAnnotation).value()));
+					new HeaderParameter(((Header) constructorParamAnnotation).value()));
 		} else if (constructorParamAnnotation instanceof OperationParam) {
 			final OperationParameter operationParameter =
 					getOperationParameter((OperationParam) constructorParamAnnotation);

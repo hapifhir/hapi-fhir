@@ -87,7 +87,7 @@ public class EvaluateMeasureSingleParams {
 	// LUKETODO:  embedded factory constructor annoation
 	// LUKETODO:  annotations on constructor parameters instead
 	public EvaluateMeasureSingleParams(
-		@Header("Timezone") String theTimezone,
+			@Header("Timezone") String theTimezone,
 			@IdParam IdType theId,
 			@OperationParam(
 							name = "periodStart",
@@ -120,18 +120,18 @@ public class EvaluateMeasureSingleParams {
 
 	private EvaluateMeasureSingleParams(EvaluateMeasureSingleParams.Builder builder) {
 		this(
-			builder.myTimezone,
-			builder.myId,
-			builder.myPeriodStart,
-			builder.myPeriodEnd,
-			builder.myReportType,
-			builder.mySubject,
-			builder.myPractitioner,
-			builder.myLastReceivedOn,
-			builder.myProductLine,
-			builder.myAdditionalData,
-			builder.myTerminologyEndpoint,
-			builder.myParameters);
+				builder.myTimezone,
+				builder.myId,
+				builder.myPeriodStart,
+				builder.myPeriodEnd,
+				builder.myReportType,
+				builder.mySubject,
+				builder.myPractitioner,
+				builder.myLastReceivedOn,
+				builder.myProductLine,
+				builder.myAdditionalData,
+				builder.myTerminologyEndpoint,
+				builder.myParameters);
 	}
 
 	public String getTimezone() {
@@ -251,7 +251,7 @@ public class EvaluateMeasureSingleParams {
 		private Bundle myAdditionalData;
 		private Endpoint myTerminologyEndpoint;
 		private Parameters myParameters;
-		
+
 		public Builder setTimezone(String theTimezone) {
 			myTimezone = theTimezone;
 			return this;
