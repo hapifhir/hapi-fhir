@@ -156,11 +156,12 @@ public class ReadOnlySearchParamCache {
 					ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(
 							nextResourceName, t -> new ResourceSearchParams(nextResourceName));
 					String nextParamName = nextCanonical.getName();
-					if (theSearchParamPatternsToInclude == null
-							|| searchParamMatchesAtLeastOnePattern(
-									theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
-						resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextCanonical);
-					}
+					//					if (theSearchParamPatternsToInclude == null
+					//							|| searchParamMatchesAtLeastOnePattern(
+					//									theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
+					//						resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextCanonical);
+					//					}
+					resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextCanonical);
 				}
 			}
 		}
@@ -175,11 +176,12 @@ public class ReadOnlySearchParamCache {
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 				String nextParamName = nextSp.getName();
 				// Add it to our return value if permitted by the pattern parameters
-				if (theSearchParamPatternsToInclude == null
-						|| searchParamMatchesAtLeastOnePattern(
-								theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
-					resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextSp);
-				}
+				//				if (theSearchParamPatternsToInclude == null
+				//						|| searchParamMatchesAtLeastOnePattern(
+				//								theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
+				//					resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextSp);
+				//				}
+				resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextSp);
 			}
 		}
 		return retVal;

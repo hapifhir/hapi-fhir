@@ -46,6 +46,11 @@ import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.SEARCH_PARAM_ROOT;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.URI_VALUE;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_LASTUPDATED;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_SECURITY;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 
 /**
  * Used to build HSearch sort clauses.
@@ -155,10 +160,23 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 				theResourceTypeName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		RuntimeSearchParam searchParam = activeSearchParams.get(theParamName);
 		if (searchParam == null) {
-			return Optional.empty();
+			RestSearchParameterTypeEnum paramType = this.getParamTypeOfSortingParams(theParamName);
+			return paramType != null ? Optional.of(paramType) : Optional.empty();
 		}
 
 		return Optional.of(searchParam.getParamType());
+	}
+
+	private RestSearchParameterTypeEnum getParamTypeOfSortingParams(String paramName) {
+		Map<String, RestSearchParameterTypeEnum> paramNameToParamType =
+			Map.of(
+				PARAM_LASTUPDATED, RestSearchParameterTypeEnum.DATE,
+				PARAM_ID, RestSearchParameterTypeEnum.TOKEN,
+				PARAM_TAG, RestSearchParameterTypeEnum.TOKEN,
+				PARAM_SECURITY, RestSearchParameterTypeEnum.TOKEN,
+				PARAM_SOURCE, RestSearchParameterTypeEnum.TOKEN
+			);
+		return paramNameToParamType.get(paramName);
 	}
 
 	/**
