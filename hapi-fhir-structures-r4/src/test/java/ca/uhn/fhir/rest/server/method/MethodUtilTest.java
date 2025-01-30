@@ -167,14 +167,15 @@ class MethodUtilTest {
 	@Test
 	void opInstanceOrType() {
 		myProvider = new MethodAndOperationParamsInnerClassesAndMethods.PatientProvider();
-		final List<IParameter> resourceParameters = getMethodAndExecute(OP_INSTANCE_OR_TYPE, IdType.class, StringType.class, Patient.class);
+		final List<IParameter> resourceParameters = getMethodAndExecute(OP_INSTANCE_OR_TYPE, IdType.class, String.class, StringType.class, Patient.class);
 
 		assertThat(resourceParameters).isNotNull()
 			 .isNotEmpty()
-			 .hasExactlyElementsOfTypes(NullParameter.class, OperationParameter.class, OperationParameter.class);
+			 .hasExactlyElementsOfTypes(NullParameter.class, HeaderParameter.class, OperationParameter.class, OperationParameter.class);
 
 		final List<IParameterToAssert> expectedParameters = List.of(
 			 new NullParameterToAssert(),
+			 new HeaderParameterToAssert("Timezone"),
 			 new OperationParameterToAssert(ourFhirContext, "PARAM1", "$OP_INSTANCE_OR_TYPE", null, String.class, "string", Void.class, OperationParameterRangeType.NOT_APPLICABLE),
 			 new OperationParameterToAssert(ourFhirContext, "PARAM2", "$OP_INSTANCE_OR_TYPE", null, String.class, "Patient", Void.class, OperationParameterRangeType.NOT_APPLICABLE)
 		);
@@ -633,10 +634,11 @@ class MethodUtilTest {
 		assertThat(resourceParameters)
 			 .isNotNull()
 			 .isNotEmpty()
-			 .hasExactlyElementsOfTypes(NullParameter.class, OperationParameter.class, OperationParameter.class, OperationParameter.class);
+			 .hasExactlyElementsOfTypes(NullParameter.class, HeaderParameter.class, OperationParameter.class, OperationParameter.class, OperationParameter.class);
 
 		final List<IParameterToAssert> expectedParameters = List.of(
 			 new NullParameterToAssert(),
+			 new HeaderParameterToAssert("Timezone"),
 			 new OperationParameterToAssert(ourFhirContext, "param1", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE, null, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE),
 			 new OperationParameterToAssert(ourFhirContext, "param2", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE, ArrayList.class, String.class, null, Void.class, OperationParameterRangeType.NOT_APPLICABLE),
 			 new OperationParameterToAssert(ourFhirContext, "param3", SAMPLE_METHOD_EMBEDDED_TYPE_NO_REQUEST_DETAILS_WITH_ID_TYPE, null, String.class, "boolean", Void.class, OperationParameterRangeType.NOT_APPLICABLE)
@@ -724,6 +726,12 @@ class MethodUtilTest {
 			return true;
 		}
 
+		if (theExpectedParameter instanceof HeaderParameterToAssert && theActualParameter instanceof HeaderParameter) {
+			assertThat(((HeaderParameter) theActualParameter).getValue()).isEqualTo(((HeaderParameterToAssert) theExpectedParameter).myHeaderValue());
+
+			return true;
+		}
+
 		if (theExpectedParameter instanceof ServletRequestParameterToAssert && theActualParameter instanceof ServletRequestParameter) {
 			return true;
 		}
@@ -746,6 +754,9 @@ class MethodUtilTest {
 	private interface IParameterToAssert {}
 
 	private record NullParameterToAssert() implements IParameterToAssert {
+	}
+
+	private record HeaderParameterToAssert(String myHeaderValue) implements IParameterToAssert {
 	}
 
 	private record ServletRequestParameterToAssert() implements IParameterToAssert {

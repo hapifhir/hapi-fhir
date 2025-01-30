@@ -148,7 +148,7 @@ class OperationMethodBindingTest {
 	@Test
 	void methodWithIdParamButNoIIdType() {
 		myProvider = new PatientProvider();
-		init(OP_INSTANCE_OR_TYPE, IdType.class, StringType.class, Patient.class);
+		init(OP_INSTANCE_OR_TYPE, IdType.class, String.class, StringType.class, Patient.class);
 
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRequestType(RequestTypeEnum.POST);

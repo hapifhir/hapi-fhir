@@ -4,11 +4,16 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.PatientProvider;
 import ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.SampleParams;
+import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
-import org.junit.jupiter.api.Disabled;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +23,8 @@ import java.time.Month;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import static ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.EXPAND;
+import static ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.OP_INSTANCE_OR_TYPE;
 import static ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.ParamsWithTypeConversion;
 import static ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.ParamsWithoutAnnotations;
 import static ca.uhn.fhir.rest.server.method.MethodAndOperationParamsInnerClassesAndMethods.SAMPLE_METHOD_EMBEDDED_TYPE_MULTIPLE_REQUEST_DETAILS;
@@ -41,6 +48,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(BaseMethodBindingMethodParameterBuilderTest.class);
 
 	private static final RequestDetails REQUEST_DETAILS = new SystemRequestDetails();
+	private static final String TIMEZONE_AMERICA_TORONTO = "America/Toronto";
 
 	private final MethodAndOperationParamsInnerClassesAndMethods myMethodAndOperationParamsInnerClassesAndMethods = new MethodAndOperationParamsInnerClassesAndMethods();
 
@@ -114,12 +122,42 @@ class BaseMethodBindingMethodParameterBuilderTest {
 	}
 
 	@Test
-	@Disabled
 	void happyPathOperationEmbeddedTypesWithIdType() {
 		final IdType id = new IdType();
 		final Method sampleMethod = myMethodAndOperationParamsInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_EMBEDDED_TYPE_REQUEST_DETAILS_FIRST_WITH_ID_TYPE, RequestDetails.class, SampleParamsWithIdParam.class);
-		final Object[] inputParams = new Object[]{REQUEST_DETAILS, id, "param1", List.of("param2"), new BooleanType(false)};
-		final Object[] expectedOutputParams = new Object[]{REQUEST_DETAILS, new SampleParamsWithIdParam(id, "param1", List.of("param2"), new BooleanType(false))};
+		final Object[] inputParams = new Object[]{REQUEST_DETAILS, id, TIMEZONE_AMERICA_TORONTO, "param1", List.of("param2"), new BooleanType(false)};
+		final Object[] expectedOutputParams = new Object[]{REQUEST_DETAILS, new SampleParamsWithIdParam(id, TIMEZONE_AMERICA_TORONTO, "param1", List.of("param2"), new BooleanType(false))};
+
+		final Object[] actualOutputParams = buildMethodParams(sampleMethod, REQUEST_DETAILS, inputParams);
+
+		assertArrayEquals(expectedOutputParams, actualOutputParams);
+	}
+
+	@Test
+	void expand() {
+		final IdType id = new IdType();
+		final ValueSet valueSet = new ValueSet();
+
+		final Method sampleMethod = myMethodAndOperationParamsInnerClassesAndMethods.getDeclaredMethod(EXPAND, HttpServletRequest.class, IIdType.class, IBaseResource.class, RequestDetails.class);
+		final TestHttpServletRequest testHttpServletRequest = new TestHttpServletRequest();
+		final Object[] inputParams = new Object[]{testHttpServletRequest, id, TIMEZONE_AMERICA_TORONTO, valueSet, REQUEST_DETAILS};
+		final Object[] expectedOutputParams = new Object[]{testHttpServletRequest, id, TIMEZONE_AMERICA_TORONTO, valueSet, REQUEST_DETAILS};
+
+		final Object[] actualOutputParams = buildMethodParams(sampleMethod, REQUEST_DETAILS, inputParams);
+
+		assertArrayEquals(expectedOutputParams, actualOutputParams);
+	}
+
+	@Test
+	void opInstanceOrType() {
+		final IdType id = new IdType();
+		final PatientProvider provider = new PatientProvider();
+		final StringType stringType = new StringType("stringType");
+		final Patient patient = new Patient();
+
+		final Method sampleMethod = myMethodAndOperationParamsInnerClassesAndMethods.getDeclaredMethod(provider, OP_INSTANCE_OR_TYPE, IdType.class, String.class, StringType.class, Patient.class);
+		final Object[] inputParams = new Object[]{id, TIMEZONE_AMERICA_TORONTO, stringType, patient};
+		final Object[] expectedOutputParams = new Object[]{id, TIMEZONE_AMERICA_TORONTO, stringType, patient};
 
 		final Object[] actualOutputParams = buildMethodParams(sampleMethod, REQUEST_DETAILS, inputParams);
 
@@ -157,9 +195,7 @@ class BaseMethodBindingMethodParameterBuilderTest {
 		});
 	}
 
-	// LUKETODO:  decide what to do with this
 	@Test
-	@Disabled
 	void buildMethodParams_withClassMiissingParameterAnnotations_shouldThrowInternalErrorException() {
 		final Method method = myMethodAndOperationParamsInnerClassesAndMethods.getDeclaredMethod(SAMPLE_METHOD_PARAM_NO_EMBEDDED_TYPE, ParamsWithoutAnnotations.class);
 

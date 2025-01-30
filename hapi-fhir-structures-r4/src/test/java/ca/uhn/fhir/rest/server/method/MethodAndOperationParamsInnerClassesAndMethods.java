@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
+import ca.uhn.fhir.rest.annotation.Header;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Offset;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -303,6 +304,8 @@ class MethodAndOperationParamsInnerClassesAndMethods {
 	static class SampleParamsWithIdParam {
 		private final IdType myId;
 
+		private final String myTimezone;
+
 		private final String myParam1;
 
 		private final List<String> myParam2;
@@ -312,6 +315,7 @@ class MethodAndOperationParamsInnerClassesAndMethods {
 		public SampleParamsWithIdParam(
 				 @IdParam
 				 IdType theId,
+				 @Header("Timezone") String theTimezone,
 				 @OperationParam(name = "param1")
 				 String theParam1,
 				 @OperationParam(name = "param2")
@@ -319,6 +323,7 @@ class MethodAndOperationParamsInnerClassesAndMethods {
 				 @OperationParam(name = "param3")
 				 BooleanType theParam3) {
 			myId = theId;
+			myTimezone = theTimezone;
 			myParam1 = theParam1;
 			myParam2 = theParam2;
 			myParam3 = theParam3;
@@ -499,6 +504,7 @@ class MethodAndOperationParamsInnerClassesAndMethods {
 		@Operation(name = "$OP_INSTANCE_OR_TYPE")
 		Parameters opInstanceOrType(
 			 @IdParam(optional = true) IdType theId,
+			 @Header("Timezone") String theTimezone,
 			 @OperationParam(name = "PARAM1" ) StringType theParam1,
 			 @OperationParam(name = "PARAM2" ) Patient theParam2) {
 			return new Parameters();
