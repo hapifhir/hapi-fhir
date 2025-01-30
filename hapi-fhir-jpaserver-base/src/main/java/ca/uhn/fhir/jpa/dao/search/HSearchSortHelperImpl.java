@@ -164,14 +164,12 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 	}
 
 	private RestSearchParameterTypeEnum getParamTypeOfSortingParams(String paramName) {
-		Map<String, RestSearchParameterTypeEnum> paramNameToParamType =
-			Map.of(
+		Map<String, RestSearchParameterTypeEnum> paramNameToParamType = Map.of(
 				Constants.PARAM_LASTUPDATED, RestSearchParameterTypeEnum.DATE,
 				Constants.PARAM_ID, RestSearchParameterTypeEnum.TOKEN,
 				Constants.PARAM_TAG, RestSearchParameterTypeEnum.TOKEN,
 				Constants.PARAM_SECURITY, RestSearchParameterTypeEnum.TOKEN,
-				Constants.PARAM_SOURCE, RestSearchParameterTypeEnum.TOKEN
-			);
+				Constants.PARAM_SOURCE, RestSearchParameterTypeEnum.TOKEN);
 		return paramNameToParamType.get(paramName);
 	}
 
