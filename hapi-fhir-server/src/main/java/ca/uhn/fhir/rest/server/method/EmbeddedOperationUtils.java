@@ -271,14 +271,15 @@ public class EmbeddedOperationUtils {
 				final Type parameterTypeArgumentAtIndex = parameterTypeArguments[index];
 				final Type fieldTypeArgumentAtIndex = fieldTypeArguments[index];
 
-				// LUKETODO:  this causes errors if we pass in a generic type with one type of generic parameter (String)
+				// LUKETODO:  this causes errors if we pass in a generic type with one type of generic parameter
+				// (String)
 				// and convert it to another (StringType)
-//				if (!parameterTypeArgumentAtIndex.equals(fieldTypeArgumentAtIndex)) {
-//					final String error = String.format(
-//							"Generic type argument does not match constructor: %s, field: %s for class: %s",
-//							parameterTypeArgumentAtIndex, fieldTypeArgumentAtIndex, theDeclaringClass);
-//					throw new ConfigurationException(error);
-//				}
+				//				if (!parameterTypeArgumentAtIndex.equals(fieldTypeArgumentAtIndex)) {
+				//					final String error = String.format(
+				//							"Generic type argument does not match constructor: %s, field: %s for class: %s",
+				//							parameterTypeArgumentAtIndex, fieldTypeArgumentAtIndex, theDeclaringClass);
+				//					throw new ConfigurationException(error);
+				//				}
 			}
 		} else {
 			final String error = String.format(
