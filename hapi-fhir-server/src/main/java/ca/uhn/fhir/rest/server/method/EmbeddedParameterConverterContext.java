@@ -29,12 +29,12 @@ import java.util.StringJoiner;
 class EmbeddedParameterConverterContext {
 
 	@Nullable
-	private final NullParameter myNullParameter;
+	private final IParameter myNonOperationParameter;
 
 	@Nullable
 	private final ParamInitializationContext myParamContext;
 
-	public static EmbeddedParameterConverterContext forParameter(NullParameter theNullParameter) {
+	public static EmbeddedParameterConverterContext forParameter(IParameter theNullParameter) {
 		return new EmbeddedParameterConverterContext(theNullParameter, null);
 	}
 
@@ -43,15 +43,15 @@ class EmbeddedParameterConverterContext {
 	}
 
 	private EmbeddedParameterConverterContext(
-			@Nullable NullParameter theNullParameter, @Nullable ParamInitializationContext theParamContext) {
+		@Nullable IParameter theNonOperationParameter, @Nullable ParamInitializationContext theParamContext) {
 
-		myNullParameter = theNullParameter;
+		myNonOperationParameter = theNonOperationParameter;
 		myParamContext = theParamContext;
 	}
 
 	@Nullable
-	public NullParameter getParameter() {
-		return myNullParameter;
+	public IParameter getParameter() {
+		return myNonOperationParameter;
 	}
 
 	@Nullable
@@ -62,7 +62,7 @@ class EmbeddedParameterConverterContext {
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", EmbeddedParameterConverterContext.class.getSimpleName() + "[", "]")
-				.add("myNullParameter=" + myNullParameter)
+				.add("myNullParameter=" + myNonOperationParameter)
 				.add("myParamContext=" + myParamContext)
 				.toString();
 	}

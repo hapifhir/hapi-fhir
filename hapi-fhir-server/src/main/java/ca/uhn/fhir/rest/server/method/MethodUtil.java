@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.annotation.Elements;
 import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
+import ca.uhn.fhir.rest.annotation.Header;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Offset;
@@ -307,6 +308,8 @@ public class MethodUtil {
 			return createValidateNode(theContext, theNextParameterAnnotations, theParameterType);
 		} else if (theNextAnnotation instanceof Validate.Profile) {
 			return createValidateProfile(theContext, theNextParameterAnnotations, theParameterType);
+		} else if (theNextAnnotation instanceof Header) {
+			return new HeaderParameter(((Header) theNextAnnotation).value());
 		}
 		return null;
 	}

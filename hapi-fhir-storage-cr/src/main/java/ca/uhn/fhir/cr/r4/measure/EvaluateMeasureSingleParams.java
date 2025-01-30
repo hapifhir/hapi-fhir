@@ -20,6 +20,7 @@
 package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
+import ca.uhn.fhir.rest.annotation.Header;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
@@ -59,6 +60,8 @@ import java.util.StringJoiner;
 // LUKETODO:  start to integrate this with a clinical reasoning branch
 @EmbeddableOperationParams
 public class EvaluateMeasureSingleParams {
+	// LUKETODO:  not sure if we need this but keep it for now
+	private final String myTimezone;
 	private final Either3<CanonicalType, IdType, Measure> myMeasure;
 
 	private final ZonedDateTime myPeriodStart;
@@ -84,6 +87,7 @@ public class EvaluateMeasureSingleParams {
 	// LUKETODO:  embedded factory constructor annoation
 	// LUKETODO:  annotations on constructor parameters instead
 	public EvaluateMeasureSingleParams(
+		@Header("Timezone") String theTimezone,
 			@IdParam IdType theId,
 			@OperationParam(
 							name = "periodStart",
@@ -100,6 +104,7 @@ public class EvaluateMeasureSingleParams {
 			@OperationParam(name = "additionalData") Bundle theAdditionalData,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			@OperationParam(name = "parameters") Parameters theParameters) {
+		myTimezone = theTimezone;
 		myMeasure = Eithers.forMiddle3(theId);
 		myPeriodStart = thePeriodStart;
 		myPeriodEnd = thePeriodEnd;
@@ -113,19 +118,24 @@ public class EvaluateMeasureSingleParams {
 		myParameters = theParameters;
 	}
 
-	private EvaluateMeasureSingleParams(Builder builder) {
+	private EvaluateMeasureSingleParams(EvaluateMeasureSingleParams.Builder builder) {
 		this(
-				builder.myId,
-				builder.myPeriodStart,
-				builder.myPeriodEnd,
-				builder.myReportType,
-				builder.mySubject,
-				builder.myPractitioner,
-				builder.myLastReceivedOn,
-				builder.myProductLine,
-				builder.myAdditionalData,
-				builder.myTerminologyEndpoint,
-				builder.myParameters);
+			builder.myTimezone,
+			builder.myId,
+			builder.myPeriodStart,
+			builder.myPeriodEnd,
+			builder.myReportType,
+			builder.mySubject,
+			builder.myPractitioner,
+			builder.myLastReceivedOn,
+			builder.myProductLine,
+			builder.myAdditionalData,
+			builder.myTerminologyEndpoint,
+			builder.myParameters);
+	}
+
+	public String getTimezone() {
+		return myTimezone;
 	}
 
 	public Either3<CanonicalType, IdType, Measure> getMeasure() {
@@ -229,6 +239,7 @@ public class EvaluateMeasureSingleParams {
 	}
 
 	public static class Builder {
+		private String myTimezone;
 		private IdType myId;
 		private ZonedDateTime myPeriodStart;
 		private ZonedDateTime myPeriodEnd;
@@ -240,59 +251,64 @@ public class EvaluateMeasureSingleParams {
 		private Bundle myAdditionalData;
 		private Endpoint myTerminologyEndpoint;
 		private Parameters myParameters;
-
-		public Builder setId(IdType myId) {
-			this.myId = myId;
+		
+		public Builder setTimezone(String theTimezone) {
+			myTimezone = theTimezone;
 			return this;
 		}
 
-		public Builder setPeriodStart(ZonedDateTime myPeriodStart) {
-			this.myPeriodStart = myPeriodStart;
+		public Builder setId(IdType theId) {
+			myId = theId;
 			return this;
 		}
 
-		public Builder setPeriodEnd(ZonedDateTime myPeriodEnd) {
-			this.myPeriodEnd = myPeriodEnd;
+		public Builder setPeriodStart(ZonedDateTime thePeriodStart) {
+			myPeriodStart = thePeriodStart;
 			return this;
 		}
 
-		public Builder setReportType(String myReportType) {
-			this.myReportType = myReportType;
+		public Builder setPeriodEnd(ZonedDateTime thePeriodEnd) {
+			myPeriodEnd = thePeriodEnd;
 			return this;
 		}
 
-		public Builder setSubject(String mySubject) {
-			this.mySubject = mySubject;
+		public Builder setReportType(String theReportType) {
+			myReportType = theReportType;
 			return this;
 		}
 
-		public Builder setPractitioner(String myPractitioner) {
-			this.myPractitioner = myPractitioner;
+		public Builder setSubject(String theSubject) {
+			mySubject = theSubject;
 			return this;
 		}
 
-		public Builder setLastReceivedOn(String myLastReceivedOn) {
-			this.myLastReceivedOn = myLastReceivedOn;
+		public Builder setPractitioner(String thePractitioner) {
+			myPractitioner = thePractitioner;
 			return this;
 		}
 
-		public Builder setProductLine(String myProductLine) {
-			this.myProductLine = myProductLine;
+		public Builder setLastReceivedOn(String theLastReceivedOn) {
+			myLastReceivedOn = theLastReceivedOn;
 			return this;
 		}
 
-		public Builder setAdditionalData(Bundle myAdditionalData) {
-			this.myAdditionalData = myAdditionalData;
+		public Builder setProductLine(String theProductLine) {
+			myProductLine = theProductLine;
 			return this;
 		}
 
-		public Builder setTerminologyEndpoint(Endpoint myTerminologyEndpoint) {
-			this.myTerminologyEndpoint = myTerminologyEndpoint;
+		public Builder setAdditionalData(Bundle theAdditionalData) {
+			myAdditionalData = theAdditionalData;
 			return this;
 		}
 
-		public Builder setParameters(Parameters myParameters) {
-			this.myParameters = myParameters;
+		public Builder setTerminologyEndpoint(Endpoint theTerminologyEndpoint) {
+			myTerminologyEndpoint = theTerminologyEndpoint;
+			return this;
+		}
+
+		public Builder setParameters(Parameters theParameters) {
+			myParameters = theParameters;
 			return this;
 		}
 

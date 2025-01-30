@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.EmbeddableOperationParams;
+import ca.uhn.fhir.rest.annotation.Header;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -107,6 +108,9 @@ public class EmbeddedParameterConverter {
 
 		if (constructorParamAnnotation instanceof IdParam) {
 			return EmbeddedParameterConverterContext.forParameter(new NullParameter());
+		} else if (constructorParamAnnotation instanceof Header) {
+			return EmbeddedParameterConverterContext.forParameter(
+				new HeaderParameter(((Header) constructorParamAnnotation).value()));
 		} else if (constructorParamAnnotation instanceof OperationParam) {
 			final OperationParameter operationParameter =
 					getOperationParameter((OperationParam) constructorParamAnnotation);

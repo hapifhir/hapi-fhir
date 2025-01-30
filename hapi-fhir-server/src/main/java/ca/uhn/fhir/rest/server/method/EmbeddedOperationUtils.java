@@ -195,6 +195,7 @@ public class EmbeddedOperationUtils {
 		final Parameter[] constructorParameters = theConstructor.getParameters();
 		final Class<?>[] constructorParameterTypes = theConstructor.getParameterTypes();
 
+		// LUKETODO:  if we pass in headers do we really need this validation, or do we need to tweak it?
 		if (constructorParameterTypes.length != theDeclaredFields.length) {
 			final String error = String.format(
 					"%sInvalid operation embedded parameters.  Constructor parameter count does not match field count: %s",
