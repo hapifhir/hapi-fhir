@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6638
+title: "The following pointcuts for CDS Hooks Prefetch Requests have been added: `CDS_HOOK_PREFETCH_REQUEST`, 
+`CDS_HOOK_PREFETCH_RESPONSE`, and `CDS_HOOK_PREFETCH_FAILED`."

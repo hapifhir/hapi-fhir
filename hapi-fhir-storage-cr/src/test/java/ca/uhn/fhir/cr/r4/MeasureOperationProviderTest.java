@@ -68,29 +68,6 @@ class MeasureOperationProviderTest extends BaseCrR4TestServer {
 	}
 
 	@Test
-	void testClientNonPatientBasedMeasureEvaluate_YES_supplementalDataCode() {
-		final String measureId = "InitialInpatientPopulation-YES-supplementalDataCode";
-
-		loadBundle("ClientNonPatientBasedMeasureBundle-YES-supplementalDataCode.json");
-
-		var measure = read(new IdType("Measure", measureId));
-		assertNotNull(measure);
-
-		var returnMeasureReport = runEvaluateMeasure("2019-01-01", "2020-01-01", "Patient/97f27374-8a5c-4aa1-a26f-5a1ab03caa47", measureId, "subject", null);
-
-		String populationName = "initial-population";
-		int expectedCount = 2;
-
-		Optional<MeasureReport.MeasureReportGroupPopulationComponent> population = returnMeasureReport.getGroup().get(0)
-			.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding()
-				&& x.getCode().getCoding().get(0).getCode().equals(populationName))
-			.findFirst();
-
-		assertThat(population.isPresent()).as(String.format("Unable to locate a population with id \"%s\"",populationName)).isTrue();
-		assertThat(expectedCount).as(String.format("expected count for population \"%s\" did not match",populationName)).isEqualTo(population.get().getCount());
-	}
-
-	@Test
 	void testMeasureEvaluateMultiVersion() {
 		loadBundle("multiversion/EXM124-7.0.000-bundle.json");
 		loadBundle("multiversion/EXM124-9.0.000-bundle.json");

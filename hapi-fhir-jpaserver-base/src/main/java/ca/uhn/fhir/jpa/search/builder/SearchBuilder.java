@@ -93,6 +93,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -152,11 +153,13 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGE
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.jpa.util.InClauseNormalizer.normalizeIdListForInClause;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.stripStart;
 
 /**
  * The SearchBuilder is responsible for actually forming the SQL query that handles
@@ -2354,7 +2357,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 				String nextParamName = theComboParamNames.get(paramIndex);
 				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
-				String nextOrValue = nextOr.getValueAsQueryToken(myContext);
+				// The only prefix accepted when combo searching is 'eq' (see validateParamValuesAreValidForComboParam).
+				// As a result, we strip the prefix if present.
+				String nextOrValue = stripStart(nextOr.getValueAsQueryToken(myContext), EQUAL.getValue());
 
 				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
 						myResourceName, nextParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
@@ -2453,7 +2458,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 				if (nextOrValue instanceof BaseParamWithPrefix) {
 					BaseParamWithPrefix<?> paramWithPrefix = (BaseParamWithPrefix<?>) nextOrValue;
-					if (paramWithPrefix.getPrefix() != null) {
+					ParamPrefixEnum prefix = paramWithPrefix.getPrefix();
+					// A parameter with the 'eq' prefix is the only accepted prefix when combo searching since
+					// birthdate=2025-01-01 and birthdate=eq2025-01-01 are equivalent searches.
+					if (prefix != null && prefix != EQUAL) {
 						String message = "Search with params " + theComboParamNames
 								+ " is not a candidate for combo searching - Parameter '" + nextParamName
 								+ "' has prefix: '"
