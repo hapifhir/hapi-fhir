@@ -150,12 +150,12 @@ public class SearchParamValidatingInterceptor {
 		// avoid a loop when loading our hard-coded core FhirContext SearchParameters
 		// skip Search Param validation if been set in the request
 		boolean isStartup = theRequestDetails != null
-			&& Boolean.TRUE == theRequestDetails.getUserData().get(SKIP_VALIDATION);
+				&& Boolean.TRUE == theRequestDetails.getUserData().get(SKIP_VALIDATION);
 		if (isStartup) {
 			logger.warn(
-				"Skipping validation of submitted SearchParameter because {} flag is {}",
-				SKIP_VALIDATION,
-				Boolean.TRUE);
+					"Skipping validation of submitted SearchParameter because {} flag is {}",
+					SKIP_VALIDATION,
+					Boolean.TRUE);
 			return;
 		}
 
