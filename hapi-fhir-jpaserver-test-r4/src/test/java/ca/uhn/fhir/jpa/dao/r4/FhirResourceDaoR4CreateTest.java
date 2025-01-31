@@ -168,7 +168,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myPatientDao.update(p, mySrd);
 
 		Observation containedObs = new Observation();
-		containedObs.setId("#cont");
+		containedObs.setId("cont");
 		containedObs.setSubject(new Reference("Patient/A"));
 
 		Encounter enc = new Encounter();
@@ -285,7 +285,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.setManagingOrganization(new Reference("Organization/ABC"));
 
 		Observation containedObs = new Observation();
-		containedObs.setId("#cont");
+		containedObs.setId("cont");
 		containedObs.setSubject(new Reference("#pat"));
 
 		Encounter enc = new Encounter();
@@ -754,7 +754,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertEquals(organizationUuid, organizationUuidParsed);
 
 		Organization org = (Organization) p.getManagingOrganization().getResource();
-		assertEquals("#" + organizationUuid, org.getId());
+		assertEquals(organizationUuid, org.getId());
 		assertThat(org.getMeta().getTag()).hasSize(1);
 
 	}
