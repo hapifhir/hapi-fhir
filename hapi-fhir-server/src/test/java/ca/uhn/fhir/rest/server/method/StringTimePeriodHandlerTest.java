@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.common;
+package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
