@@ -280,7 +280,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testSearchParameterValidation() {
 		// setup
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.getUserData().put(SearchParamValidatingInterceptor.SKIP_VALIDATION, false);
+		requestDetails.getUserData().put(SearchParamValidatingInterceptor.SKIP_VALIDATION, true);
 
 		SearchParameter sp = new SearchParameter();
 		sp.setUrl("http://example.com/name");
@@ -299,7 +299,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.update(sp, requestDetails);
 
-		//LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Skipping validation of submitted SearchParameter because " + SearchParamValidatingInterceptor.SKIP_VALIDATION + " flag is true");
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Skipping validation of submitted SearchParameter because " + SearchParamValidatingInterceptor.SKIP_VALIDATION + " flag is true");
 	}
 
 	@Test
