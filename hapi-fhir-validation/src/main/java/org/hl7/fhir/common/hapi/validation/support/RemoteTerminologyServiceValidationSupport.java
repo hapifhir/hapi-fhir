@@ -27,6 +27,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -456,6 +457,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			case IValidationSupport.TYPE_STRING:
 				StringType stringType = (StringType) theValue;
 				conceptProperty = new StringConceptProperty(theName, stringType.getValue());
+				break;
+			case IValidationSupport.TYPE_BOOLEAN:
+				BooleanType booleanType = (BooleanType) theValue;
+				conceptProperty = new BooleanConceptProperty(theName, booleanType.getValue());
 				break;
 			case IValidationSupport.TYPE_CODING:
 				Coding coding = (Coding) theValue;
