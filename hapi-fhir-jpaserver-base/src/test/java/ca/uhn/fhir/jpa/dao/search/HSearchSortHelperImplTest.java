@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -79,6 +80,38 @@ class HSearchSortHelperImplTest {
 		verify(mockSearchParamRegistry, times(1)).getActiveSearchParams(eq("Observation"), any());
 		verify(mockResourceSearchParams, times(1)).get("the-param-name");
 		assertFalse(paramType.isEmpty());
+	}
+	/**
+	 * In CDR, when HSearch is enabled, a lot of search params are missing.
+	 * Validates that _id, _lastUpdated, _tag, _security and _source returns a type when absent from
+	 * the search param registry.
+	 */
+	@Test
+	void testGetParamTypeWhenParamNameIsNotInSearchParamRegistry() {
+		//Given that we have
+		String resourceType = "CodeSystem";
+		SortSpec [] sortSpecs = {
+			new SortSpec(Constants.PARAM_LASTUPDATED),
+			new SortSpec(Constants.PARAM_ID),
+			new SortSpec(Constants.PARAM_TAG),
+			new SortSpec(Constants.PARAM_SECURITY),
+			new SortSpec(Constants.PARAM_SOURCE)
+		};
+		RestSearchParameterTypeEnum [] expectedSearchParamTypes = {
+			RestSearchParameterTypeEnum.DATE,
+			RestSearchParameterTypeEnum.TOKEN,
+			RestSearchParameterTypeEnum.TOKEN,
+			RestSearchParameterTypeEnum.TOKEN,
+			RestSearchParameterTypeEnum.TOKEN
+		};
+		when(mockSearchParamRegistry.getActiveSearchParams(eq(resourceType), any())).thenReturn(mockResourceSearchParams);
+		for (int i=0; i < 5; i++) {
+			String absentSearchParam = sortSpecs[i].getParamName();
+			Optional<RestSearchParameterTypeEnum> expectedSearchParamType = Optional.of(expectedSearchParamTypes[i]);
+			when(mockResourceSearchParams.get(absentSearchParam)).thenReturn(null);
+			Optional<RestSearchParameterTypeEnum> paramType = tested.getParamType(resourceType, absentSearchParam);
+			assertThat(paramType).isEqualTo(expectedSearchParamType);
+		}
 	}
 
 	@Test
