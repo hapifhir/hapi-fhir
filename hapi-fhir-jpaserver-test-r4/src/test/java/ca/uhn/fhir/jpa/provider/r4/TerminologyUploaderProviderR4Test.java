@@ -362,10 +362,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		myStorageSettings.setHibernateSearchIndexFullText(true);
 		myStorageSettings.setHibernateSearchIndexSearchParams(true);
 		myStorageSettings.setStoreResourceInHSearchIndex(true);
-		//Given: We have an existing NOT_PRESENT code system
+		//Given: We have a non-existent code system
 		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://example.com/cs");
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		myClient.create().resource(codeSystem).execute();
 		CodeSystem.ConceptDefinitionComponent chem = codeSystem.addConcept().setCode("CHEM").setDisplay("Chemistry");
 		chem.addConcept().setCode("HB").setDisplay("Hemoglobin");
