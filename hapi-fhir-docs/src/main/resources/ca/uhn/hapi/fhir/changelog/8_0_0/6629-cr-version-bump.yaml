@@ -1,0 +1,4 @@
+---
+type: add
+issue: 6629
+title: "Bump Clinical Reasoning to latest 3.17 versioned release, remove temporary CQL dependencies from pom"

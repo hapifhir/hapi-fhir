@@ -1,0 +1,6 @@
+---
+type: change
+issue: 6658
+title: "Added PessimisticLockException to the list of exceptions that can be retried by the HapiTransactionService.
+H2 throws this exception when ensuring Primary Key uniqueness. Without a retry, concurrent transaction processing
+could result in deadlock while enforcing uniqueness on HFJ_RES_SEARCH_URL."
