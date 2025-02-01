@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DiagnosticReport;
@@ -62,6 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -1715,6 +1717,35 @@ public class JsonParserR4Test extends BaseTest {
 		String actual = ourCtx.newJsonParser().encodeToString(p);
 		assertEquals(expected, actual);
 	}
+
+	@Test
+	public void testParseIntoObject() {
+		String expected = "{\"system\":\"http://system.org\",\"value\":\"123\",\"assigner\":{\"reference\":\"Organization/1\"}}";
+
+		// Test
+		Identifier target = new Identifier();
+		ourCtx.newJsonParser().parseInto(expected, target);
+
+		// Verify
+		assertEquals("http://system.org", target.getSystem());
+		assertEquals("123", target.getValue());
+		assertEquals("Organization/1", target.getAssigner().getReference());
+	}
+
+	@Test
+	public void testParseIntoPrimitive() {
+		String expected = "2020-02-20T12:12:01.123-05:00";
+
+		// Test
+		DateTimeType target = new DateTimeType();
+		ourCtx.newJsonParser().parseInto(expected, target);
+
+		// Verify
+		assertEquals(expected, target.getValueAsString());
+		assertThat(target.getValue()).isAfter(Instant.parse("2020-02-19T12:12:01.123-05:00"));
+		assertThat(target.getValue()).isBefore(Instant.parse("2020-02-21T12:12:01.123-05:00"));
+	}
+
 
 	@Test
 	public void testObjectWithBothPrimitiverAndArrayAlternatives() {

@@ -9,10 +9,12 @@ import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.Instant;
 
 import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds;
 import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters;
@@ -251,6 +254,34 @@ public class XmlParserR4Test extends BaseTest {
 		assertEquals(expected, actual);
 	}
 
+
+	@Test
+	public void testParseIntoObject() {
+		String expected = "<element><system value=\"http://system.org\"/><value value=\"123\"/><assigner><reference value=\"Organization/1\"/></assigner></element>";
+
+		// Test
+		Identifier target = new Identifier();
+		ourCtx.newXmlParser().parseInto(expected, target);
+
+		// Verify
+		assertEquals("http://system.org", target.getSystem());
+		assertEquals("123", target.getValue());
+		assertEquals("Organization/1", target.getAssigner().getReference());
+	}
+
+	@Test
+	public void testParseIntoPrimitive() {
+		String expected = "2020-02-20T12:12:01.123-05:00";
+
+		// Test
+		DateTimeType target = new DateTimeType();
+		ourCtx.newXmlParser().parseInto(expected, target);
+
+		// Verify
+		assertEquals(expected, target.getValueAsString());
+		assertThat(target.getValue()).isAfter(Instant.parse("2020-02-19T12:12:01.123-05:00"));
+		assertThat(target.getValue()).isBefore(Instant.parse("2020-02-21T12:12:01.123-05:00"));
+	}
 
 	/**
 	 * Ensure that a contained bundle doesn't cause a crash

@@ -22,6 +22,7 @@ package ca.uhn.fhir.parser;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.CollectionUtil;
@@ -35,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
@@ -512,4 +514,54 @@ public interface IParser {
 	 * @see ParserOptions
 	 */
 	IParser setDontStripVersionsFromReferencesAtPaths(Collection<String> thePaths);
+
+	/**
+	 * Parses an object fragment into the given structure.
+	 *
+	 * @param theSource The source value to parse and use to populate {@literal theTarget}.
+	 *                  If {@literal theTarget} is an instance of {@link org.hl7.fhir.instance.model.api.IPrimitiveType}
+	 *                  the value is treated as a simple string value. So for example, when populating
+	 *                  a {@literal DateTimeTime}, the value should resemble
+	 *                  {@literal 2020-01-01}, not {@literal <birthDate value="2020-01-01"/>}.
+	 *                  If {@literal theTarget} is a complex structure, the value should be
+	 *                  a container element suitable for the parser's encoding. So for example,
+	 *                  if the target is an {@literal Identifier}, the value would be expected
+	 *                  to resemble {@literal <identifier><system value="..."/><value value="..."/></identifier>}
+	 *                  or <code>{"system":"...", "value":"..."}</code>.
+	 * @param theTarget The target structure to populate. Note that this structure is not
+	 *                  cleared automatically by the parser, so existing values will be
+	 *                  overwritten only if {@literal theSource} has a value for the
+	 *                  given element.
+	 * @since 7.2.0
+	 */
+	default void parseInto(String theSource, IBase theTarget) {
+		try {
+			parseInto(new StringReader(theSource), theTarget);
+		} catch (IOException e) {
+			throw new Error(
+					// FIXME: new code
+					Msg.code(1) + "Encountered IOException during read from - This should not happen!", e);
+		}
+	}
+
+	/**
+	 * Parses an object fragment into the given structure.
+	 *
+	 * @param theSource The source value to parse and use to populate {@literal theTarget}.
+	 *                  If {@literal theTarget} is an instance of {@link org.hl7.fhir.instance.model.api.IPrimitiveType}
+	 *                  the value is treated as a simple string value. So for example, when populating
+	 *                  a {@literal DateTimeTime}, the value should resemble
+	 *                  {@literal 2020-01-01}, not {@literal <birthDate value="2020-01-01"/>}.
+	 *                  If {@literal theTarget} is a complex structure, the value should be
+	 *                  a container element suitable for the parser's encoding. So for example,
+	 *                  if the target is an {@literal Identifier}, the value would be expected
+	 *                  to resemble {@literal <identifier><system value="..."/><value value="..."/></identifier>}
+	 *                  or <code>{"system":"...", "value":"..."}</code>.
+	 * @param theTarget The target structure to populate. Note that this structure is not
+	 *                  cleared automatically by the parser, so existing values will be
+	 *                  overwritten only if {@literal theSource} has a value for the
+	 *                  given element.
+	 * @since 7.2.0
+	 */
+	void parseInto(Reader theSource, IBase theTarget) throws IOException;
 }

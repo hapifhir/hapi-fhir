@@ -50,6 +50,7 @@ import ca.uhn.fhir.util.ResourceUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nullable;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -293,6 +294,20 @@ public abstract class BaseParser implements IParser {
 					new EncodeContext(this, myContext.getParserOptions(), new FhirTerser.ContainedResources());
 			encodeToWriter(theElement, theWriter, encodeContext);
 		}
+	}
+
+	@Override
+	public void parseInto(Reader theSource, IBase theTarget) throws IOException {
+		if (theTarget instanceof IPrimitiveType) {
+			((IPrimitiveType<?>) theTarget).setValueAsString(IOUtils.toString(theSource));
+		} else {
+			doParseIntoComplexStructure(theSource, theTarget);
+		}
+	}
+
+	protected void doParseIntoComplexStructure(Reader theSource, IBase theTarget) {
+		// FIXME: new code
+		throw new InternalErrorException(Msg.code(1) + "This parser does not support parsing non-resource values");
 	}
 
 	protected void encodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext)
