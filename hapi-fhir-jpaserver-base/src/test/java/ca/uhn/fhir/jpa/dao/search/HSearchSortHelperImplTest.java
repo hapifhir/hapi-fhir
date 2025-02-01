@@ -88,7 +88,7 @@ class HSearchSortHelperImplTest {
 	 */
 	@Test
 	void testGetParamTypeWhenParamNameIsNotInSearchParamRegistry() {
-		//Given that we have
+		//Given that we have params absent from the SearchParamsRegistry
 		String resourceType = "CodeSystem";
 		SortSpec [] sortSpecs = {
 			new SortSpec(Constants.PARAM_LASTUPDATED),
@@ -105,11 +105,13 @@ class HSearchSortHelperImplTest {
 			RestSearchParameterTypeEnum.TOKEN
 		};
 		when(mockSearchParamRegistry.getActiveSearchParams(eq(resourceType), any())).thenReturn(mockResourceSearchParams);
+		//Execute
 		for (int i=0; i < 5; i++) {
 			String absentSearchParam = sortSpecs[i].getParamName();
 			Optional<RestSearchParameterTypeEnum> expectedSearchParamType = Optional.of(expectedSearchParamTypes[i]);
 			when(mockResourceSearchParams.get(absentSearchParam)).thenReturn(null);
 			Optional<RestSearchParameterTypeEnum> paramType = tested.getParamType(resourceType, absentSearchParam);
+			//Validate
 			assertThat(paramType).isEqualTo(expectedSearchParamType);
 		}
 	}
