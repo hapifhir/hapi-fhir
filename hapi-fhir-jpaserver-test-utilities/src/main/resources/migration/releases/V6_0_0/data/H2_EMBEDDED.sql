@@ -20,7 +20,7 @@ INSERT INTO BT2_JOB_INSTANCE (
    WORK_CHUNKS_PURGED
 ) VALUES (
    '00161699-bcfe-428e-9ca2-caceb9645f8a',
-   0,
+   false,
    0,
    0,
    '2023-07-06 14:24:10.845',
@@ -37,7 +37,7 @@ INSERT INTO BT2_JOB_INSTANCE (
    200,
    'Error message',
    83006,
-   1
+   true
 );
 
 INSERT INTO BT2_WORK_CHUNK (
