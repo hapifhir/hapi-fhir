@@ -59,13 +59,15 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	@Autowired
-	DaoRegistry myDaoRegistry;
+	private DaoRegistry myDaoRegistry;
 
 	private SearchParameterMap mySearchParameterMap;
 	private SystemRequestDetails mySystemRequestDetails;
 	private boolean myStopping;
 	private final Semaphore mySyncResourcesSemaphore = new Semaphore(1);
 	private final Object mySyncResourcesLock = new Object();
+
+	private Integer myMaxRetryCount = null;
 
 	protected BaseResourceCacheSynchronizer(String theResourceName) {
 		myResourceName = theResourceName;
@@ -150,8 +152,20 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	synchronized int doSyncResourcesWithRetry() {
 		// retry runs MAX_RETRIES times
 		// and if errors result every time, it will fail
-		Retrier<Integer> syncResourceRetrier = new Retrier<>(this::doSyncResources, MAX_RETRIES);
+		Retrier<Integer> syncResourceRetrier = new Retrier<>(this::doSyncResources, getMaxRetries());
 		return syncResourceRetrier.runWithRetry();
+	}
+
+	private int getMaxRetries() {
+		if (myMaxRetryCount != null) {
+			return myMaxRetryCount;
+		}
+		return MAX_RETRIES;
+	}
+
+	@VisibleForTesting
+	public void setMaxRetries(Integer theMaxRetries) {
+		myMaxRetryCount = theMaxRetries;
 	}
 
 	@SuppressWarnings("unchecked")

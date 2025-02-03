@@ -224,17 +224,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private SearchQueryProperties mySearchProperties;
 
-	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
+
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
+
+	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	@Autowired(required = false)
 	private IElasticsearchSvc myIElasticsearchSvc;
-
-	@Autowired
-	private IJpaStorageResourceParser myJpaStorageResourceParser;
-
-	@Autowired
-	private IResourceHistoryTableDao myResourceHistoryTableDao;
 
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
@@ -259,7 +256,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			DaoRegistry theDaoRegistry,
 			FhirContext theContext,
 			IIdHelperService theIdHelperService,
-			Class<? extends IBaseResource> theResourceType) {
+			IResourceHistoryTableDao theResourceHistoryTagDao,
+			@Nullable IFulltextSearchSvc theFulltextSearchSvc,
+			IJpaStorageResourceParser theIJpaStorageResourceParser,
+			Class<? extends IBaseResource> theResourceType
+	) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
 		myStorageSettings = theStorageSettings;
@@ -274,6 +275,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myDaoRegistry = theDaoRegistry;
 		myContext = theContext;
 		myIdHelperService = theIdHelperService;
+		myResourceHistoryTableDao = theResourceHistoryTagDao;
+		myFulltextSearchSvc = theFulltextSearchSvc;
+		myJpaStorageResourceParser = theIJpaStorageResourceParser;
 
 		mySearchProperties = new SearchQueryProperties();
 	}
@@ -1266,20 +1270,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			IBaseResource resource = null;
-			if (next != null) {
-				resource = myJpaStorageResourceParser.toResource(
-						resourceType, next, tagMap.get(next.getResourceId()), theForHistoryOperation);
-			}
+			resource = myJpaStorageResourceParser.toResource(
+				resourceType,
+				next,
+				tagMap.get(next.getResourceId()),
+				theForHistoryOperation);
 			if (resource == null) {
-				if (next != null) {
-					ourLog.warn(
-							"Unable to find resource {}/{}/_history/{} in database",
-							next.getResourceType(),
-							next.getIdDt().getIdPart(),
-							next.getVersion());
-				} else {
-					ourLog.warn("Unable to find resource in database.");
-				}
+				ourLog.warn(
+					"Unable to find resource {}/{}/_history/{} in database",
+					next.getResourceType(),
+					next.getIdDt().getIdPart(),
+					next.getVersion());
 				continue;
 			}
 
@@ -1295,12 +1296,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.MATCH);
 			}
 
+			// ensure there's enough space; "<=" because of 0-indexing
+			while (theResourceListToPopulate.size() <= index) {
+				theResourceListToPopulate.add(null);
+			}
 			theResourceListToPopulate.set(index, resource);
 		}
 	}
 
 	private Map<JpaPid, Collection<BaseTag>> getResourceTagMap(Collection<ResourceHistoryTable> theHistoryTables) {
-
 		switch (myStorageSettings.getTagStorageMode()) {
 			case VERSIONED:
 				return getPidToTagMapVersioned(theHistoryTables);
@@ -1409,14 +1413,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// when running asserts
 		assert new HashSet<>(thePids).size() == thePids.size() : "PID list contains duplicates: " + thePids;
 
+		boolean isUsingElasticSearch = isLoadingFromElasticSearchSupported(thePids);
+
 		Map<Long, Integer> position = new HashMap<>();
 		for (JpaPid next : thePids) {
 			position.put(next.getId(), theResourceListToPopulate.size());
-			theResourceListToPopulate.add(null);
 		}
 
 		// Can we fast track this loading by checking elastic search?
-		if (isLoadingFromElasticSearchSupported(thePids)) {
+		if (isUsingElasticSearch) {
 			try {
 				theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
 				return;

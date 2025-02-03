@@ -126,6 +126,7 @@ import static ca.uhn.fhir.jpa.subscription.FhirR4Util.createSubscription;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -214,6 +215,31 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myValidationSupport.fetchAllStructureDefinitions();
 
 		myReindexTestHelper = new ReindexTestHelper(myFhirContext, myDaoRegistry, mySearchParamRegistry);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void syncDatabaseToCache_elasticSearchOrJPA_shouldNotFail(boolean theUseElastisearch) throws Exception {
+		// setup
+		if (theUseElastisearch) {
+			myStorageSettings.setStoreResourceInHSearchIndex(true);
+			myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		}
+		// only 1 retry so this test doesn't take forever
+		mySubscriptionLoader.setMaxRetries(1);
+
+		// create a single subscription
+		String payload = "application/fhir+json";
+		Subscription subscription = createSubscription("Patient?", payload, ourServer.getBaseUrl(), null);
+		mySubscriptionDao.create(subscription, mySrd);
+
+		// test
+		assertDoesNotThrow(() -> {
+			mySubscriptionLoader.doSyncResourcesForUnitTest();
+		});
+
+		// reset
+		mySubscriptionLoader.setMaxRetries(null);
 	}
 
 	/**
@@ -3448,8 +3474,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-
-
 	}
 
 	/**
