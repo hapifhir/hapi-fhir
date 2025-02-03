@@ -29,6 +29,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -47,6 +48,7 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
+import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
@@ -72,6 +74,7 @@ import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.update.UpdateParameters;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -2494,16 +2497,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Start
 		if (outcome == null) {
-			outcome = doUpdateForUpdateOrPatch(
-					theRequest,
-					resourceId,
-					theMatchUrl,
-					thePerformIndexing,
-					theForceUpdateVersion,
-					theResource,
-					entity,
-					update,
-					theTransactionDetails);
+			UpdateParameters updateParameters = new UpdateParameters<>()
+					.setRequestDetails(theRequest)
+					.setResourceIdToUpdate(resourceId)
+					.setMatchUrl(theMatchUrl)
+					.setShouldPerformIndexing(thePerformIndexing)
+					.setShouldForceUpdateVersion(theForceUpdateVersion)
+					.setResource(theResource)
+					.setEntity(entity)
+					.setOperationType(update)
+					.setTransactionDetails(theTransactionDetails)
+					.setShouldForcePopulateOldResourceForProcessing(false);
+
+			outcome = doUpdateForUpdateOrPatch(updateParameters);
 		}
 
 		postUpdateTransaction(theTransactionDetails);
@@ -2525,23 +2531,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	protected DaoMethodOutcome doUpdateForUpdateOrPatch(
-			RequestDetails theRequest,
-			IIdType theResourceId,
-			String theMatchUrl,
-			boolean thePerformIndexing,
-			boolean theForceUpdateVersion,
-			T theResource,
-			IBasePersistedResource theEntity,
-			RestOperationTypeEnum theOperationType,
-			TransactionDetails theTransactionDetails) {
+	protected DaoMethodOutcome doUpdateForUpdateOrPatch(UpdateParameters<T> theUpdateParameters) {
 
 		/*
 		 * We stored a resource searchUrl at creation time to prevent resource duplication.
 		 * We'll clear any currently existing urls from the db, otherwise we could hit
 		 * duplicate index violations if we try to add another (after this create/update)
 		 */
-		ResourceTable entity = (ResourceTable) theEntity;
+		ResourceTable entity = (ResourceTable) theUpdateParameters.getEntity();
 
 		/*
 		 * If we read back the entity from hibernate, and it's already saying
@@ -2557,7 +2554,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (entity.isSearchUrlPresent()) {
 			JpaPid persistentId = entity.getResourceId();
-			theTransactionDetails.addUpdatedResourceId(persistentId);
+			theUpdateParameters.getTransactionDetails().addUpdatedResourceId(persistentId);
 
 			entity.setSearchUrlPresent(false); // it will be removed at the end
 		}
@@ -2574,16 +2571,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					null);
 		}
 
-		return super.doUpdateForUpdateOrPatch(
-				theRequest,
-				theResourceId,
-				theMatchUrl,
-				thePerformIndexing,
-				theForceUpdateVersion,
-				theResource,
-				theEntity,
-				theOperationType,
-				theTransactionDetails);
+		boolean shouldForcePopulateOldResourceForProcessing = myInterceptorBroadcaster instanceof InterceptorService
+				&& ((InterceptorService) myInterceptorBroadcaster)
+						.hasRegisteredInterceptor(PatientCompartmentEnforcingInterceptor.class);
+		theUpdateParameters.setShouldForcePopulateOldResourceForProcessing(shouldForcePopulateOldResourceForProcessing);
+		return super.doUpdateForUpdateOrPatch(theUpdateParameters);
 	}
 
 	/**
