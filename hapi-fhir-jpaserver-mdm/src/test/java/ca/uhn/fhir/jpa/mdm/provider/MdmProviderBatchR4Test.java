@@ -4,7 +4,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
@@ -60,9 +59,6 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	private IInterceptorService myInterceptorService;
 	@Autowired
 	private MdmSettings myMdmSettings;
-
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
 
 	private final PointcutLatch afterMdmLatch = new PointcutLatch(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED);
 
