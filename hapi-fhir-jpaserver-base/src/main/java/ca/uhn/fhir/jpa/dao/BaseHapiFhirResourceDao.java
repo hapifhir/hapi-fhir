@@ -2215,7 +2215,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.flatMap(pidChunk -> searchBuilder.loadResourcesByPid(pidChunk, theRequest).stream());
 		// apply interceptors
 		return resourceStream
-				.flatMap(resource -> resource == null ? Stream.empty() : invokeStoragePreAccessResources(theRequest, resource).stream())
+				.flatMap(resource -> resource == null
+						? Stream.empty()
+						: invokeStoragePreAccessResources(theRequest, resource).stream())
 				.flatMap(resource -> Optional.ofNullable(invokeStoragePreShowResources(theRequest, resource)).stream());
 	}
 

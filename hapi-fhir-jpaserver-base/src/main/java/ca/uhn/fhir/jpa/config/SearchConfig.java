@@ -165,10 +165,7 @@ public class SearchConfig {
 
 	@Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
 	@Scope("prototype")
-	public ISearchBuilder newSearchBuilder(
-		String theResourceName,
-		Class<? extends IBaseResource> theResourceType
-	) {
+	public ISearchBuilder newSearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		return new SearchBuilder(
 				theResourceName,
 				myStorageSettings,

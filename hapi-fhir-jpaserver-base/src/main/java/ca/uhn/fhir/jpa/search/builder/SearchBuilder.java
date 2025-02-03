@@ -259,8 +259,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			IResourceHistoryTableDao theResourceHistoryTagDao,
 			@Nullable IFulltextSearchSvc theFulltextSearchSvc,
 			IJpaStorageResourceParser theIJpaStorageResourceParser,
-			Class<? extends IBaseResource> theResourceType
-	) {
+			Class<? extends IBaseResource> theResourceType) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
 		myStorageSettings = theStorageSettings;
@@ -1271,16 +1270,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			IBaseResource resource = null;
 			resource = myJpaStorageResourceParser.toResource(
-				resourceType,
-				next,
-				tagMap.get(next.getResourceId()),
-				theForHistoryOperation);
+					resourceType, next, tagMap.get(next.getResourceId()), theForHistoryOperation);
 			if (resource == null) {
 				ourLog.warn(
-					"Unable to find resource {}/{}/_history/{} in database",
-					next.getResourceType(),
-					next.getIdDt().getIdPart(),
-					next.getVersion());
+						"Unable to find resource {}/{}/_history/{} in database",
+						next.getResourceType(),
+						next.getIdDt().getIdPart(),
+						next.getVersion());
 				continue;
 			}
 
