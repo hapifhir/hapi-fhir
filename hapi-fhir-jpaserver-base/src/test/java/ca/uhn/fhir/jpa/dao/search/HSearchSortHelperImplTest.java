@@ -14,6 +14,9 @@ import org.hibernate.search.engine.search.sort.dsl.SearchSortFactory;
 import org.hibernate.search.engine.search.sort.dsl.SortFinalStep;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -21,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -81,39 +85,34 @@ class HSearchSortHelperImplTest {
 		verify(mockResourceSearchParams, times(1)).get("the-param-name");
 		assertFalse(paramType.isEmpty());
 	}
+
+	private static Stream<Arguments> provideArgumentsForGetParamType() {
+		return Stream.of(
+			Arguments.of(new SortSpec(Constants.PARAM_LASTUPDATED), Optional.of(RestSearchParameterTypeEnum.DATE)),
+			Arguments.of(new SortSpec(Constants.PARAM_ID), Optional.of(RestSearchParameterTypeEnum.TOKEN)),
+			Arguments.of(new SortSpec(Constants.PARAM_TAG), Optional.of(RestSearchParameterTypeEnum.TOKEN)),
+			Arguments.of(new SortSpec(Constants.PARAM_SECURITY), Optional.of(RestSearchParameterTypeEnum.TOKEN)),
+			Arguments.of(new SortSpec(Constants.PARAM_SOURCE), Optional.of(RestSearchParameterTypeEnum.TOKEN))
+		);
+	}
 	/**
-	 * In CDR, when HSearch is enabled, a lot of search params are missing.
-	 * Validates that _id, _lastUpdated, _tag, _security and _source returns a type when absent from
+	 * Validates that getParamType() returns a param type when _id, _lastUpdated, _tag, _security and _source are absent from
 	 * the search param registry.
 	 */
-	@Test
-	void testGetParamTypeWhenParamNameIsNotInSearchParamRegistry() {
+	@ParameterizedTest
+	@MethodSource("provideArgumentsForGetParamType")
+	void testGetParamTypeWhenParamNameIsNotInSearchParamRegistry(SortSpec sortSpec, Optional<RestSearchParameterTypeEnum> expectedSearchParamType) {
 		//Given that we have params absent from the SearchParamsRegistry
 		String resourceType = "CodeSystem";
-		SortSpec [] sortSpecs = {
-			new SortSpec(Constants.PARAM_LASTUPDATED),
-			new SortSpec(Constants.PARAM_ID),
-			new SortSpec(Constants.PARAM_TAG),
-			new SortSpec(Constants.PARAM_SECURITY),
-			new SortSpec(Constants.PARAM_SOURCE)
-		};
-		RestSearchParameterTypeEnum [] expectedSearchParamTypes = {
-			RestSearchParameterTypeEnum.DATE,
-			RestSearchParameterTypeEnum.TOKEN,
-			RestSearchParameterTypeEnum.TOKEN,
-			RestSearchParameterTypeEnum.TOKEN,
-			RestSearchParameterTypeEnum.TOKEN
-		};
+		String absentSearchParam = sortSpec.getParamName();
 		when(mockSearchParamRegistry.getActiveSearchParams(eq(resourceType), any())).thenReturn(mockResourceSearchParams);
+		when(mockResourceSearchParams.get(absentSearchParam)).thenReturn(null);
+
 		//Execute
-		for (int i=0; i < 5; i++) {
-			String absentSearchParam = sortSpecs[i].getParamName();
-			Optional<RestSearchParameterTypeEnum> expectedSearchParamType = Optional.of(expectedSearchParamTypes[i]);
-			when(mockResourceSearchParams.get(absentSearchParam)).thenReturn(null);
-			Optional<RestSearchParameterTypeEnum> paramType = tested.getParamType(resourceType, absentSearchParam);
-			//Validate
-			assertThat(paramType).isEqualTo(expectedSearchParamType);
-		}
+		Optional<RestSearchParameterTypeEnum> paramType = tested.getParamType(resourceType, absentSearchParam);
+
+		//Validate
+		assertThat(paramType).isEqualTo(expectedSearchParamType);
 	}
 
 	@Test

@@ -362,6 +362,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		myStorageSettings.setHibernateSearchIndexFullText(true);
 		myStorageSettings.setHibernateSearchIndexSearchParams(true);
 		myStorageSettings.setStoreResourceInHSearchIndex(true);
+
 		//Given: We have a non-existent code system
 		CodeSystem codeSystem = new CodeSystem();
 		myClient.create().resource(codeSystem).execute();
@@ -370,6 +371,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		chem.addConcept().setCode("NEUT").setDisplay("Neutrophils");
 		CodeSystem.ConceptDefinitionComponent micro = codeSystem.addConcept().setCode("MICRO").setDisplay("Microbiology");
 		micro.addConcept().setCode("C&S").setDisplay("Culture And Sensitivity");
+
 		//Execute
 		Parameters outcome = myClient
 			.operation()
@@ -379,9 +381,11 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
 			.prettyPrint()
 			.execute();
+
 		//Validate
 		IntegerType conceptCount = (IntegerType) outcome.getParameter("conceptCount").getValue();
 		assertThat(conceptCount.getValue()).isEqualTo(5);
+
 		//Teardown
 		myStorageSettings.setHibernateSearchIndexFullText(false);
 		myStorageSettings.setHibernateSearchIndexSearchParams(false);
