@@ -227,7 +227,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private IFulltextSearchSvc myFulltextSearchSvc;
 
 	@Autowired(required = false)
-	private void setFullTextSearch(IFulltextSearchSvc theFulltextSearchSvc) {
+	public void setFullTextSearch(IFulltextSearchSvc theFulltextSearchSvc) {
 		myFulltextSearchSvc = theFulltextSearchSvc;
 	}
 

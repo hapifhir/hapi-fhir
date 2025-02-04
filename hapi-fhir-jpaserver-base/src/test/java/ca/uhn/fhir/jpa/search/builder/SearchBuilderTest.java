@@ -133,6 +133,8 @@ class SearchBuilderTest {
 		patient.setId("Patient/1");
 
 		if (theUseElastisearch) {
+			mySearchBuilder.setFullTextSearch(myFulltextSearchSvc);
+
 			myStorageSettings.setStoreResourceInHSearchIndex(true);
 			myStorageSettings.setHibernateSearchIndexSearchParams(true);
 			myStorageSettings.setHibernateSearchIndexFullText(true);
