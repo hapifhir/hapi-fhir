@@ -17,7 +17,8 @@ if not target_cdr_branch:
 form_data = {
     "token": trigger_token,
     "ref": target_cdr_branch,
-    "variables[HAPI_BRANCH]": current_hapi_branch
+    "variables[HAPI_BRANCH]": current_hapi_branch,
+    "variables[CI_RUNNER_TAGS]": "hapi-build"
 }
 
 print(f"About to start job. [target_cdr_branch={target_cdr_branch}, current_hapi_branch={current_hapi_branch}]")
