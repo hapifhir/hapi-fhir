@@ -1412,7 +1412,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// when running asserts
 		assert new HashSet<>(thePids).size() == thePids.size() : "PID list contains duplicates: " + thePids;
 
-
 		Map<Long, Integer> position = new HashMap<>();
 		int index = 0;
 		for (JpaPid next : thePids) {
