@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
@@ -191,6 +192,89 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			IBundleProvider patients = myPatientDao.search(map, details);
 			assertTrue(patients.isEmpty());
 		});
+	}
+
+	@Test
+	public void deleteResource_withPartitions_doesNotDeleteOnDifferentPartition() {
+		// setup
+		DaoMethodOutcome outcome;
+		IBundleProvider bundle;
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setUnnamedPartitionMode(false);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
+
+		Patient janePartition1 = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+		Patient janePartition2 = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(2));
+
+		// our partition req details
+		SystemRequestDetails partition1ReqDetails = new SystemRequestDetails();
+		partition1ReqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
+		SystemRequestDetails partition2ReqDetails = new SystemRequestDetails();
+		partition2ReqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(2));
+
+		SearchParameterMap spMap = new SearchParameterMap();
+		spMap.setLoadSynchronous(true);
+
+		// tests
+		// delete on incorrect partition
+		{
+			outcome = myPatientDao.delete(janePartition1.getIdElement(), partition2ReqDetails);
+
+			// nothing deleted; wrong partition
+			bundle = myPatientDao.search(spMap, partition2ReqDetails);
+			assertFalse(bundle.isEmpty());
+
+			assertEquals(2, myMdmLinkDao.count());
+		}
+
+		// delete on correct partition
+		{
+			outcome = myPatientDao.delete(janePartition1.getIdElement(), partition1ReqDetails);
+
+			// deleted on correct partition, but not other partition
+			bundle = myPatientDao.search(spMap, partition1ReqDetails);
+			assertTrue(bundle.isEmpty());
+
+			// check the other partition
+			bundle = myPatientDao.search(spMap, partition2ReqDetails);
+			assertFalse(bundle.isEmpty());
+			assertEquals(janePartition2.getId(), bundle.getAllResources().get(0)
+				.getIdElement().getValueAsString());
+
+			Long mdmLinksCount = myMdmLinkDao.count();
+			assertEquals(1, mdmLinksCount);
+		}
+	}
+
+	@Test
+	public void deleteLastResource_withPartitionsEnabled_works() {
+		// setup
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setUnnamedPartitionMode(false);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
+
+		Patient jane = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+
+		// our partition req details
+		SystemRequestDetails reqDetails = new SystemRequestDetails();
+		reqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
+
+		// test
+		DaoMethodOutcome outcome = myPatientDao.delete(jane.getIdElement(), reqDetails);
+
+		// validate
+		SearchParameterMap spMap = new SearchParameterMap();
+		spMap.setLoadSynchronous(true);
+
+		// deleted last and only match
+		Long mdmLinksCount = myMdmLinkDao.count();
+		assertEquals(0, mdmLinksCount);
+
+		// no more patients, not even golden patient, on partition
+		IBundleProvider bundle = myPatientDao.search(spMap, reqDetails);
+		assertTrue(bundle.isEmpty());
 	}
 
 	@ParameterizedTest

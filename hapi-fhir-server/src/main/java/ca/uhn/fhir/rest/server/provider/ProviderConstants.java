@@ -246,17 +246,17 @@ public class ProviderConstants {
 	public static final String OPERATION_EXPORT = "$export";
 
 	/**
-	 * Operation name for the "$replace-references" operation
+	 * Operation name for the "$hapi.fhir.replace-references" operation
 	 */
-	public static final String OPERATION_REPLACE_REFERENCES = "$replace-references";
+	public static final String OPERATION_REPLACE_REFERENCES = "$hapi.fhir.replace-references";
 
 	/**
-	 * Parameter for source reference of the "$replace-references" operation
+	 * Parameter for source reference of the "$hapi.fhir.replace-references" operation
 	 */
 	public static final String OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID = "source-reference-id";
 
 	/**
-	 * Parameter for target reference of the "$replace-references" operation
+	 * Parameter for target reference of the "$hapi.fhir.replace-references" operation
 	 */
 	public static final String OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID = "target-reference-id";
 
@@ -267,7 +267,7 @@ public class ProviderConstants {
 	public static final String OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT = "resource-limit";
 
 	/**
-	 * $replace-references output Parameters names
+	 * $hapi.fhir.replace-references output Parameters names
 	 */
 	public static final String OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK = "task";
 
