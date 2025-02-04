@@ -952,6 +952,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					requestPartitionId = RequestPartitionId.defaultPartition();
 				}
 
+				System.out.println("XXXXX " + myCounter++);
 				// Extract search params for resource
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(
 						requestPartitionId,
@@ -1121,6 +1122,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		return entity;
 	}
+
+	private int myCounter;
 
 	private static IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> getSearchParamsMapFromTransaction(
 			TransactionDetails theTransactionDetails) {

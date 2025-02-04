@@ -226,6 +226,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private IFulltextSearchSvc myFulltextSearchSvc;
 
+	@Autowired(required = false)
+	private void setFullTextSearch(IFulltextSearchSvc theFulltextSearchSvc) {
+		myFulltextSearchSvc = theFulltextSearchSvc;
+	}
+
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
@@ -257,7 +262,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			FhirContext theContext,
 			IIdHelperService theIdHelperService,
 			IResourceHistoryTableDao theResourceHistoryTagDao,
-			@Nullable IFulltextSearchSvc theFulltextSearchSvc,
 			IJpaStorageResourceParser theIJpaStorageResourceParser,
 			Class<? extends IBaseResource> theResourceType) {
 		myResourceName = theResourceName;
@@ -275,7 +279,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myContext = theContext;
 		myIdHelperService = theIdHelperService;
 		myResourceHistoryTableDao = theResourceHistoryTagDao;
-		myFulltextSearchSvc = theFulltextSearchSvc;
 		myJpaStorageResourceParser = theIJpaStorageResourceParser;
 
 		mySearchProperties = new SearchQueryProperties();
@@ -1409,14 +1412,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// when running asserts
 		assert new HashSet<>(thePids).size() == thePids.size() : "PID list contains duplicates: " + thePids;
 
-		boolean isUsingElasticSearch = isLoadingFromElasticSearchSupported(thePids);
 
 		Map<Long, Integer> position = new HashMap<>();
+		int index = 0;
 		for (JpaPid next : thePids) {
-			position.put(next.getId(), theResourceListToPopulate.size());
+			position.put(next.getId(), index++);
 		}
 
 		// Can we fast track this loading by checking elastic search?
+		boolean isUsingElasticSearch = isLoadingFromElasticSearchSupported(thePids);
 		if (isUsingElasticSearch) {
 			try {
 				theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
