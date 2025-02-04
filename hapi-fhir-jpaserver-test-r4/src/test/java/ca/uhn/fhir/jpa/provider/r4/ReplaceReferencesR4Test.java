@@ -12,7 +12,9 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
@@ -225,6 +227,39 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 		// Assert that the performer references match the expected values
 		assertThat(actualPerformerIds).containsExactly(practitionerId3.toString(), practitionerId2.toString());
+	}
+
+	@Test
+	void testReplaceReferences_DoesNotReplaceVersionedReferences() {
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
+
+		IIdType practitionerId1 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualified();
+		IIdType practitionerId2 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualified();
+
+		Provenance provenance = new Provenance();
+		provenance.addTarget(new Reference(practitionerId1));
+		IIdType provenanceId = myClient.create().resource(provenance).execute().getId();
+		// Call $replace-references operation to replace practitionerId1 with practitionerId3
+		myTestHelper.callReplaceReferencesWithResourceLimit(myClient,
+			practitionerId1.toVersionless().toString(),
+			practitionerId2.toVersionless().toString(),
+			false,
+			null);
+
+		// Fetch and validate the provenance
+		Provenance provenanceAfterOperation = myClient
+			.read()
+			.resource(Provenance.class)
+			.withId(provenanceId.toUnqualifiedVersionless())
+			.execute();
+
+		// Extract the target references from the Provenance
+		List<String> actualTargetIds = provenanceAfterOperation.getTarget().stream()
+			.map(ref -> ref.getReferenceElement().toString())
+			.toList();
+
+		// Assert that the versioned reference in the Provenance  was not replaced
+		assertThat(actualTargetIds).containsExactly(practitionerId1.toString());
 	}
 
 	private IIdType createObservationWithPerformers(IIdType... performerIds) {
