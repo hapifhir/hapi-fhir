@@ -12,7 +12,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
@@ -26,6 +25,7 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
+import java.util.Set;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper.EXPECTED_SMALL_BATCHES;
@@ -233,35 +233,43 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	void testReplaceReferences_ShouldNotReplaceVersionedReferences() {
 		// this configuration makes preserve versioned references in the Provenance.target
 		// so that we can test that the versioned reference was not replaced
+		// but keep a copy of the original configuration to restore it after the test
+		Set<String> originalNotStrippedPaths =
+			myFhirContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths();
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
+		try {
 
-		IIdType practitionerId1 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualified();
-		IIdType practitionerId2 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualified();
+			IIdType practitionerId1 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualified();
+			IIdType practitionerId2 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualified();
 
-		Provenance provenance = new Provenance();
-		provenance.addTarget(new Reference(practitionerId1));
-		IIdType provenanceId = myClient.create().resource(provenance).execute().getId();
-		// Call $replace-references operation to replace practitionerId1 with practitionerId3
-		myTestHelper.callReplaceReferencesWithResourceLimit(myClient,
-			practitionerId1.toVersionless().toString(),
-			practitionerId2.toVersionless().toString(),
-			false,
-			null);
+			Provenance provenance = new Provenance();
+			provenance.addTarget(new Reference(practitionerId1));
+			IIdType provenanceId = myClient.create().resource(provenance).execute().getId();
+			// Call $replace-references operation to replace practitionerId1 with practitionerId3
+			myTestHelper.callReplaceReferencesWithResourceLimit(myClient,
+				practitionerId1.toVersionless().toString(),
+				practitionerId2.toVersionless().toString(),
+				false,
+				null);
 
-		// Fetch and validate the provenance
-		Provenance provenanceAfterOperation = myClient
-			.read()
-			.resource(Provenance.class)
-			.withId(provenanceId.toUnqualifiedVersionless())
-			.execute();
+			// Fetch and validate the provenance
+			Provenance provenanceAfterOperation = myClient
+				.read()
+				.resource(Provenance.class)
+				.withId(provenanceId.toUnqualifiedVersionless())
+				.execute();
 
-		// Extract the target references from the Provenance
-		List<String> actualTargetIds = provenanceAfterOperation.getTarget().stream()
-			.map(ref -> ref.getReferenceElement().toString())
-			.toList();
+			// Extract the target references from the Provenance
+			List<String> actualTargetIds = provenanceAfterOperation.getTarget().stream()
+				.map(ref -> ref.getReferenceElement().toString())
+				.toList();
 
-		// Assert that the versioned reference in the Provenance  was not replaced
-		assertThat(actualTargetIds).containsExactly(practitionerId1.toString());
+			// Assert that the versioned reference in the Provenance  was not replaced
+			assertThat(actualTargetIds).containsExactly(practitionerId1.toString());
+
+		} finally {
+			myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(originalNotStrippedPaths);
+		}
 	}
 
 	private IIdType createObservationWithPerformers(IIdType... performerIds) {
