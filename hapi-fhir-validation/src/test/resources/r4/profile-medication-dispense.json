@@ -1,0 +1,55 @@
+{
+	"resourceType": "StructureDefinition",
+	"url": "http://example.com/fhir/StructureDefinition/profile-medication-dispense",
+	"version": "1.0.0",
+	"name": "MedicationDispenseProfile",
+	"status": "active",
+	"experimental": false,
+	"date": "2019",
+	"fhirVersion": "4.0.1",
+	"kind": "resource",
+	"abstract": false,
+	"type": "MedicationRequest",
+	"baseDefinition": "http://hl7.org/fhir/StructureDefinition/MedicationRequest",
+	"derivation": "constraint",
+	"differential": {
+		"element": [
+			{
+				"id": "MedicationRequest.dosageInstruction.route",
+				"path": "MedicationRequest.dosageInstruction.route",
+				"mustSupport": true
+			},
+			{
+				"id": "MedicationRequest.dosageInstruction.route.coding",
+				"path": "MedicationRequest.dosageInstruction.route.coding",
+				"max": "1",
+				"mustSupport": true,
+				"binding": {
+					"strength": "required",
+					"valueSet": "https://fhir.infoway-inforoute.ca/ValueSet/routeofadministration"
+				}
+			},
+			{
+				"id": "MedicationRequest.dosageInstruction.route.coding.system",
+				"path": "MedicationRequest.dosageInstruction.route.coding.system",
+				"fixedUri": "http://snomed.info/sct",
+				"mustSupport": true
+			},
+			{
+				"id": "MedicationRequest.dosageInstruction.route.coding.code",
+				"path": "MedicationRequest.dosageInstruction.route.coding.code",
+				"mustSupport": true
+			},
+			{
+				"id": "MedicationRequest.dosageInstruction.route.coding.display",
+				"path": "MedicationRequest.dosageInstruction.route.coding.display",
+				"mustSupport": true
+			},
+			{
+				"id": "MedicationRequest.dosageInstruction.route.text",
+				"path": "MedicationRequest.dosageInstruction.route.text",
+				"mustSupport": true
+			}
+		]
+	}
+}

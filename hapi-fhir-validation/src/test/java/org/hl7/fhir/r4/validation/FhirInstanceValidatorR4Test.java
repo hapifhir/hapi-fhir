@@ -24,6 +24,7 @@ import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyS
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
@@ -1712,6 +1713,34 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(errors).isEmpty();
+	}
+
+	@Test
+	public void testDuplicateValidationMEssages() throws IOException, FHIRException {
+		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
+		InMemoryTerminologyServerValidationSupport inMemorySupport = new InMemoryTerminologyServerValidationSupport(ourCtx);
+
+		UnknownCodeSystemWarningValidationSupport unknownCodeSystemValidationSupport = new UnknownCodeSystemWarningValidationSupport(ourCtx);
+		unknownCodeSystemValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
+
+		ValidationSupportChain support = new ValidationSupportChain(
+			defaultSupport,
+			valSupport,
+			inMemorySupport,
+			unknownCodeSystemValidationSupport
+		).setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(false);
+
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/profile-medication-dispense.json"));
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(support));
+
+		Bundle input = super.loadResource(ourCtx, Bundle.class, "/r4/medication-dispense-bundle.json");
+
+		ValidationResult output = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(all).as(all.toString()).isEmpty();
 	}
 
 	private Bundle buildBundle(int theSize, boolean theValidBundle) throws IOException {

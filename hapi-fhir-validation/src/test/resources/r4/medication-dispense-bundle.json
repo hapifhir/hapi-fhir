@@ -1,0 +1,175 @@
+{
+	"resourceType": "Bundle",
+	"id": "BundleDocumentMedicationAdministrationSubmit",
+	"identifier": {
+		"system": "http://acme.org/identifiers",
+		"value": "12345"
+	},
+	"type": "document",
+	"timestamp": "2023-10-10T22:12:21Z",
+	"entry": [
+		{
+			"fullUrl": "urn:uuid:a71aeda0-c515-4d87-9485-1884b095c2b6",
+			"resource": {
+				"resourceType": "Composition",
+				"text": {
+					"status": "generated",
+					"div": "<div>Some text</div>"
+				},
+				"title": "Consultation Note",
+				"status": "final",
+				"type": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "11488-4",
+							"display": "Consult note"
+						}
+					]
+				},
+				"author": [
+					{
+						"reference": "urn:uuid:4ddb0489-8ae9-4e50-add1-0f1336f23b24"
+					}
+				],
+				"date": "2012-01-04T09:10:14Z",
+				"section": [
+					{
+						"title": "Medication administration record",
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "80565-5",
+									"display": "Medication administration record"
+								}
+							]
+						},
+						"entry": [
+							{
+								"reference": "urn:uuid:b8af15c9-c8b3-4a06-a741-9a0f81c27a0f"
+							}
+						]
+					}
+				]
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:b8af15c9-c8b3-4a06-a741-9a0f81c27a0f",
+			"resource": {
+				"resourceType": "MedicationAdministration",
+				"text": {
+					"status": "generated",
+					"div": "<div>Some text</div>"
+				},
+				"status": "completed",
+				"medicationReference": {
+					"reference": "urn:uuid:2dea97b1-ffe6-4abc-a6a2-6e05fd87bd93"
+				},
+				"subject": {
+					"reference": "urn:uuid:d79a6997-6892-42d4-9a73-b5f67086be19"
+				},
+				"effectivePeriod": {
+					"start": "2015-01-15T14:30:00+01:00",
+					"end": "2015-01-15T14:30:00+01:00"
+				},
+				"request": {
+					"reference": "urn:uuid:20d3721c-e0a9-4b7e-977c-c5bdcce2e299"
+				}
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:4ddb0489-8ae9-4e50-add1-0f1336f23b24",
+			"resource": {
+				"resourceType": "Practitioner",
+				"text": {
+					"status": "generated",
+					"div": "<div>Some text</div>"
+				}
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:2dea97b1-ffe6-4abc-a6a2-6e05fd87bd93",
+			"resource": {
+				"resourceType": "Medication",
+				"text": {
+					"status": "generated",
+					"div": "<div>Some text</div>"
+				}
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:d79a6997-6892-42d4-9a73-b5f67086be19",
+			"resource": {
+				"resourceType": "Patient",
+				"text": {
+					"status": "generated",
+					"div": "<div>Some text</div>"
+				}
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:20d3721c-e0a9-4b7e-977c-c5bdcce2e299",
+			"resource": {
+				"resourceType": "MedicationRequest",
+				"text": {
+					"status": "generated",
+					"div": "<div>Some text</div>"
+				},
+				"status": "active",
+				"intent": "order",
+				"medicationReference": {
+					"reference": "urn:uuid:2dea97b1-ffe6-4abc-a6a2-6e05fd87bd93"
+				},
+				"subject": {
+					"reference": "urn:uuid:d79a6997-6892-42d4-9a73-b5f67086be19"
+				},
+				"meta": {
+					"profile": [
+						"http://example.com/fhir/StructureDefinition/profile-medication-dispense"
+					]
+				},
+				"dosageInstruction": [
+					{
+						"text": "Take 2 tablets by mouth 3 times a day",
+						"timing": {
+							"repeat": {
+								"duration": 2,
+								"durationUnit": "h"
+							},
+							"code": {
+								"coding": [
+									{
+										"system": "http://snomed.info/sct",
+										"code": "225750008",
+										"display": "Every two hours"
+									}
+								]
+							}
+						},
+						"asNeededBoolean": false,
+						"route": {
+							"coding": [
+								{
+									"system": "http://snomed.info/sct",
+									"code": "26643006",
+									"display": "Oral route"
+								}
+							]
+						},
+						"doseAndRate": [
+							{
+								"doseQuantity": {
+									"value": 2,
+									"unit": "Tablet",
+									"system": "http://snomed.info/sct",
+									"code": "428673006"
+								}
+							}
+						]
+					}
+				]
+			}
+		}
+	]
+}
