@@ -19,14 +19,11 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -74,33 +71,25 @@ public class TermConceptMapGroupElement extends BasePartitionable implements Ser
 			value = {
 				@JoinColumn(
 						name = "CONCEPT_MAP_GROUP_PID",
-						insertable = false,
+						insertable = true,
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
 				@JoinColumn(
 						name = "CONCEPT_MAP_GROUP_PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = false,
+						insertable = true,
 						updatable = false,
 						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TCMGELEMENT_GROUP"))
 	private TermConceptMapGroup myConceptMapGroup;
 
-	@Embedded
-	@AttributeOverride(
-			name = "myId",
-			column = @Column(name = "CONCEPT_MAP_GROUP_PID", insertable = true, updatable = false, nullable = false))
-	@AttributeOverride(
-			name = "myPartitionIdValue",
-			column =
-					@Column(
-							name = "CONCEPT_MAP_GROUP_PARTITION_ID",
-							insertable = true,
-							updatable = false,
-							nullable = true))
-	private JpaPidFk myConceptMapGroupPid;
+	@Column(name = "CONCEPT_MAP_GROUP_PID", nullable = false, insertable = false, updatable = false)
+	private Long myConceptMapGroupPid;
+
+	@Column(name = "CONCEPT_MAP_GROUP_PARTITION_ID", nullable = true, insertable = false, updatable = false)
+	private Integer myConceptMapGroupPartitionId;
 
 	@Column(name = "SOURCE_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
@@ -194,14 +183,6 @@ public class TermConceptMapGroupElement extends BasePartitionable implements Ser
 			myValueSet = getConceptMapGroup().getSourceValueSet();
 		}
 		return myValueSet;
-	}
-
-	public JpaPidFk getConceptMapGroupPid() {
-		return myConceptMapGroupPid;
-	}
-
-	public void setConceptMapGroupPid(JpaPidFk theConceptMapGroupPid) {
-		myConceptMapGroupPid = theConceptMapGroupPid;
 	}
 
 	@Override
