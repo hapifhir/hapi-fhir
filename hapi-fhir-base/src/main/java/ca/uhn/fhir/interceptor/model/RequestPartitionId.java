@@ -243,7 +243,7 @@ public class RequestPartitionId implements IModelJson {
 				&& Objects.equals(getPartitionIds().get(0), theDefaultPartitionId);
 	}
 
-	public boolean hasPartitionId(@Nullable Integer thePartitionId) {
+	public boolean hasPartitionId(Integer thePartitionId) {
 		Validate.notNull(myPartitionIds, "Partition IDs not set");
 		return myPartitionIds.contains(thePartitionId);
 	}
