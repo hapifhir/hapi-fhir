@@ -38,7 +38,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class ValidatorWrapper {
+class  {
 
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
@@ -239,6 +239,12 @@ class ValidatorWrapper {
 			StructureDefinition structureDefinition = theWorkerContext.fetchResource(StructureDefinition.class, theUrl);
 			if (structureDefinition != null) {
 				theProfileStructureDefinitions.add(structureDefinition);
+			} else {
+				// this indicates that the profile is not valid
+				ValidationMessage m = new ValidationMessage();
+				m.setLevel(ValidationMessage.IssueSeverity.ERROR);
+				m.setMessage("Invalid Profile. Failed to fetch the profile with the url=" + theUrl);
+				theMessages.add(m);
 			}
 		} catch (FHIRException e) {
 			ourLog.debug("Failed to load profile: {}", theUrl);

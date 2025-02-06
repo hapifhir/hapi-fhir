@@ -58,7 +58,8 @@ public class ParserWithValidationR4Test extends BaseValidationTestWithInlineMock
 
 		// test
 		ValidationOptions options = new ValidationOptions();
-		options.addProfile("http://tempuri.org/does-not-exist");
+		String profileUrl = "http://tempuri.org/does-not-exist";
+		options.addProfile(profileUrl);
 
 		final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ourCtx);
 		FhirValidator validator = ourCtx.newValidator();
@@ -70,8 +71,9 @@ public class ParserWithValidationR4Test extends BaseValidationTestWithInlineMock
 		// verify
 		assertFalse(validationResult.isSuccessful());
 		assertTrue(validationResult.getMessages().stream()
-			.anyMatch(r -> r.getSeverity() == ResultSeverityEnum.ERROR));
-		// TODO - add validation for the specific error to be thrown
+			.anyMatch(r ->
+						(r.getSeverity() == ResultSeverityEnum.ERROR) &&
+						(r.getMessage().equals("Invalid Profile. Failed to fetch the profile with the url="+profileUrl)) ));
 	}
 
 
