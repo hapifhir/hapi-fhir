@@ -19,11 +19,14 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -65,19 +68,28 @@ public class TermConceptMapGroup extends BasePartitionable implements Serializab
 			value = {
 				@JoinColumn(
 						name = "CONCEPT_MAP_PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
 				@JoinColumn(
-						name = "PARTITION_ID",
+						name = "CONCEPT_MAP_PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TCMGROUP_CONCEPTMAP"))
 	private TermConceptMap myConceptMap;
+
+	@Embedded
+	@AttributeOverride(
+			name = "myId",
+			column = @Column(name = "CONCEPT_MAP_PID", insertable = true, updatable = false, nullable = false))
+	@AttributeOverride(
+			name = "myPartitionIdValue",
+			column = @Column(name = "CONCEPT_MAP_PARTITION_ID", insertable = true, updatable = false, nullable = true))
+	private JpaPidFk myConceptMapPid;
 
 	@Column(name = "SOURCE_URL", nullable = false, length = TermCodeSystem.MAX_URL_LENGTH)
 	private String mySource;
@@ -130,6 +142,10 @@ public class TermConceptMapGroup extends BasePartitionable implements Serializab
 
 	public Long getId() {
 		return myId;
+	}
+
+	public void setConceptMapPid(JpaPidFk theConceptMapPid) {
+		myConceptMapPid = theConceptMapPid;
 	}
 
 	public String getSource() {

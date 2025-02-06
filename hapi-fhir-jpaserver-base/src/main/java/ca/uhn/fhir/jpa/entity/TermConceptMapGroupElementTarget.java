@@ -19,11 +19,14 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -74,19 +77,33 @@ public class TermConceptMapGroupElementTarget extends BasePartitionable implemen
 			value = {
 				@JoinColumn(
 						name = "CONCEPT_MAP_GRP_ELM_PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
 				@JoinColumn(
-						name = "PARTITION_ID",
+						name = "CONCEPT_MAP_GRP_ELM_PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TCMGETARGET_ELEMENT"))
 	private TermConceptMapGroupElement myConceptMapGroupElement;
+
+	@Embedded
+	@AttributeOverride(
+			name = "myId",
+			column = @Column(name = "CONCEPT_MAP_GRP_ELM_PID", insertable = true, updatable = false, nullable = false))
+	@AttributeOverride(
+			name = "myPartitionIdValue",
+			column =
+					@Column(
+							name = "CONCEPT_MAP_GRP_ELM_PARTITION_ID",
+							insertable = true,
+							updatable = false,
+							nullable = true))
+	private JpaPidFk myConceptMapGroupElementPid;
 
 	@Column(name = "TARGET_CODE", nullable = true, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
@@ -185,6 +202,10 @@ public class TermConceptMapGroupElementTarget extends BasePartitionable implemen
 			myValueSet = getConceptMapGroupElement().getConceptMapGroup().getTargetValueSet();
 		}
 		return myValueSet;
+	}
+
+	public void setConceptMapGroupElementPid(JpaPidFk theConceptMapGroupElementPid) {
+		myConceptMapGroupElementPid = theConceptMapGroupElementPid;
 	}
 
 	@Override
