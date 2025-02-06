@@ -182,4 +182,15 @@ public interface IRequestPartitionHelperSvc {
 	 * @return - A {@link RequestPartitionId} with a normalized list of partition ids and partition names.
 	 */
 	RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId);
+
+	/**
+	 * Test whether <code>theRequestPartitionId</code> is targeting the default partition.  Implementers should overwrite
+	 * this method to enhance the default behavior which is to invoke <code>theRequestPartitionId#isDefaultPartition</code>
+	 *
+	 * @param theRequestPartitionId to perform the evaluation upon.
+	 * @return true if the <code>theRequestPartitionId</code> is for the default partition.
+	 */
+	default boolean isDefaultPartition(@Nonnull RequestPartitionId theRequestPartitionId) {
+		return theRequestPartitionId.isDefaultPartition();
+	}
 }

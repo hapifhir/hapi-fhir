@@ -222,15 +222,28 @@ public class RequestPartitionId implements IModelJson {
 	 * Returns true if this request partition contains only one partition ID and it is the DEFAULT partition ID (null)
 	 */
 	public boolean isDefaultPartition() {
+		return isDefaultPartition(null);
+	}
+
+	/**
+	 * Test whether this request partition is for a given default partition ID.
+	 *
+	 * @param theDefaultPartitionId is the ID that was given to the default partition.  The default partition ID can be
+	 *                              NULL as per default or specifically assigned another value.
+	 *                              See PartitionSettings#setDefaultPartitionId.
+	 * @return <code>true</code> if the request partition contains only one partition ID and the partition ID is
+	 *         <code>theDefaultPartitionId</code>.
+	 */
+	public boolean isDefaultPartition(@Nullable Integer theDefaultPartitionId) {
 		if (isAllPartitions()) {
 			return false;
 		}
 		return hasPartitionIds()
 				&& getPartitionIds().size() == 1
-				&& getPartitionIds().get(0) == null;
+				&& Objects.equals(getPartitionIds().get(0), theDefaultPartitionId);
 	}
 
-	public boolean hasPartitionId(Integer thePartitionId) {
+	public boolean hasPartitionId(@Nullable Integer thePartitionId) {
 		Validate.notNull(myPartitionIds, "Partition IDs not set");
 		return myPartitionIds.contains(thePartitionId);
 	}
@@ -244,7 +257,11 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	public boolean hasDefaultPartitionId() {
-		return getPartitionIds().contains(null);
+		return hasDefaultPartitionId(null);
+	}
+
+	public boolean hasDefaultPartitionId(@Nullable Integer theDefaultPartitionId) {
+		return getPartitionIds().contains(theDefaultPartitionId);
 	}
 
 	public List<Integer> getPartitionIdsWithoutDefault() {
@@ -358,14 +375,6 @@ public class RequestPartitionId implements IModelJson {
 	public static RequestPartitionId forPartitionIdsAndNames(
 			List<String> thePartitionNames, List<Integer> thePartitionIds, LocalDate thePartitionDate) {
 		return new RequestPartitionId(thePartitionNames, thePartitionIds, thePartitionDate);
-	}
-
-	public static boolean isDefaultPartition(@Nullable RequestPartitionId thePartitionId) {
-		if (thePartitionId == null) {
-			return false;
-		}
-
-		return thePartitionId.isDefaultPartition();
 	}
 
 	/**

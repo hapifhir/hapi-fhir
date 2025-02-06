@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
@@ -22,6 +23,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
+import ca.uhn.fhir.util.ExtensionUtil;
+import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4b.model.CanonicalType;
@@ -52,6 +55,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -195,11 +199,29 @@ public class SubscriptionValidatingInterceptorTest {
 	}
 
 	@Test
+	public void testCreateSubscription_whenCreatedOnNonDefaultPartition_willFail() {
+		final Subscription subscription = createSubscription();
+		ExtensionUtil.addExtension(myFhirContext, subscription, HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, "boolean", Boolean.TRUE);
+
+		when(mySubscriptionSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
+		when(myRequestPartitionHelperSvc.isDefaultPartition(any())).thenReturn(false);
+
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+
+		try {
+			mySubscriptionValidatingInterceptor.resourcePreCreate(subscription, null, requestPartitionId);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals(Msg.code(2010) + "Cross partition subscription must be created on the default partition", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testSubscriptionUpdate() {
 		final Subscription subscription = createSubscription();
 
-		// Assert there is no Exception thrown here.
-		mySubscriptionValidatingInterceptor.resourceUpdated(subscription, subscription, null, null);
+		assertThatThrownBy(() -> mySubscriptionValidatingInterceptor.resourceUpdated(subscription, subscription, null, null))
+			.doesNotThrowAnyException();
 	}
 
 	@Test
