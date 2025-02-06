@@ -79,7 +79,7 @@ public class TermConceptMapGroupElementTarget extends BasePartitionable implemen
 						nullable = false,
 						referencedColumnName = "PID"),
 				@JoinColumn(
-						name = "CONCEPT_MAP_GRP_ELM_PARTITION_ID",
+						name = "CCEPT_MAP_GRP_ELM_PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
 						insertable = true,
 						updatable = false,
@@ -88,10 +88,7 @@ public class TermConceptMapGroupElementTarget extends BasePartitionable implemen
 			foreignKey = @ForeignKey(name = "FK_TCMGETARGET_ELEMENT"))
 	private TermConceptMapGroupElement myConceptMapGroupElement;
 
-	@Column(name = "CONCEPT_MAP_GRP_ELM_PID", nullable = false, insertable = false, updatable = false)
-	private Long myConceptMapGroupElementPid;
-
-	@Column(name = "CONCEPT_MAP_GRP_ELM_PARTITION_ID", nullable = true, insertable = false, updatable = false)
+	@Column(name = "CCEPT_MAP_GRP_ELM_PARTITION_ID", nullable = true, insertable = false, updatable = false)
 	private Integer myConceptMapGroupElementPartitionId;
 
 	@Column(name = "TARGET_CODE", nullable = true, length = TermConcept.MAX_CODE_LENGTH)

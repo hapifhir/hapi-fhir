@@ -85,9 +85,6 @@ public class TermConceptMapGroupElement extends BasePartitionable implements Ser
 			foreignKey = @ForeignKey(name = "FK_TCMGELEMENT_GROUP"))
 	private TermConceptMapGroup myConceptMapGroup;
 
-	@Column(name = "CONCEPT_MAP_GROUP_PID", nullable = false, insertable = false, updatable = false)
-	private Long myConceptMapGroupPid;
-
 	@Column(name = "CONCEPT_MAP_GROUP_PARTITION_ID", nullable = true, insertable = false, updatable = false)
 	private Integer myConceptMapGroupPartitionId;
 

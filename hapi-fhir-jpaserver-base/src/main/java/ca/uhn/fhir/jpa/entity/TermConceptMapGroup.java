@@ -79,9 +79,6 @@ public class TermConceptMapGroup extends BasePartitionable implements Serializab
 			foreignKey = @ForeignKey(name = "FK_TCMGROUP_CONCEPTMAP"))
 	private TermConceptMap myConceptMap;
 
-	@Column(name = "CONCEPT_MAP_PID", nullable = false, insertable = false, updatable = false)
-	private Long myConceptMapPid;
-
 	@Column(name = "CONCEPT_MAP_PARTITION_ID", nullable = true, insertable = false, updatable = false)
 	private Integer myConceptMapPartitionId;
 
