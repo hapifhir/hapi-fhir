@@ -1,11 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
@@ -89,9 +83,12 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
@@ -1986,6 +1983,64 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertEquals(newBirthDate.getValueAsString(), savedPatient.getBirthDateElement().getValueAsString());
 	}
 
+	@Test
+	public void testNotSecurityFilter_onBundleWithDisallowedSecurityTag_isRejected(){
+		final String filter = "_security:not=http://terminology.hl7.org/CodeSystem/v3-ActCode|NODSCLCD";
+		AuthorizationInterceptor interceptor = new ReadAllOfTypeWithFilterAuthorizationInterceptor("Bundle", filter);
+		interceptor.setAuthorizationSearchParamMatcher(new AuthorizationSearchParamMatcher(mySearchParamMatcher));
+		myServer.getRestfulServer().registerInterceptor(interceptor);
+
+		Bundle bundle = createCollectionBundle("bundle-1");
+		bundle.getMeta().addSecurity(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/v3-ActCode").setCode("NODSCLCD"));
+		doUpdateResource(bundle);
+
+		try {
+			myClient.read().resource(Bundle.class).withId("Bundle/bundle-1").execute();
+			fail();
+		} catch (ForbiddenOperationException e){
+			// pass
+		}
+	}
+
+	@Test
+	public void testNotSecurityFilter_onBundleWithAllowedSecurityTag_isAllowed(){
+		final String filter = "_security:not=http://terminology.hl7.org/CodeSystem/v3-ActCode|NODSCLCD";
+
+		AuthorizationInterceptor interceptor = new ReadAllOfTypeWithFilterAuthorizationInterceptor("Bundle", filter);
+		interceptor.setAuthorizationSearchParamMatcher(new AuthorizationSearchParamMatcher(mySearchParamMatcher));
+		myServer.getRestfulServer().registerInterceptor(interceptor);
+
+		Bundle bundle = createCollectionBundle("bundle-1");
+		bundle.getMeta().addSecurity(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/v3-ActCode").setCode("OTHER_CODE"));
+		doUpdateResource(bundle);
+
+		Bundle foundBundle = myClient.read().resource(Bundle.class).withId("bundle-1").execute();
+		assertEquals(bundle.getIdElement().toUnqualifiedVersionless(), foundBundle.getIdElement().toUnqualifiedVersionless());
+	}
+
+	@Test
+	public void testNotSecurityFilter_onBundleWithNoSecurityTags_isAllowed(){
+		final String filter = "_security:not=http://terminology.hl7.org/CodeSystem/v3-ActCode|NODSCLCD";
+
+		AuthorizationInterceptor interceptor = new ReadAllOfTypeWithFilterAuthorizationInterceptor("Bundle", filter);
+		interceptor.setAuthorizationSearchParamMatcher(new AuthorizationSearchParamMatcher(mySearchParamMatcher));
+		myServer.getRestfulServer().registerInterceptor(interceptor);
+
+		Bundle bundle = createCollectionBundle("bundle-1");
+		assertTrue(bundle.getMeta().getSecurity().isEmpty());
+		doUpdateResource(bundle);
+
+		Bundle foundBundle = myClient.read().resource(Bundle.class).withId("bundle-1").execute();
+		assertEquals(bundle.getIdElement().toUnqualifiedVersionless(), foundBundle.getIdElement().toUnqualifiedVersionless());
+	}
+
+	private Bundle createCollectionBundle(String theId){
+		Bundle bundle = new Bundle();
+		bundle.setId(theId);
+		bundle.setType(Bundle.BundleType.COLLECTION);
+		return bundle;
+	}
+
 	private Patient createPatient(String theFirstName, String theLastName) {
 		Patient patient = new Patient();
 		patient.addName().addGiven(theFirstName).setFamily(theLastName);
@@ -2197,6 +2252,29 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			return new RuleBuilder()
 				.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
 				.allow().write().allResources().withAnyId().andThen()
+				.build();
+		}
+	}
+
+	static class ReadAllOfTypeWithFilterAuthorizationInterceptor extends AuthorizationInterceptor {
+
+		private final String myResourceType;
+		private final String myFilter;
+
+		public ReadAllOfTypeWithFilterAuthorizationInterceptor(String theResourceType, String theFilter) {
+			super(PolicyEnum.DENY);
+			myResourceType = theResourceType;
+			myFilter = theFilter;
+		}
+
+		@Override
+		public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+			return new RuleBuilder()
+				.allow()
+				.read()
+				.resourcesOfType(myResourceType)
+				.withFilter(myFilter)
+				.andThen()
 				.build();
 		}
 	}
