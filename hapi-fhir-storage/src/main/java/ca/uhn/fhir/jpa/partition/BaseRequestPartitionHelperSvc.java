@@ -189,7 +189,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			SystemRequestDetails theRequest, boolean theNonPartitionableResource) {
 		RequestPartitionId requestPartitionId;
 		requestPartitionId = getSystemRequestPartitionId(theRequest);
-		if (theNonPartitionableResource && !requestPartitionId.isDefaultPartition()) {
+		if (theNonPartitionableResource && !isDefaultPartition(requestPartitionId)) {
 			throw new InternalErrorException(Msg.code(1315)
 					+ "System call is attempting to write a non-partitionable resource to a partition! This is a bug!");
 		}
@@ -326,7 +326,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		// Replace null partition ID with non-null default partition ID if one is being used
 		if (myPartitionSettings.getDefaultPartitionId() != null
 				&& retVal.hasPartitionIds()
-				&& retVal.hasDefaultPartitionId()) {
+				&& hasDefaultPartitionId(retVal)) {
 			List<Integer> partitionIds = new ArrayList<>(retVal.getPartitionIds());
 			for (int i = 0; i < partitionIds.size(); i++) {
 				if (partitionIds.get(i) == null) {
@@ -380,7 +380,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		validateSinglePartitionIdOrName(theRequestPartitionId.getPartitionNames());
 
 		// Make sure we're not using one of the conformance resources in a non-default partition
-		if (theRequestPartitionId.isDefaultPartition() || theRequestPartitionId.isAllPartitions()) {
+		if (isDefaultPartition(theRequestPartitionId) || theRequestPartitionId.isAllPartitions()) {
 			return;
 		}
 
