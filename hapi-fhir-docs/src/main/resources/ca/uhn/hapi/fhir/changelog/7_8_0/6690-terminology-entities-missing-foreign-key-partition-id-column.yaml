@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6690
+title: "Added missing foreign key columns to `TermConceptMapGroup`, `TermConceptMapGroupElement` 
+    and `TermConceptMapGroupElementTarget` entities, which was causing exception when starting application
+    when partitioning and an Hl7v2 inbound module were configured."
