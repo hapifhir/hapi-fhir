@@ -404,20 +404,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 						DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.MSSQL_2012, DriverTypeEnum.ORACLE_12C);
 
 		version.onTable("TRM_CONCEPT_MAP_GROUP")
-			.addColumn("20250116.01", "CONCEPT_MAP_PARTITION_ID")
-			.nullable()
-			.type(ColumnTypeEnum.INT);
+				.addColumn("20250116.01", "CONCEPT_MAP_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
 
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
-			.addColumn("20250116.02", "CONCEPT_MAP_GROUP_PARTITION_ID")
-			.nullable()
-			.type(ColumnTypeEnum.INT);
+				.addColumn("20250116.02", "CONCEPT_MAP_GROUP_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
 
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
-			.addColumn("20250116.03", "CCEPT_MAP_GRP_ELM_PARTITION_ID")
-			.nullable()
-			.type(ColumnTypeEnum.INT);
-
+				.addColumn("20250116.03", "CCEPT_MAP_GRP_ELM_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
 	}
 
 	protected void init780_afterPartitionChanges() {
