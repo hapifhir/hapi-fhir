@@ -225,8 +225,10 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testInvalidPointcut() {
+		final Subscription subscription = createSubscription();
+
 		try {
-			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(createSubscription(), null, null, Pointcut.TEST_RB);
+			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(subscription, null, null, Pointcut.TEST_RB);
 			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(2267) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + Pointcut.TEST_RB, e.getMessage());
