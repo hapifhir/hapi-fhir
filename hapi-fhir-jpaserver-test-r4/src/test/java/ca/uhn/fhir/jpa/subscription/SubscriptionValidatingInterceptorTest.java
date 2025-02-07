@@ -220,6 +220,7 @@ public class SubscriptionValidatingInterceptorTest {
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 		when(mySubscriptionSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.defaultPartition());
+		when(myRequestPartitionHelperSvc.isDefaultPartition(any())).thenReturn(true);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);

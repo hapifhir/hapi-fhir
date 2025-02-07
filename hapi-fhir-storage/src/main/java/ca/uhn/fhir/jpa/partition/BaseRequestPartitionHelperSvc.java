@@ -364,8 +364,9 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	}
 
 	@Override
-	public boolean isDefaultPartition(@Nonnull RequestPartitionId theRequestPartitionId) {
-		return theRequestPartitionId.isDefaultPartition(myPartitionSettings.getDefaultPartitionId());
+	@Nullable
+	public Integer getDefaultPartitionId() {
+		return myPartitionSettings.getDefaultPartitionId();
 	}
 
 	private boolean isResourceNonPartitionable(String theResourceType) {

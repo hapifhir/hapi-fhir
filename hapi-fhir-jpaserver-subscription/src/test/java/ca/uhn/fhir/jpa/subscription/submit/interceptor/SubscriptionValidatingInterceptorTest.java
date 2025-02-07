@@ -54,8 +54,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -220,8 +220,7 @@ public class SubscriptionValidatingInterceptorTest {
 	public void testSubscriptionUpdate() {
 		final Subscription subscription = createSubscription();
 
-		assertThatThrownBy(() -> mySubscriptionValidatingInterceptor.resourceUpdated(subscription, subscription, null, null))
-			.doesNotThrowAnyException();
+		assertThatNoException().isThrownBy(() -> mySubscriptionValidatingInterceptor.resourceUpdated(subscription, subscription, null, null));
 	}
 
 	@Test
