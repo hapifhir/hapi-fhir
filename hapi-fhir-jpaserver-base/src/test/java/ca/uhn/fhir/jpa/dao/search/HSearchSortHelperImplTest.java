@@ -87,13 +87,14 @@ class HSearchSortHelperImplTest {
 	}
 
 	private static Stream<Arguments> provideArgumentsForGetParamType() {
-		return Stream.of(
-			Arguments.of(new SortSpec(Constants.PARAM_LASTUPDATED), Optional.of(RestSearchParameterTypeEnum.DATE)),
-			Arguments.of(new SortSpec(Constants.PARAM_ID), Optional.of(RestSearchParameterTypeEnum.TOKEN)),
-			Arguments.of(new SortSpec(Constants.PARAM_TAG), Optional.of(RestSearchParameterTypeEnum.TOKEN)),
-			Arguments.of(new SortSpec(Constants.PARAM_SECURITY), Optional.of(RestSearchParameterTypeEnum.TOKEN)),
-			Arguments.of(new SortSpec(Constants.PARAM_SOURCE), Optional.of(RestSearchParameterTypeEnum.TOKEN))
-		);
+		Stream.Builder<Arguments> retVal = Stream.builder();
+		HSearchSortHelperImpl.ourSortingParamNameToParamType.forEach((theSortSpecName, theRestSearchParameterTypeEnum) ->
+		{
+			SortSpec sortSpec = new SortSpec(theSortSpecName);
+			retVal.add(Arguments.of(sortSpec, Optional.of(theRestSearchParameterTypeEnum)));
+		});
+
+		return retVal.build();
 	}
 	/**
 	 * Validates that getParamType() returns a param type when _id, _lastUpdated, _tag, _security and _source are absent from

@@ -53,7 +53,7 @@ import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.URI_VALUE;
  */
 public class HSearchSortHelperImpl implements IHSearchSortHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(HSearchSortHelperImpl.class);
-	private static final Map<String, RestSearchParameterTypeEnum> ourSortingParamNameToParamType = Map.of(
+	public static final Map<String, RestSearchParameterTypeEnum> ourSortingParamNameToParamType = Map.of(
 			Constants.PARAM_LASTUPDATED, RestSearchParameterTypeEnum.DATE,
 			Constants.PARAM_ID, RestSearchParameterTypeEnum.TOKEN,
 			Constants.PARAM_TAG, RestSearchParameterTypeEnum.TOKEN,
