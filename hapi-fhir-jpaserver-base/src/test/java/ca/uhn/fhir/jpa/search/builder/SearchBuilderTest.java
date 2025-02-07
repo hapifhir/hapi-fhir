@@ -121,7 +121,7 @@ class SearchBuilderTest {
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
 	@SuppressWarnings("unchecked")
-	public void loadResourcesByPid_containsNoNullElements(boolean theUseElastisearch) {
+	public void loadResourcesByPid_containsNoNullElements(boolean theUseElasticSearch) {
 		// setup
 		List<JpaPid> pids = new ArrayList<>();
 		List<JpaPid> includedPids = new ArrayList<>();
@@ -132,7 +132,7 @@ class SearchBuilderTest {
 		Patient patient = new Patient();
 		patient.setId("Patient/1");
 
-		if (theUseElastisearch) {
+		if (theUseElasticSearch) {
 			mySearchBuilder.setFullTextSearch(myFulltextSearchSvc);
 
 			myStorageSettings.setStoreResourceInHSearchIndex(true);
@@ -142,7 +142,7 @@ class SearchBuilderTest {
 
 		// when
 		// (these are just for output values)
-		if (!theUseElastisearch) {
+		if (!theUseElasticSearch) {
 			ResourceHistoryTable ht = new ResourceHistoryTable();
 			ht.setResourceId(1L);
 			ht.setResourceType("Patient");
@@ -170,7 +170,7 @@ class SearchBuilderTest {
 
 		// validating the returns for completion's sake
 		assertEquals(1, resources.size());
-		if (theUseElastisearch) {
+		if (theUseElasticSearch) {
 			// if using elastisearch, we want to know the getResources was invoked
 			// with the pid list we sent in
 			ArgumentCaptor<Collection<Long>> pidCapture = ArgumentCaptor.forClass(Collection.class);

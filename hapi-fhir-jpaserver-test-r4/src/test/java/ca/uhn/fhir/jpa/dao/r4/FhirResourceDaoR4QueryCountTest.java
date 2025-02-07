@@ -219,9 +219,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
-	public void syncDatabaseToCache_elasticSearchOrJPA_shouldNotFail(boolean theUseElastisearch) throws Exception {
+	public void syncDatabaseToCache_elasticSearchOrJPA_shouldNotFail(boolean theUseElasticSearch) throws Exception {
 		// setup
-		if (theUseElastisearch) {
+		if (theUseElasticSearch) {
 			myStorageSettings.setStoreResourceInHSearchIndex(true);
 			myStorageSettings.setHibernateSearchIndexSearchParams(true);
 		}
