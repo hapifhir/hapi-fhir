@@ -81,7 +81,6 @@ public class ReplaceReferencesPatchBundleSvc {
 			List<IdDt> theResourceIds,
 			RequestDetails theRequestDetails) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
-
 		theResourceIds.forEach(referencingResourceId -> {
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(referencingResourceId.getResourceType());
 			IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
@@ -110,7 +109,7 @@ public class ReplaceReferencesPatchBundleSvc {
 	private static boolean matches(ResourceReferenceInfo refInfo, IIdType theSourceId) {
 		return refInfo.getResourceReference()
 				.getReferenceElement()
-				.toUnqualifiedVersionless()
+				.toUnqualified()
 				.getValueAsString()
 				.equals(theSourceId.getValueAsString());
 	}
