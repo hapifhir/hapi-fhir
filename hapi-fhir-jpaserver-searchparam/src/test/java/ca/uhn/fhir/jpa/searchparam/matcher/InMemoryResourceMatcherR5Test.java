@@ -454,7 +454,6 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams retval = ResourceIndexedSearchParams.withSets();
 		retval.myDateParams.add(extractEffectiveDateParam(theObservation));
 		retval.myTokenParams.add(extractCodeTokenParam(theObservation));
-		retval.myTokenParams.add(extractSecurityTokenParam(theObservation));
 		return retval;
 	}
 
@@ -467,11 +466,6 @@ public class InMemoryResourceMatcherR5Test {
 	protected ResourceIndexedSearchParamToken extractCodeTokenParam(Observation theObservation) {
 		Coding coding = theObservation.getCode().getCodingFirstRep();
 		return new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "code", coding.getSystem(), coding.getCode());
-	}
-
-	protected ResourceIndexedSearchParamToken extractSecurityTokenParam(Observation theObservation) {
-		Coding security = theObservation.getMeta().getSecurityFirstRep();
-		return new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "_security", security.getSystem(), security.getCode());
 	}
 
 	protected ResourceIndexedSearchParamUri extractSourceUriParam(Observation theObservation) {
