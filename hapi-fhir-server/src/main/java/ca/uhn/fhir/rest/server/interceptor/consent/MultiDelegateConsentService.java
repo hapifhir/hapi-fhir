@@ -24,9 +24,12 @@ import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 /**
  * IConsentService combiner over several delegates with pluggable combination strategy
@@ -89,5 +92,9 @@ public class MultiDelegateConsentService implements IConsentService {
 			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return myVoteCombiner.apply(myDelegates.stream()
 				.map(nextDelegate -> nextDelegate.willSeeResource(theRequestDetails, theResource, theContextServices)));
+	}
+
+	public Collection<IConsentService> getDelegates() {
+		return isEmpty(myDelegates) ? Collections.emptyList() : Collections.unmodifiableCollection(myDelegates);
 	}
 }

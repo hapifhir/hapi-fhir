@@ -71,4 +71,8 @@ public class DelegatingConsentService implements IConsentService {
 	public void setTarget(IConsentService theTarget) {
 		myTarget = theTarget;
 	}
+
+	public IConsentService getTarget() {
+		return myTarget;
+	}
 }
