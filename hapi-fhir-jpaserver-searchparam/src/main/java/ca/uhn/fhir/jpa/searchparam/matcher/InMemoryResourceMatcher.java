@@ -440,7 +440,7 @@ public class InMemoryResourceMatcher {
 
 		if (param.getModifier() == TokenParamModifier.NOT) {
 			// :not filters for security labels / tags should always match resources with no security labels / tags
-			if (isEmpty(list)){
+			if (isEmpty(list)) {
 				return true;
 			}
 			haveMatch = !haveMatch;
