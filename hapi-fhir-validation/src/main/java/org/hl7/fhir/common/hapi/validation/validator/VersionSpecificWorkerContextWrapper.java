@@ -836,9 +836,32 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(
 			ConceptValidationOptions theValidationOptions, String theSystem, String theCode, String theDisplay) {
-		return myValidationSupportContext
+		IValidationSupport.CodeValidationResult result = myValidationSupportContext
 				.getRootValidationSupport()
 				.validateCode(myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, null);
+		if (result != null) {
+			return result;
+		}
+		if (!myValidationSupportContext
+				.getRootValidationSupport()
+				.isCodeSystemSupported(myValidationSupportContext, theSystem)) {
+
+			String msg = "Code system " + theSystem + " is not supported by this validation service";
+			result = new IValidationSupport.CodeValidationResult();
+			result.setMessage(msg);
+			result.setSeverity(IValidationSupport.IssueSeverity.ERROR);
+
+			IValidationSupport.CodeValidationIssue issue = new IValidationSupport.CodeValidationIssue(
+					msg,
+					IValidationSupport.IssueSeverity.ERROR,
+					IValidationSupport.CodeValidationIssueCode.NOT_FOUND,
+					IValidationSupport.CodeValidationIssueCoding.NOT_FOUND);
+
+			result.addIssue(issue);
+			return result;
+		}
+
+		return result;
 	}
 
 	@Override

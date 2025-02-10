@@ -61,6 +61,7 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -2438,5 +2439,59 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		OperationOutcome oo = validateAndReturnOutcome(obs);
 		assertHasNoErrors(oo);
 	}
+
+
+	@Test
+	public void testValidateCodeInValueSetWithUnknownCodeSystem_whenWarningSeverityConfigured_mustRaiseWarningAndSucceed() {
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
+
+		Medication medication = new Medication();
+		medication.setCode(new CodeableConcept().addCoding(new Coding("http://test123.org", "golden", "xxx")));
+		//medication.setCode(new CodeableConcept().addCoding(new Coding("http://hl7.org/fhir/universal-tag", "golden", "xxx")));
+		//medication.setCode(new CodeableConcept().addCoding(new Coding("http://snomed.info/sct", "00559407", "xxx")));
+		medication.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+
+		OperationOutcome oo;
+		String encoded;
+
+		// execute
+		oo = validateAndReturnOutcome(medication);
+
+		// verify
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertThat(oo.getIssueFirstRep().getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).contains("CodeSystem is unknown and can't be validated: https://xxx for 'https://xxx#golden'");
+	}
+
+
+	@Test
+//  @CsvSource({"ERROR", "WARNING"})
+//  public void testValidateCodeInValueSetWithUnknownCodeSystem_whenDefaultSeverityConfigured_mustRaiseErrorAndFail(String theIssueSeverity) {
+	public void testValidateCodeInValueSetWithUnknownCodeSystem_whenDefaultSeverityConfigured_mustRaiseErrorAndFail() {
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.ERROR);
+
+		Medication medication = new Medication();
+
+		//medication.getMeta().addTag(new Coding("http://hl7.org/fhir/universal-tag", "golden", "xxx"));
+		//medication.getMeta().addTag(new Coding("http://test123.org", "golden", "xxx"));
+		medication.setCode(new CodeableConcept().addCoding(new Coding("http://test123.org", "golden", "xxx")));
+		//medication.setCode(new CodeableConcept().addCoding(new Coding("http://hl7.org/fhir/universal-tag", "golden", "xxx")));
+		//medication.setCode(new CodeableConcept().addCoding(new Coding("http://snomed.info/scts", "00559407", "xxx")));
+		medication.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+
+		OperationOutcome oo;
+		String encoded;
+
+		// execute
+		oo = validateAndReturnOutcome(medication);
+
+		// verify
+		encoded = encode(oo);
+		ourLog.info("HERE:" + encoded);
+		assertThat(oo.getIssueFirstRep().getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).contains("CodeSystem is unknown and can't be validated: https://xxx for 'https://xxx#10000'");
+	}
+
 
 }
