@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Hibernate Services
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.hapi.fhir.sql.hibernatesvc;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -42,8 +61,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -109,7 +131,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class DatabasePartitionModeIdFilteringMappingContributor
 		implements org.hibernate.boot.spi.AdditionalMappingContributor {
 
-	private final Set<String> myQualifiedIdRemovedColumnNames = new HashSet<>();
+	private final Set<TableAndColumnName> myQualifiedIdRemovedColumnNames = new HashSet<>();
 
 	/**
 	 * Constructor
@@ -182,14 +204,15 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			filterPartitionedIdsFromCompositeComponents(c);
 		}
 
-		for (Map.Entry<String, PersistentClass> nextEntry :
-				theMetadata.getEntityBindingMap().entrySet()) {
-			PersistentClass entityPersistentClass = nextEntry.getValue();
+		for (String nextEntityName :
+				new TreeSet<>(theMetadata.getEntityBindingMap().keySet())) {
+
+			PersistentClass entityPersistentClass =
+					theMetadata.getEntityBindingMap().get(nextEntityName);
 			Table table = entityPersistentClass.getTable();
 			for (ForeignKey foreignKey : table.getForeignKeys().values()) {
 				// Adjust relations with local filtered columns (e.g. ManyToOne)
-				filterPartitionedIdsFromLocalFks(
-						theClassLoaderService, theMetadata, foreignKey, table, nextEntry.getKey());
+				filterPartitionedIdsFromLocalFks(theClassLoaderService, theMetadata, foreignKey, table, nextEntityName);
 			}
 
 			for (Property property : entityPersistentClass.getProperties()) {
@@ -252,7 +275,7 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 				idRemovedColumnNames.addAll(
 						property.getColumns().stream().map(Column::getName).collect(Collectors.toSet()));
 				property.getColumns().stream()
-						.map(theColumn -> table.getName() + "#" + theColumn.getName())
+						.map(theColumn -> new TableAndColumnName(table.getName(), theColumn.getName()))
 						.forEach(myQualifiedIdRemovedColumnNames::add);
 				idRemovedProperties.add(property.getName());
 
@@ -302,15 +325,17 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 
 				jakarta.persistence.Column column = field.getAnnotation(jakarta.persistence.Column.class);
 				String columnName = column.name();
-				myQualifiedIdRemovedColumnNames.add(tableName + "#" + columnName);
+				myQualifiedIdRemovedColumnNames.add(new TableAndColumnName(tableName, columnName));
 
 				PrimaryKey primaryKey = c.getTable().getPrimaryKey();
 				primaryKey
 						.getColumns()
-						.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getName()));
+						.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
+								new TableAndColumnName(tableName, t.getName())));
 
 				for (Column nextColumn : c.getTable().getColumns()) {
-					if (myQualifiedIdRemovedColumnNames.contains(tableName + "#" + nextColumn.getName())) {
+					if (myQualifiedIdRemovedColumnNames.contains(
+							new TableAndColumnName(tableName, nextColumn.getName()))) {
 						nextColumn.setNullable(true);
 					}
 				}
@@ -357,13 +382,15 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			ToOne manyToOne = (ToOne) value;
 			Set<String> columnNamesToRemoveFromFks = filterPropertiesFromToOneRelationship(
 					theClassLoaderService, theMetadata, theTable, theEntityTypeName, manyToOne);
-			removeColumns(theForeignKey.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
+			removeColumns(
+					theForeignKey.getColumns(),
+					t1 -> columnNamesToRemoveFromFks.contains(t1.getName().toUpperCase(Locale.US)));
 		} else {
 
 			theForeignKey
 					.getColumns()
-					.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
-							theForeignKey.getReferencedTable().getName() + "#" + t.getName()));
+					.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(new TableAndColumnName(
+							theForeignKey.getReferencedTable().getName(), t.getName())));
 		}
 	}
 
@@ -384,16 +411,20 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 		Set<String> columnNamesToRemoveFromFks =
 				determineFilteredColumnNamesInForeignKey(entityType, propertyName, targetTableName);
 
-		removeColumns(manyToOne.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
+		removeColumns(
+				manyToOne.getColumns(),
+				t1 -> columnNamesToRemoveFromFks.contains(t1.getName().toUpperCase(Locale.US)));
 
-		columnNamesToRemoveFromFks.forEach(t -> myQualifiedIdRemovedColumnNames.add(theTable.getName() + "#" + t));
+		columnNamesToRemoveFromFks.forEach(
+				t -> myQualifiedIdRemovedColumnNames.add(new TableAndColumnName(theTable.getName(), t)));
 		return columnNamesToRemoveFromFks;
 	}
 
 	private void filterPartitionedIdsFromUniqueConstraints(UniqueKey uniqueKey, Table table) {
 		uniqueKey
 				.getColumns()
-				.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(table.getName() + "#" + t.getName()));
+				.removeIf(t ->
+						myQualifiedIdRemovedColumnNames.contains(new TableAndColumnName(table.getName(), t.getName())));
 	}
 
 	private void filterPartitionedIdsFromRemoteFks(PersistentClass entityPersistentClass) {
@@ -407,8 +438,8 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 
 					dependantValue
 							.getColumns()
-							.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
-									propertyValueBag.getCollectionTable().getName() + "#" + t.getName()));
+							.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(new TableAndColumnName(
+									propertyValueBag.getCollectionTable().getName(), t.getName())));
 				}
 			}
 		}
@@ -429,8 +460,9 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 				if (isBlank(targetColumnName)) {
 					targetColumnName = sourceColumnName;
 				}
-				if (myQualifiedIdRemovedColumnNames.contains(theTargetTableName + "#" + targetColumnName)) {
-					columnNamesToRemoveFromFks.add(sourceColumnName);
+				if (myQualifiedIdRemovedColumnNames.contains(
+						new TableAndColumnName(theTargetTableName, targetColumnName))) {
+					columnNamesToRemoveFromFks.add(sourceColumnName.toUpperCase(Locale.US));
 				}
 			}
 		}
@@ -551,5 +583,34 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 		entityType = theClassLoaderService.classForTypeName(theEntityTypeName);
 		Validate.notNull(entityType, "Could not load type: %s", theEntityTypeName);
 		return entityType;
+	}
+
+	private static class TableAndColumnName {
+		private final String myTableName;
+		private final String myColumnName;
+		private final int myHashCode;
+
+		private TableAndColumnName(String theTableName, String theColumnName) {
+			myTableName = theTableName.toUpperCase(Locale.US);
+			myColumnName = theColumnName.toUpperCase(Locale.US);
+			myHashCode = Objects.hash(myTableName, myColumnName);
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (!(theO instanceof TableAndColumnName)) return false;
+			TableAndColumnName that = (TableAndColumnName) theO;
+			return Objects.equals(myTableName, that.myTableName) && Objects.equals(myColumnName, that.myColumnName);
+		}
+
+		@Override
+		public int hashCode() {
+			return myHashCode;
+		}
+
+		@Override
+		public String toString() {
+			return "[" + myTableName + "#" + myColumnName + "]";
+		}
 	}
 }
