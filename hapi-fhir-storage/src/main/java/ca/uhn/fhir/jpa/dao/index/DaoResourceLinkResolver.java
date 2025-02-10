@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
@@ -63,8 +64,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
@@ -203,6 +208,101 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		}
 
 		return resolvedResource;
+	}
+
+	@Override
+	public Map<PathAndRef, IResourceLookup> findTargetResource(
+		@javax.annotation.Nonnull RequestPartitionId theRequestPartitionId,
+		String theSourceResourceName,
+		Set<PathAndRef> thePathAndRefs,
+		RequestDetails theRequest,
+		TransactionDetails theTransactionDetails) {
+
+		Map<PathAndRef, IResourceLookup> result = new HashMap<>();
+
+		Map<String, List<PathAndRef>> referencesByResourceType = thePathAndRefs.stream()
+			.collect(Collectors.groupingBy(
+				pathAndRef -> getTargetResourceId(pathAndRef).getResourceType()));
+
+		for (Map.Entry<String, List<PathAndRef>> entry : referencesByResourceType.entrySet()) {
+			String resourceType = entry.getKey();
+			List<PathAndRef> pathAndRefsForType = entry.getValue();
+			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(resourceType);
+			Class<? extends IBaseResource> type = resourceDef.getImplementingClass();
+
+			HashMap<PathAndRef, IIdType> pathAndRefsWithIdParts = new HashMap<>();
+			for (PathAndRef pathAndRef : pathAndRefsForType) {
+				pathAndRefsWithIdParts.put(
+					pathAndRef, getTargetResourceId(pathAndRef));
+			}
+
+			Map<IIdType, IResourceLookup<T>> resolvedResources = Map.of();
+
+			try {
+				resolvedResources = myIdHelperService.resolveResourceIdentities(
+					theRequestPartitionId, pathAndRefsWithIdParts.values(), ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled());
+			} catch (ResourceNotFoundException e) {
+				ourLog.debug("Failed to resolve references in batch", e);
+			}
+
+			for (PathAndRef pathAndRef : pathAndRefsForType) {
+				IIdType targetResourceId = getTargetResourceId(pathAndRef);
+
+				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
+					theSourceResourceName,
+					pathAndRef.getSearchParamName(),
+					ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+
+				String idPart = targetResourceId.getIdPart();
+				IResourceLookup resolvedResource = resolvedResources.get(targetResourceId);
+
+				if (resolvedResource == null) {
+					Optional<IBasePersistedResource> createdTableOpt = this.createPlaceholderTargetIfConfiguredToDoSo(
+						type, pathAndRef.getRef(), idPart, theRequest, theTransactionDetails);
+
+					if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
+						continue;
+					}
+
+					RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(type);
+					String resName = missingResourceDef.getName();
+
+					// Check if this was a deleted resource
+					if (resolvedResource.getDeleted() != null) {
+						handleDeletedTarget(resourceType, idPart, pathAndRef.getPath());
+					}
+
+					if (createdTableOpt.isPresent()) {
+						resolvedResource = (IResourceLookup) createdTableOpt.get();
+					} else {
+						throw new InvalidRequestException(Msg.code(1094) + "Resource "
+							+ resName + "/" + idPart + " not found, specified in path: "
+							+ pathAndRef.getPath());
+					}
+				}
+
+				if (!resourceType.equals(resolvedResource.getResourceType())) {
+					throw new UnprocessableEntityException(Msg.code(1095)
+						+ "Resource contains reference to unknown resource ID " + targetResourceId.getValue());
+				}
+
+				// Cache resolved resource in transaction details
+				if (theTransactionDetails != null) {
+					T persistentId = this.myIdHelperService.newPid(
+						resolvedResource.getPersistentId().getId());
+					persistentId.setAssociatedResourceId(targetResourceId);
+					theTransactionDetails.addResolvedResourceId(targetResourceId, persistentId);
+				}
+
+				if (!searchParam.hasTargets() && searchParam.getTargets().contains(resourceType)) {
+					continue;
+				}
+
+				result.put(pathAndRef, resolvedResource);
+			}
+		}
+
+		return result;
 	}
 
 	/**
@@ -413,6 +513,14 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			value.ifPresent(theIPrimitiveType -> canonicalIdentifier.setValue(theIPrimitiveType.getValueAsString()));
 			return canonicalIdentifier;
 		}
+	}
+
+	private IIdType getTargetResourceId(PathAndRef pathAndRef) {
+		IIdType targetResourceId = pathAndRef.getRef().getReferenceElement();
+		if (targetResourceId.isEmpty() && pathAndRef.getRef().getResource() != null) {
+			targetResourceId = pathAndRef.getRef().getResource().getIdElement();
+		}
+		return targetResourceId;
 	}
 
 	/**
