@@ -29,11 +29,13 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class MeasureOperationsProvider {
@@ -48,6 +50,7 @@ public class MeasureOperationsProvider {
 		myStringTimePeriodHandler = theStringTimePeriodHandler;
 	}
 
+	// LUKETODO:  tweak javadoc
 	/**
 	 * Implements the <a href=
 	 * "https://www.hl7.org/fhir/operation-measure-evaluate-measure.html">$evaluate-measure</a>
@@ -74,6 +77,8 @@ public class MeasureOperationsProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
 	public MeasureReport evaluateMeasure(
 			@IdParam IdType theId,
+			// LUKETODO:  do we leave out measure identifier?
+			@OperationParam(name = "measureUrl") String theMeasureUrl,
 			@OperationParam(name = "periodStart") String thePeriodStart,
 			@OperationParam(name = "periodEnd") String thePeriodEnd,
 			@OperationParam(name = "reportType") String theReportType,
@@ -89,7 +94,7 @@ public class MeasureOperationsProvider {
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
 				.evaluate(
-						Eithers.forMiddle3(theId),
+						either(theId, theMeasureUrl),
 						myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails),
 						myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails),
 						theReportType,
@@ -102,5 +107,16 @@ public class MeasureOperationsProvider {
 						theParameters,
 						theProductLine,
 						thePractitioner);
+	}
+
+	// LUKETODO:
+	private Either3<CanonicalType, IdType, Measure> either(IdType theId, String theMeasureUrl) {
+		if (theId != null) {
+			return Eithers.forMiddle3(theId);
+		} else if (theMeasureUrl != null) {
+			return Eithers.forLeft3(new CanonicalType(theMeasureUrl));
+		} else {
+			throw new IllegalArgumentException("One of the following parameters must be provided: measureId, measureIdentifier, or measureUrl");
+		}
 	}
 }
