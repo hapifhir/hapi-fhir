@@ -72,6 +72,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams.isMatchSearchParam;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -438,6 +439,10 @@ public class InMemoryResourceMatcher {
 		}
 
 		if (param.getModifier() == TokenParamModifier.NOT) {
+			// :not filters for security labels / tags should always match resources with no security labels / tags
+			if (isEmpty(list)) {
+				return true;
+			}
 			haveMatch = !haveMatch;
 		}
 
