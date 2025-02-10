@@ -93,6 +93,7 @@ class HSearchSortHelperImplTest {
 			SortSpec sortSpec = new SortSpec(theSortSpecName);
 			retVal.add(Arguments.of(sortSpec, Optional.of(theRestSearchParameterTypeEnum)));
 		});
+
 		return retVal.build();
 	}
 	/**
