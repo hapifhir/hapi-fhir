@@ -385,11 +385,6 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		//Validate
 		IntegerType conceptCount = (IntegerType) outcome.getParameter("conceptCount").getValue();
 		assertThat(conceptCount.getValue()).isEqualTo(5);
-
-		//Teardown
-		myStorageSettings.setHibernateSearchIndexFullText(false);
-		myStorageSettings.setHibernateSearchIndexSearchParams(false);
-		myStorageSettings.setStoreResourceInHSearchIndex(false);
 	}
 
 	@Test

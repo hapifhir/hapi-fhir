@@ -47,6 +47,7 @@ import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.SEARCH_PARAM_ROOT;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.URI_VALUE;
+import static java.util.Objects.isNull;
 
 /**
  * Used to build HSearch sort clauses.
@@ -158,6 +159,9 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 	 */
 	@VisibleForTesting
 	Optional<RestSearchParameterTypeEnum> getParamType(String theResourceTypeName, String theParamName) {
+		if (isNull(theParamName)){
+			return Optional.empty();
+		}
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
 				theResourceTypeName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		RuntimeSearchParam searchParam = activeSearchParams.get(theParamName);
