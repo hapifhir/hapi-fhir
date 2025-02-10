@@ -159,7 +159,7 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 	 */
 	@VisibleForTesting
 	Optional<RestSearchParameterTypeEnum> getParamType(String theResourceTypeName, String theParamName) {
-		if (isNull(theParamName)){
+		if (isNull(theParamName)) {
 			return Optional.empty();
 		}
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
