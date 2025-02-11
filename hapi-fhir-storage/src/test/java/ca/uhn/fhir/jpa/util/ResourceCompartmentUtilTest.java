@@ -128,6 +128,13 @@ class ResourceCompartmentUtilTest {
 			assertThat(result).contains("P01");
 //			}
 		}
+
+		@Test
+		void nullResource_shouldNotThrowNPE() {
+			// The input resource may be null when mass ingestion is enabled.
+			Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(null, myFhirContext, mySearchParamExtractor);
+			assertThat(result).isEmpty();
+		}
 	}
 
 	private List<RuntimeSearchParam> getMockSearchParams(boolean providePatientCompartment) {

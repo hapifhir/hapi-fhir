@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6656
+title: "Previously, FHIR patch 'replace' would fail when trying to replace a sub-element of a high cardinality element
+using the the FHIR patch syntax. This has been fixed."
+

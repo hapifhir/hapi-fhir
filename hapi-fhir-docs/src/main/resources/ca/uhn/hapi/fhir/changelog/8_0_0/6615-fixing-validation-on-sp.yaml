@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6615
+jira: SMILE-9569
+title: "SearchParameter validation was not being skipped on updates, even if requested. This has been fixed"
