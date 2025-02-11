@@ -1122,9 +1122,11 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(errors).hasSize(1);
-		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found", errors.get(0).getMessage());
-		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
+		assertThat(errors).hasSize(2);
+		assertTrue(errors.stream()
+			.anyMatch(r ->
+				(r.getSeverity() == ResultSeverityEnum.ERROR) &&
+					(r.getMessage().equals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found")) ));
 	}
 
 	@Test

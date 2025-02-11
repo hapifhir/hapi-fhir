@@ -143,8 +143,9 @@ class ValidatorWrapper {
 		List<ValidationMessage> messages = new ArrayList<>();
 
 		List<StructureDefinition> profiles = new ArrayList<>();
+		List<String> invalidProfileValidationMessages = new ArrayList<>();
 		for (String nextProfileUrl : theValidationContext.getOptions().getProfiles()) {
-			fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
+			fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages, invalidProfileValidationMessages);
 		}
 
 		String input = theValidationContext.getResourceAsString();
@@ -167,7 +168,8 @@ class ValidatorWrapper {
 			// Determine if meta/profiles are present...
 			ArrayList<String> profileUrls = determineIfProfilesSpecified(document);
 			for (String nextProfileUrl : profileUrls) {
-				fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
+				fetchAndAddProfile(
+						theWorkerContext, profiles, nextProfileUrl, messages, invalidProfileValidationMessages);
 			}
 
 			Manager.FhirFormat format = Manager.FhirFormat.XML;
@@ -185,7 +187,8 @@ class ValidatorWrapper {
 					JsonArray profilesArray = profileElement.getAsJsonArray();
 					for (JsonElement element : profilesArray) {
 						String nextProfileUrl = element.getAsString();
-						fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
+						fetchAndAddProfile(
+								theWorkerContext, profiles, nextProfileUrl, messages, invalidProfileValidationMessages);
 					}
 				}
 			}
@@ -194,6 +197,18 @@ class ValidatorWrapper {
 			v.validate(null, messages, inputStream, format, profiles);
 		} else {
 			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
+		}
+
+		// if we did not able to load any profile and have invalid profile validation messages, it means those are invalid profiles
+		if (profiles.isEmpty() && !invalidProfileValidationMessages.isEmpty()) {
+			List<ValidationMessage> finalMessages = messages;
+			invalidProfileValidationMessages.forEach(message -> {
+				ValidationMessage m = new ValidationMessage();
+				m.setMessageId(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN);
+				m.setLevel(ValidationMessage.IssueSeverity.ERROR);
+				m.setMessage(message);
+				finalMessages.add(m);
+			});
 		}
 
 		// TODO: are these still needed?
@@ -234,17 +249,22 @@ class ValidatorWrapper {
 			IWorkerContext theWorkerContext,
 			List<StructureDefinition> theProfileStructureDefinitions,
 			String theUrl,
-			List<ValidationMessage> theMessages) {
+			List<ValidationMessage> theMessages,
+			List<String> validationMessages) {
 		try {
 			StructureDefinition structureDefinition = theWorkerContext.fetchResource(StructureDefinition.class, theUrl);
 			if (structureDefinition != null) {
 				theProfileStructureDefinitions.add(structureDefinition);
+				// theMessages = theMessages.stream().filter(m -> m.getMessageId() != null &&
+				// !(m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN))).collect(Collectors.toList());
 			} else {
 				// this indicates that the profile is not valid
-				ValidationMessage m = new ValidationMessage();
-				m.setLevel(ValidationMessage.IssueSeverity.ERROR);
+				/*ValidationMessage m = new ValidationMessage();
+				m.setMessageId(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN);
+				m.setLevel(ValidationMessage.IssueSeverity.WARNING);
 				m.setMessage("Invalid Profile. Failed to fetch the profile with the url=" + theUrl);
-				theMessages.add(m);
+				theMessages.add(m);*/
+				validationMessages.add("Invalid Profile. Failed to fetch the profile with the url=" + theUrl);
 			}
 		} catch (FHIRException e) {
 			ourLog.debug("Failed to load profile: {}", theUrl);
