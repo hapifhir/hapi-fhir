@@ -12,6 +12,7 @@ import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Subscription;
@@ -27,6 +28,7 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 import static ca.uhn.fhir.rest.api.Constants.RESOURCE_PARTITION_ID;
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
+import static java.util.Objects.isNull;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -207,15 +209,12 @@ class SubscriptionCanonicalizerTest {
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
 
-		if(RequestPartitionId.isDefaultPartition(theRequestPartitionId)){
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		} else {
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		}
+		assertCanonicalSubscriptionCrossPropertyValue(
+			canonicalSubscriptionWithoutExtension,
+			canonicalSubscriptionWithExtensionCrossPartitionTrue,
+			canonicalSubscriptionWithExtensionCrossPartitionFalse,
+			theRequestPartitionId
+		);
 	}
 
 	@ParameterizedTest
@@ -242,16 +241,12 @@ class SubscriptionCanonicalizerTest {
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
 
-		if(RequestPartitionId.isDefaultPartition(theRequestPartitionId)){
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		} else {
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		}
-
+		assertCanonicalSubscriptionCrossPropertyValue(
+			canonicalSubscriptionWithoutExtension,
+			canonicalSubscriptionWithExtensionCrossPartitionTrue,
+			canonicalSubscriptionWithExtensionCrossPartitionFalse,
+			theRequestPartitionId
+		);
 	}
 
 	@ParameterizedTest
@@ -276,15 +271,12 @@ class SubscriptionCanonicalizerTest {
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
 
-		if(RequestPartitionId.isDefaultPartition(theRequestPartitionId)){
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		} else {
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		}
+		assertCanonicalSubscriptionCrossPropertyValue(
+			canonicalSubscriptionWithoutExtension,
+			canonicalSubscriptionWithExtensionCrossPartitionTrue,
+			canonicalSubscriptionWithExtensionCrossPartitionFalse,
+			theRequestPartitionId
+		);
 	}
 
 	@ParameterizedTest
@@ -309,15 +301,12 @@ class SubscriptionCanonicalizerTest {
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
 
-		if(RequestPartitionId.isDefaultPartition(theRequestPartitionId)){
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		} else {
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		}
+		assertCanonicalSubscriptionCrossPropertyValue(
+			canonicalSubscriptionWithoutExtension,
+			canonicalSubscriptionWithExtensionCrossPartitionTrue,
+			canonicalSubscriptionWithExtensionCrossPartitionFalse,
+			theRequestPartitionId
+		);
 	}
 
 	private org.hl7.fhir.r4b.model.Subscription buildR4BSubscription(String thePayloadContent) {
@@ -418,5 +407,22 @@ class SubscriptionCanonicalizerTest {
 		filter.setComparator(Enumerations.SearchComparator.EQ);
 		filter.setValue(theValue);
 		return filter;
+	}
+
+	private void assertCanonicalSubscriptionCrossPropertyValue(CanonicalSubscription theCanonicalSubscriptionWithoutExtension,
+															   CanonicalSubscription theCanonicalSubscriptionWithExtensionCrossPartitionTrue,
+															   CanonicalSubscription theCanonicalSubscriptionWithExtensionCrossPartitionFalse,
+															   RequestPartitionId theRequestPartitionId) {
+
+		boolean isDefaultPartition = isNull(theRequestPartitionId) ? false : theRequestPartitionId.isDefaultPartition();
+
+		AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
+		AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
+
+		if(isDefaultPartition){
+			AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
+		} else {
+			AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
+		}
 	}
 }
