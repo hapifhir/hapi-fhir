@@ -1,11 +1,11 @@
 name: Pull Request Pipeline
 
-on: workflow_dispatch
+# on: workflow_dispatch
 
-# on:
-#   pull_request:
-#     branches:
-#       - master
+on:
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build-cache:
