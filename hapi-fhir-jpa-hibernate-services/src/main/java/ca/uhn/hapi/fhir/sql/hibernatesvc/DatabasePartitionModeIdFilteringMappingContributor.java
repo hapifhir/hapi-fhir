@@ -272,15 +272,16 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			if (remove != null) {
 				iter.remove();
 				idRemovedColumns.addAll(property.getColumns());
-				idRemovedColumnNames.addAll(
-						property.getColumns().stream().map(Column::getName).collect(Collectors.toSet()));
+				idRemovedColumnNames.addAll(property.getColumns().stream()
+						.map(c -> c.getName().toUpperCase(Locale.ROOT))
+						.collect(Collectors.toSet()));
 				property.getColumns().stream()
 						.map(theColumn -> new TableAndColumnName(table.getName(), theColumn.getName()))
 						.forEach(myQualifiedIdRemovedColumnNames::add);
 				idRemovedProperties.add(property.getName());
 
 				for (Column next : entityPersistentClass.getTable().getColumns()) {
-					if (idRemovedColumnNames.contains(next.getName())) {
+					if (idRemovedColumnNames.contains(next.getName().toUpperCase(Locale.ROOT))) {
 						next.setNullable(true);
 					}
 				}
@@ -384,7 +385,7 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 					theClassLoaderService, theMetadata, theTable, theEntityTypeName, manyToOne);
 			removeColumns(
 					theForeignKey.getColumns(),
-					t1 -> columnNamesToRemoveFromFks.contains(t1.getName().toUpperCase(Locale.US)));
+					t1 -> columnNamesToRemoveFromFks.contains(t1.getName().toUpperCase(Locale.ROOT)));
 		} else {
 
 			theForeignKey
@@ -413,7 +414,7 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 
 		removeColumns(
 				manyToOne.getColumns(),
-				t1 -> columnNamesToRemoveFromFks.contains(t1.getName().toUpperCase(Locale.US)));
+				t1 -> columnNamesToRemoveFromFks.contains(t1.getName().toUpperCase(Locale.ROOT)));
 
 		columnNamesToRemoveFromFks.forEach(
 				t -> myQualifiedIdRemovedColumnNames.add(new TableAndColumnName(theTable.getName(), t)));
@@ -462,7 +463,7 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 				}
 				if (myQualifiedIdRemovedColumnNames.contains(
 						new TableAndColumnName(theTargetTableName, targetColumnName))) {
-					columnNamesToRemoveFromFks.add(sourceColumnName.toUpperCase(Locale.US));
+					columnNamesToRemoveFromFks.add(sourceColumnName.toUpperCase(Locale.ROOT));
 				}
 			}
 		}
@@ -482,13 +483,15 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 				for (PartitionedIndex partitionedIndex : partitionedIndexes.value()) {
 					String indexName = partitionedIndex.name();
 					Set<String> columnNames = Set.of(partitionedIndex.columns());
+					assert columnNames.stream().allMatch(t -> t.equals(t.toUpperCase(Locale.ROOT)));
+
 					Index index = table.getIndex(indexName);
 					if (index != null) {
 
 						List<Selectable> selectables = getFieldValue(index, "selectables");
 						for (Iterator<Selectable> iter = selectables.iterator(); iter.hasNext(); ) {
 							Column next = (Column) iter.next();
-							if (!columnNames.contains(next.getName())) {
+							if (!columnNames.contains(next.getName().toUpperCase(Locale.ROOT))) {
 								iter.remove();
 							}
 						}
@@ -591,8 +594,8 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 		private final int myHashCode;
 
 		private TableAndColumnName(String theTableName, String theColumnName) {
-			myTableName = theTableName.toUpperCase(Locale.US);
-			myColumnName = theColumnName.toUpperCase(Locale.US);
+			myTableName = theTableName.toUpperCase(Locale.ROOT);
+			myColumnName = theColumnName.toUpperCase(Locale.ROOT);
 			myHashCode = Objects.hash(myTableName, myColumnName);
 		}
 
