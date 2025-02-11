@@ -199,7 +199,8 @@ class ValidatorWrapper {
 			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
 		}
 
-		// if we did not able to load any profile and have invalid profile validation messages, it means those are invalid profiles
+		// if we did not able to load any profile and have invalid profile validation messages, it means those are
+		// invalid profiles
 		if (profiles.isEmpty() && !invalidProfileValidationMessages.isEmpty()) {
 			List<ValidationMessage> finalMessages = messages;
 			invalidProfileValidationMessages.forEach(message -> {
