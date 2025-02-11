@@ -96,6 +96,11 @@ public class RDFParser extends BaseParser {
 	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RDFParser.class);
 
 	public static final String NODE_ROLE = "nodeRole";
+
+	static {
+		org.apache.jena.sys.JenaSystem.init(); // Jena must be initialized before RDF.type.getURI() is run;
+	}
+
 	private static final List<String> ignoredPredicates =
 			Arrays.asList(RDF.type.getURI(), FHIR_NS + FHIR_INDEX, FHIR_NS + NODE_ROLE);
 	public static final String TREE_ROOT = "treeRoot";
@@ -158,7 +163,11 @@ public class RDFParser extends BaseParser {
 
 		encodeResourceToRDFStreamWriter(resource, rdfModel, false, resourceId, encodeContext, true, null);
 
-		RDFUtil.writeRDFModel(writer, rdfModel, lang);
+		try {
+			RDFUtil.writeRDFModel(writer, rdfModel, lang);
+		} catch (Exception e) {
+			throw new DataFormatException("Error writing RDF model to writer", e);
+		}
 	}
 
 	/**
@@ -172,7 +181,13 @@ public class RDFParser extends BaseParser {
 	@Override
 	protected <T extends IBaseResource> T doParseResource(final Class<T> resourceType, final Reader reader)
 			throws DataFormatException {
-		Model model = RDFUtil.readRDFToModel(reader, this.lang);
+
+		Model model = null;
+		try {
+			model = RDFUtil.readRDFToModel(reader, this.lang);
+		} catch (Exception e) {
+			throw new DataFormatException("Error reading RDF model from reader", e);
+		}
 		return parseResource(resourceType, model);
 	}
 
@@ -213,7 +228,7 @@ public class RDFParser extends BaseParser {
 
 		if (parentResource == null) {
 			if (!resource.getIdElement().toUnqualified().hasIdPart()) {
-				parentResource = rdfModel.getResource(null);
+				parentResource = rdfModel.getResource((String) null);
 			} else {
 
 				String resourceUri = IRIs.resolve(
