@@ -638,6 +638,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 					if (!inParams.add(nextParam.getName())) {
 						continue;
 					}
+					// LUKETODO:  how to handle multiple parameters?
 					OperationDefinitionParameterComponent param = op.addParameter();
 					param.setUse(OperationParameterUse.IN);
 					if (nextParam.getParamType() != null) {
