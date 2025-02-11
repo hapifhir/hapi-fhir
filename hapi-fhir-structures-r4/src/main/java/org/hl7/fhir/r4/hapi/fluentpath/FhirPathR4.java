@@ -158,6 +158,11 @@ public class FhirPathR4 implements IFhirPath {
 			public ValueSet resolveValueSet(FHIRPathEngine engine, Object appContext, String url) {
 				return null;
 			}
+
+			@Override
+			public boolean paramIsType(String name, int index) {
+				return false;
+			}
 		});
 	}
 
