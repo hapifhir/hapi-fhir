@@ -2,50 +2,66 @@
 name: Cache Handler
 description: Handles Maven cache restoration or saving in GitHub Actions.
 inputs:
-    path:
-        description: The path to the Maven cache.
-        required: false
-        default: $HOME/.m2/repository
-    key:
-        description: The primary cache key.
-        required: false
-        #  The glob pattern **/pom.xml will match all pom.xml files in the repository, including the root pom.xml file.
-        default: |
-            ${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-    save:
-        description: Whether to save the cache (true) or restore it (false).
-        required: false
-        default: 'false'
+  path:
+    description: The path to the Maven cache.
+    required: false
+    default: $HOME/.m2/repository
+  key:
+    description: The primary cache key.
+    required: true
+  save:
+    description: Whether to save the cache (true) or restore it (false).
+    required: false
+    default: 'false'
+  exclude:
+    description: A list of directories to exclude from the cache (comma-separated). If you choose to exclude them, they are deleted before the parent directory is cached.
+    required: false
+    default: ''
 
 #   The key is the primary identifier for a cache. It uniquely defines a cache entry. If the key matches an
 #   existing cache entry exactly, that cache will be restored. The default way we use it here is generating
 #   based on the inputs or dependencies that define the cache's contents, in our case, the pom files.
 
 outputs:
-    cache-hit:
-        description: Indicates whether an exact match was found for the cache key (only for restore).
-        value: ${{ steps.restore-cache.outputs.cache-hit }}
+  cache-hit:
+    description: Indicates whether an exact match was found for the cache key (only for restore).
+    value: ${{ steps.restore-cache.outputs.cache-hit }}
 
 runs:
-    using: "composite"
-    steps:
-        - name: Debug save input
-          shell: bash
-          run: |
-              echo "Input -> Save: ${{ inputs.save }}"
+ using: "composite"
+ steps:
+  - name: Debug save input
+    shell: bash
+    run: |
+     echo "Input -> Save: ${{ inputs.save }}"
 
-        - name: Restore Cache
-          id: restore-cache
-          if: ${{ inputs.save == 'false' }}
-          uses: actions/cache/restore@v4
-          with:
-              path: ${{ inputs.path }}
-              key: ${{ inputs.key }}
+  - name: Restore Cache
+    id: restore-cache
+    if: ${{ inputs.save == 'false' }}
+    uses: actions/cache/restore@v4
+    with:
+     path: ${{ inputs.path }}
+     key: ${{ inputs.key }}
 
-        - name: Save Cache
-          id: save-cache
-          if: ${{ inputs.save == 'true' }}
-          uses: actions/cache/save@v4
-          with:
-              path: ${{ inputs.path }}
-              key: ${{ inputs.key }}
+  - name: Exclude Directories from Cache
+    if: ${{ inputs.save == 'true' }}
+    shell: bash
+    run: |
+      cache_path="${{ inputs.path }}"
+      exclude_dirs="${{ inputs.exclude }}"
+     
+      if [ -n "$exclude_dirs" ]; then
+        IFS=',' read -ra dirs <<< "$exclude_dirs"
+        for dir in "${dirs[@]}"; do
+          echo "Excluding directory: $dir"
+          rm -rf "${cache_path}/$dir"
+        done
+      fi
+
+  - name: Save Cache
+    id: save-cache
+    if: ${{ inputs.save == 'true' }}
+    uses: actions/cache/save@v4
+    with:
+      path: ${{ inputs.path }}
+      key: ${{ inputs.key }}
