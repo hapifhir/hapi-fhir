@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6608
+title: "Added logic to fail if there is an invalid profile during validation and fixed existing tests that are using invalid profiles."
