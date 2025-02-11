@@ -256,15 +256,7 @@ class ValidatorWrapper {
 			StructureDefinition structureDefinition = theWorkerContext.fetchResource(StructureDefinition.class, theUrl);
 			if (structureDefinition != null) {
 				theProfileStructureDefinitions.add(structureDefinition);
-				// theMessages = theMessages.stream().filter(m -> m.getMessageId() != null &&
-				// !(m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN))).collect(Collectors.toList());
 			} else {
-				// this indicates that the profile is not valid
-				/*ValidationMessage m = new ValidationMessage();
-				m.setMessageId(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN);
-				m.setLevel(ValidationMessage.IssueSeverity.WARNING);
-				m.setMessage("Invalid Profile. Failed to fetch the profile with the url=" + theUrl);
-				theMessages.add(m);*/
 				validationMessages.add("Invalid Profile. Failed to fetch the profile with the url=" + theUrl);
 			}
 		} catch (FHIRException e) {
