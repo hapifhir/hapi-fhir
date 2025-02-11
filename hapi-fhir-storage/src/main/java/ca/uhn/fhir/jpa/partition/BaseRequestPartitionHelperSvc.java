@@ -326,7 +326,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		// Replace null partition ID with non-null default partition ID if one is being used
 		if (myPartitionSettings.getDefaultPartitionId() != null
 				&& retVal.hasPartitionIds()
-				&& retVal.hasDefaultPartitionId()) {
+				&& hasDefaultPartitionId(retVal)) {
 			List<Integer> partitionIds = new ArrayList<>(retVal.getPartitionIds());
 			for (int i = 0; i < partitionIds.size(); i++) {
 				if (partitionIds.get(i) == null) {
@@ -363,6 +363,12 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		return theResourceType != null && !myNonPartitionableResourceNames.contains(theResourceType);
 	}
 
+	@Override
+	@Nullable
+	public Integer getDefaultPartitionId() {
+		return myPartitionSettings.getDefaultPartitionId();
+	}
+
 	private boolean isResourceNonPartitionable(String theResourceType) {
 		return theResourceType != null && !isResourcePartitionable(theResourceType);
 	}
@@ -374,7 +380,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		validateSinglePartitionIdOrName(theRequestPartitionId.getPartitionNames());
 
 		// Make sure we're not using one of the conformance resources in a non-default partition
-		if (theRequestPartitionId.isDefaultPartition() || theRequestPartitionId.isAllPartitions()) {
+		if (isDefaultPartition(theRequestPartitionId) || theRequestPartitionId.isAllPartitions()) {
 			return;
 		}
 

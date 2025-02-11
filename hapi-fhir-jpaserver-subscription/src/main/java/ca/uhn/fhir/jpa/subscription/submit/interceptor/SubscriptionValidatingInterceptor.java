@@ -264,7 +264,7 @@ public class SubscriptionValidatingInterceptor {
 					? theRequestPartitionId
 					: determinePartition(theRequestDetails, theSubscription);
 
-			if (!toCheckPartitionId.isDefaultPartition()) {
+			if (!myRequestPartitionHelperSvc.isDefaultPartition(toCheckPartitionId)) {
 				throw new UnprocessableEntityException(
 						Msg.code(2010) + "Cross partition subscription must be created on the default partition");
 			}
