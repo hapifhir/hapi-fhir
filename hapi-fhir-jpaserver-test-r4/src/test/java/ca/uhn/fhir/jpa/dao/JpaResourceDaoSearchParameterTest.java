@@ -94,7 +94,7 @@ public class JpaResourceDaoSearchParameterTest {
 			myDao.validateResourceForStorage(nextSearchParameter, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Patient.ex[[[\": Error in ?? at 1, 1: Found [ expecting a token name", e.getMessage());
+			assertEquals(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Patient.ex[[[\": Error @1, 1: Found [ expecting a token name", e.getMessage());
 		}
 	}
 
