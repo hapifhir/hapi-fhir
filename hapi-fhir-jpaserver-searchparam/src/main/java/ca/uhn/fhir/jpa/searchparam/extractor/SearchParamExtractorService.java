@@ -462,7 +462,8 @@ public class SearchParamExtractorService {
 
 	private IBaseResource findContainedResource(Collection<IBaseResource> resources, IBaseReference reference) {
 		for (IBaseResource resource : resources) {
-			if (("#" + resource.getIdElement()).equals(reference.getReferenceElement().toString())) return resource;
+			if (("#" + resource.getIdElement())
+					.equals(reference.getReferenceElement().toString())) return resource;
 		}
 		return null;
 	}

@@ -1435,8 +1435,7 @@ public class FhirTerser {
 			return true;
 		}
 		if (theReference.getResource().getIdElement().isAbsolute()
-			|| theReference.getResource().getIdElement().getValueAsString().startsWith("urn:")
-		) {
+				|| theReference.getResource().getIdElement().getValueAsString().startsWith("urn:")) {
 			return false;
 		}
 		return true;
@@ -1822,13 +1821,13 @@ public class FhirTerser {
 				UUID randomUUID = UUID.randomUUID();
 				theResource.getIdElement().setValue(randomUUID.toString());
 				newId.setValue("#" + randomUUID);
-				//TODO put newId in resourceToIdMap ?
+				// TODO put newId in resourceToIdMap ?
 				getResourceToIdMap().put(theResource, newId);
 			} else {
-				//TODO put new IdDt with # in resourceToIdMap ?
+				// TODO put new IdDt with # in resourceToIdMap ?
 				getResourceToIdMap().put(theResource, new IdDt("#" + newId.getIdPart()));
 			}
-			//getResourceToIdMap().put(theResource, newId);
+			// getResourceToIdMap().put(theResource, newId);
 			getOrCreateResourceList().add(theResource);
 			return theResource.getIdElement();
 		}
