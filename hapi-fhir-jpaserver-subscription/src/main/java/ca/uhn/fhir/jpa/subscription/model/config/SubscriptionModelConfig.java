@@ -32,6 +32,7 @@ public class SubscriptionModelConfig {
 	@Bean
 	public SubscriptionCanonicalizer subscriptionCanonicalizer(
 			FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings) {
+		//FIXME GGG
 		return new SubscriptionCanonicalizer(theFhirContext, theSubscriptionSettings);
 	}
 

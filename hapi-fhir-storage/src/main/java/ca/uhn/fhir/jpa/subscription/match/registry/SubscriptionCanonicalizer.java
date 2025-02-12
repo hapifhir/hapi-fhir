@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -70,11 +71,20 @@ public class SubscriptionCanonicalizer {
 
 	final FhirContext myFhirContext;
 	private final SubscriptionSettings mySubscriptionSettings;
+	private final IRequestPartitionHelperSvc myHelperSvc;
 
 	@Autowired
 	public SubscriptionCanonicalizer(FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings) {
 		myFhirContext = theFhirContext;
 		mySubscriptionSettings = theSubscriptionSettings;
+		myHelperSvc = null;
+	}
+
+	@Autowired
+	public SubscriptionCanonicalizer(FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings, IRequestPartitionHelperSvc theHelperSvc) {
+		myFhirContext = theFhirContext;
+		mySubscriptionSettings = theSubscriptionSettings;
+		myHelperSvc = theHelperSvc;
 	}
 
 	// TODO:  LD:  remove this constructor once all callers call the 2 arg constructor above
@@ -86,6 +96,7 @@ public class SubscriptionCanonicalizer {
 	public SubscriptionCanonicalizer(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
 		mySubscriptionSettings = new SubscriptionSettings();
+		myHelperSvc = null;
 	}
 
 	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
@@ -787,7 +798,7 @@ public class SubscriptionCanonicalizer {
 		boolean isSubscriptionCreatedOnDefaultPartition = false;
 
 		if (nonNull(requestPartitionId)) {
-			isSubscriptionCreatedOnDefaultPartition = requestPartitionId.isDefaultPartition();
+			isSubscriptionCreatedOnDefaultPartition = myHelperSvc.isDefaultPartition(requestPartitionId);
 		}
 
 		boolean isSubscriptionDefinededAsCrossPartitionSubscription =
