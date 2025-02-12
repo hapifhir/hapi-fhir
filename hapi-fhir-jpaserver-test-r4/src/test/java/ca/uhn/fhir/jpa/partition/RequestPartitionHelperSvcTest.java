@@ -7,17 +7,19 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,6 +55,11 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 
 		myPatient = new Patient();
 		myPatient.setId(new IdType("Patient", "123", "1"));
+	}
+
+	@AfterEach
+	public void afterEach(){
+		myPartitionSettings.setDefaultPartitionId(null);
 	}
 
 	@Test
@@ -180,6 +187,27 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		} catch (IllegalArgumentException e){
 			assertTrue(e.getMessage().contains("Partition ID 1000000 does not match name SOME-PARTITION-1"));
 		}
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testDefaultPartition_whenDefaultPartitionIsNotNull(Integer theRequestPartitionId) {
+		final Integer defaultPartitionId = 0;
+		myPartitionSettings.setDefaultPartitionId(defaultPartitionId);
+
+		{
+			RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(defaultPartitionId);
+			assertThat(mySvc.isDefaultPartition(requestPartitionId)).isTrue();
+		}
+
+		{
+			RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(theRequestPartitionId);
+			assertThat(mySvc.isDefaultPartition(requestPartitionId)).isFalse();
+		}
+	}
+
+	private static Stream<Integer> testDefaultPartition_whenDefaultPartitionIsNotNull(){
+		return Stream.of(null, 1,2,3);
 	}
 
 	private PartitionEntity createPartition1() {
