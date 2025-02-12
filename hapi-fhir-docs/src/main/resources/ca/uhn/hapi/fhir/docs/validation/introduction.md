@@ -8,6 +8,6 @@ This section contains details on several strategies for validating resources:
 
 * **[Instance Validator](./instance_validator.html)** is validation of the raw or parsed resource against the official FHIR validation rules (ie. the official FHIR definitions, expressed as profile resources such as [StructureDefinition](http://hl7.org/fhir/structuredefinition.html) and [ValueSet](http://hl7.org/fhir/valueset.html).
 
-  The Instance Validator can also be used to validate resources against individual Implementation Guides which derive from the core specification (e.g. the [US Core](http://hl7.com/uscore) implementation guide).
+  The Instance Validator can also be used to validate resources against individual Implementation Guides which derive from the core specification (e.g. the [US Core](https://build.fhir.org/ig/HL7/US-Core/) implementation guide).
   
 * **[Schema/Schematron Validation](./schema_validator.html)** is validation using XSD/SCH validation files provided by FHIR. This validator performs well but produces less usable error messages than Profile Validation. It is considered a legacy feature, as the Instance Validator is now mature and preferred.
