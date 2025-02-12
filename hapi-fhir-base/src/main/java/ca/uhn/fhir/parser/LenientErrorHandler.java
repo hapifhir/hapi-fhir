@@ -73,7 +73,7 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 	@Override
 	public void containedResourceWithNoId(IParseLocation theLocation) {
 		if (myLogErrors) {
-			ourLog.warn("Resource has contained child resource with no ID");
+			ourLog.warn("{}Resource has contained child resource with no ID", describeLocation(theLocation));
 		}
 	}
 
@@ -87,8 +87,9 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 			ScalarType theFoundScalarType) {
 		if (myLogErrors) {
 			if (ourLog.isWarnEnabled()) {
-				String message = createIncorrectJsonTypeMessage(
-						theElementName, theExpected, theExpectedScalarType, theFound, theFoundScalarType);
+				String message = describeLocation(theLocation) +
+						createIncorrectJsonTypeMessage(
+							theElementName, theExpected, theExpectedScalarType, theFound, theFoundScalarType);
 				ourLog.warn(message);
 			}
 		}
@@ -134,7 +135,7 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 	@Override
 	public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
 		if (myLogErrors) {
-			ourLog.warn("Resource is missing required element: {}", theElementName);
+			ourLog.warn("{}Resource is missing required element: {}", describeLocation(theLocation), theElementName);
 		}
 	}
 
