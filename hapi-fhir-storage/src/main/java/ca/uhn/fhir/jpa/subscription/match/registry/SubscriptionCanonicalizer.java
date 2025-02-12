@@ -71,20 +71,20 @@ public class SubscriptionCanonicalizer {
 
 	final FhirContext myFhirContext;
 	private final SubscriptionSettings mySubscriptionSettings;
-	private final IRequestPartitionHelperSvc myHelperSvc;
+
+	private IRequestPartitionHelperSvc myHelperSvc;
+
 
 	@Autowired
 	public SubscriptionCanonicalizer(FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings) {
 		myFhirContext = theFhirContext;
 		mySubscriptionSettings = theSubscriptionSettings;
-		myHelperSvc = null;
 	}
-
+	//TODO GGG: Eventually, we will unify autowiring styles. It is this way now as this is the least destrctive method
+	//to accomplish a minimal MR. I recommend moving all dependencies to setter autowiring, but that is for another day.
 	@Autowired
-	public SubscriptionCanonicalizer(FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings, IRequestPartitionHelperSvc theHelperSvc) {
-		myFhirContext = theFhirContext;
-		mySubscriptionSettings = theSubscriptionSettings;
-		myHelperSvc = theHelperSvc;
+	public void setPartitionHelperSvc(IRequestPartitionHelperSvc thePartitionHelperSvc) {
+		myHelperSvc = thePartitionHelperSvc;
 	}
 
 	// TODO:  LD:  remove this constructor once all callers call the 2 arg constructor above
@@ -96,7 +96,6 @@ public class SubscriptionCanonicalizer {
 	public SubscriptionCanonicalizer(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
 		mySubscriptionSettings = new SubscriptionSettings();
-		myHelperSvc = null;
 	}
 
 	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
@@ -798,7 +797,7 @@ public class SubscriptionCanonicalizer {
 		boolean isSubscriptionCreatedOnDefaultPartition = false;
 
 		if (nonNull(requestPartitionId)) {
-			isSubscriptionCreatedOnDefaultPartition = myHelperSvc.isDefaultPartition(requestPartitionId);
+			isSubscriptionCreatedOnDefaultPartition = myHelperSvc == null ? requestPartitionId.isDefaultPartition() : myHelperSvc.isDefaultPartition(requestPartitionId);
 		}
 
 		boolean isSubscriptionDefinededAsCrossPartitionSubscription =
