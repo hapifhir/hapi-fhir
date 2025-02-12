@@ -77,7 +77,9 @@ public class MdmPartitionIT extends BaseMdmR4Test {
 
 		@Hook(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS)
 		public void didNotFind(ResourceModifiedMessage theMsg) {
-			ourLog.info(theMsg.toString());
+			// in case we want to know why we can log
+			// but this is fired for all subscriptions on startup too
+			ourLog.debug(theMsg.toString());
 		}
 	}
 
@@ -103,7 +105,7 @@ public class MdmPartitionIT extends BaseMdmR4Test {
 		// test
 		myMdmHelper.createWithLatch(patient, true);
 
-		// verify
+		// verify (1 created)
 		assertEquals(initialCount + 1, myMdmLinkDao.count());
 	}
 }
