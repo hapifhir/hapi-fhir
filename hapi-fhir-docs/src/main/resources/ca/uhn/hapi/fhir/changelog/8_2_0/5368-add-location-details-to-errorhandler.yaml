@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5368
+title: "Several error messages reported by the LenientErrorHandler (the default parser error handler)
+  did not include location information in their message. Thanks to Elliot Lavy for the contribution!"
