@@ -969,6 +969,11 @@
 			<name>Mangala Ekanayake</name>
 			<organization>Cambio</organization>
 		</developer>
+		<developer>
+			<id>elavy-harris</id>
+			<name>Eliott Lavy</name>
+			<organization>Harris</organization>
+		</developer>
 	</developers>
 
 	<licenses>
