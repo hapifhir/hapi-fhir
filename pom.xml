@@ -974,6 +974,11 @@
 			<name>Eliott Lavy</name>
 			<organization>Harris</organization>
 		</developer>
+		<developer>
+			<id>krauzer</id>
+			<name>Dylan Krause</name>
+			<organization>Corbalt</organization>
+		</developer>
 	</developers>
 
 	<licenses>
