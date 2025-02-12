@@ -166,7 +166,7 @@ public class RDFParser extends BaseParser {
 		try {
 			RDFUtil.writeRDFModel(writer, rdfModel, lang);
 		} catch (Exception e) {
-			throw new DataFormatException("Error writing RDF model to writer", e);
+			throw new DataFormatException(Msg.code(2618) + "Error writing RDF model to writer", e);
 		}
 	}
 
@@ -186,7 +186,7 @@ public class RDFParser extends BaseParser {
 		try {
 			model = RDFUtil.readRDFToModel(reader, this.lang);
 		} catch (Exception e) {
-			throw new DataFormatException("Error reading RDF model from reader", e);
+			throw new DataFormatException(Msg.code(2619) + "Error reading RDF model from reader", e);
 		}
 		return parseResource(resourceType, model);
 	}
