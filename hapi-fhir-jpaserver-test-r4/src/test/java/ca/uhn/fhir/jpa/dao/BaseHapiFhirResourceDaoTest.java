@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -59,6 +60,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -73,6 +76,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -160,11 +164,44 @@ class BaseHapiFhirResourceDaoTest {
 	 * To be called for tests that require additional
 	 * setup
 	 *
-	 * @param clazz
+	 * @param theClazz
 	 */
-	private void setup(Class clazz) {
-		mySvc.setResourceType(clazz);
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private void setup(Class theClazz) {
+		mySvc.setResourceType(theClazz);
 		mySvc.start();
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void searchForResources_withNullResourceReturns_doesNotFail() {
+		// setup
+		SearchParameterMap map = new SearchParameterMap();
+		RequestDetails requestDetails = new SystemRequestDetails();
+
+		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
+		mySvc.setTransactionService(myTransactionService);
+		setup(Patient.class);
+		List<Patient> resourceList = new ArrayList<>();
+		resourceList.add(null);
+		resourceList.add(new Patient());
+
+		// when
+		when(mySearchBuilderFactory.newSearchBuilder(eq("Patient"), eq(Patient.class)))
+			.thenReturn(myISearchBuilder);
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(eq(requestDetails), eq("Patient"), eq(map)))
+			.thenReturn(RequestPartitionId.allPartitions());
+		when(myISearchBuilder.createQueryStream(any(SearchParameterMap.class), any(SearchRuntimeDetails.class), any(RequestDetails.class), any(RequestPartitionId.class)))
+			.thenReturn(Stream.of(JpaPid.fromId(1L), JpaPid.fromId(2L)));
+		when(myISearchBuilder.loadResourcesByPid(any(Collection.class), any(RequestDetails.class)))
+			.thenReturn(resourceList);
+
+		// test
+		List<Patient> resources = mySvc.searchForResources(map, requestDetails);
+
+		// verify
+		// list of 2 in (null, resource), list of 1 out (only resource)
+		assertEquals(1, resources.size());
 	}
 
 	@Test

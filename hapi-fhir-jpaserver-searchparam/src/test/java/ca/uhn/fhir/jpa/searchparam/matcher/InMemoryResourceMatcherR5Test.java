@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r5.model.BaseDateTimeType;
+import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DateTimeType;
@@ -67,6 +68,9 @@ public class InMemoryResourceMatcherR5Test {
 	private static final String SOURCE_URI = "urn:source:0";
 	private static final String REQUEST_ID = "a_request_id";
 	private static final String TEST_SOURCE = SOURCE_URI + "#" + REQUEST_ID;
+
+	public static final String SECURITY_LABEL_SYSTEM = "http://terminology.hl7.org/CodeSystem/v3-ActCode";
+	public static final String SECURITY_LABEL_CODE = "NODSCLCD";
 
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;
@@ -325,6 +329,42 @@ public class InMemoryResourceMatcherR5Test {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt" + BaseDateTimeDt.NOW_DATE_CONSTANT, myObservation, mySearchParams, newRequest());
 		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
 		assertTrue(result.matched());
+	}
+
+	@Test
+	public void testNotSecurityFilter_onBundleWithDisallowedSecurityTag_isNotMatched() {
+		String filter = "_security:not=%s|%s".formatted(SECURITY_LABEL_SYSTEM, SECURITY_LABEL_CODE);
+
+		Bundle bundle = new Bundle();
+		bundle.getMeta().addSecurity().setSystem(SECURITY_LABEL_SYSTEM).setCode(SECURITY_LABEL_CODE);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(filter, bundle, null, newRequest());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+		assertThat(result.matched()).isFalse();
+	}
+
+	@Test
+	public void testNotSecurityFilter_onBundleWithAllowedSecurityTag_isMatched() {
+		String filter = "_security:not=%s|%s".formatted(SECURITY_LABEL_SYSTEM, SECURITY_LABEL_CODE);
+
+		Bundle bundle = new Bundle();
+		bundle.getMeta().addSecurity().setSystem(SECURITY_LABEL_SYSTEM).setCode("ANOTHER_CODE");
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(filter, bundle, null, newRequest());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+		assertThat(result.matched()).isTrue();
+	}
+
+	@Test
+	public void testNotSecurityFilter_onBundleWithNoSecurityTags_isMatched() {
+		String filter = "_security:not=%s|%s".formatted(SECURITY_LABEL_SYSTEM, SECURITY_LABEL_CODE);
+
+		Bundle bundle = new Bundle();
+		assertThat(bundle.getMeta().getSecurity()).isEmpty();
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(filter, bundle, null, newRequest());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+		assertThat(result.matched()).isTrue();
 	}
 
 	@Test
