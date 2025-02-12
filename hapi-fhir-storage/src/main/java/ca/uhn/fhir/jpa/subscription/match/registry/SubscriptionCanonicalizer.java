@@ -74,14 +74,14 @@ public class SubscriptionCanonicalizer {
 
 	private IRequestPartitionHelperSvc myHelperSvc;
 
-
 	@Autowired
 	public SubscriptionCanonicalizer(FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings) {
 		myFhirContext = theFhirContext;
 		mySubscriptionSettings = theSubscriptionSettings;
 	}
-	//TODO GGG: Eventually, we will unify autowiring styles. It is this way now as this is the least destrctive method
-	//to accomplish a minimal MR. I recommend moving all dependencies to setter autowiring, but that is for another day.
+	// TODO GGG: Eventually, we will unify autowiring styles. It is this way now as this is the least destrctive method
+	// to accomplish a minimal MR. I recommend moving all dependencies to setter autowiring, but that is for another
+	// day.
 	@Autowired
 	public void setPartitionHelperSvc(IRequestPartitionHelperSvc thePartitionHelperSvc) {
 		myHelperSvc = thePartitionHelperSvc;
@@ -797,7 +797,9 @@ public class SubscriptionCanonicalizer {
 		boolean isSubscriptionCreatedOnDefaultPartition = false;
 
 		if (nonNull(requestPartitionId)) {
-			isSubscriptionCreatedOnDefaultPartition = myHelperSvc == null ? requestPartitionId.isDefaultPartition() : myHelperSvc.isDefaultPartition(requestPartitionId);
+			isSubscriptionCreatedOnDefaultPartition = myHelperSvc == null
+					? requestPartitionId.isDefaultPartition()
+					: myHelperSvc.isDefaultPartition(requestPartitionId);
 		}
 
 		boolean isSubscriptionDefinededAsCrossPartitionSubscription =
