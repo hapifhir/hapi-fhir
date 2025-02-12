@@ -139,6 +139,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		}
 
 		if (!anySubscriptionsMatchedResource) {
+			ourLog.trace("No subscription matched");
 			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
 			HookParams params = new HookParams().add(ResourceModifiedMessage.class, theMsg);
 			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS, params);

@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.mdm.config.MdmLoader;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
