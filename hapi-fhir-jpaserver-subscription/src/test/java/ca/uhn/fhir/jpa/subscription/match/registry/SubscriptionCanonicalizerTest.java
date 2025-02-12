@@ -235,7 +235,7 @@ class SubscriptionCanonicalizerTest {
 		}
 	}
 	@Test
-	public void testNonNullDefaultPartitionCanonicalizesToCrossPartition() {
+	public void testNonNullDefaultPartitionIDCanonicalizesToCrossPartition() {
 		IRequestPartitionHelperSvc myHelperSvc = new FakeNonNullDefaultPartitionIDHelper();
 		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 
@@ -243,6 +243,7 @@ class SubscriptionCanonicalizerTest {
 		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), subscriptionSettings, myHelperSvc);
 		Subscription subscription = buildMdmSubscriptionR4("test-subscription", "Patient?");
 		CanonicalSubscription canonicalize = subscriptionCanonicalizer.canonicalize(subscription);
+
 		assertThat(canonicalize.isCrossPartitionEnabled()).isTrue();
 
 	}
