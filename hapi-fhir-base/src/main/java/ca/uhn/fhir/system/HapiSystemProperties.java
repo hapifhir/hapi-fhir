@@ -37,6 +37,8 @@ public final class HapiSystemProperties {
 	static final long DEFAULT_VALIDATION_RESOURCE_CACHE_TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10);
 	static final String PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA =
 			"hapi.storage.prevent_invalidating_conditional_match_criteria";
+	static final String DISABLE_DATABASE_PARTITION_MODE_SCHEMA_CHECK =
+			"hapi.storage.disable_database_partition_mode_schema_check";
 
 	private HapiSystemProperties() {}
 
@@ -163,5 +165,10 @@ public final class HapiSystemProperties {
 	public static boolean isPreventInvalidatingConditionalMatchCriteria() {
 		return Boolean.parseBoolean(System.getProperty(
 				HapiSystemProperties.PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA, Boolean.FALSE.toString()));
+	}
+
+	public static boolean isDisableDatabasePartitionModeSchemaCheck() {
+		return Boolean.parseBoolean(System.getProperty(
+				HapiSystemProperties.DISABLE_DATABASE_PARTITION_MODE_SCHEMA_CHECK, Boolean.FALSE.toString()));
 	}
 }
