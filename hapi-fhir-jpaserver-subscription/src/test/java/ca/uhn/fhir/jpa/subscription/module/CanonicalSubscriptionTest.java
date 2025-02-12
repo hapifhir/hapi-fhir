@@ -76,7 +76,7 @@ public class CanonicalSubscriptionTest {
 	@Test
 	public void testCanonicalSubscriptionRetainsMetaTags() {
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new SubscriptionSettings());
-		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeMdmSubscription());
+		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeMdmSubscription(), null);
 		assertThat(sub1.getTags()).containsKey(TAG_SYSTEM);
 		assertEquals(sub1.getTags().get(TAG_SYSTEM), TAG_VALUE);
    }
@@ -84,8 +84,8 @@ public class CanonicalSubscriptionTest {
 	@Test
 	public void emailDetailsEquals() {
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new SubscriptionSettings());
-		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeEmailSubscription());
-		CanonicalSubscription sub2 = canonicalizer.canonicalize(makeEmailSubscription());
+		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeEmailSubscription(), null);
+		CanonicalSubscription sub2 = canonicalizer.canonicalize(makeEmailSubscription(), null);
 		assertTrue(sub1.equals(sub2));
 	}
 
@@ -98,7 +98,7 @@ public class CanonicalSubscriptionTest {
 		Subscription subscriptionWithExtensionSetToBooleanFalse = makeEmailSubscription();
 		subscriptionWithExtensionSetToBooleanFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(false));
 
-		CanonicalSubscription canonicalSubscriptionExtensionSetToBooleanFalse = canonicalizer.canonicalize(subscriptionWithExtensionSetToBooleanFalse);
+		CanonicalSubscription canonicalSubscriptionExtensionSetToBooleanFalse = canonicalizer.canonicalize(subscriptionWithExtensionSetToBooleanFalse, null);
 
 		assertEquals(canonicalSubscriptionExtensionSetToBooleanFalse.isCrossPartitionEnabled(), false);
 	}
@@ -122,7 +122,7 @@ public class CanonicalSubscriptionTest {
 		subscription.setUserData(RESOURCE_PARTITION_ID,theRequestPartitionId);
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(true));
 
-		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
+		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription, null);
 
 		System.out.print(canonicalSubscription);
 

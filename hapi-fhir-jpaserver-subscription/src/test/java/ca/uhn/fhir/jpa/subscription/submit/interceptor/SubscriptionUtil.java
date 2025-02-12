@@ -35,9 +35,9 @@ public final class SubscriptionUtil {
 		TerserUtil.setField(theFhirContext, "status", theSubscription, newValue);
 	}
 
-	public static void setCriteria(FhirContext theFhirContext, IBaseResource theSubscription, String theCriteria) {
+	public static void setCriteria(FhirContext theFhirContext, IBaseResource theSubscription, String theCriteria, Integer theDefaultPartitionId) {
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(theFhirContext);
-		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(theSubscription);
+		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(theSubscription, theDefaultPartitionId);
 		if (canonicalSubscription.isTopicSubscription()) {
 			if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
 				// Nothing to do on R5

@@ -22,8 +22,10 @@ package ca.uhn.fhir.jpa.mdm.config;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
@@ -33,6 +35,7 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -68,6 +71,9 @@ public class MdmSubscriptionLoader {
 
 	@Autowired
 	private SubscriptionLoader mySubscriptionLoader;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Autowired
 	private IMdmSettings myMdmSettings;
@@ -119,16 +125,22 @@ public class MdmSubscriptionLoader {
 
 	synchronized void updateIfNotPresent(IBaseResource theSubscription) {
 		try {
-			mySubscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
+			mySubscriptionDao.read(theSubscription.getIdElement(), getSystemRequestDetails());
 		} catch (ResourceNotFoundException | ResourceGoneException e) {
 			ourLog.info("Creating subscription " + theSubscription.getIdElement());
-			mySubscriptionDao.update(theSubscription, SystemRequestDetails.forAllPartitions());
+			mySubscriptionDao.update(theSubscription, getSystemRequestDetails());
 		}
 	}
 
 	synchronized void updateSubscriptionTopic(SubscriptionTopic theSubscriptionTopic) {
 		mySubscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
-		mySubscriptionTopicDao.update(theSubscriptionTopic, SystemRequestDetails.forAllPartitions());
+		mySubscriptionTopicDao.update(theSubscriptionTopic, getSystemRequestDetails());
+	}
+
+	private RequestDetails getSystemRequestDetails() {
+		return new SystemRequestDetails()
+				.setRequestPartitionId(
+						RequestPartitionId.fromPartitionId(myRequestPartitionHelperSvc.getDefaultPartitionId()));
 	}
 
 	protected ChannelProducerSettings getChannelProducerSettings() {

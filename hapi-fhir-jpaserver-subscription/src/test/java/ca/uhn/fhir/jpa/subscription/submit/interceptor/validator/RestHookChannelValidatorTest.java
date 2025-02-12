@@ -90,7 +90,7 @@ public class RestHookChannelValidatorTest {
 		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		channel.setEndpoint(theUrl);
 		channel.setPayload(thePayload);
-		return mySubscriptionCanonicalizer.canonicalize(subscription);
+		return mySubscriptionCanonicalizer.canonicalize(subscription, null);
 	}
 
 	static Stream<Arguments> urlAndExpectedEvaluationResultProvider() {

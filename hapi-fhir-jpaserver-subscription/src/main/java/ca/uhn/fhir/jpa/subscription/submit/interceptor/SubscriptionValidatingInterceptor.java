@@ -134,7 +134,8 @@ public class SubscriptionValidatingInterceptor {
 
 		CanonicalSubscription subscription;
 		try {
-			subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+			subscription = mySubscriptionCanonicalizer.canonicalize(
+					theSubscription, myRequestPartitionHelperSvc.getDefaultPartitionId());
 		} catch (InternalErrorException e) {
 			throw new UnprocessableEntityException(Msg.code(955) + e.getMessage());
 		}

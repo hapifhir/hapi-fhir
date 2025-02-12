@@ -41,11 +41,13 @@ class SubscriptionCanonicalizerTest {
 
 	private final SubscriptionCanonicalizer testedSC = new SubscriptionCanonicalizer(r4Context, new SubscriptionSettings());
 
+	private final Integer myDefaultPartitionId = null;
+
 	@Test
 	void testCanonicalizeR4SendDeleteMessagesSetsExtensionValueNotPresent() {
 		Subscription subscription = new Subscription();
 
-		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription);
+		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription, myDefaultPartitionId);
 
 		assertFalse(canonicalSubscription.getSendDeleteMessages());
 	}
@@ -56,7 +58,7 @@ class SubscriptionCanonicalizerTest {
 		subscription.getMeta().addTag("http://foo", "blah", "blah");
 		subscription.getMeta().addTag("http://foo", "baz", "baz");
 
-		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription);
+		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription, myDefaultPartitionId);
 
 		assertThat(canonicalSubscription.getTags()).containsEntry("http://foo", "baz");
 	}
@@ -71,7 +73,7 @@ class SubscriptionCanonicalizerTest {
 		subscription.getChannel().addExtension(sendDeleteMessagesExtension);
 
 		// execute
-		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription);
+		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription, myDefaultPartitionId);
 
 		// verify
 		assertTrue(canonicalSubscription.getSendDeleteMessages());
@@ -88,7 +90,7 @@ class SubscriptionCanonicalizerTest {
 		dstu2Sub.getChannel().addUndeclaredExtension(extensionDt);
 
 		// execute
-		CanonicalSubscription canonicalize = dstu2Canonicalizer.canonicalize(dstu2Sub);
+		CanonicalSubscription canonicalize = dstu2Canonicalizer.canonicalize(dstu2Sub, myDefaultPartitionId);
 
 		// verify
 		assertTrue(canonicalize.getSendDeleteMessages());
@@ -122,7 +124,7 @@ class SubscriptionCanonicalizerTest {
 		org.hl7.fhir.r5.model.Subscription subscription = buildR5Subscription(payloadContent);
 
 		// execute
-		CanonicalSubscription canonical = r5Canonicalizer.canonicalize(subscription);
+		CanonicalSubscription canonical = r5Canonicalizer.canonicalize(subscription, myDefaultPartitionId);
 
 		// verify
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, canonical.getStatus());
@@ -160,7 +162,7 @@ class SubscriptionCanonicalizerTest {
 		org.hl7.fhir.r4b.model.Subscription subscription = buildR4BSubscription(thePayloadContent);
 
 		// execute
-		CanonicalSubscription canonical = r4bCanonicalizer.canonicalize(subscription);
+		CanonicalSubscription canonical = r4bCanonicalizer.canonicalize(subscription, myDefaultPartitionId);
 
 		// verify
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, canonical.getStatus());
@@ -182,7 +184,7 @@ class SubscriptionCanonicalizerTest {
 		ca.uhn.fhir.model.dstu2.resource.Subscription subscriptionWithoutExtension = new ca.uhn.fhir.model.dstu2.resource.Subscription();
 		subscriptionWithoutExtension.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
 
-		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension);
+		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension, myDefaultPartitionId);
 
 		assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
 	}
@@ -205,9 +207,9 @@ class SubscriptionCanonicalizerTest {
 		subscriptionWithExtensionCrossPartitionFalse.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
 		subscriptionWithExtensionCrossPartitionFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.dstu3.model.BooleanType().setValue(false));
 
-		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension);
-		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
-		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
+		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension, myDefaultPartitionId);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue, myDefaultPartitionId);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse, myDefaultPartitionId);
 
 		assertCanonicalSubscriptionCrossPropertyValue(
 			canonicalSubscriptionWithoutExtension,
@@ -237,9 +239,9 @@ class SubscriptionCanonicalizerTest {
 		subscriptionWithExtensionCrossPartitionFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.r4.model.BooleanType().setValue(false));
 
 
-		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension);
-		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
-		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
+		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension, myDefaultPartitionId);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue, myDefaultPartitionId);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse, myDefaultPartitionId);
 
 		assertCanonicalSubscriptionCrossPropertyValue(
 			canonicalSubscriptionWithoutExtension,
@@ -267,9 +269,9 @@ class SubscriptionCanonicalizerTest {
 		subscriptionWithExtensionCrossPartitionFalse.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
 		subscriptionWithExtensionCrossPartitionFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.r4b.model.BooleanType().setValue(false));
 
-		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension);
-		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
-		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
+		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension, myDefaultPartitionId);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue, myDefaultPartitionId);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse, myDefaultPartitionId);
 
 		assertCanonicalSubscriptionCrossPropertyValue(
 			canonicalSubscriptionWithoutExtension,
@@ -297,9 +299,9 @@ class SubscriptionCanonicalizerTest {
 		subscriptionWithExtensionCrossPartitionFalse.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
 		subscriptionWithExtensionCrossPartitionFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.r5.model.BooleanType().setValue(false));
 
-		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension);
-		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
-		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
+		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension, myDefaultPartitionId);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue, myDefaultPartitionId);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse, myDefaultPartitionId);
 
 		assertCanonicalSubscriptionCrossPropertyValue(
 			canonicalSubscriptionWithoutExtension,
@@ -348,7 +350,7 @@ class SubscriptionCanonicalizerTest {
 
 		// execute
 		Subscription subscription = SubscriptionTestDataHelper.buildR4TopicSubscriptionWithContent(thePayloadContent);
-		CanonicalSubscription canonical = r4Canonicalizer.canonicalize(subscription);
+		CanonicalSubscription canonical = r4Canonicalizer.canonicalize(subscription, myDefaultPartitionId);
 
 		// verify
 
