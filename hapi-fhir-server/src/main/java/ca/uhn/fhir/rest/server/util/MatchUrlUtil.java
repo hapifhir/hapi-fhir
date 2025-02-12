@@ -12,6 +12,17 @@ import java.util.List;
 
 public class MatchUrlUtil {
 
+	/**
+	 * Non-instantiable
+	 */
+	private MatchUrlUtil() {
+		// nothing
+	}
+
+	/**
+	 * Parses a FHIR-style Match URL (Patient?identifier=http://foo|bar) into
+	 * a parsed set of parameters.
+	 */
 	public static List<NameValuePair> translateMatchUrl(String theMatchUrl) {
 		List<NameValuePair> parameters;
 		String matchUrl = theMatchUrl;
@@ -25,7 +36,7 @@ public class MatchUrlUtil {
 		matchUrl = StringUtils.replaceEach(matchUrl, searchList, replacementList);
 		if (matchUrl.contains(" ")) {
 			throw new InvalidRequestException(Msg.code(1744) + "Failed to parse match URL[" + theMatchUrl
-				+ "] - URL is invalid (must not contain spaces)");
+					+ "] - URL is invalid (must not contain spaces)");
 		}
 
 		parameters = URLEncodedUtils.parse((matchUrl), Constants.CHARSET_UTF8, '&');
@@ -37,12 +48,11 @@ public class MatchUrlUtil {
 			NameValuePair next = parameters.get(i);
 			if (next.getName().equals("email") && next.getValue().contains(" ")) {
 				BasicNameValuePair newPair =
-					new BasicNameValuePair(next.getName(), next.getValue().replace(' ', '+'));
+						new BasicNameValuePair(next.getName(), next.getValue().replace(' ', '+'));
 				parameters.set(i, newPair);
 			}
 		}
 
 		return parameters;
 	}
-
 }

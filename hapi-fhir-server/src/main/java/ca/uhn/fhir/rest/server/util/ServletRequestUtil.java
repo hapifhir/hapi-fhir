@@ -67,5 +67,4 @@ public class ServletRequestUtil {
 		theRequestDetails.getServer().populateRequestDetailsFromRequestPath(requestDetails, url);
 		return requestDetails;
 	}
-
 }
