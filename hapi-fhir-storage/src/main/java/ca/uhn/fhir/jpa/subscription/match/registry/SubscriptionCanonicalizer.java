@@ -88,18 +88,18 @@ public class SubscriptionCanonicalizer {
 		mySubscriptionSettings = new SubscriptionSettings();
 	}
 
-	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
+	public CanonicalSubscription canonicalize(IBaseResource theSubscription, Integer theDefaultPartitionId) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU2:
-				return canonicalizeDstu2(theSubscription);
+				return canonicalizeDstu2(theSubscription, theDefaultPartitionId);
 			case DSTU3:
-				return canonicalizeDstu3(theSubscription);
+				return canonicalizeDstu3(theSubscription, theDefaultPartitionId);
 			case R4:
-				return canonicalizeR4(theSubscription);
+				return canonicalizeR4(theSubscription, theDefaultPartitionId);
 			case R4B:
-				return canonicalizeR4B(theSubscription);
+				return canonicalizeR4B(theSubscription, theDefaultPartitionId);
 			case R5:
-				return canonicalizeR5(theSubscription);
+				return canonicalizeR5(theSubscription, theDefaultPartitionId);
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default:
@@ -108,7 +108,7 @@ public class SubscriptionCanonicalizer {
 		}
 	}
 
-	private CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription, Integer theDefaultPartitionId) {
 		ca.uhn.fhir.model.dstu2.resource.Subscription subscription =
 				(ca.uhn.fhir.model.dstu2.resource.Subscription) theSubscription;
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -123,7 +123,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(channel.getPayload());
 			retVal.setTags(extractTags(subscription));
-			retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription));
+			retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription, theDefaultPartitionId));
 			retVal.setSendDeleteMessages(extractDeleteExtensionDstu2(subscription));
 		} catch (FHIRException theE) {
 			throw new InternalErrorException(Msg.code(557) + theE);
@@ -154,7 +154,7 @@ public class SubscriptionCanonicalizer {
 		return retVal;
 	}
 
-	private CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription, Integer theDefaultPartitionId) {
 		org.hl7.fhir.dstu3.model.Subscription subscription = (org.hl7.fhir.dstu3.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -175,7 +175,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setPayloadSearchCriteria(
 					getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 			retVal.setTags(extractTags(subscription));
-			retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription));
+			retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription, theDefaultPartitionId));
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
@@ -293,7 +293,7 @@ public class SubscriptionCanonicalizer {
 		return Collections.emptyMap();
 	}
 
-	private CanonicalSubscription canonicalizeR4(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeR4(IBaseResource theSubscription, Integer theDefaultPartitionId) {
 		org.hl7.fhir.r4.model.Subscription subscription = (org.hl7.fhir.r4.model.Subscription) theSubscription;
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		retVal.setStatus(subscription.getStatus());
@@ -306,7 +306,7 @@ public class SubscriptionCanonicalizer {
 				getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 		retVal.setTags(extractTags(subscription));
 		setPartitionIdOnReturnValue(theSubscription, retVal);
-		retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription));
+		retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription, theDefaultPartitionId));
 
 		List<org.hl7.fhir.r4.model.CanonicalType> profiles =
 				subscription.getMeta().getProfile();
@@ -415,7 +415,7 @@ public class SubscriptionCanonicalizer {
 		return retVal;
 	}
 
-	private CanonicalSubscription canonicalizeR4B(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeR4B(IBaseResource theSubscription, Integer theDefaultPartitionId) {
 		org.hl7.fhir.r4b.model.Subscription subscription = (org.hl7.fhir.r4b.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -511,12 +511,12 @@ public class SubscriptionCanonicalizer {
 			retVal.setSendDeleteMessages(extension.getValueBooleanType().booleanValue());
 		}
 
-		retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription));
+		retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription, theDefaultPartitionId));
 
 		return retVal;
 	}
 
-	private CanonicalSubscription canonicalizeR5(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeR5(IBaseResource theSubscription, Integer theDefaultPartitionId) {
 		org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -576,7 +576,7 @@ public class SubscriptionCanonicalizer {
 
 		setR5FlagsBasedOnChannelType(subscription, retVal);
 
-		retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription));
+		retVal.setCrossPartitionEnabled(handleCrossPartition(theSubscription, theDefaultPartitionId));
 
 		return retVal;
 	}
@@ -780,14 +780,14 @@ public class SubscriptionCanonicalizer {
 		return status.getValueAsString();
 	}
 
-	private boolean handleCrossPartition(IBaseResource theSubscription) {
+	private boolean handleCrossPartition(IBaseResource theSubscription, Integer theDefaultPartitionId) {
 		RequestPartitionId requestPartitionId =
 				(RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
 
 		boolean isSubscriptionCreatedOnDefaultPartition = false;
 
 		if (nonNull(requestPartitionId)) {
-			isSubscriptionCreatedOnDefaultPartition = requestPartitionId.isDefaultPartition();
+			isSubscriptionCreatedOnDefaultPartition = requestPartitionId.isDefaultPartition(theDefaultPartitionId);
 		}
 
 		boolean isSubscriptionDefinededAsCrossPartitionSubscription =

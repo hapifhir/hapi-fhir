@@ -123,7 +123,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@MethodSource("subscriptionByFhirVersion34")
 	public void testBadCriteria(IBaseResource theSubscription) {
 		initSubscription(theSubscription);
-		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient");
+		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient", null);
 
 		try {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
@@ -137,7 +137,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@MethodSource("subscriptionByFhirVersion34")
 	public void testBadChannel(IBaseResource theSubscription) {
 		initSubscription(theSubscription);
-		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
+		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?", null);
 
 		try {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
@@ -151,7 +151,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@MethodSource("subscriptionByFhirVersion345")
 	public void testEmptyEndpoint(IBaseResource theSubscription) {
 		initSubscription(theSubscription);
-		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
+		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?", null);
 		SubscriptionUtil.setChannelType(myFhirContext, theSubscription, "message");
 
 		try {
@@ -166,7 +166,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@MethodSource("subscriptionByFhirVersion345")
 	public void testMalformedEndpoint(IBaseResource theSubscription) {
 		initSubscription(theSubscription);
-		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
+		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?", null);
 		SubscriptionUtil.setChannelType(myFhirContext, theSubscription, "message");
 		SubscriptionUtil.setEndpoint(myFhirContext, theSubscription, "foo");
 

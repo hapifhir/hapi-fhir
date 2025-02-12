@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -61,6 +62,9 @@ public class SubscriptionRegistry {
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	/**
 	 * Constructor
@@ -179,7 +183,8 @@ public class SubscriptionRegistry {
 	public synchronized boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
 		Validate.notNull(theSubscription, "theSubscription must not be null");
 		Optional<CanonicalSubscription> existingSubscription = hasSubscription(theSubscription.getIdElement());
-		CanonicalSubscription newSubscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+		CanonicalSubscription newSubscription = mySubscriptionCanonicalizer.canonicalize(
+				theSubscription, myRequestPartitionHelperSvc.getDefaultPartitionId());
 
 		if (existingSubscription.isPresent()) {
 			if (newSubscription.equals(existingSubscription.get())) {
@@ -211,7 +216,8 @@ public class SubscriptionRegistry {
 		Validate.notBlank(theId.getIdPart(), "theId must have an ID part");
 		ActiveSubscription activeSubscription = myActiveSubscriptionCache.get(theId.getIdPart());
 		Validate.notNull(activeSubscription, "Subscription with ID %s not found in cache", theId.getIdPart());
-		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(
+				theSubscription, myRequestPartitionHelperSvc.getDefaultPartitionId());
 		activeSubscription.setSubscription(canonicalized);
 
 		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
