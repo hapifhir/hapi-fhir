@@ -1,61 +1,61 @@
 name: Download and Process Artifacts
 description: Downloads artifacts for a list of modules and prepares them for further steps.
 inputs:
-    modules:
-        description: A JSON list of modules to process
-        required: true
-    github_token:
-        description: GitHub token for API authentication
-        required: true
+  modules:
+    description: A JSON list of modules to process
+    required: true
+  github_token:
+    description: GitHub token for API authentication
+    required: true
 
 runs:
-    using: composite
-    steps:
+  using: composite
+  steps:
 
-        - name: Download All Artifacts
-          uses: actions/download-artifact@v4
-          with:
-              path: ./artifacts
+  - name: Download All Artifacts
+    uses: actions/download-artifact@v4
+    with:
+      path: ./artifacts
 
-        - name: Restore Artifacts to Original Locations
-          shell: bash
-          env:
-              GH_TOKEN: ${{ inputs.github_token }}
-          run: |
-              echo "Restoring artifacts to original locations..."
-              
-              # List all artifacts for debugging
-              echo "Contents of ./artifacts directory:"
-              ls -l ./artifacts
-              
-              # Process each artifact in the downloaded directory
-              for artifact_path in ./artifacts/*; do
-                if [ -d "$artifact_path" ]; then
-                  artifact=$(basename "$artifact_path")
-                  echo "Processing artifact: $artifact"
-              
-                  # Convert artifact name back to original path
-                  original_name=$(echo "$artifact" | sed 's|_|/|g')
-                  # target_dir="${GITHUB_WORKSPACE}/${original_name}/target"
-                  target_dir="${GITHUB_WORKSPACE}/${original_name}"
-              
-                  echo "Restoring to target directory: $target_dir"
-              
-                  # Ensure the target directory exists
-                  mkdir -p "$target_dir"
-                  mv "$artifact_path/${original_name}"/* "$target_dir/" || echo "Failed to move contents for $artifact"
-              
-                  echo "Restored artifact for: $original_name"
-                else
-                  echo "Artifact path $artifact_path is not a directory. Skipping."
-                fi
-              done
-              
-              echo "All artifacts have been restored to their original locations."
+  - name: Restore Artifacts to Original Locations
+    shell: bash
+    env:
+      GH_TOKEN: ${{ inputs.github_token }}
+    run: |
+      echo "Restoring artifacts to original locations..."
+      
+      # List all artifacts for debugging
+      echo "Contents of ./artifacts directory:"
+      ls -l ./artifacts
+      
+      # Process each artifact in the downloaded directory
+      for artifact_path in ./artifacts/*; do
+        if [ -d "$artifact_path" ]; then
+          artifact=$(basename "$artifact_path")
+          echo "Processing artifact: $artifact"
+      
+          # Convert artifact name back to original path
+          original_name=$(echo "$artifact" | sed 's|_|/|g')
+          # target_dir="${GITHUB_WORKSPACE}/${original_name}/target"
+          target_dir="${GITHUB_WORKSPACE}/${original_name}"
+      
+          echo "Restoring to target directory: $target_dir"
+      
+          # Ensure the target directory exists
+          mkdir -p "$target_dir"
+          mv "$artifact_path/${original_name}"/* "$target_dir/" || echo "Failed to move contents for $artifact"
+      
+          echo "Restored artifact for: $original_name"
+        else
+          echo "Artifact path $artifact_path is not a directory. Skipping."
+        fi
+      done
+      
+      echo "All artifacts have been restored to their original locations."
 
-        - name: List All Directories and Subdirectories (Debug)
-          shell: bash
-          run: |
-              TARGET_PATH="${GITHUB_WORKSPACE}"
-              echo "Listing all directories and subdirectories under $TARGET_PATH:"
-              find "$TARGET_PATH" -type d -exec ls -ld {} +
+  - name: List All Directories and Subdirectories (Debug)
+    shell: bash
+    run: |
+      TARGET_PATH="${GITHUB_WORKSPACE}"
+      echo "Listing all directories and subdirectories under $TARGET_PATH:"
+      find "$TARGET_PATH" -type d -exec ls -ld {} +
