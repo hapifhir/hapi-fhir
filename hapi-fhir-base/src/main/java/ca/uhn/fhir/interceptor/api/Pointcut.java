@@ -624,7 +624,7 @@ public enum Pointcut implements IPointcut {
 	 * This method is called after all processing is completed for a request, but only if the
 	 * request completes normally (i.e. no exception is thrown).
 	 * <p>
-	 * This pointcut is called after the response has completely finished, meaning that the HTTP respsonse to the client
+	 * This pointcut is called after the response has completely finished, meaning that the HTTP response to the client
 	 * may or may not have already completely been returned to the client by the time this pointcut is invoked. Use caution
 	 * if you have timing-dependent logic, since there is no guarantee about whether the client will have already moved on
 	 * by the time your method is invoked. If you need a guarantee that your method is invoked before returning to the
@@ -1768,7 +1768,7 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The resource being deleted</li>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseBundle - The Bundle being processed</li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
@@ -1803,7 +1803,10 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The resource being deleted</li>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseBundle - The Bundle that wsa processed</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts- A collection of pointcut invocations and their parameters which were deferred.
+	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
@@ -1817,9 +1820,6 @@ public enum Pointcut implements IPointcut {
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
-	 * </li>
-	 * <li>
-	 * ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts- A collection of pointcut invocations and their parameters which were deferred.
 	 * </li>
 	 * </ul>
 	 * <p>
