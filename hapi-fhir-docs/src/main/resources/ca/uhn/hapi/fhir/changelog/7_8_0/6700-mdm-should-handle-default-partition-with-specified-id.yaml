@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6700
+title: "MDM would incorrectly assume no default partition ID when creating
+        and consuming subscriptions.
+        This has been fixed.
+"
