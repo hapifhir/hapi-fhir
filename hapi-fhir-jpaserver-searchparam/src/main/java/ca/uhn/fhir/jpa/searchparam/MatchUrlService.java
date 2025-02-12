@@ -37,7 +37,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
+import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
@@ -60,7 +60,7 @@ public class MatchUrlService {
 	public SearchParameterMap translateMatchUrl(
 			String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, Flag... theFlags) {
 		SearchParameterMap paramMap = new SearchParameterMap();
-		List<NameValuePair> parameters = ServletRequestUtil.translateMatchUrl(theMatchUrl);
+		List<NameValuePair> parameters = MatchUrlUtil.translateMatchUrl(theMatchUrl);
 
 		ArrayListMultimap<String, QualifiedParamList> nameToParamLists = ArrayListMultimap.create();
 		for (NameValuePair next : parameters) {
