@@ -1,66 +1,79 @@
 name: "Build Cache Maven Dependencies"
 description: "Caches Maven dependencies, resolves plugins, and builds if the cache is not hit."
 inputs:
-    java-version:
-        description: "The Java version to use"
-        required: false
-        default: "17"
-    cache-path:
-        description: "The path for the Maven cache"
-        required: false
-        default: "$HOME/.m2/repository"
+  java-version:
+    description: "The Java version to use"
+    required: false
+    default: "17"
+  cache-path:
+    description: "The path for the Maven cache"
+    required: false
+    default: "$HOME/.m2/repository"
 
 runs:
-    using: "composite"
-    steps:
-        - name: Set up JDK ${{ inputs.java-version }}
-          uses: actions/setup-java@v4
-          with:
-              java-version: ${{ inputs.java-version }}
-              distribution: "temurin"
+  using: "composite"
+  steps:
+    - name: Set up JDK ${{ inputs.java-version }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.java-version }}
+        distribution: "temurin"
 
-        - name: Restore Cached Maven dependencies
-          id: load-cache
-          uses: ./.github/actions/caching-handler
+    - name: Restore Cached Maven dependencies
+      id: load-cache
+      uses: ./.github/actions/caching-handler
+      with:
+        key: ${{ github.ref_name }}-maven-${{ hashFiles('**/pom.xml') }}
 
-        - name: Cache Hit or Miss
-          shell: bash
-          run: |
-              if [[ "${{ steps.load-cache.outputs.cache-hit }}" == "true" ]]; then
-                echo "Cache hit, skipping dependency resolution.";
-              else
-                echo "Cache miss, dependencies have been downloaded.";
-              fi
+    - name: Cache Hit or Miss
+      shell: bash
+      run: |
+        if [[ "${{ steps.load-cache.outputs.cache-hit }}" == "true" ]]; then
+          echo "Cache hit, skipping dependency resolution.";
+        else
+          echo "Cache miss, dependencies have been downloaded.";
+        fi
 
-        - name: Populate Cache with Remote Dependencies
-          shell: bash
-          if: steps.load-cache.outputs.cache-hit != 'true'
-          env:
-              MAVEN_CACHE_FOLDER: ${{ inputs.cache-path }}
-          run: |
-              mvn dependency:resolve dependency:resolve-plugins test-compile \
-                surefire:help jacoco:help \
-                -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
-                -Dstyle.color=always -Djansi.force=true
+    - name: Populate Cache with Remote Dependencies
+      shell: bash
+      if: steps.load-cache.outputs.cache-hit != 'true'
+      env:
+        MAVEN_CACHE_FOLDER: ${{ inputs.cache-path }}
+      run: |
+        mvn dependency:resolve dependency:resolve-plugins test-compile \
+          surefire:help jacoco:help \
+          -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
+          -Dstyle.color=always -Djansi.force=true
 
-        - name: Build with Maven
-          shell: bash
-          if: steps.load-cache.outputs.cache-hit != 'true'
-          env:
-              MAVEN_CACHE_FOLDER: ${{ inputs.cache-path }}
-              MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
-          run: |
-              mvn clean install -P CI,CHECKSTYLE \
-                -Dmaven.test.skip=true -e -B \
-                -Dmaven.javadoc.skip=true \
-                -Dmaven.wagon.http.pool=false \
-                -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
-                -Dhttp.keepAlive=false \
-                -Dstyle.color=always -Djansi.force=true
+    - name: Build with Maven
+      shell: bash
+      env:
+        MAVEN_CACHE_FOLDER: ${{ inputs.cache-path }}
+        MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+      run: |
+        mvn clean install -P CI,CHECKSTYLE \
+          -Dmaven.test.skip=true -e -B \
+          -Dmaven.javadoc.skip=true \
+          -Dmaven.wagon.http.pool=false \
+          -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
+          -Dhttp.keepAlive=false \
+          -Dstyle.color=always -Djansi.force=true
 
-        - name: Cache Maven dependencies
-          id: save-cache
-          if: steps.load-cache.outputs.cache-hit != 'true'
-          uses: ./.github/actions/caching-handler
-          with:
-              save: 'true'
+    #   Developers might change HAPI modules during bug fixing or feature implementation, so we want to cache the maven
+    #   dependencies separately from the HAPI dependencies.
+    - name: Cache HAPI dependencies
+      id: save-cache-hapi
+      uses: ./.github/actions/caching-handler
+      with:
+        path: "$HOME/.m2/repository/ca/uhn/"
+        key: ${{ github.ref_name }}-hapi-${{ github.run_id }}
+        save: 'true'
+
+    - name: Cache Maven dependencies
+      id: save-cache-all
+      if: steps.load-cache.outputs.cache-hit != 'true'
+      uses: ./.github/actions/caching-handler
+      with:
+        key: ${{ github.ref_name }}-maven-${{ hashFiles('**/pom.xml') }}
+        save: 'true'
+        exclude: "$HOME/.m2/repository/ca/uhn/"

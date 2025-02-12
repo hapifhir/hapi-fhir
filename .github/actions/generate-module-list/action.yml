@@ -1,91 +1,93 @@
 inputs:
-    ignored_modules:
-        description: 'Comma-separated list of modules to ignore'
-        required: true
-        default: ''
+  ignored_modules:
+    description: 'Comma-separated list of modules to ignore'
+    required: true
+    default: ''
 
 outputs:
-    modules_list:
-        description: 'The generated comma-separated list of Maven modules'
-        value: ${{ steps.list-modules.outputs.modules_list }}
+  modules_list:
+    description: 'The generated comma-separated list of Maven modules'
+    value: ${{ steps.list-modules.outputs.modules_list }}
 
 runs:
-    using: 'composite'
-    steps:
-        - name: Checkout repository
-          uses: actions/checkout@v4
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-        - name: Set up JDK 17
-          uses: actions/setup-java@v4
-          with:
-              distribution: 'adopt'
-              java-version: '17'
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'adopt'
+        java-version: '17'
 
-        - name: Debug - Print passed in ignored modules in a newline-separated list
-          shell: bash
-          run: |
-              echo "Modules to ignore:"
-              echo "${{ inputs.ignored_modules }}" | tr ',' '\n'
+    - name: Debug - Print passed in ignored modules in a newline-separated list
+      shell: bash
+      run: |
+        echo "Modules to ignore:"
+        echo "${{ inputs.ignored_modules }}" | tr ',' '\n'
 
-        - name: Find and list Maven modules
-          id: list-modules
-          shell: bash
-          run: |
-              # Specify the directory containing your multi-module Maven project
-              root_dir=$(pwd)
-              ignored_modules="${{ inputs.ignored_modules }}"  # The ignored modules list
-              ignored_modules_array=(${ignored_modules//,/ })   # Convert to an array
-              modules_list=""
-              
-              # Function to recursively find modules and maintain the directory structure
-              find_modules() {
-                local current_dir=$1
-                for dir in "$current_dir"/*/; do
-                  if [[ -f "$dir/pom.xml" ]]; then
-                    module_name=$(basename "$dir" | tr -d '\n')  # Ensure no newline characters
-                    relative_path=$(realpath --relative-to="$root_dir" "$dir")
-              
-                    # Check if the module is ignored
-                    if [[ ! " ${ignored_modules_array[@]} " =~ " $module_name " ]]; then
-                      # Add the module to the list, separating with a comma if necessary
-                      if [ -z "$modules_list" ]; then
-                        modules_list="$relative_path"
-                      else
-                        modules_list="$modules_list,$relative_path"
-                      fi
-                    fi
-              
-                    # Recursively check for submodules
-                    find_modules "$dir"
-                  fi
-                done
-              }
-              
-              # Run the function from the root directory
-              find_modules "$root_dir"
-              
-              # Remove any newline characters and extra spaces
-              modules_list=$(echo "$modules_list" | tr -d '\n' | xargs)
-              
-              # Use jq to format the modules list as a JSON array
-              json_modules_list=$(jq -R -s -c 'split(",") | map(gsub("[\\n]"; ""))' <<< "$modules_list")
-              
-              # Print the found modules list for debugging
-              echo "Found modules before setting output: $modules_list"
-              echo "Formatted JSON Array: $json_modules_list"
-              
-              # Check if list is empty
-              if [ -z "$modules_list" ]; then
-                echo "No modules found!"
-              else
-                # Set the output for the GitHub Action
-                echo "modules_list=$modules_list" >> $GITHUB_OUTPUT
+    - name: Find and list Maven modules
+      id: list-modules
+      shell: bash
+      run: |
+        # Specify the directory containing your multi-module Maven project
+        root_dir=$(pwd)
+        ignored_modules="${{ inputs.ignored_modules }}"  # The ignored modules list
+        ignored_modules_array=(${ignored_modules//,/ })   # Convert to an array
+        modules_list=""
+      
+        # Function to recursively find modules and maintain the directory structure
+        find_modules() {
+          local current_dir=$1
+          for dir in "$current_dir"/*/; do
+            if [[ -f "$dir/pom.xml" ]]; then
+              module_name=$(basename "$dir" | tr -d '\n')  # Ensure no newline characters
+              relative_path=$(realpath --relative-to="$root_dir" "$dir")
+       
+              # Check if the module is ignored
+              if [[ ! " ${ignored_modules_array[@]} " =~ " $module_name " ]]; then
+                # Add the module to the list, separating with a comma if necessary
+                if [ -z "$modules_list" ]; then
+                  modules_list="$relative_path"
+                else
+                  modules_list="$modules_list,$relative_path"
+                fi
               fi
-              
-              echo "Done compiling module list..."
+       
+              # Recursively check for submodules
+              find_modules "$dir"
+            fi
+          done
+        }
+      
+        # Run the function from the root directory
+        find_modules "$root_dir"
+       
+        # Remove any newline characters and extra spaces
+        modules_list=$(echo "$modules_list" | tr -d '\n' | xargs)
+       
+        # Use jq to format the modules list as a JSON array
+        json_modules_list=$(jq -R -s -c 'split(",") | map(gsub("[\\n]"; ""))' <<< "$modules_list")
+       
+        # Print the found modules list for debugging
+        echo "Found modules before setting output: $modules_list"
+        echo "Formatted JSON Array: $json_modules_list"
+       
+        # Check if list is empty
+        if [ -z "$modules_list" ]; then
+          echo "No modules found!"
+        else
+          # Set the output for the GitHub Action
+          echo "modules_list=$modules_list" >> $GITHUB_OUTPUT
+          # echo "modules_list=hapi-fhir-android,hapi-fhir-base,hapi-fhir-checkstyle,hapi-fhir-cli/hapi-fhir-cli-api,hapi-fhir-client-apache-http5,hapi-fhir-client-okhttp" >> $GITHUB_OUTPUT
+          # echo "modules_list=hapi-fhir-android,hapi-fhir-base,hapi-fhir-checkstyle,hapi-fhir-client-okhttp" >> $GITHUB_OUTPUT
+        fi
+       
+        echo "Done compiling module list..."
 
-        - name: Debug - Print modules in a newline-separated list
-          shell: bash
-          run: |
-              echo "Modules list generated:"
-              echo "${{ steps.list-modules.outputs.modules_list }}" | tr ',' '\n'
+    - name: Debug - Print modules in a newline-separated list
+      shell: bash
+      run: |
+        echo "Modules list generated:"
+        echo "${{ steps.list-modules.outputs.modules_list }}" | tr ',' '\n'

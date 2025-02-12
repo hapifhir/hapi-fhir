@@ -1,5 +1,7 @@
 name: Pull Request Pipeline
 
+# on: workflow_dispatch
+
 on:
   pull_request:
     branches:

@@ -465,7 +465,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations {
+	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations, Cloneable {
 		private final RequestDetails myRequestDetails;
 		private Isolation myIsolation;
 		private Propagation myPropagation;
