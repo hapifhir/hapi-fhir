@@ -87,9 +87,9 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 			ScalarType theFoundScalarType) {
 		if (myLogErrors) {
 			if (ourLog.isWarnEnabled()) {
-				String message = describeLocation(theLocation) +
-						createIncorrectJsonTypeMessage(
-							theElementName, theExpected, theExpectedScalarType, theFound, theFoundScalarType);
+				String message = describeLocation(theLocation)
+						+ createIncorrectJsonTypeMessage(
+								theElementName, theExpected, theExpectedScalarType, theFound, theFoundScalarType);
 				ourLog.warn(message);
 			}
 		}
