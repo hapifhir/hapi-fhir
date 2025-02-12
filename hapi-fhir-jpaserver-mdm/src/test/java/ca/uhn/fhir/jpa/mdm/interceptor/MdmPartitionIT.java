@@ -14,13 +14,20 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.io.IOException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -95,10 +102,28 @@ public class MdmPartitionIT extends BaseMdmR4Test {
 		// noop
 	}
 
-	@Test
-	public void createResource_withNonDefaultIdPartition_shouldCreate() throws InterruptedException {
+	@AfterEach
+	public void after() throws IOException {
+		super.after();
+		myInterceptor.setPartitionIdToSpoof(null);
+	}
+
+	static List<RequestPartitionId> partitionIds() {
+		return List.of(
+			RequestPartitionId.fromPartitionId(10),
+			RequestPartitionId.fromPartitionIdAndName(1, PARTITION_1),
+			RequestPartitionId.fromPartitionIdAndName(2, PARTITION_2),
+			RequestPartitionId.fromPartitionId(1)
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("partitionIds")
+	@NullSource
+	public void createResource_withNonDefaultIdPartition_shouldCreate(RequestPartitionId theRequestPartitionId) throws InterruptedException {
 		// setup
 		Patient patient = buildFrankPatient();
+		myInterceptor.setPartitionIdToSpoof(theRequestPartitionId);
 
 		long initialCount = myMdmLinkDao.count();
 
