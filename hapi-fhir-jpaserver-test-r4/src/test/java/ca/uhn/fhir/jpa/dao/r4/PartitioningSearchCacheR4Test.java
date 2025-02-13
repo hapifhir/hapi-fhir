@@ -20,6 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningSearchCacheR4Test.class);
 
+
+	@Test
+	public void testPartitioningDoesNotReturnDuplicatesOnPatientEverything() {
+
+	}
 	@Test
 	public void testSearch_OnePartition_UseCache() {
 		createPatient(withPartition(null), withActiveTrue());
