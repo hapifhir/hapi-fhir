@@ -24,7 +24,9 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 	@Test
 	public void testPartitioningDoesNotReturnDuplicatesOnPatientEverything() {
 
+
 	}
+
 	@Test
 	public void testSearch_OnePartition_UseCache() {
 		createPatient(withPartition(null), withActiveTrue());
