@@ -929,7 +929,8 @@ public class SearchQueryBuilder {
 		String columnName = "MHD" + (myNextNearnessColumnId++);
 		mySelect.addAliasedColumn(sum, columnName);
 		mySelect.addCustomOrderings(columnName + ordering);
-		//FIXME: This is a workaround for a bug in the used SearchQueryBuilder. The grouping should be already added by the SearchQueryBuilder automatically.
+		// FIXME: This is a workaround for a bug in the used SearchQueryBuilder. The grouping should be already added by
+		// the SearchQueryBuilder automatically.
 		if (mySelect.toString().contains("GROUP BY")) {
 			mySelect.addCustomGroupings(columnName);
 		}
