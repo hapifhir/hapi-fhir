@@ -1,0 +1,12 @@
+{
+	"resourceType": "Organization",
+	"active": true,
+	"_active": {
+		"extension": null
+	},
+	"name": "Test Org",
+	"_name": {
+		"extension": null
+	},
+	"extension": null
+}
