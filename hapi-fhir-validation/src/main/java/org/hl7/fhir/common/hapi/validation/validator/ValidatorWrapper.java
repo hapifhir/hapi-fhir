@@ -168,8 +168,7 @@ class ValidatorWrapper {
 			// Determine if meta/profiles are present...
 			ArrayList<String> profileUrls = determineIfProfilesSpecified(document);
 			for (String nextProfileUrl : profileUrls) {
-				fetchAndAddProfile(
-						theWorkerContext, profiles, nextProfileUrl, invalidProfileValidationMessages);
+				fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, invalidProfileValidationMessages);
 			}
 
 			Manager.FhirFormat format = Manager.FhirFormat.XML;
