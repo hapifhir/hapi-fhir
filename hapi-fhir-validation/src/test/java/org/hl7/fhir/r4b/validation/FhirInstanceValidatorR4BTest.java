@@ -1023,10 +1023,10 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 		assertThat(errors).hasSize(2);
-		assertTrue(errors.stream()
+		assertThat(errors.stream())
 			.anyMatch(r ->
 				(r.getSeverity() == ResultSeverityEnum.ERROR) &&
-					(r.getMessage().equals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found")) ));
+					(r.getMessage().equals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found")) );
 
 	}
 

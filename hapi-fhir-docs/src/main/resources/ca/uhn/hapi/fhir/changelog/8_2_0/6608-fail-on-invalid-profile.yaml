@@ -2,4 +2,4 @@
 type: fix
 issue: 6608
 jira: SMILE-9129
-title: "Added logic to fail if there is an invalid profile during validation and fixed existing tests that are using invalid profiles."
+title: "Previously, an invalid profile was not generating error(s) as per FHIR specification. That issue is fixed."

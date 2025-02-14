@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -70,10 +71,10 @@ public class ParserWithValidationR4Test extends BaseValidationTestWithInlineMock
 
 		// verify
 		assertFalse(validationResult.isSuccessful());
-		assertTrue(validationResult.getMessages().stream()
+		assertThat(validationResult.getMessages().stream())
 			.anyMatch(r ->
 						(r.getSeverity() == ResultSeverityEnum.ERROR) &&
-						(r.getMessage().equals("Invalid Profile. Failed to fetch the profile with the url="+profileUrl)) ));
+						(r.getMessage().equals("Invalid Profile. Failed to fetch the profile with the url="+profileUrl)) );
 	}
 
 
