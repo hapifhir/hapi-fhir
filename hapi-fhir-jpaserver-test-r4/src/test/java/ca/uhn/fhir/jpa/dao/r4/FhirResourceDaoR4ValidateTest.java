@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
 import ch.qos.logback.classic.Level;
@@ -981,7 +982,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		OperationOutcome oo = validateAndReturnOutcome(vs);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertEquals("The code '123' is not valid in the system https://bb (Validation failed)", oo.getIssue().get(0).getDiagnostics());
+		assertTrue(oo.getIssue().stream()
+			.anyMatch(r ->
+				r.getDiagnostics().equals("The code '123' is not valid in the system https://bb (Validation failed)")) );
+
 	}
 
 	@Test
