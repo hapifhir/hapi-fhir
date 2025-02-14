@@ -109,6 +109,7 @@ import jakarta.persistence.PersistenceContextType;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -128,6 +129,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Repository;
 
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.XMLEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -138,8 +141,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
-import javax.xml.stream.events.Characters;
-import javax.xml.stream.events.XMLEvent;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEqualCollection;
@@ -291,7 +292,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						next.getVersion(),
 						myCodingSpy.getBooleanObject(next));
 				if (def != null) {
-					ResourceTag tag = theEntity.addTag(def);
+					ResourceTag tag = maybeAddTagToEntity(theEntity, def);
 					allDefs.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -310,7 +311,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						next.getVersionElement().getValue(),
 						next.getUserSelectedElement().getValue());
 				if (def != null) {
-					ResourceTag tag = theEntity.addTag(def);
+					ResourceTag tag = maybeAddTagToEntity(theEntity, def);
 					allDefs.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -323,7 +324,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				TagDefinition def = cacheTagDefinitionDao.getTagOrNull(
 						theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null, null, null);
 				if (def != null) {
-					ResourceTag tag = theEntity.addTag(def);
+					ResourceTag tag = maybeAddTagToEntity(theEntity, def);
 					allDefs.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -348,7 +349,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						next.getVersion(),
 						myCodingSpy.getBooleanObject(next));
 				if (def != null) {
-					ResourceTag tag = theEntity.addTag(def);
+					ResourceTag tag = maybeAddTagToEntity(theEntity, def);
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -367,7 +368,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						next.getVersion(),
 						myCodingSpy.getBooleanObject(next));
 				if (def != null) {
-					ResourceTag tag = theEntity.addTag(def);
+					ResourceTag tag = maybeAddTagToEntity(theEntity, def);
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -380,7 +381,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				TagDefinition def = cacheTagDefinitionDao.getTagOrNull(
 						theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null, null, null);
 				if (def != null) {
-					ResourceTag tag = theEntity.addTag(def);
+					ResourceTag tag = maybeAddTagToEntity(theEntity, def);
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -400,12 +401,42 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				TagDefinition profileDef = cacheTagDefinitionDao.getTagOrNull(
 						theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null, null, null);
 
-				ResourceTag tag = theEntity.addTag(profileDef);
+				ResourceTag tag = maybeAddTagToEntity(theEntity, profileDef);
 				theAllTags.add(tag);
 				theEntity.setHasTags(true);
 			}
 		}
 	}
+
+	/**
+	 * Utility method adding <code>theTagDefToAdd</code> to <code>theEntity</code>. Since the database may contain
+	 * duplicate tagDefinitions, we perform a logical comparison, i.e. we don't care about the tagDefiniton.id, and add
+	 * the tag to the entity only if the entity does not already have that tag.
+	 *
+	 * @param theEntity receiving the tagDefinition
+	 * @param theTagDefToAdd to theEntity
+	 * @return <code>theTagDefToAdd</code> wrapped in a resourceTag if it was added to <code>theEntity</code> or <code>theEntity</code>'s
+	 * resourceTag encapsulating a tagDefinition that is logically equal to theTagDefToAdd.
+	 */
+	private ResourceTag maybeAddTagToEntity(ResourceTable theEntity, TagDefinition theTagDefToAdd) {
+		for (ResourceTag resourceTagFromEntity : theEntity.getTags()) {
+			TagDefinition tag = resourceTagFromEntity.getTag();
+			EqualsBuilder equalsBuilder = new EqualsBuilder();
+			equalsBuilder.append(tag.getSystem(), theTagDefToAdd.getSystem());
+			equalsBuilder.append(tag.getCode(), theTagDefToAdd.getCode());
+			equalsBuilder.append(tag.getDisplay(), theTagDefToAdd.getDisplay());
+			equalsBuilder.append(tag.getVersion(), theTagDefToAdd.getVersion());
+			equalsBuilder.append(tag.getUserSelected(), theTagDefToAdd.getUserSelected());
+			equalsBuilder.append(tag.getTagType(), theTagDefToAdd.getTagType());
+
+			if (equalsBuilder.isEquals()) {
+				return resourceTagFromEntity;
+			}
+		}
+
+		return theEntity.addTag(theTagDefToAdd);
+	}
+
 
 	private Set<ResourceTag> getAllTagDefinitions(ResourceTable theEntity) {
 		HashSet<ResourceTag> retVal = Sets.newHashSet();
@@ -643,7 +674,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return sourceExtension;
 	}
 
-	private boolean updateTags(
+	protected boolean updateTags(
 			TransactionDetails theTransactionDetails,
 			RequestDetails theRequest,
 			IBaseResource theResource,
