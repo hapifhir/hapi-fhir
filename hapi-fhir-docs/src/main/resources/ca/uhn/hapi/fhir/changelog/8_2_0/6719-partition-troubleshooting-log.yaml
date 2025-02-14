@@ -1,4 +1,4 @@
 ---
 type: add
-issue: mb
+issue: 6719
 title: "Added a troubleshooting log for request partition routing."
