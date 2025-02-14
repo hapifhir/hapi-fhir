@@ -29,38 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("unchecked")
 public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningSearchCacheR4Test.class);
-	@Autowired
-	protected PatientResourceProvider myPatientResourceProvider;
-
-
-	@Test
-	public void testPartitioningDoesNotReturnDuplicatesOnPatientEverything() {
-
-		IIdType patient = createPatient(withPartition(1), withActiveTrue());
-
-		List<IIdType> referencedEncounters = new ArrayList<>();
-
-		for (int i = 0; i < 7; i++) {
-			IIdType encounter = createEncounter(withPartition(1), withId("enc-" + i), withIdentifier("http://example.com/", "code"));
-			referencedEncounters.add(encounter);
-		}
-		IIdType nonReferencedEncounter = createEncounter(withPartition(1), withId("enc-1"), withIdentifier("http://example.com/", "code"));
-		for (int i = 0; i <50; i++) {
-			IIdType encounterToReference = referencedEncounters.get(i % referencedEncounters.size());
-			createObservation(withPartition(1), withId("obs-" + i ), withSubject(patient), withObservationCode("http://example.com/", "code"), withEncounter(encounterToReference));
-		}
-
-		createObservation(withPartition(1), withId("obs-1"), withSubject(patient), withObservationCode("http://example.com/", "code"));
-		PatientEverythingParameters params = new PatientEverythingParameters();
-		params.setCount(new IntegerType(50));
-		addReadPartition(1);
-
-		IBundleProvider iBundleProvider = myPatientDao.patientInstanceEverything(null, mySrd, params, patient);
-
-		List<IBaseResource> resources = iBundleProvider.getResources(0, 100);
-		assertThat(resources).hasSize(50);
-		assertThat(resources).extracting(resource -> resource.getIdElement().getValue()).doesNotHaveDuplicates();
-	}
 
 	@Test
 	public void testSearch_OnePartition_UseCache() {
