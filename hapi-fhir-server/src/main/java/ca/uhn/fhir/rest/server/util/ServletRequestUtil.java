@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.server.util;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.http.NameValuePair;
 
@@ -43,7 +42,7 @@ public class ServletRequestUtil {
 		requestDetails.setParameters(new HashMap<>());
 		if (qIndex != -1) {
 			String params = url.substring(qIndex);
-			List<NameValuePair> parameters = UrlUtil.translateMatchUrl(params);
+			List<NameValuePair> parameters = MatchUrlUtil.translateMatchUrl(params);
 			for (NameValuePair next : parameters) {
 				theParamValues.put(next.getName(), next.getValue());
 			}
