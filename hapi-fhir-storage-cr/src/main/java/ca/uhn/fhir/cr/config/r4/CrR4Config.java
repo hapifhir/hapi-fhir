@@ -43,6 +43,7 @@ import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -70,12 +71,14 @@ public class CrR4Config {
 			RepositoryFactoryForRepositoryInterface theRepositoryFactory,
 			MeasureEvaluationOptions theEvaluationOptions,
 			MeasurePeriodValidator theMeasurePeriodValidator,
-			R4MeasureServiceUtilsFactory theR4MeasureServiceUtilsFactory) {
+			R4MeasureServiceUtilsFactory theR4MeasureServiceUtilsFactory,
+			NpmResourceHolderGetter npmResourceHolderGetter) {
 		return rd -> new R4MeasureService(
 				theRepositoryFactory.create(rd),
 				theEvaluationOptions,
 				theMeasurePeriodValidator,
-				theR4MeasureServiceUtilsFactory.create(rd));
+				theR4MeasureServiceUtilsFactory.create(rd),
+				npmResourceHolderGetter);
 	}
 
 	@Bean
@@ -111,11 +114,13 @@ public class CrR4Config {
 	ICollectDataServiceFactory collectDataServiceFactory(
 			IRepositoryFactory theRepositoryFactory,
 			MeasureEvaluationOptions theMeasureEvaluationOptions,
-			R4MeasureServiceUtilsFactory theR4MeasureServiceUtilsFactory) {
+			R4MeasureServiceUtilsFactory theR4MeasureServiceUtilsFactory,
+			NpmResourceHolderGetter npmResourceHolderGetter) {
 		return rd -> new R4CollectDataService(
 				theRepositoryFactory.create(rd),
 				theMeasureEvaluationOptions,
-				theR4MeasureServiceUtilsFactory.create(rd));
+				theR4MeasureServiceUtilsFactory.create(rd),
+				npmResourceHolderGetter);
 	}
 
 	@Bean
@@ -134,13 +139,15 @@ public class CrR4Config {
 			IRepositoryFactory theRepositoryFactory,
 			CareGapsProperties theCareGapsProperties,
 			MeasureEvaluationOptions theMeasureEvaluationOptions,
-			MeasurePeriodValidator theMeasurePeriodValidator) {
+			MeasurePeriodValidator theMeasurePeriodValidator,
+			NpmResourceHolderGetter npmResourceHolderGetter) {
 		return rd -> new R4CareGapsService(
 				theCareGapsProperties,
 				theRepositoryFactory.create(rd),
 				theMeasureEvaluationOptions,
 				rd.getFhirServerBase(),
-				theMeasurePeriodValidator);
+				theMeasurePeriodValidator,
+				npmResourceHolderGetter);
 	}
 
 	@Bean
