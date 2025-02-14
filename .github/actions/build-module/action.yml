@@ -1,0 +1,68 @@
+name: 'Build Module'
+description: "Reusable action to build and test Maven projects"
+
+inputs:
+  module:
+    description: "The Maven module to build"
+    required: true
+    default: ""
+  name:
+    description: "The name of the build or artifact"
+    required: true
+    default: "default_name"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+
+    - name: Set up Java 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Docker
+      uses: docker/setup-docker@v2
+
+    - name: Create and List Maven Cache Directory
+      shell: bash
+      run: |
+        mkdir -p $HOME/.m2/repository
+        pwd
+        ls -al $HOME/.m2/repository
+      env:
+        MAVEN_CACHE_FOLDER: $HOME/.m2/repository
+
+    - name: Restore Maven Cache
+      uses: ./.github/actions/caching-handler
+      with:
+        key: ${{ github.ref_name }}-maven-${{ hashFiles('**/pom.xml') }}
+
+    - name: Restore HAPI Cache
+      uses: ./.github/actions/caching-handler
+      with:
+        path: "$HOME/.m2/repository/ca/uhn/"
+        key: ${{ github.ref_name }}-hapi-${{ github.run_id }}
+
+    - name: Build Maven Module
+      shell: bash
+      env:
+        MAVEN_CACHE_FOLDER: $HOME/.m2/repository
+        MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+      run: |
+        mvn clean verify jacoco:report -pl ${{ inputs.module }} \
+          -P JACOCO,CI -e -B \
+          -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
+          -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false \
+          -Dstyle.color=always -Djansi.force=true
+
+    - name: Upload Target Artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: ${{ inputs.module }}_build
+        path: './**/target'

@@ -93,6 +93,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -152,11 +153,13 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGE
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.jpa.util.InClauseNormalizer.normalizeIdListForInClause;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.stripStart;
 
 /**
  * The SearchBuilder is responsible for actually forming the SQL query that handles
@@ -221,17 +224,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private SearchQueryProperties mySearchProperties;
 
-	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
 
 	@Autowired(required = false)
-	private IElasticsearchSvc myIElasticsearchSvc;
+	public void setFullTextSearch(IFulltextSearchSvc theFulltextSearchSvc) {
+		myFulltextSearchSvc = theFulltextSearchSvc;
+	}
 
-	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
+
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
-	@Autowired
-	private IResourceHistoryTableDao myResourceHistoryTableDao;
+	@Autowired(required = false)
+	private IElasticsearchSvc myIElasticsearchSvc;
 
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
@@ -256,6 +261,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			DaoRegistry theDaoRegistry,
 			FhirContext theContext,
 			IIdHelperService theIdHelperService,
+			IResourceHistoryTableDao theResourceHistoryTagDao,
+			IJpaStorageResourceParser theIJpaStorageResourceParser,
 			Class<? extends IBaseResource> theResourceType) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
@@ -271,6 +278,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myDaoRegistry = theDaoRegistry;
 		myContext = theContext;
 		myIdHelperService = theIdHelperService;
+		myResourceHistoryTableDao = theResourceHistoryTagDao;
+		myJpaStorageResourceParser = theIJpaStorageResourceParser;
 
 		mySearchProperties = new SearchQueryProperties();
 	}
@@ -1263,20 +1272,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			IBaseResource resource = null;
-			if (next != null) {
-				resource = myJpaStorageResourceParser.toResource(
-						resourceType, next, tagMap.get(next.getResourceId()), theForHistoryOperation);
-			}
+			resource = myJpaStorageResourceParser.toResource(
+					resourceType, next, tagMap.get(next.getResourceId()), theForHistoryOperation);
 			if (resource == null) {
-				if (next != null) {
-					ourLog.warn(
-							"Unable to find resource {}/{}/_history/{} in database",
-							next.getResourceType(),
-							next.getIdDt().getIdPart(),
-							next.getVersion());
-				} else {
-					ourLog.warn("Unable to find resource in database.");
-				}
+				ourLog.warn(
+						"Unable to find resource {}/{}/_history/{} in database",
+						next.getResourceType(),
+						next.getIdDt().getIdPart(),
+						next.getVersion());
 				continue;
 			}
 
@@ -1292,12 +1295,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.MATCH);
 			}
 
+			// ensure there's enough space; "<=" because of 0-indexing
+			while (theResourceListToPopulate.size() <= index) {
+				theResourceListToPopulate.add(null);
+			}
 			theResourceListToPopulate.set(index, resource);
 		}
 	}
 
 	private Map<JpaPid, Collection<BaseTag>> getResourceTagMap(Collection<ResourceHistoryTable> theHistoryTables) {
-
 		switch (myStorageSettings.getTagStorageMode()) {
 			case VERSIONED:
 				return getPidToTagMapVersioned(theHistoryTables);
@@ -1407,13 +1413,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		assert new HashSet<>(thePids).size() == thePids.size() : "PID list contains duplicates: " + thePids;
 
 		Map<Long, Integer> position = new HashMap<>();
+		int index = 0;
 		for (JpaPid next : thePids) {
-			position.put(next.getId(), theResourceListToPopulate.size());
-			theResourceListToPopulate.add(null);
+			position.put(next.getId(), index++);
 		}
 
 		// Can we fast track this loading by checking elastic search?
-		if (isLoadingFromElasticSearchSupported(thePids)) {
+		boolean isUsingElasticSearch = isLoadingFromElasticSearchSupported(thePids);
+		if (isUsingElasticSearch) {
 			try {
 				theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
 				return;
@@ -2354,7 +2361,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 				String nextParamName = theComboParamNames.get(paramIndex);
 				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
-				String nextOrValue = nextOr.getValueAsQueryToken(myContext);
+				// The only prefix accepted when combo searching is 'eq' (see validateParamValuesAreValidForComboParam).
+				// As a result, we strip the prefix if present.
+				String nextOrValue = stripStart(nextOr.getValueAsQueryToken(myContext), EQUAL.getValue());
 
 				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
 						myResourceName, nextParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
@@ -2453,7 +2462,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 				if (nextOrValue instanceof BaseParamWithPrefix) {
 					BaseParamWithPrefix<?> paramWithPrefix = (BaseParamWithPrefix<?>) nextOrValue;
-					if (paramWithPrefix.getPrefix() != null) {
+					ParamPrefixEnum prefix = paramWithPrefix.getPrefix();
+					// A parameter with the 'eq' prefix is the only accepted prefix when combo searching since
+					// birthdate=2025-01-01 and birthdate=eq2025-01-01 are equivalent searches.
+					if (prefix != null && prefix != EQUAL) {
 						String message = "Search with params " + theComboParamNames
 								+ " is not a candidate for combo searching - Parameter '" + nextParamName
 								+ "' has prefix: '"

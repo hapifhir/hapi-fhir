@@ -349,12 +349,13 @@ public class Builder {
 		 * @param theFkName          the name of the foreign key
 		 * @param theParentTableName the name of the table that exports the foreign key
 		 */
-		public void dropForeignKey(String theVersion, String theFkName, String theParentTableName) {
+		public BuilderCompleteTask dropForeignKey(String theVersion, String theFkName, String theParentTableName) {
 			DropForeignKeyTask task = new DropForeignKeyTask(myRelease, theVersion);
 			task.setConstraintName(theFkName);
 			task.setTableName(getTableName());
 			task.setParentTableName(theParentTableName);
 			addTask(task);
+			return new BuilderCompleteTask(task);
 		}
 
 		public BuilderCompleteTask renameTable(String theVersion, String theNewTableName) {

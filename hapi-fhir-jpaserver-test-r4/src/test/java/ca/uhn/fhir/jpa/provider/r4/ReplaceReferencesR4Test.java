@@ -4,11 +4,16 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import jakarta.servlet.http.HttpServletResponse;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
@@ -16,9 +21,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
+import java.util.Set;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper.EXPECTED_SMALL_BATCHES;
@@ -29,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
@@ -159,7 +167,127 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		myTestHelper.assertAllReferencesUpdated();
 	}
 
-	// TODO ED we should add some tests for the invalid request error cases (and assert 4xx status code)
+	@ParameterizedTest
+	@ValueSource(strings = {""})
+	@NullSource
+	void testReplaceReferences_MissingSourceId_ThrowsInvalidRequestException(String theSourceId) {
+		InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> {
+			myTestHelper.callReplaceReferencesWithResourceLimit(myClient, theSourceId, "target-id", false, null);
+		});
+		assertThat(exception.getMessage()).contains("HAPI-2583: Parameter 'source-reference-id' is blank");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {""})
+	@NullSource
+	void testReplaceReferences_MissingTargetId_ThrowsInvalidRequestException(String theTargetId) {
+		InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> {
+			myTestHelper.callReplaceReferencesWithResourceLimit(myClient, "source-id", theTargetId, false, null);
+		});
+		assertThat(exception.getMessage()).contains("HAPI-2584: Parameter 'target-reference-id' is blank");
+	}
+
+
+	@Test
+	void testReplaceReferences_WhenReplacingAHighCardinalityReferenceElement_OnlyReplacesMatchingReferences() {
+		//This test uses an Observation resource with multiple Practitioner references in the 'performer' element.
+		// Create Practitioners
+		IIdType practitionerId1 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualifiedVersionless();
+		IIdType practitionerId2 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualifiedVersionless();
+		IIdType practitionerId3 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualifiedVersionless();
+
+		// Create observation with references in the performer field
+		IIdType observationId = createObservationWithPerformers(practitionerId1, practitionerId2).toUnqualifiedVersionless();
+
+		// Call $replace-references operation to replace practitionerId1 with practitionerId3
+		Parameters outParams = myTestHelper.callReplaceReferencesWithResourceLimit(myClient,
+			practitionerId1.toString(),
+			practitionerId3.toString(),
+			false,
+			null);
+
+		// Assert operation outcome
+		Bundle patchResultBundle = (Bundle) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME).getResource();
+
+		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
+			1, List.of(
+				"Observation"));
+
+		// Fetch and validate updated observation
+		Observation updatedObservation = myClient
+			.read()
+			.resource(Observation.class)
+			.withId(observationId)
+			.execute();
+
+		// Extract the performer references from the updated Observation
+		List<String> actualPerformerIds = updatedObservation.getPerformer().stream()
+			.map(ref -> ref.getReferenceElement().toString())
+			.toList();
+
+		// Assert that the performer references match the expected values
+		assertThat(actualPerformerIds).containsExactly(practitionerId3.toString(), practitionerId2.toString());
+	}
+
+	@Test
+	void testReplaceReferences_ShouldNotReplaceVersionedReferences() {
+		// this configuration makes preserve versioned references in the Provenance.target
+		// so that we can test that the versioned reference was not replaced
+		// but keep a copy of the original configuration to restore it after the test
+		Set<String> originalNotStrippedPaths =
+			myFhirContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths();
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
+		try {
+
+			IIdType practitionerId1 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualified();
+			IIdType practitionerId2 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualified();
+
+			Provenance provenance = new Provenance();
+			provenance.addTarget(new Reference(practitionerId1));
+			IIdType provenanceId = myClient.create().resource(provenance).execute().getId();
+			// Call $replace-references operation to replace practitionerId1 with practitionerId3
+			myTestHelper.callReplaceReferencesWithResourceLimit(myClient,
+				practitionerId1.toVersionless().toString(),
+				practitionerId2.toVersionless().toString(),
+				false,
+				null);
+
+			// Fetch and validate the provenance
+			Provenance provenanceAfterOperation = myClient
+				.read()
+				.resource(Provenance.class)
+				.withId(provenanceId.toUnqualifiedVersionless())
+				.execute();
+
+			// Extract the target references from the Provenance
+			List<String> actualTargetIds = provenanceAfterOperation.getTarget().stream()
+				.map(ref -> ref.getReferenceElement().toString())
+				.toList();
+
+			// Assert that the versioned reference in the Provenance  was not replaced
+			assertThat(actualTargetIds).containsExactly(practitionerId1.toString());
+
+		} finally {
+			myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(originalNotStrippedPaths);
+		}
+	}
+
+	private IIdType createObservationWithPerformers(IIdType... performerIds) {
+		// Create a new Observation resource
+		Observation observation = new Observation();
+
+		// Add references to performers
+		for (IIdType performerId : performerIds) {
+			observation.addPerformer(new Reference(performerId.toUnqualifiedVersionless()));
+		}
+
+		// Store the observation resource via the FHIR client
+		return myClient.create().resource(observation).execute().getId();
+
+	}
+
+
+
 
 	@Override
 	protected boolean verboseClientLogging() {

@@ -774,6 +774,7 @@ public interface IValidationSupport {
 	// Some of the types in the spec are not yet implemented as well.
 	// @see https://github.com/hapifhir/hapi-fhir/issues/5700
 	String TYPE_STRING = "string";
+	String TYPE_BOOLEAN = "boolean";
 	String TYPE_CODING = "Coding";
 	String TYPE_GROUP = "group";
 
@@ -797,6 +798,29 @@ public interface IValidationSupport {
 		@Override
 		public String getType() {
 			return TYPE_STRING;
+		}
+	}
+
+	class BooleanConceptProperty extends BaseConceptProperty {
+		private final boolean myValue;
+
+		/**
+		 * Constructor
+		 *
+		 * @param theName The name
+		 */
+		public BooleanConceptProperty(String theName, boolean theValue) {
+			super(theName);
+			myValue = theValue;
+		}
+
+		public boolean getValue() {
+			return myValue;
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_BOOLEAN;
 		}
 	}
 
@@ -1073,7 +1097,7 @@ public interface IValidationSupport {
 		private final IBaseResource myValueSet;
 		private final String myError;
 
-		private boolean myErrorIsFromServer;
+		private final boolean myErrorIsFromServer;
 
 		public ValueSetExpansionOutcome(String theError, boolean theErrorIsFromServer) {
 			myValueSet = null;
@@ -1199,7 +1223,7 @@ public interface IValidationSupport {
 		}
 
 		public void throwNotFoundIfAppropriate() {
-			if (isFound() == false) {
+			if (!isFound()) {
 				throw new ResourceNotFoundException(Msg.code(1738) + "Unable to find code[" + getSearchedForCode()
 						+ "] in system[" + getSearchedForSystem() + "]");
 			}
@@ -1270,6 +1294,10 @@ public interface IValidationSupport {
 					StringConceptProperty stringConceptProperty = (StringConceptProperty) theConceptProperty;
 					ParametersUtil.addPartString(theContext, theProperty, "value", stringConceptProperty.getValue());
 					break;
+				case TYPE_BOOLEAN:
+					BooleanConceptProperty booleanConceptProperty = (BooleanConceptProperty) theConceptProperty;
+					ParametersUtil.addPartBoolean(theContext, theProperty, "value", booleanConceptProperty.getValue());
+					break;
 				case TYPE_CODING:
 					CodingConceptProperty codingConceptProperty = (CodingConceptProperty) theConceptProperty;
 					ParametersUtil.addPartCoding(
@@ -1321,7 +1349,7 @@ public interface IValidationSupport {
 		private final String myTargetValueSetUrl;
 		private final IIdType myResourceId;
 		private final boolean myReverse;
-		private List<IBaseCoding> myCodings;
+		private final List<IBaseCoding> myCodings;
 
 		public TranslateCodeRequest(List<IBaseCoding> theCodings, String theTargetSystemUrl) {
 			myCodings = theCodings;
