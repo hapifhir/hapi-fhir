@@ -1,0 +1,1266 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "system": "sys",
+            "value": "pat-1"
+          }
+        ],
+        "birthDate": "1970-01-01"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient?identifier=sys|pat-1"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "identifier": [
+          {
+            "value": "enc-1"
+          }
+        ],
+        "status": "in-progress",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter?identifier=|enc-1"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "identifier": [
+          {
+            "value": "enc-2"
+          }
+        ],
+        "status": "in-progress",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter?identifier=|enc-2"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "identifier": [
+          {
+            "value": "enc-3"
+          }
+        ],
+        "status": "in-progress",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter?identifier=|enc-3"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "identifier": [
+          {
+            "value": "enc-4"
+          }
+        ],
+        "status": "in-progress",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter?identifier=|enc-4"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "identifier": [
+          {
+            "value": "enc-5"
+          }
+        ],
+        "status": "in-progress",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter?identifier=|enc-5"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "identifier": [
+          {
+            "value": "enc-6"
+          }
+        ],
+        "status": "in-progress",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter?identifier=|enc-6"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "identifier": [
+          {
+            "value": "enc-7"
+          }
+        ],
+        "status": "in-progress",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter?identifier=|enc-7"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "identifier": [
+          {
+            "value": "enc-8"
+          }
+        ],
+        "status": "in-progress",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter?identifier=|enc-8"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-1"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:01+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-2"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-1"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-2"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:02+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-3"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-2"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-3"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:03+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-4"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-3"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-4"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:04+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-5"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-4"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-5"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:05+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-6"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-5"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-6"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:06+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-7"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-6"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-7"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:07+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-7"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-8"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:08+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-2"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-8"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-9"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:09+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-3"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-9"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-10"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:10+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-4"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-10"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-11"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:11+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-5"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-11"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-12"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:12+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-6"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-12"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-13"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:13+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-7"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-13"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-14"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:14+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-14"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-15"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:15+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-2"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-15"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-16"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:16+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-3"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-16"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-17"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:17+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-4"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-17"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-18"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:18+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-5"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-18"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-19"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:19+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-6"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-19"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-20"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:20+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-7"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-20"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-21"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:21+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-21"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-22"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:22+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-2"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-22"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-23"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:23+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-3"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-23"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-24"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:24+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-4"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-24"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-25"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:25+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-5"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-25"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-26"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:26+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-6"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-26"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-27"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:27+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-7"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-27"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-28"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:28+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-28"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-29"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:29+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-2"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-29"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-30"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:30+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-3"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-30"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-31"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:31+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-4"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-31"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-32"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:32+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-5"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-32"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-33"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:33+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-6"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-33"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-34"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:34+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-7"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-34"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-35"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:35+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-35"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-36"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:36+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-2"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-36"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-37"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:37+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-3"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-37"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-38"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:38+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-4"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-38"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-39"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:39+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-5"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-39"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-40"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:40+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-6"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-40"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-41"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:41+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-7"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-41"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-42"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:42+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-42"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-43"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:43+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-2"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-43"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-44"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:44+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-3"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-44"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-45"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:45+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-4"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-45"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-46"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:46+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-5"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-46"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-47"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:47+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-6"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-47"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-48"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:48+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-7"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-48"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-49"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:49+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-49"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "identifier": [
+          {
+            "value": "obs-50"
+          }
+        ],
+        "status": "final",
+        "effectiveDateTime": "2016-02-15T00:00:50+02:00",
+        "subject": {
+          "reference": "Patient?identifier=sys|pat-1"
+        },
+        "encounter": {
+          "reference": "Encounter?identifier=|enc-2"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation?identifier=obs-50"
+      }
+    }
+  ]
+}

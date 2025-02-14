@@ -658,7 +658,8 @@ public class SearchTask implements Callable<Void> {
 			 */
 			int syncSize = mySyncSize;
 			while (resultIterator.hasNext()) {
-				myUnsyncedPids.add(resultIterator.next());
+				JpaPid next = resultIterator.next();
+				myUnsyncedPids.add(next);
 
 				boolean shouldSync = myUnsyncedPids.size() >= syncSize;
 
