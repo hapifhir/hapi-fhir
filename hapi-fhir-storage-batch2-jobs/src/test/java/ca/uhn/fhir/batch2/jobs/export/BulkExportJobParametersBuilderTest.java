@@ -6,8 +6,10 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -123,6 +125,25 @@ class BulkExportJobParametersBuilderTest {
 	void patientIdsWhenNull() {
 		// Act
 		myFixture.patientIds(null);
+		// Assert
+		assertThat(myFixture.build().getPatientIds()).isEmpty();
+	}
+
+	@Test
+	void patientReferences() {
+		// Arrange
+		final List<String> expected = List.of("ID1", "ID2", "ID3");
+		final List<IBaseReference> patientRefs = expected.stream().map(value -> (IBaseReference) new Reference(value)).toList();
+		// Act
+		myFixture.patientReferences(patientRefs);
+		// Assert
+		assertThat(myFixture.build().getPatientIds()).containsAll(expected);
+	}
+
+	@Test
+	void patientReferencesWhenNull() {
+		// Act
+		myFixture.patientReferences(null);
 		// Assert
 		assertThat(myFixture.build().getPatientIds()).isEmpty();
 	}
