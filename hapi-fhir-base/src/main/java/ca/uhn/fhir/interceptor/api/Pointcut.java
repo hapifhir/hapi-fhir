@@ -2097,6 +2097,7 @@ public enum Pointcut implements IPointcut {
 	 * This hook is an alternative to {@link #STORAGE_PARTITION_IDENTIFY_READ} and {@link #STORAGE_PARTITION_IDENTIFY_CREATE}
 	 * and can be used in cases where a partition interceptor does not need knowledge of the specific resources being
 	 * accessed/read/written in order to determine the appropriate partition.
+	 * If registered, then neither STORAGE_PARTITION_IDENTIFY_READ, nor STORAGE_PARTITION_IDENTIFY_CREATE will be called.
 	 * </p>
 	 * <p>
 	 * This hook will only be called if
