@@ -64,7 +64,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	@Autowired
 	PartitionSettings myPartitionSettings;
 
-	public BaseRequestPartitionHelperSvc() {
+	protected BaseRequestPartitionHelperSvc() {
 		myNonPartitionableResourceNames = new HashSet<>();
 
 		// Infrastructure
@@ -131,9 +131,9 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			IInterceptorBroadcaster compositeBroadcaster =
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, requestDetails);
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)) {
-				requestPartitionId = callAnyPointcut(requestDetails, compositeBroadcaster);
+				requestPartitionId = callAnyPointcut(compositeBroadcaster, requestDetails);
 			} else if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)) {
-				requestPartitionId = callReadPointcut(theDetails, requestDetails, compositeBroadcaster);
+				requestPartitionId = callReadPointcut(compositeBroadcaster, requestDetails, theDetails);
 			}
 		}
 
@@ -148,54 +148,51 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	}
 
 	private static RequestPartitionId callAnyPointcut(
-			RequestDetails requestDetails, IInterceptorBroadcaster compositeBroadcaster) {
+			IInterceptorBroadcaster compositeBroadcaster, RequestDetails requestDetails) {
 		// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
 		HookParams params = new HookParams()
 				.add(RequestDetails.class, requestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, requestDetails);
 
-		RequestPartitionId result = (RequestPartitionId)
-				compositeBroadcaster.callHooksAndReturnObject(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
-
-		ourLog.trace("STORAGE_PARTITION_IDENTIFY_ANY returned {}", result);
-
-		return result;
+		return callAndLog(compositeBroadcaster, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
 	}
 
 	private static RequestPartitionId callCreatePointcut(
-			@Nonnull IBaseResource theResource,
+			IInterceptorBroadcaster compositeBroadcaster,
 			RequestDetails requestDetails,
-			IInterceptorBroadcaster compositeBroadcaster) {
+			@Nonnull IBaseResource theResource) {
 		// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
 		HookParams params = new HookParams()
 				.add(IBaseResource.class, theResource)
 				.add(RequestDetails.class, requestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, requestDetails);
 
-		RequestPartitionId result = (RequestPartitionId)
-				compositeBroadcaster.callHooksAndReturnObject(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
+		return callAndLog(compositeBroadcaster, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
+	}
 
-		ourLog.trace("STORAGE_PARTITION_IDENTIFY_CREATE returned {}", result);
+	private static RequestPartitionId callAndLog(
+			IInterceptorBroadcaster compositeBroadcaster, Pointcut pointcut, HookParams params) {
+		RequestPartitionId result =
+				(RequestPartitionId) compositeBroadcaster.callHooksAndReturnObject(pointcut, params);
 
+		if (ourLog.isTraceEnabled()) {
+			ourLog.trace(
+					"{}: result={} hooks={}", pointcut, result, compositeBroadcaster.getInvokersForPointcut(pointcut));
+		}
 		return result;
 	}
 
 	private static RequestPartitionId callReadPointcut(
-			@Nonnull ReadPartitionIdRequestDetails theDetails,
+			IInterceptorBroadcaster compositeBroadcaster,
 			RequestDetails requestDetails,
-			IInterceptorBroadcaster compositeBroadcaster) {
+			@Nonnull ReadPartitionIdRequestDetails theDetails) {
 		// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
 		HookParams params = new HookParams()
 				.add(RequestDetails.class, requestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, requestDetails)
 				.add(ReadPartitionIdRequestDetails.class, theDetails);
 
-		RequestPartitionId requestPartitionId = (RequestPartitionId)
-				compositeBroadcaster.callHooksAndReturnObject(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
-
-		ourLog.trace("STORAGE_PARTITION_IDENTIFY_READ returned {}", requestPartitionId);
-
-		return requestPartitionId;
+		return callAndLog(compositeBroadcaster, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
 	}
 
 	private static void logNonPartitionableType(String theResourceType) {
@@ -218,7 +215,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
 					myInterceptorBroadcaster, theRequestDetails);
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)) {
-				requestPartitionId = callAnyPointcut(theRequestDetails, compositeBroadcaster);
+				requestPartitionId = callAnyPointcut(compositeBroadcaster, theRequestDetails);
 			}
 		}
 
@@ -308,9 +305,9 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			IInterceptorBroadcaster compositeBroadcaster =
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, requestDetails);
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)) {
-				callAnyPointcut(requestDetails, compositeBroadcaster);
+				requestPartitionId = callAnyPointcut(compositeBroadcaster, requestDetails);
 			} else if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)) {
-				requestPartitionId = callCreatePointcut(theResource, requestDetails, compositeBroadcaster);
+				requestPartitionId = callCreatePointcut(compositeBroadcaster, requestDetails, theResource);
 			}
 		}
 
@@ -480,7 +477,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			RequestPartitionId theResult) {
 		String tenantId = theRequest != null ? theRequest.getTenantId() : null;
 		ourLog.debug(
-				"Partitioning: action={} resource type={} with request tenant ID={} routed to partition ID {}",
+				"Partitioning: action={} resource type={} with request tenant ID={} routed to partition ID={}",
 				theAction,
 				theResourceType,
 				tenantId,
