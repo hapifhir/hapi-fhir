@@ -140,57 +140,63 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		validateRequestPartitionNotNull(
 				requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
 
-		RequestPartitionId resultRequestPartitionId = validateAndNormalizePartition(requestPartitionId, requestDetails, resourceType);
+		RequestPartitionId resultRequestPartitionId =
+				validateAndNormalizePartition(requestPartitionId, requestDetails, resourceType);
 		logTroubleshootingResult("read", resourceType, theRequest, resultRequestPartitionId);
 
 		return resultRequestPartitionId;
 	}
 
-
-	private static RequestPartitionId callAnyPointcut(RequestDetails requestDetails, IInterceptorBroadcaster compositeBroadcaster) {
+	private static RequestPartitionId callAnyPointcut(
+			RequestDetails requestDetails, IInterceptorBroadcaster compositeBroadcaster) {
 		// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
 		HookParams params = new HookParams()
 				.add(RequestDetails.class, requestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, requestDetails);
 
 		RequestPartitionId result = (RequestPartitionId)
-			compositeBroadcaster.callHooksAndReturnObject(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
+				compositeBroadcaster.callHooksAndReturnObject(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
 
 		ourLog.trace("STORAGE_PARTITION_IDENTIFY_ANY returned {}", result);
 
 		return result;
 	}
 
-	private static RequestPartitionId callCreatePointcut(@Nonnull IBaseResource theResource, RequestDetails requestDetails, IInterceptorBroadcaster compositeBroadcaster) {
+	private static RequestPartitionId callCreatePointcut(
+			@Nonnull IBaseResource theResource,
+			RequestDetails requestDetails,
+			IInterceptorBroadcaster compositeBroadcaster) {
 		// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
 		HookParams params = new HookParams()
-			.add(IBaseResource.class, theResource)
-			.add(RequestDetails.class, requestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, requestDetails);
+				.add(IBaseResource.class, theResource)
+				.add(RequestDetails.class, requestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, requestDetails);
 
-		RequestPartitionId result = (RequestPartitionId) compositeBroadcaster.callHooksAndReturnObject(
-			Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
+		RequestPartitionId result = (RequestPartitionId)
+				compositeBroadcaster.callHooksAndReturnObject(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
 
 		ourLog.trace("STORAGE_PARTITION_IDENTIFY_CREATE returned {}", result);
 
 		return result;
 	}
 
-	private static RequestPartitionId callReadPointcut(@Nonnull ReadPartitionIdRequestDetails theDetails, RequestDetails requestDetails, IInterceptorBroadcaster compositeBroadcaster) {
+	private static RequestPartitionId callReadPointcut(
+			@Nonnull ReadPartitionIdRequestDetails theDetails,
+			RequestDetails requestDetails,
+			IInterceptorBroadcaster compositeBroadcaster) {
 		// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
 		HookParams params = new HookParams()
-			.add(RequestDetails.class, requestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, requestDetails)
-			.add(ReadPartitionIdRequestDetails.class, theDetails);
+				.add(RequestDetails.class, requestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, requestDetails)
+				.add(ReadPartitionIdRequestDetails.class, theDetails);
 
 		RequestPartitionId requestPartitionId = (RequestPartitionId)
-			compositeBroadcaster.callHooksAndReturnObject(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
+				compositeBroadcaster.callHooksAndReturnObject(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
 
 		ourLog.trace("STORAGE_PARTITION_IDENTIFY_READ returned {}", requestPartitionId);
 
 		return requestPartitionId;
 	}
-
 
 	private static void logNonPartitionableType(String theResourceType) {
 		ourLog.trace("Partitioning: resource type {} must be on the DEFAULT partition.", theResourceType);
@@ -321,13 +327,13 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 				Pointcut.STORAGE_PARTITION_IDENTIFY_ANY);
 		validatePartitionForCreate(requestPartitionId, theResourceType);
 
-		RequestPartitionId resultRequestPartitionId = validateAndNormalizePartition(requestPartitionId, requestDetails, theResourceType);
+		RequestPartitionId resultRequestPartitionId =
+				validateAndNormalizePartition(requestPartitionId, requestDetails, theResourceType);
 
 		logTroubleshootingResult("create", theResourceType, theRequest, resultRequestPartitionId);
 
 		return resultRequestPartitionId;
 	}
-
 
 	private boolean systemRequestHasExplicitPartition(@Nonnull SystemRequestDetails theRequest) {
 		return theRequest.getRequestPartitionId() != null || theRequest.getTenantId() != null;
@@ -467,18 +473,22 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		}
 	}
 
-
-
-	private static void logTroubleshootingResult(String theAction, String theResourceType, @Nullable RequestDetails theRequest, RequestPartitionId theResult) {
+	private static void logTroubleshootingResult(
+			String theAction,
+			String theResourceType,
+			@Nullable RequestDetails theRequest,
+			RequestPartitionId theResult) {
 		String tenantId = theRequest != null ? theRequest.getTenantId() : null;
 		ourLog.debug(
-			"Partitioning: action={} resource type={} with request tenant ID={} routed to partition ID {}",
-			theAction, theResourceType, tenantId, theResult);
+				"Partitioning: action={} resource type={} with request tenant ID={} routed to partition ID {}",
+				theAction,
+				theResourceType,
+				tenantId,
+				theResult);
 	}
 
 	private void logSystemRequestResolution(RequestDetails theRequest) {
 		assert theRequest instanceof SystemRequestDetails;
 		ourLog.trace("Partitioning: request is a system request with partition routing information.");
 	}
-
 }
