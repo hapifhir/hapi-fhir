@@ -240,7 +240,7 @@ class ValidatorWrapper {
 			IWorkerContext theWorkerContext,
 			List<StructureDefinition> theProfileStructureDefinitions,
 			String theUrl,
-			List<ValidationMessage> validationMessages) {
+			List<ValidationMessage> theValidationMessages) {
 		try {
 			StructureDefinition structureDefinition = theWorkerContext.fetchResource(StructureDefinition.class, theUrl);
 			if (structureDefinition != null) {
@@ -249,8 +249,8 @@ class ValidatorWrapper {
 				ValidationMessage m = new ValidationMessage();
 				m.setMessageId(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN);
 				m.setLevel(ValidationMessage.IssueSeverity.ERROR);
-				m.setMessage("Invalid Profile. Failed to fetch the profile with the url=" + theUrl);
-				validationMessages.add(m);
+				m.setMessage("Invalid profile. Failed to retrieve profile with url=" + theUrl);
+				theValidationMessages.add(m);
 			}
 		} catch (FHIRException e) {
 			ourLog.debug("Failed to load profile: {}", theUrl);

@@ -74,7 +74,7 @@ public class ParserWithValidationR4Test extends BaseValidationTestWithInlineMock
 		assertThat(validationResult.getMessages().stream())
 			.anyMatch(r ->
 						(r.getSeverity() == ResultSeverityEnum.ERROR) &&
-						(r.getMessage().equals("Invalid Profile. Failed to fetch the profile with the url="+profileUrl)) );
+						(r.getMessage().equals("Invalid profile. Failed to retrieve profile with url="+profileUrl)) );
 	}
 
 

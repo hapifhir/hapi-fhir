@@ -2,4 +2,4 @@
 type: fix
 issue: 6608
 jira: SMILE-9129
-title: "Previously, an invalid profile was not generating error(s) as per FHIR specification. That issue is fixed."
+title: "Previously, attempting to validate a resource ($validate) with an invalid profile was not generating any error. This issue is fixed."
