@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
@@ -33,6 +34,7 @@ import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
@@ -55,8 +57,12 @@ import static org.mockito.Mockito.when;
 public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
 	private final IFhirResourceDao<Subscription> myMockSubscriptionDao = Mockito.mock(IFhirResourceDao.class);
 
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	@BeforeEach
 	public void beforeEach() {
+		when(myRequestPartitionHelperSvc.isDefaultPartition(any(RequestPartitionId.class))).thenReturn(Boolean.TRUE);
 		when(myMockSubscriptionDao.getResourceType()).thenReturn(Subscription.class);
 		myDaoRegistry.register(myMockSubscriptionDao);
 	}

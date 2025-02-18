@@ -42,7 +42,7 @@ public class ResourceMatcherR4Test extends BaseMdmRulesR4Test {
 	@Mock
 	private Appender<ILoggingEvent> myAppender;
 	@Captor
-	ArgumentCaptor<ILoggingEvent> myLoggingEvent;
+	private ArgumentCaptor<ILoggingEvent> myLoggingEvent;
 
 	@Override
 	@BeforeEach
