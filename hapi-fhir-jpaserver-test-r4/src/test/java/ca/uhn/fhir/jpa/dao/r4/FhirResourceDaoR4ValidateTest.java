@@ -982,9 +982,9 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		OperationOutcome oo = validateAndReturnOutcome(vs);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertTrue(oo.getIssue().stream()
+		assertThat(oo.getIssue().stream())
 			.anyMatch(r ->
-				r.getDiagnostics().equals("The code '123' is not valid in the system https://bb (Validation failed)")) );
+				r.getDiagnostics().equals("The code '123' is not valid in the system https://bb (Validation failed)") );
 
 	}
 
