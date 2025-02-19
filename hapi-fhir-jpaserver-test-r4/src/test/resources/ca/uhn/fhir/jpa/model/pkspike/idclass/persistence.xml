@@ -1,0 +1,24 @@
+<persistence-unit>
+	<!--
+	name="educationPU"
+						transaction-type="JTA"
+	<provider>org.hibernate.ejb.HibernatePersistence</provider>
+	<class>com.coe.jpa.StudentProfile</class>
+>
+	<mapping-file>classpath:/ca/uhn/fhir/jpa/model/pkspike/idclass/overrideMappings.xml</mapping-file>
+	-->
+	<mapping-file>./overrideMappings.xml</mapping-file>
+
+
+	<properties>
+		<!--
+		<property name="hibernate.connection.driver_class"
+					 value="com.mysql.jdbc.Driver" />
+		<property name="hibernate.connection.url"
+					 value="jdbc:mysql://localhost:3306/COE" />
+		<property name="hibernate.connection.username" value="root" />
+		<property name="show_sql" value="true" />
+		<property name="dialect" value="org.hibernate.dialect.MySQLDialect" />
+		-->
+	</properties>
+</persistence-unit>
