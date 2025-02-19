@@ -126,7 +126,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			requestPartitionId = RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 			logNonPartitionableType(resourceType);
 		} else {
-			// fixme mb: why is this path different than create?
+			// TODO mb: why is this path different than create?
 			//  Here, a non-partitionable resource is still delivered to the pointcuts.
 			IInterceptorBroadcaster compositeBroadcaster =
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, requestDetails);
@@ -358,8 +358,6 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			@Nullable String theResourceType) {
 		RequestPartitionId retVal = theRequestPartitionId;
 
-		// fixme mb log before and after
-
 		if (!myPartitionSettings.isUnnamedPartitionMode()) {
 			if (retVal.getPartitionNames() != null) {
 				retVal = validateAndNormalizePartitionNames(retVal);
@@ -386,6 +384,8 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			}
 			retVal = RequestPartitionId.fromPartitionIds(partitionIds);
 		}
+
+		ourLog.trace("Partition normalization: {} -> {}", theRequestPartitionId, retVal);
 
 		return retVal;
 	}
