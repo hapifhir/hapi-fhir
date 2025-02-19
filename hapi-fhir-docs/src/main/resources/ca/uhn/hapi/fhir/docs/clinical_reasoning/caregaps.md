@@ -26,7 +26,8 @@ The following resources are used in the Gaps in Care Reporting Scenario:
 | MeasureReport | DEQM Gaps In Care MeasureReport Profile | [DEQM Gaps In Care MeasureReport Profile](http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-indv-measurereport-deqm.html)      |
 
 ## Gaps in Care Reporting
-[Gaps through period](http://hl7.org/fhir/us/davinci-deqm/2023Jan/index.html#glossary) is the time period defined by a Client for running the Gaps in Care Report. 
+
+[Gaps through period](http://hl7.org/fhir/us/davinci-deqm/2023Jan/index.html#glossary) is the time period defined by a Client for running the Gaps in Care Report.
 * When the [gaps through period](http://hl7.org/fhir/us/davinci-deqm/2023Jan/index.html#glossary) ends on a date that is in the future, the Gaps in Care Reporting is said to look for care gaps prospectively. In this scenario, it provides providers with opportunities to assess anticipated [open gaps](http://build.fhir.org/ig/HL7/davinci-deqm/index.html#glossary) and take proper actions to close the gaps.
 * When the [gaps through period](http://hl7.org/fhir/us/davinci-deqm/2023Jan/index.html#glossary) ends on a date that is in the past, the Gaps in Care Reporting is said to look for care gaps retrospectively. In the retrospective scenario, identified [open gaps](http://build.fhir.org/ig/HL7/davinci-deqm/index.html#glossary) can no longer be acted upon to meet the quality measure.
 
@@ -36,6 +37,7 @@ The following resources are used in the Gaps in Care Reporting Scenario:
 | Retrospective Use Case | $care-gaps?periodStart=2020-01-01&periodEnd=2020-12-31&subject=Patient/123&measureId=EXM130-7.3.000&status=open-gap | 2020-01-01| 2020-12-31 | 2021-04-01 | Example: patient had colonoscopy on 2011-05-03 | Returns gaps through 2020-12-31. The Gaps in Care Report indicates the patient has a [closed gaps](http://build.fhir.org/ig/HL7/davinci-deqm/index.html#glossary) for the colorectal cancer screening measure. Since on 2020-12-31, the procedure would have occurred within the specified 10-year timeframe. |
 
 ## Operations
+
 Hapi FHIR implements the [$care-gaps](http://hl7.org/fhir/us/davinci-deqm/2023Jan/OperationDefinition-care-gaps.html) operation.
 
 ## Care Gaps
