@@ -4,5 +4,5 @@ issue: 6716
 jira: SMILE-9676
 title: "Fixed an issue that was caused by
         batch jobs attempting to store error
-        messages >500 characters.
+        messages exceeding 500 characters.
 "

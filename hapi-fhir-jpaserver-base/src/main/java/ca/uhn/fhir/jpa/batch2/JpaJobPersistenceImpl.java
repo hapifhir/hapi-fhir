@@ -43,7 +43,6 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkMetadataView;
-import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
