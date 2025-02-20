@@ -224,6 +224,13 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	/**
 	 * Returns all UPDATE queries executed on the current thread - Index 0 is oldest
 	 */
+	public List<SqlQuery> getUpdateQueries(Predicate<SqlQuery> theFilter) {
+		return getQueriesStartingWith("update").stream().filter(theFilter).collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns all UPDATE queries executed on the current thread - Index 0 is oldest
+	 */
 	public List<SqlQuery> getDeleteQueries() {
 		return getQueriesStartingWith("delete");
 	}

@@ -57,9 +57,12 @@ import jakarta.annotation.Nonnull;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.insert.Insert;
+import net.sf.jsqlparser.statement.update.Update;
+import net.sf.jsqlparser.statement.update.UpdateSet;
 import org.assertj.core.api.Assertions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.ConceptMap;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.DateTimeType;
@@ -102,6 +105,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -133,9 +137,11 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	@Autowired
 	private IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
-	private IFhirResourceDaoObservation<Observation> myObservationDao;
-	@Autowired
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
+	@Autowired
+	private IFhirResourceDao<ConceptMap> myConceptMapDao;
+	@Autowired
+	private IFhirResourceDaoObservation<Observation> myObservationDao;
 	@Autowired
 	private IFhirResourceDao<ValueSet> myValueSetDao;
 	@Autowired
@@ -288,6 +294,92 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 	}
+
+
+	@Test
+	public void testCreate_ConceptMap() throws JSQLParserException {
+		ConceptMap cm = new ConceptMap();
+		cm.setId("cm");
+		cm.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cm.setUrl("http://example.com/cm");
+		ConceptMap.ConceptMapGroupComponent group = cm.addGroup();
+		group.setSource("http://source");
+		group.setTarget("http://target");
+		ConceptMap.SourceElementComponent code0 = group.addElement().setCode("code0").setDisplay("display0");
+		code0.addTarget().setCode("target0").setDisplay("target0display0");
+
+		// Test
+		myCaptureQueriesListener.clear();
+		myConceptMapDao.update(cm, new SystemRequestDetails());
+
+		// Verify
+		myCaptureQueriesListener.logInsertQueries();
+
+		String expectedPartitionId = "NULL";
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			if (myPartitionSettings.getDefaultPartitionId() != null) {
+				expectedPartitionId = "'" + myPartitionSettings.getDefaultPartitionId() + "'";
+			}
+		}
+
+		List<SqlQuery> insertConceptMaps = myCaptureQueriesListener.getInsertQueries(t -> t.getSql(true, false).startsWith("insert into TRM_CONCEPT_MAP "));
+		assertEquals(1, insertConceptMaps.size());
+		assertEquals(expectedPartitionId, parseInsertStatementParams(insertConceptMaps.get(0).getSql(true, false)).get("PARTITION_ID"));
+
+		List<SqlQuery> insertConceptMapGroups = myCaptureQueriesListener.getInsertQueries(t -> t.getSql(true, false).startsWith("insert into TRM_CONCEPT_MAP_GROUP "));
+		assertEquals(1, insertConceptMapGroups.size());
+		assertEquals(expectedPartitionId, parseInsertStatementParams(insertConceptMapGroups.get(0).getSql(true, false)).get("PARTITION_ID"));
+
+		List<SqlQuery> insertConceptMapGroupElements = myCaptureQueriesListener.getInsertQueries(t -> t.getSql(true, false).startsWith("insert into TRM_CONCEPT_MAP_GRP_ELEMENT "));
+		assertEquals(1, insertConceptMapGroupElements.size());
+		assertEquals(expectedPartitionId, parseInsertStatementParams(insertConceptMapGroupElements.get(0).getSql(true, false)).get("PARTITION_ID"));
+
+		List<SqlQuery> insertConceptMapGroupElementTargets = myCaptureQueriesListener.getInsertQueries(t -> t.getSql(true, false).startsWith("insert into TRM_CONCEPT_MAP_GRP_ELM_TGT "));
+		assertEquals(1, insertConceptMapGroupElementTargets.size());
+		assertEquals(expectedPartitionId, parseInsertStatementParams(insertConceptMapGroupElementTargets.get(0).getSql(true, false)).get("PARTITION_ID"));
+	}
+
+	@Test
+	public void testCreate_CodeSystem() throws JSQLParserException {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("cs");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setUrl("http://example.com/cs");
+		cs.addConcept().setCode("code0").setDisplay("display0");
+
+		// Test
+		myCaptureQueriesListener.clear();
+		myCodeSystemDao.update(cs, new SystemRequestDetails());
+
+		// Verify
+		myCaptureQueriesListener.logInsertQueries();
+
+		String expectedPartitionId = "NULL";
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			if (myPartitionSettings.getDefaultPartitionId() != null) {
+				expectedPartitionId = "'" + myPartitionSettings.getDefaultPartitionId() + "'";
+			}
+		}
+
+		List<SqlQuery> insertTrmCodeSystem = myCaptureQueriesListener.getInsertQueries(t -> t.getSql(true, false).startsWith("insert into TRM_CODESYSTEM "));
+		assertEquals(1, insertTrmCodeSystem.size());
+		assertEquals(expectedPartitionId, parseInsertStatementParams(insertTrmCodeSystem.get(0).getSql(true, false)).get("PARTITION_ID"));
+		assertEquals("NULL", parseInsertStatementParams(insertTrmCodeSystem.get(0).getSql(true, false)).get("CURRENT_VERSION_PID"));
+		assertEquals("NULL", parseInsertStatementParams(insertTrmCodeSystem.get(0).getSql(true, false)).get("CURRENT_VERSION_PARTITION_ID"));
+
+		List<SqlQuery> insertTrmConcept = myCaptureQueriesListener.getInsertQueries(t -> t.getSql(true, false).startsWith("insert into TRM_CONCEPT "));
+		assertEquals(1, insertTrmConcept.size());
+		assertEquals(expectedPartitionId, parseInsertStatementParams(insertTrmConcept.get(0).getSql(true, false)).get("PARTITION_ID"));
+
+		myCaptureQueriesListener.logUpdateQueries();
+		List<SqlQuery> updateCodeSystems = myCaptureQueriesListener.getUpdateQueries(t -> t.getSql(true, false).startsWith("update TRM_CODESYSTEM "));
+		assertEquals(1, updateCodeSystems.size());
+		assertEquals(expectedPartitionId, parseUpdateStatementParams(updateCodeSystems.get(0).getSql(true, false)).get("CURRENT_VERSION_PARTITION_ID"));
+
+		List<SqlQuery> updateCodeSystemVersions = myCaptureQueriesListener.getUpdateQueries(t -> t.getSql(true, false).startsWith("update TRM_CODESYSTEM_VER "));
+		assertEquals(1, updateCodeSystemVersions.size());
+	}
+
 
 	@ParameterizedTest
 	@EnumSource(PartitionSettings.CrossPartitionReferenceMode.class)
@@ -1778,7 +1870,25 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		for (int i = 0; i < parsedStatement.getColumns().size(); i++) {
 			String columnName = parsedStatement.getColumns().get(i).getColumnName();
 			String columnValue = parsedStatement.getValues().getExpressions().get(i).toString();
+			assertFalse(retVal.containsKey(columnName), ()->"Duplicate column in insert statement: " + columnName);
 			retVal.put(columnName, columnValue);
+		}
+
+		return retVal;
+	}
+
+	private static Map<String, String> parseUpdateStatementParams(String theUpdateSql) throws JSQLParserException {
+		Update parsedStatement = (Update) CCJSqlParserUtil.parse(theUpdateSql);
+
+		Map<String, String> retVal = new HashMap<>();
+
+		for (UpdateSet updateSet : parsedStatement.getUpdateSets()) {
+			for (int i = 0; i < updateSet.getColumns().size(); i++) {
+				String columnName = updateSet.getColumns().get(i).getColumnName();
+				String columnValue = updateSet.getValues().getExpressions().get(i).toString();
+				assertFalse(retVal.containsKey(columnName), ()->"Duplicate column in insert statement: " + columnName);
+				retVal.put(columnName, columnValue);
+			}
 		}
 
 		return retVal;

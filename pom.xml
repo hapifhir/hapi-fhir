@@ -969,6 +969,16 @@
 			<name>Mangala Ekanayake</name>
 			<organization>Cambio</organization>
 		</developer>
+		<developer>
+			<id>elavy-harris</id>
+			<name>Eliott Lavy</name>
+			<organization>Harris</organization>
+		</developer>
+		<developer>
+			<id>krauzer</id>
+			<name>Dylan Krause</name>
+			<organization>Corbalt</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -1024,7 +1034,7 @@
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
 		<jaxb_runtime_version>4.0.4</jaxb_runtime_version>
-		<jena_version>4.9.0</jena_version>
+		<jena_version>5.3.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
 		<jetty_version>12.0.15</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
@@ -1032,7 +1042,7 @@
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>10.20.1</flyway_version>
 		<hibernate_version>6.6.4.Final</hibernate_version>
-		<logback_version>1.5.12</logback_version>
+		<logback_version>1.5.16</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<hibernate_search_version>7.2.1.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
@@ -1084,7 +1094,7 @@
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.15.3</elasticsearch_version>
-		<ucum_version>1.0.8</ucum_version>
+		<ucum_version>1.0.9</ucum_version>
 
 		<!-- Clinical Reasoning & CQL Support -->
 		<clinical-reasoning.version>3.17.0</clinical-reasoning.version>
@@ -1662,6 +1672,11 @@
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-arq</artifactId>
+				<version>${jena_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-shex</artifactId>
 				<version>${jena_version}</version>
 			</dependency>
 			<dependency>
