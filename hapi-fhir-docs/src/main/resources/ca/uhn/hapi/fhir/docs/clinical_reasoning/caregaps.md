@@ -1,6 +1,7 @@
 # Care Gaps
 
 ## Overview
+
 A gap in care refers to a discrepancy or gap in a patient's care that has been identified through analysis of their medical records, history, and current health status.
 These gaps can include missing or incomplete information, unmet health needs, and opportunities for preventative care or intervention. Identifying and addressing care gaps can help improve the quality of care provided to patients, reduce healthcare costs, and ultimately lead to better health outcomes.
 
@@ -41,9 +42,11 @@ The following resources are used in the Gaps in Care Reporting Scenario:
 Hapi FHIR implements the [$care-gaps](http://hl7.org/fhir/us/davinci-deqm/2023Jan/OperationDefinition-care-gaps.html) operation.
 
 ## Care Gaps
+
 The `$care-gaps` operation is used to run a Gaps in Care Report.
 
 ### Testing care gaps on Hapi FHIR
+
 Hapi FHIR is integrated with `$care-gaps` operations and following are the steps to identify open gap on sample data following the remediation step to generate a report for closed gap.
 
 All the sample files used below are available on [hapi-fhir](https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-storage-cr/src/test/resources) code base under resources folder.
