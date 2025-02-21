@@ -124,6 +124,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 		} else if ((requestDetails instanceof SystemRequestDetails) && nonPartitionableResource) {
 			requestPartitionId = RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+			logSystemRequestResolution(theRequest);
 			logNonPartitionableType(resourceType);
 		} else {
 			// TODO mb: why is this path different than create?
@@ -486,6 +487,8 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 	private void logSystemRequestResolution(RequestDetails theRequest) {
 		assert theRequest instanceof SystemRequestDetails;
-		ourLog.trace("Partitioning: request is a system request with partition routing information.");
+		ourLog.trace(
+				"Partitioning: request is a SystemRequestDetails, with RequestPartitionId={}.",
+				((SystemRequestDetails) theRequest).getRequestPartitionId());
 	}
 }
