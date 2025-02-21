@@ -480,7 +480,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 		compositionBuilder.setStatus(Composition.CompositionStatus.FINAL.toCode());
 		compositionBuilder.setSubject(thePatient.getIdElement().toUnqualifiedVersionless());
-		compositionBuilder.addTypeCoding("http://loinc.org", "60591-5", "Patient Summary Document");
+		compositionBuilder.addTypeCoding("http://loinc.org", "60591-5", "Patient summary Document");
 		compositionBuilder.setDate(InstantType.now());
 		compositionBuilder.setTitle(theStrategy.createTitle(context));
 		compositionBuilder.setConfidentiality(theStrategy.createConfidentiality(context));
