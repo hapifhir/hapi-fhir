@@ -188,7 +188,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myStartTime = theStartTime;
 		myUpdateTime = theUpdateTime;
 		myEndTime = theEndTime;
-		myErrorMessage = theErrorMessage;
+		setErrorMessage(theErrorMessage);
 		myErrorCount = theErrorCount;
 		myRecordsProcessed = theRecordsProcessed;
 		myWarningMessage = theWarningMessage;
