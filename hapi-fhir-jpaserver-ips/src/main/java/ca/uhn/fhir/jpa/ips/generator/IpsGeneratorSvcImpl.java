@@ -234,7 +234,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 						.getResourceReference()
 						.getReferenceElement()
 						.getValue();
-				if (isNotBlank(existingReference)) {
+				if (isNotBlank(existingReference) && !existingReference.startsWith("#")) {
 					existingReference = new IdType(existingReference)
 							.toUnqualifiedVersionless()
 							.getValue();
