@@ -110,6 +110,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		// SystemRequestDetails instead.
 		if (requestDetails == null) {
 			requestDetails = new SystemRequestDetails();
+			logSubstitutingDefaultSystemRequestDetails();
 		}
 
 		boolean nonPartitionableResource = isResourceNonPartitionable(resourceType);
@@ -120,11 +121,11 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 				&& systemRequestHasExplicitPartition((SystemRequestDetails) requestDetails)
 				&& !nonPartitionableResource) {
 			requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) requestDetails, false);
-			logSystemRequestResolution(theRequest);
+			logSystemRequestDetailsResolution((SystemRequestDetails) requestDetails);
 
 		} else if ((requestDetails instanceof SystemRequestDetails) && nonPartitionableResource) {
 			requestPartitionId = RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
-			logSystemRequestResolution(theRequest);
+			logSystemRequestDetailsResolution((SystemRequestDetails) requestDetails);
 			logNonPartitionableType(resourceType);
 		} else {
 			// TODO mb: why is this path different than create?
@@ -211,7 +212,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		if (theRequestDetails instanceof SystemRequestDetails
 				&& systemRequestHasExplicitPartition((SystemRequestDetails) theRequestDetails)) {
 			requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) theRequestDetails);
-			logSystemRequestResolution(theRequestDetails);
+			logSystemRequestDetailsResolution((SystemRequestDetails) theRequestDetails);
 		} else {
 			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
 					myInterceptorBroadcaster, theRequestDetails);
@@ -293,6 +294,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		// SystemRequestDetails instead.
 		if (theRequest == null) {
 			requestDetails = new SystemRequestDetails();
+			logSubstitutingDefaultSystemRequestDetails();
 		}
 
 		RequestPartitionId requestPartitionId = null;
@@ -301,7 +303,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			requestPartitionId =
 					getSystemRequestPartitionId((SystemRequestDetails) theRequest, nonPartitionableResource);
 
-			logSystemRequestResolution(theRequest);
+			logSystemRequestDetailsResolution((SystemRequestDetails) theRequest);
 		} else {
 			IInterceptorBroadcaster compositeBroadcaster =
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, requestDetails);
@@ -485,10 +487,13 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 				theResult);
 	}
 
-	private void logSystemRequestResolution(RequestDetails theRequest) {
-		assert theRequest instanceof SystemRequestDetails;
+	private void logSystemRequestDetailsResolution(SystemRequestDetails theRequest) {
 		ourLog.trace(
 				"Partitioning: request is a SystemRequestDetails, with RequestPartitionId={}.",
-				((SystemRequestDetails) theRequest).getRequestPartitionId());
+				theRequest.getRequestPartitionId());
+	}
+
+	private static void logSubstitutingDefaultSystemRequestDetails() {
+		ourLog.trace("No RequestDetails present.  Using default SystemRequestDetails.");
 	}
 }
