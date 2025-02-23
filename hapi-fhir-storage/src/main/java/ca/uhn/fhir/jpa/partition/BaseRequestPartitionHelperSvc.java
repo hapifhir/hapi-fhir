@@ -480,7 +480,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			RequestPartitionId theResult) {
 		String tenantId = theRequest != null ? theRequest.getTenantId() : null;
 		ourLog.debug(
-				"Partitioning: action={} resource type={} with request tenant ID={} routed to partition ID={}",
+				"Partitioning: action={} resource type={} with request tenant ID={} routed to RequestPartitionId={}",
 				theAction,
 				theResourceType,
 				tenantId,
