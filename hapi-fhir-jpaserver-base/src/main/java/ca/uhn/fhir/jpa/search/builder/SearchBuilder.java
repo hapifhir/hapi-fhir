@@ -1611,6 +1611,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			for (JpaPid next : pidsToInclude) {
 				if (!original.contains(next) && !allAdded.contains(next)) {
 					nextRoundMatches.add(next);
+				} else {
+					ourLog.trace("Skipping include since it has already been seen. [jpaPid={}]", next);
 				}
 			}
 
