@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Clinical Reasoning
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,25 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.config;
+package ca.uhn.fhir.rest.annotation;
 
-import ca.uhn.fhir.rest.server.method.StringTimePeriodHandler;
-import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import java.time.ZoneOffset;
-
-@Configuration
-public class CrBaseConfig {
-
-	@Bean
-	StringTimePeriodHandler stringTimePeriodHandler() {
-		return new StringTimePeriodHandler(ZoneOffset.UTC);
-	}
-
-	@Bean
-	MeasurePeriodValidator measurePeriodValidator() {
-		return new MeasurePeriodValidator();
-	}
+/**
+ * Used to indicate whether an {@link OperationParam} should be considered as part of a range of values, and if
+ * so whether it's the start or end of the range.
+ */
+public enum OperationParameterRangeType {
+	START,
+	END,
+	NOT_APPLICABLE
 }

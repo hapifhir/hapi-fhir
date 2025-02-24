@@ -116,7 +116,7 @@ public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 		try {
 			startServer(provider);
 			fail();		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(288) + "Failure scanning class MyProvider: " + Msg.code(404) + "@OperationParam detected on method that is not annotated with @Operation: public java.util.List<org.hl7.fhir.instance.model.api.IBaseResource> ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$2MyProvider.search(org.hl7.fhir.r4.model.StringType,org.hl7.fhir.r4.model.StringType)", e.getMessage());
+			assertEquals(Msg.code(288) + "Failure scanning class MyProvider: " + Msg.code(404) + "@OperationParam or @EmbeddedOperationParams detected on method: [search] that is not annotated with @Operation: public java.util.List<org.hl7.fhir.instance.model.api.IBaseResource> ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$2MyProvider.search(org.hl7.fhir.r4.model.StringType,org.hl7.fhir.r4.model.StringType)", e.getMessage());
 		}
 	}
 
