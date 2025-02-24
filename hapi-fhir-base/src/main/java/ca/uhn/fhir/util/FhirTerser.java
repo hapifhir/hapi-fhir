@@ -1434,8 +1434,15 @@ public class FhirTerser {
 		if (theReference.getResource().getIdElement().isEmpty()) {
 			return true;
 		}
+		// Check if the reference is an external reference
+		// TODO Fix Hack: ensure that this conforms to what FHIR considers (URLs, URNs, and more)
 		if (theReference.getResource().getIdElement().isAbsolute()
 				|| theReference.getResource().getIdElement().getValueAsString().startsWith("urn:")) {
+			return false;
+		}
+		// Check if the reference is a FHIR resource resolvable on the local server
+		// TODO Fix Hack: check for all resource types, not just Patient
+		if (theReference.getResource().getIdElement().getValueAsString().startsWith("Patient/")) {
 			return false;
 		}
 		return true;
