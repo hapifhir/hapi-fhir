@@ -585,7 +585,7 @@ public class XmlParserDstu3Test {
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#" + organizationUuid, org.getIdElement().getValue());
+		assertEquals(organizationUuid, org.getIdElement().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 
 		// And re-encode a second time
@@ -607,7 +607,7 @@ public class XmlParserDstu3Test {
 		// And re-encode once more, with the references cleared and a manually set local ID
 		patient.getContained().clear();
 		patient.getManagingOrganization().setReference(null);
-		patient.getManagingOrganization().getResource().setId(("#333"));
+		patient.getManagingOrganization().getResource().setId(("333"));
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).contains(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>"));
@@ -1324,7 +1324,7 @@ public class XmlParserDstu3Test {
 		// Adding medication to Contained.
 		Medication medResource = new Medication();
 		medResource.setCode(codeDt);
-		medResource.setId("#" + medId);
+		medResource.setId(medId);
 		medicationPrescript.getContained().add(medResource);
 
 		// Medication reference. This should point to the contained resource.
@@ -2055,17 +2055,17 @@ public class XmlParserDstu3Test {
 
 		// Will be added by reference
 		Patient p = new Patient();
-		p.setId("#" + "1000");
+		p.setId("1000");
 		contained.add(p);
 
 		// Will be added by direct resource object
 		Location l = new Location();
-		l.setId("#" + "1001");
+		l.setId("1001");
 		contained.add(l);
 
 		// Will not be referred to (and therefore shouldn't appear in output)
 		Location l2 = new Location();
-		l2.setId("#1002");
+		l2.setId("1002");
 		contained.add(l2);
 
 		Appointment appointment = new Appointment();
@@ -3410,10 +3410,10 @@ public class XmlParserDstu3Test {
 
 		DiagnosticReport resource = (DiagnosticReport) bundle.getEntry().get(0).getResource();
 		Observation obs = (Observation) resource.getResult().get(1).getResource();
-		assertEquals("#2", obs.getId());
+		assertEquals("2", obs.getId());
 		Reference performerFirstRep = obs.getPerformerFirstRep();
 		Practitioner performer = (Practitioner) performerFirstRep.getResource();
-		assertEquals("#3", performer.getId());
+		assertEquals("3", performer.getId());
 	}
 
 	/**

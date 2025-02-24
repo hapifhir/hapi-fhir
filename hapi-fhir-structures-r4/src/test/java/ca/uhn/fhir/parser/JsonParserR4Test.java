@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationDispense;
@@ -46,6 +47,7 @@ import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
@@ -55,6 +57,8 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -76,6 +80,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -744,159 +749,8 @@ public class JsonParserR4Test extends BaseTest {
 		assertThat(output).contains("\n  \"resourceType\"");
 	}
 
-	/**
-	 * See #814
-	 */
-	@Test
-	public void testDuplicateContainedResourcesNotOutputtedTwice() {
-		MedicationDispense md = new MedicationDispense();
 
-		MedicationRequest mr = new MedicationRequest();
-		md.addAuthorizingPrescription().setResource(mr);
 
-		Medication med = new Medication();
-		md.setMedication(new Reference(med));
-		mr.setMedication(new Reference(med));
-
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(md);
-		ourLog.info(encoded);
-
-		int idx = encoded.indexOf("\"Medication\"");
-		assertThat(idx).isNotEqualTo(-1);
-
-		idx = encoded.indexOf("\"Medication\"", idx + 1);
-		assertEquals(-1, idx);
-	}
-
-	@Test
-	public void testDuplicateContainedResourcesAcrossABundleAreReplicated() {
-		Bundle b = new Bundle();
-		Specimen specimen = new Specimen();
-		Practitioner practitioner = new Practitioner();
-		DiagnosticReport report = new DiagnosticReport();
-		report.addSpecimen(new Reference(specimen));
-		b.addEntry().setResource(report).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/DiagnosticReport");
-
-		Observation obs = new Observation();
-		obs.addPerformer(new Reference(practitioner));
-		obs.setSpecimen(new Reference(specimen));
-
-		b.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/Observation");
-
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
-		//Then: Diag should contain one local contained specimen
-		assertThat(encoded).contains("[{\"resource\":{\"resourceType\":\"DiagnosticReport\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\""+ specimen.getId().replaceFirst("#", "") +"\"}]");
-		//Then: Obs should contain one local contained specimen, and one local contained pract
-		assertThat(encoded).contains("\"resource\":{\"resourceType\":\"Observation\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\""+ specimen.getId().replaceFirst("#", "") +"\"},{\"resourceType\":\"Practitioner\",\"id\":\"" + practitioner.getId().replaceAll("#","") + "\"}]");
-		assertThat(encoded).contains("\"performer\":[{\"reference\":\""+practitioner.getId()+"\"}],\"specimen\":{\"reference\":\""+specimen.getId()+"\"}");
-
-		//Also, reverting the operation should work too!
-		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
-		IBaseResource resource1 = ((DiagnosticReport) bundle.getEntry().get(0).getResource()).getSpecimenFirstRep().getResource();
-		IBaseResource resource = ((Observation) bundle.getEntry().get(1).getResource()).getSpecimen().getResource();
-		assertThat(resource1.getIdElement().getIdPart()).isEqualTo(resource.getIdElement().getIdPart());
-		assertThat(resource1).isNotSameAs(resource);
-
-	}
-
-	@Test
-	public void testContainedResourcesNotAutoContainedWhenConfiguredNotToDoSo() {
-		MedicationDispense md = new MedicationDispense();
-		md.addIdentifier().setValue("DISPENSE");
-
-		Medication med = new Medication();
-		med.getCode().setText("MED");
-		md.setMedication(new Reference(med));
-
-		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
-		assertEquals("{\"resourceType\":\"MedicationDispense\",\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{}}", encoded);
-
-		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
-		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
-		String guidWithHash = med.getId();
-		String withoutHash = guidWithHash.replace("#", "");
-		assertThat(encoded).contains("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"" + withoutHash + "\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"" + guidWithHash +"\"}}"); //Note we dont check exact ID since its a GUID
-	}
-
-	@Test
-	public void testParseBundleWithMultipleNestedContainedResources() throws Exception {
-		String text = loadResource("/bundle-with-two-patient-resources.json");
-
-		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, text);
-		assertEquals(Boolean.TRUE, bundle.getUserData(BaseParser.RESOURCE_CREATED_BY_PARSER));
-		assertEquals(Boolean.TRUE, bundle.getEntry().get(0).getResource().getUserData(BaseParser.RESOURCE_CREATED_BY_PARSER));
-		assertEquals(Boolean.TRUE, bundle.getEntry().get(1).getResource().getUserData(BaseParser.RESOURCE_CREATED_BY_PARSER));
-
-		assertEquals("12346", getPatientIdValue(bundle, 0));
-		assertEquals("12345", getPatientIdValue(bundle, 1));
-	}
-
-	private String getPatientIdValue(Bundle input, int entry) {
-		final DocumentReference documentReference = (DocumentReference) input.getEntry().get(entry).getResource();
-		final Patient patient = (Patient) documentReference.getSubject().getResource();
-		return patient.getIdentifier().get(0).getValue();
-	}
-
-	/**
-	 * See #814
-	 */
-	@Test
-	public void testDuplicateContainedResourcesNotOutputtedTwiceWithManualIds() {
-		MedicationDispense md = new MedicationDispense();
-
-		MedicationRequest mr = new MedicationRequest();
-		mr.setId("#MR");
-		md.addAuthorizingPrescription().setResource(mr);
-
-		Medication med = new Medication();
-		med.setId("#MED");
-		md.setMedication(new Reference(med));
-		mr.setMedication(new Reference(med));
-
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(md);
-		ourLog.info(encoded);
-
-		int idx = encoded.indexOf("\"Medication\"");
-		assertThat(idx).isNotEqualTo(-1);
-
-		idx = encoded.indexOf("\"Medication\"", idx + 1);
-		assertEquals(-1, idx);
-
-	}
-
-	/*
-	 * See #814
-	 */
-	@Test
-	public void testDuplicateContainedResourcesNotOutputtedTwiceWithManualIdsAndManualAddition() {
-		MedicationDispense md = new MedicationDispense();
-
-		MedicationRequest mr = new MedicationRequest();
-		mr.setId("#MR");
-		md.addAuthorizingPrescription().setResource(mr);
-
-		Medication med = new Medication();
-		med.setId("#MED");
-
-		Reference medRef = new Reference();
-		medRef.setReference("#MED");
-		md.setMedication(medRef);
-		mr.setMedication(medRef);
-
-		md.getContained().add(mr);
-		md.getContained().add(med);
-
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(md);
-		ourLog.info(encoded);
-
-		int idx = encoded.indexOf("\"Medication\"");
-		assertThat(idx).isNotEqualTo(-1);
-
-		idx = encoded.indexOf("\"Medication\"", idx + 1);
-		assertEquals(-1, idx);
-
-	}
 
 	/**
 	 * Make sure we can perform parallel parse/encodes against the same
@@ -1087,85 +941,8 @@ public class JsonParserR4Test extends BaseTest {
 		assertEquals(false, errorHandler.isErrorOnInvalidValue());
 	}
 
-	@Test
-	public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalFirst() {
 
-		Observation obs = new Observation();
 
-		Patient pt = new Patient();
-		pt.setId("#1");
-		pt.addName().setFamily("FAM");
-		obs.getSubject().setReference("#1");
-		obs.getContained().add(pt);
-
-		Encounter enc = new Encounter();
-		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
-		obs.getEncounter().setResource(enc);
-
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
-		ourLog.info(encoded);
-
-		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
-		assertEquals("#1", obs.getContained().get(0).getId());
-		assertEquals(enc.getId(), obs.getContained().get(1).getId());
-
-		pt = (Patient) obs.getSubject().getResource();
-		assertEquals("FAM", pt.getNameFirstRep().getFamily());
-
-		enc = (Encounter) obs.getEncounter().getResource();
-		assertEquals(Encounter.EncounterStatus.ARRIVED, enc.getStatus());
-	}
-
-	@Test
-	public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalLast() {
-
-		Observation obs = new Observation();
-
-		Patient pt = new Patient();
-		pt.addName().setFamily("FAM");
-		obs.getSubject().setResource(pt);
-
-		Encounter enc = new Encounter();
-		enc.setId("#1");
-		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
-		obs.getEncounter().setReference("#1");
-		obs.getContained().add(enc);
-
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
-		ourLog.info(encoded);
-
-		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
-		assertEquals("#1", obs.getContained().get(0).getId());
-		assertEquals(pt.getId(), obs.getContained().get(1).getId());
-
-		pt = (Patient) obs.getSubject().getResource();
-		assertEquals("FAM", pt.getNameFirstRep().getFamily());
-
-		enc = (Encounter) obs.getEncounter().getResource();
-		assertEquals(Encounter.EncounterStatus.ARRIVED, enc.getStatus());
-	}
-
-	@Test
-	public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalLast2() {
-
-		MedicationRequest mr = new MedicationRequest();
-		Practitioner pract = new Practitioner().setActive(true);
-		mr.getRequester().setResource(pract);
-
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(mr);
-		ourLog.info(encoded);
-		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
-
-		Medication med = new Medication().setStatus(Medication.MedicationStatus.ACTIVE);
-		mr.setMedication(new Reference(med));
-		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(mr);
-		ourLog.info(encoded);
-		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
-
-		assertEquals(pract.getId(), mr.getContained().get(0).getId());
-		assertEquals(med.getId(), mr.getContained().get(1).getId());
-
-	}
 
 	@Test
 	public void testExcludeNothing() {
@@ -1428,7 +1205,12 @@ public class JsonParserR4Test extends BaseTest {
 		assertThat(idx).isNotEqualTo(-1);
 	}
 
-
+	/**
+	 * Enable individually if needed to test timings.
+	 */
+	@Nested
+	@DisplayName("Timing Tests")
+	class TimingTests {
 	/**
 	 * 2019-09-19 - Pre #1489
 	 * 18:24:48.548 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 200 passes - 50ms / pass - 19.7 / second
@@ -1606,85 +1388,7 @@ public class JsonParserR4Test extends BaseTest {
 		}
 		return b;
 	}
-
-	/**
-	 * Ensure that a contained bundle doesn't cause a crash
-	 */
-	@Test
-	public void testEncodeContainedBundle() {
-		String auditEvent = "{\n" +
-			"  \"resourceType\": \"AuditEvent\",\n" +
-			"  \"contained\": [ {\n" +
-			"    \"resourceType\": \"Bundle\",\n" +
-			"    \"id\": \"REASONS\",\n" +
-			"    \"entry\": [ {\n" +
-			"      \"resource\": {\n" +
-			"        \"resourceType\": \"Condition\",\n" +
-			"        \"id\": \"123\"\n" +
-			"      }\n" +
-			"    } ]\n" +
-			"  }, {\n" +
-			"    \"resourceType\": \"MeasureReport\",\n" +
-			"    \"id\": \"MRPT5000602611RD\",\n" +
-			"    \"evaluatedResource\": [ {\n" +
-			"      \"reference\": \"#REASONS\"\n" +
-			"    } ]\n" +
-			"  } ],\n" +
-			"  \"entity\": [ {\n" +
-			"    \"what\": {\n" +
-			"      \"reference\": \"#MRPT5000602611RD\"\n" +
-			"    }\n" +
-			"  } ]\n" +
-			"}";
-		AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
-		String auditEventAsString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
-		assertEquals(auditEvent, auditEventAsString);
-	}
-
-
-	/**
-	 * Ensure that a contained bundle doesn't cause a crash
-	 */
-	@Test
-	public void testParseAndEncodePreservesContainedResourceOrder() {
-		String auditEvent = "{\n" +
-			"  \"resourceType\": \"AuditEvent\",\n" +
-			"  \"contained\": [ {\n" +
-			"    \"resourceType\": \"Observation\",\n" +
-			"    \"id\": \"A\",\n" +
-			"    \"identifier\": [ {\n" +
-			"      \"value\": \"A\"\n" +
-			"    } ]\n" +
-			"  }, {\n" +
-			"    \"resourceType\": \"Observation\",\n" +
-			"    \"id\": \"B\",\n" +
-			"    \"identifier\": [ {\n" +
-			"      \"value\": \"B\"\n" +
-			"    } ]\n" +
-			"  } ],\n" +
-			"  \"entity\": [ {\n" +
-			"    \"what\": {\n" +
-			"      \"reference\": \"#B\"\n" +
-			"    }\n" +
-			"  }, {\n" +
-			"    \"what\": {\n" +
-			"      \"reference\": \"#A\"\n" +
-			"    }\n" +
-			"  } ]\n" +
-			"}";
-
-		ourLog.info("Input: {}", auditEvent);
-		AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
-		assertEquals("#A", ae.getContained().get(0).getId());
-		assertEquals("#B", ae.getContained().get(1).getId());
-		assertEquals("#B", ae.getEntity().get(0).getWhat().getReference());
-		assertEquals("#A", ae.getEntity().get(1).getWhat().getReference());
-
-		String serialized = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
-		assertEquals(auditEvent, serialized);
-
-	}
-
+}
 
 	@Test
 	public void testEncodeToString_PrimitiveDataType() {
@@ -1876,6 +1580,437 @@ public class JsonParserR4Test extends BaseTest {
 		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
 		assertThat(patientString).doesNotContain("fhir_comment");
 	}
+
+	@Nested
+	@DisplayName("Contained resources handling")
+	class ContainedResources {
+		/**
+		 * See #814
+		 */
+		@Test
+		public void testDuplicateContainedResourcesNotOutputtedTwice() {
+			MedicationDispense md = new MedicationDispense();
+
+			MedicationRequest mr = new MedicationRequest();
+			md.addAuthorizingPrescription().setResource(mr);
+
+			Medication med = new Medication();
+			md.setMedication(new Reference(med));
+			mr.setMedication(new Reference(med));
+
+			String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(md);
+			ourLog.info(encoded);
+
+			int idx = encoded.indexOf("\"Medication\"");
+			assertThat(idx).isNotEqualTo(-1);
+
+			idx = encoded.indexOf("\"Medication\"", idx + 1);
+			assertEquals(-1, idx);
+		}
+
+		@Test
+		public void testDuplicateContainedResourcesAcrossABundleAreReplicated() {
+			Bundle b = new Bundle();
+			Specimen specimen = new Specimen();
+			Practitioner practitioner = new Practitioner();
+			DiagnosticReport report = new DiagnosticReport();
+			report.addSpecimen(new Reference(specimen));
+			b.addEntry().setResource(report).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/DiagnosticReport");
+
+			Observation obs = new Observation();
+			obs.addPerformer(new Reference(practitioner));
+			obs.setSpecimen(new Reference(specimen));
+
+			b.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/Observation");
+
+			String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
+			//Then: Diag should contain one local contained specimen
+			assertThat(encoded).contains("[{\"resource\":{\"resourceType\":\"DiagnosticReport\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\""+ specimen.getId() +"\"}]");
+			//Then: Obs should contain one local contained specimen, and one local contained pract
+			assertThat(encoded).contains("\"resource\":{\"resourceType\":\"Observation\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\""+ specimen.getId() +"\"},{\"resourceType\":\"Practitioner\",\"id\":\"" + practitioner.getId() + "\"}]");
+			assertThat(encoded).contains("\"performer\":[{\"reference\":\"#"+practitioner.getId()+"\"}],\"specimen\":{\"reference\":\"#"+specimen.getId()+"\"}");
+
+			//Also, reverting the operation should work too!
+			Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
+			IBaseResource resource1 = ((DiagnosticReport) bundle.getEntry().get(0).getResource()).getSpecimenFirstRep().getResource();
+			IBaseResource resource = ((Observation) bundle.getEntry().get(1).getResource()).getSpecimen().getResource();
+			assertThat(resource1.getIdElement().getIdPart()).isEqualTo(resource.getIdElement().getIdPart());
+			assertThat(resource1).isNotSameAs(resource);
+
+		}
+
+		@Test
+		public void testContainedResourcesNotAutoContainedWhenConfiguredNotToDoSo() {
+			MedicationDispense md = new MedicationDispense();
+			md.addIdentifier().setValue("DISPENSE");
+
+			Medication med = new Medication();
+			med.getCode().setText("MED");
+			md.setMedication(new Reference(med));
+
+			ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
+			String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
+			assertEquals("{\"resourceType\":\"MedicationDispense\",\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{}}", encoded);
+
+			ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+			encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
+			String containedResourceId = med.getId();
+			String containedResourceReferenceId = "#" + containedResourceId;
+			assertThat(encoded).contains("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"" + containedResourceId + "\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"" + containedResourceReferenceId +"\"}}"); //Note we dont check exact ID since its a GUID
+		}
+
+		@Test
+		public void testParseBundleWithMultipleNestedContainedResources() throws Exception {
+			String text = loadResource("/bundle-with-two-patient-resources.json");
+
+			Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, text);
+			assertEquals(Boolean.TRUE, bundle.getUserData(BaseParser.RESOURCE_CREATED_BY_PARSER));
+			assertEquals(Boolean.TRUE, bundle.getEntry().get(0).getResource().getUserData(BaseParser.RESOURCE_CREATED_BY_PARSER));
+			assertEquals(Boolean.TRUE, bundle.getEntry().get(1).getResource().getUserData(BaseParser.RESOURCE_CREATED_BY_PARSER));
+
+			assertEquals("12346", getPatientIdValue(bundle, 0));
+			assertEquals("12345", getPatientIdValue(bundle, 1));
+		}
+
+		private String getPatientIdValue(Bundle input, int entry) {
+			final DocumentReference documentReference = (DocumentReference) input.getEntry().get(entry).getResource();
+			final Patient patient = (Patient) documentReference.getSubject().getResource();
+			return patient.getIdentifier().get(0).getValue();
+		}
+		/**
+		 * See #814
+		 */
+		@Test
+		public void testDuplicateContainedResourcesNotOutputtedTwiceWithManualIds() {
+			MedicationDispense md = new MedicationDispense();
+
+			MedicationRequest mr = new MedicationRequest();
+			mr.setId("MR");
+			md.addAuthorizingPrescription().setResource(mr);
+
+			Medication med = new Medication();
+			med.setId("MED");
+			md.setMedication(new Reference(med));
+			mr.setMedication(new Reference(med));
+
+			String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(md);
+			ourLog.info(encoded);
+
+			int idx = encoded.indexOf("\"Medication\"");
+			assertThat(idx).isNotEqualTo(-1);
+
+			idx = encoded.indexOf("\"Medication\"", idx + 1);
+			assertEquals(-1, idx);
+
+		}
+		/*
+		 * See #814
+		 */
+		@Test
+		public void testDuplicateContainedResourcesNotOutputtedTwiceWithManualIdsAndManualAddition() {
+			MedicationDispense md = new MedicationDispense();
+
+			MedicationRequest mr = new MedicationRequest();
+			mr.setId("#MR");
+			md.addAuthorizingPrescription().setResource(mr);
+
+			Medication med = new Medication();
+			med.setId("#MED");
+
+			Reference medRef = new Reference();
+			medRef.setReference("#MED");
+			md.setMedication(medRef);
+			mr.setMedication(medRef);
+
+			md.getContained().add(mr);
+			md.getContained().add(med);
+
+			String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(md);
+			ourLog.info(encoded);
+
+			int idx = encoded.indexOf("\"Medication\"");
+			assertThat(idx).isNotEqualTo(-1);
+
+			idx = encoded.indexOf("\"Medication\"", idx + 1);
+			assertEquals(-1, idx);
+
+		}
+
+		@Test
+		public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalFirst() {
+
+			Observation obs = new Observation();
+
+			Patient pt = new Patient();
+			pt.setId("1");
+			pt.addName().setFamily("FAM");
+			obs.getSubject().setReference("#1");
+			obs.getContained().add(pt);
+
+			Encounter enc = new Encounter();
+			enc.setStatus(Encounter.EncounterStatus.ARRIVED);
+			obs.getEncounter().setResource(enc);
+
+			String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
+			ourLog.info(encoded);
+
+			obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
+			assertEquals("1", obs.getContained().get(0).getId());
+			assertEquals(enc.getId(), obs.getContained().get(1).getId());
+
+			pt = (Patient) obs.getSubject().getResource();
+			assertEquals("FAM", pt.getNameFirstRep().getFamily());
+
+			enc = (Encounter) obs.getEncounter().getResource();
+			assertEquals(Encounter.EncounterStatus.ARRIVED, enc.getStatus());
+		}
+
+		@Test
+		public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalLast() {
+
+			Observation obs = new Observation();
+
+			Patient pt = new Patient();
+			pt.addName().setFamily("FAM");
+			obs.getSubject().setResource(pt);
+
+			Encounter enc = new Encounter();
+			enc.setId("1");
+			enc.setStatus(Encounter.EncounterStatus.ARRIVED);
+			obs.getEncounter().setReference("#1");
+			obs.getContained().add(enc);
+
+			String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
+			ourLog.info(encoded);
+
+			obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
+			assertEquals("1", obs.getContained().get(0).getId());
+			assertEquals(pt.getId(), obs.getContained().get(1).getId());
+
+			pt = (Patient) obs.getSubject().getResource();
+			assertEquals("FAM", pt.getNameFirstRep().getFamily());
+
+			enc = (Encounter) obs.getEncounter().getResource();
+			assertEquals(Encounter.EncounterStatus.ARRIVED, enc.getStatus());
+		}
+
+		/**
+		 * Ensure that a contained bundle doesn't cause a crash
+		 */
+		@Test
+		public void testEncodeContainedBundle() {
+			String auditEvent = """
+				 {
+				   "resourceType": "AuditEvent",
+				   "contained": [ {
+				     "resourceType": "Bundle",
+				     "id": "REASONS",
+				     "entry": [ {
+				       "resource": {
+				         "resourceType": "Condition",
+				         "id": "123"
+				       }
+				     } ]
+				   }, {
+				     "resourceType": "MeasureReport",
+				     "id": "MRPT5000602611RD",
+				     "evaluatedResource": [ {
+				       "reference": "#REASONS"
+				     } ]
+				   } ],
+				   "entity": [ {
+				     "what": {
+				       "reference": "#MRPT5000602611RD"
+				     }
+				   } ]
+				 }""";
+			AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
+			String auditEventAsString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
+			assertEquals(auditEvent, auditEventAsString);
+		}
+
+
+		/**
+		 * Ensure that a contained bundle doesn't cause a crash
+		 */
+		@Test
+		public void testParseAndEncodePreservesContainedResourceOrder() {
+			String auditEvent = """
+				 {
+				   "resourceType": "AuditEvent",
+				   "contained": [ {
+				     "resourceType": "Observation",
+				     "id": "A",
+				     "identifier": [ {
+				       "value": "A"
+				     } ]
+				   }, {
+				     "resourceType": "Observation",
+				     "id": "B",
+				     "identifier": [ {
+				       "value": "B"
+				     } ]
+				   } ],
+				   "entity": [ {
+				     "what": {
+				       "reference": "#B"
+				     }
+				   }, {
+				     "what": {
+				       "reference": "#A"
+				     }
+				   } ]
+				 }""";
+
+			ourLog.info("Input: {}", auditEvent);
+			AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
+			assertEquals("A", ae.getContained().get(0).getId());
+			assertEquals("B", ae.getContained().get(1).getId());
+			assertEquals("#B", ae.getEntity().get(0).getWhat().getReference());
+			assertEquals("#A", ae.getEntity().get(1).getWhat().getReference());
+
+			String serialized = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
+			assertEquals(auditEvent, serialized);
+
+		}
+
+		@Test
+		public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalLast2() {
+
+			MedicationRequest mr = new MedicationRequest();
+			Practitioner pract = new Practitioner().setActive(true);
+			mr.getRequester().setResource(pract);
+
+			String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(mr);
+			ourLog.info(encoded);
+			mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
+
+			Medication med = new Medication().setStatus(Medication.MedicationStatus.ACTIVE);
+			mr.setMedication(new Reference(med));
+			encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(mr);
+			ourLog.info(encoded);
+			mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
+
+			assertEquals(pract.getId(), mr.getContained().get(0).getId());
+			assertEquals(med.getId(), mr.getContained().get(1).getId());
+
+		}
+
+		@Test
+		public void testContainedResourceIdIsReadWithoutAddingHash() throws IOException {
+			String text = loadResource("/observation-with-contained-specimen.json");
+
+			Observation observation = ourCtx.newJsonParser().parseResource(Observation.class, text);
+			assertThat(observation.getSpecimen().getReference()).isEqualTo("#contained-id");
+			//TODO the parsed resource has an added `#` in the contained resource id.
+			assertSame(observation.getContained().get(0), observation.getSpecimen().getResource());
+			assertThat(observation.getContained().get(0).getId()).isEqualTo("contained-id");
+		}
+
+		@Test
+		public void testReferenceCreatedByStringDoesntMutateContained() {
+			Observation observation = new Observation();
+			observation.setId("123");
+			Specimen specimen = new Specimen();
+			specimen.setId("contained-id");
+			observation.setSpecimen(new Reference("#contained-id"));
+
+			observation.getContained().add(specimen);
+
+			String text = ourCtx.newJsonParser().encodeResourceToString(observation);
+
+			assertThat(text).contains("\"reference\":\"#contained-id\"");
+			assertThat(text).contains("\"id\":\"contained-id\"");
+
+			assertThat(observation.getContained().size()).isEqualTo(1);
+		/*TODO despite correctly encoding the contained resource, the original contained resource is mutated and given
+		   an id prefixed with a hash.
+		*/
+			assertThat(observation.getContained().get(0).getId()).isEqualTo("contained-id");
+		}
+
+		@Test
+		public void testReferenceCreatedByResourceDoesntMutateContained() {
+
+			Specimen specimen = new Specimen();
+			specimen.setId("contained-id");
+
+			Observation observation = new Observation();
+			observation.setId("123");
+			observation.setSpecimen(new Reference(specimen));
+
+			observation.getContained().add(specimen);
+
+			String text = ourCtx.newJsonParser().encodeResourceToString(observation);
+
+			assertThat(text).contains("\"reference\":\"#contained-id\"");
+			assertThat(text).contains("\"id\":\"contained-id\"");
+
+			assertThat(observation.getContained().size()).isEqualTo(1);
+
+			assertThat(observation.getContained().get(0).getId()).isEqualTo("contained-id");
+		}
+
+		@Test
+		public void testReferenceCreatedByResourceDoesntMutateEmptyContained() {
+			Specimen specimen = new Specimen();
+			specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
+
+			Observation observation = new Observation();
+			observation.setId("O1");
+			observation.setStatus(Observation.ObservationStatus.FINAL);
+			observation.setSpecimen(new Reference(specimen));
+
+			String text = ourCtx.newJsonParser().encodeResourceToString(observation);
+
+			// When encoding, if the reference does not have an id, it is generated in the FhirTerser
+			String specimenReferenceId = observation.getSpecimen().getResource().getIdElement().getValue();
+			assertThat(specimenReferenceId).doesNotStartWith("#");
+			assertSame(observation.getSpecimen().getResource(), specimen);
+
+			// the terser doesn't add a new contained element to the observation
+			assertThat(observation.getContained()).isEmpty();
+
+			// the terser doesn't mutate the id of the contained resource either
+			assertThat(specimen.getId()).doesNotStartWith("#");
+
+			// However the encoded text contains both a single contained resource, as well as the reference to it.
+			assertThat(text).contains("\"reference\":\"#"+specimenReferenceId+"\"");
+			assertThat(text).contains("\"id\":\""+specimenReferenceId+"\"");
+
+		}
+
+
+		@Test
+		public void testReferenceCreatedByIdTypeDoesntMutateContained() {
+			Specimen specimen = new Specimen();
+			specimen.setId("contained-id");
+			specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
+
+			Observation observation = new Observation();
+			observation.setId("O1");
+			observation.setStatus(Observation.ObservationStatus.FINAL);
+			observation.setSpecimen(new Reference(new IdType("#contained-id")));
+
+			observation.getContained().add(specimen);
+
+			String text = ourCtx.newJsonParser().encodeResourceToString(observation);
+
+			// When encoding,
+			String specimenReferenceId = observation.getSpecimen().getReference();
+			assertThat(specimenReferenceId).startsWith("#");
+
+			// TODO why does the terser mutate the contained element of the original resource?
+			String specimenContainedId = observation.getContained().get(0).getIdElement().getValue();
+			assertThat(specimenContainedId).isEqualTo("contained-id");
+
+			// However the encoded text contains both a single contained resource, as well as the reference to it.
+			assertThat(text).contains("\"reference\":\""+specimenReferenceId+"\"");
+			assertThat(text).contains("\"id\":\""+specimenReferenceId.substring(1)+"\"");
+
+		}
+	}
+
 
 	@DatatypeDef(
 		name = "UnknownPrimitiveType"
