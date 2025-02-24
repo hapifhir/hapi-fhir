@@ -378,7 +378,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		// Replace null partition ID with non-null default partition ID if one is being used
 		if (myPartitionSettings.getDefaultPartitionId() != null
 				&& retVal.hasPartitionIds()
-				&& hasDefaultPartitionId(retVal)) {
+				&& retVal.hasDefaultPartitionId(null)) {
 			List<Integer> partitionIds = new ArrayList<>(retVal.getPartitionIds());
 			for (int i = 0; i < partitionIds.size(); i++) {
 				if (partitionIds.get(i) == null) {
