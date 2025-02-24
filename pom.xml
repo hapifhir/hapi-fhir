@@ -979,6 +979,11 @@
 			<name>Dylan Krause</name>
 			<organization>Corbalt</organization>
 		</developer>
+		<developer>
+			<id>xmhorsehead</id>
+			<name>Xun Ma</name>
+			<organization>CSIRO</organization>
+		</developer>
 	</developers>
 
 	<licenses>
