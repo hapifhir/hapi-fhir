@@ -144,8 +144,9 @@ class ValidatorWrapper {
 		List<ValidationMessage> messages = new ArrayList<>();
 
 		List<StructureDefinition> profiles = new ArrayList<>();
+		List<ValidationMessage> invalidProfileValidationMessages = new ArrayList<>();
 		for (String nextProfileUrl : theValidationContext.getOptions().getProfiles()) {
-			fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
+			fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, invalidProfileValidationMessages);
 		}
 
 		String input = theValidationContext.getResourceAsString();
@@ -168,7 +169,7 @@ class ValidatorWrapper {
 			// Determine if meta/profiles are present...
 			ArrayList<String> profileUrls = determineIfProfilesSpecified(document);
 			for (String nextProfileUrl : profileUrls) {
-				fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
+				fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, invalidProfileValidationMessages);
 			}
 
 			Manager.FhirFormat format = Manager.FhirFormat.XML;
@@ -186,7 +187,8 @@ class ValidatorWrapper {
 					JsonArray profilesArray = profileElement.getAsJsonArray();
 					for (JsonElement element : profilesArray) {
 						String nextProfileUrl = element.getAsString();
-						fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
+						fetchAndAddProfile(
+								theWorkerContext, profiles, nextProfileUrl, invalidProfileValidationMessages);
 					}
 				}
 			}
@@ -195,6 +197,10 @@ class ValidatorWrapper {
 			v.validate(null, messages, inputStream, format, profiles);
 		} else {
 			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
+		}
+
+		if (profiles.isEmpty() && !invalidProfileValidationMessages.isEmpty()) {
+			messages.addAll(invalidProfileValidationMessages);
 		}
 
 		// TODO: are these still needed?
@@ -235,11 +241,17 @@ class ValidatorWrapper {
 			IWorkerContext theWorkerContext,
 			List<StructureDefinition> theProfileStructureDefinitions,
 			String theUrl,
-			List<ValidationMessage> theMessages) {
+			List<ValidationMessage> theValidationMessages) {
 		try {
 			StructureDefinition structureDefinition = theWorkerContext.fetchResource(StructureDefinition.class, theUrl);
 			if (structureDefinition != null) {
 				theProfileStructureDefinitions.add(structureDefinition);
+			} else {
+				ValidationMessage m = new ValidationMessage();
+				m.setMessageId(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN);
+				m.setLevel(ValidationMessage.IssueSeverity.ERROR);
+				m.setMessage("Invalid profile. Failed to retrieve profile with url=" + theUrl);
+				theValidationMessages.add(m);
 			}
 		} catch (FHIRException e) {
 			ourLog.debug("Failed to load profile: {}", theUrl);
