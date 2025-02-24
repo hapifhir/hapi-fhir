@@ -34,9 +34,9 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-storage-cr</artifactId>
-			<version>${project.version}</version>
+			<groupId>org.opencds.cqf.fhir</groupId>
+			<artifactId>cqf-fhir-storage-cr</artifactId>
+			<version>${clinical-reasoning.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
