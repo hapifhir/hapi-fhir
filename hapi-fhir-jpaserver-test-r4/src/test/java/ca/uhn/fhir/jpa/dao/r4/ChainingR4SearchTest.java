@@ -716,7 +716,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.setStatus(Observation.ObservationStatus.FINAL);
 			obs.setValue(new Quantity(81));
 			obs.setSubject(new Reference("#" +p.getId()));
-			obs.setEncounter(new Reference("#" + encounter.getId()));
+			obs.setEncounter(new Reference(encounter.getId()));
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
@@ -1024,8 +1024,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			Patient p = new Patient();
 			p.setId("pat");
+			//p.getContained().add(org);
 			p.addName().setFamily("Smith").addGiven("John");
-			p.getManagingOrganization().setReference("#" + org.getId());
+			p.getManagingOrganization().setReference(org.getId());
 
 			Observation obs = new Observation();
 			obs.getContained().add(p);
@@ -1035,8 +1036,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			Device d = new Device();
+			//d.getContained().add(org);
 			d.setId("dev");
-			d.getOwner().setReference("#" + org.getId());
+			d.getOwner().setReference(org.getId());
 
 			Observation obs2 = new Observation();
 			obs2.getContained().add(d);

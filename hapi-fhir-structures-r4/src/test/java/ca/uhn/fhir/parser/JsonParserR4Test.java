@@ -1947,9 +1947,7 @@ public class JsonParserR4Test extends BaseTest {
 			assertThat(text).contains("\"id\":\"contained-id\"");
 
 			assertThat(observation.getContained().size()).isEqualTo(1);
-		/*TODO despite correctly encoding the contained resource, the original contained resource is mutated and given
-		   an id prefixed with a hash.
-		*/
+
 			assertThat(observation.getContained().get(0).getId()).isEqualTo("contained-id");
 		}
 
