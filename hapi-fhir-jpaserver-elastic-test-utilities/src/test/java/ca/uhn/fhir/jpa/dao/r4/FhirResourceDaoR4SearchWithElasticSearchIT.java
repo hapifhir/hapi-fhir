@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
+import ca.uhn.fhir.jpa.search.IIdSearchTestTemplate;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
@@ -2616,5 +2617,16 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 
+	@Nested
+	class IdTestCases implements IIdSearchTestTemplate {
+		@Override
+		public TestDaoSearch getSearch() {
+			return myTestDaoSearch;
+		}
 
+		@Override
+		public ITestDataBuilder getBuilder() {
+			return myTestDataBuilder;
+		}
+	}
 }
