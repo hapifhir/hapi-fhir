@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -36,9 +37,12 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -52,6 +56,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -81,6 +86,62 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		super.after();
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
 		assertFalse(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference());
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {1, 50})
+	public void testPartitioningDoesNotReturnDuplicatesOnDoubleInclude(int theCount) {
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		IIdType patient = createPatient(withTenant(TENANT_A), withActiveTrue());
+		IIdType encounter = createEncounter(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("enc-"),  withIdentifier("http://example.com/", "code"));
+		createObservation(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("obs-"), withObservationCode("http://example.com/", "code"), withEncounter(encounter.toUnqualifiedVersionless().toString()));
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("_count").setValue(new IntegerType(theCount));
+		parameters.addParameter().setName("_format").setValue(new StringType("json"));
+		Bundle execute = myClient.search().forResource("Patient").include(new Include("*")).revInclude(new Include("*")).count(theCount).returnBundle(Bundle.class).execute();
+
+
+		List<String> foundIds = new ArrayList<>();
+		foundIds.addAll(execute.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		//Ensure no duplicates in first page
+		assertThat(foundIds).doesNotHaveDuplicates();
+
+		while (execute.getLink("next") != null) {
+			execute = myClient.loadPage().next(execute).execute();
+			foundIds.addAll(execute.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		}
+		assertThat(foundIds).doesNotHaveDuplicates();
+		assertThat(foundIds).hasSize(3);
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {1, 50})
+	public void testPartitioningDoesNotReturnDuplicatesOnPatientEverything(int theCount) throws IOException {
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		IIdType patient = createPatient(withTenant(TENANT_A), withActiveTrue());
+		IIdType encounter = createEncounter(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("enc-"),  withIdentifier("http://example.com/", "code"));
+		createObservation(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("obs-"), withObservationCode("http://example.com/", "code"), withEncounter(encounter.toUnqualifiedVersionless().toString()));
+
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setTenantId(TENANT_A);
+
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("_count").setValue(new IntegerType(theCount));
+		parameters.addParameter().setName("_format").setValue(new StringType("json"));
+
+		Bundle everything = myClient.operation().onInstance(patient.toUnqualifiedVersionless().toString()).named("$everything").withParameters(parameters).returnResourceType(Bundle.class).execute();
+
+		List<String> foundIds = new ArrayList<>();
+		foundIds.addAll(everything.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		//Ensure no duplicates in first page
+		assertThat(foundIds).doesNotHaveDuplicates();
+
+		while (everything.getLink("next") != null) {
+			everything = myClient.loadPage().next(everything).execute();
+			foundIds.addAll(everything.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		}
+		assertThat(foundIds).doesNotHaveDuplicates();
+		assertThat(foundIds).hasSize(3);
 	}
 
 	@Test
