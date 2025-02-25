@@ -469,13 +469,14 @@ public class SearchParamRegistryImpl
 		Stream<ReferenceParam> paramStream = theResourceIds.stream().map(ReferenceParam::new);
 
 		TaskChunker.chunk(paramStream, QUERY_CHUNK_SIZE)
-			.map(nextReferenceChunk -> {
-				ReferenceOrListParam accumulator = new ReferenceOrListParam();
-				nextReferenceChunk.forEach(accumulator::addOr);
-				SearchParameterMap params = SearchParameterMap.newSynchronous().add("_id", accumulator);
-				return mySearchParamProvider.search(params).getAllResources();
-			})
-			.forEach(searchParams::addAll);
+				.map(nextReferenceChunk -> {
+					ReferenceOrListParam accumulator = new ReferenceOrListParam();
+					nextReferenceChunk.forEach(accumulator::addOr);
+					SearchParameterMap params =
+							SearchParameterMap.newSynchronous().add("_id", accumulator);
+					return mySearchParamProvider.search(params).getAllResources();
+				})
+				.forEach(searchParams::addAll);
 
 		ourLog.debug("Read {} SearchParameters from database in {}ms", theResourceIds.size(), sw.getMillis());
 
