@@ -52,6 +52,8 @@ import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -443,14 +445,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	@SuppressWarnings("unchecked")
 	private List<JpaPid> getMembersFromGroupWithFilter(
 			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
-		RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
+		List<SearchParameterMap> maps = makeSearchParameterMaps(theParameters, theConsiderDateRange);
 		List<JpaPid> resPids = new ArrayList<>();
-
-		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(
-				def, theParameters, theConsiderDateRange);
-
-		maps.forEach(map -> addMembershipToGroupClause(map, theParameters.getGroupId()));
-
 		for (SearchParameterMap map : maps) {
 			ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType("Patient");
 			ourLog.debug(
@@ -472,17 +468,30 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return resPids;
 	}
 
-	/**
-	 * This method takes an {@link SearchParameterMap} and adds a clause to it that will filter the search results to only
-	 * return members of the defined group.
-	 *
-	 * @param theMap     the map to add the clause to.
-	 * @param theGroupId the group ID to filter by.
-	 */
-	private void addMembershipToGroupClause(SearchParameterMap theMap, String theGroupId) {
-		HasOrListParam hasOrListParam = new HasOrListParam();
-		hasOrListParam.addOr(new HasParam("Group", "member", "_id", theGroupId));
-		theMap.add(PARAM_HAS, hasOrListParam);
+	@Nonnull
+	private List<SearchParameterMap> makeSearchParameterMaps(@Nonnull ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) {
+		RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
+		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(
+				def, theParameters, theConsiderDateRange);
+		maps.forEach(map -> {
+			map.add(PARAM_HAS, makeGroupMemberHasOrListParam(theParameters));
+			map.add(PARAM_ID, makePatientIdStringOrListParam(theParameters));
+		});
+		return maps;
+	}
+
+	@Nonnull
+	private StringOrListParam makePatientIdStringOrListParam(@Nonnull ExportPIDIteratorParameters theParameters) {
+		StringOrListParam patientIds = new StringOrListParam();
+		theParameters.getPatientIds().forEach(patientId -> patientIds.addOr(new StringParam(patientId)));
+		return patientIds;
+	}
+
+	@Nonnull
+	private HasOrListParam makeGroupMemberHasOrListParam(@Nonnull ExportPIDIteratorParameters theParameters) {
+		final HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.addOr(new HasParam("Group", "member", "_id", theParameters.getGroupId()));
+		return hasOrListParam;
 	}
 
 	/**
