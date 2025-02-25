@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6711
+jira: SMILE-9733
+title: "Introduction of Database Partitioning Mode temporarily introduced a regression in the Patient `$everything` operation on partitioned servers, in which duplicates would be returned in the bundle. This has been corrected."

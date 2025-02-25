@@ -1,0 +1,7 @@
+---
+type: remove
+issue: 6746
+title: "A Vagrant-based development environment has been provided in the HAPI FHIR git repository
+  for many years. It has not been maintained, and has therefore caused a number of CVE scanner
+  failures due to outdated dependencies. At this point it is fairly straightforward to develop
+  HAPI FHIR without any external dependencies, so this is being removed."

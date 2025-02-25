@@ -50,5 +50,7 @@
 	<logger name="org.hibernate.search.backend.lucene.infostream" level="TRACE"/>  -->
 
 	<!-- <logger name="ca.uhn.fhir.log.terminology_troubleshooting" level="TRACE"/> -->
+	 <logger name="ca.uhn.fhir.log.partition_troubleshooting" level="info"/>
+
 
 </configuration>
