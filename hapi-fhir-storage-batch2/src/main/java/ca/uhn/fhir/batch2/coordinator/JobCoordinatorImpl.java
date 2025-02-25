@@ -33,6 +33,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -73,13 +74,14 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	 * Constructor
 	 */
 	public JobCoordinatorImpl(
-			@Nonnull BatchJobSender theBatchJobSender,
-			@Nonnull IChannelReceiver theWorkChannelReceiver,
-			@Nonnull IJobPersistence theJobPersistence,
-			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull WorkChunkProcessor theExecutorSvc,
-			@Nonnull IJobMaintenanceService theJobMaintenanceService,
-			@Nonnull IHapiTransactionService theTransactionService) {
+		@Nonnull BatchJobSender theBatchJobSender,
+		@Nonnull IChannelReceiver theWorkChannelReceiver,
+		@Nonnull IJobPersistence theJobPersistence,
+		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+		@Nonnull WorkChunkProcessor theExecutorSvc,
+		@Nonnull IJobMaintenanceService theJobMaintenanceService,
+		@Nonnull IHapiTransactionService theTransactionService,
+		@Nonnull IInterceptorBroadcaster theInterceptorBroadcaster) {
 		Validate.notNull(theJobPersistence);
 
 		myJobPersistence = theJobPersistence;
@@ -93,7 +95,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 				theBatchJobSender,
 				theExecutorSvc,
 				theJobMaintenanceService,
-				theTransactionService);
+				theTransactionService,
+				theInterceptorBroadcaster);
 		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
 		myJobParameterJsonValidator = new JobParameterJsonValidator();
 		myTransactionService = theTransactionService;

@@ -20,6 +20,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
@@ -75,6 +76,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 	@Mock
 	private IJobMaintenanceService myJobMaintenanceService;
+	@Mock
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
@@ -97,7 +100,15 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
 		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService());
-		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService);
+		mySvc = new JobCoordinatorImpl(
+			myBatchJobSender,
+			myWorkChannelReceiver,
+			myJobInstancePersister,
+			myJobDefinitionRegistry,
+			jobStepExecutorSvc,
+			myJobMaintenanceService,
+			myTransactionService,
+			myInterceptorBroadcaster);
 	}
 
 	@AfterEach

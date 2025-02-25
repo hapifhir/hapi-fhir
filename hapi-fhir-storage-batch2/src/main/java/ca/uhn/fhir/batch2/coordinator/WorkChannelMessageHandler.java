@@ -28,6 +28,9 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
@@ -47,19 +50,21 @@ class WorkChannelMessageHandler implements MessageHandler {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IJobPersistence myJobPersistence;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
-	private final JobStepExecutorFactory myJobStepExecutorFactory;
 	private final IHapiTransactionService myHapiTransactionService;
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+	private final JobStepExecutorFactory myJobStepExecutorFactory;
 
 	WorkChannelMessageHandler(
-			@Nonnull IJobPersistence theJobPersistence,
-			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull BatchJobSender theBatchJobSender,
-			@Nonnull WorkChunkProcessor theExecutorSvc,
-			@Nonnull IJobMaintenanceService theJobMaintenanceService,
-			IHapiTransactionService theHapiTransactionService) {
+		@Nonnull IJobPersistence theJobPersistence,
+		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+		@Nonnull BatchJobSender theBatchJobSender,
+		@Nonnull WorkChunkProcessor theExecutorSvc,
+		@Nonnull IJobMaintenanceService theJobMaintenanceService,
+		IHapiTransactionService theHapiTransactionService, IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myHapiTransactionService = theHapiTransactionService;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myJobStepExecutorFactory = new JobStepExecutorFactory(
 				theJobPersistence,
 				theBatchJobSender,
@@ -254,7 +259,15 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 			processingPreparation.ifPresentOrElse(
 					// all the setup is happy and committed.  Do the work.
-					process -> process.myStepExector.executeStep(),
+					process -> {
+						try {
+							// FIXME nd - failure hooks
+							invokeBatch2ChunkPreProcessed(process.myJobInstance, process.myWorkChunk);
+							process.myStepExector.executeStep();
+						} finally {
+							invokeBatch2ChunkCompleted(process.myJobInstance, process.myWorkChunk);
+						}
+					},
 					() -> {
 						// discard the chunk
 						ourLog.debug("Discarding chunk notification {}", workNotification);
@@ -285,6 +298,24 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 					return setupProcessing;
 				});
+	}
+
+	private void invokeBatch2ChunkPreProcessed(JobInstance theJobInstance, WorkChunk theWorkChunk){
+		if(myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PRE_PROCESSED)){
+			HookParams params = new HookParams()
+				.add(JobInstance.class, theJobInstance)
+				.add(WorkChunk.class, theWorkChunk);
+			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PRE_PROCESSED, params);
+		}
+	}
+
+	private void invokeBatch2ChunkCompleted(JobInstance theJobInstance, WorkChunk theWorkChunk){
+		if(myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED)){
+			HookParams params = new HookParams()
+				.add(JobInstance.class, theJobInstance)
+				.add(WorkChunk.class, theWorkChunk);
+			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED, params);
+		}
 	}
 
 	/**
