@@ -719,6 +719,10 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals("AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE", oo.getIssue().get(1).getDetails().getCodingFirstRep().getCode());
 		assertEquals("Automatically created placeholder resource with ID: Patient/RED/_history/1", oo.getIssue().get(1).getDiagnostics());
 
+		Extension placeholderIdExtension = oo.getIssue().get(1).getExtensionByUrl(HapiExtensions.EXTENSION_PLACEHOLDER_ID);
+		IdType placeholderId = (IdType) placeholderIdExtension.getValue();
+		assertEquals("Patient/RED/_history/1", placeholderId.getValue());
+
 		// verify subresource is created
 		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
 		assertNotNull(returned);
