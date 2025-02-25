@@ -144,7 +144,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				if (partition != null) {
 					ids.add(partition.getId());
 				} else {
-					ids.add(null);
+					ids.add(myPartitionSettings.getDefaultPartitionId());
 				}
 			}
 		}
