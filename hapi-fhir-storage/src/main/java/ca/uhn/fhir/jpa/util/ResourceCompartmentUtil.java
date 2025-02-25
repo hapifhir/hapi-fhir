@@ -53,6 +53,11 @@ public class ResourceCompartmentUtil {
 	 */
 	public static Optional<String> getPatientCompartmentIdentity(
 			IBaseResource theResource, FhirContext theFhirContext, ISearchParamExtractor theSearchParamExtractor) {
+		if (theResource == null) {
+			// The resource may be null in mass ingestion mode
+			return Optional.empty();
+		}
+
 		RuntimeResourceDefinition resourceDef = theFhirContext.getResourceDefinition(theResource);
 		List<RuntimeSearchParam> patientCompartmentSps =
 				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);

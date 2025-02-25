@@ -81,7 +81,6 @@ public class ReplaceReferencesPatchBundleSvc {
 			List<IdDt> theResourceIds,
 			RequestDetails theRequestDetails) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
-
 		theResourceIds.forEach(referencingResourceId -> {
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(referencingResourceId.getResourceType());
 			IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
@@ -101,7 +100,7 @@ public class ReplaceReferencesPatchBundleSvc {
 						refInfo,
 						theReplaceReferencesRequest.sourceId)) // We only care about references to our source resource
 				.map(refInfo -> createReplaceReferencePatchOperation(
-						referencingResource.fhirType() + "." + refInfo.getName(),
+						getFhirPathForPatch(referencingResource, refInfo),
 						new Reference(theReplaceReferencesRequest.targetId.getValueAsString())))
 				.forEach(params::addParameter); // Add each operation to parameters
 		return params;
@@ -110,9 +109,31 @@ public class ReplaceReferencesPatchBundleSvc {
 	private static boolean matches(ResourceReferenceInfo refInfo, IIdType theSourceId) {
 		return refInfo.getResourceReference()
 				.getReferenceElement()
-				.toUnqualifiedVersionless()
+				.toUnqualified()
 				.getValueAsString()
 				.equals(theSourceId.getValueAsString());
+	}
+
+	private String getFhirPathForPatch(IBaseResource theReferencingResource, ResourceReferenceInfo theRefInfo) {
+		// construct the path to the element containing the reference in the resource, e.g. "Observation.subject"
+		String path = theReferencingResource.fhirType() + "." + theRefInfo.getName();
+		// check the allowed cardinality of the element containing the reference
+		int maxCardinality = myFhirContext
+				.newTerser()
+				.getDefinition(theReferencingResource.getClass(), path)
+				.getMax();
+		if (maxCardinality != 1) {
+			// if the element allows high cardinality, specify the exact reference to replace by appending a where
+			// filter to the path. If we don't do this, all the existing references in the element would be lost as a
+			// result of getting replaced with the new reference, and that is not the behaviour we want.
+			// e.g. "Observation.performer.where(reference='Practitioner/123')"
+			return String.format(
+					"%s.where(reference='%s')",
+					path,
+					theRefInfo.getResourceReference().getReferenceElement().getValueAsString());
+		}
+		// the element allows max cardinality of 1, so the whole element can be safely replaced
+		return path;
 	}
 
 	@Nonnull

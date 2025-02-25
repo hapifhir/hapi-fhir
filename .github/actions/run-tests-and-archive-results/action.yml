@@ -2,56 +2,64 @@ name: Build and Test Maven Module
 description: Build, test, and handle logs for a Maven module
 
 inputs:
-    java-version:
-        description: 'Java version to use'
-        required: false
-        default: '17'
-    maven-cache-folder:
-        description: 'Folder path for Maven cache'
-        required: true
-        default: "$HOME/.m2/repository"
-    module-name:
-        description: 'The Maven module name to build'
-        required: true
+  java-version:
+    description: 'Java version to use'
+    required: false
+    default: '17'
+  maven-cache-folder:
+    description: 'Folder path for Maven cache'
+    required: true
+    default: "$HOME/.m2/repository"
+  module-name:
+    description: 'The Maven module name to build'
+    required: true
 
 runs:
-    using: "composite"
-    steps:
-        - name: Set up JDK ${{ inputs.java-version }}
-          uses: actions/setup-java@v4
-          with:
-              java-version: ${{ inputs.java-version }}
-              distribution: 'temurin'
+  using: "composite"
+  steps:
+   - name: Set up JDK ${{ inputs.java-version }}
+     uses: actions/setup-java@v4
+     with:
+       java-version: ${{ inputs.java-version }}
+       distribution: 'temurin'
 
-        - name: Restore Maven Cache
-          uses: ./.github/actions/caching-handler
+   - name: Restore Maven Cache
+     uses: ./.github/actions/caching-handler
+     with:
+       key: ${{ github.ref_name }}-maven-${{ hashFiles('**/pom.xml') }}
 
-        - name: Build Module ${{ inputs.module-name }}
-          shell: bash
-          env:
-              MAVEN_CACHE_FOLDER: ${{ inputs.maven-cache-folder }}
-              MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
-          run: |
-              mvn clean verify jacoco:report -pl ${{ inputs.module-name }} \
-                -P JACOCO,CI -e -B \
-                -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
-                -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false \
-                -Dstyle.color=always -Djansi.force=true
+   - name: Restore HAPI Cache
+     uses: ./.github/actions/caching-handler
+     with:
+       path: "$HOME/.m2/repository/ca/uhn/"
+       key: ${{ github.ref_name }}-hapi-${{ github.run_id }}
 
-        # Some of the modules we build are nested within other modules, so you end up with module-name that look like
-        # moduleA/moduleB, instead of just moduleB. We want to ensure we comply with GitHub's naming rules while preserving
-        # the logical structure of the artifacts. This is done by sanitizing the name (Replace invalid characters (like '/')
-        # with valid ones (like '_')
-        - name: Sanitize Artifact Name
-          id: sanitize_name
-          shell: bash
-          run: |
-              module_name=${{ inputs.module-name }}
-              sanitized_name="${module_name//\//_}"
-              echo "sanitized_name=$sanitized_name" >> $GITHUB_ENV
+   - name: Build Module ${{ inputs.module-name }}
+     shell: bash
+     env:
+       MAVEN_CACHE_FOLDER: ${{ inputs.maven-cache-folder }}
+       MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+     run: |
+       mvn clean install jacoco:report -pl ${{ inputs.module-name }} \
+         -P JACOCO,CI -e -B \
+         -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
+         -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false \
+         -Dstyle.color=always -Djansi.force=true
 
-        - name: Upload target Directory
-          uses: actions/upload-artifact@v4
-          with:
-              name: ${{ env.sanitized_name }}
-              path: '**/target/**'
+   # Some of the modules we build are nested within other modules, so you end up with module-name that look like
+   # moduleA/moduleB, instead of just moduleB. We want to ensure we comply with GitHub's naming rules while preserving
+   # the logical structure of the artifacts. This is done by sanitizing the name (Replace invalid characters (like '/')
+   # with valid ones (like '_')
+   - name: Sanitize Artifact Name
+     id: sanitize_name
+     shell: bash
+     run: |
+       module_name=${{ inputs.module-name }}
+       sanitized_name="${module_name//\//_}"
+       echo "sanitized_name=$sanitized_name" >> $GITHUB_ENV
+
+   - name: Upload target Directory
+     uses: actions/upload-artifact@v4
+     with:
+       name: ${{ env.sanitized_name }}
+       path: '**/target/**'

@@ -53,14 +53,14 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	protected StringType myGoldenMedicationId;
 
 	@RegisterExtension
-	LogbackTestExtension myLogCapture = new LogbackTestExtension((Logger) Logs.getMdmTroubleshootingLog());
+	private LogbackTestExtension myLogCapture = new LogbackTestExtension((Logger) Logs.getMdmTroubleshootingLog());
 
 	@Autowired
-	IInterceptorService myInterceptorService;
+	private IInterceptorService myInterceptorService;
 	@Autowired
-	MdmSettings myMdmSettings;
+	private MdmSettings myMdmSettings;
 
-	PointcutLatch afterMdmLatch = new PointcutLatch(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED);
+	private final PointcutLatch afterMdmLatch = new PointcutLatch(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED);
 
 	public static Stream<Arguments> requestTypes() {
 		ServletRequestDetails asyncSrd = mock(ServletRequestDetails.class);
@@ -72,6 +72,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 			Arguments.of(Named.of("Synchronous Request", syncSrd))
 		);
 	}
+
 	@Override
 	@BeforeEach
 	public void before() throws Exception {

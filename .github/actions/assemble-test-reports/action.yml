@@ -2,58 +2,66 @@ name: 'Assemble and Publish Test Reports'
 description: 'Restores Maven cache, compiles test reports, generates Jacoco aggregate report, and publishes results.'
 
 inputs:
-    github_token:
-        description: 'GitHub token to access the repository.'
-        required: true
-    CODECOV_TOKEN:
-        description: 'Codecov token to upload code coverage reports.'
-        required: true
-    modules:
-        description: 'Comma-separated list of Maven modules.'
-        required: true
+  github_token:
+    description: 'GitHub token to access the repository.'
+    required: true
+  CODECOV_TOKEN:
+    description: 'Codecov token to upload code coverage reports.'
+    required: true
+  modules:
+    description: 'Comma-separated list of Maven modules.'
+    required: true
 
 runs:
-    using: "composite"
-    steps:
-        - name: Checkout repository
-          uses: actions/checkout@v4
-          with:
-              fetch-depth: 1
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
 
-        - name: Restore Maven Cache
-          uses: ./.github/actions/caching-handler
+    - name: Restore Maven Cache
+      uses: ./.github/actions/caching-handler
+      with:
+        key: ${{ github.ref_name }}-maven-${{ hashFiles('**/pom.xml') }}
 
-        - name: Compile all previously generated reports
-          uses: ./.github/actions/compile-test-results
-          with:
-              github_token: ${{ inputs.github_token }}
-              modules: ${{ inputs.modules }}
+    - name: Restore HAPI Cache
+      uses: ./.github/actions/caching-handler
+      with:
+        path: "$HOME/.m2/repository/ca/uhn/"
+        key: ${{ github.ref_name }}-hapi-${{ github.run_id }}
 
-        - name: Generate Jacoco aggregate report
-          shell: bash
-          env:
-              MAVEN_CACHE_FOLDER: $HOME/.m2/repository
-              MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
-          run: |
-              mvn jacoco:report-aggregate -P JACOCO -f ${{ github.workspace }}/pom.xml \
-              -Dmaven.repo.local=$MAVEN_CACHE_FOLDER
+    - name: Compile all previously generated reports
+      uses: ./.github/actions/compile-test-results
+      with:
+        github_token: ${{ inputs.github_token }}
+        modules: ${{ inputs.modules }}
 
-        - name: Upload coverage to Codecov
-          shell: bash
-          run: |
-              curl -Os https://uploader.codecov.io/latest/linux/codecov
-              chmod +x codecov
-              ./codecov -t ${{ inputs.CODECOV_TOKEN }} -R ${{ github.workspace }}/hapi-fhir-jacoco/target/site/jacoco-aggregate/
+    - name: Generate Jacoco aggregate report
+      shell: bash
+      env:
+        MAVEN_CACHE_FOLDER: $HOME/.m2/repository
+        MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+      run: |
+        mvn jacoco:report-aggregate -P JACOCO -f ${{ github.workspace }}/pom.xml \
+        -Dmaven.repo.local=$MAVEN_CACHE_FOLDER
 
-        - name: Publish test results
-          uses: actions/upload-artifact@v4
-          with:
-              name: junit-test-results
-              path: './**/TEST-*.xml'
+    - name: Upload coverage to Codecov
+      shell: bash
+      run: |
+        curl -Os https://uploader.codecov.io/latest/linux/codecov
+        chmod +x codecov
+        ./codecov -t ${{ inputs.CODECOV_TOKEN }} -R ${{ github.workspace }}/hapi-fhir-jacoco/target/site/jacoco-aggregate/
 
-        - name: Publish code coverage report
-          uses: actions/upload-artifact@v4
-          with:
-              name: code-coverage
-              path: ${{ github.workspace }}/hapi-fhir-jacoco/target/site/jacoco-aggregate/jacoco.xml
-              fail_if_coverage_empty: true
+    - name: Publish test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: junit-test-results
+        path: './**/TEST-*.xml'
+
+    - name: Publish code coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: code-coverage
+        path: ${{ github.workspace }}/hapi-fhir-jacoco/target/site/jacoco-aggregate/jacoco.xml
+        fail_if_coverage_empty: true

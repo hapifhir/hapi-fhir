@@ -224,17 +224,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private SearchQueryProperties mySearchProperties;
 
-	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
 
 	@Autowired(required = false)
-	private IElasticsearchSvc myIElasticsearchSvc;
+	public void setFullTextSearch(IFulltextSearchSvc theFulltextSearchSvc) {
+		myFulltextSearchSvc = theFulltextSearchSvc;
+	}
 
-	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
+
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
-	@Autowired
-	private IResourceHistoryTableDao myResourceHistoryTableDao;
+	@Autowired(required = false)
+	private IElasticsearchSvc myIElasticsearchSvc;
 
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
@@ -259,6 +261,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			DaoRegistry theDaoRegistry,
 			FhirContext theContext,
 			IIdHelperService theIdHelperService,
+			IResourceHistoryTableDao theResourceHistoryTagDao,
+			IJpaStorageResourceParser theIJpaStorageResourceParser,
 			Class<? extends IBaseResource> theResourceType) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
@@ -274,6 +278,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myDaoRegistry = theDaoRegistry;
 		myContext = theContext;
 		myIdHelperService = theIdHelperService;
+		myResourceHistoryTableDao = theResourceHistoryTagDao;
+		myJpaStorageResourceParser = theIJpaStorageResourceParser;
 
 		mySearchProperties = new SearchQueryProperties();
 	}
@@ -1266,20 +1272,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			IBaseResource resource = null;
-			if (next != null) {
-				resource = myJpaStorageResourceParser.toResource(
-						resourceType, next, tagMap.get(next.getResourceId()), theForHistoryOperation);
-			}
+			resource = myJpaStorageResourceParser.toResource(
+					resourceType, next, tagMap.get(next.getResourceId()), theForHistoryOperation);
 			if (resource == null) {
-				if (next != null) {
-					ourLog.warn(
-							"Unable to find resource {}/{}/_history/{} in database",
-							next.getResourceType(),
-							next.getIdDt().getIdPart(),
-							next.getVersion());
-				} else {
-					ourLog.warn("Unable to find resource in database.");
-				}
+				ourLog.warn(
+						"Unable to find resource {}/{}/_history/{} in database",
+						next.getResourceType(),
+						next.getIdDt().getIdPart(),
+						next.getVersion());
 				continue;
 			}
 
@@ -1295,12 +1295,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.MATCH);
 			}
 
+			// ensure there's enough space; "<=" because of 0-indexing
+			while (theResourceListToPopulate.size() <= index) {
+				theResourceListToPopulate.add(null);
+			}
 			theResourceListToPopulate.set(index, resource);
 		}
 	}
 
 	private Map<JpaPid, Collection<BaseTag>> getResourceTagMap(Collection<ResourceHistoryTable> theHistoryTables) {
-
 		switch (myStorageSettings.getTagStorageMode()) {
 			case VERSIONED:
 				return getPidToTagMapVersioned(theHistoryTables);
@@ -1410,13 +1413,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		assert new HashSet<>(thePids).size() == thePids.size() : "PID list contains duplicates: " + thePids;
 
 		Map<Long, Integer> position = new HashMap<>();
+		int index = 0;
 		for (JpaPid next : thePids) {
-			position.put(next.getId(), theResourceListToPopulate.size());
-			theResourceListToPopulate.add(null);
+			position.put(next.getId(), index++);
 		}
 
 		// Can we fast track this loading by checking elastic search?
-		if (isLoadingFromElasticSearchSupported(thePids)) {
+		boolean isUsingElasticSearch = isLoadingFromElasticSearchSupported(thePids);
+		if (isUsingElasticSearch) {
 			try {
 				theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
 				return;
@@ -1607,6 +1611,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			for (JpaPid next : pidsToInclude) {
 				if (!original.contains(next) && !allAdded.contains(next)) {
 					nextRoundMatches.add(next);
+				} else {
+					ourLog.trace("Skipping include since it has already been seen. [jpaPid={}]", next);
 				}
 			}
 

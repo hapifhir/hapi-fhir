@@ -234,6 +234,20 @@ public class ReplaceReferencesTestHelper {
 
 	public Parameters callReplaceReferencesWithResourceLimit(
 			IGenericClient theFhirClient, boolean theIsAsync, Integer theResourceLimit) {
+		return callReplaceReferencesWithResourceLimit(
+				theFhirClient,
+				mySourcePatientId.getValue(),
+				myTargetPatientId.getValue(),
+				theIsAsync,
+				theResourceLimit);
+	}
+
+	public Parameters callReplaceReferencesWithResourceLimit(
+			IGenericClient theFhirClient,
+			String theSourceId,
+			String theTargetId,
+			boolean theIsAsync,
+			Integer theResourceLimit) {
 		IOperationUntypedWithInputAndPartialOutput<Parameters> request = theFhirClient
 				.operation()
 				.onServer()
@@ -241,10 +255,10 @@ public class ReplaceReferencesTestHelper {
 				.withParameter(
 						Parameters.class,
 						ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID,
-						new StringType(mySourcePatientId.getValue()))
+						new StringType(theSourceId))
 				.andParameter(
 						ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID,
-						new StringType(myTargetPatientId.getValue()));
+						new StringType(theTargetId));
 		if (theResourceLimit != null) {
 			request.andParameter(
 					ProviderConstants.OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT, new IntegerType(theResourceLimit));
