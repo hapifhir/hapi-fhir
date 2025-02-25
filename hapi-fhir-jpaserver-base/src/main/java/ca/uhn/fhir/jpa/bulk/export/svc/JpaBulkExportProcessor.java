@@ -469,7 +469,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	@Nonnull
-	private List<SearchParameterMap> makeSearchParameterMaps(@Nonnull ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) {
+	private List<SearchParameterMap> makeSearchParameterMaps(
+			@Nonnull ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
 		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(
 				def, theParameters, theConsiderDateRange);
