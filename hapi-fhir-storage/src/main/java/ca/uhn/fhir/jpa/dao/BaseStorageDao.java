@@ -766,15 +766,15 @@ public abstract class BaseStorageDao {
 		String detailCode = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getCode();
 		String detailDescription = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getDisplay();
 		IBase issue = OperationOutcomeUtil.addIssue(
-			theFhirContext,
-			theOperationOutcomeToPopulate,
-			OO_SEVERITY_INFO,
-			msg,
-			null,
-			OO_ISSUE_CODE_INFORMATIONAL,
-			detailSystem,
-			detailCode,
-			detailDescription);
+				theFhirContext,
+				theOperationOutcomeToPopulate,
+				OO_SEVERITY_INFO,
+				msg,
+				null,
+				OO_ISSUE_CODE_INFORMATIONAL,
+				detailSystem,
+				detailCode,
+				detailDescription);
 		if (issue instanceof IBaseHasExtensions) {
 			IBaseExtension<?, ?> resourceIdExtension = ((IBaseHasExtensions) issue).addExtension();
 			resourceIdExtension.setUrl(HapiExtensions.EXTENSION_PLACEHOLDER_ID);
