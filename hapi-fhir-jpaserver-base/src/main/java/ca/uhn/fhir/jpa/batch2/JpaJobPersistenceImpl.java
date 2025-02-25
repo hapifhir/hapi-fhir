@@ -200,6 +200,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setReport(theInstance.getReport());
 		entity.setTriggeringUsername(theInstance.getTriggeringUsername());
 		entity.setTriggeringClientId(theInstance.getTriggeringClientId());
+		entity.setUserData(theInstance.getUserDataAsString());
 
 		entity = myJobInstanceRepository.save(entity);
 		return entity.getId();

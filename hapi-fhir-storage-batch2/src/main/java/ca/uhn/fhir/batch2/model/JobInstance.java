@@ -32,6 +32,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -122,6 +124,9 @@ public class JobInstance implements IModelJson, IJobInstance {
 	@JsonProperty(value = "triggeringClientId", access = JsonProperty.Access.READ_ONLY)
 	private String myTriggeringClientId;
 
+	@JsonProperty("userData")
+	private Map<String, Object> myUserData;
+
 	/**
 	 * Constructor
 	 */
@@ -157,6 +162,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 		setWarningMessages(theJobInstance.getWarningMessages());
 		setTriggeringUsername(theJobInstance.getTriggeringUsername());
 		setTriggeringClientId(theJobInstance.getTriggeringClientId());
+		setUserData(theJobInstance.getUserData());
 	}
 
 	public String getJobDefinitionId() {
@@ -476,5 +482,24 @@ public class JobInstance implements IModelJson, IJobInstance {
 	@Override
 	public void setFastTracking(boolean theFastTracking) {
 		myFastTracking = theFastTracking;
+	}
+
+	public Map<String, Object> getUserData() {
+		if (myUserData == null) {
+			myUserData = new HashMap<>();
+		}
+		return myUserData;
+	}
+
+	public void setUserData(Map<String, Object> theUserData) {
+		myUserData = theUserData;
+	}
+
+	public String getUserDataAsString() {
+		return JsonUtil.serialize(getUserData());
+	}
+
+	public void setUserDataAsString(String theUserDataAsString) {
+		myUserData = JsonUtil.deserialize(theUserDataAsString, Map.class);
 	}
 }
