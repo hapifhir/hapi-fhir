@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6662
+title: "Fixed remote terminology lookup results showing boolean properties as strings."
