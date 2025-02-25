@@ -548,14 +548,14 @@ public class ConsentInterceptor {
 			// FIXME ND - do we want both canSeeResource() and willSeeResource()?
 			ConsentOutcome nextOutcome = next.canSeeResource(requestDetails, theResource, myContextConsentServices);
 			ConsentOperationStatusEnum status = nextOutcome.getStatus();
-			if (ConsentOperationStatusEnum.REJECT.equals(status)){
+			if (ConsentOperationStatusEnum.REJECT.equals(status)) {
 				// if any consent service rejects, reject the resource
 				return false;
 			}
 
 			nextOutcome = next.willSeeResource(requestDetails, theResource, myContextConsentServices);
 			status = nextOutcome.getStatus();
-			if (ConsentOperationStatusEnum.REJECT.equals(status)){
+			if (ConsentOperationStatusEnum.REJECT.equals(status)) {
 				// if any consent service rejects, reject the resource
 				return false;
 			}

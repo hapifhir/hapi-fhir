@@ -74,14 +74,14 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	 * Constructor
 	 */
 	public JobCoordinatorImpl(
-		@Nonnull BatchJobSender theBatchJobSender,
-		@Nonnull IChannelReceiver theWorkChannelReceiver,
-		@Nonnull IJobPersistence theJobPersistence,
-		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-		@Nonnull WorkChunkProcessor theExecutorSvc,
-		@Nonnull IJobMaintenanceService theJobMaintenanceService,
-		@Nonnull IHapiTransactionService theTransactionService,
-		@Nonnull IInterceptorBroadcaster theInterceptorBroadcaster) {
+			@Nonnull BatchJobSender theBatchJobSender,
+			@Nonnull IChannelReceiver theWorkChannelReceiver,
+			@Nonnull IJobPersistence theJobPersistence,
+			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+			@Nonnull WorkChunkProcessor theExecutorSvc,
+			@Nonnull IJobMaintenanceService theJobMaintenanceService,
+			@Nonnull IHapiTransactionService theTransactionService,
+			@Nonnull IInterceptorBroadcaster theInterceptorBroadcaster) {
 		Validate.notNull(theJobPersistence);
 
 		myJobPersistence = theJobPersistence;

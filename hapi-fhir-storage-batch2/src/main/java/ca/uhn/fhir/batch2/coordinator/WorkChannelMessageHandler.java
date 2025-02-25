@@ -55,12 +55,13 @@ class WorkChannelMessageHandler implements MessageHandler {
 	private final JobStepExecutorFactory myJobStepExecutorFactory;
 
 	WorkChannelMessageHandler(
-		@Nonnull IJobPersistence theJobPersistence,
-		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-		@Nonnull BatchJobSender theBatchJobSender,
-		@Nonnull WorkChunkProcessor theExecutorSvc,
-		@Nonnull IJobMaintenanceService theJobMaintenanceService,
-		IHapiTransactionService theHapiTransactionService, IInterceptorBroadcaster theInterceptorBroadcaster) {
+			@Nonnull IJobPersistence theJobPersistence,
+			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+			@Nonnull BatchJobSender theBatchJobSender,
+			@Nonnull WorkChunkProcessor theExecutorSvc,
+			@Nonnull IJobMaintenanceService theJobMaintenanceService,
+			IHapiTransactionService theHapiTransactionService,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myHapiTransactionService = theHapiTransactionService;
@@ -300,20 +301,18 @@ class WorkChannelMessageHandler implements MessageHandler {
 				});
 	}
 
-	private void invokeBatch2ChunkPreProcessed(JobInstance theJobInstance, WorkChunk theWorkChunk){
-		if(myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PRE_PROCESSED)){
-			HookParams params = new HookParams()
-				.add(JobInstance.class, theJobInstance)
-				.add(WorkChunk.class, theWorkChunk);
+	private void invokeBatch2ChunkPreProcessed(JobInstance theJobInstance, WorkChunk theWorkChunk) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PRE_PROCESSED)) {
+			HookParams params =
+					new HookParams().add(JobInstance.class, theJobInstance).add(WorkChunk.class, theWorkChunk);
 			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PRE_PROCESSED, params);
 		}
 	}
 
-	private void invokeBatch2ChunkCompleted(JobInstance theJobInstance, WorkChunk theWorkChunk){
-		if(myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED)){
-			HookParams params = new HookParams()
-				.add(JobInstance.class, theJobInstance)
-				.add(WorkChunk.class, theWorkChunk);
+	private void invokeBatch2ChunkCompleted(JobInstance theJobInstance, WorkChunk theWorkChunk) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED)) {
+			HookParams params =
+					new HookParams().add(JobInstance.class, theJobInstance).add(WorkChunk.class, theWorkChunk);
 			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED, params);
 		}
 	}

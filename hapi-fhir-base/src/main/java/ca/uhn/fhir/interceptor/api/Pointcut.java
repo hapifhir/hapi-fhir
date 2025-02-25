@@ -3146,7 +3146,6 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson",
 			"java.lang.Exception"),
 
-
 	/**
 	 * <b>Batch2 Hook:</b>
 	 * <p>Invoked before a work chunk is processed.</p>
@@ -3158,10 +3157,7 @@ public enum Pointcut implements IPointcut {
 	 */
 	// FIXME ND - what else do we want here?
 	BATCH2_CHUNK_PRE_PROCESSED(
-		void.class,
-		"ca.uhn.fhir.batch2.model.JobInstance",
-		"ca.uhn.fhir.batch2.model.WorkChunk"
-	),
+			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
 
 	/**
 	 * <b>Batch2 Hook:</b>
@@ -3174,10 +3170,7 @@ public enum Pointcut implements IPointcut {
 	 */
 	// FIXME ND - what else do we want here?
 	BATCH2_CHUNK_PROCESSING_COMPLETED(
-		void.class,
-		"ca.uhn.fhir.batch2.model.JobInstance",
-		"ca.uhn.fhir.batch2.model.WorkChunk"
-	),
+			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
