@@ -476,7 +476,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				def, theParameters, theConsiderDateRange);
 		maps.forEach(map -> {
 			map.add(PARAM_HAS, makeGroupMemberHasOrListParam(theParameters));
-			if(theParameters.getPatientIds() != null && !theParameters.getPatientIds().isEmpty()) {
+			if (theParameters.getPatientIds() != null
+					&& !theParameters.getPatientIds().isEmpty()) {
 				map.add(PARAM_ID, makePatientIdStringOrListParam(theParameters));
 			}
 		});
