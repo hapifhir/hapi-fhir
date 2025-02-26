@@ -96,10 +96,10 @@ public class BulkExportJobParametersBuilder {
 		return this;
 	}
 
-	public BulkExportJobParametersBuilder patientReferences(List<IBaseReference> thePatientIds) {
-		myPatientIds = thePatientIds == null
+	public BulkExportJobParametersBuilder patientReferences(List<IBaseReference> thePatientReferences) {
+		myPatientIds = thePatientReferences == null
 				? null
-				: thePatientIds.stream()
+				: thePatientReferences.stream()
 						.map(IBaseReference::getReferenceElement)
 						.map(IIdType::getValue)
 						.collect(Collectors.toList());
