@@ -19,7 +19,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.impl.BaseClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -32,7 +33,6 @@ import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -40,10 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 
 @ContextConfiguration(classes = {
@@ -67,8 +64,6 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 	public static IParser ourParser;
 
 
-	//@Autowired
-	//ApplicationContext myApplicationContext;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
 	@Autowired
@@ -112,7 +107,6 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 		builder.setConnectionManager(connectionManager);
 		ourHttpClient = builder.build();
 
-		ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
 		ourParser = ourCtx.newJsonParser().setPrettyPrint(true);
 
 		ourRestfulServer.setDefaultResponseEncoding(EncodingEnum.XML);
@@ -149,7 +143,12 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 	}
 
 	private static IGenericClient initClient(SimpleRequestHeaderInterceptor simpleHeaderInterceptor) {
-		final IGenericClient genericClient = ourCtx.newRestfulGenericClient(ourServerBase);
+		final IRestfulClientFactory restfulClientFactory = ourCtx.getRestfulClientFactory();
+
+		restfulClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
+		restfulClientFactory.setSocketTimeout(600 * 1000);
+
+		final IGenericClient genericClient = restfulClientFactory.newGenericClient(ourServerBase);
 
 		var loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setLogRequestBody(true);
@@ -157,14 +156,6 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 
 		genericClient.registerInterceptor(loggingInterceptor);
 		genericClient.registerInterceptor(simpleHeaderInterceptor);
-
-		if (genericClient instanceof BaseClient baseClient) {
-			// This line alone makes the tests 10x quicker saving us 3+ second /metadata calls
-			// per test method.
-			baseClient.setDontValidateConformance(true);
-		} else {
-			fail("Expected genericClient to be an instance of BaseClient");
-		}
 
 		return genericClient;
 	}
