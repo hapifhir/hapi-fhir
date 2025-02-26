@@ -19,6 +19,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.impl.BaseClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -40,6 +42,8 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 @ContextConfiguration(classes = {
@@ -109,9 +113,6 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 		ourHttpClient = builder.build();
 
 		ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
-		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
-		ourClient.setLogRequestAndResponse(true);
-
 		ourParser = ourCtx.newJsonParser().setPrettyPrint(true);
 
 		ourRestfulServer.setDefaultResponseEncoding(EncodingEnum.XML);
@@ -119,9 +120,9 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 		ourRestfulServer.setPagingProvider(ourPagingProvider);
 
 		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
-		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
+		ourClient = initClient(mySimpleHeaderInterceptor);
 	}
 
 	@Override
@@ -139,23 +140,6 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 		ourClient.transaction().withBundle(bundy).execute();
 	}
 
-
-	public Bundle makeBundle(List<? extends Resource> theResources) {
-		return makeBundle(theResources.toArray(new Resource[theResources.size()]));
-	}
-
-	public Bundle makeBundle(Resource... theResources) {
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.SEARCHSET);
-		bundle.setTotal(theResources != null ? theResources.length : 0);
-		if (theResources != null) {
-			for (Resource l : theResources) {
-				bundle.addEntry().setResource(l).setFullUrl("/" + l.fhirType() + "/" + l.getId());
-			}
-		}
-		return bundle;
-	}
-
 	protected RequestDetails setupRequestDetails() {
 		var requestDetails = new ServletRequestDetails();
 		requestDetails.setServletRequest(new MockHttpServletRequest());
@@ -164,4 +148,24 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 		return requestDetails;
 	}
 
+	private static IGenericClient initClient(SimpleRequestHeaderInterceptor simpleHeaderInterceptor) {
+		final IGenericClient genericClient = ourCtx.newRestfulGenericClient(ourServerBase);
+
+		var loggingInterceptor = new LoggingInterceptor();
+		loggingInterceptor.setLogRequestBody(true);
+		loggingInterceptor.setLogResponseBody(true);
+
+		genericClient.registerInterceptor(loggingInterceptor);
+		genericClient.registerInterceptor(simpleHeaderInterceptor);
+
+		if (genericClient instanceof BaseClient baseClient) {
+			// This line alone makes the tests 10x quicker saving us 3+ second /metadata calls
+			// per test method.
+			baseClient.setDontValidateConformance(true);
+		} else {
+			fail("Expected genericClient to be an instance of BaseClient");
+		}
+
+		return genericClient;
+	}
 }
