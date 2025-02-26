@@ -101,7 +101,7 @@ public class BulkExportJobParametersBuilder {
 				? null
 				: thePatientReferences.stream()
 						.map(IBaseReference::getReferenceElement)
-						.map(IIdType::getValue)
+						.map(IIdType::getIdPart)
 						.collect(Collectors.toList());
 		return this;
 	}

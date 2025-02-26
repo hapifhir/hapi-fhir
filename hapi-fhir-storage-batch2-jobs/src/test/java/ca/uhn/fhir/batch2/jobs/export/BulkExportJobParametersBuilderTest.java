@@ -133,7 +133,10 @@ class BulkExportJobParametersBuilderTest {
 	void patientReferences() {
 		// Arrange
 		final List<String> expected = List.of("ID1", "ID2", "ID3");
-		final List<IBaseReference> patientRefs = expected.stream().map(value -> (IBaseReference) new Reference(value)).toList();
+		final List<IBaseReference> patientRefs = expected.stream()
+			.map(value -> new Reference("Patient/" + value + "/_history/1"))
+			.map(IBaseReference.class::cast)
+			.toList();
 		// Act
 		myFixture.patientReferences(patientRefs);
 		// Assert
