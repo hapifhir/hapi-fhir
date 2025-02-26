@@ -53,6 +53,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.ElementDefinition;
@@ -95,6 +96,7 @@ import org.springframework.test.util.AopTestUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -1408,6 +1410,54 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testValidateAllergyIntoleranceWithBadDisplay() {
+
+		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.ERROR);
+		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.ERROR);
+		Patient patient = new Patient();
+		patient.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>hello</div>");
+		//set marital status
+		patient.getMaritalStatus()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus")
+			.setCode("M")
+			.setDisplay("Random Display");
+		OperationOutcome oop = validateAndReturnOutcome(patient);
+
+
+		// Validate a resource containing this codesystem in a field with an extendable binding
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		allergy.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>hello</div>");
+		//create a clinical status for the allergy
+		allergy.getClinicalStatus()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical")
+			.setCode("active")
+				.setDisplay("boo");
+
+		//create a codeableConcept with a display that doesn't match the expected display
+		allergy.getVerificationStatus()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-verification")
+			.setCode("confirmed")
+			.setDisplay("Random Display");
+
+		//add a patient to allergy intolerance
+		allergy.setPatient(new Reference("Patient/123"));
+
+		OperationOutcome oo = validateAndReturnOutcome(allergy);
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+
+
+		assertEquals(2, OperationOutcomeUtil.getIssueCount(myFhirContext, oo));
+		OperationOutcome.OperationOutcomeIssueComponent notInValueSetIssue = oo.getIssue().get(1);
+		assertThat(notInValueSetIssue.getDiagnostics()).contains("None of the codings provided are in the value set 'IdentifierType'");
+		assertThat(notInValueSetIssue.getDiagnostics()).contains("a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://foo#bar)");
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, notInValueSetIssue.getSeverity());
+		assertEquals("Concept Display \"not bar code\" does not match expected \"Bar Code\" for 'http://foo#bar'", oo.getIssue().get(0).getDiagnostics());
+	}
+
+	@Test
 	public void testValidateUsingExternallyDefinedCodeMisMatchDisplay_InMemory_ShouldLogWarning() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://foo");
@@ -2284,7 +2334,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	public void testValidateWrongDisplayOnRequiredBinding(IValidationSupport.IssueSeverity theDisplayCodeMismatchIssueSeverity, boolean thePreCalculateExpansion) {
 		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(theDisplayCodeMismatchIssueSeverity);
 		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(theDisplayCodeMismatchIssueSeverity);
-
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://profile");
 		sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -2374,6 +2423,563 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		}
 
+	}
+
+	@Test
+	public void testValidateWrongDisplayOnRequiredBinding() {
+		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.ERROR);
+		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.ERROR);
+
+
+
+
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://profile");
+		sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sd.setType("Observation");
+		sd.setAbstract(false);
+		sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Observation");
+		ElementDefinition codeElement = sd.getDifferential().addElement();
+		codeElement.setId("Observation.category.coding");
+		codeElement.setPath("Observation.category.coding");
+		//codeElement.addType().setCode("CodeableConcept");
+
+		//create a discriminator
+		List<ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent> theDiscriminator = new ArrayList<>();
+		theDiscriminator.add(new ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent()
+			.setType(ElementDefinition.DiscriminatorType.PATTERN)
+			.setPath("$this"));
+		codeElement.setSlicing(new ElementDefinition.ElementDefinitionSlicingComponent()
+			.setDiscriminator(theDiscriminator));
+
+		ElementDefinition codeElement1 = sd.getDifferential().addElement();
+		codeElement1.setId("Observation.category.coding:vs1");
+		codeElement1.setPath("Observation.category.coding");
+		//codeElement1.addType().setCode("CodeableConcept");
+		codeElement1.getBinding().setStrength(Enumerations.BindingStrength.REQUIRED);
+		codeElement1.getBinding().setValueSet("http://vs");
+		codeElement1.setSliceName("vs1");
+
+		ElementDefinition codeElement2 = sd.getDifferential().addElement();
+		codeElement2.setId("Observation.category.coding:vs2");
+		codeElement2.setPath("Observation.category.coding");
+		//codeElement2.addType().setCode("CodeableConcept");
+		codeElement2.getBinding().setStrength(Enumerations.BindingStrength.REQUIRED);
+		codeElement2.getBinding().setValueSet("http://vs2");
+		codeElement2.setSliceName("vs2");
+
+		String encodedStructureDefinition = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sd);
+		System.out.println(encodedStructureDefinition);
+		myStructureDefinitionDao.create(sd, new SystemRequestDetails());
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept()
+			.setCode("8302-2")
+			.setDisplay("Body Height");
+		String encodedCodeSystem = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs);
+
+		myCodeSystemDao.create(cs, new SystemRequestDetails());
+
+		CodeSystem cs2 = new CodeSystem();
+		cs2.setUrl("http://cs2");
+		cs2.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs2.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs2.addConcept()
+			.setCode("xxxx")
+			.setDisplay("XXXX");
+		String encodedCodeSystem2 = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs2);
+
+		myCodeSystemDao.create(cs2, new SystemRequestDetails());
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://cs");
+		String encodedValueSet = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(vs);
+
+
+		myValueSetDao.create(vs, new SystemRequestDetails());
+
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://vs2");
+		vs2.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs2.getCompose().addInclude().setSystem("http://cs2");
+		String encodedValueSet2 = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(vs2);
+
+
+		myValueSetDao.create(vs2, new SystemRequestDetails());
+
+		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Observation obs = new Observation();
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getText().setDivAsString("<div>hello</div>");
+		obs.getMeta().addProfile("http://profile");
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		obs.getCode().addCoding()
+			.setSystem("http://cs")
+			.setCode("8302-2")
+			.setDisplay("Body height2");
+		obs.setEffective(DateTimeType.now());
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setSubject(new Reference("Patient/123"));
+		obs.setValue(new Quantity(null, 123, "http://unitsofmeasure.org", "[in_i]", "in"));
+
+		String encodedResource = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
+		MethodOutcome outcome = myObservationDao.validate(obs, null, encodedResource, EncodingEnum.JSON, ValidationModeEnum.CREATE, null, new SystemRequestDetails());
+
+		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+		ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo).replace("\"resourceType\"", "\"resType\""));
+
+		OperationOutcome.OperationOutcomeIssueComponent badDisplayIssue;
+
+			assertThat(oo.getIssue()).hasSize(2);
+			badDisplayIssue = oo.getIssue().get(1);
+
+			OperationOutcome.OperationOutcomeIssueComponent noGoodCodings = oo.getIssue().get(1);
+			assertEquals("error", noGoodCodings.getSeverity().toCode());
+			assertEquals("None of the codings provided are in the value set 'ValueSet[http://vs]' (http://vs), and a coding from this value set is required) (codes = http://cs#8302-2)", noGoodCodings.getDiagnostics());
+
+
+	}
+
+
+	@Test
+	public void testValidateWrongDisplayOnRequiredBindingAllergyIntolerance() {
+		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.ERROR);
+		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.ERROR);
+
+		String compositionSdStrSimple =
+"""
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://compositionprofile",
+  "status": "active",
+  "abstract": false,
+  "type": "Composition",
+  "derivation": "constraint",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Composition",
+  "differential": {
+    "element": [
+      {
+			  "id": "Composition.section.entry",
+			  "path": "Composition.section.entry",
+			  "slicing": {
+				"discriminator": [ {
+				  "type": "profile",
+				  "path": "resolve()"
+				} ],
+				"ordered": false,
+				"rules": "open"
+			  }
+			},
+      {
+        "id": "Composition.section.entry:allergyOrIntolerance",
+        "path": "Composition.section.entry",
+		"sliceName": "allergyOrIntolerance",
+        "min": 1,
+        "max": "*",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://profile"
+          }
+        ]
+      }
+    ]
+  }
+}
+""";
+
+		String compositionSdStr = """
+		{
+		  "resourceType": "StructureDefinition",
+		  "url": "http://compositionprofile",
+		  "status": "active",
+		  "abstract": false,
+		  "type": "Composition",
+		  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Composition",
+		  "derivation": "constraint",
+		  "differential": {
+			"element": [ {
+			  "id": "Composition.section",
+			  "path": "Composition.section",
+			  "slicing": {
+				"discriminator": [ {
+				  "type": "pattern",
+				  "path": "code"
+				} ],
+				"ordered": false,
+				"rules": "open"
+			  },
+			  "min": 1,
+			  "mustSupport": true
+			}, {
+			  "id": "Composition.section:sectionAllergies",
+			  "path": "Composition.section",
+			  "sliceName": "sectionAllergies",
+			  "min": 1,
+			  "max": "1",
+			  "mustSupport": true
+			},
+			{
+                "id": "Composition.section:sectionAllergies.code",
+                "path": "Composition.section.code",
+                "min": 1,
+                "patternCodeableConcept": {
+                    "coding":  [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48765-2"
+                        }
+                    ]
+                },
+                "mustSupport": true
+            },
+            {
+			  "id": "Composition.section.sectionAllergies.entry",
+			  "path": "Composition.section.entry",
+			  "slicing": {
+				"discriminator": [ {
+				  "type": "profile",
+				  "path": "resolve()"
+				} ],
+				"ordered": false,
+				"rules": "open"
+			  }
+			}, {
+			  "id": "Composition.section:sectionAllergies.entry:allergyOrIntolerance",
+			  "path": "Composition.section.entry",
+			  "sliceName": "allergyOrIntolerance",
+			  "min": 1,
+			  "type": [ {
+				"code": "Reference",
+				 "targetProfile": [
+                    "http://profile"
+                 ]
+			  }]
+			}]
+		  }
+		}
+		""";
+		StructureDefinition sdComposition = (StructureDefinition) myFhirContext.newJsonParser().parseResource(compositionSdStrSimple);
+
+	/*"""{
+                "id": "Composition.section:sectionAllergies.code",
+                "path": "Composition.section.code",
+                "min": 1,
+                "patternCodeableConcept": {
+                    "coding":  [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48765-2"
+                        }
+                    ]
+                },
+                "mustSupport": true
+            } 
+		""");*/
+
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://profile");
+		sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sd.setType("AllergyIntolerance");
+		sd.setAbstract(false);
+		sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/AllergyIntolerance");
+		ElementDefinition codeElement = sd.getDifferential().addElement();
+		codeElement.setId("AllergyIntolerance.verificationStatus.coding");
+		codeElement.setPath("AllergyIntolerance.verificationStatus.coding");
+		//codeElement.addType().setCode("CodeableConcept");
+
+		//create a discriminator
+		List<ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent> theDiscriminator = new ArrayList<>();
+		theDiscriminator.add(new ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent()
+			.setType(ElementDefinition.DiscriminatorType.PATTERN)
+			.setPath("$this"));
+		codeElement.setSlicing(new ElementDefinition.ElementDefinitionSlicingComponent()
+			.setDiscriminator(theDiscriminator).setOrdered(false).setRules(ElementDefinition.SlicingRules.OPEN));
+
+		ElementDefinition codeElement1 = sd.getDifferential().addElement();
+		codeElement1.setId("AllergyIntolerance.verificationStatus.coding:vs1");
+		codeElement1.setPath("AllergyIntolerance.verificationStatus.coding");
+		//codeElement1.addType().setCode("CodeableConcept");
+		codeElement1.getBinding().setStrength(Enumerations.BindingStrength.REQUIRED);
+		//codeElement1.getBinding().setValueSet("http://vs");
+		codeElement1.getBinding().setValueSet("http://hl7.org/fhir/ValueSet/allergyintolerance-verification|4.0.1");
+		codeElement1.setSliceName("vs1");
+		codeElement1.getBase().setPath("CodeableConcept.coding");
+
+		ElementDefinition codeElement2 = sd.getDifferential().addElement();
+		codeElement2.setId("AllergyIntolerance.verificationStatus.coding:vs2");
+		codeElement2.setPath("AllergyIntolerance.verificationStatus.coding");
+		//codeElement2.addType().setCode("CodeableConcept");
+		codeElement2.getBinding().setStrength(Enumerations.BindingStrength.REQUIRED);
+		codeElement2.getBinding().setValueSet("http://vs2");
+		codeElement2.setSliceName("vs2");
+		codeElement2.getBase().setPath("CodeableConcept.coding");
+
+		String encodedStructureDefinition = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sd);
+		System.out.println(encodedStructureDefinition);
+
+		String encodedStructureDefinition2 = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sdComposition);
+		System.out.println(encodedStructureDefinition2);
+		myStructureDefinitionDao.create(sd, new SystemRequestDetails());
+
+		myStructureDefinitionDao.create(sdComposition, new SystemRequestDetails());
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept()
+			.setCode("xxxx")
+			.setDisplay("XXXX");
+		String encodedCodeSystem = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs);
+
+		myCodeSystemDao.create(cs, new SystemRequestDetails());
+
+		CodeSystem cs2 = new CodeSystem();
+		cs2.setUrl("http://cs2");
+		cs2.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs2.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs2.addConcept()
+			.setCode("yyyy")
+			.setDisplay("YYYY");
+		String encodedCodeSystem2 = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs2);
+
+		myCodeSystemDao.create(cs2, new SystemRequestDetails());
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://cs");
+		vs.getCompose().addInclude().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-verification");
+		String encodedValueSet = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(vs);
+
+
+		myValueSetDao.create(vs, new SystemRequestDetails());
+
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://vs2");
+		vs2.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs2.getCompose().addInclude().setSystem("http://cs2");
+		String encodedValueSet2 = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(vs2);
+
+
+		myValueSetDao.create(vs2, new SystemRequestDetails());
+
+		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		Composition composition = new Composition();
+		composition.getMeta().addProfile("http://compositionprofile");
+		Composition.SectionComponent section = composition.addSection();
+		section.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://loinc.org").setCode("48765-2")));
+		section.addEntry().setReference("AllergyIntolerance/123");
+
+		AllergyIntolerance alint = new AllergyIntolerance();
+		alint.setId(new IdType(123));
+		alint.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		alint.getText().setDivAsString("<div>hello</div>");
+		alint.getMeta().addProfile("http://profile");
+		alint.getVerificationStatus().addCoding()
+			.setSystem("http://cs")
+			.setCode("xxxx")
+			.setDisplay("zzzz");
+		Bundle b = new Bundle();
+		b.addEntry().setResource(composition);
+		b.addEntry().setResource(alint);
+		alint.getClinicalStatus().addCoding().setCode("active").setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical");
+
+		String encodedResource = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
+		System.out.println(encodedResource);
+		OperationOutcome oo = validateAndReturnOutcome(b);
+		//OperationOutcome oo = validateAndReturnOutcome(composition);
+		//OperationOutcome oo = validateAndReturnOutcome(alint);
+
+		ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo).replace("\"resourceType\"", "\"resType\""));
+
+		OperationOutcome.OperationOutcomeIssueComponent badDisplayIssue;
+
+		assertThat(oo.getIssue()).hasSize(2);
+		badDisplayIssue = oo.getIssue().get(1);
+
+		OperationOutcome.OperationOutcomeIssueComponent noGoodCodings = oo.getIssue().get(1);
+		assertEquals("error", noGoodCodings.getSeverity().toCode());
+		assertEquals("None of the codings provided are in the value set 'ValueSet[http://vs]' (http://vs), and a coding from this value set is required) (codes = http://cs#8302-2)", noGoodCodings.getDiagnostics());
+
+
+	}
+
+
+	@Test
+	public void testValidateWrongDisplayOnRequiredBindingAllergyIntolerance_SIMPLIFIED() {
+		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.ERROR);
+		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.ERROR);
+		//path changed from resolve() to entry, got one error
+		String compositionSdStrSimple =
+			"""
+			{
+			  "resourceType": "StructureDefinition",
+			  "url": "http://compositionprofile",
+			  "status": "active",
+			  "abstract": false,
+			  "type": "Composition",
+			  "derivation": "constraint",
+			  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Composition",
+			  "differential": {
+				"element": [
+				  {
+						  "id": "Composition.section.entry",
+						  "path": "Composition.section.entry",
+						  "slicing": {
+							"discriminator": [ {
+							  "type": "profile",
+							  "path": "resolve()"
+							} ],
+							"ordered": false,
+							"rules": "open"
+						  }
+						},
+				  {
+					"id": "Composition.section.entry:allergyOrIntolerance",
+					"path": "Composition.section.entry",
+					"sliceName": "allergyOrIntolerance",
+					"min": 1,
+					"max": "*",
+					"type": [
+					  {
+						"code": "Reference",
+						"targetProfile": "http://profile"
+					  }
+					]
+				  }
+				]
+			  }
+			}
+			""";
+
+		StructureDefinition sdComposition = (StructureDefinition) myFhirContext.newJsonParser().parseResource(compositionSdStrSimple);
+
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://profile");
+		sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sd.setType("AllergyIntolerance");
+		sd.setAbstract(false);
+		sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/AllergyIntolerance");
+
+/*
+ "element": [
+      {
+        "id": "AllergyIntolerance.verificationStatus",
+        "path": "AllergyIntolerance.verificationStatus",
+        "min": 1,
+        "max": "1",
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://vs"
+        }
+      }
+ */
+		//Create the elementDefinition above
+		ElementDefinition codeElement = sd.getDifferential().addElement();
+		codeElement.setId("AllergyIntolerance.verificationStatus");
+		codeElement.setPath("AllergyIntolerance.verificationStatus");
+		codeElement.setMin(1);
+		codeElement.setMax("1");
+		codeElement.getBinding().setStrength(Enumerations.BindingStrength.REQUIRED);
+		codeElement.getBinding().setValueSet("http://vs");
+
+
+		/*
+		ElementDefinition codeElement = sd.getDifferential().addElement();
+		codeElement.setId("AllergyIntolerance.verificationStatus.coding");
+		codeElement.setPath("AllergyIntolerance.verificationStatus.coding");
+
+		//create a discriminator
+		List<ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent> theDiscriminator = new ArrayList<>();
+		theDiscriminator.add(new ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent()
+			.setType(ElementDefinition.DiscriminatorType.PATTERN)
+			.setPath("$this"));
+		codeElement.setSlicing(new ElementDefinition.ElementDefinitionSlicingComponent()
+			.setDiscriminator(theDiscriminator).setOrdered(false).setRules(ElementDefinition.SlicingRules.OPEN));
+
+		ElementDefinition codeElement1 = sd.getDifferential().addElement();
+		codeElement1.setId("AllergyIntolerance.verificationStatus.coding:vs1");
+		codeElement1.setPath("AllergyIntolerance.verificationStatus.coding");
+		codeElement1.getBinding().setStrength(Enumerations.BindingStrength.REQUIRED);
+		codeElement1.getBinding().setValueSet("http://vs");
+		codeElement1.setSliceName("vs1");
+		codeElement1.getBase().setPath("CodeableConcept.coding");
+*/
+		String encodedStructureDefinition = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sd);
+		System.out.println(encodedStructureDefinition);
+
+		String encodedStructureDefinition2 = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sdComposition);
+		System.out.println(encodedStructureDefinition2);
+		myStructureDefinitionDao.create(sd, new SystemRequestDetails());
+
+		myStructureDefinitionDao.create(sdComposition, new SystemRequestDetails());
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept()
+			.setCode("xxxx")
+			.setDisplay("XXXX");
+		String encodedCodeSystem = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs);
+
+		myCodeSystemDao.create(cs, new SystemRequestDetails());
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://cs");
+		String encodedValueSet = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(vs);
+
+		myValueSetDao.create(vs, new SystemRequestDetails());
+
+		Composition composition = new Composition();
+		composition.getMeta().addProfile("http://compositionprofile");
+		Composition.SectionComponent section = composition.addSection();
+		section.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://loinc.org").setCode("48765-2")));
+		section.addEntry().setReference("AllergyIntolerance/123");
+
+		AllergyIntolerance alint = new AllergyIntolerance();
+		alint.setId(new IdType(123));
+		alint.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		alint.getText().setDivAsString("<div>hello</div>");
+		alint.getMeta().addProfile("http://profile");
+		alint.getVerificationStatus().addCoding()
+			.setSystem("http://cs")
+			.setCode("xxxx")
+			.setDisplay("zzzz");
+		Bundle b = new Bundle();
+		b.addEntry().setResource(composition);
+		b.addEntry().setResource(alint);
+		alint.getClinicalStatus().addCoding().setCode("active").setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical");
+
+		String encodedResource = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
+		System.out.println(encodedResource);
+		OperationOutcome oo = validateAndReturnOutcome(b);
+		//OperationOutcome oo = validateAndReturnOutcome(composition);
+		//OperationOutcome oo = validateAndReturnOutcome(alint);
+
+		ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo).replace("\"resourceType\"", "\"resType\""));
+
+		OperationOutcome.OperationOutcomeIssueComponent badDisplayIssue;
+
+		assertThat(oo.getIssue()).hasSize(2);
+		badDisplayIssue = oo.getIssue().get(1);
+
+		OperationOutcome.OperationOutcomeIssueComponent noGoodCodings = oo.getIssue().get(1);
+		assertEquals("error", noGoodCodings.getSeverity().toCode());
+		assertEquals("None of the codings provided are in the value set 'ValueSet[http://vs]' (http://vs), and a coding from this value set is required) (codes = http://cs#8302-2)", noGoodCodings.getDiagnostics());
 	}
 
 	/**
