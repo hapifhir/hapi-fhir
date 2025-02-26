@@ -545,7 +545,6 @@ public class ConsentInterceptor {
 		RequestDetails requestDetails = getRequestDetailsForCurrentExportOperation(theParameters, theResource);
 
 		for (IConsentService next : myConsentService) {
-			// FIXME ND - do we want both canSeeResource() and willSeeResource()?
 			ConsentOutcome nextOutcome = next.canSeeResource(requestDetails, theResource, myContextConsentServices);
 			ConsentOperationStatusEnum status = nextOutcome.getStatus();
 			if (ConsentOperationStatusEnum.REJECT.equals(status)) {

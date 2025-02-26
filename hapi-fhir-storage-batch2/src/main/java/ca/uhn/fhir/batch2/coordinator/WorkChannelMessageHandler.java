@@ -261,12 +261,18 @@ class WorkChannelMessageHandler implements MessageHandler {
 			processingPreparation.ifPresentOrElse(
 					// all the setup is happy and committed.  Do the work.
 					process -> {
+						// FIXME ND - is there anything else we want to add to these hooks?
+						JobInstance jobInstance = process.myJobInstance;
+						WorkChunk workChunk = process.myWorkChunk;
 						try {
-							// FIXME nd - failure hooks
-							invokeBatch2ChunkPreProcessed(process.myJobInstance, process.myWorkChunk);
+							invokeBatch2ChunkPreProcessed(jobInstance, workChunk);
 							process.myStepExector.executeStep();
+							invokeBatch2ChunkCompletedNormally(jobInstance, workChunk);
+						} catch (Exception e) {
+							invokeBatch2ChunkCompletedHandleException(jobInstance, workChunk, e);
+							throw e;
 						} finally {
-							invokeBatch2ChunkCompleted(process.myJobInstance, process.myWorkChunk);
+							invokeBatch2ChunkCompleted(jobInstance, workChunk);
 						}
 					},
 					() -> {
@@ -314,6 +320,25 @@ class WorkChannelMessageHandler implements MessageHandler {
 			HookParams params =
 					new HookParams().add(JobInstance.class, theJobInstance).add(WorkChunk.class, theWorkChunk);
 			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED, params);
+		}
+	}
+
+	private void invokeBatch2ChunkCompletedNormally(JobInstance theJobInstance, WorkChunk theWorkChunk) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_NORMALLY)) {
+			HookParams params =
+					new HookParams().add(JobInstance.class, theJobInstance).add(WorkChunk.class, theWorkChunk);
+			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_NORMALLY, params);
+		}
+	}
+
+	private void invokeBatch2ChunkCompletedHandleException(
+			JobInstance theJobInstance, WorkChunk theWorkChunk, Exception theException) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_NORMALLY)) {
+			HookParams params = new HookParams()
+					.add(JobInstance.class, theJobInstance)
+					.add(WorkChunk.class, theWorkChunk)
+					.add(Exception.class, theException);
+			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_NORMALLY, params);
 		}
 	}
 
