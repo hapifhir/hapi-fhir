@@ -445,8 +445,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	@SuppressWarnings("unchecked")
 	private List<JpaPid> getMembersFromGroupWithFilter(
 			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
-		List<SearchParameterMap> maps = makeSearchParameterMaps(theParameters, theConsiderDateRange);
-		List<JpaPid> resPids = new ArrayList<>();
+		final List<SearchParameterMap> maps = makeSearchParameterMaps(theParameters, theConsiderDateRange);
+		final List<JpaPid> resPids = new ArrayList<>();
 		for (SearchParameterMap map : maps) {
 			ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType("Patient");
 			ourLog.debug(
@@ -471,19 +471,21 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	@Nonnull
 	private List<SearchParameterMap> makeSearchParameterMaps(
 			@Nonnull ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) {
-		RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
-		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(
+		final RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
+		final List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(
 				def, theParameters, theConsiderDateRange);
 		maps.forEach(map -> {
 			map.add(PARAM_HAS, makeGroupMemberHasOrListParam(theParameters));
-			map.add(PARAM_ID, makePatientIdStringOrListParam(theParameters));
+			if(theParameters.getPatientIds() != null && !theParameters.getPatientIds().isEmpty()) {
+				map.add(PARAM_ID, makePatientIdStringOrListParam(theParameters));
+			}
 		});
 		return maps;
 	}
 
 	@Nonnull
 	private StringOrListParam makePatientIdStringOrListParam(@Nonnull ExportPIDIteratorParameters theParameters) {
-		StringOrListParam patientIds = new StringOrListParam();
+		final StringOrListParam patientIds = new StringOrListParam();
 		theParameters.getPatientIds().forEach(patientId -> patientIds.addOr(new StringParam(patientId)));
 		return patientIds;
 	}
