@@ -446,7 +446,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					myClient.transaction().withBundle(input).execute();
 					return null;
 				} catch (ResourceVersionConflictException e) {
-					assertThat(e.toString()).contains("Error flushing transaction with resource types: [Patient] - The operation has failed with a client-assigned ID constraint failure");
+					assertThat(e.toString()).contains("Error flushing transaction with resource types: [Patient (x2)] - The operation has failed with a client-assigned ID constraint failure");
 					return e.toString();
 				}
 			};

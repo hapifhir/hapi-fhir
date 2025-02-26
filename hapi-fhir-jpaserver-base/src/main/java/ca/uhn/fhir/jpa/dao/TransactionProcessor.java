@@ -649,7 +649,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 				StringBuilder typesBuilder = new StringBuilder();
 				typesBuilder.append("[");
-				for (Iterator<Map.Entry<String, Integer>> iter = types.entrySet().iterator(); iter.hasNext(); ) {
+				for (Iterator<Map.Entry<String, Integer>> iter =
+								types.entrySet().iterator();
+						iter.hasNext(); ) {
 					Map.Entry<String, Integer> entry = iter.next();
 					typesBuilder.append(entry.getKey());
 					if (entry.getValue() > 1) {
