@@ -128,6 +128,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init740();
 		init760();
 		init780();
+		init820();
+	}
+
+	protected void init820() {
+		Builder version = forVersion(VersionEnum.V8_2_0);
+
+		version.onTable("BT2_JOB_INSTANCE")
+				.addColumn("20250221.1", "USER_DATA")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
 	}
 
 	protected void init780() {
