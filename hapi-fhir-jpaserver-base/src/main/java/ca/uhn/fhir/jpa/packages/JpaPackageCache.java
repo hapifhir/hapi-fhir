@@ -397,11 +397,17 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 								.map(t -> ((IPrimitiveType<?>) t).getValueAsString())
 								.orElse(null);
 						resourceEntity.setCanonicalUrl(url);
-						version = versionChild
-								.getAccessor()
-								.getFirstValueOrNull(resource)
-								.map(t -> ((IPrimitiveType<?>) t).getValueAsString())
-								.orElse(null);
+						
+						Optional<IBase> resourceVersion = versionChild
+							.getAccessor()
+							.getFirstValueOrNull(resource);
+						if(resourceVersion.isPresent() && resourceVersion.get() instanceof IPrimitiveType) {
+							version = ((IPrimitiveType<?>) resourceVersion.get()).getValueAsString();
+						} else if (resourceVersion.isPresent() && resourceVersion.get() instanceof IBaseBackboneElement) {
+							version = String.valueOf(myCtx.newFhirPath().evaluateFirst(resourceVersion.get(), "value", IPrimitiveType.class).orElse(null));
+						} else {
+							version = null;
+						}
 						resourceEntity.setCanonicalVersion(version);
 					}
 					myPackageVersionResourceDao.save(resourceEntity);
