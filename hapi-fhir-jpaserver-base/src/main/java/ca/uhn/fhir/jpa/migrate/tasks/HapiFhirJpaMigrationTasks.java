@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationCopyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationFixTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.SearchParameterTableName;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ColumnAndNullable;
@@ -128,6 +129,82 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init740();
 		init760();
 		init780();
+		init820();
+	}
+
+	protected void init820() {
+		Builder version = forVersion(VersionEnum.V8_2_0);
+		// Add HFJ_SPIDX_IDENTITY table
+		{
+			version.addIdGenerator("20250218.1", "SEQ_SPIDX_IDENTITY", 1);
+			Builder.BuilderAddTableByColumns spidxIdentity =
+					version.addTableByColumns("20250218.2", "HFJ_SPIDX_IDENTITY", "SP_IDENTITY_ID");
+
+			spidxIdentity.addColumn("SP_IDENTITY_ID").nonNullable().type(ColumnTypeEnum.INT);
+			spidxIdentity.addColumn("HASH_IDENTITY").nonNullable().type(ColumnTypeEnum.LONG);
+			spidxIdentity.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
+			spidxIdentity.addColumn("SP_NAME").nonNullable().type(ColumnTypeEnum.STRING, 100);
+
+			spidxIdentity
+					.addIndex("20250218.3", "HFJ_SPIDX_IDENTITY_ID")
+					.unique(true)
+					.withColumns("SP_IDENTITY_ID", "HASH_IDENTITY");
+		}
+
+		// migrate RES_TYPE, SP_NAME, HASH_IDENTITY to HFJ_SPIDX_IDENTITY
+		{
+			version.populateSearchParamIdentityTable("20250218.4", SearchParameterTableName.HFJ_SPIDX_COORDS);
+			version.populateSearchParamIdentityTable("20250218.5", SearchParameterTableName.HFJ_SPIDX_DATE);
+			version.populateSearchParamIdentityTable("20250218.6", SearchParameterTableName.HFJ_SPIDX_NUMBER);
+			version.populateSearchParamIdentityTable("20250218.7", SearchParameterTableName.HFJ_SPIDX_QUANTITY);
+			version.populateSearchParamIdentityTable("20250218.8", SearchParameterTableName.HFJ_SPIDX_QUANTITY_NRML);
+			version.populateSearchParamIdentityTable("20250218.9", SearchParameterTableName.HFJ_SPIDX_STRING);
+			version.populateSearchParamIdentityTable("20250218.10", SearchParameterTableName.HFJ_SPIDX_TOKEN);
+			version.populateSearchParamIdentityTable("20250218.11", SearchParameterTableName.HFJ_SPIDX_URI);
+		}
+
+		// add SP_IDENTITY_ID columt to HFJ_SPIDX_* tables
+		{
+			version.onTable("HFJ_SPIDX_COORDS")
+					.addColumn("20250226.1", "SP_IDENTITY_ID")
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+
+			version.onTable("HFJ_SPIDX_DATE")
+					.addColumn("20250226.2", "SP_IDENTITY_ID")
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+
+			version.onTable("HFJ_SPIDX_NUMBER")
+					.addColumn("20250226.3", "SP_IDENTITY_ID")
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+
+			version.onTable("HFJ_SPIDX_QUANTITY")
+					.addColumn("20250226.4", "SP_IDENTITY_ID")
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+
+			version.onTable("HFJ_SPIDX_QUANTITY_NRML")
+					.addColumn("20250226.5", "SP_IDENTITY_ID")
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+
+			version.onTable("HFJ_SPIDX_STRING")
+					.addColumn("20250226.6", "SP_IDENTITY_ID")
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+
+			version.onTable("HFJ_SPIDX_TOKEN")
+					.addColumn("20250226.7", "SP_IDENTITY_ID")
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+
+			version.onTable("HFJ_SPIDX_URI")
+					.addColumn("20250226.8", "SP_IDENTITY_ID")
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+		}
 	}
 
 	protected void init780() {

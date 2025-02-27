@@ -36,7 +36,7 @@ import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.MAX_SP
 public class SearchParamIndexIdentity {
 
 	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_IDENTITY", sequenceName = "SEQ_SPIDX_IDENTITY")
+	@SequenceGenerator(name = "SEQ_SPIDX_IDENTITY", sequenceName = "SEQ_SPIDX_IDENTITY", allocationSize = 1)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_IDENTITY")
 	@Column(name = "SP_IDENTITY_ID")
 	private Integer mySpIdentityId;
@@ -51,4 +51,32 @@ public class SearchParamIndexIdentity {
 	@FullTextField
 	@Column(name = "SP_NAME", length = MAX_SP_NAME)
 	private String myParamName;
+
+	public Integer getMySpIdentityId() {
+		return mySpIdentityId;
+	}
+
+	public Long getHashIdentity() {
+		return myHashIdentity;
+	}
+
+	public void setHashIdentity(Long theHashIdentity) {
+		this.myHashIdentity = theHashIdentity;
+	}
+
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+	public void setResourceType(String theResourceType) {
+		this.myResourceType = theResourceType;
+	}
+
+	public String getParamName() {
+		return myParamName;
+	}
+
+	public void setParamName(String theParamName) {
+		this.myParamName = theParamName;
+	}
 }

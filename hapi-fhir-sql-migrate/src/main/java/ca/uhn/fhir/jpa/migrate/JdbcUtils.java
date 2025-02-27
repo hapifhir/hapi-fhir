@@ -557,7 +557,7 @@ public class JdbcUtils {
 				.query(theSql, theArgs, new ColumnMapRowMapper()));
 	}
 
-	private static String massageIdentifier(DatabaseMetaData theMetadata, String theIdentifier) throws SQLException {
+	public static String massageIdentifier(DatabaseMetaData theMetadata, String theIdentifier) throws SQLException {
 		String retVal = theIdentifier;
 		if (theIdentifier == null) {
 			return null;

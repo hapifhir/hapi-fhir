@@ -34,12 +34,17 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PopulateSearchParameterIdentityTableTask extends BaseTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(PopulateSearchParameterIdentityTableTask.class);
-
+	public static final String POPULATE_SPIDX_IDENTITY_H2 =
+			ClasspathUtil.loadResource("ca/uhn/fhir/jpa/migrate/taskdef/populate_spidx_identity/h2.sql");
+	public static final String POPULATE_SPIDX_IDENTITY_DERBY =
+			ClasspathUtil.loadResource("ca/uhn/fhir/jpa/migrate/taskdef/populate_spidx_identity/derby.sql");
 	public static final String POPULATE_SPIDX_IDENTITY_POSTGRES =
 			ClasspathUtil.loadResource("ca/uhn/fhir/jpa/migrate/taskdef/populate_spidx_identity/postgres.sql");
 	public static final String POPULATE_SPIDX_IDENTITY_ORACLE =
 			ClasspathUtil.loadResource("ca/uhn/fhir/jpa/migrate/taskdef/populate_spidx_identity/oracle.sql");
 	public static final String POPULATE_SPIDX_IDENTITY_MSSQL =
+			ClasspathUtil.loadResource("ca/uhn/fhir/jpa/migrate/taskdef/populate_spidx_identity/mssql.sql");
+	public static final String POPULATE_SPIDX_IDENTITY_MYSQL =
 			ClasspathUtil.loadResource("ca/uhn/fhir/jpa/migrate/taskdef/populate_spidx_identity/mssql.sql");
 
 	private final SearchParameterTableName mySearchParameterTableName;
@@ -64,8 +69,11 @@ public class PopulateSearchParameterIdentityTableTask extends BaseTask {
 		String sql = null;
 
 		switch (getDriverType()) {
+			case DERBY_EMBEDDED:
+				sql = MessageFormat.format(POPULATE_SPIDX_IDENTITY_DERBY, mySearchParameterTableName);
+				break;
 			case H2_EMBEDDED:
-				// sql = POPULATE_SPIDX_IDENTITY_POSTGRES;
+				sql = MessageFormat.format(POPULATE_SPIDX_IDENTITY_H2, mySearchParameterTableName);
 				break;
 			case POSTGRES_9_4:
 			case COCKROACHDB_21_1:
@@ -79,10 +87,10 @@ public class PopulateSearchParameterIdentityTableTask extends BaseTask {
 				break;
 			case MARIADB_10_1:
 			case MYSQL_5_7:
-			case DERBY_EMBEDDED:
+				sql = MessageFormat.format(POPULATE_SPIDX_IDENTITY_MYSQL, mySearchParameterTableName);
+				break;
 			default:
-				// MARIADB_10_1, MYSQL_5_7, DERBY_EMBEDDED are not supported by this task
-				throw new IllegalStateException(Msg.code(64));
+				throw new IllegalStateException(Msg.code(2631) + "Driver is not supported or null.");
 		}
 
 		if (isNotBlank(sql)) {

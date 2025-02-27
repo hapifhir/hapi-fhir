@@ -4,11 +4,11 @@ INSERT INTO HFJ_SPIDX_IDENTITY (
     res_type,
     sp_name
 )
-WITH cte_min_id AS (
+WITH cte_sp_id AS (
     SELECT
         hash_identity,
         MIN(sp_id) AS min_sp_id
-    FROM {0} -- replace {0} with hfj_spidx_* table
+    FROM {0} -- replace with hfj_spidx_* table
     WHERE hash_identity NOT IN (
         SELECT hash_identity
         FROM hfj_spidx_identity
@@ -20,12 +20,8 @@ SELECT
     src.hash_identity,
     src.res_type,
     src.sp_name
-FROM {0} AS src -- replace {0} with hfj_spidx_* table
-JOIN cte_min_id AS cm
-   ON src.hash_identity = cm.hash_identity
-  AND src.sp_id         = cm.min_sp_id
+FROM {0} AS src -- replace with hfj_spidx_* table
+JOIN cte_sp_id
+   ON src.hash_identity = cte_sp_id.hash_identity
+  AND src.sp_id         = cte_sp_id.min_sp_id
 ORDER BY src.res_type, src.sp_name;
-
-SELECT DISTINCT on (hash_identity)
-    hash_identity
-FROM hfj_spidx_token
