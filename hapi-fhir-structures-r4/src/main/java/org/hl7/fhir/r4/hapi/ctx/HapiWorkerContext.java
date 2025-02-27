@@ -413,6 +413,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public List<StructureDefinition> fetchTypeDefinitions(String s) {
+		return List.of(fetchTypeDefinition(s));
+	}
+
+	@Override
 	public String getLinkForUrl(String corePath, String url) {
 		throw new UnsupportedOperationException(Msg.code(279));
 	}
@@ -440,6 +445,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public <T extends Resource> T fetchResource(Class<T> theClass, String theUri, Resource resource) {
+		return fetchResource(theClass, theUri);
+	}
+
+	@Override
 	public <T extends org.hl7.fhir.r4.model.Resource> T fetchResourceWithException(Class<T> theClass, String theUri)
 			throws FHIRException {
 		T retVal = fetchResource(theClass, theUri);
@@ -447,6 +457,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			throw new FHIRException(Msg.code(281) + "Could not find resource: " + theUri);
 		}
 		return retVal;
+	}
+
+	@Override
+	public <T extends Resource> List<T> fetchResourcesByType(Class<T> aClass) {
+		return List.of();
 	}
 
 	@Override
