@@ -1,0 +1,33 @@
+{
+	"resourceType": "StructureDefinition",
+	"url": "http://example.org/fhir/StructureDefinition/TestObservation",
+	"name": "TestObservation",
+	"status": "draft",
+	"fhirVersion": "4.0.1",
+	"kind": "resource",
+	"abstract": false,
+	"type": "Observation",
+	"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+	"derivation": "constraint",
+	"differential": {
+		"element":  [
+			{
+				"id": "Observation.status",
+				"path": "Observation.status",
+				"min": 0
+			},
+			{
+				"id": "Observation.code",
+				"path": "Observation.code",
+				"binding" : {
+					"extension" : [{
+						"url" : "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+						"valueString" : "ObservationCode"
+					}],
+					"strength" : "required",
+					"valueSet" : "http://acme.org/value-set-1"
+				}
+			}
+		]
+	}
+}
