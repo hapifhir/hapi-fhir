@@ -121,7 +121,7 @@ public class MetadataConformanceDstu3Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(405, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET\"/></issue></OperationOutcome>", output);
+			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>", output);
 		}
 
 		/*
