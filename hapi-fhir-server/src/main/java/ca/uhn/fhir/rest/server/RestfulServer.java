@@ -189,7 +189,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Constructor
 	 */
 	public RestfulServer(FhirContext theCtx) {
-		this(theCtx, new InterceptorService("RestfulServer"));
+		this(theCtx, new InterceptorService());
 	}
 
 	public RestfulServer(FhirContext theCtx, IInterceptorService theInterceptorService) {

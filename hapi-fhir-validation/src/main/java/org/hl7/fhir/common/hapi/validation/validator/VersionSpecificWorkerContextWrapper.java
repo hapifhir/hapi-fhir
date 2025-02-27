@@ -193,6 +193,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public Parameters getExpansionParameters() {
+		if (Objects.isNull(myExpansionProfile)) {
+			myExpansionProfile = new Parameters();
+		}
 		return myExpansionProfile;
 	}
 
@@ -360,6 +363,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public ValueSetExpansionOutcome expandVS(ValueSet valueSet, boolean b, boolean b1, int i) {
+		return null;
+	}
+
+	@Override
 	public ValueSetExpansionOutcome expandVS(
 			Resource src,
 			ElementDefinition.ElementDefinitionBindingComponent binding,
@@ -370,10 +378,20 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public ValueSetExpansionOutcome expandVS(
+			ITerminologyOperationDetails iTerminologyOperationDetails,
+			ValueSet.ConceptSetComponent conceptSetComponent,
+			boolean b,
+			boolean b1)
+			throws TerminologyServiceException {
+		return null;
+	}
+
+	/*@Override
 	public ValueSetExpansionOutcome expandVS(ValueSet.ConceptSetComponent inc, boolean hierarchical, boolean noInactive)
 			throws TerminologyServiceException {
 		throw new UnsupportedOperationException(Msg.code(664));
-	}
+	}*/
 
 	@Override
 	public Locale getLocale() {
@@ -687,6 +705,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public ValueSetExpansionOutcome expandVS(
 			ValueSet source, boolean cacheOk, boolean heiarchical, boolean incompleteOk) {
+		return null;
+	}
+
+	@Override
+	public ValueSetExpansionOutcome expandVS(String s, boolean b, boolean b1, int i) {
 		return null;
 	}
 
