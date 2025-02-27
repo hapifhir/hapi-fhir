@@ -403,7 +403,7 @@ public class XmlParserDstu2_1Test {
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#" + organizationUuid, org.getIdElement().getValue());
+		assertEquals( organizationUuid, org.getIdElement().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 
 		// And re-encode a second time
@@ -817,7 +817,7 @@ public class XmlParserDstu2_1Test {
 	public void testEncodeBundleWithContained() {
 		DiagnosticReport rpt = new DiagnosticReport();
 		rpt.addResult().setResource(new Observation().setCode(new CodeableConcept().setText("Sharp1")).setId("#1"));
-		rpt.addResult().setResource(new Observation().setCode(new CodeableConcept().setText("Uuid1")).setId("urn:uuid:UUID1"));
+		rpt.addResult().setResource(new Observation().setCode(new CodeableConcept().setText("Uuid1")).setId("https//example.org/UUID1"));
 
 		Bundle b = new Bundle();
 		b.addEntry().setResource(rpt);
