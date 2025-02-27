@@ -1019,11 +1019,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {
 		@Override
-		public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url) {
-			return ReferenceValidationPolicy.CHECK_VALID;
-		}
-
-		@Override
 		public EnumSet<ResourceValidationAction> policyForResource(IResourceValidator validator, Object appContext,
 																   org.hl7.fhir.r5.model.StructureDefinition type, String path) {
 			return EnumSet.allOf(ResourceValidationAction.class);
@@ -1048,6 +1043,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 
 		@Override
+		public SpecialValidationAction policyForSpecialValidation(IResourceValidator validator, Object appContext, SpecialValidationRule rule, String stackPath, Element resource, Element element) {
+			return null;
+		}
+
+		@Override
 		public List<org.hl7.fhir.r5.model.StructureDefinition> getImpliedProfilesForResource(IResourceValidator validator, Object appContext, String stackPath, ElementDefinition definition, org.hl7.fhir.r5.model.StructureDefinition structure, Element resource, boolean valid, IMessagingServices msgServices, List<ValidationMessage> messages) {
 			return List.of();
 		}
@@ -1068,6 +1068,21 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		@Override
 		public boolean isSuppressMessageId(String path, String messageId) {
 			return false;
+		}
+
+		@Override
+		public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url, ReferenceDestinationType destinationType) {
+			return ReferenceValidationPolicy.CHECK_VALID;
+		}
+
+		@Override
+		public IValidationPolicyAdvisor getPolicyAdvisor() {
+			return this;
+		}
+
+		@Override
+		public IValidationPolicyAdvisor setPolicyAdvisor(IValidationPolicyAdvisor policyAdvisor) {
+			return this;
 		}
 
 		@Override
