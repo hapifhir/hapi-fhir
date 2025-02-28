@@ -715,7 +715,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getCode().addCoding().setCode("obs2").setSystem("Some System").setDisplay("Body weight as measured by me");
 			obs.setStatus(Observation.ObservationStatus.FINAL);
 			obs.setValue(new Quantity(81));
-			obs.setSubject(new Reference(p.getId()));
+			obs.setSubject(new Reference("#" +p.getId()));
 			obs.setEncounter(new Reference(encounter.getId()));
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
@@ -1024,6 +1024,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			Patient p = new Patient();
 			p.setId("pat");
+			//p.getContained().add(org);
 			p.addName().setFamily("Smith").addGiven("John");
 			p.getManagingOrganization().setReference(org.getId());
 
@@ -1035,6 +1036,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			Device d = new Device();
+			//d.getContained().add(org);
 			d.setId("dev");
 			d.getOwner().setReference(org.getId());
 

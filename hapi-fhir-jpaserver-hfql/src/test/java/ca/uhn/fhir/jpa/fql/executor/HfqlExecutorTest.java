@@ -198,7 +198,7 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		IHfqlExecutionResult.Row row = result.getNextRow();
 		assertEquals(IHfqlExecutionResult.ROW_OFFSET_ERROR, row.getRowOffset());
-		assertEquals("Failed to evaluate FHIRPath expression \"foo()\". Error: HAPI-2404: Error in ?? at 1, 1: The name foo is not a valid function name", row.getRowValues().get(0));
+		assertEquals("Failed to evaluate FHIRPath expression \"foo()\". Error: HAPI-2404: Error @1, 1: The name foo is not a valid function name", row.getRowValues().get(0));
 		assertFalse(result.hasNext());
 	}
 
