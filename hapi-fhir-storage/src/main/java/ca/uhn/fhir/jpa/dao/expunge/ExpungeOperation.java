@@ -106,7 +106,7 @@ public class ExpungeOperation<T extends IResourcePersistentId<?>, V extends IRes
 	private List<T> findHistoricalVersionsOfDeletedResources() {
 		List<T> retVal = getPartitionAwareSupplier()
 				.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfDeletedResources(
-						myResourceName, myResourceId, myRemainingCount.get()));
+						myResourceName, myResourceId, myRemainingCount.get(), "weeee im breaking the API"));
 
 		ourLog.debug("Found {} historical versions", retVal.size());
 		return retVal;
