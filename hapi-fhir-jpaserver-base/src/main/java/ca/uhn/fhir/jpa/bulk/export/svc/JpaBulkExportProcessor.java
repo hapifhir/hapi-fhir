@@ -475,27 +475,26 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		final List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(
 				def, theParameters, theConsiderDateRange);
 		maps.forEach(map -> {
-			map.add(PARAM_HAS, makeGroupMemberHasOrListParam(theParameters));
-			if (theParameters.getPatientIds() != null
-					&& !theParameters.getPatientIds().isEmpty()) {
-				map.add(PARAM_ID, makePatientIdStringOrListParam(theParameters));
+			map.add(PARAM_HAS, makeGroupMemberHasOrListParam(theParameters.getGroupId()));
+			final List<String> patientIds = theParameters.getPatientIds();
+			if (patientIds != null && !patientIds.isEmpty()) {
+				map.add(PARAM_ID, makePatientIdStringOrListParam(patientIds));
 			}
 		});
 		return maps;
 	}
 
 	@Nonnull
-	private StringOrListParam makePatientIdStringOrListParam(@Nonnull ExportPIDIteratorParameters theParameters) {
-		final StringOrListParam patientIds = new StringOrListParam();
-		theParameters.getPatientIds().forEach(patientId -> patientIds.addOr(new StringParam(patientId)));
-		return patientIds;
+	private StringOrListParam makePatientIdStringOrListParam(@Nonnull List<String> thePatientIds) {
+		final StringOrListParam stringOrListParam = new StringOrListParam();
+		thePatientIds.forEach(patientId -> stringOrListParam.addOr(new StringParam(patientId)));
+		return stringOrListParam;
 	}
 
 	@Nonnull
-	private HasOrListParam makeGroupMemberHasOrListParam(@Nonnull ExportPIDIteratorParameters theParameters) {
-		final HasOrListParam hasOrListParam = new HasOrListParam();
-		hasOrListParam.addOr(new HasParam("Group", "member", "_id", theParameters.getGroupId()));
-		return hasOrListParam;
+	private HasOrListParam makeGroupMemberHasOrListParam(@Nonnull String theGroupId) {
+		final HasParam hasParam = new HasParam("Group", "member", "_id", theGroupId);
+		return new HasOrListParam().addOr(hasParam);
 	}
 
 	/**
