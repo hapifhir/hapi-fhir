@@ -21,8 +21,12 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
@@ -53,6 +57,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.retry.RetryPolicy;
@@ -78,6 +83,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
+import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -636,11 +642,15 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void retryWithTooLargeExceptions() {
+	public void failingWorkChunks_withLargeErrorMsgs_shouldNotErrorOutTheJob() {
 		// setup
 		assertTrue(myRetryPolicyProvider instanceof RetryProviderOverride);
+
 		String jobId = getMethodNameForJobId();
 		AtomicInteger counter = new AtomicInteger();
+
+		// we want an error message larger than can be contained in the db
+		String errorMsg = RandomTextUtils.newSecureRandomAlphaNumericString(ERROR_MSG_MAX_LENGTH + 100);
 
 		// we want 1 more error than the allowed maximum
 		// otherwise we won't be updating the error chunk to have
@@ -655,8 +665,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// create a job that fails and throws a large error
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
 			counter.getAndIncrement();
-			throw new RuntimeException(RandomTextUtils.newSecureRandomAlphaNumericString(700));
-
+			throw new RuntimeException(errorMsg);
 		};
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> last = (step, sink) -> {
 			// we don't care; we'll never get here
@@ -689,7 +698,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 		String instanceId = startResponse.getInstanceId();
 
-		// waiting for the job failure
+		// waiting for the multitude of failures
 		await().until(() -> {
 			myJobMaintenanceService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
@@ -697,6 +706,17 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				+ instance.getInstanceId() + ". Status: " + instance.getStatus());
 			return counter.get() > errorCount - 1;
 		});
+
+		// verify
+		Iterator<WorkChunk> iterator = myJobPersistence.fetchAllWorkChunksIterator(instanceId, true);
+		List<WorkChunk> listOfChunks = new ArrayList<>();
+		iterator.forEachRemaining(listOfChunks::add);
+		assertEquals(1, listOfChunks.size());
+		WorkChunk workChunk = listOfChunks.get(0);
+		assertEquals(WorkChunkStatusEnum.FAILED, workChunk.getStatus());
+		// should contain some of the original error msg, but not all
+		assertTrue(workChunk.getErrorMessage().contains(errorMsg.substring(0, 100)));
+		assertTrue(workChunk.getErrorMessage().startsWith("Too many errors"));
 	}
 
 	@Test
