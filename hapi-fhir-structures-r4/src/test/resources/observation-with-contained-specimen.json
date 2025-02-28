@@ -1,0 +1,14 @@
+{
+	"resourceType": "Observation",
+	"id": "O1",
+	"contained": [
+		{
+			"resourceType": "Specimen",
+			"id": "contained-id"
+		}
+	],
+	"status": "final",
+	"specimen": {
+		"reference": "#contained-id"
+	}
+}
