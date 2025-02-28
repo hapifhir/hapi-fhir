@@ -19,31 +19,27 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class CareGapsOperationProvider {
-	private final ICareGapsServiceFactory myR4CareGapsProcessorFactory;
-	private final StringTimePeriodHandler myStringTimePeriodHandler;
+	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
 
-	public CareGapsOperationProvider(
-			ICareGapsServiceFactory theR4CareGapsProcessorFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+	private final ICareGapsServiceFactory myR4CareGapsProcessorFactory;
+
+	public CareGapsOperationProvider(ICareGapsServiceFactory theR4CareGapsProcessorFactory) {
 		myR4CareGapsProcessorFactory = theR4CareGapsProcessorFactory;
-		myStringTimePeriodHandler = theStringTimePeriodHandler;
 	}
 
 	/**
@@ -72,19 +68,7 @@ public class CareGapsOperationProvider {
 	 *
 	 * @param theRequestDetails generally auto-populated by the HAPI server
 	 *                          framework.
-	 * @param thePeriodStart       the start of the gaps through period
-	 * @param thePeriodEnd         the end of the gaps through period
-	 * @param theSubject           a reference to either a Patient or Group for which
-	 *                          the gaps in care report(s) will be generated
-	 * @param theStatus            the status code of gaps in care reports that will be
-	 *                          included in the result
-	 * @param theMeasureId         the id of Measure(s) for which the gaps in care
-	 *                          report(s) will be calculated
-	 * @param theMeasureIdentifier the identifier of Measure(s) for which the gaps in
-	 *                          care report(s) will be calculated
-	 * @param theMeasureUrl        the canonical URL of Measure(s) for which the gaps
-	 *                          in care report(s) will be calculated
-	 * @param theNonDocument    defaults to 'false' which returns standard 'document' bundle for `$care-gaps`.
+	 * @param theParams          Please refer to the javadoc for {@link CareGapsParams} for more information on the parameters.
 	 *   If 'true', this will return summarized subject bundle with only detectedIssue resource.
 	 * @return Parameters of bundles of Care Gap Measure Reports
 	 */
@@ -94,29 +78,20 @@ public class CareGapsOperationProvider {
 					"Implements the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/OperationDefinition-care-gaps.html\">$care-gaps</a> operation found in the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/index.html\">Da Vinci DEQM FHIR Implementation Guide</a> which is an extension of the <a href=\"http://build.fhir.org/operation-measure-care-gaps.html\">$care-gaps</a> operation found in the <a href=\"http://hl7.org/fhir/R4/clinicalreasoning-module.html\">FHIR Clinical Reasoning Module</a>.")
 	@Operation(name = ProviderConstants.CR_OPERATION_CARE_GAPS, idempotent = true, type = Measure.class)
 	public Parameters careGapsReport(
-			RequestDetails theRequestDetails,
-			@OperationParam(name = "periodStart") String thePeriodStart,
-			@OperationParam(name = "periodEnd") String thePeriodEnd,
-			@OperationParam(name = "subject") String theSubject,
-			@OperationParam(name = "status") List<String> theStatus,
-			@OperationParam(name = "measureId") List<String> theMeasureId,
-			@OperationParam(name = "measureIdentifier") List<String> theMeasureIdentifier,
-			@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl,
-			@OperationParam(name = "nonDocument") BooleanType theNonDocument) {
+			RequestDetails theRequestDetails, @EmbeddedOperationParams CareGapsParams theParams) {
 
 		return myR4CareGapsProcessorFactory
 				.create(theRequestDetails)
 				.getCareGapsReport(
-						myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails),
-						myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails),
-						theSubject,
-						theStatus,
-						theMeasureId == null
-								? null
-								: theMeasureId.stream().map(IdType::new).collect(Collectors.toList()),
-						theMeasureIdentifier,
-						theMeasureUrl,
-						Optional.ofNullable(theNonDocument)
+						theParams.getPeriodStart(),
+						theParams.getPeriodEnd(),
+						theParams.getSubject(),
+						theParams.getStatus(),
+						// LUKETODO:  why can't we have a List<IdType> @OperationParam?
+						theParams.getMeasureId(),
+						theParams.getMeasureIdentifier(),
+						theParams.getMeasureUrl(),
+						Optional.ofNullable(theParams.getNonDocument())
 								.map(BooleanType::getValue)
 								.orElse(false));
 	}
