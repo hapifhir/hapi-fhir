@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,8 @@ public class SubscriptionTestConfig {
 	private FhirContext myFhirContext;
 	@Autowired
 	private IChannelNamer myChannelNamer;
+	@Autowired
+	private RetryPolicyProvider myRetryPolicyProvider;
 
 	@Primary
 	@Bean(name = "myJpaValidationSupportChain")
@@ -52,7 +55,7 @@ public class SubscriptionTestConfig {
 
 	@Bean
 	public IChannelFactory subscribableChannelFactory() {
-		return new LinkedBlockingChannelFactory(myChannelNamer);
+		return new LinkedBlockingChannelFactory(myChannelNamer, myRetryPolicyProvider);
 	}
 
 	@Bean
