@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,17 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.type.SqlTypes;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseHasResource extends BasePartitionable
-		implements IBaseResourceEntity, IBasePersistedResource<JpaPid> {
+public abstract class BaseHasResource<T>
+		implements IBaseResourceEntity<T>, IBasePersistedResource<JpaPid>, Serializable {
 
 	public static final String RES_PUBLISHED = "RES_PUBLISHED";
 	public static final String RES_UPDATED = "RES_UPDATED";
@@ -48,6 +51,7 @@ public abstract class BaseHasResource extends BasePartitionable
 	@Column(name = "RES_VERSION", nullable = true, length = 7)
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private FhirVersionEnum myFhirVersion;
 
 	@Column(name = "HAS_TAGS", nullable = false)

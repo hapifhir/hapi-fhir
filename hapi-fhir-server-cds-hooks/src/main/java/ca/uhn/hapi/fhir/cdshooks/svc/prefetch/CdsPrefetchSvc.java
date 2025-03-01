@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,18 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchPointcutContextJson;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,15 +48,20 @@ public class CdsPrefetchSvc {
 	private final CdsPrefetchFhirClientSvc myResourcePrefetchFhirClient;
 	private final ICdsHooksDaoAuthorizationSvc myCdsHooksDaoAuthorizationSvc;
 
+	@Nullable
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	public CdsPrefetchSvc(
 			CdsResolutionStrategySvc theCdsResolutionStrategySvc,
 			CdsPrefetchDaoSvc theResourcePrefetchDao,
 			CdsPrefetchFhirClientSvc theResourcePrefetchFhirClient,
-			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc) {
+			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc,
+			@Nullable IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myCdsResolutionStrategySvc = theCdsResolutionStrategySvc;
 		myResourcePrefetchDao = theResourcePrefetchDao;
 		myResourcePrefetchFhirClient = theResourcePrefetchFhirClient;
 		myCdsHooksDaoAuthorizationSvc = theCdsHooksDaoAuthorizationSvc;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
 	public void augmentRequest(CdsServiceRequestJson theCdsServiceRequestJson, ICdsServiceMethod theServiceMethod) {
@@ -106,14 +116,29 @@ public class CdsPrefetchSvc {
 					template, theCdsServiceRequestJson.getContext(), myResourcePrefetchDao.getFhirContext());
 			ourLog.info("missing: {}.  Fetching with {}", theMissingPrefetch, url);
 			IBaseResource resource;
-			if (source == CdsResolutionStrategyEnum.FHIR_CLIENT) {
-				resource = myResourcePrefetchFhirClient.resourceFromUrl(theCdsServiceRequestJson, url);
-			} else if (source == CdsResolutionStrategyEnum.DAO) {
-				resource = getResourceFromDaoWithPermissionCheck(url);
-			} else {
-				// should never happen
-				throw new IllegalStateException(Msg.code(2388) + "Unexpected strategy " + theStrategies);
+
+			CdsHookPrefetchPointcutContextJson cdsHookPrefetchContext = new CdsHookPrefetchPointcutContextJson();
+			cdsHookPrefetchContext.setTemplate(template);
+			cdsHookPrefetchContext.setQuery(url);
+			cdsHookPrefetchContext.setCdsResolutionStrategy(source);
+
+			callCdsPrefetchRequestHooks(cdsHookPrefetchContext, theCdsServiceRequestJson);
+
+			try {
+				if (source == CdsResolutionStrategyEnum.FHIR_CLIENT) {
+					resource = myResourcePrefetchFhirClient.resourceFromUrl(theCdsServiceRequestJson, url);
+				} else if (source == CdsResolutionStrategyEnum.DAO) {
+					resource = getResourceFromDaoWithPermissionCheck(url);
+				} else {
+					// should never happen
+					throw new IllegalStateException(Msg.code(2388) + "Unexpected strategy " + theStrategies);
+				}
+			} catch (Exception e) {
+				callCdsPrefetchFailedHooks(cdsHookPrefetchContext, theCdsServiceRequestJson, e);
+				throw e;
 			}
+
+			callCdsPrefetchResponseHooks(cdsHookPrefetchContext, theCdsServiceRequestJson, resource);
 
 			theCdsServiceRequestJson.addPrefetch(key, resource);
 		}
@@ -133,5 +158,45 @@ public class CdsPrefetchSvc {
 		Set<String> retval = new HashSet<>(expectedPrefetchKeys);
 		retval.removeAll(actualPrefetchKeys);
 		return retval;
+	}
+
+	private void callCdsPrefetchRequestHooks(
+			CdsHookPrefetchPointcutContextJson theCdsHookPrefetchContext,
+			CdsServiceRequestJson theCdsServiceRequestJson) {
+		if (myInterceptorBroadcaster != null && myInterceptorBroadcaster.hasHooks(Pointcut.CDS_HOOK_PREFETCH_REQUEST)) {
+			HookParams params = new HookParams();
+			params.add(CdsHookPrefetchPointcutContextJson.class, theCdsHookPrefetchContext);
+			params.add(CdsServiceRequestJson.class, theCdsServiceRequestJson);
+			myInterceptorBroadcaster.callHooks(Pointcut.CDS_HOOK_PREFETCH_REQUEST, params);
+		}
+	}
+
+	private void callCdsPrefetchResponseHooks(
+			CdsHookPrefetchPointcutContextJson theCdsHookPrefetchContext,
+			CdsServiceRequestJson theCdsServiceRequestJson,
+			IBaseResource theResource) {
+		if (myInterceptorBroadcaster != null
+				&& myInterceptorBroadcaster.hasHooks(Pointcut.CDS_HOOK_PREFETCH_RESPONSE)) {
+			HookParams params = new HookParams();
+			params.add(CdsHookPrefetchPointcutContextJson.class, theCdsHookPrefetchContext);
+			params.add(CdsServiceRequestJson.class, theCdsServiceRequestJson);
+			params.add(IBaseResource.class, theResource);
+
+			myInterceptorBroadcaster.callHooks(Pointcut.CDS_HOOK_PREFETCH_RESPONSE, params);
+		}
+	}
+
+	private void callCdsPrefetchFailedHooks(
+			CdsHookPrefetchPointcutContextJson theCdsHookPrefetchContext,
+			CdsServiceRequestJson theCdsServiceRequestJson,
+			Exception theException) {
+		if (myInterceptorBroadcaster != null && myInterceptorBroadcaster.hasHooks(Pointcut.CDS_HOOK_PREFETCH_FAILED)) {
+			HookParams params = new HookParams();
+			params.add(CdsHookPrefetchPointcutContextJson.class, theCdsHookPrefetchContext);
+			params.add(CdsServiceRequestJson.class, theCdsServiceRequestJson);
+			params.add(Exception.class, theException);
+
+			myInterceptorBroadcaster.callHooks(Pointcut.CDS_HOOK_PREFETCH_FAILED, params);
+		}
 	}
 }

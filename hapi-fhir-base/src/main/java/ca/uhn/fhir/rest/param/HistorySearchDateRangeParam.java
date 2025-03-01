@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,22 @@
  */
 package ca.uhn.fhir.rest.param;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class HistorySearchDateRangeParam extends DateRangeParam {
+	/**
+	 * Constructor
+	 *
+	 * @since 8.0.0
+	 */
+	public HistorySearchDateRangeParam() {
+		this(Collections.emptyMap(), new DateRangeParam(), null);
+	}
+
+	/**
+	 * Constructor
+	 */
 	public HistorySearchDateRangeParam(
 			Map<String, String[]> theParameters, DateRangeParam theDateRange, Integer theOffset) {
 		super(theDateRange);

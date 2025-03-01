@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
@@ -31,10 +33,12 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -45,6 +49,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -59,7 +65,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_VALUESET_URL",
-					columnNames = {"URL", "VER"})
+					columnNames = {"PARTITION_ID", "URL", "VER"})
 		},
 		indexes = {
 			// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index
@@ -67,7 +73,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 			@Index(name = "FK_TRMVALUESET_RES", columnList = "RES_ID")
 		})
 @Entity()
-public class TermValueSet implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermValueSet extends BasePartitionable implements Serializable {
 	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_URL_LENGTH = 200;
@@ -86,16 +93,26 @@ public class TermValueSet implements Serializable {
 	@Column(name = "VER", nullable = true, length = MAX_VER_LENGTH)
 	private String myVersion;
 
-	@OneToOne()
-	@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
-			updatable = false,
+	@ManyToOne()
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_TRMVALUESET_RES"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResourcePid;
 
 	@Column(name = "VSNAME", nullable = true, length = MAX_NAME_LENGTH)
@@ -113,6 +130,7 @@ public class TermValueSet implements Serializable {
 	private Long myTotalConceptDesignations;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
 	private TermValueSetPreExpansionStatusEnum myExpansionStatus;
 
@@ -142,6 +160,10 @@ public class TermValueSet implements Serializable {
 		return myId;
 	}
 
+	public IdAndPartitionId getPartitionedId() {
+		return IdAndPartitionId.forId(myId, this);
+	}
+
 	public String getUrl() {
 		return myUrl;
 	}
@@ -160,6 +182,8 @@ public class TermValueSet implements Serializable {
 
 	public TermValueSet setResource(ResourceTable theResource) {
 		myResource = theResource;
+		myResourcePid = theResource.getId().getId();
+		setPartitionId(theResource.getPartitionId());
 		return this;
 	}
 
@@ -267,13 +291,14 @@ public class TermValueSet implements Serializable {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("id", myId)
 				.append("url", myUrl)
-				.append(myResource != null ? ("resource=" + myResource.toString()) : ("resource=(null)"))
+				.append("version", myVersion)
 				.append("resourcePid", myResourcePid)
 				.append("name", myName)
-				.append(myConcepts != null ? ("concepts - size=" + myConcepts.size()) : ("concepts=(null)"))
+				.append(myConcepts != null ? ("conceptCount=" + myConcepts.size()) : ("concepts=(null)"))
 				.append("totalConcepts", myTotalConcepts)
 				.append("totalConceptDesignations", myTotalConceptDesignations)
 				.append("expansionStatus", myExpansionStatus)
+				.append(myResource != null ? ("resId=" + myResource) : ("resource=(null)"))
 				.toString();
 	}
 }

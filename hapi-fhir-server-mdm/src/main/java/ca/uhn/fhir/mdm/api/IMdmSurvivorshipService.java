@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBase;
 
 /**
@@ -78,5 +79,5 @@ public interface IMdmSurvivorshipService {
 	 * @param <T> - Resource type to apply the survivorship rules to
 	 */
 	<T extends IBase> T rebuildGoldenResourceWithSurvivorshipRules(
-			T theGoldenResource, MdmTransactionContext theMdmTransactionContext);
+			RequestDetails theRequestDetails, T theGoldenResource, MdmTransactionContext theMdmTransactionContext);
 }

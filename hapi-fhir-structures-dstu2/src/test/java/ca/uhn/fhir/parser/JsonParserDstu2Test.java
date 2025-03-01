@@ -50,6 +50,7 @@ import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.testprofile.CommunicationProfile;
 import ca.uhn.fhir.parser.testprofile.PatientProfile;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.utilities.UuidUtils;
 import ca.uhn.fhir.util.TestUtil;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -1705,14 +1706,16 @@ public class JsonParserDstu2Test {
 
 		String enc = parser.encodeResourceToString(o);
 		ourLog.info(enc);
+		String patientUuid = UuidUtils.findFirstUUID(enc);
+		assertNotNull(patientUuid);
 
 		//@formatter:off
 		assertThat(enc).containsSubsequence(
 			"\"resourceType\": \"Observation\"",
 			"\"contained\": [",
 			"\"resourceType\": \"Patient\",",
-			"\"id\": \"1\"",
-			"\"reference\": \"#1\""
+			"\"id\": \"" + patientUuid + "\"",
+			"\"reference\": \"#" + patientUuid + "\""
 		);
 		//@formatter:on
 

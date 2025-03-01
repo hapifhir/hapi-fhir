@@ -230,7 +230,7 @@ public class HapiSchemaMigrationTest {
 		final Object queryResultValueVal = queryResultValuesVal.iterator().next();
 		assertThat(queryResultValueVal).isInstanceOf(Number.class);
 		if (queryResultValueVal instanceof Number queryResultNumber) {
-			assertThat(queryResultNumber.intValue()).isEqualTo(2);
+			assertThat(queryResultNumber.intValue()).isEqualTo(3);
 		}
 
 		assertThat(nullValVcCount).hasSize(1);
@@ -244,7 +244,7 @@ public class HapiSchemaMigrationTest {
 
 		final Object allCountValue = allCount.get(0).values().iterator().next();
 		if (allCountValue instanceof Number allCountNumber) {
-			assertThat(allCountNumber.intValue()).isEqualTo(2);
+			assertThat(allCountNumber.intValue()).isEqualTo(3);
 		}
 
 		try (final Connection connection = theDatabase.getDataSource().getConnection()) {

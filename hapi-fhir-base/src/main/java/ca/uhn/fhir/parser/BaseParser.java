@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.CollectionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
+import ca.uhn.fhir.util.ResourceUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nullable;
@@ -105,7 +106,6 @@ public abstract class BaseParser implements IParser {
 	private static final Set<String> notEncodeForContainedResource =
 			new HashSet<>(Arrays.asList("security", "versionId", "lastUpdated"));
 
-	private FhirTerser.ContainedResources myContainedResources;
 	private boolean myEncodeElementsAppliesToChildResourcesOnly;
 	private final FhirContext myContext;
 	private Collection<String> myDontEncodeElements;
@@ -183,12 +183,15 @@ public abstract class BaseParser implements IParser {
 	}
 
 	private String determineReferenceText(
-			IBaseReference theRef, CompositeChildElement theCompositeChildElement, IBaseResource theResource) {
+			IBaseReference theRef,
+			CompositeChildElement theCompositeChildElement,
+			IBaseResource theResource,
+			EncodeContext theContext) {
 		IIdType ref = theRef.getReferenceElement();
 		if (isBlank(ref.getIdPart())) {
 			String reference = ref.getValue();
 			if (theRef.getResource() != null) {
-				IIdType containedId = getContainedResources().getResourceId(theRef.getResource());
+				IIdType containedId = theContext.getContainedResources().getResourceId(theRef.getResource());
 				if (containedId != null && !containedId.isEmpty()) {
 					if (containedId.isLocal()) {
 						reference = containedId.getValue();
@@ -262,7 +265,8 @@ public abstract class BaseParser implements IParser {
 	@Override
 	public final void encodeResourceToWriter(IBaseResource theResource, Writer theWriter)
 			throws IOException, DataFormatException {
-		EncodeContext encodeContext = new EncodeContext(this, myContext.getParserOptions());
+		EncodeContext encodeContext =
+				new EncodeContext(this, myContext.getParserOptions(), new FhirTerser.ContainedResources());
 		encodeResourceToWriter(theResource, theWriter, encodeContext);
 	}
 
@@ -285,7 +289,8 @@ public abstract class BaseParser implements IParser {
 		} else if (theElement instanceof IPrimitiveType) {
 			theWriter.write(((IPrimitiveType<?>) theElement).getValueAsString());
 		} else {
-			EncodeContext encodeContext = new EncodeContext(this, myContext.getParserOptions());
+			EncodeContext encodeContext =
+					new EncodeContext(this, myContext.getParserOptions(), new FhirTerser.ContainedResources());
 			encodeToWriter(theElement, theWriter, encodeContext);
 		}
 	}
@@ -402,10 +407,6 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 		return elementId;
-	}
-
-	FhirTerser.ContainedResources getContainedResources() {
-		return myContainedResources;
 	}
 
 	@Override
@@ -539,10 +540,11 @@ public abstract class BaseParser implements IParser {
 		return mySuppressNarratives;
 	}
 
-	protected boolean isChildContained(BaseRuntimeElementDefinition<?> childDef, boolean theIncludedResource) {
+	protected boolean isChildContained(
+			BaseRuntimeElementDefinition<?> childDef, boolean theIncludedResource, EncodeContext theContext) {
 		return (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES
 						|| childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST)
-				&& getContainedResources().isEmpty() == false
+				&& theContext.getContainedResources().isEmpty() == false
 				&& theIncludedResource == false;
 	}
 
@@ -639,12 +641,30 @@ public abstract class BaseParser implements IParser {
 		 * We do this so that the context can verify that the structure is for
 		 * the correct FHIR version
 		 */
+		Reader readerToUse = theReader;
 		if (theResourceType != null) {
 			myContext.getResourceDefinition(theResourceType);
+			if (myContext.isStoreResourceJson()) {
+				readerToUse = new PreserveStringReader(theReader);
+			}
 		}
 
 		// Actually do the parse
-		T retVal = doParseResource(theResourceType, theReader);
+		T retVal = doParseResource(theResourceType, readerToUse);
+
+		if (theResourceType != null && myContext.isStoreResourceJson()) {
+			PreserveStringReader psr = (PreserveStringReader) readerToUse;
+			if (psr.hasString()) {
+				try {
+					ResourceUtil.addRawDataToResource(retVal, getEncoding(), psr.toString());
+					psr.close();
+				} catch (IOException ex) {
+					ourLog.warn(
+							"Unable to store raw JSON on resource. This won't affect functionality, but validation will use the resource itself, which may result in different validation results than a $validation operation.",
+							ex);
+				}
+			}
+		}
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
 		if ("Bundle".equals(def.getName())) {
@@ -788,7 +808,8 @@ public abstract class BaseParser implements IParser {
 			 */
 			if (next instanceof IBaseReference) {
 				IBaseReference nextRef = (IBaseReference) next;
-				String refText = determineReferenceText(nextRef, theCompositeChildElement, theResource);
+				String refText =
+						determineReferenceText(nextRef, theCompositeChildElement, theResource, theEncodeContext);
 				if (!StringUtils.equals(refText, nextRef.getReferenceElement().getValue())) {
 
 					if (retVal == theValues) {
@@ -980,7 +1001,7 @@ public abstract class BaseParser implements IParser {
 		return true;
 	}
 
-	protected void containResourcesInReferences(IBaseResource theResource) {
+	protected void containResourcesInReferences(IBaseResource theResource, EncodeContext theContext) {
 
 		/*
 		 * If a UUID is present in Bundle.entry.fullUrl but no value is present
@@ -1003,7 +1024,7 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 
-		myContainedResources = getContext().newTerser().containResources(theResource);
+		theContext.setContainedResources(getContext().newTerser().containResources(theResource));
 	}
 
 	static class ChildNameAndDef {
@@ -1034,8 +1055,12 @@ public abstract class BaseParser implements IParser {
 		private final List<EncodeContextPath> myEncodeElementPaths;
 		private final Set<String> myEncodeElementsAppliesToResourceTypes;
 		private final List<EncodeContextPath> myDontEncodeElementPaths;
+		private FhirTerser.ContainedResources myContainedResources;
 
-		public EncodeContext(BaseParser theParser, ParserOptions theParserOptions) {
+		public EncodeContext(
+				BaseParser theParser,
+				ParserOptions theParserOptions,
+				FhirTerser.ContainedResources theContainedResources) {
 			Collection<String> encodeElements = theParser.myEncodeElements;
 			Collection<String> dontEncodeElements = theParser.myDontEncodeElements;
 			if (isSummaryMode()) {
@@ -1058,12 +1083,22 @@ public abstract class BaseParser implements IParser {
 						dontEncodeElements.stream().map(EncodeContextPath::new).collect(Collectors.toList());
 			}
 
+			myContainedResources = theContainedResources;
+
 			myEncodeElementsAppliesToResourceTypes =
 					ParserUtil.determineApplicableResourceTypesForTerserPaths(myEncodeElementPaths);
 		}
 
 		private Map<Key, List<BaseParser.CompositeChildElement>> getCompositeChildrenCache() {
 			return myCompositeChildrenCache;
+		}
+
+		public FhirTerser.ContainedResources getContainedResources() {
+			return myContainedResources;
+		}
+
+		public void setContainedResources(FhirTerser.ContainedResources theContainedResources) {
+			myContainedResources = theContainedResources;
 		}
 	}
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cache;
 
+import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
@@ -30,7 +31,6 @@ import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -40,7 +40,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 
 import java.util.Collection;
 import java.util.List;
@@ -57,13 +59,15 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	@Autowired
-	DaoRegistry myDaoRegistry;
+	private DaoRegistry myDaoRegistry;
 
 	private SearchParameterMap mySearchParameterMap;
 	private SystemRequestDetails mySystemRequestDetails;
 	private boolean myStopping;
 	private final Semaphore mySyncResourcesSemaphore = new Semaphore(1);
 	private final Object mySyncResourcesLock = new Object();
+
+	private Integer myMaxRetryCount = null;
 
 	protected BaseResourceCacheSynchronizer(String theResourceName) {
 		myResourceName = theResourceName;
@@ -78,19 +82,32 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 	}
 
-	@PostConstruct
+	/**
+	 * This method performs a search in the DB, so use the {@link ContextStartedEvent}
+	 * to ensure that it runs after the database initializer
+	 */
+	@EventListener(classes = ContextRefreshedEvent.class)
+	@Order(IHapiBootOrder.AFTER_SUBSCRIPTION_INITIALIZED)
 	public void registerListener() {
 		if (myDaoRegistry.getResourceDaoOrNull(myResourceName) == null) {
 			ourLog.info("No resource DAO found for resource type {}, not registering listener", myResourceName);
 			return;
 		}
-		mySearchParameterMap = getSearchParameterMap();
 		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
 
 		IResourceChangeListenerCache resourceCache =
 				myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
-						myResourceName, mySearchParameterMap, this, REFRESH_INTERVAL);
+						myResourceName, provideSearchParameterMap(), this, REFRESH_INTERVAL);
 		resourceCache.forceRefresh();
+	}
+
+	private SearchParameterMap provideSearchParameterMap() {
+		SearchParameterMap searchParameterMap = mySearchParameterMap;
+		if (searchParameterMap == null) {
+			searchParameterMap = getSearchParameterMap();
+			mySearchParameterMap = searchParameterMap;
+		}
+		return searchParameterMap;
 	}
 
 	@PreDestroy
@@ -135,8 +152,20 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	synchronized int doSyncResourcesWithRetry() {
 		// retry runs MAX_RETRIES times
 		// and if errors result every time, it will fail
-		Retrier<Integer> syncResourceRetrier = new Retrier<>(this::doSyncResources, MAX_RETRIES);
+		Retrier<Integer> syncResourceRetrier = new Retrier<>(this::doSyncResources, getMaxRetries());
 		return syncResourceRetrier.runWithRetry();
+	}
+
+	private int getMaxRetries() {
+		if (myMaxRetryCount != null) {
+			return myMaxRetryCount;
+		}
+		return MAX_RETRIES;
+	}
+
+	@VisibleForTesting
+	public void setMaxRetries(Integer theMaxRetries) {
+		myMaxRetryCount = theMaxRetries;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -149,7 +178,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 			ourLog.debug("Starting sync {}s", myResourceName);
 
 			List<IBaseResource> resourceList = (List<IBaseResource>)
-					getResourceDao().searchForResources(mySearchParameterMap, mySystemRequestDetails);
+					getResourceDao().searchForResources(provideSearchParameterMap(), mySystemRequestDetails);
 			return syncResourcesIntoCache(resourceList);
 		}
 	}

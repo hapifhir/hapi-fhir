@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,10 +66,12 @@ public class TransactionDetails {
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Supplier<IBaseResource>> myResolvedResources = Collections.emptyMap();
 	private Set<IResourcePersistentId> myDeletedResourceIds = Collections.emptySet();
+	private Set<IResourcePersistentId> myUpdatedResourceIds = Collections.emptySet();
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
 	private boolean myFhirTransaction;
+	private List<IIdType> myAutoCreatedPlaceholderResources = Collections.emptyList();
 
 	/**
 	 * Constructor
@@ -119,8 +121,39 @@ public class TransactionDetails {
 	}
 
 	/**
+	 * @since 7.6.0
+	 */
+	@SuppressWarnings("rawtypes")
+	public void addUpdatedResourceId(@Nonnull IResourcePersistentId theResourceId) {
+		Validate.notNull(theResourceId, "theResourceId must not be null");
+		if (myUpdatedResourceIds.isEmpty()) {
+			myUpdatedResourceIds = new HashSet<>();
+		}
+		myUpdatedResourceIds.add(theResourceId);
+	}
+
+	/**
+	 * @since 7.6.0
+	 */
+	@SuppressWarnings("rawtypes")
+	public void addUpdatedResourceIds(Collection<? extends IResourcePersistentId> theResourceIds) {
+		for (IResourcePersistentId id : theResourceIds) {
+			addUpdatedResourceId(id);
+		}
+	}
+
+	/**
+	 * @since 7.6.0
+	 */
+	@SuppressWarnings("rawtypes")
+	public Set<IResourcePersistentId> getUpdatedResourceIds() {
+		return myUpdatedResourceIds;
+	}
+
+	/**
 	 * @since 6.8.0
 	 */
+	@SuppressWarnings("rawtypes")
 	public void addDeletedResourceId(@Nonnull IResourcePersistentId theResourceId) {
 		Validate.notNull(theResourceId, "theResourceId must not be null");
 		if (myDeletedResourceIds.isEmpty()) {
@@ -132,6 +165,7 @@ public class TransactionDetails {
 	/**
 	 * @since 6.8.0
 	 */
+	@SuppressWarnings("rawtypes")
 	public void addDeletedResourceIds(Collection<? extends IResourcePersistentId> theResourceIds) {
 		for (IResourcePersistentId<?> next : theResourceIds) {
 			addDeletedResourceId(next);
@@ -141,6 +175,7 @@ public class TransactionDetails {
 	/**
 	 * @since 6.8.0
 	 */
+	@SuppressWarnings("rawtypes")
 	@Nonnull
 	public Set<IResourcePersistentId> getDeletedResourceIds() {
 		return Collections.unmodifiableSet(myDeletedResourceIds);
@@ -195,6 +230,24 @@ public class TransactionDetails {
 	}
 
 	/**
+	 * Returns true if the given ID was marked as not existing (i.e. someone called
+	 * {@link #addResolvedResourceId(IIdType, IResourcePersistentId)} with an
+	 * ID of null).
+	 *
+	 * @param theId The resource ID
+	 * @since 8.0.0
+	 */
+	public boolean hasNullResolvedResourceId(IIdType theId) {
+		if (myResolvedResourceIds != null) {
+			String key = theId.toVersionless().getValue();
+			if (myResolvedResourceIds.containsKey(key)) {
+				return myResolvedResourceIds.get(key) == null;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
@@ -242,9 +295,9 @@ public class TransactionDetails {
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
 	public void addResolvedMatchUrl(
-			FhirContext theFhirContext, String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
-		Validate.notBlank(theConditionalUrl);
-		Validate.notNull(thePersistentId);
+			FhirContext theFhirContext, String theConditionalUrl, @Nonnull IResourcePersistentId<?> thePersistentId) {
+		Validate.notBlank(theConditionalUrl, "theConditionalUrl must not be blank");
+		Validate.notNull(thePersistentId, "thePersistentId must not be null");
 
 		if (myResolvedMatchUrls.isEmpty()) {
 			myResolvedMatchUrls = new HashMap<>();
@@ -258,8 +311,8 @@ public class TransactionDetails {
 	}
 
 	/**
-	 * @since 6.8.0
 	 * @see #addResolvedMatchUrl(FhirContext, String, IResourcePersistentId)
+	 * @since 6.8.0
 	 */
 	public void removeResolvedMatchUrl(String theMatchUrl) {
 		myResolvedMatchUrls.remove(theMatchUrl);
@@ -407,5 +460,21 @@ public class TransactionDetails {
 
 	public void setFhirTransaction(boolean theFhirTransaction) {
 		myFhirTransaction = theFhirTransaction;
+	}
+
+	public void addAutoCreatedPlaceholderResource(IIdType theResource) {
+		if (myAutoCreatedPlaceholderResources.isEmpty()) {
+			myAutoCreatedPlaceholderResources = new ArrayList<>();
+		}
+		myAutoCreatedPlaceholderResources.add(theResource);
+	}
+
+	@Nonnull
+	public List<IIdType> getAutoCreatedPlaceholderResourcesAndClear() {
+		List<IIdType> retVal = myAutoCreatedPlaceholderResources;
+		if (!myAutoCreatedPlaceholderResources.isEmpty()) {
+			myAutoCreatedPlaceholderResources = Collections.emptyList();
+		}
+		return retVal;
 	}
 }

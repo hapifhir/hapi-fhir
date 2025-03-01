@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParserErrorHandler;
 import ca.uhn.fhir.parser.JsonParser;
@@ -42,7 +43,7 @@ public class TolerantJsonParser extends JsonParser {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TolerantJsonParser.class);
 	private final FhirContext myContext;
-	private final Long myResourcePid;
+	private final JpaPid myResourcePid;
 
 	/**
 	 * Constructor
@@ -50,7 +51,8 @@ public class TolerantJsonParser extends JsonParser {
 	 * @param theResourcePid The ID of the resource that will be parsed with this parser. It would be ok to change the
 	 *                       datatype for this param if we ever need to since it's only used for logging.
 	 */
-	public TolerantJsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler, Long theResourcePid) {
+	public TolerantJsonParser(
+			FhirContext theContext, IParserErrorHandler theParserErrorHandler, JpaPid theResourcePid) {
 		super(theContext, theParserErrorHandler);
 		myContext = theContext;
 		myResourcePid = theResourcePid;
@@ -121,7 +123,7 @@ public class TolerantJsonParser extends JsonParser {
 	}
 
 	public static TolerantJsonParser createWithLenientErrorHandling(
-			FhirContext theContext, @Nullable Long theResourcePid) {
+			FhirContext theContext, @Nullable JpaPid theResourcePid) {
 		LenientErrorHandler errorHandler = new LenientErrorHandler(false).disableAllErrors();
 		return new TolerantJsonParser(theContext, errorHandler, theResourcePid);
 	}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,20 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 public class StaticLogbackTestExtension implements BeforeAllCallback, AfterAllCallback {
 	private final LogbackTestExtension myLogbackTestExtension;
 
-    public StaticLogbackTestExtension(LogbackTestExtension theLogbackTestExtension) {
-        myLogbackTestExtension = theLogbackTestExtension;
-    }
-
 	public StaticLogbackTestExtension() {
 		myLogbackTestExtension = new LogbackTestExtension();
 	}
 
-	public static StaticLogbackTestExtension withThreshold(Level theLevel) {
-		LogbackTestExtension logbackTestExtension = new LogbackTestExtension();
-		logbackTestExtension.setUp(theLevel);
-		ThresholdFilter thresholdFilter = new ThresholdFilter();
-		thresholdFilter.setLevel(theLevel.levelStr);
-		logbackTestExtension.getAppender().addFilter(thresholdFilter);
+	public StaticLogbackTestExtension(String theLoggerName, Level theLevel) {
+		myLogbackTestExtension = new LogbackTestExtension(theLoggerName, theLevel);
+	}
 
-		return new StaticLogbackTestExtension(logbackTestExtension);
+	public StaticLogbackTestExtension(Level theLevel) {
+		myLogbackTestExtension = new LogbackTestExtension(theLevel);
+	}
+
+	private StaticLogbackTestExtension(LogbackTestExtension theLogbackTestExtension) {
+		myLogbackTestExtension = theLogbackTestExtension;
 	}
 
 	@Override
@@ -63,6 +61,10 @@ public class StaticLogbackTestExtension implements BeforeAllCallback, AfterAllCa
 
 	public LogbackTestExtension getLogbackTestExtension() {
 		return myLogbackTestExtension;
+	}
+
+	public static StaticLogbackTestExtension withThreshold(Level theLevel) {
+		return new StaticLogbackTestExtension(theLevel);
 	}
 
 }

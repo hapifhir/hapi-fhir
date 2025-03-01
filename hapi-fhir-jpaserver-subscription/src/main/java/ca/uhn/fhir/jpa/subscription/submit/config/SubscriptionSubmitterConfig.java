@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,8 +100,9 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public AsyncResourceModifiedProcessingSchedulerSvc asyncResourceModifiedProcessingSchedulerSvc() {
-		return new AsyncResourceModifiedProcessingSchedulerSvc();
+	public AsyncResourceModifiedProcessingSchedulerSvc asyncResourceModifiedProcessingSchedulerSvc(
+			SubscriptionConfig subscriptionConfig, SubscriptionSettings theSubscriptionSettings) {
+		return new AsyncResourceModifiedProcessingSchedulerSvc(theSubscriptionSettings.getSubscriptionIntervalInMs());
 	}
 
 	@Bean

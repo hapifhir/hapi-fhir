@@ -4,12 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This validation support module may be placed at the end of a {@link ValidationSupportChain}
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * in order to specify that unknown code systems should be allowed.
  */
 public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSupport {
-	private static final Logger ourLog = LoggerFactory.getLogger(UnknownCodeSystemWarningValidationSupport.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 
 	public static final IssueSeverity DEFAULT_SEVERITY = IssueSeverity.ERROR;
 
@@ -87,7 +87,7 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 			result.setSeverity(null);
 			result.setMessage(null);
 		} else {
-			result.addCodeValidationIssue(new CodeValidationIssue(
+			result.addIssue(new CodeValidationIssue(
 					theMessage,
 					myNonExistentCodeSystemSeverity,
 					CodeValidationIssueCode.NOT_FOUND,

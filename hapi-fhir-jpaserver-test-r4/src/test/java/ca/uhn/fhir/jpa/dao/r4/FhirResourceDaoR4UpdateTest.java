@@ -996,7 +996,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			p2.setId(new IdType("Organization/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2, mySrd);
 			fail();
-		} catch (UnprocessableEntityException e) {
+		} catch (InvalidRequestException e) {
 			// good
 		}
 

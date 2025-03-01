@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -91,9 +91,6 @@ public class SearchConfig {
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private IResourceSearchViewDao myResourceSearchViewDao;
-
-	@Autowired
 	private FhirContext myContext;
 
 	@Autowired
@@ -132,6 +129,12 @@ public class SearchConfig {
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
 
+	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
+
+	@Autowired
+	private IJpaStorageResourceParser myJpaStorageResourceParser;
+
 	@Bean
 	public ISearchCoordinatorSvc searchCoordinatorSvc() {
 		return new SearchCoordinatorSvcImpl(
@@ -158,10 +161,8 @@ public class SearchConfig {
 
 	@Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
 	@Scope("prototype")
-	public ISearchBuilder newSearchBuilder(
-			IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+	public ISearchBuilder newSearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		return new SearchBuilder(
-				theDao,
 				theResourceName,
 				myStorageSettings,
 				myEntityManagerFactory,
@@ -172,9 +173,10 @@ public class SearchConfig {
 				myInterceptorBroadcaster,
 				myResourceTagDao,
 				myDaoRegistry,
-				myResourceSearchViewDao,
 				myContext,
 				myIdHelperService,
+				myResourceHistoryTableDao,
+				myJpaStorageResourceParser,
 				theResourceType);
 	}
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourceVersionPersistentId;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,19 +39,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Scope("prototype")
-public class ExpungeOperation implements Callable<ExpungeOutcome> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
+public class ExpungeOperation<T extends IResourcePersistentId<?>, V extends IResourceVersionPersistentId>
+		implements Callable<ExpungeOutcome> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeOperation.class);
 	public static final String PROCESS_NAME = "Expunging";
 	public static final String THREAD_PREFIX = "expunge";
 
 	@Autowired
-	private IResourceExpungeService myResourceExpungeService;
+	private IResourceExpungeService<T, V> myResourceExpungeService;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
 	private final String myResourceName;
-	private final IResourcePersistentId myResourceId;
+	private final T myResourceId;
 	private final ExpungeOptions myExpungeOptions;
 	private final RequestDetails myRequestDetails;
 	private final AtomicInteger myRemainingCount;
@@ -60,7 +62,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 
 	public ExpungeOperation(
 			String theResourceName,
-			IResourcePersistentId theResourceId,
+			T theResourceId,
 			ExpungeOptions theExpungeOptions,
 			RequestDetails theRequestDetails) {
 		myResourceName = theResourceName;
@@ -91,7 +93,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private void expungeDeletedResources() {
-		List<IResourcePersistentId> resourceIds = findHistoricalVersionsOfDeletedResources();
+		List<T> resourceIds = findHistoricalVersionsOfDeletedResources();
 
 		deleteHistoricalVersions(resourceIds);
 		if (expungeLimitReached()) {
@@ -101,8 +103,8 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 		deleteCurrentVersionsOfDeletedResources(resourceIds);
 	}
 
-	private List<IResourcePersistentId> findHistoricalVersionsOfDeletedResources() {
-		List<IResourcePersistentId> retVal = getPartitionAwareSupplier()
+	private List<T> findHistoricalVersionsOfDeletedResources() {
+		List<T> retVal = getPartitionAwareSupplier()
 				.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfDeletedResources(
 						myResourceName, myResourceId, myRemainingCount.get()));
 
@@ -119,7 +121,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private void expungeOldVersions() {
-		List<IResourcePersistentId> historicalIds = getPartitionAwareSupplier()
+		List<V> historicalIds = getPartitionAwareSupplier()
 				.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(
 						myResourceName, myResourceId, myRemainingCount.get()));
 
@@ -144,7 +146,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 				myRequestDetails);
 	}
 
-	private void deleteCurrentVersionsOfDeletedResources(List<IResourcePersistentId> theResourceIds) {
+	private void deleteCurrentVersionsOfDeletedResources(List<T> theResourceIds) {
 		getPartitionRunner()
 				.runInPartitionedThreads(
 						theResourceIds,
@@ -152,7 +154,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 								myRequestDetails, partition, myRemainingCount));
 	}
 
-	private void deleteHistoricalVersions(List<IResourcePersistentId> theResourceIds) {
+	private void deleteHistoricalVersions(List<T> theResourceIds) {
 		getPartitionRunner()
 				.runInPartitionedThreads(
 						theResourceIds,
@@ -174,6 +176,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 		myStorageSettings = theStorageSettings;
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@VisibleForTesting
 	public void setExpungeDaoServiceForTesting(IResourceExpungeService theIResourceExpungeService) {
 		myResourceExpungeService = theIResourceExpungeService;

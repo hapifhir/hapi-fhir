@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSqlBuilder;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSvcImpl;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,12 +44,18 @@ public class Batch2SupportConfig {
 	@Bean
 	public IBatch2DaoSvc batch2DaoSvc(
 			IResourceTableDao theResourceTableDao,
+			IResourceLinkDao theResourceLinkDao,
 			MatchUrlService theMatchUrlService,
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext,
 			IHapiTransactionService theTransactionService) {
 		return new Batch2DaoSvcImpl(
-				theResourceTableDao, theMatchUrlService, theDaoRegistry, theFhirContext, theTransactionService);
+				theResourceTableDao,
+				theResourceLinkDao,
+				theMatchUrlService,
+				theDaoRegistry,
+				theFhirContext,
+				theTransactionService);
 	}
 
 	@Bean
@@ -64,8 +71,9 @@ public class Batch2SupportConfig {
 			ResourceTableFKProvider theResourceTableFKProvider,
 			JpaStorageSettings theStorageSettings,
 			IIdHelperService theIdHelper,
-			IResourceLinkDao theResourceLinkDao) {
+			IResourceLinkDao theResourceLinkDao,
+			PartitionSettings thePartitionSettings) {
 		return new DeleteExpungeSqlBuilder(
-				theResourceTableFKProvider, theStorageSettings, theIdHelper, theResourceLinkDao);
+				theResourceTableFKProvider, theStorageSettings, theIdHelper, theResourceLinkDao, thePartitionSettings);
 	}
 }

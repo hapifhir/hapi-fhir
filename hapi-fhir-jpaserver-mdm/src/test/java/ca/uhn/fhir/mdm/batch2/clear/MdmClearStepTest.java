@@ -45,8 +45,10 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	private String myGoldenId;
 	private String mySourceId;
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		Patient sourcePatient = new Patient();
 		mySourceId = SOURCE_ID + "1";
 		sourcePatient.setId(mySourceId);
@@ -103,13 +105,13 @@ class MdmClearStepTest extends BaseMdmR4Test {
 			assertPatientExists(myGoldenId);
 			fail("Resource cannot be found");
 		} catch (ResourceNotFoundException e) {
-			assertEquals("HAPI-2001: Resource " + myGoldenId + " is not known", e.getMessage());
+			assertEquals("HAPI-1996: Resource " + myGoldenId + " is not known", e.getMessage());
 		}
 	}
 
 	private void mdmClearGoldenResource() {
 		ResourceIdListWorkChunkJson chunk = new ResourceIdListWorkChunkJson();
-		chunk.addTypedPid("Patient", myGoldenPid);
+		chunk.addTypedPidWithNullPartitionForUnitTest("Patient", myGoldenPid);
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();

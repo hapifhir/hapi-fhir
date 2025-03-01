@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +33,6 @@ import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,7 +69,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	public static final String ALL_LANGUAGES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/all-languages";
 	public static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
 	public static final String USPS_VALUESET_URL = "http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state";
-	private static final Logger ourLog = LoggerFactory.getLogger(CommonCodeSystemsTerminologyService.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	private static final Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
 	private static final Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
 	private static final Map<String, String> ISO_3166_CODES = Collections.unmodifiableMap(buildIso3166Codes());
@@ -190,7 +190,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return new CodeValidationResult()
 				.setSeverity(IssueSeverity.ERROR)
 				.setMessage(theMessage)
-				.setCodeValidationIssues(Collections.singletonList(new CodeValidationIssue(
+				.setIssues(Collections.singletonList(new CodeValidationIssue(
 						theMessage,
 						IssueSeverity.ERROR,
 						CodeValidationIssueCode.INVALID,

@@ -32,11 +32,14 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
 import ch.qos.logback.classic.Level;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -85,6 +88,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +117,10 @@ import static org.mockito.Mockito.when;
 
 public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ValidateTest.class);
+
+	@RegisterExtension
+	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
+
 	@Autowired
 	private IValidatorModule myValidatorModule;
 	@Autowired
@@ -974,7 +982,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		OperationOutcome oo = validateAndReturnOutcome(vs);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertEquals("The code '123' is not valid in the system https://bb (Validation failed)", oo.getIssue().get(0).getDiagnostics());
+		assertThat(oo.getIssue().stream())
+			.anyMatch(r ->
+				r.getDiagnostics().equals("The code '123' is not valid in the system https://bb (Validation failed)") );
+
 	}
 
 	@Test
@@ -1485,6 +1496,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 					return (OperationOutcome) e.getOperationOutcome();
 				}
 				break;
+			case RDF:
+				break;
+			case NDJSON:
+				break;
 		}
 
 		throw new IllegalStateException(); // shouldn't get here
@@ -1494,8 +1509,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	public void validateResource_withUnknownMetaProfileurl_validatesButLogsWarning() {
 		// setup
 		IParser parser = myFhirContext.newJsonParser();
-
-		myLogbackTestExtension.setUp(Level.WARN);
 
 		String obsStr ="""
 					{
@@ -2231,6 +2244,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			createStructureDefinitionInDao();
 
 			// execute
+			((ValidationSupportChain)myValidationSupport).invalidateExpiringCaches();
 			final String outcomePatientValidateAfterStructDef = validate(PATIENT_WITH_REAL_URL);
 
 			// verify

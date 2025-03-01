@@ -1,32 +1,42 @@
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
+import org.assertj.core.api.AssertionsForClassTypes;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 import static ca.uhn.fhir.rest.api.Constants.RESOURCE_PARTITION_ID;
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
+import static java.util.Objects.isNull;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -34,6 +44,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SubscriptionCanonicalizerTest {
+
+	private static final Integer NON_NULL_DEFAULT_PARTITION_ID = 666;
 
 	FhirContext r4Context = FhirContext.forR4();
 
@@ -170,6 +182,90 @@ class SubscriptionCanonicalizerTest {
 		return Stream.of(null, RequestPartitionId.fromPartitionId(1), RequestPartitionId.defaultPartition()) ;
 	}
 
+	private class FakeNonNullDefaultPartitionIDHelper implements IRequestPartitionHelperSvc {
+
+		@Override
+		public @Nullable Integer getDefaultPartitionId() {
+			return NON_NULL_DEFAULT_PARTITION_ID;
+		}
+
+		@Override
+		public boolean isDefaultPartition(@NotNull RequestPartitionId theRequestPartitionId) {
+			return  theRequestPartitionId.getPartitionIds().get(0).equals(NON_NULL_DEFAULT_PARTITION_ID);
+		}
+
+		@Override
+		public boolean hasDefaultPartitionId(@NotNull RequestPartitionId theRequestPartitionId) {
+			return theRequestPartitionId.getPartitionIds().stream().anyMatch(part -> part.equals(NON_NULL_DEFAULT_PARTITION_ID));
+		}
+
+		@Override
+		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, @NotNull ReadPartitionIdRequestDetails theDetails) {
+			return null;
+		}
+
+		@Override
+		public RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails) {
+			return null;
+		}
+
+		@Override
+		public @NotNull RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @NotNull IBaseResource theResource, @NotNull String theResourceType) {
+			return null;
+		}
+
+		@Override
+		public @NotNull Set<Integer> toReadPartitions(@NotNull RequestPartitionId theRequestPartitionId) {
+			return Set.of();
+		}
+
+		@Override
+		public boolean isResourcePartitionable(String theResourceType) {
+			return false;
+		}
+
+		@Override
+		public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
+			return null;
+		}
+
+		@Override
+		public RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
+			return null;
+		}
+	}
+	@Test
+	public void testNonNullDefaultPartitionIDCanonicalizesToCrossPartition() {
+		IRequestPartitionHelperSvc myHelperSvc = new FakeNonNullDefaultPartitionIDHelper();
+		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
+
+		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
+		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), subscriptionSettings);
+		subscriptionCanonicalizer.setPartitionHelperSvc(myHelperSvc);
+		Subscription subscription = buildMdmSubscriptionR4("test-subscription", "Patient?");
+		CanonicalSubscription canonicalize = subscriptionCanonicalizer.canonicalize(subscription);
+
+		assertThat(canonicalize.isCrossPartitionEnabled()).isTrue();
+
+	}
+	private Subscription buildMdmSubscriptionR4(String theId, String theCriteria) {
+		Subscription retval = new Subscription();
+		retval.setId(theId);
+		retval.setReason("MDM Simulacrum Subscription");
+		retval.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		retval.setCriteria(theCriteria);
+		retval.addExtension()
+			.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
+			.setValue(new BooleanType().setValue(true));
+		Subscription.SubscriptionChannelComponent channel = retval.getChannel();
+		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
+		channel.setEndpoint("channel:test");
+		channel.setPayload(Constants.CT_JSON);
+		RequestPartitionId retPartId = RequestPartitionId.fromPartitionId(NON_NULL_DEFAULT_PARTITION_ID);
+		retval.setUserData(Constants.RESOURCE_PARTITION_ID, retPartId);
+		return retval;
+	}
+
 	@ParameterizedTest
 	@MethodSource("crossPartitionParams")
 	void testSubscriptionCrossPartitionEnableProperty_forDstu2WithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
@@ -207,15 +303,12 @@ class SubscriptionCanonicalizerTest {
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
 
-		if(RequestPartitionId.isDefaultPartition(theRequestPartitionId)){
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		} else {
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		}
+		assertCanonicalSubscriptionCrossPropertyValue(
+			canonicalSubscriptionWithoutExtension,
+			canonicalSubscriptionWithExtensionCrossPartitionTrue,
+			canonicalSubscriptionWithExtensionCrossPartitionFalse,
+			theRequestPartitionId
+		);
 	}
 
 	@ParameterizedTest
@@ -242,16 +335,12 @@ class SubscriptionCanonicalizerTest {
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
 
-		if(RequestPartitionId.isDefaultPartition(theRequestPartitionId)){
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		} else {
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		}
-
+		assertCanonicalSubscriptionCrossPropertyValue(
+			canonicalSubscriptionWithoutExtension,
+			canonicalSubscriptionWithExtensionCrossPartitionTrue,
+			canonicalSubscriptionWithExtensionCrossPartitionFalse,
+			theRequestPartitionId
+		);
 	}
 
 	@ParameterizedTest
@@ -276,15 +365,12 @@ class SubscriptionCanonicalizerTest {
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
 
-		if(RequestPartitionId.isDefaultPartition(theRequestPartitionId)){
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		} else {
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		}
+		assertCanonicalSubscriptionCrossPropertyValue(
+			canonicalSubscriptionWithoutExtension,
+			canonicalSubscriptionWithExtensionCrossPartitionTrue,
+			canonicalSubscriptionWithExtensionCrossPartitionFalse,
+			theRequestPartitionId
+		);
 	}
 
 	@ParameterizedTest
@@ -309,15 +395,12 @@ class SubscriptionCanonicalizerTest {
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
 		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
 
-		if(RequestPartitionId.isDefaultPartition(theRequestPartitionId)){
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		} else {
-			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
-			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
-		}
+		assertCanonicalSubscriptionCrossPropertyValue(
+			canonicalSubscriptionWithoutExtension,
+			canonicalSubscriptionWithExtensionCrossPartitionTrue,
+			canonicalSubscriptionWithExtensionCrossPartitionFalse,
+			theRequestPartitionId
+		);
 	}
 
 	private org.hl7.fhir.r4b.model.Subscription buildR4BSubscription(String thePayloadContent) {
@@ -418,5 +501,22 @@ class SubscriptionCanonicalizerTest {
 		filter.setComparator(Enumerations.SearchComparator.EQ);
 		filter.setValue(theValue);
 		return filter;
+	}
+
+	private void assertCanonicalSubscriptionCrossPropertyValue(CanonicalSubscription theCanonicalSubscriptionWithoutExtension,
+															   CanonicalSubscription theCanonicalSubscriptionWithExtensionCrossPartitionTrue,
+															   CanonicalSubscription theCanonicalSubscriptionWithExtensionCrossPartitionFalse,
+															   RequestPartitionId theRequestPartitionId) {
+
+		boolean isDefaultPartition = isNull(theRequestPartitionId) ? false : theRequestPartitionId.isDefaultPartition();
+
+		AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
+		AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
+
+		if(isDefaultPartition){
+			AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
+		} else {
+			AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
+		}
 	}
 }

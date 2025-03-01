@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
@@ -59,7 +60,7 @@ public class MatchUrlService {
 	public SearchParameterMap translateMatchUrl(
 			String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, Flag... theFlags) {
 		SearchParameterMap paramMap = new SearchParameterMap();
-		List<NameValuePair> parameters = UrlUtil.translateMatchUrl(theMatchUrl);
+		List<NameValuePair> parameters = MatchUrlUtil.translateMatchUrl(theMatchUrl);
 
 		ArrayListMultimap<String, QualifiedParamList> nameToParamLists = ArrayListMultimap.create();
 		for (NameValuePair next : parameters) {
@@ -168,8 +169,10 @@ public class MatchUrlService {
 			} else if (nextParamName.startsWith("_") && !Constants.PARAM_LANGUAGE.equals(nextParamName)) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
-				RuntimeSearchParam paramDef =
-						mySearchParamRegistry.getActiveSearchParam(theResourceDefinition.getName(), nextParamName);
+				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(
+						theResourceDefinition.getName(),
+						nextParamName,
+						ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (paramDef == null) {
 					throw throwUnrecognizedParamException(theMatchUrl, theResourceDefinition, nextParamName);
 				}

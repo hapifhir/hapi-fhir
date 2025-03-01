@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - HFQL Driver
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,7 +207,8 @@ public class HfqlExecutor implements IHfqlExecutor {
 	 */
 	private void massageWhereClauses(HfqlStatement theStatement) {
 		String fromResourceName = theStatement.getFromResourceName();
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(fromResourceName);
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
+				fromResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 		for (HfqlStatement.WhereClause nextWhereClause : theStatement.getWhereClauses()) {
 
@@ -311,7 +312,9 @@ public class HfqlExecutor implements IHfqlExecutor {
 				QualifierDetails qualifiedParamName = QualifierDetails.extractQualifiersFromParameterName(paramName);
 
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
-						statement.getFromResourceName(), qualifiedParamName.getParamName());
+						statement.getFromResourceName(),
+						qualifiedParamName.getParamName(),
+						ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (searchParam == null) {
 					throw newInvalidRequestExceptionUnknownSearchParameter(paramName);
 				}

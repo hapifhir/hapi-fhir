@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,8 @@ public class SearchPreferHandlingInterceptor {
 				}
 			}
 
-			RuntimeSearchParam activeSearchParam = searchParamRetriever.getActiveSearchParam(resourceName, paramName);
+			RuntimeSearchParam activeSearchParam = searchParamRetriever.getActiveSearchParam(
+					resourceName, paramName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 			if (activeSearchParam == null) {
 
 				if (theHandling == PreferHandlingEnum.LENIENT) {
@@ -144,11 +145,14 @@ public class SearchPreferHandlingInterceptor {
 				} else {
 
 					// Strict handling
-					List<String> allowedParams =
-							searchParamRetriever.getActiveSearchParams(resourceName).getSearchParamNames().stream()
-									.sorted()
-									.distinct()
-									.collect(Collectors.toList());
+					List<String> allowedParams = searchParamRetriever
+							.getActiveSearchParams(
+									resourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
+							.getSearchParamNames()
+							.stream()
+							.sorted()
+							.distinct()
+							.collect(Collectors.toList());
 					HapiLocalizer localizer = theRequestDetails.getFhirContext().getLocalizer();
 					String msg = localizer.getMessage(
 							"ca.uhn.fhir.jpa.dao.BaseStorageDao.invalidSearchParameter",

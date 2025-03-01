@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,10 +138,15 @@ public class SqlQuery {
 					break;
 				}
 				String nextParamValue = nextParams.remove(0);
-				if (theSanitizeParams) {
-					nextParamValue = UrlUtil.sanitizeUrlPart(nextParamValue);
+				String nextSubstitution;
+				if (nextParamValue != null) {
+					if (theSanitizeParams) {
+						nextParamValue = UrlUtil.sanitizeUrlPart(nextParamValue);
+					}
+					nextSubstitution = "'" + nextParamValue + "'";
+				} else {
+					nextSubstitution = "NULL";
 				}
-				String nextSubstitution = "'" + nextParamValue + "'";
 				retVal = retVal.substring(0, idx) + nextSubstitution + retVal.substring(idx + 1);
 				idx += nextSubstitution.length();
 			}

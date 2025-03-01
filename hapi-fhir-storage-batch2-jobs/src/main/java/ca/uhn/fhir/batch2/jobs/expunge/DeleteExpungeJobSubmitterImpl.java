@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,13 +78,16 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 					Msg.code(820) + "Delete Expunge not allowed:  " + myStorageSettings.cannotDeleteExpungeReason());
 		}
 
-		for (String url : theUrlsToDeleteExpunge) {
-			HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(String.class, url);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRE_DELETE_EXPUNGE)) {
+			for (String url : theUrlsToDeleteExpunge) {
+				HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(String.class, url);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
+			}
 		}
 
 		DeleteExpungeJobParameters deleteExpungeJobParameters = new DeleteExpungeJobParameters();

@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.test.utilities.UuidUtils;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -81,6 +82,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -425,11 +427,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertTrue(outcome.getCreated());
 		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
 		assertNotNull(searchUrlEntity);
-		assertEquals(expectedResId, searchUrlEntity.getResourcePid());
+		assertEquals(expectedResId, searchUrlEntity.getResourcePid().getId());
 		Instant now = Instant.now();
-		assertThat(searchUrlEntity.getCreatedTime())
+		assertThat(new Date(searchUrlEntity.getCreatedTime().getTime()))
 			.as("Check that the creation time of the URL is within the last second")
-			.isBetween(now.minus(1, ChronoUnit.SECONDS), now);
+			.isBetween(now.minus(1, ChronoUnit.SECONDS), now.plus(1, ChronoUnit.SECONDS));
 		assertEquals(expectedNormalizedMatchUrl, searchUrlEntity.getSearchUrl());
 
 	}
@@ -612,7 +614,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertTrue(p.getActive());
 
 		// Pick an ID that was already used as an internal PID
-		Long newId = runInTransaction(() -> myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromNewest(
+		JpaPid newId = runInTransaction(() -> myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromNewest(
 			PageRequest.of(0, 1),
 			DateUtils.addDays(new Date(), -1),
 			DateUtils.addDays(new Date(), 1)
@@ -624,7 +626,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		IIdType id1 = myPatientDao.update(p).getId();
 
-		assertEquals(Long.toString(newId), id1.getIdPart());
+		assertEquals(Long.toString(newId.getId()), id1.getIdPart());
 		assertEquals("1", id1.getVersionIdPart());
 
 		// Read it back
@@ -637,7 +639,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM2");
 		id1 = myPatientDao.update(p).getId();
 
-		assertEquals(Long.toString(newId), id1.getIdPart());
+		assertEquals(Long.toString(newId.getId()), id1.getIdPart());
 		assertEquals("2", id1.getVersionIdPart());
 
 		p = myPatientDao.read(id1);
@@ -738,7 +740,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Input: {}", encoded);
-		assertThat(encoded).contains("#1");
+		String organizationUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(organizationUuid);
 
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
@@ -746,10 +749,12 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Output: {}", encoded);
-		assertThat(encoded).contains("#1");
+		String organizationUuidParsed = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(organizationUuidParsed);
+		assertEquals(organizationUuid, organizationUuidParsed);
 
 		Organization org = (Organization) p.getManagingOrganization().getResource();
-		assertEquals("#1", org.getId());
+		assertEquals("#" + organizationUuid, org.getId());
 		assertThat(org.getMeta().getTag()).hasSize(1);
 
 	}
@@ -1400,7 +1405,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 			assertEquals(theExpectedTasks.length, searchUrlsPreDelete.size());
 			assertEquals(Arrays.stream(theExpectedTasks).map(Resource::getIdElement).map(IdType::getIdPartAsLong).toList(),
-						 searchUrlsPreDelete.stream().map(ResourceSearchUrlEntity::getResourcePid).toList());
+						 searchUrlsPreDelete.stream().map(t->t.getResourcePid().getId()).toList());
 		}
 
 		private void deleteExpunge(Task theTask) {

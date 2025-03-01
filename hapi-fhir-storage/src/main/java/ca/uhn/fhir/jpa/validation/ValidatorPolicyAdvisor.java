@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,5 +116,15 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 			IMessagingServices msgServices,
 			List<ValidationMessage> messages) {
 		return Arrays.asList();
+	}
+
+	@Override
+	public boolean isSuppressMessageId(String path, String messageId) {
+		return false;
+	}
+
+	@Override
+	public ReferenceValidationPolicy getReferencePolicy() {
+		return ReferenceValidationPolicy.IGNORE;
 	}
 }

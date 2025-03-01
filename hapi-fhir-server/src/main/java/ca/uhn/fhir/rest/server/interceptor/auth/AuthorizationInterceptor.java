@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,7 +164,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				rules.size(),
 				getPointcutNameOrEmpty(thePointcut),
 				getResourceTypeOrEmpty(theInputResource),
-				getResourceTypeOrEmpty(theOutputResource));
+				getResourceTypeOrEmpty(theOutputResource),
+				thePointcut);
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
@@ -528,7 +529,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			case EXTENDED_OPERATION_TYPE:
 			case EXTENDED_OPERATION_INSTANCE: {
 				if (theResponseObject != null) {
-					resources = toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+					resources = toListOfResourcesAndExcludeContainerUnlessStandalone(theResponseObject, fhirContext);
 				}
 				break;
 			}
@@ -575,7 +576,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		OUT,
 	}
 
-	protected static List<IBaseResource> toListOfResourcesAndExcludeContainer(
+	protected static List<IBaseResource> toListOfResourcesAndExcludeContainerUnlessStandalone(
 			IBaseResource theResponseObject, FhirContext fhirContext) {
 		if (theResponseObject == null) {
 			return Collections.emptyList();
@@ -588,6 +589,13 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			return Collections.singletonList(theResponseObject);
 		}
 
+		return toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+	}
+
+	@Nonnull
+	public static List<IBaseResource> toListOfResourcesAndExcludeContainer(
+			IBaseResource theResponseObject, FhirContext fhirContext) {
+		List<IBaseResource> retVal;
 		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
 
 		// Exclude the container

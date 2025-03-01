@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrationTaskExecutionResultEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ public class MigrationResult {
 	public final List<BaseTask.ExecutedStatement> executedStatements = new ArrayList<>();
 	public final List<BaseTask> succeededTasks = new ArrayList<>();
 	public final List<BaseTask> failedTasks = new ArrayList<>();
+	public MigrationTaskExecutionResultEnum executionResult;
 
 	public String summary() {
 		return String.format(

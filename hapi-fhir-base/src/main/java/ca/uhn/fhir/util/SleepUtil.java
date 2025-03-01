@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class SleepUtil {
 	@SuppressWarnings("BusyWait")
 	public void sleepAtLeast(long theMillis, boolean theLogProgress) {
 		long start = System.currentTimeMillis();
-		while (System.currentTimeMillis() <= start + theMillis) {
+		while (System.currentTimeMillis() < start + theMillis) {
 			try {
 				long timeSinceStarted = System.currentTimeMillis() - start;
 				long timeToSleep = Math.max(0, theMillis - timeSinceStarted);

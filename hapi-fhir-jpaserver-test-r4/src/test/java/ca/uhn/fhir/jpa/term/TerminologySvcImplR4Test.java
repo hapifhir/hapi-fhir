@@ -11,6 +11,8 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -170,7 +172,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetDao.deleteById(termValueSetId);
+				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
 				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});
@@ -210,7 +212,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetDao.deleteById(termValueSetId);
+				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
 				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});
@@ -270,37 +272,38 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 
-		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
+		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, null);
 		assertNull(result);
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, "BOGUS", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, "11378-7", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsGuess, valueSet, null, "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, coding, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, codeableConcept);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -318,38 +321,39 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 
-		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
+		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, null);
 		assertNull(result);
 
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, "BOGUS", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, "11378-7", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsGuess, valueSet, null, "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, coding, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, codeableConcept);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -382,7 +386,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			Set<TermConcept> termConcepts = new HashSet<>(termCodeSystemVersion_1.getConcepts());
 			assertThat(toCodes(termConcepts)).containsExactlyInAnyOrder("A", "B");
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id.getIdPartAsLong()));
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 
 		});
@@ -403,7 +407,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
 			assertThat(toCodes(termConcepts_updated)).containsExactlyInAnyOrder("A", "B", "C");
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id_v2.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id_v2.getIdPartAsLong()));
 			assertEquals("2", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 		});
 	}
@@ -437,7 +441,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			Set<TermConcept> termConcepts = new HashSet<>(termCodeSystemVersion_1.getConcepts());
 			assertThat(toCodes(termConcepts)).containsExactlyInAnyOrder("A", "B");
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id.getIdPartAsLong()));
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 		});
 
@@ -456,7 +460,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
 			assertThat(toCodes(termConcepts_updated)).containsExactlyInAnyOrder("A", "B");
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id_v2.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id_v2.getIdPartAsLong()));
 			assertEquals("2", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 			assertEquals(CS_URL_2, termCodeSystem.getCodeSystemUri());
 		});
@@ -540,7 +544,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			Set<TermConcept> termConcepts = new HashSet<>(termCodeSystemVersion_1.getConcepts());
 			assertThat(toCodes(termConcepts)).containsExactlyInAnyOrder("A", "B");
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id.getIdPartAsLong()));
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 
 		});
@@ -558,7 +562,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
 			assertThat(toCodes(termConcepts_updated)).containsExactlyInAnyOrder("A", "B");
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id.getIdPartAsLong()));
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 		});
 	}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import ca.uhn.fhir.util.SleepUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.PessimisticLockException;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -147,7 +148,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			@Nonnull Runnable theCallback) {
 		TransactionCallbackWithoutResult callback = new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
 				theCallback.run();
 			}
 		};
@@ -322,7 +323,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 				// calling isThrowableOrItsSubclassPresent instead of isThrowablePresent for
 				// PessimisticLockingFailureException, because we want to retry on its subclasses as well,  especially
 				// CannotAcquireLockException, which is thrown in some deadlock situations which we want to retry
-				|| isThrowableOrItsSubclassPresent(theThrowable, PessimisticLockingFailureException.class);
+				|| isThrowableOrItsSubclassPresent(theThrowable, PessimisticLockingFailureException.class)
+				|| isThrowableOrItsSubclassPresent(theThrowable, PessimisticLockException.class);
 	}
 
 	@Nullable
@@ -364,19 +366,21 @@ public class HapiTransactionService implements IHapiTransactionService {
 						}
 
 						if (maxRetries == 0) {
-							HookParams params = new HookParams()
-									.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
-									.addIfMatchesType(
-											ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
-							ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
-									(ResourceVersionConflictResolutionStrategy)
-											CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-													myInterceptorBroadcaster,
-													theExecutionBuilder.myRequestDetails,
-													Pointcut.STORAGE_VERSION_CONFLICT,
-													params);
-							if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
-								maxRetries = conflictResolutionStrategy.getMaxRetries();
+							IInterceptorBroadcaster compositeBroadcaster =
+									CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+											myInterceptorBroadcaster, theExecutionBuilder.myRequestDetails);
+							if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_VERSION_CONFLICT)) {
+								HookParams params = new HookParams()
+										.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
+										.addIfMatchesType(
+												ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
+								ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
+										(ResourceVersionConflictResolutionStrategy)
+												compositeBroadcaster.callHooksAndReturnObject(
+														Pointcut.STORAGE_VERSION_CONFLICT, params);
+								if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
+									maxRetries = conflictResolutionStrategy.getMaxRetries();
+								}
 							}
 						}
 
@@ -428,7 +432,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	public void setTransactionPropagationWhenChangingPartitions(
 			Propagation theTransactionPropagationWhenChangingPartitions) {
-		Validate.notNull(theTransactionPropagationWhenChangingPartitions);
+		Objects.requireNonNull(theTransactionPropagationWhenChangingPartitions);
 		myTransactionPropagationWhenChangingPartitions = theTransactionPropagationWhenChangingPartitions;
 	}
 
@@ -462,7 +466,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations, Cloneable {
-
 		private final RequestDetails myRequestDetails;
 		private Isolation myIsolation;
 		private Propagation myPropagation;
@@ -533,8 +536,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 		@Override
 		public <T> T execute(@Nonnull TransactionCallback<T> callback) {
-			assert callback != null;
-
 			return doExecute(this, callback);
 		}
 
@@ -578,7 +579,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	/**
-	 * Returns true if we alreadyt have an active transaction associated with the current thread, AND
+	 * Returns true if we already have an active transaction associated with the current thread, AND
 	 * either it's non-read-only or we only need a read-only transaction, AND
 	 * the newly requested transaction has a propagation of REQUIRED
 	 */

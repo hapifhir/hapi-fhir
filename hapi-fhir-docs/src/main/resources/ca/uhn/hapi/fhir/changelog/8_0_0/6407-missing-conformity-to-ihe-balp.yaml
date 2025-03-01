@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6407
+title: "Corrected IHE BALP AuditEvent generation, so that it records one Audit Event per resource owner. Thanks to Jens Villadsen (@jkiddo) for the contribution!"

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class PartitionSettings {
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
 	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
-	private boolean myPartitionIdsInPrimaryKeys = false;
+	private boolean myDatabasePartitionMode = false;
 
 	public PartitionSettings() {
 		super();
@@ -47,8 +47,8 @@ public class PartitionSettings {
 	 *
 	 * @since 8.0.0
 	 */
-	public boolean isPartitionIdsInPrimaryKeys() {
-		return myPartitionIdsInPrimaryKeys;
+	public boolean isDatabasePartitionMode() {
+		return myDatabasePartitionMode;
 	}
 
 	/**
@@ -59,8 +59,8 @@ public class PartitionSettings {
 	 *
 	 * @since 8.0.0
 	 */
-	public void setPartitionIdsInPrimaryKeys(boolean thePartitionIdsInPrimaryKeys) {
-		myPartitionIdsInPrimaryKeys = thePartitionIdsInPrimaryKeys;
+	public void setDatabasePartitionMode(boolean theDatabasePartitionMode) {
+		myDatabasePartitionMode = theDatabasePartitionMode;
 	}
 
 	/**
@@ -201,10 +201,30 @@ public class PartitionSettings {
 				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
+	/**
+	 * The {@link ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity}
+	 * table is used to prevent accidental concurrent conditional create/update operations
+	 * from creating duplicate resources by inserting a row in that table as a part
+	 * of the database transaction performing the write operation. If this setting
+	 * is set to {@literal false} (which is the default), the partition
+	 * ID is not written to this table, meaning that duplicates are prevented across
+	 * partitions. If this setting is {@literal true}, duplicates will not be
+	 * prevented if they appear on different partitions.
+	 */
 	public boolean isConditionalCreateDuplicateIdentifiersEnabled() {
 		return myConditionalCreateDuplicateIdentifiersEnabled;
 	}
 
+	/**
+	 * The {@link ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity}
+	 * table is used to prevent accidental concurrent conditional create/update operations
+	 * from creating duplicate resources by inserting a row in that table as a part
+	 * of the database transaction performing the write operation. If this setting
+	 * is set to {@literal false} (which is the default), the partition
+	 * ID is not written to this table, meaning that duplicates are prevented across
+	 * partitions. If this setting is {@literal true}, duplicates will not be
+	 * prevented if they appear on different partitions.
+	 */
 	public void setConditionalCreateDuplicateIdentifiersEnabled(
 			boolean theConditionalCreateDuplicateIdentifiersEnabled) {
 		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;
@@ -222,23 +242,5 @@ public class PartitionSettings {
 		 * will be managed by the database.
 		 */
 		ALLOWED_UNQUALIFIED,
-	}
-
-	public enum BlockPatientCompartmentUpdateMode {
-		/**
-		 * Resource updates which would change resource's patient compartment are blocked.
-		 */
-		ALWAYS,
-
-		/**
-		 * Resource updates which would change resource's patient compartment are blocked
-		 * when Partition Selection Mode is PATIENT_ID
-		 */
-		DEFAULT,
-
-		/**
-		 * Resource updates which would change resource's patient compartment are allowed.
-		 */
-		NEVER,
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,9 @@ import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r5.JpaR5Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProviderCtxConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
@@ -41,6 +43,7 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -74,17 +77,20 @@ public class TestR5Config {
 	public static final Predicate<String> SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES = CircularQueueCaptureQueriesListener.DEFAULT_SELECT_INCLUSION_CRITERIA.and(t -> !t.toLowerCase(Locale.US).startsWith("select next value"));
 	public static Integer ourMaxThreads;
 
+	@Value("${" + JpaConstants.HAPI_DATABASE_PARTITION_MODE + ":false}")
+	private boolean myIncludePartitionIdsInPks;
+
 	static {
 		/*
 		 * We use a randomized number of maximum threads in order to try
 		 * and catch any potential deadlocks caused by database connection
 		 * starvation
 		 *
-		 * A minimum of 2 is necessary for most transactions,
-		 * so 2 will be our limit
+		 * A minimum of 3 is necessary for most transactions,
+		 * so 3 will be our minimum
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 2;
+			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
 
 			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
@@ -93,6 +99,8 @@ public class TestR5Config {
 		}
 	}
 
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
 	@Autowired
@@ -150,8 +158,14 @@ public class TestR5Config {
 
 		};
 
+		String connectionString = "jdbc:h2:mem:testdb_r5";
+		if (myIncludePartitionIdsInPks) {
+			// Use a separate schema for partitioned PKs
+			connectionString += "_partitioned";
+		}
+
 		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:testdb_r5");
+		retVal.setUrl(connectionString);
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");

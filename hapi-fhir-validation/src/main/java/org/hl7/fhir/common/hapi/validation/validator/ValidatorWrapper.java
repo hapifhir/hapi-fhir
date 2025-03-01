@@ -3,6 +3,7 @@ package org.hl7.fhir.common.hapi.validation.validator;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
 import com.google.gson.Gson;
@@ -25,11 +26,11 @@ import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.validation.instance.InstanceValidator;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ import java.util.stream.Collectors;
 
 class ValidatorWrapper {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorWrapper.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private boolean myAnyExtensionsAllowed;
 	private boolean myErrorForUnknownProfiles;
@@ -142,12 +143,15 @@ class ValidatorWrapper {
 		List<ValidationMessage> messages = new ArrayList<>();
 
 		List<StructureDefinition> profiles = new ArrayList<>();
+		List<ValidationMessage> invalidProfileValidationMessages = new ArrayList<>();
 		for (String nextProfileUrl : theValidationContext.getOptions().getProfiles()) {
-			fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
+			fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, invalidProfileValidationMessages);
 		}
 
 		String input = theValidationContext.getResourceAsString();
 		EncodingEnum encoding = theValidationContext.getResourceAsStringEncoding();
+		InputStream inputStream = constructNewReaderInputStream(new StringReader(input));
+
 		if (encoding == EncodingEnum.XML) {
 			Document document;
 			try {
@@ -164,11 +168,8 @@ class ValidatorWrapper {
 			// Determine if meta/profiles are present...
 			ArrayList<String> profileUrls = determineIfProfilesSpecified(document);
 			for (String nextProfileUrl : profileUrls) {
-				fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
+				fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, invalidProfileValidationMessages);
 			}
-
-			String resourceAsString = theValidationContext.getResourceAsString();
-			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), StandardCharsets.UTF_8);
 
 			Manager.FhirFormat format = Manager.FhirFormat.XML;
 			v.validate(null, messages, inputStream, format, profiles);
@@ -185,20 +186,22 @@ class ValidatorWrapper {
 					JsonArray profilesArray = profileElement.getAsJsonArray();
 					for (JsonElement element : profilesArray) {
 						String nextProfileUrl = element.getAsString();
-						fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
+						fetchAndAddProfile(
+								theWorkerContext, profiles, nextProfileUrl, invalidProfileValidationMessages);
 					}
 				}
 			}
 
-			String resourceAsString = theValidationContext.getResourceAsString();
-			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), StandardCharsets.UTF_8);
-
 			Manager.FhirFormat format = Manager.FhirFormat.JSON;
 			v.validate(null, messages, inputStream, format, profiles);
-
 		} else {
 			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
 		}
+
+		if (profiles.isEmpty() && !invalidProfileValidationMessages.isEmpty()) {
+			messages.addAll(invalidProfileValidationMessages);
+		}
+
 		// TODO: are these still needed?
 		messages = messages.stream()
 				.filter(m -> m.getMessageId() == null
@@ -220,15 +223,34 @@ class ValidatorWrapper {
 		return messages;
 	}
 
+	private ReaderInputStream constructNewReaderInputStream(Reader theReader) {
+		try {
+			return ReaderInputStream.builder()
+					.setCharset(StandardCharsets.UTF_8)
+					.setReader(theReader)
+					.get();
+		} catch (Exception ex) {
+			// we don't expect this ever
+			throw new IllegalArgumentException(
+					Msg.code(2596) + "Error constructing input reader stream while validating resource.", ex);
+		}
+	}
+
 	private void fetchAndAddProfile(
 			IWorkerContext theWorkerContext,
 			List<StructureDefinition> theProfileStructureDefinitions,
 			String theUrl,
-			List<ValidationMessage> theMessages) {
+			List<ValidationMessage> theValidationMessages) {
 		try {
 			StructureDefinition structureDefinition = theWorkerContext.fetchResource(StructureDefinition.class, theUrl);
 			if (structureDefinition != null) {
 				theProfileStructureDefinitions.add(structureDefinition);
+			} else {
+				ValidationMessage m = new ValidationMessage();
+				m.setMessageId(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN);
+				m.setLevel(ValidationMessage.IssueSeverity.ERROR);
+				m.setMessage("Invalid profile. Failed to retrieve profile with url=" + theUrl);
+				theValidationMessages.add(m);
 			}
 		} catch (FHIRException e) {
 			ourLog.debug("Failed to load profile: {}", theUrl);

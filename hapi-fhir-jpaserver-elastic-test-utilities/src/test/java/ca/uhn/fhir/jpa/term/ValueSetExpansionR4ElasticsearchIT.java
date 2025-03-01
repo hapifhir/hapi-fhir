@@ -162,7 +162,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -202,7 +202,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 	}
 
@@ -264,7 +264,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		codeSystem.setName("SYSTEM NAME");
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-		ResourceTable csResource = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable csResource = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		codeSystemVersion.setResource(csResource);
@@ -277,8 +277,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
 			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList());
 
-//		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		await().atMost(10, SECONDS).until(() -> {
+		await().atMost(20, SECONDS).until(() -> {
 			myTerminologyDeferredStorageSvc.saveDeferred();
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
 		});
@@ -324,7 +323,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		codeSystem.setName("SYSTEM NAME");
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-		ResourceTable csResource = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable csResource = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		codeSystemVersion.setResource(csResource);

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
@@ -48,12 +47,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toPredicateArray;
 
@@ -64,7 +65,7 @@ public class HistoryBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HistoryBuilder.class);
 	private final String myResourceType;
-	private final Long myResourceId;
+	private final JpaPid myResourceId;
 	private final Date myRangeStartInclusive;
 	private final Date myRangeEndInclusive;
 
@@ -81,14 +82,14 @@ public class HistoryBuilder {
 	private FhirContext myCtx;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	/**
 	 * Constructor
 	 */
 	public HistoryBuilder(
 			@Nullable String theResourceType,
-			@Nullable Long theResourceId,
+			@Nullable JpaPid theResourceId,
 			@Nullable Date theRangeStartInclusive,
 			@Nullable Date theRangeEndInclusive) {
 		myResourceType = theResourceType;
@@ -109,7 +110,6 @@ public class HistoryBuilder {
 		return query.getSingleResult();
 	}
 
-	@SuppressWarnings("OptionalIsPresent")
 	public List<ResourceHistoryTable> fetchEntities(
 			RequestPartitionId thePartitionId,
 			Integer theOffset,
@@ -121,8 +121,6 @@ public class HistoryBuilder {
 		Root<ResourceHistoryTable> from = criteriaQuery.from(ResourceHistoryTable.class);
 
 		addPredicatesToQuery(cb, thePartitionId, criteriaQuery, from, theHistorySearchStyle);
-
-		from.fetch("myProvenance", JoinType.LEFT);
 
 		/*
 		 * The sort on myUpdated is the important one for _history operations, but there are
@@ -150,21 +148,19 @@ public class HistoryBuilder {
 		query.setMaxResults(theToIndex - theFromIndex);
 
 		List<ResourceHistoryTable> tables = query.getResultList();
-		if (tables.size() > 0) {
-			ImmutableListMultimap<Long, ResourceHistoryTable> resourceIdToHistoryEntries =
+		if (!tables.isEmpty()) {
+			ImmutableListMultimap<JpaPid, ResourceHistoryTable> resourceIdToHistoryEntries =
 					Multimaps.index(tables, ResourceHistoryTable::getResourceId);
-			Set<JpaPid> pids = resourceIdToHistoryEntries.keySet().stream()
-					.map(JpaPid::fromId)
-					.collect(Collectors.toSet());
-			PersistentIdToForcedIdMap pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
+			Set<JpaPid> pids = resourceIdToHistoryEntries.keySet();
+			PersistentIdToForcedIdMap<JpaPid> pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
 			ourLog.trace("Translated IDs: {}", pidToForcedId.getResourcePersistentIdOptionalMap());
 
-			for (Long nextResourceId : resourceIdToHistoryEntries.keySet()) {
+			for (JpaPid nextResourceId : resourceIdToHistoryEntries.keySet()) {
 				List<ResourceHistoryTable> historyTables = resourceIdToHistoryEntries.get(nextResourceId);
 
 				String resourceId;
 
-				Optional<String> forcedId = pidToForcedId.get(JpaPid.fromId(nextResourceId));
+				Optional<String> forcedId = pidToForcedId.get(nextResourceId);
 				if (forcedId.isPresent()) {
 					resourceId = forcedId.get();
 					// IdHelperService returns a forcedId with the '<resourceType>/' prefix
@@ -172,11 +168,12 @@ public class HistoryBuilder {
 					// For that reason, strip the prefix before setting the transientForcedId below.
 					// If not stripped this messes up the id of the resource as the resourceType would be repeated
 					// twice like Patient/Patient/1234 in the resource constructed
-					if (resourceId.startsWith(myResourceType + "/")) {
-						resourceId = resourceId.substring(myResourceType.length() + 1);
+					int slashIdx = resourceId.indexOf('/');
+					if (slashIdx != -1) {
+						resourceId = resourceId.substring(slashIdx + 1);
 					}
 				} else {
-					resourceId = nextResourceId.toString();
+					resourceId = Long.toString(nextResourceId.getId());
 				}
 
 				for (ResourceHistoryTable nextHistoryTable : historyTables) {
@@ -196,25 +193,38 @@ public class HistoryBuilder {
 			HistorySearchStyleEnum theHistorySearchStyle) {
 		List<Predicate> predicates = new ArrayList<>();
 
-		if (!thePartitionId.isAllPartitions()) {
-			if (thePartitionId.isDefaultPartition()) {
-				predicates.add(theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")));
-			} else if (thePartitionId.hasDefaultPartitionId()) {
-				predicates.add(theCriteriaBuilder.or(
-						theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")),
-						theFrom.get("myPartitionIdValue").in(thePartitionId.getPartitionIdsWithoutDefault())));
-			} else {
-				predicates.add(theFrom.get("myPartitionIdValue").in(thePartitionId.getPartitionIds()));
-			}
-		}
-
 		if (myResourceId != null) {
-			predicates.add(theCriteriaBuilder.equal(theFrom.get("myResourceId"), myResourceId));
-		} else if (myResourceType != null) {
-			validateNotSearchingAllPartitions(thePartitionId);
-			predicates.add(theCriteriaBuilder.equal(theFrom.get("myResourceType"), myResourceType));
+
+			predicates.add(theCriteriaBuilder.equal(theFrom.get("myResourceId"), myResourceId.getId()));
+			if (myPartitionSettings.isPartitioningEnabled()) {
+				if (myResourceId.getPartitionId() != null) {
+					predicates.add(
+							theCriteriaBuilder.equal(theFrom.get("myPartitionIdValue"), myResourceId.getPartitionId()));
+				} else {
+					predicates.add(theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")));
+				}
+			}
+
 		} else {
-			validateNotSearchingAllPartitions(thePartitionId);
+
+			if (!thePartitionId.isAllPartitions()) {
+				if (thePartitionId.isDefaultPartition()) {
+					predicates.add(theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")));
+				} else if (thePartitionId.hasDefaultPartitionId()) {
+					predicates.add(theCriteriaBuilder.or(
+							theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")),
+							theFrom.get("myPartitionIdValue").in(thePartitionId.getPartitionIdsWithoutDefault())));
+				} else {
+					predicates.add(theFrom.get("myPartitionIdValue").in(thePartitionId.getPartitionIds()));
+				}
+			}
+
+			if (myResourceType != null) {
+				validateNotSearchingAllPartitions(thePartitionId);
+				predicates.add(theCriteriaBuilder.equal(theFrom.get("myResourceType"), myResourceType));
+			} else {
+				validateNotSearchingAllPartitions(thePartitionId);
+			}
 		}
 
 		if (myRangeStartInclusive != null) {
@@ -242,15 +252,30 @@ public class HistoryBuilder {
 		Subquery<Date> pastDateSubQuery = theQuery.subquery(Date.class);
 		Root<ResourceHistoryTable> subQueryResourceHistory = pastDateSubQuery.from(ResourceHistoryTable.class);
 		Expression myUpdatedMostRecent = theCriteriaBuilder.max(subQueryResourceHistory.get("myUpdated"));
+
+		/*
+		 * This conversion from the Date in myRangeEndInclusive into a ZonedDateTime is an experiment -
+		 * There is an intermittent test failure in testSearchHistoryWithAtAndGtParameters() that I can't
+		 * figure out. But I've added a ton of logging to the error it fails with and I noticed that
+		 * we emit SQL along the lines of
+		 *   select coalesce(max(rht2_0.RES_UPDATED), timestamp with time zone '2024-10-05 18:24:48.172000000Z')
+		 * for this date, and all other dates are in GMT so this is an experiment. If nothing changes,
+		 * we can roll this back to
+		 *   theCriteriaBuilder.literal(myRangeStartInclusive)
+		 * JA 20241005
+		 */
+		ZonedDateTime rangeStart =
+				ZonedDateTime.ofInstant(Instant.ofEpochMilli(myRangeStartInclusive.getTime()), ZoneId.of("GMT"));
+
 		Expression myUpdatedMostRecentOrDefault =
-				theCriteriaBuilder.coalesce(myUpdatedMostRecent, theCriteriaBuilder.literal(myRangeStartInclusive));
+				theCriteriaBuilder.coalesce(myUpdatedMostRecent, theCriteriaBuilder.literal(rangeStart));
 
 		pastDateSubQuery
 				.select(myUpdatedMostRecentOrDefault)
 				.where(
 						theCriteriaBuilder.lessThanOrEqualTo(
 								subQueryResourceHistory.get("myUpdated"), myRangeStartInclusive),
-						theCriteriaBuilder.equal(subQueryResourceHistory.get("myResourceId"), myResourceId));
+						theCriteriaBuilder.equal(subQueryResourceHistory.get("myResourcePid"), myResourceId.toFk()));
 
 		Predicate updatedDatePredicate =
 				theCriteriaBuilder.greaterThanOrEqualTo(theFrom.get("myUpdated"), pastDateSubQuery);

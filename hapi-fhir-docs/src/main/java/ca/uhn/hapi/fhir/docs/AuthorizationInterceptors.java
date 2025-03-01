@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -262,7 +262,6 @@ public class AuthorizationInterceptors {
 			}
 		};
 		// END SNIPPET: advancedCompartment
-
 	}
 
 	@SuppressWarnings("InnerClassMayBeStatic")
@@ -330,7 +329,7 @@ public class AuthorizationInterceptors {
 		SearchNarrowingConsentService consentService =
 				new SearchNarrowingConsentService(validationSupport, searchParamRegistry);
 
-		// Create a ConsentIntereptor to apply the ConsentService and register it with the server
+		// Create a ConsentInterceptor to apply the ConsentService and register it with the server
 		ConsentInterceptor consentInterceptor = new ConsentInterceptor();
 		consentInterceptor.registerConsentService(consentService);
 		restfulServer.registerInterceptor(consentInterceptor);

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.server.util;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.http.NameValuePair;
 
@@ -43,7 +42,7 @@ public class ServletRequestUtil {
 		requestDetails.setParameters(new HashMap<>());
 		if (qIndex != -1) {
 			String params = url.substring(qIndex);
-			List<NameValuePair> parameters = UrlUtil.translateMatchUrl(params);
+			List<NameValuePair> parameters = MatchUrlUtil.translateMatchUrl(params);
 			for (NameValuePair next : parameters) {
 				theParamValues.put(next.getName(), next.getValue());
 			}

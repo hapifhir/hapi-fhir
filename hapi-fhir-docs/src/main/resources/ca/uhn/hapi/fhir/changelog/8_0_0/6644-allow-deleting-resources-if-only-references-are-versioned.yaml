@@ -1,0 +1,11 @@
+---
+type: add
+issue: 6644
+jira: SMILE-9604
+title: "By default, referential integrity is enforced on deletes.
+        This change introduces support for an exceptional case such
+        that deletion of a given resource will not be blocked if all
+        references to that resource are versioned. If there is at
+        least one unversioned reference to the resource, deletion will
+        still be blocked.
+"

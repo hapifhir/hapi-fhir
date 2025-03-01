@@ -1,0 +1,9 @@
+---
+type: change
+issue: 6460
+title: "When performing a FHIR Transaction which deletes and then updates (or otherwise
+   un-deletes) the same resource within a single transaction, the delete was previously
+   not stored as a distinct version (meaning that the resource version was only
+   incremented once, and no delete was actually stored in the resource history. This
+   has been changed so that deletes will always appear as a distinct entry in the
+   resource history."

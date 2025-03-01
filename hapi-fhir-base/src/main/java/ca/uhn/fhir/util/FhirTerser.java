@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import com.google.common.collect.Lists;
@@ -61,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -70,6 +70,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -77,15 +78,27 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.substring;
 
 public class FhirTerser {
 
 	private static final Pattern COMPARTMENT_MATCHER_PATH =
 			Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
+
 	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED =
 			FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
+
 	private final FhirContext myContext;
+
+	/**
+	 * This comparator sorts IBaseReferences, and places any that are missing an ID at the end. Those with an ID go to the front.
+	 */
+	private static final Comparator<IBaseReference> REFERENCES_WITH_IDS_FIRST =
+			Comparator.nullsLast(Comparator.comparing(ref -> {
+				if (ref.getResource() == null) return true;
+				if (ref.getResource().getIdElement() == null) return true;
+				if (ref.getResource().getIdElement().getValue() == null) return true;
+				return false;
+			}));
 
 	public FhirTerser(FhirContext theContext) {
 		super();
@@ -1418,6 +1431,13 @@ public class FhirTerser {
 	private void containResourcesForEncoding(
 			ContainedResources theContained, IBaseResource theResource, boolean theModifyResource) {
 		List<IBaseReference> allReferences = getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
+
+		// Note that we process all contained resources that have arrived here with an ID contained resources first, so
+		// that we don't accidentally auto-assign an ID
+		// which may collide with a resource we have yet to process.
+		// See: https://github.com/hapifhir/hapi-fhir/issues/6403
+		allReferences.sort(REFERENCES_WITH_IDS_FIRST);
+
 		for (IBaseReference next : allReferences) {
 			IBaseResource resource = next.getResource();
 			if (resource == null && next.getReferenceElement().isLocal()) {
@@ -1437,11 +1457,11 @@ public class FhirTerser {
 			IBaseResource resource = next.getResource();
 			if (resource != null) {
 				if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
-					if (theContained.getResourceId(resource) != null) {
-						// Prevent infinite recursion if there are circular loops in the contained resources
+
+					IIdType id = theContained.addContained(resource);
+					if (id == null) {
 						continue;
 					}
-					IIdType id = theContained.addContained(resource);
 					if (theModifyResource) {
 						getContainedResourceList(theResource).add(resource);
 						next.setReference(id.getValue());
@@ -1768,8 +1788,6 @@ public class FhirTerser {
 	}
 
 	public static class ContainedResources {
-		private long myNextContainedId = 1;
-
 		private List<IBaseResource> myResourceList;
 		private IdentityHashMap<IBaseResource, IIdType> myResourceToIdMap;
 		private Map<String, IBaseResource> myExistingIdToContainedResourceMap;
@@ -1782,6 +1800,11 @@ public class FhirTerser {
 		}
 
 		public IIdType addContained(IBaseResource theResource) {
+			if (this.getResourceId(theResource) != null) {
+				// Prevent infinite recursion if there are circular loops in the contained resources
+				return null;
+			}
+
 			IIdType existing = getResourceToIdMap().get(theResource);
 			if (existing != null) {
 				return existing;
@@ -1789,16 +1812,7 @@ public class FhirTerser {
 
 			IIdType newId = theResource.getIdElement();
 			if (isBlank(newId.getValue())) {
-				newId.setValue("#" + myNextContainedId++);
-			} else {
-				// Avoid auto-assigned contained IDs colliding with pre-existing ones
-				String idPart = newId.getValue();
-				if (substring(idPart, 0, 1).equals("#")) {
-					idPart = idPart.substring(1);
-					if (StringUtils.isNumeric(idPart)) {
-						myNextContainedId = Long.parseLong(idPart) + 1;
-					}
-				}
+				newId.setValue("#" + UUID.randomUUID());
 			}
 
 			getResourceToIdMap().put(theResource, newId);
@@ -1861,46 +1875,6 @@ public class FhirTerser {
 
 		public boolean hasExistingIdToContainedResource() {
 			return myExistingIdToContainedResourceMap != null;
-		}
-
-		public void assignIdsToContainedResources() {
-
-			if (!getContainedResources().isEmpty()) {
-
-				/*
-				 * The idea with the code block below:
-				 *
-				 * We want to preserve any IDs that were user-assigned, so that if it's really
-				 * important to someone that their contained resource have the ID of #FOO
-				 * or #1 we will keep that.
-				 *
-				 * For any contained resources where no ID was assigned by the user, we
-				 * want to manually create an ID but make sure we don't reuse an existing ID.
-				 */
-
-				Set<String> ids = new HashSet<>();
-
-				// Gather any user assigned IDs
-				for (IBaseResource nextResource : getContainedResources()) {
-					if (getResourceToIdMap().get(nextResource) != null) {
-						ids.add(getResourceToIdMap().get(nextResource).getValue());
-					}
-				}
-
-				// Automatically assign IDs to the rest
-				for (IBaseResource nextResource : getContainedResources()) {
-
-					while (getResourceToIdMap().get(nextResource) == null) {
-						String nextCandidate = "#" + myNextContainedId;
-						myNextContainedId++;
-						if (!ids.add(nextCandidate)) {
-							continue;
-						}
-
-						getResourceToIdMap().put(nextResource, new IdDt(nextCandidate));
-					}
-				}
-			}
 		}
 	}
 }

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -15,22 +14,22 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRetrieveNonInlinedResource() {
 		IIdType id = createPatient(withActiveTrue());
-		Long pid = id.getIdPartAsLong();
+		JpaPidFk pid = JpaPidFk.fromId(id.getIdPartAsLong());
 
 		relocateResourceTextToCompressedColumn(pid, 1L);
 
 		runInTransaction(()->{
-			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(pid, 1);
+			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersion(pid, 1);
 			assertNotNull(historyEntity.getResource());
 			assertNull(historyEntity.getResourceTextVc());
 			assertEquals(ResourceEncodingEnum.JSONC, historyEntity.getEncoding());

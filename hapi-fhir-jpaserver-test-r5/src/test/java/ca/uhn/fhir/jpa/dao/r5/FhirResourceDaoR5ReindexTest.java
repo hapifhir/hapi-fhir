@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -13,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
 @SuppressWarnings({"Duplicates"})
@@ -40,6 +41,7 @@ public class FhirResourceDaoR5ReindexTest extends BaseJpaR5Test {
 			assertTrue(table.isParamsUriPopulated());
 			ResourceIndexedSearchParamUri uri = new ResourceIndexedSearchParamUri(new PartitionSettings(), "SearchParameter", "url", "http://foo");
 			uri.setResource(table);
+			uri.setResourceId(table.getId().getId());
 			uri.calculateHashes();
 			myResourceIndexedSearchParamUriDao.save(uri);
 		});

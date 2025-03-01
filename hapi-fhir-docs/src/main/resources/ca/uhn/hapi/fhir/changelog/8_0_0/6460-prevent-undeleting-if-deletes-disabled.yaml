@@ -1,0 +1,5 @@
+---
+type: change
+issue: 6460
+title: "If deletes are disabled in the JPA server, it is no longer possible to un-delete
+   a resource (i.e. update a previously deleted resource to make it non-deleted)."

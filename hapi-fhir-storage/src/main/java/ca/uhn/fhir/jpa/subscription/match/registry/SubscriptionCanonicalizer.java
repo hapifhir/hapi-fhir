@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -71,10 +72,19 @@ public class SubscriptionCanonicalizer {
 	final FhirContext myFhirContext;
 	private final SubscriptionSettings mySubscriptionSettings;
 
+	private IRequestPartitionHelperSvc myHelperSvc;
+
 	@Autowired
 	public SubscriptionCanonicalizer(FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings) {
 		myFhirContext = theFhirContext;
 		mySubscriptionSettings = theSubscriptionSettings;
+	}
+	// TODO GGG: Eventually, we will unify autowiring styles. It is this way now as this is the least destrctive method
+	// to accomplish a minimal MR. I recommend moving all dependencies to setter autowiring, but that is for another
+	// day.
+	@Autowired
+	public void setPartitionHelperSvc(IRequestPartitionHelperSvc thePartitionHelperSvc) {
+		myHelperSvc = thePartitionHelperSvc;
 	}
 
 	// TODO:  LD:  remove this constructor once all callers call the 2 arg constructor above
@@ -787,7 +797,9 @@ public class SubscriptionCanonicalizer {
 		boolean isSubscriptionCreatedOnDefaultPartition = false;
 
 		if (nonNull(requestPartitionId)) {
-			isSubscriptionCreatedOnDefaultPartition = requestPartitionId.isDefaultPartition();
+			isSubscriptionCreatedOnDefaultPartition = myHelperSvc == null
+					? requestPartitionId.isDefaultPartition()
+					: myHelperSvc.isDefaultPartition(requestPartitionId);
 		}
 
 		boolean isSubscriptionDefinededAsCrossPartitionSubscription =

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -383,8 +383,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				String resourceType = myFhirContext.getResourceType(theJobDetails.getCurrentSearchResourceType());
 				RuntimeResourceDefinition resourceDef =
 						myFhirContext.getResourceDefinition(theJobDetails.getCurrentSearchResourceType());
-				ISearchBuilder searchBuilder = mySearchBuilderFactory.newSearchBuilder(
-						resourceDao, resourceType, resourceDef.getImplementingClass());
+				ISearchBuilder searchBuilder =
+						mySearchBuilderFactory.newSearchBuilder(resourceType, resourceDef.getImplementingClass());
 				List<IBaseResource> listToPopulate = new ArrayList<>();
 
 				myTransactionService.withRequest(null).execute(() -> {
