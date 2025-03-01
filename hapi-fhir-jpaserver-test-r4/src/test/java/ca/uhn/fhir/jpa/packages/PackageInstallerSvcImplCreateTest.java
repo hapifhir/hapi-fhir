@@ -267,4 +267,38 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		PackageInstallerSvcImplCreateTest.PACKAGE.save(stream);
 		return stream.toByteArray();
 	}
+
+
+	@Test
+	public void testIdClashBetweenPackages() throws IOException {
+		String packageIdA = "org.testA";
+		String packageIdB = "org.testB";
+		String packageVersion = "1.0.0";
+		NpmPackage pkgA = createPackage(new CodeSystem().setUrl("http://url/aCode").setId("1"), "CodeSystem", packageIdA);
+		NpmPackage pkgB = createPackage(new CodeSystem().setUrl("http://url/bCode").setId("1"), "CodeSystem", packageIdB);
+		ByteArrayOutputStream originA = new ByteArrayOutputStream();
+		ByteArrayOutputStream originB = new ByteArrayOutputStream();
+		pkgA.save(originA);
+		pkgB.save(originB);
+
+		mySvc.install(new PackageInstallationSpec().setName(packageIdA).setVersion(packageVersion).setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(originA.toByteArray()));
+		mySvc.install(new PackageInstallationSpec().setName(packageIdB).setVersion(packageVersion).setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(originB.toByteArray()));
+	}
+
+
+
+	@Nonnull
+	public static NpmPackage createPackage(IBaseResource theResource, String theResourceType, String packageId) {
+		PackageGenerator manifestGenerator = new PackageGenerator();
+		manifestGenerator.name(packageId);
+		manifestGenerator.version("1.0.0");
+		manifestGenerator.description("a package");
+		manifestGenerator.fhirVersions(List.of(FhirVersionEnum.R4.getFhirVersionString()));
+		String csString = FhirContext.forR4Cached().newJsonParser().encodeResourceToString(theResource);
+		NpmPackage pkg = NpmPackage.empty(manifestGenerator);
+		pkg.addFile("package", theResourceType + ".json", csString.getBytes(StandardCharsets.UTF_8), theResourceType);
+
+		return pkg;
+	}
+
 }

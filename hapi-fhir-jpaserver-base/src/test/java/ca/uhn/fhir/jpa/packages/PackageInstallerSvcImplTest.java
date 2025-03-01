@@ -254,7 +254,7 @@ public class PackageInstallerSvcImplTest {
 
 
 		PackageInstallationSpec newSpec = setupResourceInPackage(null, newCs, myCodeSystemDao);
-		when(myCodeSystemDao.update(any(), any(), any())).thenThrow(new ResourceVersionConflictException("Resource already exists with that ID but with a different URL"));
+		when(myCodeSystemDao.update(any(), any(), any())).thenThrow(new ResourceVersionConflictException("HAPI-0550: HAPI-0825: The operation has failed with a client-assigned ID constraint failure. This typically means that multiple client threads are trying to create a new resource with the same client-assigned ID at the same time, and this thread was chosen to be rejected. It can also happen when a request disables the Upsert Existence Check."));
 		mySvc.install(newSpec);
 
 
