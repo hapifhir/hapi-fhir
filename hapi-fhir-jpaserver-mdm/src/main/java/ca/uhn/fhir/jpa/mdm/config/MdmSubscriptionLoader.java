@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,6 +131,10 @@ public class MdmSubscriptionLoader {
 		mySubscriptionTopicDao.update(theSubscriptionTopic, SystemRequestDetails.forAllPartitions());
 	}
 
+	protected ChannelProducerSettings getChannelProducerSettings() {
+		return new ChannelProducerSettings();
+	}
+
 	private org.hl7.fhir.dstu3.model.Subscription buildMdmSubscriptionDstu3(String theId, String theCriteria) {
 		org.hl7.fhir.dstu3.model.Subscription retval = new org.hl7.fhir.dstu3.model.Subscription();
 		retval.setId(theId);
@@ -147,7 +151,7 @@ public class MdmSubscriptionLoader {
 		org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelComponent channel = retval.getChannel();
 		channel.setType(org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType.MESSAGE);
 		channel.setEndpoint("channel:"
-				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
+				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, getChannelProducerSettings()));
 		channel.setPayload(Constants.CT_JSON);
 		return retval;
 	}
@@ -168,7 +172,7 @@ public class MdmSubscriptionLoader {
 		Subscription.SubscriptionChannelComponent channel = retval.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
 		channel.setEndpoint("channel:"
-				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
+				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, getChannelProducerSettings()));
 		channel.setPayload(Constants.CT_JSON);
 		return retval;
 	}
@@ -216,7 +220,7 @@ public class MdmSubscriptionLoader {
 				.setSystem(CanonicalSubscriptionChannelType.MESSAGE.getSystem()));
 
 		subscription.setEndpoint("channel:"
-				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
+				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, getChannelProducerSettings()));
 		subscription.setContentType(Constants.CT_JSON);
 
 		return Collections.singletonList(subscription);

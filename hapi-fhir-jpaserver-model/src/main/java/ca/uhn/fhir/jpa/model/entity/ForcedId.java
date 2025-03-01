@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
+
+import java.util.Objects;
 
 /**
  * The old way we handled client-assigned resource ids.
@@ -104,6 +106,20 @@ class ForcedId extends BasePartitionable {
 		b.append("forcedId", myForcedId);
 		b.append("resourcePid", myResourcePid);
 		return b.toString();
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (!(theO instanceof ForcedId)) return false;
+		ForcedId forcedId = (ForcedId) theO;
+		return Objects.equals(myForcedId, forcedId.myForcedId)
+				&& Objects.equals(myResourcePid, forcedId.myResourcePid)
+				&& Objects.equals(myResourceType, forcedId.myResourceType);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(myForcedId, myResourcePid, myResourceType);
 	}
 
 	public String asTypedFhirResourceId() {

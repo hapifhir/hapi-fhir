@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6451
+jira: SMILE-9089
+title: "Previously, activating `BulkDataImport` job would not change jobs status to `RUNNING`, 
+causing it to be processed multiple times instead of single time. This has been fixed."

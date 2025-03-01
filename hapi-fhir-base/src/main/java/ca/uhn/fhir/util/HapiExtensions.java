@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,6 +111,12 @@ public class HapiExtensions {
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
 
 	/**
+	 * URL for extension on a Search Parameter which determines whether it should be enabled for searching for resources
+	 */
+	public static final String EXT_SEARCHPARAM_ENABLED_FOR_SEARCHING =
+			"http://hapifhir.io/fhir/StructureDefinition/searchparameter-enabled-for-searching";
+
+	/**
 	 * URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder
 	 */
 	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER =
@@ -187,6 +193,18 @@ public class HapiExtensions {
 			"http://hl7.org/fhir/tools/CustomBaseResource";
 	public static final String EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE =
 			"http://hl7.org/fhir/tools/CustomTargetResource";
+
+	/**
+	 * When a resource is replacing another resource, this extension can be added
+	 * to include a reference to the resource that is being replaced.
+	 */
+	public static final String EXTENSION_REPLACES = "http://hapifhir.io/fhir/StructureDefinition/replaces";
+
+	/**
+	 * When a resource is replaced by another resource, this extension can be added
+	 * to include a reference to the resource that is replacing it.
+	 */
+	public static final String EXTENSION_REPLACED_BY = "http://hapifhir.io/fhir/StructureDefinition/replaced-by";
 
 	/**
 	 * Non instantiable

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +158,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		return myVersionCanonicalizer.parametersFromCanonical(retValCanonical);
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes"})
 	@Nonnull
 	private Parameters reindexInTransaction(RequestDetails theRequestDetails, IIdType theResourceId) {
 		StopWatch sw = new StopWatch();
@@ -177,7 +177,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 
 		List<String> messages = new ArrayList<>();
 
-		JpaPid pid = JpaPid.fromId(entity.getId());
+		JpaPid pid = entity.getId();
 		ReindexOutcome outcome = dao.reindex(pid, new ReindexParameters(), theRequestDetails, new TransactionDetails());
 		messages.add("Reindex completed in " + sw);
 
@@ -441,7 +441,8 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 	private void fillInParamNames(
 			ResourceTable theEntity, Collection<SearchParamPresentEntity> theTarget, String theResourceName) {
 		Map<Long, String> hashes = new HashMap<>();
-		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(theResourceName);
+		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(
+				theResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 		for (RuntimeSearchParam next : searchParams.values()) {
 			hashes.put(
 					SearchParamPresentEntity.calculateHashPresence(

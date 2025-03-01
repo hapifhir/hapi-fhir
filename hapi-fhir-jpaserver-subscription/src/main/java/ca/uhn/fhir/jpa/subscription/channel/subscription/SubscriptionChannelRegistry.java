@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Multimaps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +49,8 @@ public class SubscriptionChannelRegistry {
 	// This map is a reference count so we know to destroy the channel when there are no more active subscriptions using
 	// it
 	// Key Channel Name, Value Subscription Id
-	private final Multimap<String, String> myActiveSubscriptionByChannelName =
-			MultimapBuilder.hashKeys().arrayListValues().build();
+	private final Multimap<String, String> myActiveSubscriptionByChannelName = Multimaps.synchronizedMultimap(
+			MultimapBuilder.hashKeys().arrayListValues().build());
 	private final Map<String, IChannelProducer> myChannelNameToSender = new ConcurrentHashMap<>();
 
 	@Autowired
@@ -120,7 +121,7 @@ public class SubscriptionChannelRegistry {
 		return mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(theParameters.getChannelName(), settings);
 	}
 
-	public synchronized void remove(ActiveSubscription theActiveSubscription) {
+	public void remove(ActiveSubscription theActiveSubscription) {
 		String channelName = theActiveSubscription.getChannelName();
 		ourLog.info("Removing subscription {} from channel {}", theActiveSubscription.getId(), channelName);
 		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription.getId());

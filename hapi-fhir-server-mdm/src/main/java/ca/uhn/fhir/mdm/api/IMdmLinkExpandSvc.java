@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -41,5 +40,5 @@ public interface IMdmLinkExpandSvc {
 	Set<String> expandMdmByGoldenResourcePid(
 			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid);
 
-	Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IdDt theId);
+	Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IIdType theId);
 }

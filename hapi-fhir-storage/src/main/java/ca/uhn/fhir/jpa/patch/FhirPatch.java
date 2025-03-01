@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,34 +172,20 @@ public class FhirPatch {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
-		String containingPath;
-		String elementName;
+		ParsedPath parsedPath = ParsedPath.parse(path);
+		List<IBase> containingElements = myContext
+				.newFhirPath()
+				.evaluate(
+						theResource,
+						parsedPath.getEndsWithAFilterOrIndex() ? parsedPath.getContainingPath() : path,
+						IBase.class);
 
-		if (path.endsWith(")")) {
-			// This is probably a filter, so we're probably dealing with a list
-			int filterArgsIndex = path.lastIndexOf('('); // Let's hope there aren't nested parentheses
-			int lastDotIndex = path.lastIndexOf(
-					'.', filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
-			int secondLastDotIndex = path.lastIndexOf('.', lastDotIndex - 1);
-			containingPath = path.substring(0, secondLastDotIndex);
-			elementName = path.substring(secondLastDotIndex + 1, lastDotIndex);
-		} else if (path.endsWith("]")) {
-			// This is almost definitely a list
-			int openBracketIndex = path.lastIndexOf('[');
-			int lastDotIndex = path.lastIndexOf('.', openBracketIndex);
-			containingPath = path.substring(0, lastDotIndex);
-			elementName = path.substring(lastDotIndex + 1, openBracketIndex);
-		} else {
-			containingPath = path;
-			elementName = null;
-		}
-
-		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 		for (IBase nextElement : containingElements) {
-			if (elementName == null) {
-				deleteSingleElement(nextElement);
+			if (parsedPath.getEndsWithAFilterOrIndex()) {
+				// if the path ends with a filter or index, we must be dealing with a list
+				deleteFromList(theResource, nextElement, parsedPath.getLastElementName(), path);
 			} else {
-				deleteFromList(theResource, nextElement, elementName, path);
+				deleteSingleElement(nextElement);
 			}
 		}
 	}
@@ -227,18 +213,51 @@ public class FhirPatch {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
-		int lastDot = path.lastIndexOf(".");
-		String containingPath = path.substring(0, lastDot);
-		String elementName = path.substring(lastDot + 1);
+		ParsedPath parsedPath = ParsedPath.parse(path);
 
-		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
-		for (IBase nextElement : containingElements) {
+		List<IBase> containingElements =
+				myContext.newFhirPath().evaluate(theResource, parsedPath.getContainingPath(), IBase.class);
+		for (IBase containingElement : containingElements) {
 
-			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
+			ChildDefinition childDefinition = findChildDefinition(containingElement, parsedPath.getLastElementName());
+			IBase newValue = getNewValue(theParameters, containingElement, childDefinition);
+			if (parsedPath.getEndsWithAFilterOrIndex()) {
+				// if the path ends with a filter or index, we must be dealing with a list
+				replaceInList(newValue, theResource, containingElement, childDefinition, path);
+			} else {
+				childDefinition.getChildDef().getMutator().setValue(containingElement, newValue);
+			}
+		}
+	}
 
-			IBase newValue = getNewValue(theParameters, nextElement, childDefinition);
+	private void replaceInList(
+			IBase theNewValue,
+			IBaseResource theResource,
+			IBase theContainingElement,
+			ChildDefinition theChildDefinitionForTheList,
+			String theFullReplacePath) {
 
-			childDefinition.getChildDef().getMutator().setValue(nextElement, newValue);
+		List<IBase> existingValues = new ArrayList<>(
+				theChildDefinitionForTheList.getChildDef().getAccessor().getValues(theContainingElement));
+		List<IBase> valuesToReplace = myContext.newFhirPath().evaluate(theResource, theFullReplacePath, IBase.class);
+		if (valuesToReplace.isEmpty()) {
+			String msg = myContext
+					.getLocalizer()
+					.getMessage(FhirPatch.class, "noMatchingElementForPath", theFullReplacePath);
+			throw new InvalidRequestException(Msg.code(2617) + msg);
+		}
+
+		BaseRuntimeChildDefinition.IMutator listMutator =
+				theChildDefinitionForTheList.getChildDef().getMutator();
+		// clear the whole list first, then reconstruct it in the loop below replacing the values that need to be
+		// replaced
+		listMutator.setValue(theContainingElement, null);
+		for (IBase existingValue : existingValues) {
+			if (valuesToReplace.contains(existingValue)) {
+				listMutator.addValue(theContainingElement, theNewValue);
+			} else {
+				listMutator.addValue(theContainingElement, existingValue);
+			}
 		}
 	}
 
@@ -665,6 +684,89 @@ public class FhirPatch {
 
 		public BaseRuntimeElementDefinition<?> getChildElement() {
 			return myChildElement;
+		}
+	}
+
+	/**
+	 * This class helps parse a FHIR path into its component parts for easier patch operation processing.
+	 * It has 3 components:
+	 *  - The last element name, which is the last element in the path (not including any list index or filter)
+	 *  - The containing path, which is the prefix of the path up to the last element
+	 *  - A flag indicating whether the path has a filter or index on the last element of the path, which indicates
+	 *  that the path we are dealing is probably for a list element.
+	 * Examples:
+	 * 1. For path "Patient.identifier[2].system",
+	 *   - the lastElementName is "system",
+	 *   - the containingPath is "Patient.identifier[2]",
+	 *   - and endsWithAFilterOrIndex flag is false
+	 *
+	 *  2. For path "Patient.identifier[2]" or for path "Patient.identifier.where('system'='sys1')"
+	 *  - the lastElementName is "identifier",
+	 *  - the containingPath is "Patient",
+	 *  - and the endsWithAFilterOrIndex is true
+	 */
+	protected static class ParsedPath {
+		private final String myLastElementName;
+		private final String myContainingPath;
+		private final boolean myEndsWithAFilterOrIndex;
+
+		public ParsedPath(String theLastElementName, String theContainingPath, boolean theEndsWithAFilterOrIndex) {
+			myLastElementName = theLastElementName;
+			myContainingPath = theContainingPath;
+			myEndsWithAFilterOrIndex = theEndsWithAFilterOrIndex;
+		}
+
+		/**
+		 * returns the last element of the path
+		 */
+		public String getLastElementName() {
+			return myLastElementName;
+		}
+
+		/**
+		 * Returns the prefix of the path up to the last FHIR resource element
+		 */
+		public String getContainingPath() {
+			return myContainingPath;
+		}
+
+		/**
+		 * Returns whether the path has a filter or index on the last element of the path, which indicates
+		 * that the path we are dealing is probably a list element.
+		 */
+		public boolean getEndsWithAFilterOrIndex() {
+			return myEndsWithAFilterOrIndex;
+		}
+
+		public static ParsedPath parse(String path) {
+			String containingPath;
+			String elementName;
+			boolean endsWithAFilterOrIndex = false;
+
+			if (path.endsWith(")")) {
+				// This is probably a filter, so we're probably dealing with a list
+				endsWithAFilterOrIndex = true;
+				int filterArgsIndex = path.lastIndexOf('('); // Let's hope there aren't nested parentheses
+				int lastDotIndex = path.lastIndexOf(
+						'.',
+						filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
+				int secondLastDotIndex = path.lastIndexOf('.', lastDotIndex - 1);
+				containingPath = path.substring(0, secondLastDotIndex);
+				elementName = path.substring(secondLastDotIndex + 1, lastDotIndex);
+			} else if (path.endsWith("]")) {
+				// This is almost definitely a list
+				endsWithAFilterOrIndex = true;
+				int openBracketIndex = path.lastIndexOf('[');
+				int lastDotIndex = path.lastIndexOf('.', openBracketIndex);
+				containingPath = path.substring(0, lastDotIndex);
+				elementName = path.substring(lastDotIndex + 1, openBracketIndex);
+			} else {
+				int lastDot = path.lastIndexOf(".");
+				containingPath = path.substring(0, lastDot);
+				elementName = path.substring(lastDot + 1);
+			}
+
+			return new ParsedPath(elementName, containingPath, endsWithAFilterOrIndex);
 		}
 	}
 }

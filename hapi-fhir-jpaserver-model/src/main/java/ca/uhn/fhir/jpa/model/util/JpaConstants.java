@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -301,6 +301,8 @@ public class JpaConstants {
 			"https://hapifhir.org/NamingSystem/bulk-export-binary-resource-type";
 	public static final Set<String> UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE =
 			Set.of("Provenance", "List", "Group");
+	public static final String HAPI_DATABASE_PARTITION_MODE = "hapi.database_partition_mode";
+	public static final String HAPI_DATABASE_PARTITION_MODE_DEFAULT = "false";
 
 	/**
 	 * Non-instantiable

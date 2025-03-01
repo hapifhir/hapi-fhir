@@ -12,6 +12,9 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
@@ -22,7 +25,6 @@ import ca.uhn.fhir.jpa.test.PatientReindexTestHelper;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import jakarta.annotation.PostConstruct;
-import jakarta.persistence.Query;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -67,8 +69,10 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
-		myStorageSettings.setStoreMetaSourceInformation(new JpaStorageSettings().getStoreMetaSourceInformation());
-		myStorageSettings.setPreserveRequestIdInResourceBody(new JpaStorageSettings().isPreserveRequestIdInResourceBody());
+		JpaStorageSettings defaults = new JpaStorageSettings();
+		myStorageSettings.setStoreMetaSourceInformation(defaults.getStoreMetaSourceInformation());
+		myStorageSettings.setPreserveRequestIdInResourceBody(defaults.isPreserveRequestIdInResourceBody());
+		myStorageSettings.setAccessMetaSourceInformationFromProvenanceTable(defaults.isAccessMetaSourceInformationFromProvenanceTable());
 	}
 
 	@Test
@@ -89,7 +93,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		// Move resource text to compressed storage, which we don't write to anymore but legacy
 		// data may exist that was previously stored there, so we're simulating that.
 		List<ResourceHistoryTable> allHistoryEntities = runInTransaction(() -> myResourceHistoryTableDao.findAll());
-		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(t.getResourceId(), t.getVersion()));
+		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(t.getResourceId().toFk(), t.getVersion()));
 
 		runInTransaction(()->{
 			assertEquals(20, myResourceHistoryTableDao.count());
@@ -114,7 +118,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		runInTransaction(()->{
 			assertEquals(20, myResourceHistoryTableDao.count());
 			ResourceHistoryTable history = myResourceHistoryTableDao.findAll().get(0);
-			if (history.getResourceId().equals(patientId.getIdPartAsLong()) && history.getVersion() < 11) {
+			if (history.getResourceId().equals(JpaPid.fromId(patientId.getIdPartAsLong())) && history.getVersion() < 11) {
 				assertNull(history.getResourceTextVc());
 				assertNotNull(history.getResource());
 			} else {
@@ -146,7 +150,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		// Move resource text to compressed storage, which we don't write to anymore but legacy
 		// data may exist that was previously stored there, so we're simulating that.
 		List<ResourceHistoryTable> allHistoryEntities = runInTransaction(() -> myResourceHistoryTableDao.findAll());
-		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(t.getResourceId(), t.getVersion()));
+		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(t.getResourceId().toFk(), t.getVersion()));
 
 		runInTransaction(()->{
 			assertEquals(20, myResourceHistoryTableDao.count());
@@ -171,7 +175,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		runInTransaction(()->{
 			assertEquals(20, myResourceHistoryTableDao.count());
 			for (ResourceHistoryTable history : myResourceHistoryTableDao.findAll()) {
-				assertNotNull(history.getResourceTextVc());
+				assertNotNull(history.getResourceTextVc(), ()->"Null history on: " + history);
 				assertNull(history.getResource());
 			}
 		});
@@ -181,27 +185,90 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testOptimizeStorage_AllVersions_SingleResourceWithMultipleVersion() {
+
+		// this difference of this test from testOptimizeStorage_AllVersions is that this one has only 1 resource
+		// (with multiple versions) in the db. There was a bug where if only one resource were being re-indexed, the
+		// resource wasn't processed for optimize storage.
+
+		// Setup
+		IIdType patientId = createPatient(withActiveTrue());
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId(patientId.toUnqualifiedVersionless());
+			p.setActive(true);
+			p.addIdentifier().setValue(String.valueOf(i));
+			myPatientDao.update(p, mySrd);
+		}
+
+		// Move resource text to compressed storage, which we don't write to anymore but legacy
+		// data may exist that was previously stored there, so we're simulating that.
+		List<ResourceHistoryTable> allHistoryEntities = runInTransaction(() -> myResourceHistoryTableDao.findAll());
+		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(t.getResourceId().toFk(), t.getVersion()));
+
+		runInTransaction(()->{
+			assertEquals(11, myResourceHistoryTableDao.count());
+			for (ResourceHistoryTable history : myResourceHistoryTableDao.findAll()) {
+				assertNull(history.getResourceTextVc());
+				assertNotNull(history.getResource());
+			}
+		});
+
+		// execute
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_REINDEX);
+		startRequest.setParameters(
+			new ReindexJobParameters()
+				.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS)
+				.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE)
+		);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
+		myBatch2JobHelper.awaitJobCompletion(startResponse);
+
+		// validate
+		runInTransaction(()->{
+			assertEquals(11, myResourceHistoryTableDao.count());
+			for (ResourceHistoryTable history : myResourceHistoryTableDao.findAll()) {
+				assertNotNull(history.getResourceTextVc());
+				assertNull(history.getResource());
+			}
+		});
+		Patient patient = myPatientDao.read(patientId, mySrd);
+		assertTrue(patient.getActive());
+	}
+
+	@Test
 	public void testOptimizeStorage_AllVersions_CopyProvenanceEntityData() {
 		// Setup
 		myStorageSettings.setStoreMetaSourceInformation(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
+		myStorageSettings.setAccessMetaSourceInformationFromProvenanceTable(true);
 		myStorageSettings.setPreserveRequestIdInResourceBody(true);
 
 		for (int i = 0; i < 10; i++) {
 			Patient p = new Patient();
 			p.setId("PATIENT" + i);
-			p.getMeta().setSource("http://foo#bar");
 			p.addIdentifier().setValue(String.valueOf(i));
 			myPatientDao.update(p, mySrd);
 
-			p.addIdentifier().setSystem("http://blah");
+			p.setActive(true);
 			myPatientDao.update(p, mySrd);
 		}
 
 		runInTransaction(()->{
+			List<ResourceHistoryTable> versions = myResourceHistoryTableDao.findAll();
+			for (var version : versions) {
+				ResourceHistoryProvenanceEntity provenance = new ResourceHistoryProvenanceEntity();
+				provenance.setResourceTable(version.getResourceTable());
+				provenance.setResourceHistoryTable(version);
+				provenance.setSourceUri("http://foo");
+				provenance.setRequestId("bar");
+				myResourceHistoryProvenanceDao.save(provenance);
+			}
+		});
+
+		runInTransaction(()->{
 			assertEquals(20, myResourceHistoryTableDao.count());
 			assertEquals(20, myResourceHistoryProvenanceDao.count());
-			Query query = myEntityManager.createQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " p SET p.mySourceUri = NULL, p.myRequestId = NULL");
-			assertEquals(20, query.executeUpdate());
 		});
 
 		runInTransaction(()-> {
@@ -228,6 +295,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 
 		// validate
 		runInTransaction(()-> {
+			assertEquals(0, myResourceHistoryProvenanceDao.count());
 			for (var next : myResourceHistoryProvenanceDao.findAll()) {
 				assertEquals("bar", next.getRequestId());
 				assertEquals("http://foo", next.getSourceUri());
@@ -327,7 +395,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(parameters);
-		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(res);
 
 		assertThat(jobInstance.getCombinedRecordsProcessed()).isEqualTo(3);
@@ -338,7 +406,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		IIdType obsId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
 
 		runInTransaction(() -> {
-			int entriesInSpIndexTokenTable = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
+			int entriesInSpIndexTokenTable = myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(obsId.getIdPartAsLong()));
 			assertEquals(1, entriesInSpIndexTokenTable);
 
 			// simulate resource deletion
@@ -363,7 +431,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 
 		// then
 		runInTransaction(() -> {
-			int entriesInSpIndexTokenTablePostReindexing = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
+			int entriesInSpIndexTokenTablePostReindexing = myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(obsId.getIdPartAsLong()));
 			assertEquals(0, entriesInSpIndexTokenTablePostReindexing);
 		});
 	}

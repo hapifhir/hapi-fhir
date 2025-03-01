@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.submit.config.SearchParamSubmitterConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
@@ -42,6 +43,7 @@ import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.LoggingEmailSender;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
 import jakarta.persistence.EntityManagerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -58,6 +60,10 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 	ThreadPoolFactoryConfig.class
 })
 public class TestJPAConfig {
+
+	@Value("${" + JpaConstants.HAPI_DATABASE_PARTITION_MODE + ":false}")
+	private boolean myIncludePartitionIdsInPks;
+
 	@Bean
 	public JpaStorageSettings storageSettings() {
 		JpaStorageSettings retVal = new JpaStorageSettings();
@@ -76,7 +82,9 @@ public class TestJPAConfig {
 
 	@Bean
 	public PartitionSettings partitionSettings() {
-		return new PartitionSettings();
+		PartitionSettings retVal = new PartitionSettings();
+		retVal.setDatabasePartitionMode(myIncludePartitionIdsInPks);
+		return retVal;
 	}
 
 	@Bean

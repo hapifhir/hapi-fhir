@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -15,6 +12,7 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -39,11 +37,15 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -54,6 +56,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -61,11 +64,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -82,6 +86,62 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		super.after();
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
 		assertFalse(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference());
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {1, 50})
+	public void testPartitioningDoesNotReturnDuplicatesOnDoubleInclude(int theCount) {
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		IIdType patient = createPatient(withTenant(TENANT_A), withActiveTrue());
+		IIdType encounter = createEncounter(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("enc-"),  withIdentifier("http://example.com/", "code"));
+		createObservation(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("obs-"), withObservationCode("http://example.com/", "code"), withEncounter(encounter.toUnqualifiedVersionless().toString()));
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("_count").setValue(new IntegerType(theCount));
+		parameters.addParameter().setName("_format").setValue(new StringType("json"));
+		Bundle execute = myClient.search().forResource("Patient").include(new Include("*")).revInclude(new Include("*")).count(theCount).returnBundle(Bundle.class).execute();
+
+
+		List<String> foundIds = new ArrayList<>();
+		foundIds.addAll(execute.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		//Ensure no duplicates in first page
+		assertThat(foundIds).doesNotHaveDuplicates();
+
+		while (execute.getLink("next") != null) {
+			execute = myClient.loadPage().next(execute).execute();
+			foundIds.addAll(execute.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		}
+		assertThat(foundIds).doesNotHaveDuplicates();
+		assertThat(foundIds).hasSize(3);
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {1, 50})
+	public void testPartitioningDoesNotReturnDuplicatesOnPatientEverything(int theCount) throws IOException {
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		IIdType patient = createPatient(withTenant(TENANT_A), withActiveTrue());
+		IIdType encounter = createEncounter(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("enc-"),  withIdentifier("http://example.com/", "code"));
+		createObservation(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("obs-"), withObservationCode("http://example.com/", "code"), withEncounter(encounter.toUnqualifiedVersionless().toString()));
+
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setTenantId(TENANT_A);
+
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("_count").setValue(new IntegerType(theCount));
+		parameters.addParameter().setName("_format").setValue(new StringType("json"));
+
+		Bundle everything = myClient.operation().onInstance(patient.toUnqualifiedVersionless().toString()).named("$everything").withParameters(parameters).returnResourceType(Bundle.class).execute();
+
+		List<String> foundIds = new ArrayList<>();
+		foundIds.addAll(everything.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		//Ensure no duplicates in first page
+		assertThat(foundIds).doesNotHaveDuplicates();
+
+		while (everything.getLink("next") != null) {
+			everything = myClient.loadPage().next(everything).execute();
+			foundIds.addAll(everything.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		}
+		assertThat(foundIds).doesNotHaveDuplicates();
+		assertThat(foundIds).hasSize(3);
 	}
 
 	@Test
@@ -104,7 +164,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		runInTransaction(() -> {
 			PartitionEntity partition = myPartitionDao.findForName(TENANT_A).orElseThrow(IllegalStateException::new);
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(partition.getId(), resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -142,7 +202,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 		});
 
 
@@ -362,7 +422,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 		});
 
 	}
@@ -416,10 +476,10 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -490,9 +550,9 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -522,6 +582,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	@Test
+	@Disabled("This test relied on a tenantId mismatch with the partition ID of the resource - This " +
+		"doesn't really make sense since tenant ID != partition ID")
 	public void testPartitionInRequestDetails_UpdateWithWrongTenantId() {
 		IIdType idA = createPatient(withTenant(TENANT_A), withActiveTrue()).toVersionless();
 		IBaseResource patientA = buildPatient(withId(idA), withActiveTrue());
@@ -531,7 +593,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			myPatientDao.update((Patient) patientA, requestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(2079) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known", e.getMessage());
+			String idPart = ((Patient) patientA).getIdElement().getIdPart();
+			assertThat(e.getMessage()).contains("HAPI-0960: Can not create resource with ID[" + idPart + "]");
 		}
 	}
 
@@ -554,9 +617,9 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -618,10 +681,10 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -666,6 +729,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IIdType idB = createResource("Condition", withTenant(TENANT_A), withObservationCode("http://cs", "A"));
 		Condition theCondition = myClient.read().resource(Condition.class).withId(idB).execute();
 		theCondition.getSubject().setReference("Patient/" + idA.getIdPart());
+		logAllResources();
+		myTenantClientInterceptor.setTenantId(ProviderConstants.ALL_PARTITIONS_TENANT_NAME);
 		doUpdateResource(theCondition);
 	}
 

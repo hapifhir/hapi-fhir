@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -8,11 +7,12 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.test.utilities.MockInvoker;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +31,7 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 	protected ISearchParamRegistry mySearchParamRegistry;
 	protected List<String> myMessages = new ArrayList<>();
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	protected ComboSearchParameterTestHelper myComboSearchParameterTestHelper;
 
 	@Override
 	@BeforeEach
@@ -47,21 +48,23 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 
 		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.JPA_PERFTRACE_WARNING))).thenReturn(true);
 		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.JPA_PERFTRACE_INFO))).thenReturn(true);
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.JPA_PERFTRACE_INFO), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams params = t.getArgument(1, HookParams.class);
+		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED))).thenReturn(true);
+		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH))).thenReturn(true);
+		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.JPA_PERFTRACE_INFO))).thenReturn(MockInvoker.list(params->{
 			myMessages.add("INFO " + params.get(StorageProcessingMessage.class).getMessage());
-			return null;
-		});
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.JPA_PERFTRACE_WARNING), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams params = t.getArgument(1, HookParams.class);
+		}));
+
+
+		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.JPA_PERFTRACE_WARNING))).thenReturn(MockInvoker.list(params->{
 			myMessages.add("WARN " + params.get(StorageProcessingMessage.class).getMessage());
-			return null;
-		});
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams params = t.getArgument(1, HookParams.class);
+		}));
+		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED))).thenReturn(MockInvoker.list(params->{
 			myMessages.add("REUSING CACHED SEARCH");
-			return null;
-		});
+		}));
+
+		// allow searches to use cached results
+		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH))).thenReturn(MockInvoker.list(params->true));
+		myComboSearchParameterTestHelper = new ComboSearchParameterTestHelper(mySearchParameterDao, mySearchParamRegistry);
 	}
 
 	@AfterEach
@@ -78,6 +81,11 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 
 	protected void logCapturedMessages() {
 		ourLog.info("Messages:\n  {}", String.join("\n  ", myMessages));
+	}
+
+	protected void createBirthdateAndGenderSps(boolean theUnique) {
+		myComboSearchParameterTestHelper.createBirthdateAndGenderSps(theUnique);
+		myMessages.clear();
 	}
 
 }

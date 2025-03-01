@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ObjectUtil;
+import ca.uhn.fhir.util.ResourceUtil;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
@@ -103,12 +105,17 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 		IEncoder encoder = new IEncoder() {
 			@Override
 			public String encode() {
-				return theContext.newJsonParser().encodeResourceToString(theResource);
+				// use the stored json string, if available
+				// otherwise, encode the actual resource
+				return ObjectUtils.firstNonNull(
+						ResourceUtil.getRawStringFromResourceOrNull(theResource),
+						theContext.newJsonParser().encodeResourceToString(theResource));
 			}
 
 			@Override
 			public EncodingEnum getEncoding() {
-				return EncodingEnum.JSON;
+				return ObjectUtils.defaultIfNull(
+						ResourceUtil.getEncodingTypeFromUserData(theResource), EncodingEnum.JSON);
 			}
 		};
 		return new ValidationContext<>(theContext, theResource, encoder, options);

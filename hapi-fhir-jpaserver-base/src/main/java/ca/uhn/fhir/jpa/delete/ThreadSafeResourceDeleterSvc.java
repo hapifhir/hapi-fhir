@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,17 +155,19 @@ public class ThreadSafeResourceDeleterSvc {
 			TransactionDetails theTransactionDetails,
 			IdDt nextSource,
 			IFhirResourceDao<?> dao) {
-		// Interceptor call: STORAGE_CASCADE_DELETE
 
 		// Remove the version so we grab the latest version to delete
 		IBaseResource resource = dao.read(nextSource.toVersionless(), theRequest);
+
+		// Interceptor call: STORAGE_CASCADE_DELETE
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 		HookParams params = new HookParams()
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest)
 				.add(DeleteConflictList.class, theConflictList)
 				.add(IBaseResource.class, resource);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
+		compositeBroadcaster.callHooks(Pointcut.STORAGE_CASCADE_DELETE, params);
 
 		return dao.delete(resource.getIdElement(), theConflictList, theRequest, theTransactionDetails);
 	}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
@@ -29,15 +31,20 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 
 import java.io.Serializable;
@@ -51,7 +58,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 			@Index(name = "IDX_CNCPT_MP_GRP_ELM_TGT_CD", columnList = "TARGET_CODE"),
 			@Index(name = "FK_TCMGETARGET_ELEMENT", columnList = "CONCEPT_MAP_GRP_ELM_PID")
 		})
-public class TermConceptMapGroupElementTarget implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermConceptMapGroupElementTarget extends BasePartitionable implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	static final int MAX_EQUIVALENCE_LENGTH = 50;
@@ -63,12 +71,26 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	private Long myId;
 
 	@ManyToOne()
-	@JoinColumn(
-			name = "CONCEPT_MAP_GRP_ELM_PID",
-			nullable = false,
-			referencedColumnName = "PID",
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CONCEPT_MAP_GRP_ELM_PID",
+						insertable = false,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "PID"),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_TCMGETARGET_ELEMENT"))
 	private TermConceptMapGroupElement myConceptMapGroupElement;
+
+	@Column(name = "CONCEPT_MAP_GRP_ELM_PID", nullable = false)
+	private Long myConceptMapGroupElementPid;
 
 	@Column(name = "TARGET_CODE", nullable = true, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
@@ -77,6 +99,7 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	private String myDisplay;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(name = "TARGET_EQUIVALENCE", nullable = true, length = MAX_EQUIVALENCE_LENGTH)
 	private ConceptMapEquivalence myEquivalence;
 
@@ -112,6 +135,9 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 
 	public void setConceptMapGroupElement(TermConceptMapGroupElement theTermConceptMapGroupElement) {
 		myConceptMapGroupElement = theTermConceptMapGroupElement;
+		myConceptMapGroupElementPid = theTermConceptMapGroupElement.getId();
+		Validate.notNull(myConceptMapGroupElementPid, "ConceptMapGroupElement must not be null");
+		setPartitionId(theTermConceptMapGroupElement.getPartitionId());
 	}
 
 	public String getConceptMapUrl() {

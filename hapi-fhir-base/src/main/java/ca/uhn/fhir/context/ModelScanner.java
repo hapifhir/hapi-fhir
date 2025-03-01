@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -439,6 +439,18 @@ class ModelScanner {
 						name = name.substring("Base FHIR compartment definition for ".length());
 					}
 					providesMembershipInCompartments.add(name);
+				}
+
+				/**
+				 * In the base FHIR R4 specification, the Device resource is not a part of the Patient compartment.
+				 * However, it is a patient-specific resource that most users expect to be, and several derivative
+				 * specifications including g(10) testing expect it to be, and the fact that it is not has led to many
+				 * bug reports in HAPI FHIR. As of HAPI FHIR 8.0.0 it is being manually added in response to those
+				 * requests.
+				 * See https://github.com/hapifhir/hapi-fhir/issues/6536 for more information.
+				 */
+				if (searchParam.name().equals("patient") && searchParam.path().equals("Device.patient")) {
+					providesMembershipInCompartments.add("Patient");
 				}
 
 				List<RuntimeSearchParam.Component> components = null;

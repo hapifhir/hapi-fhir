@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,12 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,11 +32,12 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -53,14 +58,15 @@ import static org.apache.commons.lang3.StringUtils.length;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = TermCodeSystemVersion.IDX_CODESYSTEM_AND_VER,
-					columnNames = {"CODESYSTEM_PID", "CS_VERSION_ID"})
+					columnNames = {"PARTITION_ID", "CODESYSTEM_PID", "CS_VERSION_ID"})
 		},
 		indexes = {
 			@Index(name = "FK_CODESYSVER_RES_ID", columnList = "RES_ID"),
 			@Index(name = "FK_CODESYSVER_CS_ID", columnList = "CODESYSTEM_PID")
 		})
 @Entity()
-public class TermCodeSystemVersion implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermCodeSystemVersion extends BasePartitionable implements Serializable {
 	public static final String IDX_CODESYSTEM_AND_VER = "IDX_CODESYSTEM_AND_VER";
 	public static final int MAX_VERSION_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
@@ -68,22 +74,32 @@ public class TermCodeSystemVersion implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCodeSystem")
 	private Collection<TermConcept> myConcepts;
 
-	@Id()
+	@Id
 	@SequenceGenerator(name = "SEQ_CODESYSTEMVER_PID", sequenceName = "SEQ_CODESYSTEMVER_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CODESYSTEMVER_PID")
 	@Column(name = "PID")
 	private Long myId;
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
-			updatable = false,
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", nullable = false, insertable = false, updatable = false)
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResourcePid;
 
 	@Column(name = "CS_VERSION_ID", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
@@ -94,19 +110,26 @@ public class TermCodeSystemVersion implements Serializable {
 	 * issued. It should be made non-nullable at some point.
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "CODESYSTEM_PID",
-			referencedColumnName = "PID",
-			nullable = true,
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CODESYSTEM_PID",
+						referencedColumnName = "PID",
+						insertable = false,
+						updatable = false,
+						nullable = true),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						nullable = true,
+						updatable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;
 
-	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
+	@Column(name = "CODESYSTEM_PID", insertable = true, updatable = true, nullable = true)
 	private Long myCodeSystemPid;
-
-	@SuppressWarnings("unused")
-	@OneToOne(mappedBy = "myCurrentVersion", optional = true, fetch = FetchType.LAZY)
-	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
 
 	@Column(name = "CS_DISPLAY", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemDisplayName;
@@ -124,6 +147,8 @@ public class TermCodeSystemVersion implements Serializable {
 
 	public TermCodeSystemVersion setCodeSystem(TermCodeSystem theCodeSystem) {
 		myCodeSystem = theCodeSystem;
+		myCodeSystemPid = theCodeSystem.getPid();
+		assert myCodeSystemPid != null;
 		return this;
 	}
 
@@ -147,8 +172,14 @@ public class TermCodeSystemVersion implements Serializable {
 		return myConcepts;
 	}
 
+	@Nullable
 	public Long getPid() {
 		return myId;
+	}
+
+	@Nonnull
+	public IdAndPartitionId getId() {
+		return IdAndPartitionId.forId(myId, this);
 	}
 
 	public ResourceTable getResource() {
@@ -157,6 +188,8 @@ public class TermCodeSystemVersion implements Serializable {
 
 	public TermCodeSystemVersion setResource(ResourceTable theResource) {
 		myResource = theResource;
+		myResourcePid = theResource.getId().getId();
+		setPartitionId(theResource.getPartitionId());
 		return this;
 	}
 

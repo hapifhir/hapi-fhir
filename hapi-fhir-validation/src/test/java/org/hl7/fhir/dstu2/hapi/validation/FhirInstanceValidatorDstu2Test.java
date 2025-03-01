@@ -1,11 +1,6 @@
 package org.hl7.fhir.dstu2.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -14,12 +9,13 @@ import ca.uhn.fhir.model.dstu2.valueset.ProcedureStatusEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.MockValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu2.model.DateType;
@@ -28,94 +24,34 @@ import org.hl7.fhir.dstu2.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu2.model.StringType;
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.quality.Strictness;
-import org.mockito.stubbing.Answer;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
-public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInlineMocks {
+@ExtendWith(MockitoExtension.class)
+public class FhirInstanceValidatorDstu2Test extends BaseTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu2Test.class);
-	private static FhirContext ourCtxDstu2 = FhirContext.forDstu2();
+	private static FhirContext ourCtxDstu2 = FhirContext.forDstu2Cached();
 	private static FhirInstanceValidator ourValidator;
-	private static FhirContext ourCtxHl7OrgDstu2 = FhirContext.forDstu2Hl7Org();
-
-	private ArrayList<String> myValidConcepts;
-	private final Set<String> myValidSystems = new HashSet<>();
-
-	private void addValidConcept(String theSystem, String theCode) {
-		myValidSystems.add(theSystem);
-		myValidConcepts.add(theSystem + "___" + theCode);
-	}
+	private static FhirContext ourCtxHl7OrgDstu2 = FhirContext.forDstu2Hl7OrgCached();
+	private MockValidationSupport myMockSupport = new MockValidationSupport(FhirContext.forDstu2Cached());
 
 	@BeforeEach
 	public void beforeEach() {
-		myValidConcepts = new ArrayList<>();
 
-		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(ourCtxDstu2);
-		IValidationSupport mockSupport = mock(IValidationSupport.class, withSettings().strictness(Strictness.LENIENT));
-		when(mockSupport.getFhirContext()).thenReturn(ourCtxDstu2);
-		when(mockSupport.isCodeSystemSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
-			@Override
-			public Boolean answer(InvocationOnMock theInvocation) {
-				String url = (String) theInvocation.getArguments()[1];
-				boolean retVal = myValidSystems.contains(url);
-				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[]{url, retVal});
-
-				return retVal;
-			}
-		});
-
-		when(mockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IValidationSupport.CodeValidationResult>() {
-			@Override
-			public IValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
-				ConceptValidationOptions options = theInvocation.getArgument(1, ConceptValidationOptions.class);
-				String system = theInvocation.getArgument(2, String.class);
-				String code = theInvocation.getArgument(3, String.class);
-				String display = theInvocation.getArgument(4, String.class);
-				String valueSetUrl = theInvocation.getArgument(5, String.class);
-				IValidationSupport.CodeValidationResult retVal;
-				if (myValidConcepts.contains(system + "___" + code)) {
-					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
-				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code");
-				} else {
-					retVal = null;
-				}
-				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
-				return retVal;
-			}
-		});
-
-		IValidationSupport validationSupport = new ValidationSupportChain(
-			mockSupport,
-			defaultProfileValidationSupport,
-			new InMemoryTerminologyServerValidationSupport(ourCtxDstu2));
-
-
-
+		ValidationSupportChain validationSupport = new ValidationSupportChain(
+			myMockSupport,
+			ourCtxDstu2.getValidationSupport());
 		ourValidator = new FhirInstanceValidator(validationSupport);
 
 	}
@@ -138,7 +74,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 
 	@Test
 	public void testObservation() {
-		addValidConcept("http://loinc.org", "12345");
+		myMockSupport.addValidConcept("http://loinc.org", "12345");
 
 		Observation o = new Observation();
 		o.addIdentifier().setSystem("http://acme.org").setValue("1234");
@@ -324,7 +260,6 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 
 		assertTrue(result.isSuccessful());
 	}
-	
 
 
 	@AfterAll

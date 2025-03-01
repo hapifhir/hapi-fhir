@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
@@ -51,11 +52,11 @@ public class ReadTermConceptVersionsStep
 
 		long pid = parameters.getTermPid();
 
-		Iterator<Long> versionPids = myITermCodeSystemSvc.getAllCodeSystemVersionForCodeSystemPid(pid);
+		Iterator<IdAndPartitionId> versionPids = myITermCodeSystemSvc.getAllCodeSystemVersionForCodeSystemPid(pid);
 		while (versionPids.hasNext()) {
-			long next = versionPids.next().longValue();
+			IdAndPartitionId next = versionPids.next();
 			CodeSystemVersionPIDResult versionPidResult = new CodeSystemVersionPIDResult();
-			versionPidResult.setCodeSystemVersionPID(next);
+			versionPidResult.setCodeSystemVersionPID(next.getId());
 			theDataSink.accept(versionPidResult);
 		}
 

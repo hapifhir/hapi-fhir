@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ public class TestElasticsearchContainerHelper {
 			.withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
 			// turn off security warnings
 			.withEnv("xpack.security.enabled", "false")
+			// turn off machine learning (we don't need it in tests anyways)
+			.withEnv("xpack.ml.enabled", "false")
 			.withStartupTimeout(Duration.of(300, SECONDS));
 	}
 

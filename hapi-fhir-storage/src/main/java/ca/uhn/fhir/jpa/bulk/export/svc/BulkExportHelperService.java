@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,19 +45,22 @@ public class BulkExportHelperService {
 	@Autowired
 	private FhirContext myContext;
 
+	public BulkExportHelperService() {}
+
 	/**
 	 * Given the parameters, create the search parameter map based on type filters and the _since parameter.
 	 *
-	 * The input boolean theConsiderSince determines whether to consider the lastUpdated date in the search parameter map.
+	 * The input boolean theConsiderDateRange determines whether to consider the lastUpdated date in the search parameter map.
 	 */
 	public List<SearchParameterMap> createSearchParameterMapsForResourceType(
-			RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderSince) {
+			RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderDateRange) {
 		String resourceType = theDef.getName();
 		List<String> typeFilters = theParams.getFilters();
 		List<SearchParameterMap> spMaps = null;
 		spMaps = typeFilters.stream()
 				.filter(typeFilter -> typeFilter.startsWith(resourceType + "?"))
-				.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef, theParams.getStartDate()))
+				.map(filter -> buildSearchParameterMapForTypeFilter(
+						filter, theDef, theParams.getStartDate(), theParams.getEndDate()))
 				.collect(Collectors.toList());
 
 		typeFilters.stream().filter(filter -> !filter.contains("?")).forEach(filter -> {
@@ -69,8 +72,8 @@ public class BulkExportHelperService {
 		// None of the _typeFilters applied to the current resource type, so just make a simple one.
 		if (spMaps.isEmpty()) {
 			SearchParameterMap defaultMap = new SearchParameterMap();
-			if (theConsiderSince) {
-				enhanceSearchParameterMapWithCommonParameters(defaultMap, theParams.getStartDate());
+			if (theConsiderDateRange) {
+				addLastUpdatedFilter(defaultMap, theParams.getStartDate(), theParams.getEndDate());
 			}
 			spMaps = Collections.singletonList(defaultMap);
 		}
@@ -79,16 +82,16 @@ public class BulkExportHelperService {
 	}
 
 	private SearchParameterMap buildSearchParameterMapForTypeFilter(
-			String theFilter, RuntimeResourceDefinition theDef, Date theSinceDate) {
+			String theFilter, RuntimeResourceDefinition theDef, Date theStartDate, Date theEndDate) {
 		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(theFilter, theDef);
-		enhanceSearchParameterMapWithCommonParameters(searchParameterMap, theSinceDate);
+		addLastUpdatedFilter(searchParameterMap, theStartDate, theEndDate);
 		return searchParameterMap;
 	}
 
-	private void enhanceSearchParameterMapWithCommonParameters(SearchParameterMap map, Date theSinceDate) {
+	void addLastUpdatedFilter(SearchParameterMap map, Date theStartDate, Date theEndDate) {
 		map.setLoadSynchronous(true);
-		if (theSinceDate != null) {
-			map.setLastUpdated(new DateRangeParam(theSinceDate, null));
+		if (theStartDate != null || theEndDate != null) {
+			map.setLastUpdated(new DateRangeParam(theStartDate, theEndDate));
 		}
 	}
 

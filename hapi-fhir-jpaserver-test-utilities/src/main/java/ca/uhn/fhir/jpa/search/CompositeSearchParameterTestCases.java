@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,7 +223,7 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		searchParameter.addComponent(
 				componentFrom("http://hl7.org/fhir/SearchParameter/RiskAssessment-probability", "RiskAssessment"));
 		searchParameter.setExtension(List.of(theExtension));
-		doCreateResource(searchParameter);
+		ourLog.info("Created SP: {}", doCreateResource(searchParameter).toUnqualifiedVersionless());
 
 		// enable this sp.
 		myTestDaoSearch.getSearchParamRegistry().forceRefresh();

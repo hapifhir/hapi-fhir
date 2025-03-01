@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
@@ -172,13 +173,13 @@ public class ExpandResourceAndWriteBinaryStep
 			ResourceIdList theIds,
 			RequestPartitionId theRequestPartitionId,
 			Consumer<List<IBaseResource>> theResourceListConsumer) {
-		ArrayListMultimap<String, String> typeToIds = ArrayListMultimap.create();
-		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t.getId()));
+		ArrayListMultimap<String, TypedPidJson> typeToIds = ArrayListMultimap.create();
+		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t));
 
 		for (String resourceType : typeToIds.keySet()) {
 
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-			List<String> allIds = typeToIds.get(resourceType);
+			List<TypedPidJson> allIds = typeToIds.get(resourceType);
 			while (!allIds.isEmpty()) {
 
 				// Load in batches in order to avoid having too many PIDs go into a
@@ -186,12 +187,13 @@ public class ExpandResourceAndWriteBinaryStep
 				int batchSize = Math.min(500, allIds.size());
 
 				Set<IResourcePersistentId> nextBatchOfPids = allIds.subList(0, batchSize).stream()
-						.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(t, resourceType))
+						.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(
+								t.getPartitionId(), t.getPid(), resourceType))
 						.collect(Collectors.toSet());
 				allIds = allIds.subList(batchSize, allIds.size());
 
 				PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
-						.withRequest(null)
+						.withSystemRequestOnPartition(theRequestPartitionId)
 						.execute(() -> myIdHelperService.translatePidsToForcedIds(nextBatchOfPids));
 
 				TokenOrListParam idListParam = new TokenOrListParam();

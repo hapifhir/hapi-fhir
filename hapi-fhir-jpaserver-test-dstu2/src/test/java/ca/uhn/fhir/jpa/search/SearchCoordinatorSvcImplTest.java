@@ -76,6 +76,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked"})
@@ -91,7 +92,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	@Mock
 	private ISearchResultCacheSvc mySearchResultCacheSvc;
 	private Search myCurrentSearch;
-	@Mock
+	@Mock(strictness = Mock.Strictness.STRICT_STUBS)
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Mock
 	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
@@ -289,7 +290,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	}
 
 	private void initSearches() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 	}
 
 	private void initAsyncSearches() {
@@ -318,8 +319,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		mockSearchTask();
-		when(myInterceptorBroadcaster.callHooks(any(), any()))
-			.thenReturn(true);
+		when(myInterceptorBroadcaster.hasHooks(any())).thenReturn(true);
+		when(myInterceptorBroadcaster.getInvokersForPointcut(any())).thenReturn(List.of());
 
 		ourLog.info("Registering the first search");
 		new Thread(() -> mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions())).start();
@@ -437,7 +438,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testLoadSearchResultsFromDifferentCoordinator() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		final String uuid = UUID.randomUUID().toString();
 
@@ -517,7 +518,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearch() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -531,7 +532,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearchWithOffset() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setOffset(10);
@@ -544,7 +545,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearchUpTo() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		int loadUpto = 30;
 		SearchParameterMap params = new SearchParameterMap();
@@ -584,7 +585,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	@Test
 	public void testFetchAllResultsReturnsNull() {
 		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myCallingDao);
-		when(myCallingDao.getContext()).thenReturn(ourCtx);
 
 		Search search = new Search();
 		search.setUuid("0000-1111");

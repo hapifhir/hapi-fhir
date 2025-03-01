@@ -40,11 +40,15 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchFtTest.class);
 
+	@Override
 	@BeforeEach
-	public void beforeDisableResultReuse() {
+	public void before() throws Exception {
+		super.before();
+
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setAllowContainsSearches(true);
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 	}
 
 	/**

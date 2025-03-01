@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -31,9 +32,9 @@ public interface IResourceIndexedSearchParamStringDao
 		extends JpaRepository<ResourceIndexedSearchParamString, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
-	@Query("DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :resId")
-	void deleteByResourceId(@Param("resId") Long theResourcePid);
+	@Query("DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResource.myPid = :resId")
+	void deleteByResourceId(@Param("resId") JpaPid theResourcePid);
 
-	@Query("SELECT t FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :resId")
-	List<ResourceIndexedSearchParamString> findAllForResourceId(@Param("resId") Long thePatientId);
+	@Query("SELECT t FROM ResourceIndexedSearchParamString t WHERE t.myResource.myPid = :resId")
+	List<ResourceIndexedSearchParamString> findAllForResourceId(@Param("resId") JpaPid thePatientId);
 }

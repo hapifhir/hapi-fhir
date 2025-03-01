@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ITermConceptDesignationDao
-		extends JpaRepository<TermConceptDesignation, Long>, IHapiFhirJpaRepository {
+		extends JpaRepository<TermConceptDesignation, IdAndPartitionId>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM TermConceptDesignation WHERE myCodeSystemVersion.myId = :csv_pid")

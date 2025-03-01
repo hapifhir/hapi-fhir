@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,8 @@ public class InterceptorService extends BaseInterceptorService<Pointcut>
 
 	@Override
 	public void registerAnonymousInterceptor(Pointcut thePointcut, int theOrder, IAnonymousInterceptor theInterceptor) {
-		Validate.notNull(thePointcut);
-		Validate.notNull(theInterceptor);
+		Validate.notNull(thePointcut, "thePointcut must not be null");
+		Validate.notNull(theInterceptor, "theInterceptor must not be null");
 		BaseInvoker invoker = new AnonymousLambdaInvoker(thePointcut, theInterceptor, theOrder);
 		registerAnonymousInterceptor(thePointcut, theInterceptor, invoker);
 	}
@@ -81,7 +81,7 @@ public class InterceptorService extends BaseInterceptorService<Pointcut>
 		}
 
 		@Override
-		Object invoke(HookParams theParams) {
+		public Object invoke(HookParams theParams) {
 			myHook.invoke(myPointcut, theParams);
 			return true;
 		}

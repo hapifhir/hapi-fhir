@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,20 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ISubscriptionTableDao extends JpaRepository<SubscriptionTable, Long>, IHapiFhirJpaRepository {
+// TODO: We deprecated this entity in 8.0.0 and stopped writing it - Eventually delete it
+@Deprecated
+public interface ISubscriptionTableDao
+		extends JpaRepository<SubscriptionTable, IdAndPartitionId>, IHapiFhirJpaRepository {
 
 	@Modifying
-	@Query("DELETE FROM SubscriptionTable t WHERE t.mySubscriptionResource = :subscription ")
-	void deleteAllForSubscription(@Param("subscription") ResourceTable theSubscription);
+	@Query("DELETE FROM SubscriptionTable t WHERE t.myResId = :res_id ")
+	void deleteAllForSubscription(@Param("res_id") Long theSubscriptionResourceId);
 
 	@Query("SELECT t FROM SubscriptionTable t WHERE t.myResId = :pid")
 	SubscriptionTable findOneByResourcePid(@Param("pid") Long theId);

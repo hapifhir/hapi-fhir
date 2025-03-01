@@ -1,0 +1,4 @@
+---
+type: remove
+issue: 6512
+title: "The methods on FhirVersionEnum which produces a FhirContext (newContext() ,and newContextCached()) have been deprecated, and will be removed."

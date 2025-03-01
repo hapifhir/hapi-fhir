@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -61,9 +62,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamRegistryImpl
@@ -76,10 +80,10 @@ public class SearchParamRegistryImpl
 			Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*"));
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
-	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
+	public static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 
-	private final JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
+	private JpaSearchParamCache myJpaSearchParamCache;
 
 	@Autowired
 	private StorageSettings myStorageSettings;
@@ -99,6 +103,9 @@ public class SearchParamRegistryImpl
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+
 	private IResourceChangeListenerCache myResourceChangeListenerCache;
 	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
 	private volatile IPhoneticEncoder myPhoneticEncoder;
@@ -111,46 +118,68 @@ public class SearchParamRegistryImpl
 		super();
 	}
 
+	@PostConstruct
+	public void start() {
+		myJpaSearchParamCache = new JpaSearchParamCache(myPartitionSettings);
+	}
+
 	@Override
-	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+	public RuntimeSearchParam getActiveSearchParam(
+			@Nonnull String theResourceName,
+			@Nonnull String theParamName,
+			@Nonnull SearchParamLookupContextEnum theContext) {
 		requiresActiveSearchParams();
 
 		// Can still be null in unit test scenarios
 		if (myActiveSearchParams != null) {
-			return myActiveSearchParams.get(theResourceName, theParamName);
-		} else {
-			return null;
+			RuntimeSearchParam param = myActiveSearchParams.get(theResourceName, theParamName);
+			if (param != null) {
+				if (isAllowedForContext(param, theContext)) {
+					return param;
+				}
+			}
 		}
+
+		return null;
 	}
 
 	@Nonnull
 	@Override
-	public ResourceSearchParams getActiveSearchParams(String theResourceName) {
+	public ResourceSearchParams getActiveSearchParams(
+			@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 		requiresActiveSearchParams();
-		return getActiveSearchParams().getSearchParamMap(theResourceName);
+		return getActiveSearchParams().getSearchParamMap(theResourceName).toFilteredForContext(theContext);
 	}
 
 	private void requiresActiveSearchParams() {
 		if (myActiveSearchParams == null) {
-			// forced refreshes should not use a cache - we're forcibly refrsching it, after all
+			// forced refreshes should not use a cache - we're forcibly refreshing it, after all
 			myResourceChangeListenerCache.forceRefresh();
 		}
 	}
 
 	@Override
-	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
-		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName);
+	public List<RuntimeSearchParam> getActiveComboSearchParams(
+			@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
+		return filteredForContext(myJpaSearchParamCache.getActiveComboSearchParams(theResourceName), theContext);
 	}
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, ComboSearchParamType theParamType) {
-		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamType);
+			@Nonnull String theResourceName,
+			@Nonnull ComboSearchParamType theParamType,
+			@Nonnull SearchParamLookupContextEnum theContext) {
+		return filteredForContext(
+				myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamType), theContext);
 	}
 
 	@Override
-	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
-		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames);
+	public List<RuntimeSearchParam> getActiveComboSearchParams(
+			@Nonnull String theResourceName,
+			@Nonnull Set<String> theParamNames,
+			@Nonnull SearchParamLookupContextEnum theContext) {
+		return filteredForContext(
+				myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames), theContext);
 	}
 
 	@Override
@@ -160,16 +189,20 @@ public class SearchParamRegistryImpl
 
 	@Nullable
 	@Override
-	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+	public RuntimeSearchParam getActiveSearchParamByUrl(
+			@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext) {
 		if (myActiveSearchParams != null) {
-			return myActiveSearchParams.getByUrl(theUrl);
-		} else {
-			return null;
+			RuntimeSearchParam param = myActiveSearchParams.getByUrl(theUrl);
+			if (isAllowedForContext(param, theContext)) {
+				return param;
+			}
 		}
+		return null;
 	}
 
 	@Override
-	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
+	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(
+			@Nonnull String theResourceName, @Nonnull IIdType theId) {
 		return myJpaSearchParamCache.getActiveComboSearchParamById(theResourceName, theId);
 	}
 
@@ -307,7 +340,7 @@ public class SearchParamRegistryImpl
 			ourLog.debug(
 					"Adding search parameter {}.{} to SearchParamRegistry",
 					nextBaseName,
-					StringUtils.defaultString(name, "[composite]"));
+					Objects.toString(name, "[composite]"));
 			retval++;
 		}
 		return retval;
@@ -363,6 +396,11 @@ public class SearchParamRegistryImpl
 			throw new IllegalStateException(Msg.code(511) + "SearchParamRegistry has not been initialized");
 		}
 		return ReadOnlySearchParamCache.fromRuntimeSearchParamCache(myActiveSearchParams);
+	}
+
+	@VisibleForTesting
+	public void setActiveSearchParams(RuntimeSearchParamCache theSearchParams) {
+		myActiveSearchParams = theSearchParams;
 	}
 
 	/**
@@ -451,13 +489,10 @@ public class SearchParamRegistryImpl
 		mySearchParameterCanonicalizer = theSearchParameterCanonicalizerForUnitTest;
 	}
 
-	@VisibleForTesting
-	public int getMaxManagedParamCountForUnitTests() {
-		return MAX_MANAGED_PARAM_COUNT;
-	}
-
-	@VisibleForTesting
-	public void setActiveSearchParams(RuntimeSearchParamCache theSearchParams) {
-		myActiveSearchParams = theSearchParams;
+	private static List<RuntimeSearchParam> filteredForContext(
+			List<RuntimeSearchParam> theActiveComboSearchParams, SearchParamLookupContextEnum theContext) {
+		return theActiveComboSearchParams.stream()
+				.filter(t -> isAllowedForContext(t, theContext))
+				.collect(Collectors.toList());
 	}
 }

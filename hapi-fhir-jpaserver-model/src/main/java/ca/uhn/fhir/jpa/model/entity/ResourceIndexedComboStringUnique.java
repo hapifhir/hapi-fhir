@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,18 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIndex;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIndexes;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.Validate;
@@ -58,23 +62,30 @@ import org.hl7.fhir.instance.model.api.IIdType;
  */
 @Entity()
 @Table(
-		name = "HFJ_IDX_CMP_STRING_UNIQ",
+		name = ResourceIndexedComboStringUnique.HFJ_IDX_CMP_STRING_UNIQ,
 		indexes = {
 			@Index(
 					name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING,
-					columnList = "IDX_STRING",
+					columnList = "PARTITION_ID,IDX_STRING",
 					unique = true),
 			@Index(
 					name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE,
-					columnList = "RES_ID",
+					columnList = "PARTITION_ID,RES_ID",
 					unique = false)
 		})
+@PartitionedIndexes({
+	@PartitionedIndex(
+			name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE,
+			columns = {"RES_ID"})
+})
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {
 
 	public static final int MAX_STRING_LENGTH = 500;
 	public static final String IDX_IDXCMPSTRUNIQ_STRING = "IDX_IDXCMPSTRUNIQ_STRING";
 	public static final String IDX_IDXCMPSTRUNIQ_RESOURCE = "IDX_IDXCMPSTRUNIQ_RESOURCE";
+	public static final String HFJ_IDX_CMP_STRING_UNIQ = "HFJ_IDX_CMP_STRING_UNIQ";
 
 	@GenericGenerator(
 			name = "SEQ_IDXCMPSTRUNIQ_ID",
@@ -84,14 +95,28 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	@Column(name = "PID")
 	private Long myId;
 
-	@ManyToOne
-	@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
+	@ManyToOne(
+			optional = false,
+			cascade = {})
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true)
+			},
 			foreignKey = @ForeignKey(name = "FK_IDXCMPSTRUNIQ_RES_ID"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", updatable = false, nullable = true)
 	private Long myResourceId;
 
 	// TODO: These hashes were added in 7.4.0 - They aren't used or indexed yet, but
@@ -105,7 +130,7 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	 * collisions is bad, since it would be plain impossible to insert a row
 	 * with a false collision here. So in order to reduce that risk, we
 	 * double the number of bits we hash by having two hashes, effectively
-	 * making the hash a 128 bit hash instead of just 64.
+	 * making the hash a 128-bit hash instead of just 64.
 	 * <p>
 	 * The idea is that having two of them widens the hash from 64 bits to 128
 	 * bits
@@ -129,13 +154,6 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 
 	@Column(name = "IDX_STRING", nullable = false, length = MAX_STRING_LENGTH)
 	private String myIndexString;
-
-	/**
-	 * This is here to support queries only, do not set this field directly
-	 */
-	@SuppressWarnings("unused")
-	@Column(name = PartitionablePartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
-	private Integer myPartitionIdValue;
 
 	/**
 	 * Constructor
@@ -186,6 +204,11 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		myIndexString = source.myIndexString;
 		myHashComplete = source.myHashComplete;
 		myHashComplete2 = source.myHashComplete2;
+	}
+
+	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	@Override

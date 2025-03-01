@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,15 +109,18 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 							+ "] param[" + theParamName + "]";
 					ourLog.info(msg);
 
-					StorageProcessingMessage message = new StorageProcessingMessage();
-					ourLog.warn(msg);
-					message.setMessage(msg);
-					HookParams params = new HookParams()
-							.add(RequestDetails.class, theRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-							.add(StorageProcessingMessage.class, message);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									myInterceptorBroadcaster, theRequestDetails);
+					if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_WARNING)) {
+						StorageProcessingMessage message = new StorageProcessingMessage();
+						message.setMessage(msg);
+						HookParams params = new HookParams()
+								.add(RequestDetails.class, theRequestDetails)
+								.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+								.add(StorageProcessingMessage.class, message);
+						compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
+					}
 
 					long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
 							getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName);

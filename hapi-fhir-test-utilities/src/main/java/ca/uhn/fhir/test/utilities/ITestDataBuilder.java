@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
@@ -85,6 +86,13 @@ public interface ITestDataBuilder {
 	 */
 	default ICreationArgument withLanguage(String theLanguage) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "language", "string", theLanguage);
+	}
+
+	/**
+	 * List.entry.item
+	 */
+	default ICreationArgument withListItem(IIdType theReference) {
+		return withElementAt("entry", withReference("item", theReference));
 	}
 
 	/**
@@ -171,9 +179,15 @@ public interface ITestDataBuilder {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "name", "string", theStatus);
 	}
 
-	default ICreationArgument withId(String theId) {
+	default ICreationArgument withId(@Nonnull String theId) {
 		return t -> {
 			assertThat(theId).matches("[a-zA-Z0-9-]+");
+			((IBaseResource)t).setId(theId);
+		};
+	}
+
+	default ICreationArgument withIdOrNull(@Nullable String theId) {
+		return t -> {
 			((IBaseResource)t).setId(theId);
 		};
 	}
@@ -231,6 +245,10 @@ public interface ITestDataBuilder {
 
 	default IBaseResource buildPatient(ICreationArgument... theModifiers) {
 		return buildResource("Patient", theModifiers);
+	}
+
+	default IIdType createList(ICreationArgument... theModifiers) {
+		return createResource("List", theModifiers);
 	}
 
 	default IIdType createPatient(ICreationArgument... theModifiers) {
@@ -305,7 +323,11 @@ public interface ITestDataBuilder {
 	}
 
 	default ICreationArgument withEncounter(@Nullable String theEncounter) {
-		return withReference("encounter", new IdType(theEncounter));
+		return withEncounter(new IdType(theEncounter));
+	}
+
+	default ICreationArgument withEncounter(@Nullable IIdType theEncounter) {
+		return withReference("encounter", theEncounter);
 	}
 
 	@Nonnull
@@ -315,7 +337,7 @@ public interface ITestDataBuilder {
 				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
 				reference.setReference(theReferenceValue.getValue());
 
-				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition((IBaseResource) t);
+				BaseRuntimeElementDefinition<?> resourceDef = getFhirContext().getElementDefinition(t.getClass());
 				resourceDef.getChildByName(theReferenceName).getMutator().addValue(t, reference);
 			}
 		};

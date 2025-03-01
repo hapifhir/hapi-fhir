@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,6 +98,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -115,12 +116,14 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -274,19 +277,20 @@ public abstract class BaseTransactionProcessor {
 
 	@SuppressWarnings("unchecked")
 	private void handleTransactionCreateOrUpdateOutcome(
-			IdSubstitutionMap idSubstitutions,
-			Map<IIdType, DaoMethodOutcome> idToPersistedOutcome,
-			IIdType nextResourceId,
-			DaoMethodOutcome outcome,
-			IBase newEntry,
+			IdSubstitutionMap theIdSubstitutions,
+			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
+			IIdType theNextResourceId,
+			DaoMethodOutcome theOutcome,
+			IBase theNewEntry,
 			String theResourceType,
 			IBaseResource theRes,
 			RequestDetails theRequestDetails) {
-		IIdType newId = outcome.getId().toUnqualified();
-		IIdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
-		if (newId.equals(resourceId) == false) {
-			if (!nextResourceId.isEmpty()) {
-				idSubstitutions.put(resourceId, newId);
+		IIdType newId = theOutcome.getId().toUnqualified();
+		IIdType resourceId =
+				isPlaceholder(theNextResourceId) ? theNextResourceId : theNextResourceId.toUnqualifiedVersionless();
+		if (!newId.equals(resourceId)) {
+			if (!theNextResourceId.isEmpty()) {
+				theIdSubstitutions.put(resourceId, newId);
 			}
 			if (isPlaceholder(resourceId)) {
 				/*
@@ -294,27 +298,27 @@ public abstract class BaseTransactionProcessor {
 				 */
 				IIdType id = myContext.getVersion().newIdType();
 				id.setValue(theResourceType + '/' + resourceId.getValue());
-				idSubstitutions.put(id, newId);
+				theIdSubstitutions.put(id, newId);
 			}
 		}
 
-		populateIdToPersistedOutcomeMap(idToPersistedOutcome, newId, outcome);
+		populateIdToPersistedOutcomeMap(theIdToPersistedOutcome, newId, theOutcome);
 
-		if (shouldSwapBinaryToActualResource(theRes, theResourceType, nextResourceId)) {
-			theRes = idToPersistedOutcome.get(newId).getResource();
+		if (shouldSwapBinaryToActualResource(theRes, theResourceType, theNextResourceId)) {
+			theRes = theIdToPersistedOutcome.get(newId).getResource();
 		}
 
-		if (outcome.getCreated()) {
-			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
+		if (theOutcome.getCreated()) {
+			myVersionAdapter.setResponseStatus(theNewEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
 		} else {
-			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
+			myVersionAdapter.setResponseStatus(theNewEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
 		}
 
 		Date lastModified = getLastModified(theRes);
-		myVersionAdapter.setResponseLastModified(newEntry, lastModified);
+		myVersionAdapter.setResponseLastModified(theNewEntry, lastModified);
 
-		if (outcome.getOperationOutcome() != null) {
-			myVersionAdapter.setResponseOutcome(newEntry, outcome.getOperationOutcome());
+		if (theOutcome.getOperationOutcome() != null) {
+			myVersionAdapter.setResponseOutcome(theNewEntry, theOutcome.getOperationOutcome());
 		}
 
 		if (theRequestDetails != null) {
@@ -323,9 +327,9 @@ public abstract class BaseTransactionProcessor {
 					RestfulServerUtils.parsePreferHeader(null, prefer).getReturn();
 			if (preferReturn != null) {
 				if (preferReturn == PreferReturnEnum.REPRESENTATION) {
-					if (outcome.getResource() != null) {
-						outcome.fireResourceViewCallbacks();
-						myVersionAdapter.setResource(newEntry, outcome.getResource());
+					if (theOutcome.getResource() != null) {
+						theOutcome.fireResourceViewCallbacks();
+						myVersionAdapter.setResource(theNewEntry, theOutcome.getResource());
 					}
 				}
 			}
@@ -359,14 +363,14 @@ public abstract class BaseTransactionProcessor {
 		try {
 
 			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
-			if (CompositeInterceptorBroadcaster.hasHooks(
-					Pointcut.STORAGE_TRANSACTION_PROCESSING, myInterceptorBroadcaster, theRequestDetails)) {
+			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+					myInterceptorBroadcaster, theRequestDetails);
+			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
 				HookParams params = new HookParams()
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequest)
 						.add(IBaseBundle.class, theRequest);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
 			}
 
 			return processTransaction(theRequestDetails, theRequest, theActionName, theNestedMode);
@@ -561,8 +565,9 @@ public abstract class BaseTransactionProcessor {
 				theRequestDetails, response, getEntries, originalRequestOrder, transactionStopWatch, theNestedMode);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 			String taskDurations = transactionStopWatch.formatTaskDurations();
 			StorageProcessingMessage message = new StorageProcessingMessage();
 			message.setMessage("Transaction timing:\n" + taskDurations);
@@ -570,8 +575,7 @@ public abstract class BaseTransactionProcessor {
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(StorageProcessingMessage.class, message);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
+			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 		}
 
 		return response;
@@ -691,7 +695,7 @@ public abstract class BaseTransactionProcessor {
 		TransactionCallback<EntriesToProcessMap> txCallback = status -> {
 			final Set<IIdType> allIds = new LinkedHashSet<>();
 			final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
-			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
+			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new LinkedHashMap<>();
 
 			EntriesToProcessMap retVal = doTransactionWriteOperations(
 					theRequestDetails,
@@ -821,12 +825,10 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
-		return CompositeInterceptorBroadcaster.hasHooks(
-						Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE, myInterceptorBroadcaster, theRequestDetails)
-				|| CompositeInterceptorBroadcaster.hasHooks(
-						Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST,
-						myInterceptorBroadcaster,
-						theRequestDetails);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		return compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE)
+				|| compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST);
 	}
 
 	private void callWriteOperationsHook(
@@ -834,10 +836,14 @@ public abstract class BaseTransactionProcessor {
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			TransactionWriteOperationsDetails theWriteOperationsDetails) {
-		HookParams params = new HookParams()
-				.add(TransactionDetails.class, theTransactionDetails)
-				.add(TransactionWriteOperationsDetails.class, theWriteOperationsDetails);
-		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, thePointcut, params);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(thePointcut)) {
+			HookParams params = new HookParams()
+					.add(TransactionDetails.class, theTransactionDetails)
+					.add(TransactionWriteOperationsDetails.class, theWriteOperationsDetails);
+			compositeBroadcaster.callHooks(thePointcut, params);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -967,18 +973,16 @@ public abstract class BaseTransactionProcessor {
 									+ " as it contained a duplicate conditional " + verb;
 							ourLog.info(msg);
 							// Interceptor broadcast: JPA_PERFTRACE_INFO
-							if (CompositeInterceptorBroadcaster.hasHooks(
-									Pointcut.JPA_PERFTRACE_WARNING, myInterceptorBroadcaster, theRequestDetails)) {
+							IInterceptorBroadcaster compositeBroadcaster =
+									CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+											myInterceptorBroadcaster, theRequestDetails);
+							if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_WARNING)) {
 								StorageProcessingMessage message = new StorageProcessingMessage().setMessage(msg);
 								HookParams params = new HookParams()
 										.add(RequestDetails.class, theRequestDetails)
 										.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 										.add(StorageProcessingMessage.class, message);
-								CompositeInterceptorBroadcaster.doCallHooks(
-										myInterceptorBroadcaster,
-										theRequestDetails,
-										Pointcut.JPA_PERFTRACE_INFO,
-										params);
+								compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 							}
 
 							theEntries.remove(index);
@@ -1133,6 +1137,7 @@ public abstract class BaseTransactionProcessor {
 			 * Loop through the request and process any entries of type
 			 * PUT, POST or DELETE
 			 */
+			String previousVerb = null;
 			for (int i = 0; i < theEntries.size(); i++) {
 				if (i % 250 == 0) {
 					ourLog.debug("Processed {} non-GET entries out of {} in transaction", i, theEntries.size());
@@ -1144,6 +1149,11 @@ public abstract class BaseTransactionProcessor {
 				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds);
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
+				if (previousVerb != null && !previousVerb.equals(verb)) {
+					handleVerbChangeInTransactionWriteOperations();
+				}
+				previousVerb = verb;
+
 				String resourceType = res != null ? myContext.getResourceType(res) : null;
 				Integer order = theOriginalRequestOrder.get(nextReqEntry);
 				IBase nextRespEntry =
@@ -1350,7 +1360,8 @@ public abstract class BaseTransactionProcessor {
 						}
 
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
-						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
+						IIdType patchId =
+								myContext.getVersion().newIdType(parts.getResourceType(), parts.getResourceId());
 
 						String conditionalUrl;
 						if (isNull(patchId.getIdPart())) {
@@ -1402,6 +1413,8 @@ public abstract class BaseTransactionProcessor {
 				theTransactionStopWatch.endCurrentTask();
 			}
 
+			postTransactionProcess(theTransactionDetails);
+
 			/*
 			 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
 			 * if something else has a reference to it.. Unless the thing that has a reference to it
@@ -1447,7 +1460,11 @@ public abstract class BaseTransactionProcessor {
 			}
 			if (!myStorageSettings.isMassIngestionMode()) {
 				validateNoDuplicates(
-						theRequest, theActionName, conditionalRequestUrls, theIdToPersistedOutcome.values());
+						theRequest,
+						theTransactionDetails,
+						theActionName,
+						conditionalRequestUrls,
+						theIdToPersistedOutcome.values());
 			}
 
 			theTransactionStopWatch.endCurrentTask();
@@ -1469,13 +1486,14 @@ public abstract class BaseTransactionProcessor {
 				}
 			}
 
+			IInterceptorBroadcaster compositeBroadcaster =
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 			ListMultimap<Pointcut, HookParams> deferredBroadcastEvents =
 					theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			for (Map.Entry<Pointcut, HookParams> nextEntry : deferredBroadcastEvents.entries()) {
 				Pointcut nextPointcut = nextEntry.getKey();
 				HookParams nextParams = nextEntry.getValue();
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, theRequest, nextPointcut, nextParams);
+				compositeBroadcaster.callHooks(nextPointcut, nextParams);
 			}
 
 			DeferredInterceptorBroadcasts deferredInterceptorBroadcasts =
@@ -1486,8 +1504,7 @@ public abstract class BaseTransactionProcessor {
 					.add(DeferredInterceptorBroadcasts.class, deferredInterceptorBroadcasts)
 					.add(TransactionDetails.class, theTransactionDetails)
 					.add(IBaseBundle.class, theResponse);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_TRANSACTION_PROCESSED, params);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSED, params);
 
 			theTransactionDetails.deferredBroadcastProcessingFinished();
 
@@ -1500,6 +1517,22 @@ public abstract class BaseTransactionProcessor {
 				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}
 		}
+	}
+
+	/**
+	 * Subclasses may override this in order to invoke specific operations when
+	 * we're finished handling all the write entries in the transaction bundle
+	 * with a given verb.
+	 */
+	protected void handleVerbChangeInTransactionWriteOperations() {
+		// nothing
+	}
+
+	/**
+	 * Implement to handle post transaction processing
+	 */
+	protected void postTransactionProcess(TransactionDetails theTransactionDetails) {
+		// nothing
 	}
 
 	/**
@@ -1660,9 +1693,9 @@ public abstract class BaseTransactionProcessor {
 			IdSubstitutionMap theIdSubstitutions,
 			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 			StopWatch theTransactionStopWatch,
-			EntriesToProcessMap entriesToProcess,
-			Set<IIdType> nonUpdatedEntities,
-			Set<IBasePersistedResource> updatedEntities) {
+			EntriesToProcessMap theEntriesToProcess,
+			Set<IIdType> theNonUpdatedEntities,
+			Set<IBasePersistedResource> theUpdatedEntities) {
 		FhirTerser terser = myContext.newTerser();
 		theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
 		IdentityHashMap<DaoMethodOutcome, Set<IBaseReference>> deferredIndexesForAutoVersioning = null;
@@ -1687,6 +1720,9 @@ public abstract class BaseTransactionProcessor {
 
 			Set<IBaseReference> referencesToAutoVersion =
 					BaseStorageDao.extractReferencesToAutoVersion(myContext, myStorageSettings, nextResource);
+			Set<IBaseReference> referencesToKeepClientSuppliedVersion =
+					BaseStorageDao.extractReferencesToAvoidReplacement(myContext, nextResource);
+
 			if (referencesToAutoVersion.isEmpty()) {
 				// no references to autoversion - we can do the resolve and save now
 				resolveReferencesThenSaveAndIndexResource(
@@ -1694,13 +1730,14 @@ public abstract class BaseTransactionProcessor {
 						theTransactionDetails,
 						theIdSubstitutions,
 						theIdToPersistedOutcome,
-						entriesToProcess,
-						nonUpdatedEntities,
-						updatedEntities,
+						theEntriesToProcess,
+						theNonUpdatedEntities,
+						theUpdatedEntities,
 						terser,
 						nextOutcome,
 						nextResource,
-						referencesToAutoVersion); // this is empty
+						referencesToAutoVersion, // this is empty
+						referencesToKeepClientSuppliedVersion);
 			} else {
 				// we have autoversioned things to defer until later
 				if (deferredIndexesForAutoVersioning == null) {
@@ -1717,19 +1754,22 @@ public abstract class BaseTransactionProcessor {
 				DaoMethodOutcome nextOutcome = nextEntry.getKey();
 				Set<IBaseReference> referencesToAutoVersion = nextEntry.getValue();
 				IBaseResource nextResource = nextOutcome.getResource();
+				Set<IBaseReference> referencesToKeepClientSuppliedVersion =
+						BaseStorageDao.extractReferencesToAvoidReplacement(myContext, nextResource);
 
 				resolveReferencesThenSaveAndIndexResource(
 						theRequest,
 						theTransactionDetails,
 						theIdSubstitutions,
 						theIdToPersistedOutcome,
-						entriesToProcess,
-						nonUpdatedEntities,
-						updatedEntities,
+						theEntriesToProcess,
+						theNonUpdatedEntities,
+						theUpdatedEntities,
 						terser,
 						nextOutcome,
 						nextResource,
-						referencesToAutoVersion);
+						referencesToAutoVersion,
+						referencesToKeepClientSuppliedVersion);
 			}
 		}
 	}
@@ -1739,15 +1779,16 @@ public abstract class BaseTransactionProcessor {
 			TransactionDetails theTransactionDetails,
 			IdSubstitutionMap theIdSubstitutions,
 			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
-			EntriesToProcessMap entriesToProcess,
-			Set<IIdType> nonUpdatedEntities,
-			Set<IBasePersistedResource> updatedEntities,
-			FhirTerser terser,
+			EntriesToProcessMap theEntriesToProcess,
+			Set<IIdType> theNonUpdatedEntities,
+			Set<IBasePersistedResource> theUpdatedEntities,
+			FhirTerser theTerser,
 			DaoMethodOutcome theDaoMethodOutcome,
 			IBaseResource theResource,
-			Set<IBaseReference> theReferencesToAutoVersion) {
+			Set<IBaseReference> theReferencesToAutoVersion,
+			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion) {
 		// References
-		List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(theResource);
+		List<ResourceReferenceInfo> allRefs = theTerser.getAllResourceReferences(theResource);
 		for (ResourceReferenceInfo nextRef : allRefs) {
 			IBaseReference resourceReference = nextRef.getResourceReference();
 			IIdType nextId = resourceReference.getReferenceElement();
@@ -1769,16 +1810,18 @@ public abstract class BaseTransactionProcessor {
 				}
 			}
 			if (newId != null || theIdSubstitutions.containsSource(nextId)) {
-				if (newId == null) {
-					newId = theIdSubstitutions.getForSource(nextId);
-				}
-				if (newId != null) {
-					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
-
-					if (theReferencesToAutoVersion.contains(resourceReference)) {
-						replaceResourceReference(newId, resourceReference, theTransactionDetails);
-					} else {
-						replaceResourceReference(newId.toVersionless(), resourceReference, theTransactionDetails);
+				if (shouldReplaceResourceReference(
+						theReferencesToAutoVersion, theReferencesToKeepClientSuppliedVersion, resourceReference)) {
+					if (newId == null) {
+						newId = theIdSubstitutions.getForSource(nextId);
+					}
+					if (newId != null) {
+						ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
+						if (theReferencesToAutoVersion.contains(resourceReference)) {
+							replaceResourceReference(newId, resourceReference, theTransactionDetails);
+						} else {
+							replaceResourceReference(newId.toVersionless(), resourceReference, theTransactionDetails);
+						}
 					}
 				}
 			} else if (nextId.getValue().startsWith("urn:")) {
@@ -1833,7 +1876,7 @@ public abstract class BaseTransactionProcessor {
 		// URIs
 		Class<? extends IPrimitiveType<?>> uriType = (Class<? extends IPrimitiveType<?>>)
 				myContext.getElementDefinition("uri").getImplementingClass();
-		List<? extends IPrimitiveType<?>> allUris = terser.getAllPopulatedChildElementsOfType(theResource, uriType);
+		List<? extends IPrimitiveType<?>> allUris = theTerser.getAllPopulatedChildElementsOfType(theResource, uriType);
 		for (IPrimitiveType<?> nextRef : allUris) {
 			if (nextRef instanceof IIdType) {
 				continue; // No substitution on the resource ID itself!
@@ -1861,7 +1904,7 @@ public abstract class BaseTransactionProcessor {
 		IJpaDao jpaDao = (IJpaDao) dao;
 
 		IBasePersistedResource updateOutcome = null;
-		if (updatedEntities.contains(theDaoMethodOutcome.getEntity())) {
+		if (theUpdatedEntities.contains(theDaoMethodOutcome.getEntity())) {
 			boolean forceUpdateVersion = !theReferencesToAutoVersion.isEmpty();
 			String matchUrl = theDaoMethodOutcome.getMatchUrl();
 			RestOperationTypeEnum operationType = theDaoMethodOutcome.getOperationType();
@@ -1878,7 +1921,7 @@ public abstract class BaseTransactionProcessor {
 					theTransactionDetails);
 			updateOutcome = daoMethodOutcome.getEntity();
 			theDaoMethodOutcome = daoMethodOutcome;
-		} else if (!nonUpdatedEntities.contains(theDaoMethodOutcome.getId())) {
+		} else if (!theNonUpdatedEntities.contains(theDaoMethodOutcome.getId())) {
 			updateOutcome = jpaDao.updateEntity(
 					theRequest,
 					theResource,
@@ -1895,7 +1938,7 @@ public abstract class BaseTransactionProcessor {
 		if (updateOutcome != null) {
 			IIdType newId = updateOutcome.getIdDt();
 
-			IIdType entryId = entriesToProcess.getIdWithVersionlessComparison(newId);
+			IIdType entryId = theEntriesToProcess.getIdWithVersionlessComparison(newId);
 			if (entryId != null && !StringUtils.equals(entryId.getValue(), newId.getValue())) {
 				entryId.setValue(newId.getValue());
 			}
@@ -1904,11 +1947,41 @@ public abstract class BaseTransactionProcessor {
 
 			theIdSubstitutions.updateTargets(newId);
 
-			if (theDaoMethodOutcome.getOperationOutcome() != null) {
-				IBase responseEntry = entriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
-				myVersionAdapter.setResponseOutcome(responseEntry, theDaoMethodOutcome.getOperationOutcome());
+			// This will only be null if we're not intending to return an OO
+			IBaseOperationOutcome operationOutcome = theDaoMethodOutcome.getOperationOutcome();
+			if (operationOutcome != null) {
+
+				List<IIdType> autoCreatedPlaceholders =
+						theTransactionDetails.getAutoCreatedPlaceholderResourcesAndClear();
+				for (IIdType autoCreatedPlaceholder : autoCreatedPlaceholders) {
+					BaseStorageDao.addIssueToOperationOutcomeForAutoCreatedPlaceholder(
+							myContext, autoCreatedPlaceholder, operationOutcome);
+				}
+
+				IBase responseEntry = theEntriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
+				myVersionAdapter.setResponseOutcome(responseEntry, operationOutcome);
 			}
 		}
+	}
+
+	/**
+	 * We should replace the references when
+	 * 1. It is not a reference we should keep the client-supplied version for as configured by `DontStripVersionsFromReferences` or
+	 * 2. It is a reference that has been identified for auto versioning or
+	 * 3. Is a placeholder reference
+	 * @param theReferencesToAutoVersion list of references identified for auto versioning
+	 * @param theReferencesToKeepClientSuppliedVersion list of references that we should not strip the version for
+	 * @param theResourceReference the resource reference
+	 * @return true if we should replace the resource reference, false if we should keep the client provided reference
+	 */
+	private boolean shouldReplaceResourceReference(
+			Set<IBaseReference> theReferencesToAutoVersion,
+			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion,
+			IBaseReference theResourceReference) {
+		return (!theReferencesToKeepClientSuppliedVersion.contains(theResourceReference)
+						&& myContext.getParserOptions().isStripVersionsFromReferences())
+				|| theReferencesToAutoVersion.contains(theResourceReference)
+				|| isPlaceholder(theResourceReference.getReferenceElement());
 	}
 
 	private void replaceResourceReference(
@@ -1926,21 +1999,31 @@ public abstract class BaseTransactionProcessor {
 
 	private void validateNoDuplicates(
 			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails,
 			String theActionName,
 			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls,
 			Collection<DaoMethodOutcome> thePersistedOutcomes) {
+
+		Map<ResourceTable, ResourceIndexedSearchParams> existingSearchParams =
+				theTransactionDetails.getOrCreateUserData(
+						HapiTransactionService.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS, Collections::emptyMap);
 
 		IdentityHashMap<IBaseResource, ResourceIndexedSearchParams> resourceToIndexedParams =
 				new IdentityHashMap<>(thePersistedOutcomes.size());
 		thePersistedOutcomes.stream()
 				.filter(t -> !t.isNop())
-				.filter(t -> t.getEntity()
-						instanceof ResourceTable) // N.B. GGG: This validation never occurs for mongo, as nothing is a
-				// ResourceTable.
+				// N.B. GGG: This validation never occurs for mongo, as nothing is a ResourceTable.
+				.filter(t -> t.getEntity() instanceof ResourceTable)
 				.filter(t -> t.getEntity().getDeleted() == null)
 				.filter(t -> t.getResource() != null)
-				.forEach(t -> resourceToIndexedParams.put(
-						t.getResource(), ResourceIndexedSearchParams.withLists((ResourceTable) t.getEntity())));
+				.forEach(t -> {
+					ResourceTable entity = (ResourceTable) t.getEntity();
+					ResourceIndexedSearchParams params = existingSearchParams.get(entity);
+					if (params == null) {
+						params = ResourceIndexedSearchParams.withLists(entity);
+					}
+					resourceToIndexedParams.put(t.getResource(), params);
+				});
 
 		for (Map.Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
 			String matchUrl = nextEntry.getKey();

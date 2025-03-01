@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,15 @@ public class JpaSearchParamCache {
 	volatile Map<String, Map<Set<String>, List<RuntimeSearchParam>>> myActiveParamNamesToComboSearchParams =
 			Collections.emptyMap();
 	volatile Map<Long, IndexedSearchParam> myHashIdentityToIndexedSearchParams = Collections.emptyMap();
+
+	private final PartitionSettings myPartitionSettings;
+
+	/**
+	 * Constructor
+	 */
+	public JpaSearchParamCache(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
 
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 		List<RuntimeSearchParam> retval = myActiveComboSearchParams.get(theResourceName);
@@ -250,7 +259,7 @@ public class JpaSearchParamCache {
 			Map<Long, IndexedSearchParam> theHashIdentityToIndexedSearchParams,
 			String theSpName) {
 		Long hashIdentity = SearchParamHash.hashSearchParam(
-				new PartitionSettings(), RequestPartitionId.defaultPartition(), theResourceName, theSpName);
+				myPartitionSettings, RequestPartitionId.defaultPartition(), theResourceName, theSpName);
 		theHashIdentityToIndexedSearchParams.put(hashIdentity, new IndexedSearchParam(theSpName, theResourceName));
 	}
 }
