@@ -17,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class RequestPartitionIdTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(RequestPartitionIdTest.class);
 
+	private static final Integer ourDefaultPartitionId = 0;
+	
 	@Test
 	public void testHashCode() {
 		assertEquals(31860737, RequestPartitionId.allPartitions().hashCode());
@@ -39,6 +41,29 @@ public class RequestPartitionIdTest {
 		assertFalse(RequestPartitionId.forPartitionIdsAndNames(Lists.newArrayList("Name1", "Name2"), null, null).isDefaultPartition());
 		assertFalse(RequestPartitionId.forPartitionIdsAndNames(null, Lists.newArrayList(1, 2), null).isAllPartitions());
 		assertFalse(RequestPartitionId.forPartitionIdsAndNames(null, Lists.newArrayList(1, 2), null).isDefaultPartition());
+	}
+
+	@Test
+	public void testIsDefaultPartition_withDefaultPartitionAsParameter() {
+
+		assertThat(RequestPartitionId.defaultPartition().isDefaultPartition(null)).isTrue();
+		assertThat(RequestPartitionId.fromPartitionIds(ourDefaultPartitionId).isDefaultPartition(ourDefaultPartitionId)).isTrue();
+
+		assertThat(RequestPartitionId.defaultPartition().isDefaultPartition(ourDefaultPartitionId)).isFalse();
+		assertThat(RequestPartitionId.allPartitions().isDefaultPartition(ourDefaultPartitionId)).isFalse();
+		assertThat(RequestPartitionId.fromPartitionIds(ourDefaultPartitionId, 2).isDefaultPartition(ourDefaultPartitionId)).isFalse();
+	}
+
+	@Test
+	public void testHasDefaultPartition_withDefaultPartitionAsParameter() {
+
+		assertThat(RequestPartitionId.defaultPartition().hasDefaultPartitionId(null)).isTrue();
+		assertThat(RequestPartitionId.fromPartitionIds(ourDefaultPartitionId).hasDefaultPartitionId(ourDefaultPartitionId)).isTrue();
+		assertThat(RequestPartitionId.fromPartitionIds(ourDefaultPartitionId, null).hasDefaultPartitionId(null)).isTrue();
+		assertThat(RequestPartitionId.fromPartitionIds(ourDefaultPartitionId, null).hasDefaultPartitionId(ourDefaultPartitionId)).isTrue();
+
+		assertThat(RequestPartitionId.fromPartitionIds(ourDefaultPartitionId).hasDefaultPartitionId(null)).isFalse();
+		assertThat(RequestPartitionId.defaultPartition().hasDefaultPartitionId(ourDefaultPartitionId)).isFalse();
 	}
 
 	@Test

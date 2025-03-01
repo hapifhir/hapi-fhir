@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		mySearchParamRetriever = theSearchParamRetriever;
 	}
 
+	@Override
 	public void validate(MdmRulesJson theMdmRules) {
 		validateMdmTypes(theMdmRules);
 		validateSearchParams(theMdmRules);
@@ -127,7 +128,9 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	public void validateTypeHasIdentifier(String theResourceType) {
-		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, "identifier") == null) {
+		if (mySearchParamRetriever.getActiveSearchParam(
+						theResourceType, "identifier", ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
+				== null) {
 			throw new ConfigurationException(
 					Msg.code(1510) + "Resource Type " + theResourceType
 							+ " is not supported, as it does not have an 'identifier' field, which is necessary for MDM workflow.");
@@ -162,7 +165,9 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 
 	private void validateResourceSearchParam(String theFieldName, String theResourceType, String theSearchParam) {
 		String searchParam = SearchParameterUtil.stripModifier(theSearchParam);
-		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, searchParam) == null) {
+		if (mySearchParamRetriever.getActiveSearchParam(
+						theResourceType, searchParam, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
+				== null) {
 			throw new ConfigurationException(Msg.code(1511) + "Error in " + theFieldName + ": " + theResourceType
 					+ " does not have a search parameter called '" + theSearchParam + "'");
 		}

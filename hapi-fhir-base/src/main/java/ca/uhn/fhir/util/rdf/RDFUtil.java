@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,18 @@
  */
 package ca.uhn.fhir.util.rdf;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.WriterOutputStream;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 
 public class RDFUtil {
@@ -34,17 +40,28 @@ public class RDFUtil {
 		return ModelFactory.createDefaultModel();
 	}
 
-	public static Model readRDFToModel(final Reader reader, final Lang lang) {
+	public static Model readRDFToModel(final Reader reader, final Lang lang) throws IOException {
+		// Jena has removed methods that use a generic Reader.
+		// reads only from InputStream, StringReader, or String
+		// Reader must be explicitly cast to StringReader
 		Model rdfModel = initializeRDFModel();
-		RDFDataMgr.read(rdfModel, reader, null, lang);
+		if (reader instanceof StringReader) {
+			RDFDataMgr.read(rdfModel, (StringReader) reader, null, lang);
+		} else if (reader instanceof InputStreamReader) {
+			String content = IOUtils.toString(reader);
+			RDFDataMgr.read(rdfModel, new StringReader(content), null, lang);
+		}
 		return rdfModel;
 	}
 
-	public static void writeRDFModel(Writer writer, Model rdfModel, Lang lang) {
-		// This writes to the provided Writer.
-		// Jena has deprecated methods that use a generic Writer
-		// writer could be explicitly casted to StringWriter in order to hit a
-		// non-deprecated overload
-		RDFDataMgr.write(writer, rdfModel, lang);
+	public static void writeRDFModel(Writer writer, Model rdfModel, Lang lang) throws IOException {
+		// Jena has removed methods that use a generic Writer.
+		// Writer must be explicitly cast to StringWriter or OutputStream
+		// in order to hit a write method.
+		OutputStream outputStream = WriterOutputStream.builder()
+				.setWriter(writer)
+				.setCharset("UTF-8")
+				.get();
+		RDFDataMgr.write(outputStream, rdfModel, lang);
 	}
 }

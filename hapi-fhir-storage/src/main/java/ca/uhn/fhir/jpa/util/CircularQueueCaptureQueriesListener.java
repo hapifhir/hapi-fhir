@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Queues;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.hl7.fhir.r4.model.InstantType;
@@ -32,9 +33,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -53,9 +56,10 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 
 	public static final Predicate<String> DEFAULT_SELECT_INCLUSION_CRITERIA =
 			t -> t.toLowerCase(Locale.US).startsWith("select");
-	private static final int CAPACITY = 1000;
+	private static final int CAPACITY = 10000;
 	private static final Logger ourLog = LoggerFactory.getLogger(CircularQueueCaptureQueriesListener.class);
 	private Queue<SqlQuery> myQueries;
+	private AtomicInteger myGetConnectionCounter;
 	private AtomicInteger myCommitCounter;
 	private AtomicInteger myRollbackCounter;
 
@@ -89,6 +93,12 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		return myCommitCounter;
 	}
 
+	@Nullable
+	@Override
+	protected AtomicInteger provideGetConnectionCounter() {
+		return myGetConnectionCounter;
+	}
+
 	@Override
 	protected AtomicInteger provideRollbackCounter() {
 		return myRollbackCounter;
@@ -99,6 +109,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public void clear() {
 		myQueries.clear();
+		myGetConnectionCounter.set(0);
 		myCommitCounter.set(0);
 		myRollbackCounter.set(0);
 	}
@@ -108,6 +119,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public void startCollecting() {
 		myQueries = Queues.synchronizedQueue(new CircularFifoQueue<>(CAPACITY));
+		myGetConnectionCounter = new AtomicInteger(0);
 		myCommitCounter = new AtomicInteger(0);
 		myRollbackCounter = new AtomicInteger(0);
 	}
@@ -165,10 +177,18 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		return getQueriesMatching(thePredicate, threadName);
 	}
 
+	/**
+	 * @deprecated Use {@link #countCommits()}
+	 */
+	@Deprecated
 	public int getCommitCount() {
 		return myCommitCounter.get();
 	}
 
+	/**
+	 * @deprecated Use {@link #countRollbacks()}
+	 */
+	@Deprecated
 	public int getRollbackCount() {
 		return myRollbackCounter.get();
 	}
@@ -188,10 +208,24 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	}
 
 	/**
+	 * Returns all INSERT queries executed on the current thread - Index 0 is oldest
+	 */
+	public List<SqlQuery> getInsertQueries(Predicate<SqlQuery> theFilter) {
+		return getQueriesStartingWith("insert").stream().filter(theFilter).collect(Collectors.toList());
+	}
+
+	/**
 	 * Returns all UPDATE queries executed on the current thread - Index 0 is oldest
 	 */
 	public List<SqlQuery> getUpdateQueries() {
 		return getQueriesStartingWith("update");
+	}
+
+	/**
+	 * Returns all UPDATE queries executed on the current thread - Index 0 is oldest
+	 */
+	public List<SqlQuery> getUpdateQueries(Predicate<SqlQuery> theFilter) {
+		return getQueriesStartingWith("update").stream().filter(theFilter).collect(Collectors.toList());
 	}
 
 	/**
@@ -352,11 +386,8 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		List<SqlQuery> insertQueries = getInsertQueries().stream()
 				.filter(t -> theInclusionPredicate == null || theInclusionPredicate.test(t))
 				.collect(Collectors.toList());
-		boolean inlineParams = true;
-		List<String> queries = insertQueries.stream()
-				.map(t -> CircularQueueCaptureQueriesListener.formatQueryAsSql(t, inlineParams, inlineParams))
-				.collect(Collectors.toList());
-		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
+		List<String> queriesStrings = renderQueriesForLogging(true, true, insertQueries);
+		ourLog.info("Insert Queries:\n{}", String.join("\n", queriesStrings));
 
 		return countQueries(insertQueries);
 	}
@@ -400,6 +431,17 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 
 	public int countInsertQueries() {
 		return countQueries(getInsertQueries());
+	}
+
+	/**
+	 * This method returns a count of insert queries which were issued more than
+	 * once. If a query was issued twice with batched parameters, that does not
+	 * count as a repeated query, but if it is issued as two separate insert
+	 * statements with a single set of parameters this counts as a repeated
+	 * query.
+	 */
+	public int countInsertQueriesRepeated() {
+		return getInsertQueries(new DuplicateCheckingPredicate()).size();
 	}
 
 	public int countUpdateQueries() {
@@ -466,5 +508,20 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		}
 		b.append("\n");
 		return b.toString();
+	}
+
+	/**
+	 * Create a new instance of this each time you use it
+	 */
+	private static class DuplicateCheckingPredicate implements Predicate<SqlQuery> {
+		private final Set<String> mySeenSql = new HashSet<>();
+
+		@Override
+		public boolean test(SqlQuery theSqlQuery) {
+			String sql = theSqlQuery.getSql(false, false);
+			boolean retVal = !mySeenSql.add(sql);
+			ourLog.trace("SQL duplicate[{}]: {}", retVal, sql);
+			return retVal;
+		}
 	}
 }

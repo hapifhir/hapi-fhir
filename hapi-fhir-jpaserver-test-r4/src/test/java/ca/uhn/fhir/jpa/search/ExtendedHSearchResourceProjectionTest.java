@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
@@ -22,7 +23,7 @@ class ExtendedHSearchResourceProjectionTest {
 
 	@Test
 	public void basicBodyReceivesId() {
-		myProjection = new ExtendedHSearchResourceProjection(22, null, "{ \"resourceType\":\"Observation\"}");
+		myProjection = new ExtendedHSearchResourceProjection(JpaPid.fromId(22L), null, "{ \"resourceType\":\"Observation\"}");
 
 		myResource = myProjection.toResource(myParser);
 
@@ -32,7 +33,7 @@ class ExtendedHSearchResourceProjectionTest {
 
 	@Test
 	public void forcedIdOverridesPid() {
-		myProjection = new ExtendedHSearchResourceProjection(22, "force-id", "{ \"resourceType\":\"Observation\"}");
+		myProjection = new ExtendedHSearchResourceProjection(JpaPid.fromId(22L), "force-id", "{ \"resourceType\":\"Observation\"}");
 
 		myResource = myProjection.toResource(myParser);
 
@@ -45,7 +46,7 @@ class ExtendedHSearchResourceProjectionTest {
 	public void nullResourceStringThrows() {
 		ResourceNotFoundInIndexException ex = assertThrows(
 			ResourceNotFoundInIndexException.class,
-			() -> new ExtendedHSearchResourceProjection(22, null, null));
+			() -> new ExtendedHSearchResourceProjection(JpaPid.fromId(22L), null, null));
 		assertEquals(Msg.code(2130) + RESOURCE_NOT_STORED_ERROR + "22", ex.getMessage());
 	}
 
@@ -54,7 +55,7 @@ class ExtendedHSearchResourceProjectionTest {
 	public void emptyResourceStringThrows() {
 		ResourceNotFoundInIndexException ex = assertThrows(
 			ResourceNotFoundInIndexException.class,
-			() -> new ExtendedHSearchResourceProjection(22, null, ""));
+			() -> new ExtendedHSearchResourceProjection(JpaPid.fromId(22L), null, ""));
 		assertEquals(Msg.code(2130) + RESOURCE_NOT_STORED_ERROR + "22", ex.getMessage());
 	}
 

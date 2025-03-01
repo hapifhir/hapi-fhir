@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,6 +115,7 @@ public class DaoSearchParamSynchronizer {
 			@Nullable IPreSaveHook<T> theAddParamPreSaveHook) {
 		Collection<T> newParams = theNewParams;
 		for (T next : newParams) {
+			next.setResourceId(theEntity.getId().getId());
 			next.setPartitionId(theEntity.getPartitionId());
 			next.calculateHashes();
 		}
@@ -169,12 +170,24 @@ public class DaoSearchParamSynchronizer {
 		}
 
 		for (T next : paramsToAdd) {
-			myEntityManager.merge(next);
+			if (next.getId() == null) {
+				myEntityManager.persist(next);
+			} else {
+				myEntityManager.merge(next);
+			}
 		}
 
 		// TODO:  are there any unintended consequences to fixing this bug?
 		theAddRemoveCount.addToAddCount(paramsToAdd.size());
 		theAddRemoveCount.addToRemoveCount(paramsToRemove.size());
+
+		// Replace the existing "new set" with the set of params we should be adding.
+		// We're going to add them back into the entity just in case it gets updated
+		// a second time within the same transaction
+		theNewParams.clear();
+		theNewParams.addAll(theExistingParams);
+		theNewParams.addAll(paramsToAdd);
+		theNewParams.removeAll(paramsToRemove);
 	}
 
 	/**

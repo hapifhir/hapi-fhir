@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
-import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
 
-public interface IJpaStorageResourceParser extends IStorageResourceParser {
+public interface IJpaStorageResourceParser extends IStorageResourceParser<JpaPid> {
 
 	/**
 	 * Convert a storage entity into a FHIR resource model instance. This method may return null if the entity is not
@@ -35,8 +35,8 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser {
 	 */
 	<R extends IBaseResource> R toResource(
 			Class<R> theResourceType,
-			IBaseResourceEntity theEntity,
-			Collection<ResourceTag> theTagList,
+			IBaseResourceEntity<?> theEntity,
+			Collection<BaseTag> theTagList,
 			boolean theForHistoryOperation);
 
 	/**
@@ -44,7 +44,7 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser {
 	 * objects pulled from the database
 	 */
 	<R extends IBaseResource> R populateResourceMetadata(
-			IBaseResourceEntity theEntitySource,
+			IBaseResourceEntity<?> theEntitySource,
 			boolean theForHistoryOperation,
 			@Nullable Collection<? extends BaseTag> tagList,
 			long theVersion,
@@ -57,5 +57,5 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser {
 	 * @param theEntitySource The source
 	 * @param theResourceTarget The target
 	 */
-	void updateResourceMetadata(IBaseResourceEntity theEntitySource, IBaseResource theResourceTarget);
+	void updateResourceMetadata(IBaseResourceEntity<?> theEntitySource, IBaseResource theResourceTarget);
 }

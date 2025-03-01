@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,12 +303,14 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 				theForceUpdate,
 				theCreateNewHistoryEntry);
 
-		if (getStorageSettings().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
-			if (retVal.getDeleted() == null) {
-				ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
-				myTerminologySvc.storeTermValueSet(retVal, valueSet);
-			} else {
-				myTerminologySvc.deleteValueSetAndChildren(retVal);
+		if (thePerformIndexing) {
+			if (getStorageSettings().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
+				if (retVal.getDeleted() == null) {
+					ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
+					myTerminologySvc.storeTermValueSet(retVal, valueSet);
+				} else {
+					myTerminologySvc.deleteValueSetAndChildren(retVal);
+				}
 			}
 		}
 

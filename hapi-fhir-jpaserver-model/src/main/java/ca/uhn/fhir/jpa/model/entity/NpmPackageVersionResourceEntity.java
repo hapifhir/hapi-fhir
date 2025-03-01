@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -38,6 +39,8 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.Date;
 
@@ -66,12 +69,29 @@ public class NpmPackageVersionResourceEntity {
 	private NpmPackageVersionEntity myPackageVersion;
 
 	@ManyToOne
-	@JoinColumn(
-			name = "BINARY_RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "BINARY_RES_ID",
+						referencedColumnName = "RES_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_NPM_PKVR_RESID"))
 	private ResourceTable myResourceBinary;
+
+	@Column(name = "BINARY_RES_ID", nullable = false)
+	private Long myResourcePid;
+
+	@Column(name = "PARTITION_ID", nullable = true)
+	private Integer myPartitionId;
 
 	@Column(name = "FILE_DIR", length = 200)
 	private String myDirectory;
@@ -89,6 +109,7 @@ public class NpmPackageVersionResourceEntity {
 	private String myCanonicalVersion;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(name = "FHIR_VERSION", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
 	private FhirVersionEnum myFhirVersion;
 
@@ -125,6 +146,8 @@ public class NpmPackageVersionResourceEntity {
 
 	public void setResourceBinary(ResourceTable theResourceBinary) {
 		myResourceBinary = theResourceBinary;
+		myResourcePid = theResourceBinary.getId().getId();
+		myPartitionId = theResourceBinary.getPersistentId().getPartitionId();
 	}
 
 	public String getFhirVersionId() {

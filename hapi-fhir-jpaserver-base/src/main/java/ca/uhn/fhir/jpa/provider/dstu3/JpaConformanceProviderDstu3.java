@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,11 +190,12 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		 * global params like _lastUpdated
 		 */
 		ResourceSearchParams searchParams;
-		ResourceSearchParams serverConfigurationActiveSearchParams =
-				myServerConfiguration.getActiveSearchParams(theResourceName);
+		ResourceSearchParams serverConfigurationActiveSearchParams = myServerConfiguration.getActiveSearchParams(
+				theResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		if (mySearchParamRegistry != null) {
-			searchParams =
-					mySearchParamRegistry.getActiveSearchParams(theResourceName).makeCopy();
+			searchParams = mySearchParamRegistry
+					.getActiveSearchParams(theResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
+					.makeCopy();
 			if (searchParams == null) {
 				return ResourceSearchParams.empty(theResourceName);
 			}
@@ -229,8 +230,8 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 				if (isBlank(otherResourceType)) {
 					continue;
 				}
-				ResourceSearchParams activeSearchParams =
-						mySearchParamRegistry.getActiveSearchParams(otherResourceType);
+				ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
+						otherResourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				activeSearchParams.values().stream()
 						.filter(t -> isNotBlank(t.getName()))
 						.filter(t -> t.getTargets().contains(resourcename))

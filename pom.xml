@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.7.0-SNAPSHOT</version>
+	<version>8.1.0-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -49,7 +49,7 @@
 
 	<repositories>
 		<repository>
-			<id>oss-snapshot</id>
+			<id>oss-snapshots</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 			<snapshots>
 				<enabled>true</enabled>
@@ -115,6 +115,7 @@
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
 		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
+		<module>hapi-fhir-client-apache-http5</module>
 		<module>hapi-fhir-client-okhttp</module>
 		<module>hapi-fhir-android</module>
 		<module>hapi-fhir-cli</module>
@@ -125,7 +126,8 @@
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
 		<module>hapi-fhir-server-cds-hooks</module>
-	</modules>
+        <module>hapi-fhir-jpa-hibernate-services</module>
+    </modules>
 
 	<dependencies>
 		<dependency>
@@ -948,6 +950,35 @@
 			<id>Boereck</id>
 			<name>Max Bureck</name>
 		</developer>
+		<developer>
+			<id>SevcikMichal</id>
+			<name>Michal Sevcik</name>
+		</developer>
+		<developer>
+			<id>iyt-trifork</id>
+			<name>Ibrahim Tallouzi</name>
+			<organization>Trifork A/S</organization>
+		</developer>
+		<developer>
+			<id>madduci</id>
+			<name>Michele Adduci</name>
+			<organization>gematik GmbH</organization>
+		</developer>
+		<developer>
+			<id>MangalaEkanayake</id>
+			<name>Mangala Ekanayake</name>
+			<organization>Cambio</organization>
+		</developer>
+		<developer>
+			<id>elavy-harris</id>
+			<name>Eliott Lavy</name>
+			<organization>Harris</organization>
+		</developer>
+		<developer>
+			<id>krauzer</id>
+			<name>Dylan Krause</name>
+			<organization>Corbalt</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -958,9 +989,10 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.3.25</fhir_core_version>
+		<fhir_core_version>6.4.0</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
+		<surefire_version>3.5.2</surefire_version>
 
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
@@ -976,7 +1008,7 @@
 		<apache_karaf_version>4.2.5</apache_karaf_version>
 		<aries_spifly_version>1.2</aries_spifly_version>
 		<caffeine_version>3.1.8</caffeine_version>
-		<checkstyle_version>10.17.0</checkstyle_version>
+		<checkstyle_version>10.21.1</checkstyle_version>
 		<maven_changes_version>2.12.1</maven_changes_version>
 		<commons_codec_version>1.15</commons_codec_version>
 		<commons_compress_version>1.26.0</commons_compress_version>
@@ -990,10 +1022,10 @@
 		<!-- Before Bumping: See note above about dbcp2 -->
 		<commons_pool2_version>2.12.0</commons_pool2_version>
 		<commons_text_version>1.10.0</commons_text_version>
-		<commons_io_version>2.11.0</commons_io_version>
-		<commons_lang3_version>3.14.0</commons_lang3_version>
+		<commons_io_version>2.17.0</commons_io_version>
+		<commons_lang3_version>3.17.0</commons_lang3_version>
 		<com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
-		<error_prone_core_version>2.23.0</error_prone_core_version>
+		<error_prone_core_version>2.36.0</error_prone_core_version>
 		<mockito_version>5.8.0</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
 		<guava_version>33.2.1-jre</guava_version>
@@ -1002,59 +1034,70 @@
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
 		<jaxb_runtime_version>4.0.4</jaxb_runtime_version>
-		<jena_version>4.9.0</jena_version>
+		<jena_version>5.3.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
-		<jetty_version>12.0.9</jetty_version>
+		<jetty_version>12.0.15</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.10.1</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
-		<flyway_version>9.4.0</flyway_version>
-		<hibernate_version>6.4.1.Final</hibernate_version>
-		<logback_version>1.4.14</logback_version>
+		<flyway_version>10.20.1</flyway_version>
+		<hibernate_version>6.6.4.Final</hibernate_version>
+		<logback_version>1.5.16</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
-		<hibernate_search_version>7.0.0.Final</hibernate_search_version>
+		<hibernate_search_version>7.2.1.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
-		<lucene_version>9.8.0</lucene_version>
+		<lucene_version>9.11.1</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
-		<httpcore_version>4.4.13</httpcore_version>
-		<httpclient_version>4.5.13</httpclient_version>
+		<httpcore_version>4.4.16</httpcore_version>
+		<httpclient_version>4.5.14</httpclient_version>
+		<jackson_version>2.18.1</jackson_version>
+		<jackson_databind_version>2.18.1</jackson_databind_version>
+		<httpclient5_version>5.4.1</httpclient5_version>
+		<httpcore5_version>5.3.1</httpcore5_version>
 		<jackson_version>2.17.1</jackson_version>
 		<jackson_databind_version>2.17.1</jackson_databind_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>4.12.0</okhttp_version>
-		<otel_instrumentation.version>2.8.0</otel_instrumentation.version>
+		<!--
+		Note: As of 2024-11, the opentelemetry-agent-for-testing dependency published to Maven
+		uses a version which lines up with the OTEL instrumentation version, but with "-alpha"
+		appended to it. So we do that too here. This could change in the future.
+		-->
+		<otel_instrumentation.version>2.10.0</otel_instrumentation.version>
+		<otel_agent_for_testing.version>${otel_instrumentation.version}-alpha</otel_agent_for_testing.version>
 		<poi_version>4.1.2</poi_version>
 		<poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
-		<resteasy_version>6.2.9.Final</resteasy_version>
+		<resteasy_version>6.2.10.Final</resteasy_version>
 		<ph_schematron_version>7.1.2</ph_schematron_version>
 		<ph_commons_version>9.5.4</ph_commons_version>
 		<plexus_compiler_api_version>2.13.0</plexus_compiler_api_version>
 		<reflections_version>0.9.11</reflections_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-		<swagger_version>2.2.22</swagger_version>
-		<slf4j_version>2.0.13</slf4j_version>
-		<log4j_to_slf4j_version>2.19.0</log4j_to_slf4j_version>
-		<spring_version>6.1.8</spring_version>
-		<spring_data_bom_version>2023.1.6</spring_data_bom_version>
-		<spring_batch_version>4.3.10</spring_batch_version>
-		<spring_boot_version>3.2.6</spring_boot_version>
-		<spring_retry_version>2.0.6</spring_retry_version>
+		<swagger_version>2.2.25</swagger_version>
+		<slf4j_version>2.0.16</slf4j_version>
+		<log4j_to_slf4j_version>2.24.1</log4j_to_slf4j_version>
+		<spring_version>6.1.14</spring_version>
+		<spring_data_bom_version>2024.0.5</spring_data_bom_version>
+		<spring_framework_bom_version>6.1.15</spring_framework_bom_version>
+		<spring_boot_version>3.3.5</spring_boot_version>
+		<spring_retry_version>2.0.10</spring_retry_version>
 		<json_path_version>2.9.0</json_path_version>
+		<jboss_logging_version>3.6.1.Final</jboss_logging_version>
 		<stax2_api_version>3.1.4</stax2_api_version>
-		<testcontainers_version>1.19.3</testcontainers_version>
+		<testcontainers_version>1.20.3</testcontainers_version>
 		<thymeleaf-version>3.1.2.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
-		<elastic_apm_version>1.44.0</elastic_apm_version>
-		<elasticsearch_version>8.14.3</elasticsearch_version>
-		<ucum_version>1.0.8</ucum_version>
+		<elastic_apm_version>1.52.0</elastic_apm_version>
+		<elasticsearch_version>8.15.3</elasticsearch_version>
+		<ucum_version>1.0.9</ucum_version>
 
 		<!-- Clinical Reasoning & CQL Support -->
-		<clinical-reasoning.version>3.13.0</clinical-reasoning.version>
+		<clinical-reasoning.version>3.17.0</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1064,10 +1107,19 @@
 		<maven.compiler.testSource>17</maven.compiler.testSource>
 		<maven.compiler.testTarget>17</maven.compiler.testTarget>
 		<maven.compiler.testRelease>17</maven.compiler.testRelease>
-		<maven_checkstyle_version>3.4.0</maven_checkstyle_version>
 
 		<!-- Jacoco -->
 		<argLine></argLine>
+
+		<!-- Plugin Versioning -->
+		<maven-resources-plugin-version>3.3.0</maven-resources-plugin-version>
+		<buildnumber-maven-plugin-version>3.2.1</buildnumber-maven-plugin-version>
+		<jacoco-maven-plugin-version>0.8.12</jacoco-maven-plugin-version>
+		<maven-assembly-plugin-version>3.7.1</maven-assembly-plugin-version>
+		<maven-license-plugin-version>2.5.0</maven-license-plugin-version>
+		<maven-enforcer-plugin-version>3.5.0</maven-enforcer-plugin-version>
+		<maven-checkstyle-version>3.6.0</maven-checkstyle-version>
+
 	</properties>
 
 	<dependencyManagement>
@@ -1091,6 +1143,13 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>${spring_framework_bom_version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
 				<groupId>aopalliance</groupId>
 				<artifactId>aopalliance</artifactId>
 				<version>1.0</version>
@@ -1104,6 +1163,11 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-core</artifactId>
 				<version>${logback_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.logging</groupId>
+				<artifactId>jboss-logging</artifactId>
+				<version>${jboss_logging_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.atlassian.commonmark</groupId>
@@ -1156,20 +1220,25 @@
 				<version>${caffeine_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.github.jsqlparser</groupId>
+				<artifactId>jsqlparser</artifactId>
+				<version>5.0</version>
+			</dependency>
+			<dependency>
 				<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
 				<artifactId>owasp-java-html-sanitizer</artifactId>
-				<version>20211018.2</version>
+				<version>20240325.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>21.5</version>
+				<version>22.3</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
 				<groupId>org.simplejavamail</groupId>
 				<artifactId>simple-java-mail</artifactId>
-				<version>8.11.2</version>
+				<version>8.12.2</version>
 				<exclusions>
 					<exclusion>
 						<groupId>com.github.bbottema</groupId>
@@ -1232,7 +1301,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>2.2.224</version>
+				<version>2.3.232</version>
 			</dependency>
 			<dependency>
 				<groupId>com.helger.commons</groupId>
@@ -1268,14 +1337,14 @@
 			<dependency>
 				<groupId>com.squareup.okio</groupId>
 				<artifactId>okio-jvm</artifactId>
-				<version>3.4.0</version>
+				<version>3.9.1</version>
 			</dependency>
 
 			<!-- Architecture Test -->
 			<dependency>
 				<groupId>com.tngtech.archunit</groupId>
 				<artifactId>archunit-junit5</artifactId>
-				<version>1.0.1</version>
+				<version>1.3.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -1301,7 +1370,7 @@
 			<dependency>
 				<groupId>commons-cli</groupId>
 				<artifactId>commons-cli</artifactId>
-				<version>1.5.0</version>
+				<version>1.9.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -1346,7 +1415,7 @@
 			<dependency>
 				<groupId>org.jetbrains</groupId>
 				<artifactId>annotations</artifactId>
-				<version>23.0.0</version>
+				<version>26.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
@@ -1477,12 +1546,12 @@
 			<dependency>
 				<groupId>com.mysql</groupId>
 				<artifactId>mysql-connector-j</artifactId>
-				<version>8.2.0</version>
+				<version>9.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-				<version>2.2.0</version>
+				<version>2.6.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
@@ -1538,6 +1607,16 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
 				<version>${commons_text_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents.core5</groupId>
+				<artifactId>httpcore5</artifactId>
+				<version>${httpcore5_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents.client5</groupId>
+				<artifactId>httpclient5</artifactId>
+				<version>${httpclient5_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -1596,6 +1675,11 @@
 				<version>${jena_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-shex</artifactId>
+				<version>${jena_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-analysis-phonetic</artifactId>
 				<version>${lucene_version}</version>
@@ -1627,19 +1711,14 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven</groupId>
-				<artifactId>maven-project</artifactId>
-				<version>2.2.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-plugin-api</artifactId>
-				<version>3.8.6</version>
+				<version>3.9.9</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
 				<artifactId>maven-plugin-annotations</artifactId>
-				<version>3.9.0</version>
+				<version>3.14.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.poi</groupId>
@@ -1664,7 +1743,7 @@
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
 				<artifactId>velocity-engine-core</artifactId>
-				<version>2.3</version>
+				<version>2.4.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.awaitility</groupId>
@@ -1863,7 +1942,7 @@
 			<dependency>
 				<groupId>org.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>
-				<version>3.11.0</version>
+				<version>4.6.0</version>
 				<exclusions>
 					<exclusion>
 						<!-- Don't let HTMLUnit bring in Jetty 9 -->
@@ -1908,11 +1987,6 @@
 				<groupId>org.hibernate.orm</groupId>
 				<artifactId>hibernate-envers</artifactId>
 				<version>${hibernate_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.data</groupId>
-				<artifactId>spring-data-envers</artifactId>
-				<version>${spring_boot_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.validator</groupId>
@@ -2014,12 +2088,12 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.3</version>
+				<version>42.7.4</version>
 			</dependency>
 			<dependency>
 				<groupId>com.oracle.database.jdbc</groupId>
 				<artifactId>ojdbc11</artifactId>
-				<version>23.3.0.23.09</version>
+				<version>23.6.0.24.10</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -2156,19 +2230,19 @@
 				<version>${thymeleaf-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.webjars.npm</groupId>
-				<artifactId>ace-builds</artifactId>
-				<version>1.22.0</version>
+				<groupId>org.webjars</groupId>
+				<artifactId>bootstrap</artifactId>
+				<version>5.3.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.npm</groupId>
-				<artifactId>bootstrap</artifactId>
-				<version>4.5.2</version>
+				<artifactId>ace-builds</artifactId>
+				<version>1.36.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>Eonasdan-bootstrap-datetimepicker</artifactId>
-				<version>4.17.47</version>
+				<version>4.17.49</version>
 				<exclusions>
 					<exclusion>
 						<groupId>*</groupId>
@@ -2179,7 +2253,7 @@
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>font-awesome</artifactId>
-				<version>5.8.2</version>
+				<version>5.15.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
@@ -2213,19 +2287,19 @@
 				<version>2.29.4</version>
 			</dependency>
 			<dependency>
-				<groupId>org.webjars.npm</groupId>
+				<groupId>org.webjars</groupId>
 				<artifactId>popper.js</artifactId>
-				<version>1.16.1</version>
+				<version>2.11.7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>swagger-ui</artifactId>
-				<version>4.1.3</version>
+				<version>4.19.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xmlunit</groupId>
 				<artifactId>xmlunit-core</artifactId>
-				<version>2.4.0</version>
+				<version>2.10.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
@@ -2297,6 +2371,16 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry.javaagent</groupId>
+				<artifactId>opentelemetry-testing-common</artifactId>
+				<version>${otel_agent_for_testing.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry.javaagent</groupId>
+				<artifactId>opentelemetry-agent-for-testing</artifactId>
+				<version>${otel_agent_for_testing.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.assertj</groupId>
@@ -2329,6 +2413,11 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>hapi-tinder-plugin</artifactId>
+					<version>${project.version}</version>
+				</plugin>
 				<plugin>
 					<groupId>com.diffplug.spotless</groupId>
 					<artifactId>spotless-maven-plugin</artifactId>
@@ -2381,7 +2470,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>${maven-resources-plugin-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
@@ -2401,7 +2490,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>${maven_assembly_plugin_version}</version>
+					<version>${maven-assembly-plugin-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.felix</groupId>
@@ -2411,50 +2500,33 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
-					<version>3.0.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-clean-plugin</artifactId>
 					<version>3.1.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>3.4.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.11.0</version>
+					<version>3.13.0</version>
 					<configuration>
-						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 						<encoding>UTF-8</encoding>
 						<fork>true</fork>
 						<meminitial>500m</meminitial>
 						<maxmem>2000m</maxmem>
-						<compilerArgs>
-							<arg>-XDcompilePolicy=simple</arg>
-							<arg>-Xplugin:ErrorProne -Xep:MissingSummary:OFF -Xep:JavaUtilDate:OFF -XepExcludedPaths:.*/src/test/java/.*</arg>
-							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
-							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
-							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
-							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
-							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
-							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
-							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
-							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
-							<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
-							<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
-						</compilerArgs>
-						<annotationProcessorPaths>
-							<path>
-								<groupId>com.google.errorprone</groupId>
-								<artifactId>error_prone_core</artifactId>
-								<version>${error_prone_core_version}</version>
-							</path>
-						</annotationProcessorPaths>
 					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.1.2</version>
+					<version>3.8.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>3.1.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.sonatype.plugins</groupId>
@@ -2484,7 +2556,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>${surefire_version}</version>
 					<configuration>
 						<reuseForks>false</reuseForks>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
@@ -2501,22 +2573,22 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.6.1</version>
+					<version>3.9.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>2.4.3</version>
+					<version>3.6.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>3.2.1</version>
+					<version>3.3.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.1.2</version>
+					<version>${surefire_version}</version>
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
@@ -2537,30 +2609,22 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>3.3.2</version>
+					<version>3.4.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.6.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>buildnumber-maven-plugin</artifactId>
-					<version>3.0.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>cobertura-maven-plugin</artifactId>
-					<version>2.7</version>
-					<configuration>
-						<skip>true</skip>
-					</configuration>
+					<version>${buildnumber-maven-plugin-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>2.0.0</version>
+					<version>${maven-license-plugin-version}</version>
 					<configuration>
 						<verbose>true</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>
@@ -2570,7 +2634,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>versions-maven-plugin</artifactId>
-					<version>2.8.1</version>
+					<version>2.18.0</version>
 					<configuration>
 						<processDependencyManagementTransitive>false</processDependencyManagementTransitive>
 					</configuration>
@@ -2586,18 +2650,9 @@
 					<version>${maven_changes_version}</version>
 				</plugin>
 				<plugin>
-					<groupId>org.eluder.coveralls</groupId>
-					<artifactId>coveralls-maven-plugin</artifactId>
-					<version>4.3.0</version>
-					<configuration>
-						<coberturaReports>
-						</coberturaReports>
-					</configuration>
-				</plugin>
-				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.9</version>
+					<version>${jacoco-maven-plugin-version}</version>
 					<configuration>
 						<excludes>
 							<exclude>ca/uhn/fhir/model/dstu2/**/*.class</exclude>
@@ -2609,67 +2664,16 @@
 						</excludes>
 					</configuration>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											ca.uhn.hapi.fhir
-										</groupId>
-										<artifactId>
-											hapi-tinder-plugin
-										</artifactId>
-										<versionRange>
-											[0.8-SNAPSHOT,)
-										</versionRange>
-										<goals>
-											<goal>
-												generate-jparest-server
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-antrun-plugin
-										</artifactId>
-										<versionRange>
-											[1.7,)
-										</versionRange>
-										<goals>
-											<goal>run</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
+
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
-					<version>2.5.2</version>
+					<version>3.1.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.23</version>
+					<version>1.24</version>
 					<configuration>
 						<signature>
 							<groupId>net.sf.androidscents.signature</groupId>
@@ -2694,12 +2698,12 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<inherited>true</inherited>
-				<version>${maven_checkstyle_version}</version>
+				<version>${maven-checkstyle-version}</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>${maven-enforcer-plugin-version}</version>
 				<executions>
 					<execution>
 						<id>enforce-maven</id>
@@ -3007,61 +3011,46 @@
 		</plugins>
 	</build>
 
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-changes-plugin</artifactId>
-				<version>${maven_changes_version}</version>
-				<inherited>false</inherited>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>changes-report</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-				<configuration>
-					<feedType>atom_1.0</feedType>
-					<issueLinkTemplatePerSystem>
-						<default>https://github.com/hapifhir/hapi-fhir/issues/%ISSUE%</default>
-					</issueLinkTemplatePerSystem>
-					<escapeHTML>false</escapeHTML>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>2.19.1</version>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>failsafe-report-only</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-				<configuration>
-					<reportsDirectories>
-						<reportDirectory>${project.basedir}/hapi-fhir-base/target/surefire-reports/</reportDirectory>
-						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu/target/surefire-reports/
-						</reportDirectory>
-						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu2/target/surefire-reports/
-						</reportDirectory>
-						<reportDirectory>${project.basedir}/hapi-fhir-jpaserver-base/target/surefire-reports/
-						</reportDirectory>
-					</reportsDirectories>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.0.0</version>
-				<inherited>false</inherited>
-			</plugin>
-		</plugins>
-	</reporting>
-
 	<profiles>
+		<profile>
+			<id>ERRORPRONE</id>
+			<build>
+				<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<encoding>UTF-8</encoding>
+						<fork>true</fork>
+						<meminitial>500m</meminitial>
+						<maxmem>2000m</maxmem>
+						<forceLegacyJavacApi>true</forceLegacyJavacApi>
+						<compilerArgs>
+							<arg>-XDcompilePolicy=simple</arg>
+							<arg>--should-stop=ifError=FLOW</arg>
+							<arg>-Xplugin:ErrorProne -Xep:MissingSummary:OFF -Xep:JavaUtilDate:OFF -XepExcludedPaths:.*/src/test/java/.*|.*/hapi-fhir-docs/src/main/java/.*</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+							<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+							<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+						</compilerArgs>
+						<annotationProcessorPaths>
+							<path>
+								<groupId>com.google.errorprone</groupId>
+								<artifactId>error_prone_core</artifactId>
+								<version>${error_prone_core_version}</version>
+							</path>
+						</annotationProcessorPaths>
+					</configuration>
+				</plugin></plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>DIST</id>
 			<build>
@@ -3083,21 +3072,6 @@
 							</execution>
 						</executions>
 					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>ROOT</id>
-			<reporting>
-				<plugins>
-				</plugins>
-			</reporting>
-			<modules>
-			</modules>
-			<build>
-				<plugins>
-					<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <version>${maven_assembly_plugin_version}</version> <executions> <execution> <phase>package</phase> <goals> <goal>single</goal> </goals>
-						<configuration> <attach>false</attach> <descriptors> <descriptor>${project.basedir}/src/assembly/hapi-fhir-sample-projects.xml</descriptor> </descriptors> </configuration> </execution> </executions> </plugin> -->
 				</plugins>
 			</build>
 		</profile>
@@ -3144,16 +3118,16 @@
 							</execution>
 						</executions>
 					</plugin>
-					<!--					<plugin>-->
-					<!--						<groupId>org.apache.maven.plugins</groupId>-->
-					<!--						<artifactId>maven-checkstyle-plugin</artifactId>-->
-					<!--						<executions>-->
-					<!--							<execution>-->
-					<!--								<id>hapi-single-module-checkstyle</id>-->
-					<!--								<phase>none</phase>-->
-					<!--							</execution>-->
-					<!--						</executions>-->
-					<!--					</plugin>-->
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-checkstyle-plugin</artifactId>
+							<executions>
+								<execution>
+									<id>hapi-single-module-checkstyle</id>
+									<phase>none</phase>
+								</execution>
+							</executions>
+						</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -3205,48 +3179,20 @@
 							</execution>
 						</executions>
 					</plugin>
-					<!--					<plugin>-->
-					<!--						<groupId>org.apache.maven.plugins</groupId>-->
-					<!--						<artifactId>maven-checkstyle-plugin</artifactId>-->
-					<!--						<executions>-->
-					<!--							<execution>-->
-					<!--								<id>validate</id>-->
-					<!--								<phase>none</phase>-->
-					<!--							</execution>-->
-					<!--						</executions>-->
-					<!--					</plugin>-->
-				</plugins>
-			</build>
-		</profile>
-
-		<!--
-		This profile is basically here to work around an IJ bug where the
-		<testSource> tag is ignored in IJ's compiler. See:
-		https://youtrack.jetbrains.com/issue/IDEA-85478
-		IntelliJ 2023.1 now supports this, so we removed the activation.
-		But if you want to run an older IntelliJ, activate the old-intellij profile in the Maven tab.
-		-->
-		<profile>
-			<id>old-intellij</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<configuration>
-							<source>17</source>
-							<target>17</target>
-							<release>17</release>
-							<testSource>17</testSource>
-							<testTarget>17</testTarget>
-						</configuration>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>validate</id>
+								<phase>none</phase>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
 		</profile>
+
 		<profile>
 			<id>ossrh-repo</id>
 			<activation>
@@ -3304,4 +3250,3 @@
 		</profile>
 	</profiles>
 </project>
-

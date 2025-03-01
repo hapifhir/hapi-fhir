@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,31 +26,34 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ * Thread-safety: This class is thread-safe.
+ */
 class ActiveSubscriptionCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscriptionCache.class);
 
-	private final Map<String, ActiveSubscription> myCache = new ConcurrentHashMap<>();
+	private final Map<String, ActiveSubscription> myCache = new HashMap<>();
 
-	public ActiveSubscription get(String theIdPart) {
+	public synchronized ActiveSubscription get(String theIdPart) {
 		return myCache.get(theIdPart);
 	}
 
-	public Collection<ActiveSubscription> getAll() {
-		return Collections.unmodifiableCollection(myCache.values());
+	public synchronized Collection<ActiveSubscription> getAll() {
+		return Collections.unmodifiableCollection(new ArrayList<>(myCache.values()));
 	}
 
-	public int size() {
+	public synchronized int size() {
 		return myCache.size();
 	}
 
-	public void put(String theSubscriptionId, ActiveSubscription theActiveSubscription) {
+	public synchronized void put(String theSubscriptionId, ActiveSubscription theActiveSubscription) {
 		myCache.put(theSubscriptionId, theActiveSubscription);
 	}
 
@@ -66,9 +69,10 @@ class ActiveSubscriptionCache {
 		return activeSubscription;
 	}
 
-	List<String> markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(Collection<String> theAllIds) {
+	synchronized List<String> markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(
+			Collection<String> theAllIds) {
 		List<String> retval = new ArrayList<>();
-		for (String next : new ArrayList<>(myCache.keySet())) {
+		for (String next : myCache.keySet()) {
 			ActiveSubscription activeSubscription = myCache.get(next);
 			if (theAllIds.contains(next)) {
 				// In case we got a false positive from a race condition on a previous sync, unset the flag.
@@ -90,7 +94,7 @@ class ActiveSubscriptionCache {
 	 * @param theTopic
 	 * @return a list of all subscriptions that are subscribed to the given topic
 	 */
-	public List<ActiveSubscription> getTopicSubscriptionsForTopic(String theTopic) {
+	public synchronized List<ActiveSubscription> getTopicSubscriptionsForTopic(String theTopic) {
 		assert !isBlank(theTopic);
 		return getAll().stream()
 				.filter(as -> as.getSubscription().isTopicSubscription())
@@ -98,7 +102,7 @@ class ActiveSubscriptionCache {
 				.collect(Collectors.toList());
 	}
 
-	public List<ActiveSubscription> getAllNonTopicSubscriptions() {
+	public synchronized List<ActiveSubscription> getAllNonTopicSubscriptions() {
 		return getAll().stream()
 				.filter(as -> !as.getSubscription().isTopicSubscription())
 				.collect(Collectors.toList());

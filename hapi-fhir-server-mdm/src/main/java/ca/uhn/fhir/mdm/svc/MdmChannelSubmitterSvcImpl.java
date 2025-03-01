@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,8 +82,12 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 		myChannelFactory = theIChannelFactory;
 	}
 
+	protected ChannelProducerSettings getChannelProducerSettings() {
+		return new ChannelProducerSettings();
+	}
+
 	private void init() {
-		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
+		ChannelProducerSettings channelSettings = getChannelProducerSettings();
 		myMdmChannelProducer = myChannelFactory.getOrCreateProducer(
 				EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
 	}

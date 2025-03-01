@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -46,12 +47,19 @@ import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.SEARCH_PARAM_ROOT;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.URI_VALUE;
+import static java.util.Objects.isNull;
 
 /**
  * Used to build HSearch sort clauses.
  */
 public class HSearchSortHelperImpl implements IHSearchSortHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(HSearchSortHelperImpl.class);
+	public static final Map<String, RestSearchParameterTypeEnum> ourSortingParamNameToParamType = Map.of(
+			Constants.PARAM_LASTUPDATED, RestSearchParameterTypeEnum.DATE,
+			Constants.PARAM_ID, RestSearchParameterTypeEnum.TOKEN,
+			Constants.PARAM_TAG, RestSearchParameterTypeEnum.TOKEN,
+			Constants.PARAM_SECURITY, RestSearchParameterTypeEnum.TOKEN,
+			Constants.PARAM_SOURCE, RestSearchParameterTypeEnum.TOKEN);
 
 	/** Indicates which HSearch properties must be sorted for each RestSearchParameterTypeEnum **/
 	private Map<RestSearchParameterTypeEnum, List<String>> mySortPropertyListMap = Map.of(
@@ -151,13 +159,20 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 	 */
 	@VisibleForTesting
 	Optional<RestSearchParameterTypeEnum> getParamType(String theResourceTypeName, String theParamName) {
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theResourceTypeName);
+		RestSearchParameterTypeEnum value;
+
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
+				theResourceTypeName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		RuntimeSearchParam searchParam = activeSearchParams.get(theParamName);
+
 		if (searchParam == null) {
-			return Optional.empty();
+			value = isNull(theParamName) ? null : ourSortingParamNameToParamType.get(theParamName);
+
+		} else {
+			value = searchParam.getParamType();
 		}
 
-		return Optional.of(searchParam.getParamType());
+		return Optional.ofNullable(value);
 	}
 
 	/**

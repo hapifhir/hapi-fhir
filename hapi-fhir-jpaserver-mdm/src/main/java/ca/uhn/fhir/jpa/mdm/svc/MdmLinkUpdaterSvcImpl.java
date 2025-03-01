@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,8 +180,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 			// with the link broken, the golden resource has delta info from a resource
 			// that is no longer matched to it; we need to remove this delta. But it's
 			// easier to just rebuild the resource from scratch using survivorship rules/current links
-			goldenResource =
-					myMdmSurvivorshipService.rebuildGoldenResourceWithSurvivorshipRules(goldenResource, mdmContext);
+			goldenResource = myMdmSurvivorshipService.rebuildGoldenResourceWithSurvivorshipRules(
+					theParams.getRequestDetails(), goldenResource, mdmContext);
 		}
 
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_UPDATE_LINK)) {

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
+import java.util.List;
 
 public interface IResourceSearchUrlDao extends JpaRepository<ResourceSearchUrlEntity, Long>, IHapiFhirJpaRepository {
 
@@ -36,4 +37,8 @@ public interface IResourceSearchUrlDao extends JpaRepository<ResourceSearchUrlEn
 	@Modifying
 	@Query("DELETE FROM ResourceSearchUrlEntity s WHERE (s.myResourcePid = :resID)")
 	int deleteByResId(@Param("resID") long resId);
+
+	@Modifying
+	@Query("DELETE FROM ResourceSearchUrlEntity s WHERE s.myResourcePid IN (:resIDS)")
+	int deleteByResIds(@Param("resIDS") List<Long> theIds);
 }

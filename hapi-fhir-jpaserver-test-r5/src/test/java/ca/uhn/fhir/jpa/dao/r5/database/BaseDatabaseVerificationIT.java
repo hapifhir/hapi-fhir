@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r5.database;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
@@ -11,8 +10,10 @@ import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
+import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
+import ca.uhn.fhir.jpa.test.QueryTestCases;
 import ca.uhn.fhir.jpa.test.config.TestR5Config;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -22,8 +23,8 @@ import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
-import jakarta.persistence.EntityManagerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -38,15 +39,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -57,10 +60,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.HAPI_DATABASE_PARTITION_MODE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_EVERYTHING;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
@@ -68,12 +74,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabaseVerificationIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
-
-	@Autowired
-	EntityManagerFactory myEntityManagerFactory;
-
-	@Autowired
-	JpaEmbeddedDatabase myJpaEmbeddedDatabase;
+	public static final String INIT_SCHEMA = "init_schema";
 
 	@Autowired
 	IFhirResourceDaoPatient<Patient> myPatientDao;
@@ -96,6 +97,8 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
 
+	SystemRequestDetails myRequestDetails = new SystemRequestDetails();
+
 	@RegisterExtension
 	protected RestfulServerExtension myServer = new RestfulServerExtension(FhirContext.forR5Cached());
 
@@ -117,9 +120,9 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		Patient patient = new Patient();
 		patient.setActive(true);
 		patient.addName().setFamily(name);
-		IIdType id = myPatientDao.create(patient, new SystemRequestDetails()).getId();
+		IIdType id = myPatientDao.create(patient, myRequestDetails).getId();
 
-		Patient actual = myPatientDao.read(id, new SystemRequestDetails());
+		Patient actual = myPatientDao.read(id, myRequestDetails);
 		assertEquals(name, actual.getName().get(0).getFamily());
 	}
 
@@ -128,7 +131,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	public void testDelete() {
 		Patient patient = new Patient();
 		patient.setActive(true);
-		IIdType id = myPatientDao.create(patient, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+		IIdType id = myPatientDao.create(patient, myRequestDetails).getId().toUnqualifiedVersionless();
 
 		myPatientDao.delete(id, new SystemRequestDetails());
 
@@ -193,24 +196,19 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 
 	@ParameterizedTest
-	@CsvSource(textBlock = """
-			query string,			Patient?name=smith
-			query date,				Observation?date=2021
-			query token,			Patient?active=true
-			sort string, 			Patient?_sort=name
-			sort date, 				Observation?_sort=date
-			sort token, 			Patient?_sort=active
-			sort chained date, 		Observation?_sort=patient.birthdate
-			sort chained string, 	Observation?_sort=patient.name
-			sort chained qualified, Patient?_sort=Practitioner:general-practitioner.family
-			sort chained token, 	Observation?_sort=patient.active
-			""")
-	void testSyntaxForVariousQueries(String theMessage, String theQuery) {
-		assertDoesNotThrow(()->myTestDaoSearch.searchForBundleProvider(theQuery), theMessage);
+	@MethodSource("ca.uhn.fhir.jpa.test.QueryTestCases#get")
+	void testSyntaxForVariousQueries(QueryTestCases theQueryTestCase) {
+		assertDoesNotThrow(() -> myTestDaoSearch.searchForBundleProvider(theQueryTestCase.getQuery()), theQueryTestCase.getName());
 	}
 
 	@Configuration
 	public static class TestConfig extends TestR5Config {
+
+		@Value("${" + HAPI_DATABASE_PARTITION_MODE + ":false}")
+		private boolean myDatabasePartitionMode;
+
+		@Value("${" + INIT_SCHEMA + ":}")
+		private String myInitSchemaClasspath;
 
 		@Autowired
 		private JpaDatabaseContextConfigParamObject myJpaDatabaseContextConfigParamObject;
@@ -223,7 +221,22 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, myJpaDatabaseContextConfigParamObject.getJpaEmbeddedDatabase().getDriverType(), MIGRATION_TABLENAME);
 			HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
-			MigrationTaskList tasks = new HapiFhirJpaMigrationTasks(Set.of()).getAllTasks(VersionEnum.values());
+			if (isNotBlank(myInitSchemaClasspath)) {
+				JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+				ourLog.info("Using database DDL file: {}", myInitSchemaClasspath);
+				String statementsFile = ClasspathUtil.loadResource(myInitSchemaClasspath);
+				List<String> statements = SqlUtil.splitSqlFileIntoStatements(statementsFile);
+				for (String sql : statements) {
+					jdbcTemplate.execute(sql);
+				}
+			}
+
+			Set<String> flags= new HashSet<>();
+			if (myDatabasePartitionMode) {
+				flags.add(HapiFhirJpaMigrationTasks.FlagEnum.DB_PARTITION_MODE.getCommandLineValue());
+			}
+
+			MigrationTaskList tasks = new HapiFhirJpaMigrationTasks(flags).getAllTasks(VersionEnum.values());
 
 			SchemaMigrator schemaMigrator = new SchemaMigrator(
 				"HAPI FHIR", MIGRATION_TABLENAME, dataSource, new Properties(), tasks, hapiMigrationStorageSvc);

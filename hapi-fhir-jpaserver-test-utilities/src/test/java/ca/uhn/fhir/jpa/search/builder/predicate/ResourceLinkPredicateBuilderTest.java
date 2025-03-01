@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -34,7 +35,9 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,20 +71,20 @@ public class ResourceLinkPredicateBuilderTest {
 	@Test
 	public void createEverythingPredicate_withListOfPids_returnsInPredicate() {
 		when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE + "1", PLACEHOLDER_BASE + "2"));
-		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1L, 2L);
+		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), JpaPid.fromId(1L), JpaPid.fromId(2L));
 		assertEquals(InCondition.class, condition.getClass());
 	}
 
 	@Test
 	public void createEverythingPredicate_withSinglePid_returnsInCondition() {
 		when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE + "1"));
-		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1L);
+		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), JpaPid.fromId(1L));
 		assertEquals(BinaryCondition.class, condition.getClass());
 	}
 
 	@Test
 	public void createEverythingPredicate_withNoPids_returnsBinaryCondition() {
-		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new Long[0]);
+		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new JpaPid[0]);
 		assertEquals(BinaryCondition.class, condition.getClass());
 	}
 
@@ -111,7 +114,7 @@ public class ResourceLinkPredicateBuilderTest {
 		String resourceType = "Bundle";
 		RuntimeSearchParam mockSearchParam = mock(RuntimeSearchParam.class);
 		when(mockSearchParam.getPathsSplit()).thenReturn(List.of("Patient.given", "Bundle.composition.subject", "Bundle.type"));
-		when(mySearchParamRegistry.getActiveSearchParam(resourceType, paramName)).thenReturn(mockSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParam(eq(resourceType), eq(paramName), any())).thenReturn(mockSearchParam);
 		List<String> result = myResourceLinkPredicateBuilder.createResourceLinkPaths(resourceType, paramName, List.of());
 		assertThat(result).containsExactlyInAnyOrder("Bundle.composition.subject", "Bundle.type");
 	}
@@ -128,14 +131,14 @@ public class ResourceLinkPredicateBuilderTest {
 	public void createResourceLinkPaths_withChainAndSearchParameterFoundNoQualifiers_returnsPath() {
 		String paramName = "subject.identifier";
 		String resourceType = "Observation";
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "subject.identifier")).thenReturn(null);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("subject.identifier"), any())).thenReturn(null);
 		RuntimeSearchParam observationSubjectSP = mock(RuntimeSearchParam.class);
 		when(observationSubjectSP.getPathsSplit()).thenReturn(List.of("Observation.subject"));
 		when(observationSubjectSP.getTargets()).thenReturn(Set.of("Patient"));
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "subject")).thenReturn(observationSubjectSP);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("subject"), any())).thenReturn(observationSubjectSP);
 		RuntimeSearchParam patientIdentifierSP = mock(RuntimeSearchParam.class);
 		when(patientIdentifierSP.getPathsSplit()).thenReturn(List.of("Patient.identifier"));
-		when(mySearchParamRegistry.getActiveSearchParam("Patient", "identifier")).thenReturn(patientIdentifierSP);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Patient"),eq( "identifier"), any())).thenReturn(patientIdentifierSP);
 		List<String> result = myResourceLinkPredicateBuilder.createResourceLinkPaths(resourceType, paramName, List.of());
 		assertThat(result).containsExactlyInAnyOrder("Observation.subject.identifier");
 	}
@@ -145,23 +148,23 @@ public class ResourceLinkPredicateBuilderTest {
 		String paramName = "subject.managingOrganization.identifier";
 		String resourceType = "Observation";
 
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "subject.managingOrganization.identifier")).thenReturn(null);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("subject.managingOrganization.identifier"), any())).thenReturn(null);
 
 		RuntimeSearchParam observationSubjectSP = mock(RuntimeSearchParam.class);
 		when(observationSubjectSP.getPathsSplit()).thenReturn(List.of("Observation.subject"));
 		when(observationSubjectSP.getTargets()).thenReturn(Set.of("Patient"));
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "subject")).thenReturn(observationSubjectSP);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("subject"), any())).thenReturn(observationSubjectSP);
 
-		when(mySearchParamRegistry.getActiveSearchParam("Patient", "managingOrganization.identifier")).thenReturn(null);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Patient"), eq("managingOrganization.identifier"), any())).thenReturn(null);
 
 		RuntimeSearchParam organizationSP = mock(RuntimeSearchParam.class);
 		when(organizationSP.getPathsSplit()).thenReturn(List.of("Patient.managingOrganization"));
 		when(organizationSP.getTargets()).thenReturn(Set.of("Organization"));
-		when(mySearchParamRegistry.getActiveSearchParam("Patient", "managingOrganization")).thenReturn(organizationSP);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Patient"), eq("managingOrganization"), any())).thenReturn(organizationSP);
 
 		RuntimeSearchParam organizationIdentifierSP = mock(RuntimeSearchParam.class);
 		when(organizationIdentifierSP.getPathsSplit()).thenReturn(List.of("Organization.identifier"));
-		when(mySearchParamRegistry.getActiveSearchParam("Organization", "identifier")).thenReturn(organizationIdentifierSP);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Organization"), eq("identifier"), any())).thenReturn(organizationIdentifierSP);
 
 		List<String> result = myResourceLinkPredicateBuilder.createResourceLinkPaths(resourceType, paramName, List.of("Patient", "Organization"));
 		assertThat(result).containsExactlyInAnyOrder("Observation.subject.managingOrganization.identifier");
@@ -171,11 +174,11 @@ public class ResourceLinkPredicateBuilderTest {
 	public void createResourceLinkPaths_withChainAndSearchParameterFoundWithNonMatchingQualifier_returnsEmpty() {
 		String paramName = "subject.identifier";
 		String resourceType = "Observation";
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "subject.identifier")).thenReturn(null);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("subject.identifier"), any())).thenReturn(null);
 		RuntimeSearchParam observationSubjectSP = mock(RuntimeSearchParam.class);
 		when(observationSubjectSP.getPathsSplit()).thenReturn(List.of("Observation.subject"));
 		when(observationSubjectSP.getTargets()).thenReturn(Set.of("Patient"));
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "subject")).thenReturn(observationSubjectSP);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("subject"), any())).thenReturn(observationSubjectSP);
 		List<String> result = myResourceLinkPredicateBuilder.createResourceLinkPaths(resourceType, paramName, List.of("Group"));
 		assertThat(result).isEmpty();
 	}

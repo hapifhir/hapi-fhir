@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,4 +58,7 @@ public class SubscriptionConstants {
 			"http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-payload-content";
 	public static final String SUBSCRIPTION_TOPIC_STATUS =
 			"http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-subscription-status-r4";
+
+	public static final int ORDER_SUBSCRIPTION_VALIDATING = 100;
+	public static final int ORDER_SUBSCRIPTION_ACTIVATING = 200;
 }

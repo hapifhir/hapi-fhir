@@ -23,6 +23,11 @@ indent_style = tab
 tab_width = 3
 indent_size = 3
 
+[*.js]
+indent_style = tab
+tab_width = 3
+indent_size = 3
+
 [*.vm]
 indent_style = tab
 tab_width = 3
@@ -99,7 +104,7 @@ ij_java_doc_align_param_comments = true
 ij_java_doc_do_not_wrap_if_one_line = false
 ij_java_doc_enable_formatting = true
 ij_java_doc_enable_leading_asterisks = true
-ij_java_doc_indent_on_continuation = false
+ij_java_doc_indent_on_continuation = true
 ij_java_doc_keep_empty_lines = true
 ij_java_doc_keep_empty_parameter_tag = true
 ij_java_doc_keep_empty_return_tag = true

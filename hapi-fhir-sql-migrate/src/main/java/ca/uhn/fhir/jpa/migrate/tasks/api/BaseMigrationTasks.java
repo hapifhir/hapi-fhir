@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,15 @@ import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.Validate;
 import org.flywaydb.core.api.MigrationVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
 import static java.util.Objects.nonNull;
 
 public class BaseMigrationTasks<T extends Enum> {
-	MigrationVersion lastVersion;
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseMigrationTasks.class);
 	private Multimap<T, BaseTask> myTasks =
 			MultimapBuilder.hashKeys().arrayListValues().build();
 
@@ -77,7 +79,9 @@ public class BaseMigrationTasks<T extends Enum> {
 		MigrationTaskList retval = new MigrationTaskList();
 		for (T nextVersion : theVersionEnumValues) {
 			Collection<BaseTask> nextValues = myTasks.get(nextVersion);
-			if (nextValues != null) {
+			ourLog.debug(
+					"Version {} has {} migration tasks", nextVersion, nextValues != null ? nextValues.size() : "(no)");
+			if (nextValues != null && !nextValues.isEmpty()) {
 				validate(nextValues);
 				retval.addAll(nextValues);
 			}
@@ -102,6 +106,7 @@ public class BaseMigrationTasks<T extends Enum> {
 	}
 
 	void validate(Collection<BaseTask> theTasks) {
+		MigrationVersion lastVersion = null;
 		for (BaseTask task : theTasks) {
 			task.validateVersion();
 			String version = task.getMigrationVersion();

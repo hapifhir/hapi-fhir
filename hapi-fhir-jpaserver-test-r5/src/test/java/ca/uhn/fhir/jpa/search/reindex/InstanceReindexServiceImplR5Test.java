@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.BooleanType;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Nonnull;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -181,10 +183,12 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		IIdType id = createObservation(withSubject("Patient/A"));
 
 		runInTransaction(() -> {
-			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set TARGET_RESOURCE_ID = null").executeUpdate());
+			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set (TARGET_RESOURCE_ID,TARGET_RES_PARTITION_ID) = (null, null)").executeUpdate());
 			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set TARGET_RESOURCE_URL = 'http://foo'").executeUpdate());
 			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set TARGET_RESOURCE_VERSION = 1").executeUpdate());
 		});
+
+		myEntityManager.clear();
 
 		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
@@ -344,7 +348,8 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 	}
 
 	@Nonnull
-	private static List<Parameters.ParametersParameterComponent> findIndexes(Parameters theResponse, String theParamName, int theExpectedSize, String theSectionName) {
+	private static List<Parameters.ParametersParameterComponent> findIndexes(Parameters theResponse, @Nonnull String theParamName, int theExpectedSize, String theSectionName) {
+		Validate.notBlank(theParamName, "theParamName must not be blank");
 		List<Parameters.ParametersParameterComponent> indexes = theResponse.getParameters(theSectionName);
 		assertThat(indexes).hasSize(1);
 
@@ -352,7 +357,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 			.get(0)
 			.getPart()
 			.stream()
-			.filter(t -> t.getName().equals(theParamName))
+			.filter(t -> Objects.equals(theParamName, t.getName()))
 			.toList();
 
 		assertThat(indexInstances).hasSize(theExpectedSize);

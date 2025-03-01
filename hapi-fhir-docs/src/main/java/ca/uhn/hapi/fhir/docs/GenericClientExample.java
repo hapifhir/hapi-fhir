@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,13 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.apache.ApacheHttp5RestfulClientFactory;
+import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -52,14 +55,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GenericClientExample {
+	public static void chooseProvider() {
+		// START SNIPPET: chooseProvider
+		// Create a context and configure it for deferred child scanning
+		FhirContext ctx = FhirContext.forR5();
+
+		// Use Apache HttpClient 4.x client (this is the default)
+		ctx.setRestfulClientFactory(new ApacheRestfulClientFactory(ctx));
+
+		// Use OkHttp as the HTTP provider
+		ctx.setRestfulClientFactory(new OkHttpRestfulClientFactory(ctx));
+
+		// Use Apache HttpClient 5.x client
+		ctx.setRestfulClientFactory(new ApacheHttp5RestfulClientFactory(ctx));
+
+		// Now create a client and use it
+		String serverBase = "http://hapi.fhir.org/baseR5";
+		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
+		// END SNIPPET: chooseProvider
+	}
+
 	public static void deferModelScanning() {
 		// START SNIPPET: deferModelScanning
 		// Create a context and configure it for deferred child scanning
-		FhirContext ctx = FhirContext.forDstu2();
+		FhirContext ctx = FhirContext.forR5();
 		ctx.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
 
 		// Now create a client and use it
-		String serverBase = "http://fhirtest.uhn.ca/baseDstu2";
+		String serverBase = "http://hapi.fhir.org/baseR5";
 		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 		// END SNIPPET: deferModelScanning
 	}
@@ -67,13 +90,13 @@ public class GenericClientExample {
 	public static void performance() {
 		// START SNIPPET: dontValidate
 		// Create a context
-		FhirContext ctx = FhirContext.forDstu2();
+		FhirContext ctx = FhirContext.forR5();
 
 		// Disable server validation (don't pull the server's metadata first)
 		ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		// Now create a client and use it
-		String serverBase = "http://fhirtest.uhn.ca/baseDstu2";
+		String serverBase = "http://hapi.fhir.org/baseR5";
 		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 		// END SNIPPET: dontValidate
 	}
@@ -134,8 +157,8 @@ public class GenericClientExample {
 	public static void simpleExample() {
 		// START SNIPPET: simple
 		// We're connecting to a DSTU1 compliant server in this example
-		FhirContext ctx = FhirContext.forDstu2();
-		String serverBase = "http://fhirtest.uhn.ca/baseDstu2";
+		FhirContext ctx = FhirContext.forR5();
+		String serverBase = "http://hapi.fhir.org/baseR5";
 
 		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 

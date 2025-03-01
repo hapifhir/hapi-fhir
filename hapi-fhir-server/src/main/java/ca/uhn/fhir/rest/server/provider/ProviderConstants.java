@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,9 +67,9 @@ public class ProviderConstants {
 	public static final String DIFF_INCLUDE_META_PARAMETER = "includeMeta";
 
 	/**
-	 * EMPI Operations
+	 * MDM Operations
 	 */
-	public static final String EMPI_MATCH = "$match";
+	public static final String PATIENT_MATCH = "$match";
 
 	public static final String MDM_MATCH = "$mdm-match";
 	public static final String MDM_MATCH_RESOURCE = "resource";
@@ -132,7 +132,7 @@ public class ProviderConstants {
 	public static final String OPERATION_META = "$meta";
 
 	/**
-	 *  Operation name for the $expunge operation
+	 * Operation name for the $expunge operation
 	 */
 	public static final String OPERATION_EXPUNGE = "$expunge";
 
@@ -239,8 +239,64 @@ public class ProviderConstants {
 	 * Operation name for the "$export-poll-status" operation
 	 */
 	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
+
 	/**
 	 * Operation name for the "$export" operation
 	 */
 	public static final String OPERATION_EXPORT = "$export";
+
+	/**
+	 * Operation name for the "$hapi.fhir.replace-references" operation
+	 */
+	public static final String OPERATION_REPLACE_REFERENCES = "$hapi.fhir.replace-references";
+
+	/**
+	 * Parameter for source reference of the "$hapi.fhir.replace-references" operation
+	 */
+	public static final String OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID = "source-reference-id";
+
+	/**
+	 * Parameter for target reference of the "$hapi.fhir.replace-references" operation
+	 */
+	public static final String OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID = "target-reference-id";
+
+	/**
+	 * If the request is being performed synchronously and the number of resources that need to change
+	 * exceeds this amount, the operation will fail with 412 Precondition Failed.
+	 */
+	public static final String OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT = "resource-limit";
+
+	/**
+	 * $hapi.fhir.replace-references output Parameters names
+	 */
+	public static final String OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK = "task";
+
+	public static final String OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME = "outcome";
+
+	/**
+	 * Operation name for the Resource "$merge" operation
+	 * Hapi-fhir use is based on https://www.hl7.org/fhir/patient-operation-merge.html
+	 */
+	public static final String OPERATION_MERGE = "$merge";
+	/**
+	 * Patient $merge operation parameters
+	 */
+	public static final String OPERATION_MERGE_PARAM_SOURCE_PATIENT = "source-patient";
+
+	public static final String OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER = "source-patient-identifier";
+	public static final String OPERATION_MERGE_PARAM_TARGET_PATIENT = "target-patient";
+	public static final String OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER = "target-patient-identifier";
+	public static final String OPERATION_MERGE_PARAM_RESULT_PATIENT = "result-patient";
+	public static final String OPERATION_MERGE_PARAM_BATCH_SIZE = "batch-size";
+	public static final String OPERATION_MERGE_PARAM_PREVIEW = "preview";
+	public static final String OPERATION_MERGE_PARAM_DELETE_SOURCE = "delete-source";
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_INPUT = "input";
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_OUTCOME = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_RESULT = "result";
+	public static final String OPERATION_MERGE_OUTPUT_PARAM_TASK = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
+
+	public static final String HAPI_BATCH_JOB_ID_SYSTEM = "http://hapifhir.io/batch/jobId";
+	public static final String OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT_STRING = "512";
+	public static final Integer OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT =
+			Integer.parseInt(OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT_STRING);
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams.isMatchSearchParam;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -250,7 +251,8 @@ public class InMemoryResourceMatcher {
 		}
 
 		String resourceName = theResourceDefinition.getName();
-		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName);
+		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(
+				resourceName, theParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		InMemoryMatchResult checkUnsupportedResult =
 				checkForUnsupportedParameters(theParamName, paramDef, theAndOrParams);
 		if (!checkUnsupportedResult.supported()) {
@@ -437,6 +439,10 @@ public class InMemoryResourceMatcher {
 		}
 
 		if (param.getModifier() == TokenParamModifier.NOT) {
+			// :not filters for security labels / tags should always match resources with no security labels / tags
+			if (isEmpty(list)) {
+				return true;
+			}
 			haveMatch = !haveMatch;
 		}
 
@@ -589,6 +595,10 @@ public class InMemoryResourceMatcher {
 				case NOT:
 					return !theSearchParams.matchParam(
 							theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
+				case ABOVE:
+				case BELOW:
+				case TEXT:
+				case OF_TYPE:
 				default:
 					return theSearchParams.matchParam(
 							theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
@@ -688,9 +698,22 @@ public class InMemoryResourceMatcher {
 						return getValidationSupportOrNull() != null;
 					case NOT:
 						return true;
+					case TEXT:
+					case OF_TYPE:
+					case ABOVE:
+					case BELOW:
 					default:
 						return false;
 				}
+			case NUMBER:
+			case DATE:
+			case STRING:
+			case REFERENCE:
+			case COMPOSITE:
+			case QUANTITY:
+			case URI:
+			case HAS:
+			case SPECIAL:
 			default:
 				return false;
 		}

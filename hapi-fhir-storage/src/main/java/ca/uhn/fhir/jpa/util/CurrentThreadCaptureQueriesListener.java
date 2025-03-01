@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListener {
 
 	private static final ThreadLocal<Queue<SqlQuery>> ourQueues = new ThreadLocal<>();
+	private static final ThreadLocal<AtomicInteger> ourGetConnections = new ThreadLocal<>();
 	private static final ThreadLocal<AtomicInteger> ourCommits = new ThreadLocal<>();
 	private static final ThreadLocal<AtomicInteger> ourRollbacks = new ThreadLocal<>();
 	private static final Logger ourLog = LoggerFactory.getLogger(CurrentThreadCaptureQueriesListener.class);
@@ -46,6 +48,12 @@ public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListe
 		return ourCommits.get();
 	}
 
+	@Nullable
+	@Override
+	protected AtomicInteger provideGetConnectionCounter() {
+		return ourGetConnections.get();
+	}
+
 	@Override
 	protected AtomicInteger provideRollbackCounter() {
 		return ourRollbacks.get();
@@ -57,6 +65,7 @@ public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListe
 	public static SqlQueryList getCurrentQueueAndStopCapturing() {
 		Queue<SqlQuery> retVal = ourQueues.get();
 		ourQueues.remove();
+		ourGetConnections.remove();
 		ourCommits.remove();
 		ourRollbacks.remove();
 		if (retVal == null) {
@@ -76,6 +85,7 @@ public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public static void startCapturing() {
 		ourQueues.set(new ArrayDeque<>());
+		ourGetConnections.set(new AtomicInteger(0));
 		ourCommits.set(new AtomicInteger(0));
 		ourRollbacks.set(new AtomicInteger(0));
 	}

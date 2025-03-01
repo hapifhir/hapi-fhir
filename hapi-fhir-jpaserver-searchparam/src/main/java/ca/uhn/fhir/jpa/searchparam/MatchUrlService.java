@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,8 +168,10 @@ public class MatchUrlService {
 			} else if (nextParamName.startsWith("_") && !Constants.PARAM_LANGUAGE.equals(nextParamName)) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
-				RuntimeSearchParam paramDef =
-						mySearchParamRegistry.getActiveSearchParam(theResourceDefinition.getName(), nextParamName);
+				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(
+						theResourceDefinition.getName(),
+						nextParamName,
+						ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (paramDef == null) {
 					throw throwUnrecognizedParamException(theMatchUrl, theResourceDefinition, nextParamName);
 				}

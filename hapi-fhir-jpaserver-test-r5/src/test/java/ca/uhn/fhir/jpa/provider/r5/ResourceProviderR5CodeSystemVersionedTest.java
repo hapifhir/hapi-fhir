@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r5;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
@@ -28,8 +29,8 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR5CodeSystemVersionedTest.class);
 
-	private long parentChildCs1Id;
-	private long parentChildCs2Id;
+	private JpaPid parentChildCs1Id;
+	private JpaPid parentChildCs2Id;
 
 	@BeforeEach
 	@Transactional

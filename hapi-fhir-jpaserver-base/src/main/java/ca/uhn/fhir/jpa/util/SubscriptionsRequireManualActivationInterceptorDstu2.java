@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@
 package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
@@ -29,31 +32,32 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import static ca.uhn.fhir.subscription.SubscriptionConstants.ORDER_SUBSCRIPTION_ACTIVATING;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Interceptor which requires newly created {@link Subscription subscriptions} to be in
  * {@link SubscriptionStatusEnum#REQUESTED} state and prevents clients from changing the status.
  */
-public class SubscriptionsRequireManualActivationInterceptorDstu2 extends ServerOperationInterceptorAdapter {
+@Interceptor
+public class SubscriptionsRequireManualActivationInterceptorDstu2 {
 
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu2")
 	private IFhirResourceDao<Subscription> myDao;
 
-	@Override
+	@Hook(value = Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, order = ORDER_SUBSCRIPTION_ACTIVATING)
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
 		if (myDao.getContext().getResourceType(theResource).equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			verifyStatusOk(RestOperationTypeEnum.CREATE, null, theResource);
 		}
 	}
 
-	@Override
+	@Hook(value = Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, order = ORDER_SUBSCRIPTION_ACTIVATING)
 	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 		if (myDao.getContext().getResourceType(theNewResource).equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			verifyStatusOk(RestOperationTypeEnum.UPDATE, theOldResource, theNewResource);

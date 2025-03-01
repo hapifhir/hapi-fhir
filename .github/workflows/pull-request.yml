@@ -1,0 +1,89 @@
+name: Pull Request Pipeline
+
+# on: workflow_dispatch
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build the Maven cache
+        id: cache-maven
+        uses: ./.github/actions/build-cache
+        with:
+          java-version: '17'
+          cache-path: $HOME/.m2/repository
+
+  generate-module-list:
+    name: Generate List of Modules to Build
+    runs-on: ubuntu-latest
+    outputs:
+      modules_list: ${{ steps.format-modules.outputs.modules_list }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate Modules List
+        id: generate_list
+        uses: ./.github/actions/generate-module-list
+        with:
+#         We ignore a bunch of modules that we don't want tested because they (a) are demo modules, or (b) have no tests
+          ignored_modules: 'hapi-fhir-bom,hapi-deployable-pom,hapi-fhir-spring-boot,hapi-fhir-spring-boot-sample-client-apache,hapi-fhir-spring-boot-sample-client-okhttp,hapi-fhir-spring-boot-starter,hapi-fhir-spring-boot-samples,hapi-fhir-validation-resources-dstu2.1,hapi-fhir-structures-r4b,hapi-fhir-validation-resources-r4b,hapi-fhir-jpa,hapi-fhir-serviceloaders,hapi-fhir-storage-batch2-test-utilities,hapi-fhir-cli,hapi-fhir-dist,hapi-fhir-jacoco,hapi-fhir-server-cds-hooks,hapi-fhir-caching-testing,hapi-fhir-cli-app,hapi-fhir-karaf-features,hapi-fhir-karaf-integration-tests,osgi'
+
+      - name: Format Modules List as JSON Array
+        id: format-modules
+        run: |
+          # Use jq to format the modules list as a JSON array
+          echo "modules_list=$(jq -R -s -c 'split(",") | map(gsub("[\\n]"; ""))' <<< '${{ steps.generate_list.outputs.modules_list }}')" >> $GITHUB_OUTPUT
+
+      - name: Print formatted modules as JSON
+        run: |
+          echo "Formatted JSON Array:"
+          echo "${{ steps.format-modules.outputs.modules_list }}"
+
+  test-module:
+    runs-on: ubuntu-latest
+    needs:
+      - build-cache
+      - generate-module-list
+
+    strategy:
+      matrix:
+        module: ${{ fromJSON(needs.generate-module-list.outputs.modules_list) }}
+      max-parallel: 256
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Tests and Archive Results
+        uses: ./.github/actions/run-tests-and-archive-results
+        with:
+          java-version: '17'
+          maven-cache-folder: $HOME/.m2/repository
+          module-name: ${{ matrix.module }}
+
+  assemble-test-reports:
+    runs-on: ubuntu-latest
+    needs:
+      - generate-module-list
+      - test-module
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Assemble Reports
+        uses: ./.github/actions/assemble-test-reports
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          modules: ${{ needs.generate-module-list.outputs.modules_list }}
