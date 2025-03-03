@@ -32,7 +32,6 @@ import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.policy.TimeoutRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.CannotCreateTransactionException;
@@ -59,7 +58,7 @@ class RetryingMessageHandlerWrapper implements MessageHandler {
 		retryPolicy.setTimeout(DateUtils.MILLIS_PER_MINUTE);
 		retryTemplate.setRetryPolicy(retryPolicy);
 		retryTemplate.setThrowLastExceptionOnExhausted(true);
-		RetryListener retryListener = new RetryListenerSupport() {
+		RetryListener retryListener = new RetryListener() {
 			@Override
 			public <T, E extends Throwable> void onError(
 					RetryContext theContext, RetryCallback<T, E> theCallback, Throwable theThrowable) {

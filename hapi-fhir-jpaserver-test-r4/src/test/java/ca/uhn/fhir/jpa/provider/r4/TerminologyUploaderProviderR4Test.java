@@ -357,6 +357,37 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
+	public void testApplyDeltaAdd_UsingCodeSystemWithElasticSearch() {
+		//Given: Advance HSearch indexing is enabled
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		myStorageSettings.setStoreResourceInHSearchIndex(true);
+
+		//Given: We have a non-existent code system
+		CodeSystem codeSystem = new CodeSystem();
+		myClient.create().resource(codeSystem).execute();
+		CodeSystem.ConceptDefinitionComponent chem = codeSystem.addConcept().setCode("CHEM").setDisplay("Chemistry");
+		chem.addConcept().setCode("HB").setDisplay("Hemoglobin");
+		chem.addConcept().setCode("NEUT").setDisplay("Neutrophils");
+		CodeSystem.ConceptDefinitionComponent micro = codeSystem.addConcept().setCode("MICRO").setDisplay("Microbiology");
+		micro.addConcept().setCode("C&S").setDisplay("Culture And Sensitivity");
+
+		//Execute
+		Parameters outcome = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://example.com/cs"))
+			.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
+			.prettyPrint()
+			.execute();
+
+		//Validate
+		IntegerType conceptCount = (IntegerType) outcome.getParameter("conceptCount").getValue();
+		assertThat(conceptCount.getValue()).isEqualTo(5);
+	}
+
+	@Test
 	public void testApplyDeltaAdd_UsingCodeSystemWithConceptProprieties() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://foo/cs");

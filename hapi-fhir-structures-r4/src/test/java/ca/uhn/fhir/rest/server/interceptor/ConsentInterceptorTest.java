@@ -139,7 +139,6 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		doNothing().when(myConsentSvc).completeOperationSuccess(any(), any());
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 

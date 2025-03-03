@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6714
+jira: SMILE-9691
+title: "Previously, it was possible for a persisted resource to get a version bump due to unnecessary updates to its 
+associated tags. This issue is fixed."
