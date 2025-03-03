@@ -383,11 +383,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			Validate.isTrue(changeCount > 0, "No changed chunk matching %s", chunkId);
 
 			int failChangeCount = myWorkChunkRepository.updateChunkForTooManyErrors(
-				WorkChunkStatusEnum.FAILED,
-				chunkId,
-				MAX_CHUNK_ERROR_COUNT,
-				ERROR_MSG_MAX_LENGTH
-			);
+					WorkChunkStatusEnum.FAILED, chunkId, MAX_CHUNK_ERROR_COUNT, ERROR_MSG_MAX_LENGTH);
 
 			if (failChangeCount > 0) {
 				return WorkChunkStatusEnum.FAILED;

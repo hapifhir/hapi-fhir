@@ -83,7 +83,8 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 				threadNamePrefix,
 				SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
 
-		return new LinkedBlockingChannel(theChannelName, threadPoolExecutor, threadPoolExecutor::getQueueSize, myRetryPolicyProvider);
+		return new LinkedBlockingChannel(
+				theChannelName, threadPoolExecutor, threadPoolExecutor::getQueueSize, myRetryPolicyProvider);
 	}
 
 	@PreDestroy

@@ -39,7 +39,11 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 
 	private final RetryPolicyProvider myRetryPolicyProvider;
 
-	public LinkedBlockingChannel(String theName, Executor theExecutor, Supplier<Integer> theQueueSizeSupplier, RetryPolicyProvider theRetryPolicyProvider) {
+	public LinkedBlockingChannel(
+			String theName,
+			Executor theExecutor,
+			Supplier<Integer> theQueueSizeSupplier,
+			RetryPolicyProvider theRetryPolicyProvider) {
 		super(theExecutor);
 		myName = theName;
 		myQueueSizeSupplier = theQueueSizeSupplier;

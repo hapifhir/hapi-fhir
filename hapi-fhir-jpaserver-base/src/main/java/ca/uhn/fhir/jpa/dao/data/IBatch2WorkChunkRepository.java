@@ -123,17 +123,15 @@ public interface IBatch2WorkChunkRepository
 	 * @return - the number of updated chunks (should be 1)
 	 */
 	@Modifying
-	@Query(
-		"UPDATE Batch2WorkChunkEntity e "
-		+ "SET e.myStatus = :failed, "
-		+ "e.myErrorMessage = LEFT(CONCAT('Too many errors (', CAST(e.myErrorCount as string), '). Last err msg ', e.myErrorMessage), :maxErrorSize) "
-		+ "WHERE e.myId = :chunkId and e.myErrorCount > :maxCount"
-	)
+	@Query("UPDATE Batch2WorkChunkEntity e "
+			+ "SET e.myStatus = :failed, "
+			+ "e.myErrorMessage = LEFT(CONCAT('Too many errors (', CAST(e.myErrorCount as string), '). Last err msg ', e.myErrorMessage), :maxErrorSize) "
+			+ "WHERE e.myId = :chunkId and e.myErrorCount > :maxCount")
 	int updateChunkForTooManyErrors(
-		@Param("failed") WorkChunkStatusEnum theStatus,
-		@Param("chunkId") String theChunkId,
-		@Param("maxCount") int theMaxErrorCount,
-		@Param("maxErrorSize") int theMaxErrorSize);
+			@Param("failed") WorkChunkStatusEnum theStatus,
+			@Param("chunkId") String theChunkId,
+			@Param("maxCount") int theMaxErrorCount,
+			@Param("maxErrorSize") int theMaxErrorSize);
 
 	@Modifying
 	@Query(

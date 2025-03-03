@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
 import ca.uhn.fhir.util.BaseUnrecoverableRuntimeException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
@@ -31,8 +30,6 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.policy.TimeoutRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.CannotCreateTransactionException;
 
@@ -43,7 +40,8 @@ class RetryingMessageHandlerWrapper implements MessageHandler {
 
 	private RetryPolicyProvider myRetryPolicyProvider;
 
-	RetryingMessageHandlerWrapper(MessageHandler theWrap, String theChannelName, RetryPolicyProvider theRetryPolicyProvider) {
+	RetryingMessageHandlerWrapper(
+			MessageHandler theWrap, String theChannelName, RetryPolicyProvider theRetryPolicyProvider) {
 		myWrap = theWrap;
 		myChannelName = theChannelName;
 		myRetryPolicyProvider = theRetryPolicyProvider;
