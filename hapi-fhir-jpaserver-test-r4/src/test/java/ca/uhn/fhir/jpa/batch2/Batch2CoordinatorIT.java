@@ -25,8 +25,6 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
-import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
@@ -57,7 +55,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.retry.RetryPolicy;
@@ -86,7 +83,6 @@ import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -108,8 +104,11 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		private RetryPolicy myRetryPolicy;
 
-		public void setRetryPolicy(RetryPolicy theRetryPolicy) {
+		private BackOffPolicy myBackOffPolicy;
+
+		public void setPolicies(RetryPolicy theRetryPolicy, BackOffPolicy theBackOffPolicy) {
 			myRetryPolicy = theRetryPolicy;
+			myBackOffPolicy = theBackOffPolicy;
 		}
 
 		@Override
@@ -122,7 +121,10 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		@Override
 		protected BackOffPolicy backOffPolicy() {
-			return new NoBackOffPolicy();
+			if (myBackOffPolicy != null) {
+				return myBackOffPolicy;
+			}
+			return super.backOffPolicy();
 		}
 	}
 
@@ -184,6 +186,11 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
 		myStorageSettings.setJobFastTrackingEnabled(true);
+
+		// reset
+		if (myRetryPolicyProvider instanceof RetryProviderOverride rp) {
+			rp.setPolicies(null, null);
+		}
 	}
 
 	@AfterEach
@@ -660,7 +667,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		MaxAttemptsRetryPolicy retryPolicy = new MaxAttemptsRetryPolicy();
 		retryPolicy.setMaxAttempts(errorCount);
 		RetryProviderOverride overrideRetryProvider = (RetryProviderOverride) myRetryPolicyProvider;
-		overrideRetryProvider.setRetryPolicy(retryPolicy);
+		overrideRetryProvider.setPolicies(retryPolicy, new NoBackOffPolicy());
 
 		// create a job that fails and throws a large error
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
@@ -875,7 +882,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				callLatch(myFirstStepLatch, step);
 				throw new RuntimeException("Expected Test Exception");
 			};
-		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
+			IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 			String jobDefId = getMethodNameForJobId();
 			JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
