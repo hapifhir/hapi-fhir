@@ -195,6 +195,16 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 		assertThat(sourcePackage.getId()).isEqualTo("hl7.fhir.r999.core");
 	}
 
+	@Test
+	public void allStructureDefinitions() {
+		setupValidation();
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://foo");
+		when(myValidationSupportContext.getRootValidationSupport().fetchAllStructureDefinitions()).thenReturn(List.of(sd));
+		var list = myWorkerContextWrapper.fetchResourcesByType(org.hl7.fhir.r5.model.StructureDefinition.class);
+		assertThat(list).hasSize(1).allSatisfy(sdResult -> assertThat(sdResult.getUrl()).isEqualTo(sd.getUrl()));
+	}
+
 	private List<StructureDefinition> createPrimitiveStructureDefinitions() {
 		StructureDefinition stringType = createPrimitive("string");
 		StructureDefinition boolType = createPrimitive("boolean");
