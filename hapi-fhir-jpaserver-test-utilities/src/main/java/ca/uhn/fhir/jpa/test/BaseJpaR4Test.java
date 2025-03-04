@@ -528,7 +528,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected ITermConceptMapDao myTermConceptMapDao;
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
-	@SpyBean
+	@Autowired
 	protected MemoryCacheService myMemoryCacheService;
 	@Autowired
 	protected ICacheWarmingSvc myCacheWarmingSvc;

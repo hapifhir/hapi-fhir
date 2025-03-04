@@ -41,6 +41,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.util.List;
@@ -66,6 +67,8 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 	private IHapiTransactionService myTransactionService;
 	@Autowired
 	private IResourceLinkResolver myResourceLinkResolver;
+	@SpyBean
+	protected MemoryCacheService myMemoryCacheService;
 	@Mock
 	private ICrossPartitionReferenceDetectedHandler myCrossPartitionReferencesDetectedInterceptor;
 	@Captor

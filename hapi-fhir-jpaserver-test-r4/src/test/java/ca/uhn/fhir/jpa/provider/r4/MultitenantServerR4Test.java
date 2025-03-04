@@ -83,6 +83,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.io.IOException;
@@ -112,6 +113,8 @@ import static org.mockito.Mockito.when;
 public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Test implements ITestDataBuilder {
 	@Captor
 	private ArgumentCaptor<JpaPid> myMatchUrlCacheValueCaptor;
+	@SpyBean
+	private MemoryCacheService myMemoryCacheService;
 
 	@Override
 	@AfterEach
