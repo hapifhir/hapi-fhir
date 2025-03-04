@@ -100,6 +100,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 })
 public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
+	/***
+	 * Our internal configuration of Retry Mechanism is
+	 * with exponential backoff, and infinite retries.
+	 *
+	 * This isn't ideal for tests; so we will override
+	 * the retry mechanism for tests that require it.
+	 */
 	public static class RetryProviderOverride extends RetryPolicyProvider {
 
 		private RetryPolicy myRetryPolicy;
