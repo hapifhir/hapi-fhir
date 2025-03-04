@@ -1,5 +1,16 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.util.BundleBuilder;
+
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Patient;
+
+import org.hl7.fhir.r4.model.StringType;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
@@ -155,4 +166,38 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 
 	}
 
+	@Test
+	public void testConditionalCreate_withMultiplePartitionsAndMatchUrlCache_NoCachePartitionConflicts() {
+		myStorageSettings.setMatchUrlCacheEnabled(true);
+		myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(true);
+
+		Bundle responseBundle1 = mySystemDao.transaction(mySrd, createPatientWithConditionalUrlOnPartition(1));
+		assertResourceCreated(responseBundle1);
+
+		Bundle responseBundle2 = mySystemDao.transaction(mySrd, createPatientWithConditionalUrlOnPartition(2));
+		assertResourceCreated(responseBundle2);
+	}
+
+	private Bundle createPatientWithConditionalUrlOnPartition(Integer thePartitionId) {
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+		Patient p = new Patient();
+		p.setIdentifier(List.of(new Identifier().setSystem("foo").setValue("bar")));
+		p.setActive(true);
+		p.setName(List.of(new HumanName().setFamily("ABC").setGiven(List.of(new StringType("DEF")))));
+		bb.addTransactionUpdateEntry(p, "Patient?identifier=foo|bar");
+		addCreatePartitionNTimes(thePartitionId, 3);
+
+		return (Bundle) bb.getBundle();
+	}
+
+	private static void assertResourceCreated(Bundle responseBundle1) {
+		assertThat(responseBundle1.getEntry()).hasSize(1);
+		Bundle.BundleEntryResponseComponent response1 = responseBundle1.getEntryFirstRep().getResponse();
+		assertThat(response1.getStatus()).isEqualTo("201 Created");
+		OperationOutcome oo1 = (OperationOutcome) response1.getOutcome();
+		assertThat(oo1.getIssue()).hasSize(1);
+		CodeableConcept details1 = oo1.getIssueFirstRep().getDetails();
+		assertThat(details1.getCodingFirstRep().getCode()).isEqualTo("SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH");
+	}
 }

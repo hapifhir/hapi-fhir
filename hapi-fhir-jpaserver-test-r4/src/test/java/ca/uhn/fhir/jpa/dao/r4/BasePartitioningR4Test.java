@@ -61,17 +61,20 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	public void after() {
 		assertNoRemainingPartitionIds();
 
-		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
-		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
-		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
-		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
+		PartitionSettings defaultPartitionSettings = new PartitionSettings();
+		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
+
+		myPartitionSettings.setIncludePartitionInSearchHashes(defaultPartitionSettings.isIncludePartitionInSearchHashes());
+		myPartitionSettings.setPartitioningEnabled(defaultPartitionSettings.isPartitioningEnabled());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultPartitionSettings.getAllowReferencesAcrossPartitions());
+		myPartitionSettings.setDefaultPartitionId(defaultPartitionSettings.getDefaultPartitionId());
 
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
 
-		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
-		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
-		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().getMatchUrlCache());
+		myStorageSettings.setIndexMissingFields(defaultStorageSettings.getIndexMissingFields());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaultStorageSettings.isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setMassIngestionMode(defaultStorageSettings.isMassIngestionMode());
+		myStorageSettings.setMatchUrlCacheEnabled(defaultStorageSettings.isMatchUrlCacheEnabled());
 
 		if (myRegisteredSearchParamValidatingInterceptor) {
 			myInterceptorRegistry.unregisterInterceptor(mySearchParamValidatingInterceptor);
@@ -236,6 +239,12 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			myEntityManager.createNativeQuery("alter table " + ResourceTable.HFJ_RESOURCE + " drop constraint " + IDX_RES_TYPE_FHIR_ID).executeUpdate();
 		});
 		myHaveDroppedForcedIdUniqueConstraint = true;
+	}
+
+	protected void addCreatePartitionNTimes(Integer thePartitionId, Integer theNumberOfTimes) {
+		for (int i = 0; i < theNumberOfTimes; i++) {
+			addCreatePartition(thePartitionId, null);
+		}
 	}
 
 	protected void addCreatePartition(Integer thePartitionId) {

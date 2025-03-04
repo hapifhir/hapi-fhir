@@ -546,6 +546,72 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		assertEquals("Family", patient1.getName().get(0).getFamily());
 	}
 
+	@Test
+	public void testTransactionPatch_withConditionalAndMatchUrlCache_sameMatchUrlInDifferentPartitionShouldNotBeFound() {
+		// Given
+		myStorageSettings.setMatchUrlCacheEnabled(true);
+
+		IBaseResource patientToCreate = buildPatient(withTenant(TENANT_A), withActiveTrue(), withId("1234a"),
+			withFamily("Family"), withGiven("Given"), withBirthdate("1970-01-01"));
+		myClient.update().resource(patientToCreate).execute();
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(TENANT_A);
+		JpaPid patientPid = (JpaPid) myPatientDao.readEntity(new IdType("1234a"), requestDetails).getPersistentId();
+
+		String thePatientMatchUrl = "Patient?_id=1234a";
+		Bundle patchBundle1 = createPatchBundleReplaceBirthDateOnPatient("2000-01-01", thePatientMatchUrl);
+
+		// When
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		myClient.transaction().withBundle(patchBundle1).execute();
+		Patient patient1 = myPatientDao.read(new IdType("Patient/1234a"), requestDetails);
+
+		// Then: the Patch is successful and the match url is cached
+		assertEquals("Family", patient1.getName().get(0).getFamily());
+		assertThat(patient1.getBirthDateElement().getValueAsString()).isEqualTo("2000-01-01");
+
+		// Verify that the entry is put into cache
+		verify(myMemoryCacheService).putAfterCommit(eq(MemoryCacheService.CacheEnum.MATCH_URL), eq(thePatientMatchUrl), myMatchUrlCacheValueCaptor.capture());
+		JpaPid actualCachedPid = myMatchUrlCacheValueCaptor.getValue();
+		assertThat(actualCachedPid.getId()).isEqualTo(patientPid.getId());
+		assertThat(actualCachedPid.getPartitionId()).isEqualTo(TENANT_A_ID);
+
+		reset(myMemoryCacheService);
+		Bundle patchBundle2 = createPatchBundleReplaceBirthDateOnPatient("2025-01-01", thePatientMatchUrl);
+
+		try {
+			// When: Perform Patch with the same match url, but in another partition
+			myTenantClientInterceptor.setTenantId(TENANT_B);
+			myClient.transaction().withBundle(patchBundle2).execute();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// Then: the match URl cache should not be resolved
+			assertThat(e.getMessage()).contains("Invalid match URL \"" + thePatientMatchUrl + "\" - No resources match this search");
+			Patient patientInDb = myPatientDao.read(new IdType("Patient/1234a"), requestDetails);
+			assertEquals("Family", patientInDb.getName().get(0).getFamily());
+			assertThat(patientInDb.getBirthDateElement().getValueAsString()).isEqualTo("2000-01-01");
+			verify(myMemoryCacheService, never()).putAfterCommit(eq(MemoryCacheService.CacheEnum.MATCH_URL), eq(thePatientMatchUrl), any());
+		}
+	}
+
+	private static Bundle createPatchBundleReplaceBirthDateOnPatient(String theDate, String thePatientUrl) {
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation.addPart().setName("type").setValue(new CodeType("replace"));
+		operation.addPart().setName("path").setValue(new CodeType("Patient.birthDate"));
+		operation.addPart().setName("value").setValue(new DateType(theDate));
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setFullUrl(thePatientUrl)
+			.setResource(patch)
+			.getRequest().setUrl(thePatientUrl)
+			.setMethod(Bundle.HTTPVerb.PATCH);
+		return input;
+	}
 
 	@Test
 	public void testUpdate_withConditionalReferenceAndMatchUrlCache_sameMatchUrlInDifferentPartitionShouldNotBeFound() {
@@ -898,4 +964,113 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		}
 	}
 
+	/**
+	 * This is a partitioned version of the same test in
+	 * {@link FhirResourceDaoR4ConcurrentWriteTest#testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate()}
+	 */
+	@Nested
+	class TestConcurrencyInterceptorInPartitioningMode {
+		private static final int THREAD_COUNT = 10;
+
+		private ExecutorService myExecutor;
+		private TransactionConcurrencySemaphoreInterceptor myConcurrencySemaphoreInterceptor;
+
+		@BeforeEach
+		public void before() {
+			myExecutor = Executors.newFixedThreadPool(THREAD_COUNT);
+			myConcurrencySemaphoreInterceptor = new TransactionConcurrencySemaphoreInterceptor(myMemoryCacheService);
+
+			RestfulServer server = new RestfulServer(myFhirContext);
+			when(mySrd.getServer()).thenReturn(server);
+		}
+
+		@AfterEach
+		public void after() {
+			myExecutor.shutdown();
+			myInterceptorRegistry.unregisterInterceptor(myConcurrencySemaphoreInterceptor);
+		}
+
+		@Test
+		public void testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate() throws ExecutionException, InterruptedException {
+			myStorageSettings.setMatchUrlCacheEnabled(true);
+			myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(true);
+			myInterceptorRegistry.registerInterceptor(myConcurrencySemaphoreInterceptor);
+			myConcurrencySemaphoreInterceptor.setLogWaits(true);
+
+			Runnable creatorForPartitionA = ()->{
+				Bundle input = createBundleForRunnableTransaction();
+				SystemRequestDetails requestDetails = new SystemRequestDetails();
+				requestDetails.setTenantId(TENANT_A);
+				mySystemDao.transaction(requestDetails, input);
+			};
+
+			Runnable creatorForPartitionB = ()->{
+				Bundle input = createBundleForRunnableTransaction();
+				SystemRequestDetails requestDetails = new SystemRequestDetails();
+				requestDetails.setTenantId(TENANT_B);
+				mySystemDao.transaction(requestDetails, input);
+			};
+
+			for (int set = 0; set < 3; set++) {
+				myConcurrencySemaphoreInterceptor.clearSemaphores();
+
+				List<Future<?>> futures = new ArrayList<>();
+				for (int j = 0; j < 10; j++) {
+					if (j % 2 == 0) {
+						futures.add(myExecutor.submit(creatorForPartitionA));
+					} else {
+						futures.add(myExecutor.submit(creatorForPartitionB));
+					}
+
+				}
+
+				for (Future<?> next : futures) {
+					next.get();
+				}
+
+				// Only a thread from the first iteration (set) will acquire the semaphores for the match urls
+				// Since the match URLs will still be present in the Match URL cache for the remaining of the test
+				if (set == 0) {
+					assertEquals(2, myConcurrencySemaphoreInterceptor.countSemaphores());
+				} else {
+					assertEquals(0, myConcurrencySemaphoreInterceptor.countSemaphores());
+				}
+			}
+
+			runInTransaction(() -> {
+				Map<String, Integer> counts = getResourceCountMap();
+				assertEquals(4, counts.get("Patient"), counts.toString());
+			});
+		}
+
+		private Bundle createBundleForRunnableTransaction() {
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+			Patient patient1 = new Patient();
+			patient1.addIdentifier().setSystem("http://foo").setValue("1");
+			bb.addTransactionCreateEntry(patient1).conditional("Patient?identifier=http://foo|1");
+
+			Patient patient2 = new Patient();
+			patient2.addIdentifier().setSystem("http://foo").setValue("2");
+			bb.addTransactionCreateEntry(patient2).conditional("Patient?identifier=http://foo|2");
+
+			return (Bundle) bb.getBundle();
+		}
+
+		@Nonnull
+		private Map<String, Integer> getResourceCountMap() {
+			Map<String, Integer> counts = new TreeMap<>();
+			myResourceTableDao
+				.findAll()
+				.stream()
+				.forEach(t -> {
+					counts.putIfAbsent(t.getResourceType(), 0);
+					int value = counts.get(t.getResourceType());
+					value++;
+					counts.put(t.getResourceType(), value);
+				});
+			ourLog.info("Counts: {}", counts);
+			return counts;
+		}
+	}
 }
