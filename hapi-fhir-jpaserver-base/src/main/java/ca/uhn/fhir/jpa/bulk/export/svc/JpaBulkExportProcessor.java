@@ -52,8 +52,6 @@ import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -215,19 +213,19 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return pids;
 	}
 
-	private static void filterBySpecificPatient(
+	private void filterBySpecificPatient(
 			ExportPIDIteratorParameters theParams,
 			String resourceType,
 			String patientSearchParam,
 			SearchParameterMap map) {
 		if (resourceType.equalsIgnoreCase("Patient")) {
 			if (theParams.getPatientIds() != null) {
-				ReferenceOrListParam referenceOrListParam = getReferenceOrListParam(theParams);
+				ReferenceOrListParam referenceOrListParam = makeReferenceOrListParam(theParams.getPatientIds());
 				map.add(PARAM_ID, referenceOrListParam);
 			}
 		} else {
 			if (theParams.getPatientIds() != null) {
-				ReferenceOrListParam referenceOrListParam = getReferenceOrListParam(theParams);
+				ReferenceOrListParam referenceOrListParam = makeReferenceOrListParam(theParams.getPatientIds());
 				map.add(patientSearchParam, referenceOrListParam);
 			} else {
 				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
@@ -236,11 +234,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	@Nonnull
-	private static ReferenceOrListParam getReferenceOrListParam(ExportPIDIteratorParameters theParams) {
-		ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
-		for (String patientId : theParams.getPatientIds()) {
-			referenceOrListParam.addOr(new ReferenceParam(patientId));
-		}
+	private ReferenceOrListParam makeReferenceOrListParam(@Nonnull List<String> thePatientIds) {
+		final ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
+		thePatientIds.forEach(patientId -> referenceOrListParam.addOr(new ReferenceParam(patientId)));
 		return referenceOrListParam;
 	}
 
@@ -478,17 +474,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			map.add(PARAM_HAS, makeGroupMemberHasOrListParam(theParameters.getGroupId()));
 			final List<String> patientIds = theParameters.getPatientIds();
 			if (patientIds != null && !patientIds.isEmpty()) {
-				map.add(PARAM_ID, makePatientIdStringOrListParam(patientIds));
+				map.add(PARAM_ID, makeReferenceOrListParam(patientIds));
 			}
 		});
 		return maps;
-	}
-
-	@Nonnull
-	private StringOrListParam makePatientIdStringOrListParam(@Nonnull List<String> thePatientIds) {
-		final StringOrListParam stringOrListParam = new StringOrListParam();
-		thePatientIds.forEach(patientId -> stringOrListParam.addOr(new StringParam(patientId)));
-		return stringOrListParam;
 	}
 
 	@Nonnull
