@@ -40,6 +40,7 @@ import org.hl7.fhir.utilities.validation.ValidationOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -413,8 +414,14 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public List<StructureDefinition> fetchTypeDefinitions(String s) {
-		return List.of(fetchTypeDefinition(s));
+	public List<StructureDefinition> fetchTypeDefinitions(String input) {
+		List<StructureDefinition> types = new ArrayList<>();
+		for (StructureDefinition sd : allStructures()) {
+			if (input.equals(sd.getTypeTail())) {
+				types.add(sd);
+			}
+		}
+		return types;
 	}
 
 	@Override
@@ -461,7 +468,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public <T extends Resource> List<T> fetchResourcesByType(Class<T> aClass) {
-		return List.of();
+		List<T> res = new ArrayList<>();
+		if (aClass == StructureDefinition.class) {
+			res.addAll((Collection<? extends T>) getStructures());
+		}
+		return res;
 	}
 
 	@Override
