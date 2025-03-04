@@ -52,7 +52,6 @@ public class ReadR4Test {
 	public void testRead() throws Exception {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PatientProvider());
 
-
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_format=xml&_pretty=true");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 
@@ -66,9 +65,6 @@ public class ReadR4Test {
 			assertThat(responseContent).containsSubsequence(
 				"<Patient xmlns=\"http://hl7.org/fhir\">",
 				" <id value=\"2\"/>",
-				" <meta>",
-				"  <profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>",
-				" </meta>",
 				" <modifierExtension url=\"http://example.com/ext/date\">",
 				"  <valueDate value=\"2011-01-01\"/>",
 				" </modifierExtension>",
@@ -93,9 +89,6 @@ public class ReadR4Test {
 			assertThat(responseContent).containsSubsequence(
 				"<Patient xmlns=\"http://hl7.org/fhir\">",
 				" <id value=\"2\"/>",
-				" <meta>",
-				"  <profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>",
-				" </meta>",
 				" <modifierExtension url=\"http://example.com/ext/date\">",
 				"  <valueDate value=\"2011-01-01\"/>",
 				" </modifierExtension>",

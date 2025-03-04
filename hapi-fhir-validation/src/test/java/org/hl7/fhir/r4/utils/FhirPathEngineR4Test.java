@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -49,8 +50,12 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		o.setSpecimen(new Reference(specimen));
 
-		IParser p = ourCtx.newJsonParser();
-		o = (Observation) p.parseResource(p.encodeResourceToString(o));
+		IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
+		String encoded = p.encodeResourceToString(o);
+		ourLog.info(encoded);
+
+		o = (Observation) p.parseResource(encoded);
+		assertThat(o.getSpecimen().getReference()).isEqualTo("#" + o.getContained().get(0).getId());
 
 		List<Base> value;
 
