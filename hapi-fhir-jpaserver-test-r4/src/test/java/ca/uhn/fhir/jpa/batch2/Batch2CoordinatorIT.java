@@ -105,7 +105,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	 * with exponential backoff, and infinite retries.
 	 *
 	 * This isn't ideal for tests; so we will override
-	 * the retry mechanism for tests that require it.
+	 * the retry mechanism for tests that require it to
+	 * make them run faster and more 'predictably'
 	 */
 	public static class RetryProviderOverride extends RetryPolicyProvider {
 
