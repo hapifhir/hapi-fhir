@@ -54,12 +54,10 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 
 		List<Base> value;
 
-
 		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen", Base.class);
 		assertThat(value).hasSize(1);
 		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve()", Base.class);
 		assertThat(value).hasSize(1);
-
 
 		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve().receivedTime", Base.class);
 		assertThat(value).hasSize(1);
