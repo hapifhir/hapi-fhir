@@ -161,7 +161,7 @@ public class FhirPathR4 implements IFhirPath {
 
 			@Override
 			public boolean paramIsType(String name, int index) {
-				return true;
+				return false;
 			}
 		});
 	}
