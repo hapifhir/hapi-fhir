@@ -5,13 +5,19 @@ import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
+import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4ConcurrentWriteTest;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.interceptor.TransactionConcurrencySemaphoreInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -25,9 +31,20 @@ import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -35,12 +52,16 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -50,8 +71,18 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+
+import static org.mockito.ArgumentMatchers.eq;
+
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.io.IOException;
@@ -79,12 +110,17 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
 public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Test implements ITestDataBuilder {
+	@Captor
+	private ArgumentCaptor<JpaPid> myMatchUrlCacheValueCaptor;
 
 	@Override
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
+		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
+
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+		myStorageSettings.setMatchUrlCacheEnabled(defaultStorageSettings.isMatchUrlCacheEnabled());
 		assertFalse(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference());
 	}
 
@@ -510,6 +546,54 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		assertEquals("Family", patient1.getName().get(0).getFamily());
 	}
 
+
+	@Test
+	public void testUpdate_withConditionalReferenceAndMatchUrlCache_sameMatchUrlInDifferentPartitionShouldNotBeFound() {
+		// Given
+		myStorageSettings.setMatchUrlCacheEnabled(true);
+
+		IBaseResource patientA = buildPatient(withTenant(TENANT_A), withActiveTrue(), withId("1234a"),
+			withFamily("Family"), withGiven("Given"));
+		myClient.update().resource(patientA).execute();
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(TENANT_A);
+		JpaPid patientPid = (JpaPid) myPatientDao.readEntity(new IdType("1234a"), requestDetails).getPersistentId();
+
+		Encounter encounter = new Encounter();
+		encounter.setId("1234b");
+		String thePatientMatchUrl = "Patient?_id=1234a";
+		encounter.setSubject(new Reference(thePatientMatchUrl));
+
+		// When
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		myClient.update().resource(encounter).execute();
+
+		// Then: ensure the Encounter is updated
+		Encounter encounter1 = myEncounterDao.read(new IdType("Encounter/1234b"), requestDetails);
+		assertEquals("Patient/1234a", encounter1.getSubject().getReference());
+
+		// Also ensure that the match URL cache is populated after resolving
+		verify(myMemoryCacheService).putAfterCommit(eq(MemoryCacheService.CacheEnum.MATCH_URL), eq(thePatientMatchUrl), myMatchUrlCacheValueCaptor.capture());
+		JpaPid actualCachedPid = myMatchUrlCacheValueCaptor.getValue();
+		assertThat(actualCachedPid.getId()).isEqualTo(patientPid.getId());
+		assertThat(actualCachedPid.getPartitionId()).isEqualTo(TENANT_A_ID);
+
+		reset(myMemoryCacheService);
+		encounter.setId("1234c");
+
+		try {
+			// When: try to update the Encounter again with the same Patient match url, but on Partition B
+			myTenantClientInterceptor.setTenantId(TENANT_B);
+			myClient.update().resource(encounter).execute();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// Then: the match URL should fail to resolve
+			assertThat(e.getMessage()).contains("Invalid match URL \"" + thePatientMatchUrl + "\" - No resources match this search");
+			verify(myMemoryCacheService, never()).putAfterCommit(eq(MemoryCacheService.CacheEnum.MATCH_URL), eq(thePatientMatchUrl), any());
+		}
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = {"Patient/1234a", "TENANT-B/Patient/1234a"})
 	public void testTransactionGet_withSearchNarrowingInterceptor_retrievesPatient(String theEntryUrl) {
@@ -813,4 +897,5 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 				+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + jobId;
 		}
 	}
+
 }
