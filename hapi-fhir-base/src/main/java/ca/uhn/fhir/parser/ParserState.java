@@ -399,7 +399,7 @@ class ParserState<T> {
 				myErrorHandler.containedResourceWithNoId(null);
 			} else {
 				if (!res.getId().isLocal()) {
-					res.setId(new IdDt('#' + res.getId().getIdPart()));
+					res.setId(new IdDt(res.getId().getIdPart()));
 				}
 				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
 			}
@@ -439,7 +439,7 @@ class ParserState<T> {
 				// need an ID to be referred to)
 				myErrorHandler.containedResourceWithNoId(null);
 			} else {
-				res.getIdElement().setValue('#' + res.getIdElement().getIdPart());
+				res.getIdElement().setValue(res.getIdElement().getIdPart());
 				getPreResourceState()
 						.getContainedResources()
 						.put(res.getIdElement().getValue(), res);
@@ -1238,7 +1238,8 @@ class ParserState<T> {
 				String ref = nextRef.getReferenceElement().getValue();
 				if (isNotBlank(ref)) {
 					if (ref.startsWith("#") && ref.length() > 1) {
-						IBaseResource target = myContainedResources.get(ref);
+						String refId = ref.substring(1);
+						IBaseResource target = myContainedResources.get(refId);
 						if (target != null) {
 							ourLog.debug("Resource contains local ref {}", ref);
 							nextRef.setResource(target);
@@ -1285,7 +1286,7 @@ class ParserState<T> {
 			super.wereBack();
 
 			IResource nextResource = (IResource) getCurrentElement();
-			String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
+			String version = nextResource.getId().getVersionIdPart();
 			String resourceName = myContext.getResourceType(nextResource);
 			String bundleIdPart = nextResource.getId().getIdPart();
 			if (isNotBlank(bundleIdPart)) {

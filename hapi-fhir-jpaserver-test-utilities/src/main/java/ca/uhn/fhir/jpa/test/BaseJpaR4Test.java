@@ -118,6 +118,9 @@ import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import jakarta.persistence.EntityManager;
+
+import java.util.Objects;
+
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -195,6 +198,7 @@ import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.validation.instance.advisor.BasePolicyAdvisorForFullValidation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -563,6 +567,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
 
+	private IValidationPolicyAdvisor policyAdvisor;
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
@@ -1077,8 +1082,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 		@Override
 		public IValidationPolicyAdvisor getPolicyAdvisor() {
-			return this;
-		}
+		  if (Objects.isNull(policyAdvisor)) {
+			  return new BasePolicyAdvisorForFullValidation(getReferencePolicy());
+		  }
+
+		  return policyAdvisor;
+	  }
 
 		@Override
 		public IValidationPolicyAdvisor setPolicyAdvisor(IValidationPolicyAdvisor policyAdvisor) {
