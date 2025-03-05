@@ -229,10 +229,10 @@ public class XmlParserDstu2Test {
 
 		DiagnosticReport resource = (DiagnosticReport) bundle.getEntry().get(0).getResource();
 		Observation obs = (Observation) resource.getResult().get(1).getResource();
-		assertEquals("#2", obs.getId().getValue());
+		assertEquals("2", obs.getId().getValue());
 		ResourceReferenceDt performerFirstRep = obs.getPerformer().get(0);
 		Practitioner performer = (Practitioner) performerFirstRep.getResource();
-		assertEquals("#3", performer.getId().getValue());
+		assertEquals("3", performer.getId().getValue());
 	}
 
 	@Test
@@ -536,7 +536,7 @@ public class XmlParserDstu2Test {
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#" + organizationUuid, org.getId().getValue());
+		assertEquals(organizationUuid, org.getId().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 
 		// And re-encode a second time
@@ -2523,7 +2523,6 @@ public class XmlParserDstu2Test {
 			+ "<entry><fullUrl value=\"http://localhost:58402/fhir/context/Patient/1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/><lastUpdated value=\"2015-09-11T23:35:42.295-04:00\"/></meta><name><family value=\"testHistoryWithDeletedResource\"/></name></Patient></resource></entry>"
 			+ "</Bundle>\n";
 		//@formatter:on
-
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
 		assertEquals("http://localhost:58402/fhir/context/Patient/1/_history/3", bundle.getEntry().get(0).getResource().getId().getValue());
 		assertEquals("http://localhost:58402/fhir/context/Patient/1/_history/2", bundle.getEntry().get(1).getResource().getId().getValue());
