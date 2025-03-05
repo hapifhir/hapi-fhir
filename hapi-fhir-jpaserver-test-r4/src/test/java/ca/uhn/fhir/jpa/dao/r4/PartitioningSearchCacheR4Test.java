@@ -13,25 +13,16 @@ import org.hl7.fhir.r4.model.StringType;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
-import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
-import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.IntegerType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,7 +44,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 
 		{
 			myCaptureQueriesListener.clear();
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe(), ()-> "Resources:\n * " + runInTransaction(()->myResourceTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * "))) +
@@ -72,7 +63,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		// Try from a different partition
 		{
 			myCaptureQueriesListener.clear();
-			addReadPartition(2);
+			addNextTargetPartitionsForRead(2);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe());
@@ -89,7 +80,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		// Try from the first partition, should be a cache hit this time
 		{
 			myCaptureQueriesListener.clear();
-			addReadPartition(2);
+			addNextTargetPartitionsForRead(2);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.HIT, outcome.getCacheStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe());
@@ -116,7 +107,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 
 		{
 			myCaptureQueriesListener.clear();
-			addReadPartition(1, null);
+			addNextTargetPartitionsForRead(1, null);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(4, outcome.sizeOrThrowNpe());
@@ -133,7 +124,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		// Try from a different partition
 		{
 			myCaptureQueriesListener.clear();
-			addReadPartition(2, 1);
+			addNextTargetPartitionsForRead(2, 1);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(4, outcome.sizeOrThrowNpe());
@@ -150,7 +141,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		// Try from the first partition, should be a cache hit this time
 		{
 			myCaptureQueriesListener.clear();
-			addReadPartition(1, null);
+			addNextTargetPartitionsForRead(1, null);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.HIT, outcome.getCacheStatus());
 			assertEquals(4, outcome.sizeOrThrowNpe());
@@ -186,7 +177,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		p.setActive(true);
 		p.setName(List.of(new HumanName().setFamily("ABC").setGiven(List.of(new StringType("DEF")))));
 		bb.addTransactionUpdateEntry(p, "Patient?identifier=foo|bar");
-		addCreatePartitionNTimes(thePartitionId, 3);
+		addNextTargetPartitionNTimesForCreate(thePartitionId, 3);
 
 		return (Bundle) bb.getBundle();
 	}

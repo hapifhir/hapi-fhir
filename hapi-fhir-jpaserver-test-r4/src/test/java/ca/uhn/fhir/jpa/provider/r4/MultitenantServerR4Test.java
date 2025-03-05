@@ -15,8 +15,10 @@ import ca.uhn.fhir.jpa.interceptor.TransactionConcurrencySemaphoreInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+
+import static ca.uhn.fhir.jpa.util.ConcurrencyTestUtil.executeFutures;
+
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
@@ -24,6 +26,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -40,14 +43,19 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -88,7 +96,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -976,11 +983,13 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		private static final int THREAD_COUNT = 10;
 
 		private ExecutorService myExecutor;
+		CompletionService<Boolean> myCompletionService;
 		private TransactionConcurrencySemaphoreInterceptor myConcurrencySemaphoreInterceptor;
 
 		@BeforeEach
 		public void before() {
 			myExecutor = Executors.newFixedThreadPool(THREAD_COUNT);
+			myCompletionService = new ExecutorCompletionService<>(myExecutor);
 			myConcurrencySemaphoreInterceptor = new TransactionConcurrencySemaphoreInterceptor(myMemoryCacheService);
 
 			RestfulServer server = new RestfulServer(myFhirContext);
@@ -994,42 +1003,38 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		}
 
 		@Test
-		public void testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate() throws ExecutionException, InterruptedException {
+		public void testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate() {
 			myStorageSettings.setMatchUrlCacheEnabled(true);
 			myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(true);
 			myInterceptorRegistry.registerInterceptor(myConcurrencySemaphoreInterceptor);
 			myConcurrencySemaphoreInterceptor.setLogWaits(true);
 
-			Runnable creatorForPartitionA = ()->{
+			Callable<Boolean> creatorForPartitionA = () -> {
 				Bundle input = createBundleForRunnableTransaction();
 				SystemRequestDetails requestDetails = new SystemRequestDetails();
 				requestDetails.setTenantId(TENANT_A);
-				mySystemDao.transaction(requestDetails, input);
+				return executeTransactionOrThrow(requestDetails, input);
 			};
 
-			Runnable creatorForPartitionB = ()->{
+			Callable<Boolean> creatorForPartitionB = () -> {
 				Bundle input = createBundleForRunnableTransaction();
 				SystemRequestDetails requestDetails = new SystemRequestDetails();
 				requestDetails.setTenantId(TENANT_B);
-				mySystemDao.transaction(requestDetails, input);
+				return executeTransactionOrThrow(requestDetails, input);
 			};
 
 			for (int set = 0; set < 3; set++) {
 				myConcurrencySemaphoreInterceptor.clearSemaphores();
 
-				List<Future<?>> futures = new ArrayList<>();
 				for (int j = 0; j < 10; j++) {
 					if (j % 2 == 0) {
-						futures.add(myExecutor.submit(creatorForPartitionA));
+						myCompletionService.submit(creatorForPartitionA);
 					} else {
-						futures.add(myExecutor.submit(creatorForPartitionB));
+						myCompletionService.submit(creatorForPartitionB);
 					}
-
 				}
 
-				for (Future<?> next : futures) {
-					next.get();
-				}
+				executeFutures(myCompletionService, 10);
 
 				// Only a thread from the first iteration (set) will acquire the semaphores for the match urls
 				// Since the match URLs will still be present in the Match URL cache for the remaining of the test
@@ -1044,6 +1049,17 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 				Map<String, Integer> counts = getResourceCountMap();
 				assertEquals(4, counts.get("Patient"), counts.toString());
 			});
+		}
+
+		private boolean executeTransactionOrThrow(SystemRequestDetails requestDetails, Bundle input) {
+			try {
+				mySystemDao.transaction(requestDetails, input);
+				return true;
+			} catch (Throwable theError) {
+				String bundleAsString = myFhirContext.newJsonParser().encodeResourceToString(input);
+				ourLog.error("Caught an error during processing instance {}", bundleAsString, theError);
+				throw new InternalErrorException("Caught an error during processing instance " + bundleAsString, theError);
+			}
 		}
 
 		private Bundle createBundleForRunnableTransaction() {
