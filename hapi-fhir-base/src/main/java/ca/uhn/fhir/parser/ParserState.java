@@ -1286,13 +1286,11 @@ class ParserState<T> {
 			super.wereBack();
 
 			IResource nextResource = (IResource) getCurrentElement();
-			String version = nextResource.getId().getVersionIdPart();
+			// for DSTU2, we cannot use directly "nextResource.getId().getVersionIdPart();"
+			String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
 			String resourceName = myContext.getResourceType(nextResource);
 			String bundleIdPart = nextResource.getId().getIdPart();
 			if (isNotBlank(bundleIdPart)) {
-				// if (isNotBlank(entryBaseUrl)) {
-				// nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
-				// } else {
 				IdDt previousId = nextResource.getId();
 				nextResource.setId(new IdDt(null, resourceName, bundleIdPart, version));
 				// Copy extensions
@@ -1301,7 +1299,6 @@ class ParserState<T> {
 						nextResource.getId().addUndeclaredExtension(ext);
 					}
 				}
-				// }
 			}
 		}
 	}
