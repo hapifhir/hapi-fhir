@@ -1,17 +1,16 @@
 package ca.uhn.fhir.jpa.util;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.Future;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ConcurrencyTestUtil {
 
@@ -44,7 +43,7 @@ public class ConcurrencyTestUtil {
 
 		if (!errors.isEmpty()) {
 			fail(String.format("Failed to execute futures. Found %d errors :%n", errors.size())
-				+ String.join(", ", errors));
+					+ String.join(", ", errors));
 		}
 	}
 }
