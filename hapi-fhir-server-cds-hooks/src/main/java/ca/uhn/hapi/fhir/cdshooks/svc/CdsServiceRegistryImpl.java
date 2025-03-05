@@ -38,20 +38,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
-import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(CdsServiceRegistryImpl.class);
-	private final CdsServiceRequestJsonDeserializer myCdsServiceRequestJsonDeserializer;
-	private CdsServiceCache myServiceCache;
 
+	private final CdsServiceRequestJsonDeserializer myCdsServiceRequestJsonDeserializer;
 	private final CdsHooksContextBooter myCdsHooksContextBooter;
 	private final CdsPrefetchSvc myCdsPrefetchSvc;
 	private final ObjectMapper myObjectMapper;
+
+	private CdsServiceCache myServiceCache;
 
 	public CdsServiceRegistryImpl(
 			CdsHooksContextBooter theCdsHooksContextBooter,
@@ -79,10 +80,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		final CdsServiceJson cdsServiceJson = getCdsServiceJson(theServiceId);
 		final CdsServiceRequestJson deserializedRequest =
 				myCdsServiceRequestJsonDeserializer.deserialize(cdsServiceJson, theCdsServiceRequestJson);
-		ICdsServiceMethod serviceMethod = (ICdsServiceMethod) getCdsServiceMethodOrThrowException(theServiceId);
-		myCdsPrefetchSvc.augmentRequest(deserializedRequest, serviceMethod);
-		Object response = serviceMethod.invoke(myObjectMapper, deserializedRequest, theServiceId);
-		return encodeServiceResponse(theServiceId, response);
+		return callService(theServiceId, deserializedRequest);
 	}
 
 	@Override
@@ -90,6 +88,20 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		ICdsMethod feedbackMethod = getCdsFeedbackMethodOrThrowException(theServiceId);
 		Object response = feedbackMethod.invoke(myObjectMapper, theCdsServiceFeedbackJson, theServiceId);
 		return encodeFeedbackResponse(theServiceId, response);
+	}
+
+	@Override
+	public void registerService(
+			String theServiceId,
+			CdsServiceJson theCdsServiceJson,
+			boolean theAllowAutoFhirClientPrefetch,
+			String theModuleId) {
+		registerService(
+			theServiceId,
+			buildRequestToResponseFunction(theServiceId),
+			theCdsServiceJson,
+			theAllowAutoFhirClientPrefetch,
+			theModuleId);
 	}
 
 	@Override
@@ -108,7 +120,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 
 	@Override
 	public void unregisterService(String theServiceId, String theModuleId) {
-		Validate.notNull(theServiceId);
+		Objects.requireNonNull(theServiceId);
 
 		ICdsMethod activeService = myServiceCache.unregisterServiceMethod(theServiceId, theModuleId);
 		if (activeService != null) {
@@ -161,6 +173,18 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		} else {
 			return buildFeedbackFromImplementation(theServiceId, theResponse);
 		}
+	}
+
+	private Function<CdsServiceRequestJson, CdsServiceResponseJson> buildRequestToResponseFunction(String theServiceId) {
+		return cdsServiceRequestJson -> callService(theServiceId, cdsServiceRequestJson);
+	}
+
+	@Nonnull
+	private CdsServiceResponseJson callService(String theServiceId, CdsServiceRequestJson deserializedRequest) {
+		ICdsServiceMethod serviceMethod = (ICdsServiceMethod) getCdsServiceMethodOrThrowException(theServiceId);
+		myCdsPrefetchSvc.augmentRequest(deserializedRequest, serviceMethod);
+		Object response = serviceMethod.invoke(myObjectMapper, deserializedRequest, theServiceId);
+		return encodeServiceResponse(theServiceId, response);
 	}
 
 	private CdsServiceResponseJson buildResponseFromImplementation(String theServiceId, Object theResult) {

@@ -28,10 +28,6 @@ class CdsServiceRegistryImplTest {
 	@Mock
 	private CdsPrefetchSvc myCdsPrefetchSvc;
 	@Mock
-	private ICdsCrServiceFactory myCdsCrServiceFactory;
-	@Mock
-	private ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
-	@Mock
 	private CdsServiceCache myCdsServiceCache;
 	@Mock
 	private CdsServiceRequestJsonDeserializer myCdsServiceRequestJsonDeserializer;
@@ -40,7 +36,7 @@ class CdsServiceRegistryImplTest {
 
 	@BeforeEach()
 	void setup() {
-		myFixture = new CdsServiceRegistryImpl(myCdsHooksContextBooter, myCdsPrefetchSvc, myObjectMapper, myCdsCrServiceFactory, myCrDiscoveryServiceFactory, myCdsServiceRequestJsonDeserializer);
+		myFixture = new CdsServiceRegistryImpl(myCdsHooksContextBooter, myCdsPrefetchSvc, myObjectMapper, myCdsServiceRequestJsonDeserializer);
 	}
 
 	@Test

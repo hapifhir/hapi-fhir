@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
@@ -35,6 +36,16 @@ import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsConfigServiceImpl;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsHooksContextBooter;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrSettings;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsServiceInterceptor;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrService;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.CdsCrDiscoveryServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICdsCrDiscoveryServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryService;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchDaoSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
@@ -42,6 +53,7 @@ import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsResolutionStrategySvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,11 +183,17 @@ public class CdsHooksConfig {
 	}
 
 	@Bean
-	public CdsServiceInterceptor cdsServiceInterceptor() {
+	public CdsServiceInterceptor cdsServiceInterceptor(
+			CdsServiceRegistryImpl theCdsServiceRegistry,
+			ICrDiscoveryServiceFactory theDiscoveryServiceFactory) {
 		if (myResourceChangeListenerRegistry == null) {
 			return null;
 		}
-		CdsServiceInterceptor listener = new CdsServiceInterceptor();
+		// TODO: LD:  how do we get the module ID here?
+		final String fakeModuleId = "cdsHooks";
+		// TODO: LD:  how do we determine if this is true or false?
+		final boolean isAllowFhirClientPrefetch = false;
+		final CdsServiceInterceptor listener = new CdsServiceInterceptor(theCdsServiceRegistry, fakeModuleId, isAllowFhirClientPrefetch, theDiscoveryServiceFactory);
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
 				PLAN_DEFINITION_RESOURCE_NAME, SearchParameterMap.newSynchronous(), listener, 1000);
 		return listener;

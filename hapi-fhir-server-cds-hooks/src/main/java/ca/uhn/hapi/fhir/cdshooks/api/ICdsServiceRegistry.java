@@ -56,6 +56,13 @@ public interface ICdsServiceRegistry {
 	 */
 	CdsServiceFeedbackJson callFeedback(String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson);
 
+	// TODO:  LD:  javadoc?
+	void registerService(
+		String theServiceId,
+		CdsServiceJson theCdsServiceJson,
+		boolean theAllowAutoFhirClientPrefetch,
+		String theModuleId);
+
 	/**
 	 * Register a new CDS Service with the endpoint.
 	 *

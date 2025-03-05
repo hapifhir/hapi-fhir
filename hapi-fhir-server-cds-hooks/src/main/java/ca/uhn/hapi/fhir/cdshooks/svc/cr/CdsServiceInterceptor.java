@@ -23,10 +23,10 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.ResourceChangeEvent;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,10 +38,21 @@ import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.CDS_CR_MODULE_ID;
 public class CdsServiceInterceptor implements IResourceChangeListener {
 	static final Logger ourLog = LoggerFactory.getLogger(CdsServiceInterceptor.class);
 
-	@Autowired
-	CdsServiceRegistryImpl myCdsServiceRegistry;
+	private final CdsServiceRegistryImpl myCdsServiceRegistry;
+	private final String myModuleId;
+	private final boolean myAllowFhirClientPrefetch;
+	private final ICrDiscoveryServiceFactory myDiscoveryServiceFactory;
 
-	public CdsServiceInterceptor() {}
+	public CdsServiceInterceptor(
+			CdsServiceRegistryImpl theCdsServiceRegistry,
+			String theModuleId,
+			boolean theAllowFhirClientPrefetch,
+			ICrDiscoveryServiceFactory theDiscoveryServiceFactory) {
+		myCdsServiceRegistry = theCdsServiceRegistry;
+		myModuleId = theModuleId;
+		myAllowFhirClientPrefetch = theAllowFhirClientPrefetch;
+		myDiscoveryServiceFactory = theDiscoveryServiceFactory;
+	}
 
 	@Override
 	public void handleInit(Collection<IIdType> theResourceIds) {
@@ -69,7 +80,12 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
 	private void insert(List<IIdType> theCreatedIds) {
 		for (IIdType id : theCreatedIds) {
 			try {
-				myCdsServiceRegistry.registerCrService(id.getIdPart());
+				final String serviceId = id.getIdPart();
+				myCdsServiceRegistry.registerService(
+					serviceId,
+					myDiscoveryServiceFactory.create(serviceId).resolveService(),
+					myAllowFhirClientPrefetch,
+					myModuleId);
 			} catch (Exception e) {
 				ourLog.info(String.format("Failed to create service for %s", id.getIdPart()));
 			}
