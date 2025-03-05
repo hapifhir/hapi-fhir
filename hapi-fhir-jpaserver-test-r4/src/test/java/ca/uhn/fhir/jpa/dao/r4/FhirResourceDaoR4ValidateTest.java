@@ -853,7 +853,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setSubject(new Reference("Group/ABC"));
 		oo = validateAndReturnOutcome(obs);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("Unable to find a match for profile Group/ABC (by type) among choices: ; [CanonicalType[http://hl7.org/fhir/StructureDefinition/Patient]]");
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("Unable to find a profile match for Group/ABC (by type) among choices: ; [http://hl7.org/fhir/StructureDefinition/Patient]");
 
 		// Target of right type
 		obs.setSubject(new Reference("Patient/DEF"));
@@ -984,7 +984,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		assertThat(oo.getIssue().stream())
 			.anyMatch(r ->
-				r.getDiagnostics().equals("The code '123' is not valid in the system https://bb (Validation failed)") );
+				r.getDiagnostics().equals("Profile reference 'https://foo' has not been checked because it could not be found, and the validator is set to not fetch unknown profiles") );
 
 	}
 
