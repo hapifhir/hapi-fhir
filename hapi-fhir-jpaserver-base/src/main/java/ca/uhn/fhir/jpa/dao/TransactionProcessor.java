@@ -358,10 +358,21 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					resourceType = myFhirContext.getResourceType(resource);
 				}
 				if (("PUT".equals(verb) || "PATCH".equals(verb)) && requestUrl != null && requestUrl.contains("?")) {
-					preFetchConditionalUrl(resourceType, requestUrl, true, idsToPreFetch, searchParameterMapsToResolve);
+					preFetchConditionalUrl(
+							resourceType,
+							requestUrl,
+							true,
+							idsToPreFetch,
+							searchParameterMapsToResolve,
+							theRequestPartitionId);
 				} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
 					preFetchConditionalUrl(
-							resourceType, requestIfNoneExist, false, idsToPreFetch, searchParameterMapsToResolve);
+							resourceType,
+							requestIfNoneExist,
+							false,
+							idsToPreFetch,
+							searchParameterMapsToResolve,
+							theRequestPartitionId);
 				}
 
 				if (myStorageSettings.isAllowInlineMatchUrlReferences()) {
@@ -374,7 +385,12 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						String refResourceType = determineResourceTypeInResourceUrl(myFhirContext, referenceUrl);
 						if (refResourceType != null) {
 							preFetchConditionalUrl(
-									refResourceType, referenceUrl, false, idsToPreFetch, searchParameterMapsToResolve);
+									refResourceType,
+									referenceUrl,
+									false,
+									idsToPreFetch,
+									searchParameterMapsToResolve,
+									theRequestPartitionId);
 						}
 					}
 				}
@@ -546,14 +562,17 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * @param theShouldPreFetchResourceBody         Should we also fetch the actual resource body, or just figure out the PID associated with it. See the method javadoc above for some context.
 	 * @param theOutputIdsToPreFetch                This will be populated with any resource PIDs that need to be pre-fetched
 	 * @param theOutputSearchParameterMapsToResolve This will be populated with any {@link SearchParameterMap} instances corresponding to match URLs we need to resolve
+	 * @param thePartitionId						The partition ID of the associated resource (can be null)
 	 */
 	private void preFetchConditionalUrl(
 			String theResourceType,
 			String theRequestUrl,
 			boolean theShouldPreFetchResourceBody,
 			List<Long> theOutputIdsToPreFetch,
-			List<MatchUrlToResolve> theOutputSearchParameterMapsToResolve) {
-		JpaPid cachedId = myMatchResourceUrlService.processMatchUrlUsingCacheOnly(theResourceType, theRequestUrl);
+			List<MatchUrlToResolve> theOutputSearchParameterMapsToResolve,
+			RequestPartitionId thePartitionId) {
+		JpaPid cachedId =
+				myMatchResourceUrlService.processMatchUrlUsingCacheOnly(theResourceType, theRequestUrl, thePartitionId);
 		if (cachedId != null) {
 			if (theShouldPreFetchResourceBody) {
 				theOutputIdsToPreFetch.add(cachedId.getId());

@@ -61,17 +61,20 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	public void after() {
 		assertNoRemainingPartitionIds();
 
-		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
-		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
-		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
-		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
+		PartitionSettings defaultPartitionSettings = new PartitionSettings();
+		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
+
+		myPartitionSettings.setIncludePartitionInSearchHashes(defaultPartitionSettings.isIncludePartitionInSearchHashes());
+		myPartitionSettings.setPartitioningEnabled(defaultPartitionSettings.isPartitioningEnabled());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultPartitionSettings.getAllowReferencesAcrossPartitions());
+		myPartitionSettings.setDefaultPartitionId(defaultPartitionSettings.getDefaultPartitionId());
 
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
 
-		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
-		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
-		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().getMatchUrlCache());
+		myStorageSettings.setIndexMissingFields(defaultStorageSettings.getIndexMissingFields());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaultStorageSettings.isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setMassIngestionMode(defaultStorageSettings.isMassIngestionMode());
+		myStorageSettings.setMatchUrlCacheEnabled(defaultStorageSettings.isMatchUrlCacheEnabled());
 
 		if (myRegisteredSearchParamValidatingInterceptor) {
 			myInterceptorRegistry.unregisterInterceptor(mySearchParamValidatingInterceptor);
@@ -112,7 +115,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		// Ensure the partition names are resolved
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_1, PARTITION_2, PARTITION_3, PARTITION_4));
+		myPartitionInterceptor.addNextTargetReadPartition(RequestPartitionId.fromPartitionNames(JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_1, PARTITION_2, PARTITION_3, PARTITION_4));
 		myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true), mySrd);
 
 		// Pre-fetch the partitions by ID
@@ -144,8 +147,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	protected void createUniqueComboSp() {
-		addCreateDefaultPartition();
-		addReadDefaultPartition(); // one for search param validation
+		addNextTargetPartitionForCreateDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-gender");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
@@ -155,8 +158,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp, mySrd);
 
-		addCreateDefaultPartition();
-		addReadDefaultPartition(); // one for search param validation
+		addNextTargetPartitionForCreateDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-family");
 		sp.setType(Enumerations.SearchParamType.STRING);
@@ -166,7 +169,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp, mySrd);
 
-		addCreateDefaultPartition();
+		addNextTargetPartitionForCreateDefaultPartition();
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-gender-family-unique");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
@@ -189,8 +192,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	protected void createNonUniqueComboSp() {
-		addCreateDefaultPartition();
-		addReadDefaultPartition(); // one for search param validation
+		addNextTargetPartitionForCreateDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-family");
 		sp.setType(Enumerations.SearchParamType.STRING);
@@ -200,8 +203,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp, mySrd);
 
-		addCreateDefaultPartition();
-		addReadDefaultPartition(); // one for search param validation
+		addNextTargetPartitionForCreateDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-managingorg");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
@@ -211,7 +214,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp, mySrd);
 
-		addCreateDefaultPartition();
+		addNextTargetPartitionForCreateDefaultPartition();
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-family-and-org");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
@@ -238,42 +241,48 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myHaveDroppedForcedIdUniqueConstraint = true;
 	}
 
-	protected void addCreatePartition(Integer thePartitionId) {
-		addCreatePartition(thePartitionId, null);
+	protected void addNextTargetPartitionNTimesForCreate(Integer thePartitionId, Integer theNumberOfTimes) {
+		for (int i = 0; i < theNumberOfTimes; i++) {
+			addNextTargetPartitionForCreate(thePartitionId, null);
+		}
 	}
 
-	protected void addCreatePartition(Integer thePartitionId, LocalDate thePartitionDate) {
+	protected void addNextTargetPartitionForCreate(Integer thePartitionId) {
+		addNextTargetPartitionForCreate(thePartitionId, null);
+	}
+
+	protected void addNextTargetPartitionForCreate(Integer thePartitionId, LocalDate thePartitionDate) {
 		Validate.notNull(thePartitionId);
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(thePartitionId, thePartitionDate);
-		myPartitionInterceptor.addCreatePartition(requestPartitionId);
+		myPartitionInterceptor.addNextTargetPartitionForCreate(requestPartitionId);
 	}
 
-	protected void addCreateDefaultPartition() {
-		myPartitionInterceptor.addCreatePartition(RequestPartitionId.defaultPartition());
+	protected void addNextTargetPartitionForCreateDefaultPartition() {
+		myPartitionInterceptor.addNextTargetPartitionForCreate(RequestPartitionId.defaultPartition());
 	}
 
-	protected void addCreateDefaultPartition(LocalDate thePartitionDate) {
+	protected void addNextTargetPartitionForCreateDefaultPartition(LocalDate thePartitionDate) {
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(null, thePartitionDate);
-		myPartitionInterceptor.addCreatePartition(requestPartitionId);
+		myPartitionInterceptor.addNextTargetPartitionForCreate(requestPartitionId);
 	}
 
-	protected void addReadPartition(Integer... thePartitionId) {
+	protected void addNextTargetPartitionsForRead(Integer... thePartitionId) {
 		Validate.notNull(thePartitionId);
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionIds(thePartitionId));
+		myPartitionInterceptor.addNextTargetReadPartition(RequestPartitionId.fromPartitionIds(thePartitionId));
 	}
 
-	protected void addReadPartitions(String... thePartitionNames) {
+	protected void addNextTargetPartitionsForRead(String... thePartitionNames) {
 		Validate.notNull(thePartitionNames);
 		Validate.isTrue(thePartitionNames.length > 0);
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(thePartitionNames));
+		myPartitionInterceptor.addNextTargetReadPartition(RequestPartitionId.fromPartitionNames(thePartitionNames));
 	}
 
-	protected void addReadDefaultPartition() {
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.defaultPartition());
+	protected void addNextTargetPartitionForReadDefaultPartition() {
+		myPartitionInterceptor.addNextTargetReadPartition(RequestPartitionId.defaultPartition());
 	}
 
-	protected void addReadAllPartitions() {
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.allPartitions());
+	protected void addNextTargetPartitionForReadAllPartitions() {
+		myPartitionInterceptor.addNextTargetReadPartition(RequestPartitionId.allPartitions());
 	}
 
 	public void createRequestId() {
@@ -283,9 +292,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	protected ICreationArgument withPartition(Integer thePartitionId) {
 		return t -> {
 			if (thePartitionId != null) {
-				addCreatePartition(thePartitionId, null);
+				addNextTargetPartitionForCreate(thePartitionId, null);
 			} else {
-				addCreateDefaultPartition();
+				addNextTargetPartitionForCreateDefaultPartition();
 			}
 		};
 	}
@@ -293,11 +302,11 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	protected ICreationArgument withReadWritePartitions(Integer thePartitionId) {
 		return t -> {
 			if (thePartitionId != null) {
-				addReadPartition(thePartitionId);
-				addCreatePartition(thePartitionId, null);
+				addNextTargetPartitionsForRead(thePartitionId);
+				addNextTargetPartitionForCreate(thePartitionId, null);
 			} else {
-				addReadDefaultPartition();
-				addCreateDefaultPartition();
+				addNextTargetPartitionForReadDefaultPartition();
+				addNextTargetPartitionForCreateDefaultPartition();
 			}
 		};
 	}
@@ -308,7 +317,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 		private final List<RequestPartitionId> myReadRequestPartitionIds = new ArrayList<>();
 
-		public void addReadPartition(RequestPartitionId theRequestPartitionId) {
+		public void addNextTargetReadPartition(RequestPartitionId theRequestPartitionId) {
 			myReadRequestPartitionIds.add(theRequestPartitionId);
 			ourLog.info("Adding partition {} for read (not have {})", theRequestPartitionId, myReadRequestPartitionIds.size());
 		}
@@ -349,10 +358,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	@Interceptor
 	public static class MyWriteInterceptor {
 
-
 		private final List<RequestPartitionId> myCreateRequestPartitionIds = new ArrayList<>();
 
-		public void addCreatePartition(RequestPartitionId theRequestPartitionId) {
+		public void addNextTargetPartitionForCreate(RequestPartitionId theRequestPartitionId) {
 			myCreateRequestPartitionIds.add(theRequestPartitionId);
 		}
 

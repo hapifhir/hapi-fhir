@@ -180,7 +180,7 @@ public class TransactionConcurrencySemaphoreInterceptor {
 	}
 
 	/**
-	 * Clear all semaphors from the list. This is really mostly intended for testing scenarios.
+	 * Clear all semaphores from the list. This is really mostly intended for testing scenarios.
 	 */
 	public void clearSemaphores() {
 		mySemaphoreCache.invalidateAll();
