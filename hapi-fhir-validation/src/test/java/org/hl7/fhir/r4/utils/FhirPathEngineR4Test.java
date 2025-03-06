@@ -2,6 +2,7 @@ package org.hl7.fhir.r4.utils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.utils.FhirPathEngineTest;
@@ -24,6 +25,8 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -31,6 +34,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
@@ -39,32 +43,100 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPathEngineTest.class);
 	private static FHIRPathEngine ourEngine;
 
-	@Test
-	public void testCrossResourceBoundaries() throws FHIRException {
-		Specimen specimen = new Specimen();
-		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
 
-		Observation o = new Observation();
-		o.setId("O1");
-		o.setStatus(Observation.ObservationStatus.FINAL);
-		o.setSpecimen(new Reference(specimen));
+	@Nested
+	@DisplayName("FHIRPath access for contained resources.")
+	class CrossResourceBoundaries{
 
-		IParser p = ourCtx.newJsonParser();
-		o = (Observation) p.parseResource(p.encodeResourceToString(o));
+		/**
+		 * When a contained resource without an ID is set as a reference directly, the JSON parser will automatically
+		 * generate a valid ID for the contained resource, add it to the and the .
+		 */
+		@Test
+		public void testParserGeneratedContainedId() throws FHIRException {
+			Specimen specimen = new Specimen();
+			specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
 
-		List<Base> value;
+			Observation o = new Observation();
+			o.setId("O1");
+			o.setStatus(Observation.ObservationStatus.FINAL);
+			o.setSpecimen(new Reference(specimen));
 
+			IParser p = ourCtx.newJsonParser();
+			o = (Observation) p.parseResource(p.encodeResourceToString(o));
 
-		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen", Base.class);
-		assertThat(value).hasSize(1);
-		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve()", Base.class);
-		assertThat(value).hasSize(1);
+			List<Base> value;
 
+			value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen", Base.class);
+			assertThat(value).hasSize(1);
+			assertSpecimenFoundAndDateCorrect(o);
+		}
 
-		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve().receivedTime", Base.class);
-		assertThat(value).hasSize(1);
-		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
+		/** If a contained resource with an ID exists in the contained field, it can be referred to by a # prefixed
+		 * reference.
+		 * <p/>
+		 * This is the most basic FHIR structure that allow FHIRPath to resolve references to contained resources.
+		 **/
+		@Test
+		public void testManuallySetContainedAndReference() throws FHIRException {
+			Specimen specimen = new Specimen();
+			specimen.setId("S1");
+			specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
+
+			Observation o = new Observation();
+			o.setId("O1");
+			o.setStatus(Observation.ObservationStatus.FINAL);
+			o.setSpecimen(new Reference("#S1"));
+
+			o.getContained().add(specimen);
+
+			List<Base> value;
+
+			value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen", Base.class);
+			assertThat(value).hasSize(1);
+
+			assertSpecimenFoundAndDateCorrect(o);
+		}
+
+		/**If a contained resource with an ID exists in the contained field, it can be referred to by a # prefixed
+		 * reference, as well as included as the resource for that reference
+		 **/
+		@Test
+		public void testManuallySetContainedAndReferenceWithResource()  throws FHIRException {
+			Specimen specimen = new Specimen();
+			specimen.setId("S1");
+			specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
+
+			Observation o = new Observation();
+			o.setId("O1");
+			o.setStatus(Observation.ObservationStatus.FINAL);
+			Reference reference = new Reference("#S1");
+			reference.setResource(specimen);
+			o.setSpecimen(reference);
+
+			o.getContained().add(specimen);
+
+			List<Base> value;
+
+			value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen", Base.class);
+			assertThat(value).hasSize(1);
+			assertSpecimenFoundAndDateCorrect(o);
+		}
+
+		private void assertSpecimenFoundAndDateCorrect(Observation o) {
+			List<Base> value;
+			value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve()", Base.class);
+			assertThat(value).hasSize(1);
+
+			value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve().receivedTime", Base.class);
+			assertThat(value).hasSize(1);
+			assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
+		}
+
 	}
+
+
+
 
 
 
