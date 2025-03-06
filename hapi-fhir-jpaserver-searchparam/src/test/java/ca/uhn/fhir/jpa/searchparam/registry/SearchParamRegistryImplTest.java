@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -52,6 +51,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.SearchParamLookupContextEnum.ALL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -141,20 +141,19 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	void handleInit() {
-		assertEquals(31, mySearchParamRegistry.getActiveSearchParams("Patient", null).size());
+		assertEquals(31, mySearchParamRegistry.getActiveSearchParams("Patient", ALL).size());
 
 		IdDt idBad = new IdDt("SearchParameter/bad");
-		when(mySearchParamProvider.read(idBad)).thenThrow(new ResourceNotFoundException("id bad"));
 
 		IdDt idGood = new IdDt("SearchParameter/good");
 		SearchParameter goodSearchParam = buildSearchParameter(Enumerations.PublicationStatus.ACTIVE);
-		when(mySearchParamProvider.read(idGood)).thenReturn(goodSearchParam);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(goodSearchParam));
 
 		List<IIdType> idList = new ArrayList<>();
 		idList.add(idBad);
 		idList.add(idGood);
 		mySearchParamRegistry.handleInit(idList);
-		assertEquals(32, mySearchParamRegistry.getActiveSearchParams("Patient", null).size());
+		assertEquals(32, mySearchParamRegistry.getActiveSearchParams("Patient", ALL).size());
 	}
 
 	@Test
@@ -229,7 +228,7 @@ public class SearchParamRegistryImplTest {
 	}
 
 	private void assertPatientSearchParamSize(int theExpectedSize) {
-		assertEquals(theExpectedSize, mySearchParamRegistry.getActiveSearchParams("Patient", null).size());
+		assertEquals(theExpectedSize, mySearchParamRegistry.getActiveSearchParams("Patient", ALL).size());
 	}
 
 	private void assertResult(ResourceChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
@@ -256,19 +255,19 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	public void testGetActiveUniqueSearchParams_Empty() {
-		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Patient", null)).isEmpty();
+		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Patient", ALL)).isEmpty();
 	}
 
 	@Test
 	public void testGetActiveSearchParamByUrl_whenSPExists_returnsActiveSp() {
-		RuntimeSearchParam patientLanguageSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/Patient-language", null);
+		RuntimeSearchParam patientLanguageSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/Patient-language", ALL);
 		assertNotNull(patientLanguageSp);
 		assertEquals(patientLanguageSp.getId().getIdPart(), "Patient-language");
 	}
 
 	@Test
 	public void testGetActiveSearchParamByUrl_whenSPNotExist_returnsNull() {
-		RuntimeSearchParam nonExistingSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/nonExistingSp", null);
+		RuntimeSearchParam nonExistingSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/nonExistingSp", ALL);
 		assertNull(nonExistingSp);
 	}
 
@@ -287,7 +286,7 @@ public class SearchParamRegistryImplTest {
 
 		assertFalse(retried.get());
 		mySearchParamRegistry.forceRefresh();
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient", null);
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient", ALL);
 		assertTrue(retried.get());
 		assertEquals(ourBuiltInSearchParams.getSearchParamMap("Patient").size(), activeSearchParams.size());
 	}
@@ -300,7 +299,7 @@ public class SearchParamRegistryImplTest {
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 
 		mySearchParamRegistry.forceRefresh();
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient", null);
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient", ALL);
 
 		RuntimeSearchParam converted = activeSearchParams.get("foo");
 		assertNotNull(converted);
@@ -335,7 +334,7 @@ public class SearchParamRegistryImplTest {
 
 		mySearchParamRegistry.forceRefresh();
 
-		RuntimeSearchParam canonicalSp = mySearchParamRegistry.getRuntimeSearchParam("Encounter", "subject", null);
+		RuntimeSearchParam canonicalSp = mySearchParamRegistry.getRuntimeSearchParam("Encounter", "subject", ALL);
 		assertEquals("Modified Subject", canonicalSp.getDescription());
 		assertTrue(canonicalSp.hasUpliftRefchain("name1"));
 		assertFalse(canonicalSp.hasUpliftRefchain("name99"));
@@ -344,7 +343,7 @@ public class SearchParamRegistryImplTest {
 
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
 		// Add a new search parameter entity
-		List<ResourceTable> newEntities = new ArrayList(ourEntities);
+		List<ResourceTable> newEntities = new ArrayList<>(ourEntities);
 		newEntities.add(createEntity(++ourLastId, 1));
 		resetMock(theStatus, newEntities);
 		return newEntities;
