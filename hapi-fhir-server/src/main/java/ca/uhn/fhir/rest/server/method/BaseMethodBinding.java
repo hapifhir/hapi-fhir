@@ -111,24 +111,13 @@ public abstract class BaseMethodBinding {
 	}
 
 	protected Object[] createMethodParams(RequestDetails theRequest) {
+		ourLog.info("1234: Creating parameters for method {}, and requestDetails: {}", myMethod.getName(), theRequest);
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
 			IParameter param = getParameters().get(i);
 			if (param != null) {
 				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
 			}
-		}
-		return params;
-	}
-
-	protected Object[] createParametersForServerRequest(RequestDetails theRequest) {
-		Object[] params = new Object[getParameters().size()];
-		for (int i = 0; i < getParameters().size(); i++) {
-			IParameter param = getParameters().get(i);
-			if (param == null) {
-				continue;
-			}
-			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
 		}
 		return params;
 	}
@@ -260,8 +249,12 @@ public abstract class BaseMethodBinding {
 
 		// Actually invoke the method
 		try {
-			Method method = getMethod();
-			return method.invoke(getProvider(), theMethodParams);
+			final Method method = getMethod();
+
+			final BaseMethodBindingMethodParameterBuilder baseMethodBindingMethodParameterBuilder =
+					new BaseMethodBindingMethodParameterBuilder(method, theRequest, theMethodParams);
+
+			return method.invoke(getProvider(), baseMethodBindingMethodParameterBuilder.build());
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
