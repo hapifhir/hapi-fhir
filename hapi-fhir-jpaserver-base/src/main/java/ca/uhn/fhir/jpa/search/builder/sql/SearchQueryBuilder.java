@@ -906,28 +906,24 @@ public class SearchQueryBuilder {
 			double theLatitudeValue,
 			double theLongitudeValue,
 			boolean theAscending) {
-		FunctionCall absLatitude = new FunctionCall("ABS");
 		String latitudePlaceholder = generatePlaceholder(theLatitudeValue);
-		ComboExpression absLatitudeMiddle = new ComboExpression(
-				ComboExpression.Op.SUBTRACT, theCoordsBuilder.getColumnLatitude(), latitudePlaceholder);
-		absLatitude = absLatitude.addCustomParams(absLatitudeMiddle);
-
-		FunctionCall absLongitude = new FunctionCall("ABS");
 		String longitudePlaceholder = generatePlaceholder(theLongitudeValue);
-		ComboExpression absLongitudeMiddle = new ComboExpression(
+		ComboExpression latitudeDiff = new ComboExpression(
+				ComboExpression.Op.SUBTRACT, theCoordsBuilder.getColumnLatitude(), latitudePlaceholder);
+		ComboExpression longitudeDiff = new ComboExpression(
 				ComboExpression.Op.SUBTRACT, theCoordsBuilder.getColumnLongitude(), longitudePlaceholder);
-		absLongitude = absLongitude.addCustomParams(absLongitudeMiddle);
 
-		ComboExpression sum = new ComboExpression(ComboExpression.Op.ADD, absLatitude, absLongitude);
-		String ordering;
-		if (theAscending) {
-			ordering = "";
-		} else {
-			ordering = " DESC";
-		}
+		ComboExpression squaredLatitudeDiff =
+			new ComboExpression(ComboExpression.Op.MULTIPLY, latitudeDiff, latitudeDiff);
+		ComboExpression squaredLongitudeDiff =
+			new ComboExpression(ComboExpression.Op.MULTIPLY, longitudeDiff, longitudeDiff);
+		FunctionCall euclideanDistance = new FunctionCall("SQRT")
+			.addCustomParams(
+				new ComboExpression(ComboExpression.Op.ADD, squaredLatitudeDiff, squaredLongitudeDiff));
 
-		String columnName = "MHD" + (myNextNearnessColumnId++);
-		mySelect.addAliasedColumn(sum, columnName);
+		String columnName = "EUC_DIST" + (myNextNearnessColumnId++);
+		mySelect.addAliasedColumn(euclideanDistance, columnName);
+		String ordering = theAscending ? "" : " DESC";
 		mySelect.addCustomOrderings(columnName + ordering);
 	}
 

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -36,8 +35,9 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 
@@ -391,8 +391,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"PractitionerRole-Toronto",
 			"PractitionerRole-Mississauga",
 			"PractitionerRole-St. Catharines",
-			"PractitionerRole-Oshawa",
 			"PractitionerRole-Hamilton",
+			"PractitionerRole-Oshawa",
 			"PractitionerRole-Barrie",
 			"PractitionerRole-Kitchener");
 
