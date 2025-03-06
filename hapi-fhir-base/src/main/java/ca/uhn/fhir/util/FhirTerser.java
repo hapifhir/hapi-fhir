@@ -40,6 +40,7 @@ import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.BaseParser;
 import ca.uhn.fhir.parser.DataFormatException;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
@@ -1264,8 +1265,7 @@ public class FhirTerser {
 		if (theElement instanceof IBaseReference) {
 			IBaseResource target = ((IBaseReference) theElement).getResource();
 			if (target != null) {
-				if (target.getIdElement().hasIdPart() == false
-						|| target.getIdElement().isLocal()) {
+				if (target.getIdElement().hasIdPart() == false || isInternalFragment(target)) {
 					RuntimeResourceDefinition targetDef = myContext.getResourceDefinition(target);
 					visit(theStack, target, target, pathToElement, null, targetDef, theCallback);
 				}
@@ -1434,18 +1434,39 @@ public class FhirTerser {
 		if (theReference.getResource().getIdElement().isEmpty()) {
 			return true;
 		}
+
 		// Check if the reference is an external reference
 		// TODO Fix Hack: ensure that this conforms to what FHIR considers (URLs, URNs, and more)
 		if (theReference.getResource().getIdElement().isAbsolute()
 				|| theReference.getResource().getIdElement().getValueAsString().startsWith("urn:")) {
 			return false;
 		}
-		// Check if the reference is a FHIR resource resolvable on the local server
-		// TODO Fix Hack: check for all resource types, not just Patient
-		if (theReference.getResource().getIdElement().getValueAsString().startsWith("Patient/")) {
-			return false;
+		/*
+				// Check if the reference is a FHIR resource resolvable on the local server
+				// TODO Fix Hack: check for all resource types, not just Patient
+				if (theReference.getResource().getIdElement().getValueAsString().startsWith("Patient/")
+				|| theReference.getResource().getIdElement().getValueAsString().startsWith("Medication/")
+				|| theReference.getResource().getIdElement().getValueAsString().startsWith("Organization/")) {
+					return false;
+				}
+		*/
+		return isInternalFragment(theReference.getResource());
+	}
+
+	private static boolean isInternalFragment(IBaseResource resource) {
+		/*
+		if (resource.getIdElement().isLocal()) {
+			resource.setId(new IdDt(resource.getIdElement().getIdPart().substring(1)));
+			resource.setUserData(BaseParser.CONTAINED_RESOURCE_CREATED_BY_PARSER, true);
+			return true;
+		}*/
+		if (resource.getUserData(BaseParser.CONTAINED_RESOURCE_CREATED_BY_PARSER) != null) {
+			Object value = resource.getUserData(BaseParser.CONTAINED_RESOURCE_CREATED_BY_PARSER);
+			if (value instanceof Boolean && (Boolean) value) {
+				return true;
+			}
 		}
-		return true;
+		return false;
 	}
 
 	private void containResourcesForEncoding(
@@ -1484,7 +1505,7 @@ public class FhirTerser {
 					}
 					if (theModifyResource) {
 						getContainedResourceList(theResource).add(resource);
-						next.setReference("#" + id.getValue());
+						next.setReference(id.getValue());
 					}
 					if (isInternalFragment(next) && theContained.hasExistingIdToContainedResource()) {
 						theContained
@@ -1528,6 +1549,10 @@ public class FhirTerser {
 
 		List<? extends IBaseResource> containedResources = getContainedResourceList(theResource);
 		for (IBaseResource next : containedResources) {
+			String nextId = next.getIdElement().getValue();
+			//if (StringUtils.isNotBlank(nextId)) {
+				next.setUserData(BaseParser.CONTAINED_RESOURCE_CREATED_BY_PARSER, Boolean.TRUE);
+			//}
 			contained.addContained(next);
 		}
 
@@ -1812,6 +1837,11 @@ public class FhirTerser {
 			return myExistingIdToContainedResourceMap;
 		}
 
+		/**
+		 *
+		 * @param theResource
+		 * @return the reference ID of the resource.
+		 */
 		public IIdType addContained(IBaseResource theResource) {
 			if (this.getResourceId(theResource) != null) {
 				// Prevent infinite recursion if there are circular loops in the contained resources
@@ -1829,14 +1859,18 @@ public class FhirTerser {
 				theResource.getIdElement().setValue(randomUUID.toString());
 				newId.setValue("#" + randomUUID);
 				// TODO put newId in resourceToIdMap ?
-				getResourceToIdMap().put(theResource, newId);
+				//getResourceToIdMap().put(theResource, theResource.getIdElement());
 			} else {
 				// TODO put new IdDt with # in resourceToIdMap ?
-				getResourceToIdMap().put(theResource, new IdDt("#" + newId.getIdPart()));
+				if (newId.isLocal()) {
+					theResource.setUserData(BaseParser.CONTAINED_RESOURCE_CREATED_BY_PARSER, true);
+				}
+				//getResourceToIdMap().put(theResource, theResource.getIdElement());
 			}
-			// getResourceToIdMap().put(theResource, newId);
+
+			getResourceToIdMap().put(theResource, newId);
 			getOrCreateResourceList().add(theResource);
-			return theResource.getIdElement();
+			return newId;
 		}
 
 		public void addContained(IIdType theId, IBaseResource theResource) {
@@ -1853,6 +1887,11 @@ public class FhirTerser {
 			return getOrCreateResourceList();
 		}
 
+		/**
+		 *
+		 * @param theNext
+		 * @return the reference ID of the resource.
+		 */
 		public IIdType getResourceId(IBaseResource theNext) {
 			if (getResourceToIdMap() == null) {
 				return null;
@@ -1863,7 +1902,7 @@ public class FhirTerser {
 				return idFromMap;
 			} else if (theNext.getIdElement().getIdPart() != null) {
 				return getResourceToIdMap().values().stream()
-						.filter(id -> theNext.getIdElement().getIdPart().equals(id.getIdPart()))
+						.filter(id -> ("#" + theNext.getIdElement().getIdPart()).equals(id.getIdPart()))
 						.findAny()
 						.orElse(null);
 			} else {

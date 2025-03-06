@@ -101,6 +101,9 @@ public abstract class BaseParser implements IParser {
 	public static final String RESOURCE_CREATED_BY_PARSER =
 			BaseParser.class.getName() + "_" + "RESOURCE_CREATED_BY_PARSER";
 
+	public static final String CONTAINED_RESOURCE_CREATED_BY_PARSER =
+			BaseParser.class.getName() + "_" + "CONTAINED_RESOURCE_CREATED_BY_PARSER";
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParser.class);
 
 	private static final Set<String> notEncodeForContainedResource =
@@ -193,11 +196,7 @@ public abstract class BaseParser implements IParser {
 			if (theRef.getResource() != null) {
 				IIdType containedId = theContext.getContainedResources().getResourceId(theRef.getResource());
 				if (containedId != null && !containedId.isEmpty()) {
-					if (containedId.isLocal()) {
-						reference = containedId.getValue();
-					} else {
-						reference = "#" + containedId.getValue();
-					}
+					reference = containedId.getValue();
 				} else {
 					IIdType refId = theRef.getResource().getIdElement();
 					if (refId != null) {

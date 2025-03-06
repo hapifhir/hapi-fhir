@@ -1683,13 +1683,12 @@ public class JsonParserR4Test extends BaseTest {
 		@Test
 		public void testDuplicateContainedResourcesNotOutputtedTwiceWithManualIds() {
 			MedicationDispense md = new MedicationDispense();
-
 			MedicationRequest mr = new MedicationRequest();
-			mr.setId("MR");
+			mr.setId("#MR");
 			md.addAuthorizingPrescription().setResource(mr);
 
 			Medication med = new Medication();
-			med.setId("MED");
+			med.setId("#MED");
 			md.setMedication(new Reference(med));
 			mr.setMedication(new Reference(med));
 

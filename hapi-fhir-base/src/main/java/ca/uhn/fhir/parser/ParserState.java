@@ -398,9 +398,10 @@ class ParserState<T> {
 				// need an ID to be referred to)
 				myErrorHandler.containedResourceWithNoId(null);
 			} else {
-				if (!res.getId().isLocal()) {
-					res.setId(new IdDt(res.getId().getIdPart()));
-				}
+				/*if (res.getId().isLocal()) {
+					res.setId(new IdDt(res.getId().getIdPart().substring(1)));
+				}*/
+				//res.setUserData(BaseParser.CONTAINED_RESOURCE_CREATED_BY_PARSER, true);
 				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
 			}
 			IResource preResCurrentElement = (IResource) getPreResourceState().getCurrentElement();
@@ -440,6 +441,8 @@ class ParserState<T> {
 				myErrorHandler.containedResourceWithNoId(null);
 			} else {
 				res.getIdElement().setValue(res.getIdElement().getIdPart());
+				//res.setUserData(BaseParser.CONTAINED_RESOURCE_CREATED_BY_PARSER, true);
+
 				getPreResourceState()
 						.getContainedResources()
 						.put(res.getIdElement().getValue(), res);
