@@ -26,8 +26,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.stream.Stream;
 
 public interface IBatch2WorkChunkMetadataViewRepository extends JpaRepository<Batch2WorkChunkMetadataView, String> {
 
@@ -37,4 +39,10 @@ public interface IBatch2WorkChunkMetadataViewRepository extends JpaRepository<Ba
 			Pageable thePageRequest,
 			@Param("instanceId") String theInstanceId,
 			@Param("states") Collection<WorkChunkStatusEnum> theStates);
+
+	@Query("SELECT v FROM Batch2WorkChunkMetadataView v WHERE v.myInstanceId = :instanceId AND v.myStatus IN :states "
+			+ " ORDER BY v.myInstanceId, v.myTargetStepId, v.myStatus, v.mySequence, v.myId ASC")
+	@Transactional(readOnly = true) // Ensures the transaction remains open for streaming
+	Stream<Batch2WorkChunkMetadataView> streamWorkChunkMetadataForJobInStates(
+			@Param("instanceId") String theInstanceId, @Param("states") Collection<WorkChunkStatusEnum> theStates);
 }

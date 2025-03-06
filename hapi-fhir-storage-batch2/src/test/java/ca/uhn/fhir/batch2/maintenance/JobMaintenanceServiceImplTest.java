@@ -18,6 +18,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.test.util.LogbackTestExtension;
@@ -116,7 +117,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			myJobDefinitionRegistry,
 			batchJobSender,
 			myJobExecutorSvc,
-			myReductionStepExecutorService
+			myReductionStepExecutorService,
+			new HapiTransactionService()
 		);
 		myStorageSettings.setJobFastTrackingEnabled(true);
 	}
