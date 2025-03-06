@@ -44,6 +44,9 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
 
+	@JsonProperty(value = "createProvenance", defaultValue = "true", required = false)
+	private boolean myCreateProvenance;
+
 	public ReplaceReferencesJobParameters() {}
 
 	public ReplaceReferencesJobParameters(ReplaceReferencesRequest theReplaceReferencesRequest, int theBatchSize) {
@@ -53,6 +56,7 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 		// async case.
 		myBatchSize = theBatchSize;
 		myPartitionId = theReplaceReferencesRequest.partitionId;
+		myCreateProvenance = theReplaceReferencesRequest.createProvenance;
 	}
 
 	public FhirIdJson getSourceId() {
@@ -91,6 +95,7 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 	}
 
 	public ReplaceReferencesRequest asReplaceReferencesRequest() {
-		return new ReplaceReferencesRequest(mySourceId.asIdDt(), myTargetId.asIdDt(), myBatchSize, myPartitionId);
+		return new ReplaceReferencesRequest(
+				mySourceId.asIdDt(), myTargetId.asIdDt(), myBatchSize, myPartitionId, myCreateProvenance);
 	}
 }
