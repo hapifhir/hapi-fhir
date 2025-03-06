@@ -59,7 +59,7 @@ public interface ICdsConfigService {
 	}
 
 	private static <IdType extends IIdType> IdType newId(
-		FhirVersionEnum fhirVersionEnum, String resourceType, String idPart) {
+			FhirVersionEnum fhirVersionEnum, String resourceType, String idPart) {
 		checkNotNull(fhirVersionEnum);
 		checkNotNull(resourceType);
 		checkNotNull(idPart);
@@ -88,7 +88,7 @@ public interface ICdsConfigService {
 				return (IdType) new org.hl7.fhir.r5.model.IdType(id);
 			default:
 				throw new IllegalArgumentException(String.format(
-					"newId does not support FHIR version %s", fhirVersionEnum.getFhirVersionString()));
+						"newId does not support FHIR version %s", fhirVersionEnum.getFhirVersionString()));
 		}
 	}
 }
