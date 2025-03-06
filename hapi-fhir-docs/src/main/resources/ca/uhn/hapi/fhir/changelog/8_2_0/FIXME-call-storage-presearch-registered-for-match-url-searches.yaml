@@ -1,0 +1,5 @@
+---
+type: change
+issue: FIXME
+title: "The `STORAGE_PRESEARCH_REGISTERED` pointcut will now be called when evaluating conditional operation
+   search URLs, such as the match URLs used for FHIR conditional create and update operations."

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: FIXME
+title: "A bug in the snapshot generator prevented the automatic generation of StructureDefinition snapshots
+   from differential profiles specifically for FHIR R5 StructureDefinitions, which could prevent successful
+   validation when using these profiles against R5 resources. This has been corrected."
