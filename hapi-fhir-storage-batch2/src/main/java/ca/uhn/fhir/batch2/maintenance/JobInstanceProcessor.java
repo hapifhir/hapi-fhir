@@ -279,7 +279,6 @@ public class JobInstanceProcessor {
 	 * We will move READY chunks to QUEUE'd and send them to the queue/topic (kafka)
 	 * for processing.
 	 */
-
 	private void enqueueReadyChunks(JobInstance theJobInstance, JobDefinition<?> theJobDefinition) {
 		long deadline = System.currentTimeMillis() + 60 * 1000;
 		boolean done = false;
@@ -288,10 +287,10 @@ public class JobInstanceProcessor {
 			// This allows for all nodes to remain busy instead of processing each page's worth of data at a time
 			Pageable pageable = Pageable.ofSize(WORK_CHUNK_METADATA_BATCH_SIZE).withPage(0);
 			Page<WorkChunkMetadata> results = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
-				pageable, myInstanceId, Set.of(WorkChunkStatusEnum.READY));
+					pageable, myInstanceId, Set.of(WorkChunkStatusEnum.READY));
 			if (results.isEmpty()) {
 				break;
-				}
+			}
 			Iterator<WorkChunkMetadata> iter = results.iterator();
 			int counter = 0;
 			while (iter.hasNext()) {
@@ -306,13 +305,13 @@ public class JobInstanceProcessor {
 				updateChunkAndSendToQueue(metadata);
 				counter++;
 			}
-		ourLog.debug(
-				"Encountered {} READY work chunks for job {} of type {}",
-				counter,
-				theJobInstance.getInstanceId(),
-				theJobDefinition.getJobDefinitionId());
-		// timebox update  of 10k records
-		} while(deadline>System.currentTimeMillis() && !done);
+			ourLog.debug(
+					"Encountered {} READY work chunks for job {} of type {}",
+					counter,
+					theJobInstance.getInstanceId(),
+					theJobDefinition.getJobDefinitionId());
+			// timebox update  of 10k records
+		} while (deadline > System.currentTimeMillis() && !done);
 	}
 
 	/**
