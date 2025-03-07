@@ -100,6 +100,9 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		return encodeFeedbackResponse(theServiceId, response);
 	}
 
+	/**
+	 * @see ICdsServiceRegistry#registerService
+	 */
 	@Override
 	public void registerService(
 			String theServiceId,
@@ -125,14 +128,25 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		return true;
 	}
 
+	/**
+	 * @see ICdsServiceRegistry#unregisterService
+	 */
 	@Override
-	public void unregisterService(String theServiceId, String theModuleId) {
-		Validate.notNull(theServiceId);
-
+	public void unregisterService(@Nonnull String theServiceId, String theModuleId) {
+		Validate.notNull(theServiceId, "CDS Hook Service Id cannot be null");
 		ICdsMethod activeService = myServiceCache.unregisterServiceMethod(theServiceId, theModuleId);
 		if (activeService != null) {
 			ourLog.info("Unregistered active service {}", theServiceId);
 		}
+	}
+
+	/**
+	 * @see ICdsServiceRegistry#unregisterServices
+	 */
+	@Override
+	public void unregisterServices(@Nonnull String theModuleId) {
+		Validate.notNull(theModuleId, "CDS Hook Module/Group Id cannot be null");
+		myServiceCache.unregisterServices(theModuleId);
 	}
 
 	@Override

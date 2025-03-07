@@ -31,8 +31,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.CDS_CR_MODULE_ID;
@@ -42,6 +45,7 @@ public class CdsServiceCache {
 	final Map<String, ICdsMethod> myServiceMap = new LinkedHashMap<>();
 	final Map<String, ICdsMethod> myFeedbackMap = new LinkedHashMap<>();
 	final CdsServicesJson myCdsServiceJson = new CdsServicesJson();
+	final Map<String, Set<String>> myGroups = new LinkedHashMap<>();
 
 	public void registerService(
 			String theServiceId,
@@ -66,6 +70,7 @@ public class CdsServiceCache {
 					new CdsDynamicPrefetchableServiceMethod(
 							theCdsServiceJson, theMethod, theAllowAutoFhirClientPrefetch);
 			myServiceMap.put(theServiceId, cdsDynamicPrefetchableServiceMethod);
+			myGroups.computeIfAbsent(theModuleId, k -> new HashSet<>()).add(theServiceId);
 			myCdsServiceJson.addService(theCdsServiceJson);
 		}
 	}
@@ -108,6 +113,10 @@ public class CdsServiceCache {
 		if (myServiceMap.containsKey(theServiceId)) {
 			final ICdsMethod serviceMethod = myServiceMap.get(theServiceId);
 			myServiceMap.remove(theServiceId);
+			myGroups.computeIfAbsent(theModuleId, k -> new HashSet<>()).remove(theServiceId);
+			if (myGroups.get(theModuleId).isEmpty()) {
+				myGroups.remove(theModuleId);
+			}
 			if (serviceMethod instanceof ICdsServiceMethod) {
 				myCdsServiceJson.removeService(((ICdsServiceMethod) serviceMethod).getCdsServiceJson());
 			}
@@ -118,6 +127,17 @@ public class CdsServiceCache {
 					theServiceId,
 					theModuleId);
 			return null;
+		}
+	}
+
+	public void unregisterServices(String theModuleId) {
+		if (myGroups.containsKey(theModuleId)) {
+			new ArrayList<>(myGroups.get(theModuleId))
+				.forEach(serviceId -> unregisterServiceMethod(serviceId, theModuleId));
+		} else {
+			ourLog.error(
+				"CDS services for moduleId: {}, are not registered. Nothing to remove!",
+				theModuleId);
 		}
 	}
 
@@ -138,4 +158,5 @@ public class CdsServiceCache {
 				.findFirst()
 				.orElse(null);
 	}
+
 }
