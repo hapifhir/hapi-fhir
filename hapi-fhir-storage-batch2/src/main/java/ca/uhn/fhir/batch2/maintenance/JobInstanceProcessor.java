@@ -33,7 +33,6 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.time.DateUtils;
@@ -266,17 +265,6 @@ public class JobInstanceProcessor {
 		return workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
 	}
 
-	protected PagingIterator<WorkChunkMetadata> getReadyChunks() {
-		return new PagingIterator<>(WORK_CHUNK_METADATA_BATCH_SIZE, (index, batchsize, consumer) -> {
-			Pageable pageable = Pageable.ofSize(batchsize).withPage(index);
-			Page<WorkChunkMetadata> results = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
-					pageable, myInstanceId, Set.of(WorkChunkStatusEnum.READY));
-			for (WorkChunkMetadata metadata : results) {
-				consumer.accept(metadata);
-			}
-		});
-	}
-
 	/**
 	 * Trigger the reduction step for the given job instance. Reduction step chunks should never be queued.
 	 */
@@ -291,28 +279,40 @@ public class JobInstanceProcessor {
 	 * We will move READY chunks to QUEUE'd and send them to the queue/topic (kafka)
 	 * for processing.
 	 */
+
 	private void enqueueReadyChunks(JobInstance theJobInstance, JobDefinition<?> theJobDefinition) {
-		Iterator<WorkChunkMetadata> iter = getReadyChunks();
-
-		int counter = 0;
-		while (iter.hasNext()) {
-			WorkChunkMetadata metadata = iter.next();
-
-			/*
-			 * For each chunk id
-			 * * Move to QUEUE'd
-			 * * Send to topic
-			 * * flush changes
-			 * * commit
-			 */
-			updateChunkAndSendToQueue(metadata);
-			counter++;
-		}
+		long deadline = System.currentTimeMillis() + 60 * 1000;
+		boolean done = false;
+		do {
+			// PageNumber '0' is hardcoded to re-saturate 10k records to process at a time instead of fixed pages
+			// This allows for all nodes to remain busy instead of processing each page's worth of data at a time
+			Pageable pageable = Pageable.ofSize(WORK_CHUNK_METADATA_BATCH_SIZE).withPage(0);
+			Page<WorkChunkMetadata> results = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
+				pageable, myInstanceId, Set.of(WorkChunkStatusEnum.READY));
+			if (results.isEmpty()) {
+				break;
+				}
+			Iterator<WorkChunkMetadata> iter = results.iterator();
+			int counter = 0;
+			while (iter.hasNext()) {
+				/*
+				 * For each chunk id
+				 * * Move to QUEUE'd
+				 * * Send to topic
+				 * * flush changes
+				 * * commit
+				 */
+				WorkChunkMetadata metadata = iter.next();
+				updateChunkAndSendToQueue(metadata);
+				counter++;
+			}
 		ourLog.debug(
 				"Encountered {} READY work chunks for job {} of type {}",
 				counter,
 				theJobInstance.getInstanceId(),
 				theJobDefinition.getJobDefinitionId());
+		// timebox update  of 10k records
+		} while(deadline>System.currentTimeMillis() && !done);
 	}
 
 	/**
