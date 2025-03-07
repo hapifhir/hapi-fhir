@@ -133,11 +133,9 @@ public class CdsServiceCache {
 	public void unregisterServices(String theModuleId) {
 		if (myGroups.containsKey(theModuleId)) {
 			new ArrayList<>(myGroups.get(theModuleId))
-				.forEach(serviceId -> unregisterServiceMethod(serviceId, theModuleId));
+					.forEach(serviceId -> unregisterServiceMethod(serviceId, theModuleId));
 		} else {
-			ourLog.error(
-				"CDS services for moduleId: {}, are not registered. Nothing to remove!",
-				theModuleId);
+			ourLog.error("CDS services for moduleId: {}, are not registered. Nothing to remove!", theModuleId);
 		}
 	}
 
@@ -158,5 +156,4 @@ public class CdsServiceCache {
 				.findFirst()
 				.orElse(null);
 	}
-
 }
