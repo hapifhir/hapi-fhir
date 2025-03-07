@@ -84,8 +84,16 @@ public interface ICdsServiceRegistry {
 	 * Remove registered CDS service with the service ID, only removes dynamically registered service
 	 *
 	 * @param theServiceId the id of the service to be removed
+	 * @param theModuleId the id of the module/group where the service is registered
 	 */
 	void unregisterService(String theServiceId, String theModuleId);
+
+	/**
+	 * Remove registered CDS services with the Group ID, only removes dynamically registered services
+	 *
+	 * @param theModuleId the id of the module/group where the services are registered
+	 */
+	void unregisterServices(String theModuleId);
 
 	/**
 	 * Get registered CDS service with service ID
