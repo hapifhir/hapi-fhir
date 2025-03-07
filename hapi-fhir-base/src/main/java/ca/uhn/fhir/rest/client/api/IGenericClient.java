@@ -62,6 +62,7 @@ public interface IGenericClient extends IRestfulClient {
 	 *
 	 * @deprecated As of HAPI 3.0.0 this method has been deprecated, as the operation is now called "capabilities". Use {@link #capabilities()} instead
 	 */
+	@Deprecated(since = "3.0.0", forRemoval = true)
 	IFetchConformanceUntyped fetchConformance();
 
 	/**

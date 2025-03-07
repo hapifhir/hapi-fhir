@@ -52,9 +52,11 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
- * Utilities for dealing with parameters resources in a version indepenedent way
+ * Utilities for dealing with parameters resources in a version independent way
  */
 public class ParametersUtil {
+
+	private ParametersUtil() {}
 
 	public static Optional<String> getNamedParameterValueAsString(
 			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
@@ -323,7 +325,7 @@ public class ParametersUtil {
 	@SuppressWarnings("unchecked")
 	public static void addParameterToParametersBoolean(
 			FhirContext theCtx, IBaseParameters theParameters, String theName, boolean theValue) {
-		addParameterToParameters(theCtx, theParameters, theName, theCtx.getPrimitiveBoolean(theValue));
+		addParameterToParameters(theCtx, theParameters, theName, theCtx.newPrimitiveBoolean(theValue));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -429,7 +431,7 @@ public class ParametersUtil {
 	}
 
 	public static void addPartBoolean(FhirContext theContext, IBase theParameter, String theName, Boolean theValue) {
-		addPart(theContext, theParameter, theName, theContext.getPrimitiveBoolean(theValue));
+		addPart(theContext, theParameter, theName, theContext.newPrimitiveBoolean(theValue));
 	}
 
 	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {

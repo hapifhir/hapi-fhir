@@ -39,7 +39,7 @@ public class InterceptorService extends BaseInterceptorService<Pointcut>
 	 * Constructor which uses a default name of "default"
 	 */
 	public InterceptorService() {
-		this("default");
+		super(Pointcut.class);
 	}
 
 	/**
@@ -47,8 +47,9 @@ public class InterceptorService extends BaseInterceptorService<Pointcut>
 	 *
 	 * @param theName The name for this registry (useful for troubleshooting)
 	 */
+	@Deprecated(since = "8.0.0", forRemoval = true)
 	public InterceptorService(String theName) {
-		super(Pointcut.class, theName);
+		super(Pointcut.class);
 	}
 
 	@Override

@@ -56,5 +56,8 @@
   }, {
     "code": "SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE",
     "display": "Conditional patch succeeded: No changes were detected so no action was taken."
+  }, {
+    "code": "AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE",
+    "display": "Automatically created placeholder resource."
   } ]
 }
