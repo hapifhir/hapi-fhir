@@ -18,6 +18,7 @@ import ca.uhn.fhir.util.VersionUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
@@ -131,6 +132,15 @@ public class MetadataCapabilityStatementDstu3Test {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+	}
+
+	@Test
+	public void testHeadElements() throws Exception {
+
+		HttpRequestBase httpGet = new HttpHead(ourServer.getBaseUrl() + "/metadata?_elements=fhirVersion&_pretty=true");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		status.getAllHeaders();
+		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
