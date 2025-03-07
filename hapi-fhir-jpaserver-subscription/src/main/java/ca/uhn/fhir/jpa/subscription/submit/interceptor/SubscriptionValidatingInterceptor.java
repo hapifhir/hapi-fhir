@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -264,7 +264,7 @@ public class SubscriptionValidatingInterceptor {
 					? theRequestPartitionId
 					: determinePartition(theRequestDetails, theSubscription);
 
-			if (!toCheckPartitionId.isDefaultPartition()) {
+			if (!myRequestPartitionHelperSvc.isDefaultPartition(toCheckPartitionId)) {
 				throw new UnprocessableEntityException(
 						Msg.code(2010) + "Cross partition subscription must be created on the default partition");
 			}

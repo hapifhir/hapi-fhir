@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -74,19 +75,22 @@ public class TermConceptMapGroupElementTarget extends BasePartitionable implemen
 			value = {
 				@JoinColumn(
 						name = "CONCEPT_MAP_GRP_ELM_PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = true,
-				//						updatable = false,
-				//						nullable = false)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TCMGETARGET_ELEMENT"))
 	private TermConceptMapGroupElement myConceptMapGroupElement;
+
+	@Column(name = "CONCEPT_MAP_GRP_ELM_PID", nullable = false)
+	private Long myConceptMapGroupElementPid;
 
 	@Column(name = "TARGET_CODE", nullable = true, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
@@ -131,6 +135,8 @@ public class TermConceptMapGroupElementTarget extends BasePartitionable implemen
 
 	public void setConceptMapGroupElement(TermConceptMapGroupElement theTermConceptMapGroupElement) {
 		myConceptMapGroupElement = theTermConceptMapGroupElement;
+		myConceptMapGroupElementPid = theTermConceptMapGroupElement.getId();
+		Validate.notNull(myConceptMapGroupElementPid, "ConceptMapGroupElement must not be null");
 		setPartitionId(theTermConceptMapGroupElement.getPartitionId());
 	}
 

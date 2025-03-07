@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -351,8 +351,21 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private boolean isDeletingLastMatchedSourceResource(IResourcePersistentId theSourcePid, List<IMdmLink> theMatches) {
-		return theMatches.size() == 1
-				&& theMatches.get(0).getSourcePersistenceId().equals(theSourcePid);
+		if (theMatches.size() != 1) {
+			// if there's not 1 match, it can't be the last match
+			return false;
+		}
+
+		IMdmLink match = theMatches.get(0);
+
+		if (theSourcePid.getPartitionId() != null) {
+			// if they are in different partitions, it's not the matching resource
+			if (!theSourcePid.getPartitionId().equals(match.getPartitionId().getPartitionId())) {
+				return false;
+			}
+		}
+
+		return match.getSourcePersistenceId().getId().equals(theSourcePid.getId());
 	}
 
 	private MdmTransactionContext createMdmContext(

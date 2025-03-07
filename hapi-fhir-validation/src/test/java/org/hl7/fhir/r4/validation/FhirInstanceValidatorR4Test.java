@@ -1,13 +1,9 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
@@ -32,7 +28,6 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.fhirpath.FHIRPathEngine;
@@ -43,7 +38,6 @@ import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -68,9 +62,7 @@ import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
-import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.elementmodel.JsonParser;
 import org.hl7.fhir.r5.test.utils.ClassesLoadedFlags;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
@@ -89,19 +81,12 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -115,8 +100,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -125,7 +108,7 @@ import static org.mockito.Mockito.when;
 public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorR4Test.class);
-	private static FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	@RegisterExtension
 	public LoggingExtension myLoggingExtension = new LoggingExtension();
 	@Mock
@@ -135,7 +118,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myFhirValidator;
 	private IValidationSupport myValidationSupport;
-	private MockValidationSupport myMockSupport = new MockValidationSupport(FhirContext.forR4Cached());
+	private final MockValidationSupport myMockSupport = new MockValidationSupport(FhirContext.forR4Cached());
 
 	/**
 	 * An invalid local reference should not cause a ServiceException.
@@ -250,7 +233,6 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertThat(result.isSuccessful()).as(all.toString()).isFalse();
 		assertThat(result.getMessages().get(0).getMessage()).startsWith("Unknown code 'https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code#foo'");
-
 	}
 
 	@Test
@@ -1140,9 +1122,11 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(errors).hasSize(1);
-		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found", errors.get(0).getMessage());
-		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
+		assertThat(errors).hasSize(2);
+		assertThat(errors.stream())
+			.anyMatch(r ->
+				(r.getSeverity() == ResultSeverityEnum.ERROR) &&
+					(r.getMessage().equals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found")) );
 	}
 
 	@Test

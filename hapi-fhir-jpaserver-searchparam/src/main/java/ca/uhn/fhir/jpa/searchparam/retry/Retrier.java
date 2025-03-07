@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
@@ -69,11 +68,10 @@ public class Retrier<T> {
 		retryPolicy.setMaxAttempts(theMaxRetries);
 		myRetryTemplate.setRetryPolicy(retryPolicy);
 
-		RetryListener listener = new RetryListenerSupport() {
+		RetryListener listener = new RetryListener() {
 			@Override
-			public <T, E extends Throwable> void onError(
-					RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
-				super.onError(context, callback, throwable);
+			public <TT, E extends Throwable> void onError(
+					RetryContext context, RetryCallback<TT, E> callback, Throwable throwable) {
 				if (throwable instanceof NullPointerException
 						|| throwable instanceof UnsupportedOperationException
 						|| HapiSystemProperties.isUnitTestModeEnabled()) {

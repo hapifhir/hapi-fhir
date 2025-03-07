@@ -1,0 +1,7 @@
+---
+type: add
+issue: 6580
+title: "A new `RESULT` column has been added to the database migration table to record the migration execution result.
+values are `NOT_APPLIED_SKIPPED` (either skipped via the `skip-versions` flag or if the migration task was stubbed), 
+`NOT_APPLIED_NOT_FOR_THIS_DATABASE` (does not apply to that database), `NOT_APPLIED_PRECONDITION_NOT_MET` (not run based on a SQL script outcome),
+`NOT_APPLIED_ALLOWED_FAILURE` (the migration failed, but it is permitted to fail), `APPLIED`."

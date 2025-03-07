@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,9 @@ public enum StorageResponseCodeEnum implements ICodingEnum {
 	SUCCESSFUL_PATCH_NO_CHANGE("Patch succeeded: No changes were detected so no action was taken."),
 	SUCCESSFUL_CONDITIONAL_PATCH("Conditional patch succeeded."),
 	SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE(
-			"Conditional patch succeeded: No changes were detected so no action was taken.");
+			"Conditional patch succeeded: No changes were detected so no action was taken."),
+	AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE("Automatically created placeholder resource."),
+	;
 
 	public static final String SYSTEM = "https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code";
 

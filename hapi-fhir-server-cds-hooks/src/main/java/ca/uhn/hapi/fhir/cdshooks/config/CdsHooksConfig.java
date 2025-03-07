@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.hapi.fhir.cdshooks.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -50,6 +51,7 @@ import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsResolutionStrategySvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
@@ -209,12 +211,14 @@ public class CdsHooksConfig {
 			CdsResolutionStrategySvc theCdsResolutionStrategySvc,
 			CdsPrefetchDaoSvc theResourcePrefetchDao,
 			CdsPrefetchFhirClientSvc theResourcePrefetchFhirClient,
-			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc) {
+			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc,
+			@Nullable IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new CdsPrefetchSvc(
 				theCdsResolutionStrategySvc,
 				theResourcePrefetchDao,
 				theResourcePrefetchFhirClient,
-				theCdsHooksDaoAuthorizationSvc);
+				theCdsHooksDaoAuthorizationSvc,
+				theInterceptorBroadcaster);
 	}
 
 	@Bean

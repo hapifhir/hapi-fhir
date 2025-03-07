@@ -35,6 +35,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator.IEndpointUrlValidationStrategy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -108,7 +109,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setPayload("application/fhir+json");
 		subscription.getChannel().setEndpoint("http://foo");
 
-		mySvc.resourcePreCreate(subscription, null, null);
+		assertThatNoException().isThrownBy(() -> mySvc.resourcePreCreate(subscription, null, null));
 	}
 
 	@Test
@@ -196,7 +197,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		subscription.getChannel().setEndpoint("http://foo");
 
-		mySvc.resourcePreCreate(subscription, null, null);
+		assertThatNoException().isThrownBy(() -> mySvc.resourcePreCreate(subscription, null, null));
 	}
 
 	@Test
@@ -220,6 +221,7 @@ public class SubscriptionValidatingInterceptorTest {
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 		when(mySubscriptionSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.defaultPartition());
+		when(myRequestPartitionHelperSvc.isDefaultPartition(any())).thenReturn(true);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);

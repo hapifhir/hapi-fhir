@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,18 @@ public class Batch2SupportConfig {
 	@Bean
 	public IBatch2DaoSvc batch2DaoSvc(
 			IResourceTableDao theResourceTableDao,
+			IResourceLinkDao theResourceLinkDao,
 			MatchUrlService theMatchUrlService,
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext,
 			IHapiTransactionService theTransactionService) {
 		return new Batch2DaoSvcImpl(
-				theResourceTableDao, theMatchUrlService, theDaoRegistry, theFhirContext, theTransactionService);
+				theResourceTableDao,
+				theResourceLinkDao,
+				theMatchUrlService,
+				theDaoRegistry,
+				theFhirContext,
+				theTransactionService);
 	}
 
 	@Bean

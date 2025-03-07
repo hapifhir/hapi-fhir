@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ColumnAndNullable;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
+import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -48,7 +49,6 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
-import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
@@ -89,6 +89,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			+ "WHERE EXISTS (SELECT 1\n"
 			+ "	FROM collation_by_column\n"
 			+ "	WHERE my_collation != 'C')";
+
 	private final Set<FlagEnum> myFlags;
 
 	/**
@@ -130,7 +131,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init780() {
-		final Builder version = forVersion(VersionEnum.V7_8_0);
+		Builder version = forVersion(VersionEnum.V7_8_0);
+
+		version.addTask(new VerifyDatabasePartitioningModeMigrationTask(
+				version.getRelease(), "20241008.1", getFlags().contains(FlagEnum.DB_PARTITION_MODE)));
 
 		version.onTable("HFJ_RES_SEARCH_URL")
 				.dropForeignKey("20241008.100", "FK_RES_SEARCH_URL_RESOURCE", "HFJ_RESOURCE");
@@ -339,6 +343,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.type(ColumnTypeEnum.DATE_ONLY);
 
+		init780_afterPartitionChanges();
+
 		version.onTable("NPM_PACKAGE_VER")
 				.addColumn("20241023.10", "PKG_AUTHOR")
 				.nullable()
@@ -373,6 +379,33 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.withType(ColumnTypeEnum.TINYINT)
 				.heavyweightSkipByDefault();
+
+		/*
+		 * These two constraints were the last two that we had that used
+		 * hibernate-generated names. Yay!
+		 */
+		version.onTable("HFJ_RES_TAG").dropForeignKey("20250115.10", "FKbfcjbaftmiwr3rxkwsy23vneo", "HFJ_TAG_DEF");
+		version.onTable("HFJ_HISTORY_TAG").dropForeignKey("20250115.20", "FKtderym7awj6q8iq5c51xv4ndw", "HFJ_TAG_DEF");
+
+		/*
+		 * This migration drops a constraint from ResourceLink#myTargetResource. Not having this
+		 * constraint is a significant performance improvement in some cases, and the column is
+		 * nullable anyhow already because we also have the possibility of having a logical reference
+		 * instead of a hard one. We still keep the constraint present on the ResourceLink
+		 * entity for two reasons:
+		 * 1. We want to leave it in place on H2 to ensure that it helps to catch any bugs.
+		 * 2. We can't drop it as of 2025-01-16 because of this Hibernate bug:
+		 *    https://hibernate.atlassian.net/browse/HHH-19046
+		 */
+		version.onTable("HFJ_RES_LINK")
+				.dropForeignKey("20250115.30", "FK_RESLINK_TARGET", "HFJ_RESOURCE")
+				.runEvenDuringSchemaInitialization()
+				.onlyAppliesToPlatforms(
+						DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.MSSQL_2012, DriverTypeEnum.ORACLE_12C);
+	}
+
+	protected void init780_afterPartitionChanges() {
+		// subclasses may override
 	}
 
 	/**
@@ -1474,11 +1507,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Postgres tuning.
 		String postgresTuningStatementsAll =
 				ClasspathUtil.loadResource("ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql");
-		List<String> postgresTuningStatements = Arrays.stream(postgresTuningStatementsAll.split("\\n"))
-				.map(StringUtils::trim)
-				.filter(StringUtils::isNotBlank)
-				.filter(t -> !t.startsWith("--"))
-				.collect(Collectors.toList());
+		List<String> postgresTuningStatements = SqlUtil.splitSqlFileIntoStatements(postgresTuningStatementsAll);
 		version.executeRawSqls("20230402.1", Map.of(DriverTypeEnum.POSTGRES_9_4, postgresTuningStatements));
 
 		// Use an unlimited length text column for RES_TEXT_VC
@@ -3581,7 +3610,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spidxCoords = version.onTable("HFJ_SPIDX_COORDS");
 		version.startSectionWithMessage("Starting work on table: " + spidxCoords.getTableName());
 		spidxCoords.addColumn("20180903.1", "HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxCoords.dropIndex("20180903.2", "IDX_SP_COORDS");
 			spidxCoords
 					.addIndex("20180903.4", "IDX_SP_COORDS_HASH")
@@ -3602,7 +3631,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
 		version.startSectionWithMessage("Starting work on table: " + spidxDate.getTableName());
 		spidxDate.addColumn("20180903.6", "HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxDate.dropIndex("20180903.7", "IDX_SP_TOKEN");
 			spidxDate
 					.addIndex("20180903.8", "IDX_SP_DATE_HASH")
@@ -3625,7 +3654,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spidxNumber = version.onTable("HFJ_SPIDX_NUMBER");
 		version.startSectionWithMessage("Starting work on table: " + spidxNumber.getTableName());
 		spidxNumber.addColumn("20180903.11", "HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxNumber.dropIndex("20180903.12", "IDX_SP_NUMBER");
 			spidxNumber
 					.addIndex("20180903.13", "IDX_SP_NUMBER_HASH_VAL")
@@ -3655,7 +3684,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addColumn("20180903.17", "HASH_IDENTITY_AND_UNITS")
 				.nullable()
 				.type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxQuantity.dropIndex("20180903.18", "IDX_SP_QUANTITY");
 			spidxQuantity
 					.addIndex("20180903.19", "IDX_SP_QUANTITY_HASH")
@@ -3701,7 +3730,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spidxString = version.onTable("HFJ_SPIDX_STRING");
 		version.startSectionWithMessage("Starting work on table: " + spidxString.getTableName());
 		spidxString.addColumn("20180903.23", "HASH_NORM_PREFIX").nullable().type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxString.dropIndex("20180903.24", "IDX_SP_STRING");
 			spidxString
 					.addIndex("20180903.25", "IDX_SP_STRING_HASH_NRM")
@@ -3740,7 +3769,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spidxToken.addColumn("20180903.30", "HASH_SYS").nullable().type(ColumnTypeEnum.LONG);
 		spidxToken.addColumn("20180903.31", "HASH_SYS_AND_VALUE").nullable().type(ColumnTypeEnum.LONG);
 		spidxToken.addColumn("20180903.32", "HASH_VALUE").nullable().type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxToken.dropIndex("20180903.33", "IDX_SP_TOKEN");
 			spidxToken.dropIndex("20180903.34", "IDX_SP_TOKEN_UNQUAL");
 			spidxToken
@@ -3803,7 +3832,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spidxUri = version.onTable("HFJ_SPIDX_URI");
 		version.startSectionWithMessage("Starting work on table: " + spidxUri.getTableName());
 		spidxUri.addColumn("20180903.40", "HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
-		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+		if (!getFlags().contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxUri.addIndex("20180903.41", "IDX_SP_URI_HASH_IDENTITY")
 					.unique(false)
 					.withColumns("HASH_IDENTITY", "SP_URI");
@@ -4255,10 +4284,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init330() { // 20180114 - 20180329
 		Builder version = forVersion(VersionEnum.V3_3_0);
 
+		String schemaPath = "/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned";
+		if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
+			schemaPath = "/ca/uhn/hapi/fhir/jpa/docs/database/partitioned";
+		}
 		version.initializeSchema(
-				"20180115.0",
-				new SchemaInitializationProvider(
-						"HAPI FHIR", "/ca/uhn/hapi/fhir/jpa/docs/database", "HFJ_RESOURCE", true));
+				"20180115.0", new SchemaInitializationProvider("HAPI FHIR", schemaPath, "HFJ_RESOURCE", true));
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 		version.startSectionWithMessage("Starting work on table: " + hfjResource.getTableName());
@@ -4271,13 +4302,23 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		hfjResVer.modifyColumn("20180115.4", "RES_TEXT").nullable();
 	}
 
+	public Set<FlagEnum> getFlags() {
+		return myFlags;
+	}
+
 	public enum FlagEnum {
+		DB_PARTITION_MODE("database-partition-mode"),
+
 		NO_MIGRATE_HASHES("no-migrate-350-hashes");
 
 		private final String myCommandLineValue;
 
 		FlagEnum(String theCommandLineValue) {
 			myCommandLineValue = theCommandLineValue;
+		}
+
+		public String getCommandLineValue() {
+			return myCommandLineValue;
 		}
 
 		public static FlagEnum fromCommandLineValue(String theCommandLineValue) {

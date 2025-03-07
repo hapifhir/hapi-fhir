@@ -8,6 +8,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.validator.ProfileKnowledgeWorkerR5;
@@ -19,7 +20,6 @@ import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
@@ -37,7 +37,7 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
  * </ul>
  */
 public class SnapshotGeneratingValidationSupport implements IValidationSupport {
-	private static final Logger ourLog = LoggerFactory.getLogger(SnapshotGeneratingValidationSupport.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	private final FhirContext myCtx;
 	private final VersionCanonicalizer myVersionCanonicalizer;
 	private final IWorkerContext myWorkerContext;

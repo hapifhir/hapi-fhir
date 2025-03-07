@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 			HookParams params = theParamsSupplier.get();
 			return callHooks(thePointcut, params);
 		}
-		return true; // callHooks returns true when none present;
+		return true; // callHooks returns true when none present
 	}
 
 	/**
@@ -84,5 +84,9 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 		int getOrder();
 
 		Object getInterceptor();
+
+		default String getHookDescription() {
+			return toString();
+		}
 	}
 }

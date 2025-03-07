@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Validate.notNull(csv);
 
 		CodeSystem codeSystem = myTerminologySvc.fetchCanonicalCodeSystemFromCompleteContext(theSystem);
-		if (codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+		if (codeSystem != null && codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 			throw new InvalidRequestException(
 					Msg.code(844) + "CodeSystem with url[" + Constants.codeSystemWithDefaultDescription(theSystem)
 							+ "] can not apply a delta - wrong content mode: " + codeSystem.getContent());

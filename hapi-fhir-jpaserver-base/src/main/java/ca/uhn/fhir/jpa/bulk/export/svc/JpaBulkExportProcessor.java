@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,19 +213,19 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return pids;
 	}
 
-	private static void filterBySpecificPatient(
+	private void filterBySpecificPatient(
 			ExportPIDIteratorParameters theParams,
 			String resourceType,
 			String patientSearchParam,
 			SearchParameterMap map) {
 		if (resourceType.equalsIgnoreCase("Patient")) {
 			if (theParams.getPatientIds() != null) {
-				ReferenceOrListParam referenceOrListParam = getReferenceOrListParam(theParams);
+				ReferenceOrListParam referenceOrListParam = makeReferenceOrListParam(theParams.getPatientIds());
 				map.add(PARAM_ID, referenceOrListParam);
 			}
 		} else {
 			if (theParams.getPatientIds() != null) {
-				ReferenceOrListParam referenceOrListParam = getReferenceOrListParam(theParams);
+				ReferenceOrListParam referenceOrListParam = makeReferenceOrListParam(theParams.getPatientIds());
 				map.add(patientSearchParam, referenceOrListParam);
 			} else {
 				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
@@ -234,11 +234,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	@Nonnull
-	private static ReferenceOrListParam getReferenceOrListParam(ExportPIDIteratorParameters theParams) {
-		ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
-		for (String patientId : theParams.getPatientIds()) {
-			referenceOrListParam.addOr(new ReferenceParam(patientId));
-		}
+	private ReferenceOrListParam makeReferenceOrListParam(@Nonnull List<String> thePatientIds) {
+		final ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
+		thePatientIds.forEach(patientId -> referenceOrListParam.addOr(new ReferenceParam(patientId)));
 		return referenceOrListParam;
 	}
 
@@ -443,14 +441,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	@SuppressWarnings("unchecked")
 	private List<JpaPid> getMembersFromGroupWithFilter(
 			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
-		RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
-		List<JpaPid> resPids = new ArrayList<>();
-
-		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(
-				def, theParameters, theConsiderDateRange);
-
-		maps.forEach(map -> addMembershipToGroupClause(map, theParameters.getGroupId()));
-
+		final List<SearchParameterMap> maps = makeSearchParameterMaps(theParameters, theConsiderDateRange);
+		final List<JpaPid> resPids = new ArrayList<>();
 		for (SearchParameterMap map : maps) {
 			ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType("Patient");
 			ourLog.debug(
@@ -472,17 +464,26 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return resPids;
 	}
 
-	/**
-	 * This method takes an {@link SearchParameterMap} and adds a clause to it that will filter the search results to only
-	 * return members of the defined group.
-	 *
-	 * @param theMap     the map to add the clause to.
-	 * @param theGroupId the group ID to filter by.
-	 */
-	private void addMembershipToGroupClause(SearchParameterMap theMap, String theGroupId) {
-		HasOrListParam hasOrListParam = new HasOrListParam();
-		hasOrListParam.addOr(new HasParam("Group", "member", "_id", theGroupId));
-		theMap.add(PARAM_HAS, hasOrListParam);
+	@Nonnull
+	private List<SearchParameterMap> makeSearchParameterMaps(
+			@Nonnull ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) {
+		final RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
+		final List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(
+				def, theParameters, theConsiderDateRange);
+		maps.forEach(map -> {
+			map.add(PARAM_HAS, makeGroupMemberHasOrListParam(theParameters.getGroupId()));
+			final List<String> patientIds = theParameters.getPatientIds();
+			if (patientIds != null && !patientIds.isEmpty()) {
+				map.add(PARAM_ID, makeReferenceOrListParam(patientIds));
+			}
+		});
+		return maps;
+	}
+
+	@Nonnull
+	private HasOrListParam makeGroupMemberHasOrListParam(@Nonnull String theGroupId) {
+		final HasParam hasParam = new HasParam("Group", "member", "_id", theGroupId);
+		return new HasOrListParam().addOr(hasParam);
 	}
 
 	/**

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ public class ResourceLink extends BaseResourceIndex {
 	private static final long serialVersionUID = 1L;
 	public static final String TARGET_RES_PARTITION_ID = "TARGET_RES_PARTITION_ID";
 	public static final String TARGET_RESOURCE_ID = "TARGET_RESOURCE_ID";
+	public static final String FK_RESLINK_TARGET = "FK_RESLINK_TARGET";
 
 	@GenericGenerator(name = "SEQ_RESLINK_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESLINK_ID")
@@ -90,12 +91,12 @@ public class ResourceLink extends BaseResourceIndex {
 						insertable = false,
 						updatable = false,
 						nullable = false),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = false,
-				//						updatable = false,
-				//						nullable = false)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_RESLINK_SOURCE"))
 	private ResourceTable mySourceResource;
@@ -116,14 +117,20 @@ public class ResourceLink extends BaseResourceIndex {
 						nullable = true,
 						insertable = false,
 						updatable = false),
-				//				@JoinColumn(
-				//						name = TARGET_RES_PARTITION_ID,
-				//						referencedColumnName = "PARTITION_ID",
-				//						nullable = true,
-				//						insertable = false,
-				//						updatable = false),
+				@JoinColumn(
+						name = TARGET_RES_PARTITION_ID,
+						referencedColumnName = "PARTITION_ID",
+						nullable = true,
+						insertable = false,
+						updatable = false),
 			},
-			foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
+			/*
+			 * TODO: We need to drop this constraint because it affects performance in pretty
+			 *  terrible ways on a lot of platforms. But a Hibernate bug present in Hibernate 6.6.4
+			 *  makes it impossible.
+			 *  See: https://hibernate.atlassian.net/browse/HHH-19046
+			 */
+			foreignKey = @ForeignKey(name = FK_RESLINK_TARGET))
 	private ResourceTable myTargetResource;
 
 	@Transient

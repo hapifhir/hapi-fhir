@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,12 +55,12 @@ public abstract class BaseSubscriptionSettings {
 	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
 	 * Reducing delay between creation of the Subscription and Activation.
 	 *
-	 * @since 7.8.0
+	 * @since 8.0.0
 	 */
 	private boolean mySubscriptionChangeQueuedImmediately = false;
 
 	/**
-	 * @since 7.8.0
+	 * @since 8.0.0
 	 *
 	 * Regex To perform validation on the endpoint URL for Subscription of type RESTHOOK.
 	 */
@@ -289,7 +289,7 @@ public abstract class BaseSubscriptionSettings {
 	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
 	 * Reducing delay between creation of the Subscription and Activation.
 	 *
-	 * @since 7.8.0
+	 * @since 8.0.0
 	 */
 	public boolean isSubscriptionChangeQueuedImmediately() {
 		return mySubscriptionChangeQueuedImmediately;
@@ -299,7 +299,7 @@ public abstract class BaseSubscriptionSettings {
 	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
 	 * Reducing delay between creation of the Subscription and Activation.
 	 *
-	 * @since 7.8.0
+	 * @since 8.0.0
 	 */
 	public void setSubscriptionChangeQueuedImmediately(boolean theSubscriptionChangeQueuedImmediately) {
 		mySubscriptionChangeQueuedImmediately = theSubscriptionChangeQueuedImmediately;

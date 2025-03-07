@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,17 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 	private final String myName;
 	private final Supplier<Integer> myQueueSizeSupplier;
 
-	public LinkedBlockingChannel(String theName, Executor theExecutor, Supplier<Integer> theQueueSizeSupplier) {
+	private final RetryPolicyProvider myRetryPolicyProvider;
+
+	public LinkedBlockingChannel(
+			String theName,
+			Executor theExecutor,
+			Supplier<Integer> theQueueSizeSupplier,
+			RetryPolicyProvider theRetryPolicyProvider) {
 		super(theExecutor);
 		myName = theName;
 		myQueueSizeSupplier = theQueueSizeSupplier;
+		myRetryPolicyProvider = theRetryPolicyProvider;
 	}
 
 	public int getQueueSizeForUnitTest() {
@@ -65,7 +72,7 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 
 	@Override
 	public boolean subscribe(@Nonnull MessageHandler theHandler) {
-		return super.subscribe(new RetryingMessageHandlerWrapper(theHandler, getName()));
+		return super.subscribe(new RetryingMessageHandlerWrapper(theHandler, getName(), myRetryPolicyProvider));
 	}
 
 	@Override
@@ -86,7 +93,7 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 	/**
 	 * Creates a synchronous channel, mostly intended for testing
 	 */
-	public static LinkedBlockingChannel newSynchronous(String theName) {
-		return new LinkedBlockingChannel(theName, null, () -> 0);
+	public static LinkedBlockingChannel newSynchronous(String theName, RetryPolicyProvider theRetryPolicyProvider) {
+		return new LinkedBlockingChannel(theName, null, () -> 0, theRetryPolicyProvider);
 	}
 }

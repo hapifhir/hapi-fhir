@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
@@ -37,7 +38,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -69,12 +69,12 @@ public class TermConceptParentChildLink implements Serializable {
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = false,
-				//						updatable = false,
-				//						nullable = false)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CHILD"))
 	private TermConcept myChild;
@@ -91,12 +91,12 @@ public class TermConceptParentChildLink implements Serializable {
 						insertable = false,
 						updatable = false,
 						nullable = false),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = false,
-				//						updatable = false,
-				//						nullable = false)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CS"))
 	private TermCodeSystemVersion myCodeSystem;
@@ -116,12 +116,12 @@ public class TermConceptParentChildLink implements Serializable {
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = false,
-				//						updatable = false,
-				//						nullable = false)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_PARENT"))
 	private TermConcept myParent;
@@ -132,7 +132,7 @@ public class TermConceptParentChildLink implements Serializable {
 	@EmbeddedId
 	private TermConceptParentChildLinkPk myId;
 
-	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = true, updatable = false)
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
 	private Integer myPartitionIdValue;
 
 	@Enumerated(EnumType.ORDINAL)
@@ -264,19 +264,20 @@ public class TermConceptParentChildLink implements Serializable {
 	}
 
 	@Embeddable
-	public static class TermConceptParentChildLinkPk implements Serializable {
+	public static class TermConceptParentChildLinkPk {
 
 		@SequenceGenerator(name = "SEQ_CONCEPT_PC_PID", sequenceName = "SEQ_CONCEPT_PC_PID")
 		@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PC_PID")
 		@Column(name = "PID")
 		private Long myId;
 
-		@Transient
+		@PartitionedIdProperty
+		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
 		private Integer myPartitionIdValue;
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(myId);
+			return Objects.hash(myId, myPartitionIdValue);
 		}
 
 		@Override
@@ -288,7 +289,7 @@ public class TermConceptParentChildLink implements Serializable {
 				return false;
 			}
 			TermConceptParentChildLinkPk that = (TermConceptParentChildLinkPk) theO;
-			return Objects.equals(myId, that.myId);
+			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
 		}
 
 		@Override

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.hibernate.annotations.GenericGenerator;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_RESTAG_TAGID",
-					columnNames = {"RES_ID", "TAG_ID"})
+					columnNames = {"PARTITION_ID", "RES_ID", "TAG_ID"})
 		})
 @IdClass(IdAndPartitionId.class)
 public class ResourceTag extends BaseTag {
@@ -75,12 +75,12 @@ public class ResourceTag extends BaseTag {
 						insertable = false,
 						updatable = false,
 						nullable = true),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = false,
-				//						updatable = false,
-				//						nullable = true)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true)
 			},
 			foreignKey = @ForeignKey(name = "FK_RESTAG_RESOURCE"))
 	private ResourceTable myResource;
@@ -175,7 +175,7 @@ public class ResourceTag extends BaseTag {
 			b.append("partition", getPartitionId().getPartitionId());
 		}
 		b.append("resId", getResourceId());
-		b.append("tag", getTag().getId());
+		b.append("tag", getTagId());
 		return b.build();
 	}
 }

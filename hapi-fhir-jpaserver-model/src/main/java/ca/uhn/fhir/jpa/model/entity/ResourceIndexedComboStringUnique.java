@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIndex;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIndexes;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -64,13 +66,18 @@ import org.hl7.fhir.instance.model.api.IIdType;
 		indexes = {
 			@Index(
 					name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING,
-					columnList = "IDX_STRING",
+					columnList = "PARTITION_ID,IDX_STRING",
 					unique = true),
 			@Index(
 					name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE,
-					columnList = "RES_ID",
+					columnList = "PARTITION_ID,RES_ID",
 					unique = false)
 		})
+@PartitionedIndexes({
+	@PartitionedIndex(
+			name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE,
+			columns = {"RES_ID"})
+})
 @IdClass(IdAndPartitionId.class)
 public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {
@@ -99,12 +106,12 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 						insertable = false,
 						updatable = false,
 						nullable = true),
-				//				@JoinColumn(
-				//						name = "PARTITION_ID",
-				//						referencedColumnName = "PARTITION_ID",
-				//						insertable = false,
-				//						updatable = false,
-				//						nullable = true)
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true)
 			},
 			foreignKey = @ForeignKey(name = "FK_IDXCMPSTRUNIQ_RES_ID"))
 	private ResourceTable myResource;

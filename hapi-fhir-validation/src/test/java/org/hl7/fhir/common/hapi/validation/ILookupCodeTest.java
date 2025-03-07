@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.support.IValidationSupport.ConceptDesignation;
 import ca.uhn.fhir.context.support.IValidationSupport.GroupConceptProperty;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.IValidationSupport.StringConceptProperty;
+import ca.uhn.fhir.context.support.IValidationSupport.BooleanConceptProperty;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
@@ -17,17 +18,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_BOOLEAN;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_CODING;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_GROUP;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_STRING;
-import static java.util.stream.IntStream.range;
-import static org.assertj.core.api.Assertions.assertThat;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM_NAME;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM_VERSION;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.DISPLAY;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.LANGUAGE;
+import static java.util.stream.IntStream.range;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.createConceptProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -198,7 +200,8 @@ public interface ILookupCodeTest {
 		assertEquals(theExpectedResult.isCodeIsAbstract(), outcome.isCodeIsAbstract());
 
 		assertEquals(theExpectedResult.getProperties().size(), outcome.getProperties().size());
-		range(0, outcome.getProperties().size()).forEach(i -> assertEqualConceptProperty(theExpectedResult.getProperties().get(i), outcome.getProperties().get(i)));
+		range(0, outcome.getProperties().size()).forEach(i ->
+			assertEqualConceptProperty(theExpectedResult.getProperties().get(i), outcome.getProperties().get(i)));
 
 		assertEquals(theExpectedResult.getDesignations().size(), outcome.getDesignations().size());
 		range(0, outcome.getDesignations().size()).forEach(i -> assertEqualConceptDesignation(theExpectedResult.getDesignations().get(i), outcome.getDesignations().get(i)));
@@ -223,6 +226,11 @@ public interface ILookupCodeTest {
 			case TYPE_STRING -> {
 				StringConceptProperty expected = (StringConceptProperty) theExpectedProperty;
 				StringConceptProperty actual = (StringConceptProperty) theProperty;
+				assertEquals(expected.getValue(), actual.getValue());
+			}
+			case TYPE_BOOLEAN -> {
+				BooleanConceptProperty expected = (BooleanConceptProperty) theExpectedProperty;
+				IValidationSupport.BooleanConceptProperty actual = (BooleanConceptProperty) theProperty;
 				assertEquals(expected.getValue(), actual.getValue());
 			}
 			case TYPE_CODING -> {

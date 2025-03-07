@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.util.ArrayUtil;
 import ca.uhn.fhir.util.DatatypeUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -92,6 +93,16 @@ public class BulkExportJobParametersBuilder {
 		myPatientIds = thePatientIds == null
 				? null
 				: thePatientIds.stream().map(IPrimitiveType::getValueAsString).collect(Collectors.toList());
+		return this;
+	}
+
+	public BulkExportJobParametersBuilder patientReferences(List<IBaseReference> thePatientReferences) {
+		myPatientIds = thePatientReferences == null
+				? null
+				: thePatientReferences.stream()
+						.map(IBaseReference::getReferenceElement)
+						.map(IIdType::getIdPart)
+						.collect(Collectors.toList());
 		return this;
 	}
 

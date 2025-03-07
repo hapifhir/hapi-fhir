@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams.isMatchSearchParam;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -438,6 +439,10 @@ public class InMemoryResourceMatcher {
 		}
 
 		if (param.getModifier() == TokenParamModifier.NOT) {
+			// :not filters for security labels / tags should always match resources with no security labels / tags
+			if (isEmpty(list)) {
+				return true;
+			}
 			haveMatch = !haveMatch;
 		}
 

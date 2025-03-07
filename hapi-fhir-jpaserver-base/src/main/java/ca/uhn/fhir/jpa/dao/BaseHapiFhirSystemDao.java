@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,12 +206,42 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			 * However, for realistic average workloads, this should reduce the number of round trips.
 			 */
 			if (!idChunk.isEmpty()) {
-				List<ResourceTable> entityChunk = prefetchResourceTableAndHistory(idChunk);
+				List<ResourceTable> entityChunk = null;
+
+				/*
+				 * Unless we're in Mass Ingestion mode, we will pre-fetch the current
+				 * saved resource text in HFJ_RES_VER (ResourceHistoryTable). If we're
+				 * in Mass Ingestion Mode, we don't need to do that because every update
+				 * will generate a new version anyway so the system never needs to know
+				 * the current contents.
+				 */
+				if (!myStorageSettings.isMassIngestionMode()) {
+					entityChunk = prefetchResourceTableAndHistory(idChunk);
+				}
 
 				if (thePreFetchIndexes) {
 
+					/*
+					 * If we're in mass ingestion mode, then we still need to load the resource
+					 * entries in HFJ_RESOURCE (ResourceTable). We combine that with the search
+					 * for tokens (since token is the most likely kind of index to be populated
+					 * for any arbitrary resource type).
+					 *
+					 * For all other index types, we only load indexes if at least one
+					 * HFJ_RESOURCE row indicates that a resource we care about actually has
+					 * index rows of the given type.
+					 */
+					if (entityChunk == null) {
+						String jqlQuery =
+								"SELECT r FROM ResourceTable r LEFT JOIN FETCH r.myParamsToken WHERE r.myPid IN ( :IDS )";
+						TypedQuery<ResourceTable> query = myEntityManager.createQuery(jqlQuery, ResourceTable.class);
+						query.setParameter("IDS", idChunk);
+						entityChunk = query.getResultList();
+					} else {
+						prefetchByField("token", "myParamsToken", ResourceTable::isParamsTokenPopulated, entityChunk);
+					}
+
 					prefetchByField("string", "myParamsString", ResourceTable::isParamsStringPopulated, entityChunk);
-					prefetchByField("token", "myParamsToken", ResourceTable::isParamsTokenPopulated, entityChunk);
 					prefetchByField("date", "myParamsDate", ResourceTable::isParamsDatePopulated, entityChunk);
 					prefetchByField(
 							"quantity", "myParamsQuantity", ResourceTable::isParamsQuantityPopulated, entityChunk);

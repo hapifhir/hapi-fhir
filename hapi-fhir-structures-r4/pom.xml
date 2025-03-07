@@ -5,17 +5,13 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>7.7.14-SNAPSHOT</version>
+		<version>8.1.1-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-structures-r4</artifactId>
 	<packaging>bundle</packaging>
-
-	<properties>
-		<shexjava_version>1.3beta</shexjava_version>
-	</properties>
 
 	<name>HAPI FHIR Structures - FHIR R4</name>
 
@@ -25,7 +21,7 @@
 			<artifactId>okhttp</artifactId>
 			<optional>true</optional>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
@@ -59,7 +55,7 @@
 			</exclusions>
 		</dependency>
 
-		<!-- 
+		<!--
 		Optional dependencies from RI codebase
 		-->
 		<dependency>
@@ -85,7 +81,7 @@
 
 
 		<!--
-		Test dependencies on other optional parts of HAPI 
+		Test dependencies on other optional parts of HAPI
 		-->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -124,21 +120,8 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>fr.inria.lille.shexjava</groupId>
-			<artifactId>shexjava-core</artifactId>
-			<version>${shexjava_version}</version>
-			<scope>test</scope>
-			<exclusions>
-				<!-- If this is included it confused the RDFParser -->
-				<exclusion>
-					<groupId>org.apache.commons</groupId>
-					<artifactId>commons-rdf-jena</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>xml-apis</artifactId>
-					<groupId>xml-apis</groupId>
-				</exclusion>
-			</exclusions>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-shex</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.helger.commons</groupId>

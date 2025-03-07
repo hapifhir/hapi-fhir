@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,21 +69,21 @@ public class SubscriptionRegistry {
 		super();
 	}
 
-	public synchronized ActiveSubscription get(String theIdPart) {
+	public ActiveSubscription get(String theIdPart) {
 		return myActiveSubscriptionCache.get(theIdPart);
 	}
 
-	public synchronized Collection<ActiveSubscription> getAll() {
+	public Collection<ActiveSubscription> getAll() {
 		return myActiveSubscriptionCache.getAll();
 	}
 
-	public synchronized List<ActiveSubscription> getTopicSubscriptionsByTopic(String theTopic) {
+	public List<ActiveSubscription> getTopicSubscriptionsByTopic(String theTopic) {
 		return myActiveSubscriptionCache.getTopicSubscriptionsForTopic(theTopic);
 	}
 
 	private Optional<CanonicalSubscription> hasSubscription(IIdType theId) {
-		Validate.notNull(theId);
-		Validate.notBlank(theId.getIdPart());
+		Validate.notNull(theId, "theId must not be null");
+		Validate.notBlank(theId.getIdPart(), "theId must have an ID part");
 		Optional<ActiveSubscription> activeSubscription =
 				Optional.ofNullable(myActiveSubscriptionCache.get(theId.getIdPart()));
 		return activeSubscription.map(ActiveSubscription::getSubscription);
@@ -92,8 +92,7 @@ public class SubscriptionRegistry {
 	/**
 	 * Extracts the retry configuration settings from the CanonicalSubscription object.
 	 *
-	 * Returns the configuration, or null, if no retry (or a bad retry value)
-	 * is specified.
+	 * @return the configuration, or null, if no retry (or a bad retry value) is specified.
 	 */
 	private ChannelRetryConfiguration getRetryConfigurationFromSubscriptionExtensions(
 			CanonicalSubscription theSubscription) {
@@ -115,10 +114,10 @@ public class SubscriptionRegistry {
 	}
 
 	private void registerSubscription(IIdType theId, CanonicalSubscription theCanonicalSubscription) {
-		Validate.notNull(theId);
+		Validate.notNull(theId, "theId must not be null");
 		String subscriptionId = theId.getIdPart();
-		Validate.notBlank(subscriptionId);
-		Validate.notNull(theCanonicalSubscription);
+		Validate.notBlank(subscriptionId, "theId must have an ID part");
+		Validate.notNull(theCanonicalSubscription, "theCanonicalSubscription must not be null");
 
 		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(theCanonicalSubscription);
 
@@ -143,8 +142,8 @@ public class SubscriptionRegistry {
 		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, params);
 	}
 
-	public synchronized void unregisterSubscriptionIfRegistered(String theSubscriptionId) {
-		Validate.notNull(theSubscriptionId);
+	public void unregisterSubscriptionIfRegistered(String theSubscriptionId) {
+		Validate.notNull(theSubscriptionId, "theSubscriptionId must not be null");
 
 		ActiveSubscription activeSubscription = myActiveSubscriptionCache.remove(theSubscriptionId);
 		if (activeSubscription != null) {
@@ -161,14 +160,14 @@ public class SubscriptionRegistry {
 	}
 
 	@PreDestroy
-	public synchronized void unregisterAllSubscriptions() {
+	public void unregisterAllSubscriptions() {
 		// Once to set flag
 		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
 		// Twice to remove
 		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
 	}
 
-	synchronized void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
+	void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
 
 		List<String> idsToDelete =
 				myActiveSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(theAllIds);
@@ -178,7 +177,7 @@ public class SubscriptionRegistry {
 	}
 
 	public synchronized boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
-		Validate.notNull(theSubscription);
+		Validate.notNull(theSubscription, "theSubscription must not be null");
 		Optional<CanonicalSubscription> existingSubscription = hasSubscription(theSubscription.getIdElement());
 		CanonicalSubscription newSubscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
 
@@ -208,10 +207,10 @@ public class SubscriptionRegistry {
 
 	private void updateSubscription(IBaseResource theSubscription) {
 		IIdType theId = theSubscription.getIdElement();
-		Validate.notNull(theId);
-		Validate.notBlank(theId.getIdPart());
+		Validate.notNull(theId, "theId must not be null");
+		Validate.notBlank(theId.getIdPart(), "theId must have an ID part");
 		ActiveSubscription activeSubscription = myActiveSubscriptionCache.get(theId.getIdPart());
-		Validate.notNull(activeSubscription);
+		Validate.notNull(activeSubscription, "Subscription with ID %s not found in cache", theId.getIdPart());
 		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(theSubscription);
 		activeSubscription.setSubscription(canonicalized);
 
@@ -229,7 +228,7 @@ public class SubscriptionRegistry {
 		return myActiveSubscriptionCache.size();
 	}
 
-	public synchronized List<ActiveSubscription> getAllNonTopicSubscriptions() {
+	public List<ActiveSubscription> getAllNonTopicSubscriptions() {
 		return myActiveSubscriptionCache.getAllNonTopicSubscriptions();
 	}
 }

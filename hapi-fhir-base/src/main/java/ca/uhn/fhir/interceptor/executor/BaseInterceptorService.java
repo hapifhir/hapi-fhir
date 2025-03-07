@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -571,6 +571,11 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 					.append("method", myMethod)
 					.toString();
+		}
+
+		@Override
+		public String getHookDescription() {
+			return myMethod.getDeclaringClass().getName() + "." + myMethod.getName();
 		}
 
 		public POINTCUT getPointcut() {

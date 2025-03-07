@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
@@ -19,6 +20,7 @@ import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -62,6 +64,8 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
@@ -170,16 +174,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import ch. qos. logback. classic.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.client.apache.ResourceEntity;
+
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -221,6 +230,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	@Autowired
 	private ISearchDao mySearchEntityDao;
+
+	@RegisterExtension
+	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(SearchParamValidatingInterceptor.class, Level.WARN);
 
 	@Override
 	@AfterEach
@@ -264,7 +276,31 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
 
+	@Test
+	public void testSearchParameterValidation() {
+		// setup
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.getUserData().put(SearchParamValidatingInterceptor.SKIP_VALIDATION, true);
 
+		SearchParameter sp = new SearchParameter();
+		sp.setUrl("http://example.com/name");
+		sp.setId("name");
+		sp.setCode("name");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		sp.addBase("Patient");
+		sp.setExpression("Patient.name");
+
+		// test
+		DaoMethodOutcome outcome = mySearchParameterDao.update(sp, requestDetails);
+
+		myCaptureQueriesListener.clear();
+		sp.setId(outcome.getId());
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.update(sp, requestDetails);
+
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Skipping validation of submitted SearchParameter because " + SearchParamValidatingInterceptor.SKIP_VALIDATION + " flag is true");
+	}
 
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
@@ -2440,7 +2476,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=ge" + InstantDt.withCurrentTime().getYear());
 		assertThat(idValues).as(idValues.toString()).hasSize(10);
 
-		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=gt" + InstantDt.withCurrentTime().getYear());
+		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=gt" + (InstantDt.withCurrentTime().getYear() + 1));
 		assertThat(idValues).isEmpty();
 	}
 

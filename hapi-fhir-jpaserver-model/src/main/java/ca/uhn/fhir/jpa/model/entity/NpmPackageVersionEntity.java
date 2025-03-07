@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
@@ -79,12 +80,26 @@ public class NpmPackageVersionEntity {
 	private NpmPackageEntity myPackage;
 
 	@ManyToOne
-	@JoinColumn(
-			name = "BINARY_RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "BINARY_RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_NPM_PKV_RESID"))
 	private ResourceTable myPackageBinary;
+
+	@Column(name = "BINARY_RES_ID", nullable = false)
+	private Long myPackageBinaryResourceId;
 
 	@Column(name = "PARTITION_ID", nullable = true)
 	private Integer myPackageBinaryPartitionId;
@@ -193,6 +208,8 @@ public class NpmPackageVersionEntity {
 
 	public void setPackageBinary(ResourceTable thePackageBinary) {
 		myPackageBinary = thePackageBinary;
+		myPackageBinaryResourceId = thePackageBinary.getId().getId();
+		myPackageBinaryPartitionId = thePackageBinary.getPersistentId().getPartitionId();
 	}
 
 	public void setSavedTime(Date theSavedTime) {

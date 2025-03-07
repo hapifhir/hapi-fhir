@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,6 +219,13 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public List<SqlQuery> getUpdateQueries() {
 		return getQueriesStartingWith("update");
+	}
+
+	/**
+	 * Returns all UPDATE queries executed on the current thread - Index 0 is oldest
+	 */
+	public List<SqlQuery> getUpdateQueries(Predicate<SqlQuery> theFilter) {
+		return getQueriesStartingWith("update").stream().filter(theFilter).collect(Collectors.toList());
 	}
 
 	/**
