@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +40,7 @@ public class SubscriptionChannelFactoryTest {
 	@BeforeEach
 	public void before() {
 		when(myChannelNamer.getChannelName(any(), any())).thenReturn("CHANNEL_NAME");
-		mySvc = new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(myChannelNamer));
+		mySvc = new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(myChannelNamer, new RetryPolicyProvider()));
 	}
 
 	/**

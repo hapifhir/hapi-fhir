@@ -41,8 +41,11 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 	private final IChannelNamer myChannelNamer;
 	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
 
-	public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer) {
+	private RetryPolicyProvider myRetryPolicyProvider;
+
+	public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer, RetryPolicyProvider theRetryPolicyProvider) {
 		myChannelNamer = theChannelNamer;
+		myRetryPolicyProvider = theRetryPolicyProvider;
 	}
 
 	@Override
@@ -80,7 +83,8 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 				threadNamePrefix,
 				SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
 
-		return new LinkedBlockingChannel(theChannelName, threadPoolExecutor, threadPoolExecutor::getQueueSize);
+		return new LinkedBlockingChannel(
+				theChannelName, threadPoolExecutor, threadPoolExecutor::getQueueSize, myRetryPolicyProvider);
 	}
 
 	@PreDestroy
