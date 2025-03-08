@@ -113,6 +113,26 @@ public interface IBatch2WorkChunkRepository
 			@Param("em") String theErrorMessage,
 			@Param("status") WorkChunkStatusEnum theInProgress);
 
+	/**
+	 * Updates the workchunk error count and error message for WorkChunks that have failed after multiple retries.
+	 *
+	 * @param theStatus - the new status of the workchunk
+	 * @param theChunkId - the id of the workchunk to update
+	 * @param theMaxErrorCount - maximum error count (# of errors allowed for retry)
+	 * @param theMaxErrorSize - max error size (maximum number of characters)
+	 * @return - the number of updated chunks (should be 1)
+	 */
+	@Modifying
+	@Query("UPDATE Batch2WorkChunkEntity e "
+			+ "SET e.myStatus = :failed, "
+			+ "e.myErrorMessage = LEFT(CONCAT('Too many errors (', CAST(e.myErrorCount as string), '). Last err msg ', e.myErrorMessage), :maxErrorSize) "
+			+ "WHERE e.myId = :chunkId and e.myErrorCount > :maxCount")
+	int updateChunkForTooManyErrors(
+			@Param("failed") WorkChunkStatusEnum theStatus,
+			@Param("chunkId") String theChunkId,
+			@Param("maxCount") int theMaxErrorCount,
+			@Param("maxErrorSize") int theMaxErrorSize);
+
 	@Modifying
 	@Query(
 			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myStartTime = :st WHERE e.myId = :id AND e.myStatus IN :startStatuses")
