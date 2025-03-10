@@ -19,33 +19,25 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.R4MeasureEvaluatorSingleFactory;
-import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.EmbeddedOperationParams;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Parameters;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MeasureOperationsProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(MeasureOperationsProvider.class);
 
 	private final R4MeasureEvaluatorSingleFactory myR4MeasureServiceFactory;
-	private final StringTimePeriodHandler myStringTimePeriodHandler;
 
-	public MeasureOperationsProvider(
-			R4MeasureEvaluatorSingleFactory theR4MeasureServiceFactory,
-			StringTimePeriodHandler theStringTimePeriodHandler) {
+	public MeasureOperationsProvider(R4MeasureEvaluatorSingleFactory theR4MeasureServiceFactory) {
 		myR4MeasureServiceFactory = theR4MeasureServiceFactory;
-		myStringTimePeriodHandler = theStringTimePeriodHandler;
 	}
 
 	/**
@@ -56,51 +48,38 @@ public class MeasureOperationsProvider {
 	 * Reasoning Module</a>. This implementation aims to be compatible with the CQF
 	 * IG.
 	 *
-	 * @param theId             the id of the Measure to evaluate
-	 * @param thePeriodStart    The start of the reporting period
-	 * @param thePeriodEnd      The end of the reporting period
-	 * @param theReportType     The type of MeasureReport to generate
-	 * @param theSubject        the subject to use for the evaluation
-	 * @param thePractitioner   the practitioner to use for the evaluation
-	 * @param theLastReceivedOn the date the results of this measure were last
-	 *                          received.
-	 * @param theProductLine    the productLine (e.g. Medicare, Medicaid, etc) to use
-	 *                          for the evaluation. This is a non-standard parameter.
-	 * @param theAdditionalData the data bundle containing additional data
+	 * @param theParams          Please refer to the javadoc for {@link EvaluateMeasureSingleParams} for more information on the parameters.
 	 * @param theRequestDetails The details (such as tenant) of this request. Usually
 	 *                          autopopulated HAPI.
 	 * @return the calculated MeasureReport
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
 	public MeasureReport evaluateMeasure(
-			@IdParam IdType theId,
-			@OperationParam(name = "periodStart") String thePeriodStart,
-			@OperationParam(name = "periodEnd") String thePeriodEnd,
-			@OperationParam(name = "reportType") String theReportType,
-			@OperationParam(name = "subject") String theSubject,
-			@OperationParam(name = "practitioner") String thePractitioner,
-			@OperationParam(name = "lastReceivedOn") String theLastReceivedOn,
-			@OperationParam(name = "productLine") String theProductLine,
-			@OperationParam(name = "additionalData") Bundle theAdditionalData,
-			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-			@OperationParam(name = "parameters") Parameters theParameters,
-			RequestDetails theRequestDetails)
+			@EmbeddedOperationParams EvaluateMeasureSingleParams theParams, RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
 				.evaluate(
-						Eithers.forMiddle3(theId),
-						myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails),
-						myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails),
-						theReportType,
-						theSubject,
-						theLastReceivedOn,
+						// LUKETODO:  1. can we support the concept of Either in hapi-fhir annotations?
+						// LUKETODO:  2. can we modify OperationParam to support the concept of mututally exclusive
+						// params
+						// LUKETODO:  3. code gen from operation definition
+						// LUKETODO:  4. is there such as thing as a MUTUALLY EXCLUSIVE ANNotation?. is there such as
+						// thing as a MUTUALLY EXCLUSIVE ANNotation?4. is there such as thing as a MUTUALLY EXCLUSIVE
+						// ANNotation?4. is there such as thing as a MUTUALLY EXCLUSIVE ANNotation?
+						// so 3 different params :  try annotations
+						theParams.getMeasure(),
+						theParams.getPeriodStart(),
+						theParams.getPeriodEnd(),
+						theParams.getReportType(),
+						theParams.getSubject(),
+						theParams.getLastReceivedOn(),
 						null,
-						theTerminologyEndpoint,
+						theParams.getTerminologyEndpoint(),
 						null,
-						theAdditionalData,
-						theParameters,
-						theProductLine,
-						thePractitioner);
+						theParams.getAdditionalData(),
+						theParams.getParameters(),
+						theParams.getProductLine(),
+						theParams.getPractitioner());
 	}
 }
