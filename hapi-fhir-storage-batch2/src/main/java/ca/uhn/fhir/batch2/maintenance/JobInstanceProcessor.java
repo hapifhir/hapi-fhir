@@ -281,7 +281,8 @@ public class JobInstanceProcessor {
 	 */
 	private void enqueueReadyChunks(JobInstance theJobInstance, JobDefinition<?> theJobDefinition) {
 		// timebox to prevent unusual amount of time updating resources
-		long deadline = System.currentTimeMillis() + 60 * 1000;
+		long minuteMS = 60 * 1000;
+		long deadline = System.currentTimeMillis() + minuteMS;
 		boolean done = false;
 		do {
 			// Paginator has an issue keeping worker nodes saturated due to processing workloads a page at a time
