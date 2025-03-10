@@ -525,6 +525,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 						return false;
 					} else if(t.getMessage().contains("The constraint key 'inv-1' already exists at the location 'http://hl7.org/fhir/StructureDefinition/TestScript' with a different expression")) {
 						return false;
+					} else if(t.getMessage().contains("The element slicing is prohibited on the element DomainResource.extension") || t.getMessage().contains("The element slicing is prohibited on the element DomainResource.modifierExtension")) {
+						// Core 6.5.15 contains this new validation that let the test fail
+						return false;
 					}
 					else if (t.getSeverity() == ResultSeverityEnum.WARNING
 						&& ( "VALIDATION_HL7_PUBLISHER_MISMATCH".equals(t.getMessageId())
