@@ -91,7 +91,6 @@ jobs:
   final-result:
       if: ${{ always() }}
       runs-on: ubuntu-latest
-      name: Final Results
       needs: [assemble-test-reports]
       steps:
           - run: exit 1
