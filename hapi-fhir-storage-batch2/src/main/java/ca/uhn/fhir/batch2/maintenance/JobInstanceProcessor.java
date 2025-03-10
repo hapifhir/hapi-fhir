@@ -297,8 +297,7 @@ public class JobInstanceProcessor {
 			int counter = 0;
 
 			if (!done) {
-				Iterator<WorkChunkMetadata> iter = results.iterator();
-				while (iter.hasNext()) {
+				for (WorkChunkMetadata metadata : results) {
 					/*
 					 * For each chunk id
 					 * * Move to QUEUE'd
@@ -306,7 +305,6 @@ public class JobInstanceProcessor {
 					 * * flush changes
 					 * * commit
 					 */
-					WorkChunkMetadata metadata = iter.next();
 					updateChunkAndSendToQueue(metadata);
 					counter++;
 				}
