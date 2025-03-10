@@ -320,7 +320,15 @@ public class JobInstanceProcessor {
 					counter,
 					theJobInstance.getInstanceId(),
 					theJobDefinition.getJobDefinitionId());
-			// timebox update of 10k records
+
+			// Log warning if deadline is exceeded
+			if (System.currentTimeMillis() >= deadline) {
+				ourLog.warn(
+						"Deadline exceeded while processing job {} of type {}. Some chunks may not have been processed.",
+						theJobInstance.getInstanceId(),
+						theJobDefinition.getJobDefinitionId());
+			}
+
 		} while (deadline > System.currentTimeMillis() && !done);
 	}
 
