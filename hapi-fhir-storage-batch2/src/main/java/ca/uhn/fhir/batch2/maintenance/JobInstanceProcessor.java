@@ -284,10 +284,10 @@ public class JobInstanceProcessor {
 		long deadline = System.currentTimeMillis() + 60 * 1000;
 		boolean done = false;
 		do {
-			// PageNumber '0' is hardcoded to re-saturate 10k records to process at a time instead of fixed smaller
-			// pages
-			// once the first processed page of records is completed, the next 10k needing processing will automatically
-			// be retrieved
+			// Paginator has an issue keeping worker nodes saturated due to processing workloads a page at a time
+			// PageNumber '0' is hardcoded to re-saturate 10k records to process at a time instead
+			// Each consecutive request for results will be the next 10k records needing updating (no paging needed)
+			// Recommend this eventually moves to java stream once architecture supports the change
 			Pageable pageable = Pageable.ofSize(WORK_CHUNK_METADATA_BATCH_SIZE).withPage(0);
 			Page<WorkChunkMetadata> results = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
 					pageable, myInstanceId, Set.of(WorkChunkStatusEnum.READY));
