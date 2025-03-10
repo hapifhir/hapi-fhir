@@ -22,7 +22,6 @@ package ca.uhn.hapi.fhir.cdshooks.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
@@ -75,18 +74,13 @@ public class CdsHooksConfig {
 		final CdsServiceRequestJsonDeserializer cdsServiceRequestJsonDeserializer =
 				new CdsServiceRequestJsonDeserializer(theFhirContext, theObjectMapper);
 		return new CdsServiceRegistryImpl(
-				theCdsHooksContextBooter,
-				theCdsPrefetchSvc,
-				theObjectMapper,
-				cdsServiceRequestJsonDeserializer);
+				theCdsHooksContextBooter, theCdsPrefetchSvc, theObjectMapper, cdsServiceRequestJsonDeserializer);
 	}
 
 	@Bean
 	public ICdsConfigService cdsConfigService(
-			FhirContext theFhirContext,
-			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper) {
-		return new CdsConfigServiceImpl(
-				theFhirContext, theObjectMapper, myDaoRegistry, myRestfulServer);
+			FhirContext theFhirContext, @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper) {
+		return new CdsConfigServiceImpl(theFhirContext, theObjectMapper, myDaoRegistry, myRestfulServer);
 	}
 
 	@Bean
