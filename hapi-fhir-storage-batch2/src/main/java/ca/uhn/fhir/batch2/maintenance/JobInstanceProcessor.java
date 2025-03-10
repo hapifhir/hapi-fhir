@@ -280,37 +280,47 @@ public class JobInstanceProcessor {
 	 * for processing.
 	 */
 	private void enqueueReadyChunks(JobInstance theJobInstance, JobDefinition<?> theJobDefinition) {
+		// timebox to prevent unusual amount of time updating resources
 		long deadline = System.currentTimeMillis() + 60 * 1000;
 		boolean done = false;
 		do {
-			// PageNumber '0' is hardcoded to re-saturate 10k records to process at a time instead of fixed pages
-			// This allows for all nodes to remain busy instead of processing each page's worth of data at a time
+			// PageNumber '0' is hardcoded to re-saturate 10k records to process at a time instead of fixed smaller
+			// pages
+			// once the first processed page of records is completed, the next 10k needing processing will automatically
+			// be retrieved
 			Pageable pageable = Pageable.ofSize(WORK_CHUNK_METADATA_BATCH_SIZE).withPage(0);
 			Page<WorkChunkMetadata> results = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
 					pageable, myInstanceId, Set.of(WorkChunkStatusEnum.READY));
 			if (results.isEmpty()) {
-				break;
+				done = true;
 			}
-			Iterator<WorkChunkMetadata> iter = results.iterator();
 			int counter = 0;
-			while (iter.hasNext()) {
-				/*
-				 * For each chunk id
-				 * * Move to QUEUE'd
-				 * * Send to topic
-				 * * flush changes
-				 * * commit
-				 */
-				WorkChunkMetadata metadata = iter.next();
-				updateChunkAndSendToQueue(metadata);
-				counter++;
+
+			if (!done) {
+				Iterator<WorkChunkMetadata> iter = results.iterator();
+				while (iter.hasNext()) {
+					/*
+					 * For each chunk id
+					 * * Move to QUEUE'd
+					 * * Send to topic
+					 * * flush changes
+					 * * commit
+					 */
+					WorkChunkMetadata metadata = iter.next();
+					updateChunkAndSendToQueue(metadata);
+					counter++;
+				}
+			}
+			// catch to prevent unlimited looping
+			if (counter < WORK_CHUNK_METADATA_BATCH_SIZE) {
+				done = true;
 			}
 			ourLog.debug(
 					"Encountered {} READY work chunks for job {} of type {}",
 					counter,
 					theJobInstance.getInstanceId(),
 					theJobDefinition.getJobDefinitionId());
-			// timebox update  of 10k records
+			// timebox update of 10k records
 		} while (deadline > System.currentTimeMillis() && !done);
 	}
 
