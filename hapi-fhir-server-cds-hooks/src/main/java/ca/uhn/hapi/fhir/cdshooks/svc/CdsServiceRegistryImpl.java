@@ -100,18 +100,21 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		return encodeFeedbackResponse(theServiceId, response);
 	}
 
+	/**
+	 * @see ICdsServiceRegistry#registerService
+	 */
 	@Override
 	public void registerService(
 			String theServiceId,
 			Function<CdsServiceRequestJson, CdsServiceResponseJson> theServiceFunction,
 			CdsServiceJson theCdsServiceJson,
 			boolean theAllowAutoFhirClientPrefetch,
-			String theModuleId) {
+			String theServiceGroupId) {
 		if (theCdsServiceJson.getExtensionClass() == null) {
 			theCdsServiceJson.setExtensionClass(CdsHooksExtension.class);
 		}
 		myServiceCache.registerDynamicService(
-				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theModuleId);
+				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theServiceGroupId);
 	}
 
 	@Override
@@ -125,14 +128,25 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		return true;
 	}
 
+	/**
+	 * @see ICdsServiceRegistry#unregisterService
+	 */
 	@Override
-	public void unregisterService(String theServiceId, String theModuleId) {
-		Validate.notNull(theServiceId);
-
-		ICdsMethod activeService = myServiceCache.unregisterServiceMethod(theServiceId, theModuleId);
+	public void unregisterService(@Nonnull String theServiceId, String theServiceGroupId) {
+		Validate.notNull(theServiceId, "CDS Hook Service Id cannot be null");
+		ICdsMethod activeService = myServiceCache.unregisterServiceMethod(theServiceId, theServiceGroupId);
 		if (activeService != null) {
 			ourLog.info("Unregistered active service {}", theServiceId);
 		}
+	}
+
+	/**
+	 * @see ICdsServiceRegistry#unregisterServices
+	 */
+	@Override
+	public void unregisterServices(@Nonnull String theServiceGroupId) {
+		Validate.notNull(theServiceGroupId, "CDS Hook Service Group Id cannot be null");
+		myServiceCache.unregisterServices(theServiceGroupId);
 	}
 
 	@Override
