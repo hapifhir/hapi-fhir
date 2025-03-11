@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
+import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
 import ca.uhn.fhir.jpa.dao.CacheTagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.DaoSearchParamProvider;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
@@ -57,6 +58,7 @@ import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
@@ -580,6 +582,13 @@ public class JpaConfig {
 	@Bean
 	public IResourceVersionSvc resourceVersionSvc() {
 		return new ResourceVersionSvcDaoImpl();
+	}
+
+	@Bean
+	public SearchParamIdentityCache searchParameterHashIdentityCache(
+			@Autowired IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
+			@Autowired PlatformTransactionManager theTxManager) {
+		return new SearchParamIdentityCache(theResourceIndexedSearchParamIdentityDao, theTxManager);
 	}
 
 	/* **************************************************************** *

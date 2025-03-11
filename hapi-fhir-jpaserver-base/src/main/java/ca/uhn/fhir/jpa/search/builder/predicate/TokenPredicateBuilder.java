@@ -33,7 +33,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -258,12 +257,8 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			 * For a token :not search, we look for index rows that have the right identity (i.e. it's the right resource and
 			 * param name) but not the actual provided token value.
 			 */
-
-			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-					getPartitionSettings(), theRequestPartitionId, theResourceName, paramName);
 			Condition hashIdentityPredicate =
-					BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
-
+					createHashIdentityPredicate(theRequestPartitionId, theResourceName, paramName);
 			Condition hashValuePredicate = createPredicateOrList(theResourceName, paramName, sortedCodesList, false);
 			predicate = QueryParameterUtils.toAndPredicate(hashIdentityPredicate, hashValuePredicate);
 
@@ -272,10 +267,8 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			predicate = createPredicateOrList(theResourceName, paramName, sortedCodesList, true);
 
 			if (myStorageSettings.isIncludeHashIdentityForTokenSearches()) {
-				long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-						getPartitionSettings(), theRequestPartitionId, theResourceName, paramName);
 				Condition hashIdentityPredicate =
-						BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
+						createHashIdentityPredicate(theRequestPartitionId, theResourceName, paramName);
 				predicate = QueryParameterUtils.toAndPredicate(hashIdentityPredicate, predicate);
 			}
 		}

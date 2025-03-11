@@ -44,6 +44,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamNumberDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
@@ -85,6 +86,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -261,6 +263,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
 	@Autowired
 	protected IResourceIndexedComboStringUniqueDao myResourceIndexedComboStringUniqueDao;
+	@Autowired
+	protected IResourceIndexedSearchParamIdentityDao myResourceIndexedSearchParamIdentityDao;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc myFulltestSearchSvc;
 	@Autowired(required = false)
@@ -639,10 +643,11 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@Nonnull
 	protected List<ResourceIndexedSearchParamToken> getAllTokenIndexes(String... theParamNames) {
-		return runInTransaction(()->myResourceIndexedSearchParamTokenDao
+		List<Long> searchParamHashIdentities = getSearchParamHashIdentities(theParamNames);
+		return runInTransaction(() -> myResourceIndexedSearchParamTokenDao
 			.findAll()
 			.stream()
-			.filter(t -> theParamNames.length == 0 || Arrays.asList(theParamNames).contains(t.getParamName()))
+			.filter(t -> theParamNames.length == 0 || searchParamHashIdentities.contains(t.getHashIdentity()))
 			.toList());
 	}
 
@@ -677,13 +682,38 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@Nonnull
 	protected List<ResourceIndexedSearchParamString> getAllStringIndexes(String... theParamNames) {
-		return runInTransaction(()->myResourceIndexedSearchParamStringDao
+		List<Long> searchParamHashIdentities = getSearchParamHashIdentities(theParamNames);
+		return myResourceIndexedSearchParamStringDao
 			.findAll()
 			.stream()
-			.filter(t -> theParamNames.length == 0 || Arrays.asList(theParamNames).contains(t.getParamName()))
-			.toList());
+			.filter(t -> theParamNames.length == 0 || searchParamHashIdentities.contains(t.getHashIdentity()))
+			.toList();
 	}
 
+	protected List<Long> getSearchParamHashIdentities(String[] theParamNames) {
+		List<Long> searchParamHashIdentities = new ArrayList<>(theParamNames.length);
+		if (theParamNames.length != 0) {
+			searchParamHashIdentities.addAll(myResourceIndexedSearchParamIdentityDao
+				.findAll()
+				.stream()
+				.filter(t -> Arrays.asList(theParamNames).contains(t.getParamName()))
+				.map(IndexedSearchParamIdentity::getHashIdentity)
+				.toList());
+		}
+		return searchParamHashIdentities;
+	}
+
+	protected long getSpIdentitySelectCount() {
+		return myCaptureQueriesListener.getSelectQueries().stream()
+			.filter(q -> q.getSql(false, false).contains("HFJ_SPIDX_IDENTITY"))
+			.count();
+	}
+
+	protected long getSpIdentityInsertCount() {
+		return myCaptureQueriesListener.getInsertQueries().stream()
+			.filter(q -> q.getSql(false, false).contains("insert into HFJ_SPIDX_IDENTITY"))
+			.count();
+	}
 
 	protected void logAllResourceTags() {
 		runInTransaction(() -> {

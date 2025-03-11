@@ -27,13 +27,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.MAX_SP_NAME;
 
 @Entity
-@Table(name = "HFJ_SPIDX_IDENTITY")
-public class SearchParamIndexIdentity {
+@Table(
+		name = "HFJ_SPIDX_IDENTITY",
+		uniqueConstraints = @UniqueConstraint(name = "HFJ_SPIDX_HASH_IDENTITY", columnNames = "HASH_IDENTITY"))
+public class IndexedSearchParamIdentity {
 
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_IDENTITY", sequenceName = "SEQ_SPIDX_IDENTITY", allocationSize = 1)
@@ -52,8 +55,12 @@ public class SearchParamIndexIdentity {
 	@Column(name = "SP_NAME", length = MAX_SP_NAME)
 	private String myParamName;
 
-	public Integer getMySpIdentityId() {
+	public Integer getSpIdentityId() {
 		return mySpIdentityId;
+	}
+
+	public void setSpIdentityId(Integer theSpIdentityId) {
+		this.mySpIdentityId = theSpIdentityId;
 	}
 
 	public Long getHashIdentity() {

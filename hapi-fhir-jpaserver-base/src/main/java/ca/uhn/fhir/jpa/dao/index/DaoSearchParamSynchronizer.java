@@ -22,10 +22,12 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -59,6 +61,9 @@ public class DaoSearchParamSynchronizer {
 
 	@Autowired
 	private IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+
+	@Autowired
+	private SearchParamIdentityCache mySearchParameterHashIdentityCache;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -170,6 +175,7 @@ public class DaoSearchParamSynchronizer {
 		}
 
 		for (T next : paramsToAdd) {
+			findOrCreateSearchParamIdentity(next);
 			if (next.getId() == null) {
 				myEntityManager.persist(next);
 			} else {
@@ -188,6 +194,23 @@ public class DaoSearchParamSynchronizer {
 		theNewParams.addAll(theExistingParams);
 		theNewParams.addAll(paramsToAdd);
 		theNewParams.removeAll(paramsToRemove);
+	}
+
+	/**
+	 * <p>
+	 * This method checks if {@link IndexedSearchParamIdentity} exists in {@link SearchParamIdentityCache},
+	 * If Identity does not exist, a new {@link IndexedSearchParamIdentity} will be created in separate thread.
+	 * </p>
+	 * For details, see: {@link SearchParamIdentityCache#findOrCreateSearchParamIdentity(Long hashIdentity,String paramName, String tesourceType)}
+	 */
+	private <T extends BaseResourceIndex> void findOrCreateSearchParamIdentity(T theNewParam) {
+		if (theNewParam instanceof BaseResourceIndexedSearchParam) {
+			BaseResourceIndexedSearchParam indexedSearchParam = ((BaseResourceIndexedSearchParam) theNewParam);
+			mySearchParameterHashIdentityCache.findOrCreateSearchParamIdentity(
+					indexedSearchParam.getHashIdentity(),
+					indexedSearchParam.getParamName(),
+					indexedSearchParam.getResourceType());
+		}
 	}
 
 	/**

@@ -30,16 +30,13 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -71,10 +68,7 @@ import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForCont
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamRegistryImpl
-		implements ISearchParamRegistry,
-				IResourceChangeListener,
-				ISearchParamRegistryController,
-				ISearchParamHashIdentityRegistry {
+		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
 
 	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
 			Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*"));
@@ -103,9 +97,6 @@ public class SearchParamRegistryImpl
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
-	@Autowired
-	private PartitionSettings myPartitionSettings;
-
 	private IResourceChangeListenerCache myResourceChangeListenerCache;
 	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
 	private volatile IPhoneticEncoder myPhoneticEncoder;
@@ -120,7 +111,7 @@ public class SearchParamRegistryImpl
 
 	@PostConstruct
 	public void start() {
-		myJpaSearchParamCache = new JpaSearchParamCache(myPartitionSettings);
+		myJpaSearchParamCache = new JpaSearchParamCache();
 	}
 
 	@Override
@@ -180,11 +171,6 @@ public class SearchParamRegistryImpl
 			@Nonnull SearchParamLookupContextEnum theContext) {
 		return filteredForContext(
 				myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames), theContext);
-	}
-
-	@Override
-	public Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity) {
-		return myJpaSearchParamCache.getIndexedSearchParamByHashIdentity(theHashIdentity);
 	}
 
 	@Nullable
