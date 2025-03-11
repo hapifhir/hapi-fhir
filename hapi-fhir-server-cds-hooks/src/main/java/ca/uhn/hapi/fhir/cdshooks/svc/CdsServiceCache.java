@@ -135,7 +135,8 @@ public class CdsServiceCache {
 			new ArrayList<>(myGroups.get(theServiceGroupId))
 					.forEach(serviceId -> unregisterServiceMethod(serviceId, theServiceGroupId));
 		} else {
-			ourLog.error("CDS services for serviceGroupId: {}, are not registered. Nothing to remove!", theServiceGroupId);
+			ourLog.error(
+					"CDS services for serviceGroupId: {}, are not registered. Nothing to remove!", theServiceGroupId);
 		}
 	}
 
