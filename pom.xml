@@ -984,6 +984,11 @@
 			<name>Xun Ma</name>
 			<organization>CSIRO</organization>
 		</developer>
+		<developer>
+			<id>berkant-k</id>
+			<name>Berkant Karduman</name>
+			<organization>TigaHealth</organization>
+		</developer>
 	</developers>
 
 	<licenses>
