@@ -25,8 +25,6 @@ import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServicesJson;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +32,6 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.CDS_CR_MODULE_ID;
 
 public class CdsServiceCache {
 	static final Logger ourLog = LoggerFactory.getLogger(CdsServiceCache.class);
@@ -67,23 +63,6 @@ public class CdsServiceCache {
 							theCdsServiceJson, theMethod, theAllowAutoFhirClientPrefetch);
 			myServiceMap.put(theServiceId, cdsDynamicPrefetchableServiceMethod);
 			myCdsServiceJson.addService(theCdsServiceJson);
-		}
-	}
-
-	public void registerCrService(
-			String theServiceId,
-			ICrDiscoveryServiceFactory theDiscoveryServiceFactory,
-			ICdsCrServiceFactory theCrServiceFactory) {
-		if (!isCdsServiceAlreadyRegistered(theServiceId, CDS_CR_MODULE_ID)) {
-			CdsServiceJson cdsServiceJson =
-					theDiscoveryServiceFactory.create(theServiceId).resolveService();
-			if (cdsServiceJson != null) {
-				final CdsCrServiceMethod cdsCrServiceMethod =
-						new CdsCrServiceMethod(cdsServiceJson, theCrServiceFactory);
-				myServiceMap.put(theServiceId, cdsCrServiceMethod);
-				myCdsServiceJson.addService(cdsServiceJson);
-				ourLog.info("Created service for {}", theServiceId);
-			}
 		}
 	}
 

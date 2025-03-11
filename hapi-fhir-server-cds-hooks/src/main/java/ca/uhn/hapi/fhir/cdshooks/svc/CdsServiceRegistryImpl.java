@@ -32,8 +32,6 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServicesJson;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,21 +52,15 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private final CdsHooksContextBooter myCdsHooksContextBooter;
 	private final CdsPrefetchSvc myCdsPrefetchSvc;
 	private final ObjectMapper myObjectMapper;
-	private final ICdsCrServiceFactory myCdsCrServiceFactory;
-	private final ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
 
 	public CdsServiceRegistryImpl(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
 			ObjectMapper theObjectMapper,
-			ICdsCrServiceFactory theCdsCrServiceFactory,
-			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
 			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
-		myCdsCrServiceFactory = theCdsCrServiceFactory;
-		myCrDiscoveryServiceFactory = theCrDiscoveryServiceFactory;
 		myCdsServiceRequestJsonDeserializer = theCdsServiceRequestJsonDeserializer;
 	}
 
@@ -112,17 +104,6 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		}
 		myServiceCache.registerDynamicService(
 				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theModuleId);
-	}
-
-	@Override
-	public boolean registerCrService(String theServiceId) {
-		try {
-			myServiceCache.registerCrService(theServiceId, myCrDiscoveryServiceFactory, myCdsCrServiceFactory);
-		} catch (Exception e) {
-			ourLog.error("Error received during CR CDS Service registration: {}", e.getMessage());
-			return false;
-		}
-		return true;
 	}
 
 	@Override
