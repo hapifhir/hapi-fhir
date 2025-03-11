@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIdGeneratorTaskITTestSuite;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIndexTaskITTestSuite;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTaskITTestSuite;
-import ca.uhn.fhir.jpa.migrate.taskdef.PopulateSearchParameterIdentityTableTaskITTestSuite;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -61,14 +60,6 @@ public abstract class BaseCollectedMigrationTaskSuite {
 
 	@Nested
 	class AddIdGeneratorTaskTests implements AddIdGeneratorTaskITTestSuite {
-		@Override
-		public Support getSupport() {
-			return BaseCollectedMigrationTaskSuite.this.getSupport();
-		}
-	}
-
-	@Nested
-	class PopulateSearchParameterIdentityTableTaskITTests implements PopulateSearchParameterIdentityTableTaskITTestSuite {
 		@Override
 		public Support getSupport() {
 			return BaseCollectedMigrationTaskSuite.this.getSupport();

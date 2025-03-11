@@ -647,9 +647,9 @@ public class JdbcUtils {
 		private final Connection connection;
 		private final Dialect dialect;
 
-		public EmptyExtractionContext(Connection connection, Dialect dialect) {
-			this.connection = connection;
-			this.dialect = dialect;
+		public EmptyExtractionContext(Connection theConnection, Dialect theDialect) {
+			this.connection = theConnection;
+			this.dialect = theDialect;
 		}
 
 		@Override

@@ -46,11 +46,9 @@ import ca.uhn.fhir.jpa.migrate.taskdef.MigrateColumnClobTypeToTextTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresTextClobToBinaryClobTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ModifyColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
-import ca.uhn.fhir.jpa.migrate.taskdef.PopulateSearchParameterIdentityTableTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameIndexTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameTableTask;
-import ca.uhn.fhir.jpa.migrate.taskdef.SearchParameterTableName;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
@@ -189,14 +187,6 @@ public class Builder {
 
 	public void addNop(String theVersion) {
 		addTask(new NopTask(myRelease, theVersion));
-	}
-
-	public BuilderCompleteTask populateSearchParamIdentityTable(
-			String theVersion, SearchParameterTableName theTableName) {
-		PopulateSearchParameterIdentityTableTask task =
-				new PopulateSearchParameterIdentityTableTask(myRelease, theVersion, theTableName);
-		addTask(task);
-		return new BuilderCompleteTask(task);
 	}
 
 	public static class BuilderWithTableName implements BaseMigrationTasks.IAcceptsTasks {
