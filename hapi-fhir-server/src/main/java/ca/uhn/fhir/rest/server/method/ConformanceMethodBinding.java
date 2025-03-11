@@ -225,7 +225,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 				return MethodMatchEnum.EXACT;
 			}
 			throw new MethodNotAllowedException(
-					Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD", RequestTypeEnum.GET);
+					Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD");
 		}
 
 		return MethodMatchEnum.NONE;

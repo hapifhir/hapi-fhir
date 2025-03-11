@@ -13,6 +13,8 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -108,15 +110,17 @@ public class ConformanceMethodBindingTest {
 		verify(provider, times(2)).getServerConformance(any(), any());
 	}
 
-	@Test
-	public void invokeServer_metadata() throws NoSuchMethodException {
+
+	@ParameterizedTest
+	@EnumSource(
+		value = RequestTypeEnum.class,
+		names = {"GET", "HEAD"})
+	public void invokeServer_metadata(RequestTypeEnum requestTypeEnum) throws NoSuchMethodException {
 		init(new TestResourceProvider());
 
 		RequestDetails requestDetails = mySrd;
 		when(requestDetails.getOperation()).thenReturn("metadata");
-		when(requestDetails.getRequestType()).thenReturn(RequestTypeEnum.GET);
-		assertEquals(conformanceMethodBinding.incomingServerRequestMatchesMethod(requestDetails), MethodMatchEnum.EXACT);
-		when(requestDetails.getRequestType()).thenReturn(RequestTypeEnum.HEAD);
+		when(requestDetails.getRequestType()).thenReturn(requestTypeEnum);
 		assertEquals(conformanceMethodBinding.incomingServerRequestMatchesMethod(requestDetails), MethodMatchEnum.EXACT);
 
 	}
